@@ -1,6 +1,8 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Entypo from 'react-native-vector-icons/Entypo';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Colors from '../Utils/Colors';
 import HomeStack from './HomeStack';
 import DashboardStack from './DashboardStack';
@@ -20,7 +22,7 @@ function BottomNavigation({ }) {
             screenOptions={{
                 headerShown: false,
                 tabBarStyle: { width: '100%', backgroundColor: Colors.white, height: 55, paddingVertical: 2 },
-                tabBarActiveTintColor: Colors.textBlue,
+                tabBarActiveTintColor: Colors.darkblue,
                 tabBarHideOnKeyboard: true,
                 tabBarLabelStyle: {
                     fontSize: 12,
@@ -37,6 +39,7 @@ function BottomNavigation({ }) {
                         <Entypo
                             name={'home'}
                             size={23}
+                            color={color}
                         //style={[styles.buttonIcon, { color: Colors.textBlue }]}
                         />
                     ),
@@ -50,9 +53,10 @@ function BottomNavigation({ }) {
                     headerShown: false,
                     tabBarLabel: 'Dashboard',
                     tabBarIcon: ({ color }) => (
-                        <Entypo
-                            name={'home'}
+                        <MaterialCommunityIcons
+                            name={'view-dashboard'}
                             size={23}
+                            color={color}
                         // style={[styles.buttonIcon, { color: Colors.textBlue }]}
                         />
                     ),
@@ -66,9 +70,10 @@ function BottomNavigation({ }) {
                     headerShown: false,
                     tabBarLabel: 'Profile',
                     tabBarIcon: ({ color }) => (
-                        <Entypo
-                            name={'home'}
+                        <FontAwesome5
+                            name={'user-circle'}
                             size={23}
+                            color={color}
                         // style={[styles.buttonIcon, { color: Colors.textBlue }]}
                         />
                     ),

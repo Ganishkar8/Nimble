@@ -2,20 +2,27 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ApplicationScreen from '../Screens/ApplicationScreen';
+import HomeScreen from '../Screens/HomeScreen';
 
 const Stack = createNativeStackNavigator();
 
-export default HomeStack = () => { 
+export default HomeStack = () => {
 
   return (
 
-      <Stack.Navigator initialRouteName="ApplicationScreen" headerMode={null}>
+    <Stack.Navigator initialRouteName="HomeScreen" headerMode={null}>
       <Stack.Screen
         name="ApplicationScreen"
         component={ApplicationScreen}
-        options={{headerShown: false}}
-        />
-    
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="HomeScreen"
+        component={HomeScreen}
+        options={{ headerShown: false }}
+      />
+
     </Stack.Navigator>
   );
 };
