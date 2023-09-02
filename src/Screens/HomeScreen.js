@@ -5,14 +5,17 @@ import {
     ImageBackground,
     View,
     Platform,
+    TouchableOpacity,
     Alert,
     Image,
+    StatusBar,
     Text
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Colors from '../Utils/Colors';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 
-const HomeScreen = () => {
+const HomeScreen = ({ navigation }) => {
 
     useEffect(() => {
 
@@ -23,23 +26,19 @@ const HomeScreen = () => {
     return (
         // enclose all components in this View tag
         <SafeAreaView>
-
+<StatusBar backgroundColor={Colors.darkblue} barStyle="light-content" />
             <View style={styles.parentView}>
 
-                <View style={{ width: '100%', marginLeft: '4.4%', marginTop: '12%', flexDirection: 'row' }}>
+                <View style={{ width: '100%', marginLeft: '4.4%', marginTop: '12%', flexDirection: 'row',alignItems:'center' }}>
 
-                    <Text style={{ flex: 0.8, fontSize: 20, color: '#4e4e4e' }}>Hi! John Doe</Text>
+                    <Text style={{ textAlign:'left',flex: 0.9, fontSize: 20, color: '#4e4e4e' }}>Hi! {global.USERNAME}</Text>
 
-                    <Image
-                        style={styles.tinyLogo}
-                        source={{
-                            uri: 'https://reactnative.dev/img/tiny_logo.png',
-                        }}
-                    />
+                    <Image source={require('../Images/notification_bell_new.png')}
+                                style={styles.tinyLogo} />
 
                 </View>
 
-                <Text style={{ width: '100%', marginLeft: '4.4%', fontSize: 12, color: '#9f9f9f', marginTop: 5 }}>User ID:1234567</Text>
+                <Text style={{ width: '100%', marginLeft: '4.4%', fontSize: 12, color: '#9f9f9f', marginTop: 5 }}>User ID :{global.USERID}</Text>
 
                 <View style={{ width: '95%', height: '30%', borderRadius: 10, marginTop: '4%', backgroundColor: '#ffffff', flexDirection: 'column' }}>
 
@@ -52,28 +51,34 @@ const HomeScreen = () => {
 
                             <View style={{ flexDirection: 'column' }}>
                                 <View style={styles.circularView}>
-
+                                <Image source={require('../Images/money.png')}
+                                style={{width:20,height:20}} />
                                 </View>
                                 <Text style={{ fontSize: 12, color: '#4e4e4e', marginTop: '2%', textAlign: 'center' }}>Products</Text>
                             </View>
 
                             <View style={{ flexDirection: 'column', flex: 0.25 }}>
                                 <View style={styles.circularView1}>
-
+                                <Image source={require('../Images/calculator.png')}
+                                style={{width:20,height:20}} />
                                 </View>
                                 <Text style={{ fontSize: 12, color: '#4e4e4e', marginTop: '2%', textAlign: 'center' }}>Calculator</Text>
                             </View>
 
-                            <View style={{ flexDirection: 'column', flex: 0.25 }}>
+                            <TouchableOpacity onPress={()=>navigation.navigate('LoanApplicationTracker')} activeOpacity ={10} style={{ flexDirection: 'column', flex: 0.25 }}>
+                            <View>
                                 <View style={styles.circularView2}>
-
+                                <Image source={require('../Images/lead_list.png')}
+                                style={{width:20,height:23}} />
                                 </View>
                                 <Text style={{ fontSize: 12, color: '#4e4e4e', marginTop: '2%', textAlign: 'center' }}>Application</Text>
                             </View>
+                            </TouchableOpacity>
 
                             <View style={{ flexDirection: 'column', alignItems: 'center', flex: 0.25 }}>
                                 <View style={styles.circularView3}>
-
+                                <Image source={require('../Images/iconly_broken_profile.png')}
+                                style={{width:22,height:26}} />
                                 </View>
                                 <Text style={{ fontSize: 12, color: '#4e4e4e', marginTop: '2%' }}>Lead</Text>
                             </View>
@@ -104,10 +109,16 @@ const HomeScreen = () => {
                         </View>
 
 
-                        <View style={{ width: '40%', height: '20%',marginLeft:'7%',marginTop:'7%',justifyContent:'center', backgroundColor: Colors.darkblue,borderRadius:20 }}>
+                        <View style={{ width: '40%', height: '20%',marginLeft:'7%',marginTop:'7%',alignItems:'center',justifyContent:'center',flexDirection:'row', backgroundColor: Colors.darkblue,borderRadius:20 }}>
                         
-                        <Text style={{ fontSize: 14, color: '#ffffff',marginLeft:'10%' }}>Get Started</Text>
+                        <Text style={{flex:0.8, fontSize: 14, color: '#ffffff',marginLeft:'7%' }}>Get Started</Text>
 
+                        <AntDesign
+                            name={'arrowright'}
+                            size={18}
+                            color={'#ffffff'}
+                        //style={[styles.buttonIcon, { color: Colors.textBlue }]}
+                        />
 
                         </View>
 
@@ -152,8 +163,9 @@ const styles = StyleSheet.create({
         resizeMode: 'contain',
     },
     tinyLogo: {
-        width: 20,
-        height: 20,
+        width: 15,
+        height: 18,
+        justifyContent:'center'
     },
     circularView: {
         width: 60,
