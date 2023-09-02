@@ -1,5 +1,6 @@
 export default {
     
     textBlue:'#073A87',
-    white : '#FFFFFF'
+    white : '#FFFFFF',
+    darkblue: '#0294ff'
 }
