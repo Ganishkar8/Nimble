@@ -28,11 +28,6 @@ const Route = () => {
         />
 
         <Stack.Screen
-          name="LoanApplicationTracker"
-          component={LoanApplicationTracker}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
           name="BottomNavigation"
           component={BottomNavigation}
           options={{ headerShown: false }}

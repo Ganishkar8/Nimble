@@ -14,6 +14,7 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import apiInstance from '../Utils/apiInstance';
+import Colors from '../Utils/Colors';
 
 const data = [
 
@@ -107,7 +108,7 @@ const LoanApplicationTracker = ({ }) => {
                     <View>
                         <Text style={{ color: '#707070', fontSize: 13, fontWeight: '400' }}>Status</Text>
                         <View>
-                            <Text style={{ color: '#707070', fontSize: 13, fontWeight: '500', marginTop: 5 }}>{item.status}</Text>
+                            <Text style={{ color: '#e85050', fontSize: 13, fontWeight: '500', marginTop: 5 }}>{item.status}</Text>
                         </View>
                     </View>
 
@@ -163,7 +164,7 @@ const LoanApplicationTracker = ({ }) => {
     return (
 
         <View style={styles.container}>
-            <StatusBar backgroundColor='#fff' barStyle="dark-content" />
+            <StatusBar backgroundColor={Colors.darkblue} barStyle="dark-content" />
 
             <View style={styles.headerView}>
 
