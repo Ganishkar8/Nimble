@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import {
     SafeAreaView,
     StyleSheet,
-    ImageBackground,
+    Image,
     View,
     Platform,
     Alert,
@@ -10,16 +10,15 @@ import {
     TouchableOpacity
 } from 'react-native';
 
+
+
 const SplashScreen = ({ navigation }) => {
 
     useEffect(() => {
-
-
+        setTimeout(() => {
+            navigation.navigate('LoginScreen')
+          }, 1000);
     }, []);
-
-    const nav = () => {
-        navigation.navigate('BottomNavigation')
-    }
 
 
     return (
@@ -27,10 +26,11 @@ const SplashScreen = ({ navigation }) => {
         <SafeAreaView>
 
             <View style={styles.parentView}>
-                <TouchableOpacity onPress={nav}>
-                    <Text style={{ color: '#000' }}>hi</Text>
+                
+                <Image source={require('../Images/loginbg.png')} style={{width:200,height:200}}/>
+                <TouchableOpacity onPress={secondAPI}>
+                    <Text style={{ color: '#000',marginTop: 20,fontSize:20 }}>Nimble</Text>
                 </TouchableOpacity>
-
 
             </View>
         </SafeAreaView>
@@ -51,16 +51,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center'
     },
-    imageStyle1: {
-        width: 230,
-        height: 100,
-        resizeMode: 'contain'
-    },
-    imageStyleLogo: {
-        width: 100,
-        height: 100,
-        resizeMode: 'contain',
-    }
 });
 
 
