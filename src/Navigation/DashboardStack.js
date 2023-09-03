@@ -9,7 +9,8 @@ export default DashboardStack = () => {
 
   return (
 
-      <Stack.Navigator initialRouteName="DashboardScreen" headerMode={null}>
+      <Stack.Navigator >
+        
       <Stack.Screen
         name="DashboardScreen"
         component={DashboardScreen}

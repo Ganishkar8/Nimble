@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect,useState } from 'react';
 import {
     SafeAreaView,
     StyleSheet,
@@ -14,33 +14,38 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import Colors from '../Utils/Colors';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import MyStatusBar from './ MyStatusBar';
+import Loading from './Loading';
 
 const HomeScreen = ({ navigation }) => {
 
-    useEffect(() => {
+    const [loading, setLoading] = useState(false);
 
+    useEffect(() => {
 
     }, []);
 
-
     return (
-        // enclose all components in this View tag
-        <SafeAreaView>
-<StatusBar backgroundColor={Colors.darkblue} barStyle="light-content" />
-            <View style={styles.parentView}>
+           
+             <View>
+             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
+             {loading ? <Loading /> : null}
+             <View style={styles.parentView}>
 
-                <View style={{ width: '100%', marginLeft: '4.4%', marginTop: '12%', flexDirection: 'row',alignItems:'center' }}>
+                <View style={{ width: '100%', marginLeft: '4.4%', marginTop: '5%', 
+                flexDirection: 'row',alignItems:'center' ,paddingHorizontal:5}}>
 
-                    <Text style={{ textAlign:'left',flex: 0.9, fontSize: 20, color: '#4e4e4e' }}>Hi! {global.USERNAME}</Text>
+                <Text style={{ textAlign:'left',flex: 0.9, fontSize: 20, color: '#4e4e4e' }}>Hi! {global.USERNAME}</Text>
 
-                    <Image source={require('../Images/notification_bell_new.png')}
-                                style={styles.tinyLogo} />
+                 <Image source={require('../Images/notification_bell_new.png')}
+                 style={styles.tinyLogo} />
 
                 </View>
 
-                <Text style={{ width: '100%', marginLeft: '4.4%', fontSize: 12, color: '#9f9f9f', marginTop: 5 }}>User ID :{global.USERID}</Text>
-
-                <View style={{ width: '95%', height: '30%', borderRadius: 10, marginTop: '4%', backgroundColor: '#ffffff', flexDirection: 'column' }}>
+                <Text style={{ width: '100%', marginLeft: '4.4%', fontSize: 12, 
+                color: '#9f9f9f', marginTop: 5 ,paddingHorizontal:5}}>User ID :{global.USERID}</Text>
+                <View style={{ width: '95%', height: '30%', borderRadius: 10, 
+                marginTop: '4%', backgroundColor: '#ffffff', flexDirection: 'column' }}>
 
                     <View style={{ marginLeft: '4%' }}>
 
@@ -54,7 +59,7 @@ const HomeScreen = ({ navigation }) => {
                                 <Image source={require('../Images/money.png')}
                                 style={{width:20,height:20}} />
                                 </View>
-                                <Text style={{ fontSize: 12, color: '#4e4e4e', marginTop: '2%', textAlign: 'center' }}>Products</Text>
+                                <Text style={{ fontSize: 12, color: '#4e4e4e', marginTop:8, textAlign: 'center', }}>Products</Text>
                             </View>
 
                             <View style={{ flexDirection: 'column', flex: 0.25 }}>
@@ -62,7 +67,7 @@ const HomeScreen = ({ navigation }) => {
                                 <Image source={require('../Images/calculator.png')}
                                 style={{width:20,height:20}} />
                                 </View>
-                                <Text style={{ fontSize: 12, color: '#4e4e4e', marginTop: '2%', textAlign: 'center' }}>Calculator</Text>
+                                <Text style={{ fontSize: 12, color: '#4e4e4e', marginTop:8, textAlign: 'center' }}>Calculator</Text>
                             </View>
 
                             <TouchableOpacity onPress={()=>navigation.navigate('LoanApplicationTracker')} activeOpacity ={10} style={{ flexDirection: 'column', flex: 0.25 }}>
@@ -71,7 +76,7 @@ const HomeScreen = ({ navigation }) => {
                                 <Image source={require('../Images/lead_list.png')}
                                 style={{width:20,height:23}} />
                                 </View>
-                                <Text style={{ fontSize: 12, color: '#4e4e4e', marginTop: '2%', textAlign: 'center' }}>Application</Text>
+                                <Text style={{ fontSize: 12, color: '#4e4e4e', marginTop:8, textAlign: 'center' }}>Application</Text>
                             </View>
                             </TouchableOpacity>
 
@@ -80,7 +85,7 @@ const HomeScreen = ({ navigation }) => {
                                 <Image source={require('../Images/iconly_broken_profile.png')}
                                 style={{width:22,height:26}} />
                                 </View>
-                                <Text style={{ fontSize: 12, color: '#4e4e4e', marginTop: '2%' }}>Lead</Text>
+                                <Text style={{ fontSize: 12, color: '#4e4e4e', marginTop:8 }}>Lead</Text>
                             </View>
 
                         </View>
@@ -132,8 +137,8 @@ const HomeScreen = ({ navigation }) => {
 
 
 
-            </View>
-        </SafeAreaView>
+             </View>
+             </View>
     );
 };
 

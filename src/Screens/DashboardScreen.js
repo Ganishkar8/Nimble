@@ -2,27 +2,32 @@ import React, { useEffect } from 'react';
 import {
     SafeAreaView,
     StyleSheet,
-    ImageBackground,
+    Image,
     View,
     Platform,
     Alert,
-    Text
+    Text,
+    TouchableOpacity
 } from 'react-native';
 
-const DashboardScreen = () => {
+
+
+const DashboardScreen = ({ navigation }) => {
 
     useEffect(() => {
-
-
+        
     }, []);
 
 
     return (
         // enclose all components in this View tag
         <SafeAreaView>
-            
+
             <View style={styles.parentView}>
-                <Text style={{color:'#000'}}>Dashboard Screen</Text>
+                
+                <TouchableOpacity>
+                    <Text style={{ color: '#000',marginTop: 20,fontSize:20 }}>DashboardScreen</Text>
+                </TouchableOpacity>
 
             </View>
         </SafeAreaView>
@@ -35,7 +40,7 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
         alignItems: 'center',
-        justifyContent : 'center'
+        justifyContent: 'center'
     },
     imageStyle: {
         width: '100%',
@@ -43,16 +48,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center'
     },
-    imageStyle1: {
-        width: 230,
-        height: 100,
-        resizeMode: 'contain'
-    },
-    imageStyleLogo: {
-        width: 100,
-        height: 100,
-        resizeMode: 'contain',
-    }
 });
 
 

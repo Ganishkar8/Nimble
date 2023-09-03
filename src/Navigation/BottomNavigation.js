@@ -7,6 +7,8 @@ import Colors from '../Utils/Colors';
 import HomeStack from './HomeStack';
 import DashboardStack from './DashboardStack';
 import ProfileStack from './ProfileStack';
+import DashboardScreen from '../Screens/DashboardScreen';
+import { NavigationContainer } from '@react-navigation/native';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -18,10 +20,11 @@ function BottomNavigation({ }) {
 
         <Tab.Navigator
             initialRouteName="Home"
-
+            detachInactiveScreens = {false}
             screenOptions={{
                 headerShown: false,
-                tabBarStyle: { width: '100%', backgroundColor: Colors.white, height: 55, paddingVertical: 2 },
+                tabBarStyle: { width: '100%', backgroundColor: Colors.white,
+                },
                 tabBarActiveTintColor: Colors.darkblue,
                 tabBarHideOnKeyboard: true,
                 tabBarLabelStyle: {
@@ -40,7 +43,7 @@ function BottomNavigation({ }) {
                             name={'home'}
                             size={23}
                             color={color}
-                        //style={[styles.buttonIcon, { color: Colors.textBlue }]}
+                          //style={[styles.buttonIcon, { color: Colors.textBlue }]}
                         />
                     ),
                 }}
@@ -57,7 +60,7 @@ function BottomNavigation({ }) {
                             name={'view-dashboard'}
                             size={23}
                             color={color}
-                        // style={[styles.buttonIcon, { color: Colors.textBlue }]}
+                          // style={[styles.buttonIcon, { color: Colors.textBlue }]}
                         />
                     ),
                 }}
@@ -79,9 +82,6 @@ function BottomNavigation({ }) {
                     ),
                 }}
             />
-
-
-
         </Tab.Navigator>
     );
 }

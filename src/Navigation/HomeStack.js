@@ -11,24 +11,28 @@ export default HomeStack = () => {
 
   return (
 
-    <Stack.Navigator initialRouteName="HomeScreen" headerMode={null}>
+    <Stack.Navigator >
+
+        <Stack.Screen
+        name="HomeScreen"
+        component={HomeScreen}
+        options={{ headerShown: false }}
+      />
+
+<Stack.Screen
+        name="LoanApplicationTracker"
+        component={LoanApplicationTracker}
+        options={{ headerShown: false }}
+      />
       <Stack.Screen
         name="ApplicationScreen"
         component={ApplicationScreen}
         options={{ headerShown: false }}
       />
 
-      <Stack.Screen
-        name="LoanApplicationTracker"
-        component={LoanApplicationTracker}
-        options={{ headerShown: false }}
-      />
+      
 
-      <Stack.Screen
-        name="HomeScreen"
-        component={HomeScreen}
-        options={{ headerShown: false }}
-      />
+    
 
     </Stack.Navigator>
   );

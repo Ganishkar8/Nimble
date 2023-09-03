@@ -8,6 +8,7 @@ import {
     StyleSheet,
     TextInput,
     TouchableOpacity,
+    SafeAreaView,
 } from 'react-native';
 
 import Entypo from 'react-native-vector-icons/Entypo';
@@ -15,6 +16,8 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import apiInstance from '../Utils/apiInstance';
 import Colors from '../Utils/Colors';
+import MyStatusBar from './ MyStatusBar';
+import Loading from './Loading';
 
 const data = [
 
@@ -24,12 +27,13 @@ const data = [
     { name: 'Rejected' }
 ]
 
-const LoanApplicationTracker = ({ }) => {
+const LoanApplicationTracker = ({navigation}) => {
 
     const [click, setClick] = useState('');
     const [search, setSearch] = useState('');
     const [pendingData, setPendingData] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         getPendingData()
@@ -40,12 +44,14 @@ const LoanApplicationTracker = ({ }) => {
             "isActive": true
         }
         const baseURL = '8101'
+        setLoading(true)
         apiInstance(baseURL).post('/api/v1/cases?page=0&size=20', appDetails)
             .then((response) => {
                 // Handle the response data
                 console.log("ResponseDataApi::" + JSON.stringify(response.data));
                 setPendingData(response.data.content)
                 setFilteredData(response.data.content)
+                setLoading(false)
                 // const decodedToken = jwtDecode(response.data.jwtToken);
                 // console.log("LoginJWTDecode::" + JSON.stringify(decodedToken));
             })
@@ -163,18 +169,21 @@ const LoanApplicationTracker = ({ }) => {
 
     return (
 
-        <View style={styles.container}>
-            <StatusBar backgroundColor={Colors.darkblue} barStyle="dark-content" />
-
-            <View style={styles.headerView}>
-
-                <View style={{
+              <View style={{ flex: 1, backgroundColor: '#fefefe' }}>
+              <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
+              {loading ? <Loading /> : null}
+               <View style={styles.headerView}>
+                  <View style={{
                     width: '100%', height: 56, alignItems: 'center', justifyContent: 'center',
                     flexDirection: 'row'
-                }}>
-                    <View style={{ width: '15%', height: 56, alignItems: 'center', justifyContent: 'center' }}>
-                        <Entypo name='chevron-left' size={25} color='#4e4e4e' />
+                 }}>
+                    <TouchableOpacity onPress={()=>navigation.goBack()} style={{ width: '15%', height: 56, alignItems: 'center', justifyContent: 'center' }}>
+                    <View >
+                    
+                    <Entypo name='chevron-left' size={25} color='#4e4e4e' />
+                    
                     </View>
+                    </TouchableOpacity>
                     <View style={{ width: '85%', height: 56, justifyContent: 'center' }}>
                         <Text style={{ fontSize: 18, color: '#000', fontWeight: '400' }}>Loan Application Tracker</Text>
                     </View>
@@ -213,9 +222,10 @@ const LoanApplicationTracker = ({ }) => {
                         }}
                     />
                 </View>
-            </View>
+              </View>
 
-            <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 10, }}>
+               <View style={{ width: '100%', alignItems: 'center', 
+               justifyContent: 'center', marginTop: 10,marginBottom:8 }}>
                 <View style={{
                     width: '90%', backgroundColor: '#f2f2f2',
                     borderRadius: 7, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10
@@ -238,23 +248,20 @@ const LoanApplicationTracker = ({ }) => {
                     />
                     <Ionicons name="search" style={{ marginStart: 32 }} size={20} color={'#aaaaaa'} />
                 </View>
-            </View>
-            {filteredData.length > 0 ?
-                (<View style={{ width: '100%', justifyContent: 'center', marginBottom: 200 }}>
+                 </View>
+           
+                  <View style={{ width: '100%', justifyContent: 'center', marginBottom: 200 }}>
                     <FlatList
                         data={filteredData}
                         renderItem={listView}
                         showsVerticalScrollIndicator={false}
                         keyExtractor={(item, index) => index.toString()}
                     />
-                </View>) :
-                <View style={{ width: '100%', justifyContent: 'center', marginTop: 100, alignItems: 'center' }}>
-                    <Text style={{ color: '#707070', fontSize: 13, fontWeight: '500', marginTop: 5 }}>Loading...</Text>
-                </View>
-            }
+                  </View>
+        
 
 
-        </View>
+              </View>
     );
 };
 

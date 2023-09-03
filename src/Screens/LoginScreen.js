@@ -22,13 +22,16 @@ import Feather from 'react-native-vector-icons/Feather';
 import apiInstance from '../Utils/apiInstance';
 import jwtDecode from 'jwt-decode';
 import Colors from '../Utils/Colors';
+import MyStatusBar from './ MyStatusBar';
+import Loading from './Loading';
 
 const LoginScreen = ({ navigation }) => {
 
-    const [userID, setUserID] = useState('');
-    const [password, setPassword] = useState('');
+    const [userID, setUserID] = useState('admin');
+    const [password, setPassword] = useState('12345');
     const [secureTextEntry, setSecureTextEntry] = useState(true);
     const [loading, setLoading] = useState(false);
+
 
     useEffect(() => {
 
@@ -44,13 +47,14 @@ const LoginScreen = ({ navigation }) => {
             "password": password
         }
         const baseURL = '8081'
+        setLoading(true)
         apiInstance(baseURL).post('/api/auth/login', appDetails)
             .then(async(response) => {
                 // Handle the response data
                 console.log("ResponseLoginApi::" + JSON.stringify(response.data));
                 const decodedToken = await jwtDecode(response.data.jwtToken);
                 console.log("LoginJWTDecode::" + JSON.stringify(decodedToken));
-                
+                setLoading(false)
                 global.USERNAME = decodedToken.userName;
                 global.USERID = decodedToken.userId;
                 loginHandle1();
@@ -77,9 +81,11 @@ const LoginScreen = ({ navigation }) => {
 
     return (
 
-        <View style={{ flex: 1, backgroundColor: '#fefefe' }}>
-            <StatusBar backgroundColor={Colors.darkblue} barStyle="light-content" />
-            <ScrollView showsVerticalScrollIndicator={false} >
+             <View style={{ flex: 1, backgroundColor: '#fefefe' }}>
+             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
+             {loading ? <Loading /> : null}
+             <ScrollView showsVerticalScrollIndicator={false} >
+
                 <View style={{ alignItems: 'center', justifyContent: 'center' }}>
 
                     <View style={{ width: '100%', flexDirection: 'row', }}>
@@ -272,23 +278,28 @@ const LoginScreen = ({ navigation }) => {
                     </View>
 
 
-                    <View style={{ width: '92%', flexDirection: 'row',alignItems:'center', justifyContent: 'space-between', marginTop: 8, marginTop: 20 }}>
+                    <View style={{ width: '92%', flexDirection: 'row',alignItems:'center', 
+                    justifyContent: 'space-between', marginTop: 8, marginTop: 20,paddingVertical:130 }}>
                         <View style={{alignItems:'flex-start',flex:0.5}}>
-                            <Image style={{ width: 60, height: 26, resizeMode: 'contain' }} source={require('../Images/nimble.png')} />
+                            <Image style={{ width: 60, height: 26, resizeMode: 'contain' }} 
+                            source={require('../Images/nimble.png')} />
                             <View style={{alignItems:'center'}}>
-                                <Text style={{marginLeft:14, color: '#4e4e4e',textAlign:'center', fontSize: 7, fontWeight: '500'}}>Business Loan</Text>
+                                <Text style={{marginLeft:14, color: '#4e4e4e',
+                                textAlign:'center', fontSize: 7, fontWeight: '500'}}>Business Loan</Text>
                             </View>
                         </View>
 
                         <View style={{flex:0.5,alignItems:'flex-end'}}>
-                            <Image style={{ width: 60, height: 40, resizeMode: 'contain', marginTop: 9 }} source={require('../Images/cslogo.png')} />
+                            <Image style={{ width: 60, height: 40, resizeMode: 'contain', marginTop: 9 }} 
+                            source={require('../Images/cslogo.png')} />
                         </View>
 
                     </View>
                 </View>
             </ScrollView>
-            <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 5, position: 'absolute', bottom: 0 }}>
-                <View style={{ marginLeft:18,marginRight:18,marginTop:18,marginBottom:5 }}>
+            <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', 
+            marginTop: 5, position: 'absolute', bottom: 0 ,marginBottom:25}}>
+                <View style={{ marginLeft:18,marginRight:18,marginTop:18,marginBottom:9 }}>
                     <Text style={{ color: '#8a8f9d', fontSize: 12 }}>By continuing you agree to our <Text style={{ color: '#0294ff' }}>Terms</Text> and <Text style={{ color: '#0294ff' }}>Privacy policy</Text></Text>
                 </View>
                 <View>
