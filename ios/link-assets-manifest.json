@@ -110,10 +110,6 @@
       "sha1": "5633a4f50fb7cf79131b957beff9114b0997bdac"
     },
     {
-      "path": "assets/fonts/Poppins-Regular.ttf",
-      "sha1": "01d319c533f62ea29f03b5df8adfd4d93d2d2a38"
-    },
-    {
       "path": "assets/fonts/Poppins-SemiBold.ttf",
       "sha1": "20b39c8b480c946b084d6aa09f12bf10b2ec5aa6"
     },
@@ -128,6 +124,10 @@
     {
       "path": "assets/fonts/Poppins-ThinItalic.ttf",
       "sha1": "0ae5e70e426adb3104852afb7a83a89bf3699260"
+    },
+    {
+      "path": "assets/fonts/PoppinsRegular.ttf",
+      "sha1": "01d319c533f62ea29f03b5df8adfd4d93d2d2a38"
     },
     {
       "path": "assets/fonts/SimpleLineIcons.ttf",

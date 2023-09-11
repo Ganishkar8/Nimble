@@ -9,6 +9,8 @@ import {
     Text,
     TouchableOpacity
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Colors from '../Utils/Colors';
 
 
 
@@ -27,10 +29,10 @@ const SplashScreen = ({ navigation }) => {
 
             <View style={styles.parentView}>
                 
-                <Image source={require('../Images/loginbg.png')} style={{width:200,height:200}}/>
-                <TouchableOpacity onPress={secondAPI}>
-                    <Text style={{ color: '#000',marginTop: 20,fontSize:20 }}>Nimble</Text>
-                </TouchableOpacity>
+                <Image source={require('../Images/splashlogo.png')} style={{width:100,height:35}}/>
+                
+                    <Text style={{ color: Colors.darkblack,fontSize:12,marginLeft:34 }}>Business Loan</Text>
+                
 
             </View>
         </SafeAreaView>
