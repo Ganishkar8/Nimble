@@ -47,8 +47,10 @@ const LeadCreationBasic = (props, { navigation }) => {
     const [mobileNumber, setMobileNumber] = useState('');
 
     useEffect(() => {
-
-    }, []);
+        props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
+        return () =>
+        props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
+    }, [navigation]);
 
 
     return (
