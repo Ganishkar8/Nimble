@@ -24,11 +24,17 @@ import jwtDecode from 'jwt-decode';
 import Colors from '../Utils/Colors';
 import MyStatusBar from './ MyStatusBar';
 import Loading from './Loading';
+import TextComp from '../Components/TextComp';
+import { connect } from 'react-redux';
+import { languageAction } from '../Utils/redux/actions/languageAction';
+import { language } from '../Utils/LanguageString';
+import Commonstyles from '../Utils/Commonstyles';
+import ImageComp from '../Components/ImageComp';
 
-const LoginScreen = ({ navigation }) => {
+const LoginScreen = (props, { navigation }) => {
 
-    const [userID, setUserID] = useState('admin');
-    const [password, setPassword] = useState('12345');
+    const [userID, setUserID] = useState('');
+    const [password, setPassword] = useState('');
     const [secureTextEntry, setSecureTextEntry] = useState(true);
     const [loading, setLoading] = useState(false);
 
@@ -38,8 +44,8 @@ const LoginScreen = ({ navigation }) => {
     }, []);
 
     const nav = () => {
-        if(userID.length < 3 || password.length<3){
-            alert('please enter valid details')
+        if (userID.length < 3 || password.length < 3) {
+            alert(language[0][props.language].str_errlogin)
             return;
         }
         const appDetails = {
@@ -49,7 +55,7 @@ const LoginScreen = ({ navigation }) => {
         const baseURL = '8081'
         setLoading(true)
         apiInstance(baseURL).post('/api/auth/login', appDetails)
-            .then(async(response) => {
+            .then(async (response) => {
                 // Handle the response data
                 console.log("ResponseLoginApi::" + JSON.stringify(response.data));
                 const decodedToken = await jwtDecode(response.data.jwtToken);
@@ -57,11 +63,12 @@ const LoginScreen = ({ navigation }) => {
                 setLoading(false)
                 global.USERNAME = decodedToken.userName;
                 global.USERID = decodedToken.userId;
-                loginHandle1();
+                loginHandle();
 
             })
             .catch((error) => {
                 // Handle the error
+                setLoading(false)
                 alert(error);
             });
     }
@@ -75,90 +82,55 @@ const LoginScreen = ({ navigation }) => {
         }
     };
 
-    const loginHandle1 = () => {
-        navigation.navigate('BottomNavigation');
+    const loginHandle = () => {
+        props.navigation.navigate('BottomNavigation');
     };
 
     return (
 
-             <View style={{ flex: 1, backgroundColor: '#fefefe' }}>
-             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
-             {loading ? <Loading /> : null}
-             <ScrollView showsVerticalScrollIndicator={false} >
+        <View style={{ flex: 1, backgroundColor: Colors.lightwhite }}>
+            <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
 
-                <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+            <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" >
+                {loading ? <Loading /> : null}
+                <View style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-start' }}>
 
                     <View style={{ width: '100%', flexDirection: 'row', }}>
+
                         <View style={{ width: '100%', }}>
-                            <Image source={require('../Images/loginbg.png')}
-                                style={{ width: 140, height: 140, resizeMode: 'contain' }} />
+                            <ImageComp imageSrc={require('../Images/loginbg.png')} imageStylee={{ width: 140, height: 140, resizeMode: 'contain' }} />
                         </View>
+
                         <View style={{ width: '55%', }}>
 
                         </View>
 
                     </View>
-                    <View style={{ width: '100%', marginTop: 30, paddingHorizontal: 16, }}>
-                        <Text
-                            style={{
-                                color: '#000',
-                                fontSize: 22,
-                                fontWeight: 'bold',
-                            }}>
-                            Login
-                        </Text>
 
-                        <Text
-                            style={{
-                                color: '#8a8f9d',
-                                fontSize: 14,
-                                fontWeight: '400',
-                                marginTop: 7
-                            }}>
-                            Please enter your User ID and Password
-                        </Text>
+                    <View style={{ width: '100%', marginTop: 30, paddingHorizontal: 16, }}>
+
+                        <TextComp textVal={language[0][props.language].str_login} textStyle={[Commonstyles.boldtextStyle, { fontSize: 22 }]} />
+                        <TextComp textVal={language[0][props.language].str_logindesc} textStyle={{ color: Colors.lightgrey, fontSize: 14, marginTop: 7 }} />
+
                     </View>
 
 
-                    <View style={{
-                        width: '100%', marginTop: 19, paddingHorizontal: 0,
-                        alignItems: 'center', justifyContent: 'center'
-                    }}>
+                    <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
 
-                        <View style={{
-                            width: '90%', marginTop: 3,
-                            paddingHorizontal: 0,
-                        }}>
-                            <Text
-                                style={{
-                                    color: '#707070',
-                                    fontSize: 14,
-                                    paddingHorizontal: 0,
-                                    fontWeight: '400',
-                                }}>
-                                USER ID
-                            </Text>
+                        <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
+                            <TextComp textVal={language[0][props.language].str_userid} textStyle={Commonstyles.inputtextStyle} />
                         </View>
 
-                        <View style={{
-                            width: '90%', marginTop: 3,
-                            paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: '#e2e2e2'
-                        }}>
+                        <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: '#e2e2e2' }}>
 
                             <TextInput
                                 value={userID}
                                 onChangeText={txt => setUserID(txt)}
-                                placeholder={'User ID'}
-                                placeholderTextColor="#bbbdc1"
+                                placeholder={language[0][props.language].str_useridholder}
+                                placeholderTextColor={Colors.lightgrey}
                                 secureTextEntry={false}
                                 autoCapitalize="none"
-                                style={{
-                                    width: '90%',
-                                    height: 43,
-                                    fontSize: 15,
-                                    fontWeight: '400',
-
-                                }}
+                                style={Commonstyles.textinputtextStyle}
                             />
 
                         </View>
@@ -172,16 +144,7 @@ const LoginScreen = ({ navigation }) => {
                     }}>
 
                         <View style={{ width: '90%', marginTop: 0, }}>
-                            <Text
-                                style={{
-                                    color: '#707070',
-                                    fontSize: 14,
-                                    paddingHorizontal: 0,
-                                    fontWeight: '400',
-                                }}>
-                                PASSWORD
-                            </Text>
-
+                            <TextComp textVal={language[0][props.language].str_password} textStyle={Commonstyles.inputtextStyle} />
                         </View>
 
                         <View style={{
@@ -192,15 +155,10 @@ const LoginScreen = ({ navigation }) => {
                             <TextInput
                                 value={password}
                                 onChangeText={password => setPassword(password)}
-                                placeholder={'Password'}
-                                placeholderTextColor="#bbbdc1"
+                                placeholder={language[0][props.language].str_passwordholder}
+                                placeholderTextColor={Colors.lightgrey}
                                 secureTextEntry={secureTextEntry ? true : false}
-                                style={{
-                                    width: '90%',
-                                    fontSize: 15,
-                                    fontWeight: '400',
-                                    height: 43,
-                                }}
+                                style={Commonstyles.textinputtextStyle}
                             />
 
 
@@ -247,15 +205,10 @@ const LoginScreen = ({ navigation }) => {
                                 alignItems: 'center',
                                 justifyContent: 'flex-end',
                             }}>
-                            <Text
-                                style={{
-                                    color: '#0294ff',
-                                    fontSize: 14,
-                                    marginRight: 0,
-                                    fontWeight: '400'
-                                }}>
-                                Forgot Password ?
-                            </Text>
+
+                            <TextComp textVal={language[0][props.language].str_forgotpassword} textStyle={{ color: Colors.darkblue, fontSize: 14 }} />
+
+
                         </View>
                     </View>
 
@@ -267,50 +220,75 @@ const LoginScreen = ({ navigation }) => {
                             justifyContent: 'center',
                             alignItems: 'center',
                         }}>
-                        <TouchableOpacity onPress={nav} activeOpacity ={10} style={{
-                            width: '88%', height: 43, backgroundColor: '#0294ff',
+                        <TouchableOpacity onPress={nav} activeOpacity={10} style={{
+                            width: '88%', height: 50, backgroundColor: '#0294ff',
                             borderRadius: 45, alignItems: 'center', justifyContent: 'center'
                         }}>
                             <View >
-                                <Text style={{ color: '#fff', fontSize: 13, fontWeight: '500' }}>LOGIN</Text>
+                            <TextComp textVal={language[0][props.language].str_login.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13,fontWeight:500 }} />
+                                
                             </View>
                         </TouchableOpacity>
                     </View>
 
 
-                    <View style={{ width: '92%', flexDirection: 'row',alignItems:'center', 
-                    justifyContent: 'space-between', marginTop: 8, marginTop: 20,paddingVertical:130 }}>
-                        <View style={{alignItems:'flex-start',flex:0.5}}>
-                            <Image style={{ width: 60, height: 26, resizeMode: 'contain' }} 
-                            source={require('../Images/nimble.png')} />
-                            <View style={{alignItems:'center'}}>
-                                <Text style={{marginLeft:14, color: '#4e4e4e',
-                                textAlign:'center', fontSize: 7, fontWeight: '500'}}>Business Loan</Text>
+                </View>
+
+
+                <View style={{ justifyContent: 'flex-end', alignItems: 'center', marginBottom: 25 }}>
+                    <View style={{
+                        width: '92%', flexDirection: 'row', alignItems: 'center',
+                        justifyContent: 'space-between', paddingVertical: 20
+                    }}>
+                        <View style={{ alignItems: 'flex-start', flex: 0.5 }}>
+                            <Image style={{ width: 60, height: 26, resizeMode: 'contain' }}
+                                source={require('../Images/nimble.png')} />
+                            <View style={{ alignItems: 'center' }}>
+                                <Text style={{
+                                    marginLeft: 14, color: '#4e4e4e',
+                                    textAlign: 'center', fontSize: 7, fontWeight: '500'
+                                }}>Business Loan</Text>
                             </View>
                         </View>
 
-                        <View style={{flex:0.5,alignItems:'flex-end'}}>
-                            <Image style={{ width: 60, height: 40, resizeMode: 'contain', marginTop: 9 }} 
-                            source={require('../Images/cslogo.png')} />
+                        <View style={{ flex: 0.5, alignItems: 'flex-end' }}>
+                            <Image style={{ width: 60, height: 40, resizeMode: 'contain', marginTop: 9 }}
+                                source={require('../Images/cslogo.png')} />
                         </View>
 
                     </View>
+
+                    <View style={{ marginLeft: 18, marginRight: 18, marginBottom: 9 }}>
+                        <Text style={{ color: '#8a8f9d', fontSize: 12 }}>{language[0][props.language].str_termsdesc}<Text style={{ color: '#0294ff' }}>{language[0][props.language].str_terms}</Text> {language[0][props.language].str_and} <Text style={{ color: '#0294ff' }}>{language[0][props.language].str_privacypolicy}</Text></Text>
+                    </View>
+                    <View>
+                        <Text style={{ color: '#8a8f9d', fontSize: 13, }}>{language[0][props.language].str_version}:{global.APPVERSIONNO}</Text>
+                    </View>
                 </View>
+
             </ScrollView>
-            <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', 
-            marginTop: 5, position: 'absolute', bottom: 0 ,marginBottom:25}}>
-                <View style={{ marginLeft:18,marginRight:18,marginTop:18,marginBottom:9 }}>
-                    <Text style={{ color: '#8a8f9d', fontSize: 12 }}>By continuing you agree to our <Text style={{ color: '#0294ff' }}>Terms</Text> and <Text style={{ color: '#0294ff' }}>Privacy policy</Text></Text>
-                </View>
-                <View>
-                    <Text style={{ color: '#8a8f9d', fontSize: 13, }}>Version:1.0.0</Text>
-                </View>
-            </View>
+
+
+
+
         </View>
     );
 };
 
-export default LoginScreen;
+
+const mapStateToProps = (state) => {
+    const { language } = state.languageReducer;
+    return {
+        language: language
+    }
+}
+
+const mapDispatchToProps = (dispatch) => ({
+    languageAction: (item) => dispatch(languageAction(item)),
+});
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(LoginScreen);
 
 const { width, height } = Dimensions.get('window');
 
@@ -333,5 +311,10 @@ const styles = StyleSheet.create({
         margin: 16,
         fontSize: 20,
         textAlign: 'center',
+    },
+
+    bottomView: {
+        width: '100%', alignItems: 'center', justifyContent: 'flex-end',
+        marginTop: 5, position: 'absolute', bottom: 0, marginBottom: 25
     },
 });

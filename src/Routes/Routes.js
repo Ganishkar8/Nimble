@@ -14,7 +14,7 @@ const Route = () => {
 
     <NavigationContainer>
 
-      <Stack.Navigator initialRouteName="LoginScreen">
+      <Stack.Navigator initialRouteName="SplashScreen">
 
         <Stack.Screen
           name="SplashScreen"
