@@ -75,7 +75,7 @@ const LeadCreationBasic = (props, { navigation }) => {
 
                             <TextComp textStyle={{ color: Colors.mediumgrey, fontSize: 15, fontWeight: '500' }} textVal={language[0][props.language].str_basicdetails}></TextComp>
 
-                            <ProgressComp progressvalue={0.25} />
+                            <ProgressComp progressvalue={0.25} textvalue="1 of 4"/>
 
                         </View>
 
@@ -213,7 +213,7 @@ const LeadCreationBasic = (props, { navigation }) => {
                             justifyContent: 'flex-end',
                             alignItems: 'center',
                         }}>
-                        <TouchableOpacity onPress={()=>{props.navigation.navigate('LeadCreationBusiness');}} activeOpacity={10} style={{
+                        <TouchableOpacity onPress={()=>{props.navigation.navigate('LeadCreationBusiness')}} activeOpacity={10} style={{
                             width: '88%', height: 50, backgroundColor: '#0294ff',
                             borderRadius: 45, alignItems: 'center', justifyContent: 'center'
                         }}>

@@ -4,7 +4,7 @@ import Colors from '../Utils/Colors';
 import TextComp from './TextComp';
 import { ProgressBar, MD3Colors } from 'react-native-paper';
 
-const ProgressComp = ({ progressvalue, imageStylee }) => {
+const ProgressComp = ({ progressvalue, imageStylee , textvalue }) => {
     return (
         <View style={{ flexDirection: 'row', marginTop: 20 }}>
             <View style={{ width: '88%', justifyContent: 'center' }}>
@@ -15,7 +15,7 @@ const ProgressComp = ({ progressvalue, imageStylee }) => {
 
             <View style={{ width: '15%', alignItems: 'center', justifyContent: 'center' }}>
 
-                <TextComp textVal="1 of 4" textStyle={{ fontSize: 12, color: Colors.lightgrey, textAlign: 'center' }}></TextComp>
+                <TextComp textVal={textvalue} textStyle={{ fontSize: 12, color: Colors.lightgrey, textAlign: 'center' }}></TextComp>
 
             </View>
 

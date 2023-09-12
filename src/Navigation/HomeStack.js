@@ -6,6 +6,8 @@ import HomeScreen from '../Screens/HomeScreen';
 import LoanApplicationTracker from '../Screens/LoanApplicationTracker';
 import LeadCreationBasic from '../Screens/LeadCreationBasic';
 import LeadCreationBusiness from '../Screens/LeadCreationBusiness';
+import LeadCreationLoan from '../Screens/LeadCreationLoan';
+import LeadCreationCustomerPhoto from '../Screens/LeadCreationCustomerPhoto';
 
 const Stack = createNativeStackNavigator();
 
@@ -47,6 +49,20 @@ export default HomeStack = () => {
       />
 
 
+      <Stack.Screen
+        name="LeadCreationLoan"
+        component={LeadCreationLoan}
+        options={{ headerShown: false, tabBarVisible: false }}
+
+      />
+
+
+      <Stack.Screen
+        name="LeadCreationCustomerPhoto"
+        component={LeadCreationCustomerPhoto}
+        options={{ headerShown: false, tabBarVisible: false }}
+
+      />
 
 
 

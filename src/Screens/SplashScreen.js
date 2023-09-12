@@ -11,15 +11,19 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Colors from '../Utils/Colors';
+import Sqlitedatabase from '../Database/Sqlitedatabase';
 
 
 
 const SplashScreen = ({ navigation }) => {
 
     useEffect(() => {
-        setTimeout(() => {
-            navigation.navigate('LoginScreen')
-          }, 1000);
+        Sqlitedatabase.createTables().then(table => {
+            //setTimeout(() => {
+                navigation.navigate('LoginScreen')
+             // }, 1000);
+        });
+        
     }, []);
 
 

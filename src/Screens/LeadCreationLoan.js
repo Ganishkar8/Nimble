@@ -36,15 +36,17 @@ import { ProgressBar, MD3Colors } from 'react-native-paper';
 import { Picker } from '@react-native-picker/picker';
 import ProgressComp from '../Components/ProgressComp';
 
-const LeadCreationBusiness = (props, { navigation }) => {
+const LeadCreationLoan = (props, { navigation }) => {
 
     const [checked, setChecked] = React.useState('first');
-    const [choosenLabel, setChoosenLabel] = useState('Native');
-    const [choosenIndex, setChoosenIndex] = useState('2');
-    const [businessName, setBusinessName] = useState('');
-    const [incomeTurnOver, setIncomeTurnOver] = useState('');
-    const [year, setYear] = useState('');
-    const [months, setMonths] = useState('');
+    const [loanTypeLabel, setLoanTypeLabel] = useState('Native');
+    const [loanTypeIndex, setLoanTypeIndex] = useState('2');
+    const [loanPurposeLabel, setLoanPurposeLabel] = useState('Native');
+    const [loanPurposeIndex, setLoanPurposeIndex] = useState('2');
+    const [leadTypeLabel, setLeadTypeLabel] = useState('Native');
+    const [leadTypeIndex, setLeadTypeIndex] = useState('2');
+    const [loanAmount, setLoanAmount] = useState('');
+
 
     useEffect(() => {
 
@@ -73,40 +75,20 @@ const LeadCreationBusiness = (props, { navigation }) => {
 
                         <View style={{ width: '90%', marginTop: 3, }}>
 
-                            <TextComp textStyle={{ color: Colors.mediumgrey, fontSize: 15, fontWeight: '500' }} textVal={language[0][props.language].str_businessdetails}></TextComp>
+                            <TextComp textStyle={{ color: Colors.mediumgrey, fontSize: 15, fontWeight: '500' }} textVal={language[0][props.language].str_loandetails}></TextComp>
 
-                            <ProgressComp progressvalue={0.5} textvalue="2 of 4"/>
+                            <ProgressComp progressvalue={0.75} textvalue="3 of 4" />
 
                         </View>
 
 
                     </View>
 
-                    <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
 
-                        <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
-                            <TextComp textVal={language[0][props.language].str_businessname} textStyle={Commonstyles.inputtextStyle} Visible={true} />
-                        </View>
-
-                        <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: '#e2e2e2' }}>
-
-                            <TextInput
-                                value={businessName}
-                                onChangeText={txt => setBusinessName(txt)}
-                                placeholder={''}
-                                placeholderTextColor={Colors.lightgrey}
-                                secureTextEntry={false}
-                                autoCapitalize="none"
-                                style={Commonstyles.textinputtextStyle}
-                            />
-
-                        </View>
-
-                    </View>
 
                     <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
-                            <TextComp textVal={language[0][props.language].str_industrytype} textStyle={Commonstyles.inputtextStyle} Visible={true} />
+                            <TextComp textVal={language[0][props.language].str_loantype} textStyle={Commonstyles.inputtextStyle} Visible={true} />
 
                         </View>
                         <View style={{
@@ -114,11 +96,43 @@ const LeadCreationBusiness = (props, { navigation }) => {
                         }}>
 
                             <Picker
-                                selectedValue={choosenLabel}
+                                selectedValue={loanTypeLabel}
                                 style={styles.picker}
                                 onValueChange={(itemValue, itemIndex) => {
-                                    setChoosenLabel(itemValue);
-                                    setChoosenIndex(itemIndex);
+                                    setLoanTypeLabel(itemValue);
+                                    setLoanTypeIndex(itemIndex);
+                                }}>
+                                <Picker.Item label="Hello" value="Hello" />
+                                <Picker.Item label="React" value="React" />
+                                <Picker.Item label="Native" value="Native" />
+                                <Picker.Item label="How" value="How" />
+                                <Picker.Item label="are" value="are" />
+                                <Picker.Item label="you" value="you" />
+                            </Picker>
+
+                        </View>
+                        <View style={{
+                            width: '90%', marginTop: 6, flexDirection: 'row',
+                            borderBottomWidth: 1, borderBottomColor: '#e2e2e2', position: 'absolute', bottom: 3
+                        }}></View>
+                    </View>
+
+
+                    <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+                        <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
+                            <TextComp textVal={language[0][props.language].str_loanpurpose} textStyle={Commonstyles.inputtextStyle} Visible={true} />
+
+                        </View>
+                        <View style={{
+                            width: '95%',
+                        }}>
+
+                            <Picker
+                                selectedValue={loanPurposeLabel}
+                                style={styles.picker}
+                                onValueChange={(itemValue, itemIndex) => {
+                                    setLoanPurposeLabel(itemValue);
+                                    setLoanPurposeIndex(itemIndex);
                                 }}>
                                 <Picker.Item label="Hello" value="Hello" />
                                 <Picker.Item label="React" value="React" />
@@ -139,14 +153,14 @@ const LeadCreationBusiness = (props, { navigation }) => {
                     <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
 
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
-                            <TextComp textVal={language[0][props.language].str_businessturnover} textStyle={Commonstyles.inputtextStyle} />
+                            <TextComp textVal={language[0][props.language].str_loanamountmultiple} textStyle={Commonstyles.inputtextStyle} Visible={true} />
                         </View>
 
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: '#e2e2e2' }}>
 
                             <TextInput
-                                value={incomeTurnOver}
-                                onChangeText={txt => setIncomeTurnOver(txt)}
+                                value={loanAmount}
+                                onChangeText={txt => setLoanAmount(txt)}
                                 placeholder={''}
                                 placeholderTextColor={Colors.lightgrey}
                                 secureTextEntry={false}
@@ -158,54 +172,38 @@ const LeadCreationBusiness = (props, { navigation }) => {
 
                     </View>
 
-                    <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
 
+                    <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
-                            <TextComp textVal={language[0][props.language].str_businessvintage} textStyle={Commonstyles.inputtextStyle} Visible={true} />
-                        </View>
-
-                        <View style={{ width: '90%', flexDirection: 'row', justifyContent: 'space-between' }}>
-
-                            <View style={{ width: '48%', marginTop: 20 }}>
-
-                                <TextComp textVal={language[0][props.language].str_year} textStyle={Commonstyles.inputtextStyle} Visible={true} />
-                                <View style={{ width: '100%', marginTop: 3, paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: '#e2e2e2' }}>
-
-                                    <TextInput
-                                        value={year}
-                                        onChangeText={txt => setYear(txt)}
-                                        placeholder={''}
-                                        placeholderTextColor={Colors.lightgrey}
-                                        secureTextEntry={false}
-                                        autoCapitalize="none"
-                                        style={Commonstyles.textinputtextStyle}
-                                    />
-
-                                </View>
-                            </View>
-
-
-                            <View style={{ width: '48%', marginTop: 20 }}>
-
-                                <TextComp textVal={language[0][props.language].str_months} textStyle={Commonstyles.inputtextStyle} Visible={true} />
-                                <View style={{ width: '100%', marginTop: 3, paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: '#e2e2e2' }}>
-
-                                    <TextInput
-                                        value={months}
-                                        onChangeText={txt => setMonths(txt)}
-                                        placeholder={''}
-                                        placeholderTextColor={Colors.lightgrey}
-                                        secureTextEntry={false}
-                                        autoCapitalize="none"
-                                        style={Commonstyles.textinputtextStyle}
-                                    />
-
-                                </View>
-                            </View>
+                            <TextComp textVal={language[0][props.language].str_leadtype} textStyle={Commonstyles.inputtextStyle} Visible={true} />
 
                         </View>
+                        <View style={{
+                            width: '95%',
+                        }}>
 
+                            <Picker
+                                selectedValue={leadTypeLabel}
+                                style={styles.picker}
+                                onValueChange={(itemValue, itemIndex) => {
+                                    setLeadTypeLabel(itemValue);
+                                    setLeadTypeIndex(itemIndex);
+                                }}>
+                                <Picker.Item label="Hello" value="Hello" />
+                                <Picker.Item label="React" value="React" />
+                                <Picker.Item label="Native" value="Native" />
+                                <Picker.Item label="How" value="How" />
+                                <Picker.Item label="are" value="are" />
+                                <Picker.Item label="you" value="you" />
+                            </Picker>
+
+                        </View>
+                        <View style={{
+                            width: '90%', marginTop: 6, flexDirection: 'row',
+                            borderBottomWidth: 1, borderBottomColor: '#e2e2e2', position: 'absolute', bottom: 3
+                        }}></View>
                     </View>
+
 
 
 
@@ -220,7 +218,7 @@ const LeadCreationBusiness = (props, { navigation }) => {
                         justifyContent: 'flex-end',
                         alignItems: 'center',
                     }}>
-                    <TouchableOpacity onPress={() => { props.navigation.navigate('LeadCreationLoan') }} activeOpacity={10} style={{
+                    <TouchableOpacity onPress={() => {  props.navigation.navigate('LeadCreationCustomerPhoto') }} activeOpacity={10} style={{
                         width: '88%', height: 50, backgroundColor: '#0294ff',
                         borderRadius: 45, alignItems: 'center', justifyContent: 'center'
                     }}>
@@ -280,4 +278,4 @@ const mapDispatchToProps = (dispatch) => ({
 });
 
 
-export default connect(mapStateToProps, mapDispatchToProps)(LeadCreationBusiness);
+export default connect(mapStateToProps, mapDispatchToProps)(LeadCreationLoan);
