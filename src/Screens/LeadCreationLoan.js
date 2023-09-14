@@ -13,6 +13,7 @@ import {
     KeyboardAvoidingView,
     Dimensions,
     ImageBackground,
+    PermissionsAndroid,
     TextInput,
     Alert,
     Platform,
@@ -39,172 +40,256 @@ import tbl_SystemCodeDetails from '../Database/Table/tbl_SystemCodeDetails';
 import tbl_SystemMandatoryFields from '../Database/Table/tbl_SystemMandatoryFields';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Modal from 'react-native-modal';
+import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 
-const LeadCreationBusiness = (props, { navigation }) => {
+
+const LeadCreationLoan = (props, { navigation }) => {
+
     const [errMsg, setErrMsg] = useState('');
     const [loading, setLoading] = useState(false);
-    const [checked, setChecked] = React.useState('first');
-    const [industryTypeLabel, setIndustryTypeLabel] = useState('');
-    const [industryTypeIndex, setIndustryTypeIndex] = useState('');
-    const [industryTypeCaption, setIndustryTypeCaption] = useState('INDUSTRY TYPE');
-    const [industryTypeMan, setIndustryTypeMan] = useState(false);
-    const [industryTypeVisible, setIndustryTypeVisible] = useState(true);
-    const [industryTypeDisable, setIndustryTypeDisable] = useState(false);
-    const [businessName, setBusinessName] = useState('');
-    const [businessNameCaption, setBusinessNameCaption] = useState('BUSINESS NAME');
-    const [businessNameMan, setBusinessNameMan] = useState(false);
-    const [businessNameVisible, setBusinessNameVisible] = useState(true);
-    const [businessNameDisable, setBusinessNameDisable] = useState(false);
-    const [incomeTurnOver, setIncomeTurnOver] = useState('');
-    const [incomeTurnOverCaption, setIncomeTurnOverCaption] = useState('INCOME/BUSINESS TURNOVER(MONTHLY)');
-    const [incomeTurnOverMan, setIncomeTurnOverMan] = useState(false);
-    const [incomeTurnOverVisible, setIncomeTurnOverVisible] = useState(true);
-    const [incomeTurnOverDisable, setIncomeTurnOverDisable] = useState(false);
-    const [year, setYear] = useState('');
-    const [yearCaption, setYearCaption] = useState('YEAR');
-    const [yearMan, setYearMan] = useState(false);
-    const [yearVisible, setYearVisible] = useState(true);
-    const [yearDisable, setYearDisable] = useState(false);
-    const [months, setMonths] = useState('');
-    const [monthsCaption, setMonthsCaption] = useState('MONTHS');
-    const [monthsMan, setMonthsMan] = useState(false);
-    const [monthsVisible, setMonthsVisible] = useState(true);
-    const [monthsDisable, setMonthsDisable] = useState(false);
-    const [industryTypeData, setIndustryTypeData] = useState([]);
+    const [checked, setChecked] = React.useState('');
+    const [loanTypeLabel, setLoanTypeLabel] = useState('');
+    const [loanTypeIndex, setLoanTypeIndex] = useState('');
+    const [loanTypeCaption, setLoanTypeCaption] = useState('LOAN TYPE');
+    const [loanTypeMan, setLoanTypeMan] = useState(false);
+    const [loanTypeVisible, setLoanTypeVisible] = useState(true);
+    const [loanTypeDisable, setLoanTypeDisable] = useState(false);
+    const [loanPurposeLabel, setLoanPurposeLabel] = useState('');
+    const [loanPurposeIndex, setLoanPurposeIndex] = useState('');
+    const [loanPurposeCaption, setLoanPurposeCaption] = useState('LOAN PURPOSE');
+    const [loanPurposeMan, setLoanPurposeMan] = useState(false);
+    const [loanPurposeVisible, setLoanPurposeVisible] = useState(true);
+    const [loanPurposeDisable, setLoanPurposeDisable] = useState(false);
+    const [leadTypeLabel, setLeadTypeLabel] = useState('');
+    const [leadTypeIndex, setLeadTypeIndex] = useState('');
+    const [leadTypeCaption, setLeadTypeCaption] = useState('LEAD TYPE');
+    const [leadTypeMan, setLeadTypeMan] = useState(false);
+    const [leadTypeVisible, setLeadTypeVisible] = useState(true);
+    const [leadTypeDisable, setLeadTypeDisable] = useState(false);
+    const [loanAmount, setLoanAmount] = useState('');
+    const [loanAmountCaption, setLoanAmountCaption] = useState("LOAN AMOUNT (MULTIPLE OF 5000's)");
+    const [loanAmountMan, setLoanAmountMan] = useState(false);
+    const [loanAmountVisible, setLoanAmountVisible] = useState(true);
+    const [loanAmountDisable, setLoanAmountDisable] = useState(false);
+    const [loanTypeData, setLoanTypeData] = useState([]);
+    const [loanPurposeData, setLoanPurposeData] = useState([]);
+    const [leadTypeData, setLeadTypeData] = useState([]);
+
     const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
     const showBottomSheet = () => setBottomErrorSheetVisible(true);
     const hideBottomSheet = () => setBottomErrorSheetVisible(false);
 
-    const businessNameRef = useRef(null);
-    const incomeTurnOverRef = useRef(null);
-    const yearRef = useRef(null);
-    const monthsRef = useRef(null);
 
     useEffect(() => {
-
-        makeSystemMandatoryFields();
         pickerData();
-
+        makeSystemMandatoryFields();
     }, []);
 
 
+ 
+
+  const checkPermissions = async () => {
+    const permissionsToRequest = [];
+
+    if (Platform.OS === 'android') {
+      // Camera permission
+      const cameraPermission = await PermissionsAndroid.check(
+        PermissionsAndroid.PERMISSIONS.CAMERA
+      );
+      if (cameraPermission !== PermissionsAndroid.RESULTS.GRANTED) {
+        permissionsToRequest.push(PermissionsAndroid.PERMISSIONS.CAMERA);
+      }
+
+      // Location permission
+      const locationPermission = await PermissionsAndroid.check(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+      );
+      if (locationPermission !== PermissionsAndroid.RESULTS.GRANTED) {
+        permissionsToRequest.push(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+      }
+
+      // Request all pending permissions
+      requestPermissions(permissionsToRequest);
+    } else {
+      // For iOS and other platforms, use react-native-permissions
+      const cameraResult = await check(PERMISSIONS.IOS.CAMERA);
+      const locationResult = await check(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
+
+      const permissionsToRequest = [];
+
+      if (cameraResult !== RESULTS.GRANTED) {
+        permissionsToRequest.push(PERMISSIONS.IOS.CAMERA);
+      }
+
+      if (locationResult !== RESULTS.GRANTED) {
+        permissionsToRequest.push(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
+      }
+
+      // Request all pending permissions
+      request(permissionsToRequest);
+    }
+  };
+
+  const requestPermissions = async (permissions) => {
+    if (Platform.OS === 'android') {
+      try {
+        const grantedPermissions = await PermissionsAndroid.requestMultiple(permissions);
+        
+        if (grantedPermissions === PermissionsAndroid.RESULTS.GRANTED) {
+          // All permissions granted
+        } else {
+          // Handle denied permissions
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      // For iOS and other platforms, use react-native-permissions
+      const results = await request(permissions);
+      
+      if (results.every(result => result === RESULTS.GRANTED)) {
+        // All permissions granted
+      } else {
+        // Handle denied permissions
+      }
+    }
+  };
+
+
     const pickerData = async () => {
-        tbl_SystemCodeDetails.getSystemCodeDetailsBasedOnID('IndustryType').then(value => {
+
+        tbl_SystemCodeDetails.getSystemCodeDetailsBasedOnID('LNTP').then(value => {
             if (value !== undefined && value.length > 0) {
                 console.log(value)
 
                 for (var i = 0; i < value.length; i++) {
                     if (value[i].IsDefault === '1') {
-                        setIndustryTypeLabel(value[i].SubCodeID);
-                        setIndustryTypeIndex(i + 1);
+                        setLoanTypeLabel(value[i].SubCodeID);
+                        setLoanTypeIndex(i + 1);
                     }
                 }
 
-                setIndustryTypeData(value)
+                setLoanTypeData(value)
 
             }
         })
+
+        tbl_SystemCodeDetails.getSystemCodeDetailsBasedOnID('LNPUR').then(value => {
+            if (value !== undefined && value.length > 0) {
+                console.log(value)
+
+                for (var i = 0; i < value.length; i++) {
+                    if (value[i].IsDefault === '1') {
+                        setLoanPurposeLabel(value[i].SubCodeID);
+                        setLoanPurposeIndex(i + 1);
+                    }
+                }
+
+                setLoanPurposeData(value)
+
+            }
+        })
+
+        tbl_SystemCodeDetails.getSystemCodeDetailsBasedOnID('LeadType').then(value => {
+            if (value !== undefined && value.length > 0) {
+                console.log(value)
+
+                for (var i = 0; i < value.length; i++) {
+                    if (value[i].IsDefault === '1') {
+                        setLeadTypeLabel(value[i].SubCodeID);
+                        setLeadTypeIndex(i + 1);
+                    }
+                }
+
+                setLeadTypeData(value)
+
+            }
+        })
+
     }
 
     const makeSystemMandatoryFields = () => {
 
-        tbl_SystemMandatoryFields.getSystemMandatoryFieldsBasedOnFieldUIID('sp_industrytype').then(value => {
+        tbl_SystemMandatoryFields.getSystemMandatoryFieldsBasedOnFieldUIID('sp_loantype').then(value => {
             if (value !== undefined && value.length > 0) {
                 console.log(value[0])
-                setIndustryTypeCaption(value[0].FieldName)
+                setLoanTypeCaption(value[0].FieldName)
                 if (value[0].IsMandatory == "1") {
-                    setIndustryTypeMan(true);
+                    setLoanTypeMan(true);
                 }
                 if (value[0].IsHide == "1") {
-                    setIndustryTypeVisible(false);
+                    setLoanTypeVisible(false);
                 }
                 if (value[0].IsDisable == "1") {
-                    setIndustryTypeDisable(true);
+                    setLoanTypeDisable(true);
                 }
                 if (value[0].IsCaptionChange == "1") {
-                    setIndustryTypeCaption(value[0].FieldCaptionChange)
+                    setLoanTypeCaption(value[0].FieldCaptionChange)
                 }
             }
         })
 
         //firstName
-        tbl_SystemMandatoryFields.getSystemMandatoryFieldsBasedOnFieldUIID('et_businessname').then(value => {
+        tbl_SystemMandatoryFields.getSystemMandatoryFieldsBasedOnFieldUIID('sp_loanpurpose').then(value => {
             if (value !== undefined && value.length > 0) {
                 console.log(value[0])
-                setBusinessNameCaption(value[0].FieldName)
+                setLoanPurposeCaption(value[0].FieldName)
                 if (value[0].IsMandatory == "1") {
-                    setBusinessNameMan(true);
+                    setLoanPurposeMan(true);
                 }
                 if (value[0].IsHide == "1") {
-                    setBusinessNameVisible(false);
+                    setLoanPurposeVisible(false);
                 }
                 if (value[0].IsDisable == "1") {
-                    setBusinessNameDisable(true);
+                    setLoanPurposeDisable(true);
                 }
                 if (value[0].IsCaptionChange == "1") {
-                    setBusinessNameCaption(value[0].FieldCaptionChange)
+                    setLoanPurposeCaption(value[0].FieldCaptionChange)
                 }
             }
         })
 
-        tbl_SystemMandatoryFields.getSystemMandatoryFieldsBasedOnFieldUIID('et_incometurnover').then(value => {
+        tbl_SystemMandatoryFields.getSystemMandatoryFieldsBasedOnFieldUIID('et_loanamount').then(value => {
 
 
             if (value !== undefined && value.length > 0) {
                 console.log(value)
-                setIncomeTurnOverCaption(value[0].FieldName)
+                setLoanAmountCaption(value[0].FieldName)
                 if (value[0].IsMandatory == "1") {
-                    setIncomeTurnOverMan(true);
+                    setLoanAmountMan(true);
                 }
                 if (value[0].IsHide == "1") {
-                    setIncomeTurnOverVisible(false);
+                    setLoanAmountVisible(false);
                 }
                 if (value[0].IsDisable == "1") {
-                    setIncomeTurnOverDisable(true);
+                    setLoanAmountDisable(true);
                 }
                 if (value[0].IsCaptionChange == "1") {
-                    setIncomeTurnOverCaption(value[0].FieldCaptionChange)
+                    setLoanAmountCaption(value[0].FieldCaptionChange)
                 }
             }
         })
 
-        tbl_SystemMandatoryFields.getSystemMandatoryFieldsBasedOnFieldUIID('et_year').then(value => {
+        tbl_SystemMandatoryFields.getSystemMandatoryFieldsBasedOnFieldUIID('sp_leadtype').then(value => {
             if (value !== undefined && value.length > 0) {
                 console.log(value)
-                setYearCaption(value[0].FieldName)
+                setLeadTypeCaption(value[0].FieldName)
                 if (value[0].IsMandatory == "1") {
-                    setYearMan(true);
+                    setLeadTypeMan(true);
                 }
                 if (value[0].IsHide == "1") {
-                    setYearVisible(false);
+                    setLeadTypeVisible(false);
                 }
                 if (value[0].IsDisable == "1") {
-                    setYearDisable(true);
+                    setLeadTypeDisable(true);
                 }
                 if (value[0].IsCaptionChange == "1") {
-                    setYearCaption(value[0].FieldCaptionChange)
+                    setLeadTypeCaption(value[0].FieldCaptionChange)
                 }
             }
         })
 
-        tbl_SystemMandatoryFields.getSystemMandatoryFieldsBasedOnFieldUIID('et_months').then(value => {
-            if (value !== undefined && value.length > 0) {
-                console.log(value)
-                setMonthsCaption(value[0].FieldName)
-                if (value[0].IsMandatory == "1") {
-                    setMonthsMan(true);
-                }
-                if (value[0].IsHide == "1") {
-                    setMonthsVisible(false);
-                }
-                if (value[0].IsDisable == "1") {
-                    setMonthsDisable(true);
-                }
-                if (value[0].IsCaptionChange == "1") {
-                    setMonthsCaption(value[0].FieldCaptionChange)
-                }
-            }
-        })
+
 
     }
 
@@ -248,8 +333,8 @@ const LeadCreationBusiness = (props, { navigation }) => {
             //         setLoading(false)
             //         alert(error);
             //     });
-
-            props.navigation.navigate('LeadCreationLoan')
+            checkPermissions();
+           // props.navigation.navigate('LeadCreationCustomerPhoto')
         }
 
 
@@ -259,46 +344,49 @@ const LeadCreationBusiness = (props, { navigation }) => {
         var flag = false; var i = 1;
         var errorMessage = '';
 
-        if (industryTypeMan && industryTypeVisible) {
-            if (industryTypeLabel === 'Select') {
-                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + industryTypeCaption + '\n';
+        if (loanTypeMan && loanTypeVisible) {
+            if (loanTypeLabel === 'Select') {
+                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + loanTypeCaption + '\n';
                 i++;
                 flag = true;
             }
         }
 
-        if (businessNameMan && businessNameVisible) {
-            if (businessName.length <= 0) {
-                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + businessNameCaption + '\n';
-                i++;
-                flag = true;
-            }
-        }
-        if (incomeTurnOverMan && incomeTurnOverVisible) {
-            if (incomeTurnOver.length <= 0) {
-                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + incomeTurnOverCaption + '\n';
-                i++;
-                flag = true;
-            }
-        }
-        if (yearMan && yearVisible) {
-            if (year.length <= 0) {
-                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + yearCaption + '\n';
+        if (loanPurposeMan && loanPurposeVisible) {
+            if (loanPurposeLabel === 'Select') {
+                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + loanPurposeCaption + '\n';
                 i++;
                 flag = true;
             }
         }
 
-        if (monthsMan && monthsVisible) {
-            if (months.length <= 0) {
-                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + monthsCaption + '\n';
+        if (loanAmountMan && loanAmountVisible) {
+            if (loanAmount.length <= 0) {
+                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + loanAmountCaption + '\n';
+                i++;
+                flag = true;
+            }else if (!isMultipleOf5000(loanAmount)) {
+                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + loanAmountCaption+ ' '+ language[0][props.language].str_mulfive + '\n';
                 i++;
                 flag = true;
             }
         }
+
+        if (leadTypeMan && leadTypeVisible) {
+            if (leadTypeLabel === 'Select') {
+                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + leadTypeCaption + '\n';
+                i++;
+                flag = true;
+            }
+        }
+
         setErrMsg(errorMessage);
         return flag;
     }
+
+    function isMultipleOf5000(number) {
+        return number % 5000 === 0;
+      }
 
 
     return (
@@ -367,7 +455,6 @@ const LeadCreationBusiness = (props, { navigation }) => {
                         </View>
                     </Modal>
 
-
                     <View style={{
                         width: '100%', height: 56, alignItems: 'center', justifyContent: 'center',
 
@@ -379,43 +466,20 @@ const LeadCreationBusiness = (props, { navigation }) => {
 
                         <View style={{ width: '90%', marginTop: 3, }}>
 
-                            <TextComp textStyle={{ color: Colors.mediumgrey, fontSize: 15, fontWeight: '500' }} textVal={language[0][props.language].str_businessdetails}></TextComp>
+                            <TextComp textStyle={{ color: Colors.mediumgrey, fontSize: 15, fontWeight: '500' }} textVal={language[0][props.language].str_loandetails}></TextComp>
 
-                            <ProgressComp progressvalue={0.5} textvalue="2 of 4" />
+                            <ProgressComp progressvalue={0.75} textvalue="3 of 4" />
 
                         </View>
 
 
                     </View>
 
-                    <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
 
-                        <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
-                            <TextComp textVal={businessNameCaption} textStyle={Commonstyles.inputtextStyle} Visible={businessNameMan} />
-                        </View>
-
-                        <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: '#e2e2e2' }}>
-
-                            <TextInput
-                                value={businessName}
-                                onChangeText={txt => setBusinessName(txt)}
-                                placeholder={''}
-                                placeholderTextColor={Colors.lightgrey}
-                                secureTextEntry={false}
-                                autoCapitalize="characters"
-                                style={Commonstyles.textinputtextStyle}
-                                ref={businessNameRef}
-                                returnKeyType="next"
-                                onSubmitEditing={() => { incomeTurnOverRef.current.focus(); }}
-                            />
-
-                        </View>
-
-                    </View>
 
                     <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
-                            <TextComp textVal={industryTypeCaption} textStyle={Commonstyles.inputtextStyle} Visible={industryTypeMan} />
+                            <TextComp textVal={loanTypeCaption} textStyle={Commonstyles.inputtextStyle} Visible={loanTypeMan} />
 
                         </View>
                         <View style={{
@@ -423,14 +487,45 @@ const LeadCreationBusiness = (props, { navigation }) => {
                         }}>
 
                             <Picker
-                                selectedValue={industryTypeLabel}
+                                selectedValue={loanTypeLabel}
                                 style={styles.picker}
                                 onValueChange={(itemValue, itemIndex) => {
-                                    setIndustryTypeLabel(itemValue);
-                                    setIndustryTypeIndex(itemIndex);
+                                    setLoanTypeLabel(itemValue);
+                                    setLoanTypeIndex(itemIndex);
                                 }}>
                                 {
-                                    industryTypeData.map(item => {
+                                    loanTypeData.map(item => {
+                                        return <Picker.Item value={item.SubCodeID} label={item.Label} />
+                                    })
+                                }
+                            </Picker>
+
+                        </View>
+                        <View style={{
+                            width: '90%', marginTop: 6, flexDirection: 'row',
+                            borderBottomWidth: 1, borderBottomColor: '#e2e2e2', position: 'absolute', bottom: 3
+                        }}></View>
+                    </View>
+
+
+                    <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+                        <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
+                            <TextComp textVal={loanPurposeCaption} textStyle={Commonstyles.inputtextStyle} Visible={loanPurposeMan} />
+
+                        </View>
+                        <View style={{
+                            width: '95%',
+                        }}>
+
+                            <Picker
+                                selectedValue={loanPurposeLabel}
+                                style={styles.picker}
+                                onValueChange={(itemValue, itemIndex) => {
+                                    setLoanPurposeLabel(itemValue);
+                                    setLoanPurposeIndex(itemIndex);
+                                }}>
+                                {
+                                    loanPurposeData.map(item => {
                                         return <Picker.Item value={item.SubCodeID} label={item.Label} />
                                     })
                                 }
@@ -447,81 +542,57 @@ const LeadCreationBusiness = (props, { navigation }) => {
                     <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
 
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
-                            <TextComp textVal={incomeTurnOverCaption} Visible={incomeTurnOverMan} textStyle={Commonstyles.inputtextStyle} />
+                            <TextComp textVal={loanAmountCaption} textStyle={Commonstyles.inputtextStyle} Visible={loanAmountMan} />
                         </View>
 
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: '#e2e2e2' }}>
 
                             <TextInput
-                                value={incomeTurnOver}
-                                onChangeText={txt => setIncomeTurnOver(txt)}
+                                value={loanAmount}
+                                onChangeText={txt => setLoanAmount(txt)}
                                 placeholder={''}
                                 placeholderTextColor={Colors.lightgrey}
                                 secureTextEntry={false}
-                                autoCapitalize="characters"
+                                autoCapitalize="none"
+                                keyboardType="numeric"
                                 style={Commonstyles.textinputtextStyle}
-                                ref={incomeTurnOverRef}
-                                returnKeyType="next"
-                                onSubmitEditing={() => { yearRef.current.focus(); }}
                             />
 
                         </View>
 
                     </View>
 
-                    <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
 
+                    <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
-                            <TextComp textVal={language[0][props.language].str_businessvintage} textStyle={Commonstyles.inputtextStyle} Visible={true} />
-                        </View>
-
-                        <View style={{ width: '90%', flexDirection: 'row', justifyContent: 'space-between' }}>
-
-                            <View style={{ width: '48%', marginTop: 20 }}>
-
-                                <TextComp textVal={yearCaption} textStyle={Commonstyles.inputtextStyle} Visible={yearMan} />
-                                <View style={{ width: '100%', marginTop: 3, paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: '#e2e2e2' }}>
-
-                                    <TextInput
-                                        value={year}
-                                        onChangeText={txt => setYear(txt)}
-                                        placeholder={''}
-                                        placeholderTextColor={Colors.lightgrey}
-                                        secureTextEntry={false}
-                                        autoCapitalize="characters"
-                                        style={Commonstyles.textinputtextStyle}
-                                        ref={yearRef}
-                                        returnKeyType="next"
-                                        onSubmitEditing={() => { monthsRef.current.focus(); }}
-                                    />
-
-                                </View>
-                            </View>
-
-
-                            <View style={{ width: '48%', marginTop: 20 }}>
-
-                                <TextComp textVal={monthsCaption} textStyle={Commonstyles.inputtextStyle} Visible={monthsMan} />
-                                <View style={{ width: '100%', marginTop: 3, paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: '#e2e2e2' }}>
-
-                                    <TextInput
-                                        value={months}
-                                        onChangeText={txt => setMonths(txt)}
-                                        placeholder={''}
-                                        placeholderTextColor={Colors.lightgrey}
-                                        secureTextEntry={false}
-                                        autoCapitalize="characters"
-                                        style={Commonstyles.textinputtextStyle}
-                                        ref={monthsRef}
-                                        returnKeyType="done"
-                                    />
-
-                                </View>
-                            </View>
+                            <TextComp textVal={leadTypeCaption} textStyle={Commonstyles.inputtextStyle} Visible={leadTypeMan} />
 
                         </View>
+                        <View style={{
+                            width: '95%',
+                        }}>
 
+                            <Picker
+                                selectedValue={leadTypeLabel}
+                                style={styles.picker}
+                                onValueChange={(itemValue, itemIndex) => {
+                                    setLeadTypeLabel(itemValue);
+                                    setLeadTypeIndex(itemIndex);
+                                }}>
+                                {
+                                    leadTypeData.map(item => {
+                                        return <Picker.Item value={item.SubCodeID} label={item.Label} />
+                                    })
+                                }
+                            </Picker>
+
+                        </View>
+                        <View style={{
+                            width: '90%', marginTop: 6, flexDirection: 'row',
+                            borderBottomWidth: 1, borderBottomColor: '#e2e2e2', position: 'absolute', bottom: 3
+                        }}></View>
                     </View>
+
 
 
 
@@ -606,4 +677,4 @@ const mapDispatchToProps = (dispatch) => ({
 });
 
 
-export default connect(mapStateToProps, mapDispatchToProps)(LeadCreationBusiness);
+export default connect(mapStateToProps, mapDispatchToProps)(LeadCreationLoan);

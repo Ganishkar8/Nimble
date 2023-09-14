@@ -14,5 +14,6 @@ export default {
     line :'#e3e3e3',
     skyBlue :'#0294ff',
     dimText :'#a1a5b7',
-    dimmText :'#707070'
+    dimmText :'#707070',
+    red:'#FC2C57'
 }

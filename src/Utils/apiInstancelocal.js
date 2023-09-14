@@ -1,14 +1,14 @@
 import axios from 'axios';
 
-const apiInstance = (baseURL,authToken) => {
+const apiInstancelocal = (baseURL) => {
 
-    const baseURLFinal = 'http://nimbleservicebeta.brnetsaas.com:'+baseURL
+    const baseURLFinal = 'http://192.168.1.120:'+baseURL
     const instance = axios.create({
         baseURL: baseURLFinal,
         timeout: 500000, // Set your desired timeout
         headers: {
             'Content-Type': 'application/json',
-             'Authorization' : authToken
+            'accept': 'application/json',
         },
     });
 
@@ -46,6 +46,7 @@ const apiInstance = (baseURL,authToken) => {
         },
         (error) => {
             // Handle response error
+            console.log("ResponseError:", error);
             return Promise.reject(error);
         }
     );
@@ -57,4 +58,4 @@ const apiInstance = (baseURL,authToken) => {
 
 
 
-export default apiInstance;
+export default apiInstancelocal;
