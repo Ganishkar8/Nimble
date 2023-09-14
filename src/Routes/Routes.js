@@ -7,6 +7,8 @@ import SplashScreen from '../Screens/SplashScreen';
 import BottomNavigation from '../Navigation/BottomNavigation';
 import LoginScreen from '../Screens/LoginScreen';
 import LoanApplicationTracker from '../Screens/LoanApplicationTracker';
+import LeadManagement from '../Screens/LeadManagement';
+import LeadDetails from '../Screens/LeadDetails';
 
 const Route = () => {
 
@@ -18,7 +20,7 @@ const Route = () => {
 
         <Stack.Screen
           name="SplashScreen"
-          component={SplashScreen}
+          component={LeadDetails}
           options={{ headerShown: false }}
         />
         <Stack.Screen
