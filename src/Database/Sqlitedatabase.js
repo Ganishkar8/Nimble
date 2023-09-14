@@ -18,15 +18,57 @@ const createTables = async () => {
         ModuleTypeID TEXT,
         IsDisable TEXT,
         IsCaptionChange TEXT,
+        FieldCaptionChange TEXT,
         IsHide TEXT,
         MinLength TEXT,
         MaxLength TEXT
+      )`,
+      `CREATE TABLE IF NOT EXISTS tbl_SystemCodeDetails (
+        Identity TEXT,
+        Id TEXT,
+        SubCodeID TEXT,
+        Label TEXT,
+        DisplayOrder TEXT,
+        IsDefault TEXT
+      )`,
+      `CREATE TABLE IF NOT EXISTS tbl_UserCodeDetails (
+        Identity TEXT,
+        Id TEXT,
+        SubCodeID TEXT,
+        Label TEXT,
+        DisplayOrder TEXT,
+        IsDefault TEXT
       )`,
 
        
 
         // Add more CREATE TABLE queries for other tables...
     ];
+
+    const dropqueries = [
+        // tbl_SystemMandatoryFields
+       `DROP TABLE IF EXISTS tbl_SystemMandatoryFields`,
+     ,
+
+       
+
+        // Add more CREATE TABLE queries for other tables...
+    ];
+
+    await db.transaction(tx => {
+        dropqueries.forEach(query => {
+            tx.executeSql(
+                query,
+                [],
+                () => {
+                    console.log('Table droped successfully');
+                },
+                error => {
+                    console.error('Error dropping table:', error);
+                }
+            );
+        });
+    });
 
     await db.transaction(tx => {
         queries.forEach(query => {

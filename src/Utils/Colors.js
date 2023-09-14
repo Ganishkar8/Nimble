@@ -10,5 +10,10 @@ export default {
     mediumgrey: '#707070',
     darkblack: '#4e4e4e',
     lightblue: '#CBE9FE',
-    green:'#3AB44C'
+    green:'#3AB44C',
+    line :'#e3e3e3',
+    skyBlue :'#0294ff',
+    dimText :'#a1a5b7',
+    dimmText :'#707070',
+    red:'#FC2C57'
 }

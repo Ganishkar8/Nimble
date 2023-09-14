@@ -1,7 +1,7 @@
 import SQLite from 'react-native-sqlite-storage';
 
 const database_name = 'Nimble.db';
-const database_version = '1.0';
+const database_version = '1.1';
 const database_displayname = 'SOB';
 const database_size = 200000;
 // Add your encryption key here

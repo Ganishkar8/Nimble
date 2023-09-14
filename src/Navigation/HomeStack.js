@@ -37,14 +37,14 @@ export default HomeStack = () => {
       <Stack.Screen
         name="LeadCreationBasic"
         component={LeadCreationBasic}
-        options={{ headerShown: false, tabBarVisible: false }}
+        options={{ headerShown: false }}
 
       />
 
       <Stack.Screen
         name="LeadCreationBusiness"
         component={LeadCreationBusiness}
-        options={{ headerShown: false, tabBarVisible: false }}
+        options={{ headerShown: false }}
 
       />
 

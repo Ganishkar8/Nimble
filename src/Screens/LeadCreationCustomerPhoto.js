@@ -17,6 +17,7 @@ import {
     Alert,
     PermissionsAndroid,
     Platform,
+    Button
 } from 'react-native';
 
 import Feather from 'react-native-vector-icons/Feather';
@@ -38,7 +39,17 @@ import { Picker } from '@react-native-picker/picker';
 import ProgressComp from '../Components/ProgressComp';
 import Geolocation from '@react-native-community/geolocation';
 import RNAndroidLocationEnabler from 'react-native-android-location-enabler';
-import MapView, {Marker} from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
+import Entypo from 'react-native-vector-icons/Entypo';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import Fontisto from 'react-native-vector-icons/Fontisto';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import ImagePicker, { ImageOrVideo } from 'react-native-image-crop-picker';
+import { tr } from 'react-native-paper-dates';
+import  Modal from 'react-native-modal';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 
 const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
@@ -56,12 +67,26 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
     ] = useState('');
     const [gpslatlon, setGPSLatLon] = useState('');
     const mapRef = useRef(null);
+    const [visible, setVisible] = useState(true);
+    const [photoOptionvisible, setphotoOptionvisible] = useState(false);
+    const [imageUri, setImageUri] = useState(null);
+    const [imageFile, setImageFile] = useState([]);
+    const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
+    const [deleteVisible, setDeleteVisible] = useState(false);
+
+
+    const showBottomSheet = () => setBottomSheetVisible(true);
+    const hideBottomSheet = () => setBottomSheetVisible(false);
+
+    const showphotoBottomSheet = () => setphotoOptionvisible(true);
+    const hidephotoBottomSheet = () => setphotoOptionvisible(false);
+
 
     useEffect(() => {
         const requestLocationPermission = async () => {
             if (Platform.OS === 'ios') {
                 getOneTimeLocation();
-                subscribeLocationLocation();
+                //subscribeLocationLocation();
             } else {
                 try {
                     const granted = await PermissionsAndroid.request(
@@ -72,11 +97,26 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                         },
                     );
                     if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-                       
-                                getOneTimeLocation();
-                                subscribeLocationLocation();
-                          
-                       
+                        // RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
+                        //     interval: 10000,
+                        //     fastInterval: 5000,
+                        //   })
+                        //     .then((data) => {
+                        getOneTimeLocation();
+                        //subscribeLocationLocation();
+                        // })
+                        // .catch((err) => {
+                        // The user has not accepted to enable the location services or something went wrong during the process
+                        // "err" : { "code" : "ERR00|ERR01|ERR02|ERR03", "message" : "message"}
+                        // codes :
+                        //  - ERR00 : The user has clicked on Cancel button in the popup
+                        //  - ERR01 : If the Settings change are unavailable
+                        //  - ERR02 : If the popup has failed to open
+                        //  - ERR03 : Internal error
+                        // });
+
+
+
                     } else {
                         setLocationStatus('Permission Denied');
                     }
@@ -86,35 +126,97 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
             }
         };
         requestLocationPermission();
-        return () => {
-           // Geolocation.clearWatch(watchID);
-        };
-    }, []);
-
-
-    const zoomToMarker = () => {
-        if (mapRef.current) {
-          mapRef.current.animateToRegion(
-            {
-              latitude: currentLatitude,
-              longitude: currentLongitude,
-              latitudeDelta: 0.02, // Adjust the zoom level as needed
-              longitudeDelta: 0.02,
-            },
-            1000 // Duration of the animation in milliseconds
-          );
+        requestCameraPermission();
         
+
+        return () => {
+            // Geolocation.clearWatch(watchID);
+        };
+    }, [gpslatlon]);
+
+
+    
+
+    const requestExternalStoragePermission = async () => {
+      
+        try {
+          const granted = await PermissionsAndroid.requestMultiple([
+            PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+            PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          ]);
+    
+          if (
+            granted['android.permission.READ_EXTERNAL_STORAGE'] === 'granted' &&
+            granted['android.permission.WRITE_EXTERNAL_STORAGE'] === 'granted'
+          ) {
+            console.log('External storage permissions granted');
+          } else {
+            console.log('External storage permissions denied');
+          }
+        } catch (err) {
+          console.warn(err);
         }
       };
 
+    const zoomToMarker = () => {
+        if (mapRef.current) {
+            mapRef.current.animateToRegion(
+                {
+                    latitude: currentLatitude,
+                    longitude: currentLongitude,
+                    latitudeDelta: 0.02, // Adjust the zoom level as needed
+                    longitudeDelta: 0.02,
+                },
+                1000 // Duration of the animation in milliseconds
+            );
 
-    const  getOneTimeLocation = () => {
+        }
+    };
+
+
+    const pickImage = () => {
+       // setVisible(false)
+        hidephotoBottomSheet();
+        ImagePicker.openCamera({
+            width: 300,
+            height: 400,
+            cropping: true,
+        }).then(image => {
+            setImageFile(image)
+            //alert(JSON.stringify(image.path))
+            setImageUri(image.path)
+            setVisible(false)
+            props.onChange?.(image);
+        })
+
+    };
+
+    const selectImage = async() => {
+       // setVisible(false)
+       let isStoragePermitted = await requestExternalStoragePermission();
+        hidephotoBottomSheet();
+        ImagePicker.openPicker({
+          width: 300,
+          height: 400,
+          cropping: true,
+        }).then(image => {
+            setImageFile(image)
+            //alert(JSON.stringify(image.path))
+            setImageUri(image.path)
+            setVisible(false)
+           props.onChange?.(image);
+        })
+
+       };
+
+
+    const getOneTimeLocation = () => {
         setLocationStatus('Getting Location ...');
         Geolocation.getCurrentPosition(
             //Will give you the current location
             (position) => {
                 setLocationStatus('You are Here');
-               
+
                 //getting the Longitude from the location json
                 const currentLongitude =
                     JSON.stringify(position.coords.longitude);
@@ -122,24 +224,26 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                 //getting the Latitude from the location json
                 const currentLatitude =
                     JSON.stringify(position.coords.latitude);
-                
+
                 //Setting Longitude state
                 setCurrentLongitude(parseFloat(currentLongitude));
 
                 //Setting Longitude state
                 setCurrentLatitude(parseFloat(currentLatitude));
-                
-               // setGPSLatLon(currentLatitude+","+currentLongitude)
+
+                // setGPSLatLon(currentLatitude+","+currentLongitude)
                 zoomToMarker();
-                setGPSLatLon(currentLatitude+","+currentLongitude)
-                
-                
+                setGPSLatLon((prevCount) => currentLatitude + "," + currentLongitude);
+
+
+
             },
             (error) => {
                 setLocationStatus(error.message);
+                console.log(error)
             },
             {
-                enableHighAccuracy: false,
+                enableHighAccuracy: true,
                 timeout: 30000,
                 maximumAge: 1000
             },
@@ -172,10 +276,35 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                 setLocationStatus(error.message);
             },
             {
-                enableHighAccuracy: false,
+                enableHighAccuracy: true,
                 maximumAge: 1000
             },
         );
+    };
+
+    const requestCameraPermission = async () => {
+
+        try {
+            const granted = await PermissionsAndroid.request(
+                PermissionsAndroid.PERMISSIONS.CAMERA,
+                {
+                    title: 'Camera Permission',
+                    message: 'App needs camera permission',
+                },
+            );
+
+            // If CAMERA Permission is granted
+            return granted === PermissionsAndroid.RESULTS.GRANTED;
+        } catch (err) {
+            console.warn(err);
+            return false;
+        }
+    };
+
+    const deletePhoto = () => {
+        setImageUri(null);
+        setVisible(true);
+        hideBottomSheet();
     };
 
 
@@ -189,6 +318,174 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                 contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
 
                 <View style={{ flex: 1 }}>
+
+                  
+                <Modal
+                        isVisible={bottomSheetVisible}
+                        onBackdropPress={hideBottomSheet}
+                        style={styles.modal}
+                    >
+                        <View style={styles.modalContent}>
+
+                            {!deleteVisible && <View>
+
+                                <TextComp textVal="Customerphoto.png" textStyle={{ width: '90%', fontSize: 14, color: Colors.mediumgrey, marginTop: 15 }} Visible={false} />
+                                <View style={{ width: '100%', flexDirection: 'row', marginTop: 15, paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: '#e2e2e2' }} />
+
+                                <View style={{ width: '100%', flexDirection: 'row', marginTop: 25 }}>
+                                    <View style={{ width: '15%' }}>
+                                        <Image source={require('../Images/preview.png')}
+                                            style={{ width: 20, height: 20 }} />
+                                    </View>
+                                    <View style={{ width: '85%', justifyContent: 'center' }}>
+                                        <TextComp textVal={language[0][props.language].str_preview} textStyle={{ fontSize: 14, color: Colors.mediumgrey }} Visible={false} />
+                                    </View>
+
+                                </View>
+
+                                <TouchableOpacity onPress={() => { setphotoOptionvisible(true); hideBottomSheet() }} activeOpacity={0.5} style={{ width: '100%', flexDirection: 'row', marginTop: 25 }}>
+                                    <View style={{ flexDirection: 'row' }} >
+                                        <View style={{ width: '15%' }}>
+                                            <Image source={require('../Images/fileupload.png')}
+                                                style={{ width: 16, height: 20 }} />
+                                        </View>
+                                        <View style={{ width: '85%', justifyContent: 'center' }}>
+                                            <TextComp textVal={language[0][props.language].str_retake} textStyle={{ fontSize: 14, color: Colors.mediumgrey }} Visible={false} />
+                                        </View>
+
+                                    </View>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity onPress={() => { setDeleteVisible(true) }} activeOpacity={0.5} style={{ width: '100%', flexDirection: 'row', marginTop: 25, marginBottom: 20 }}>
+                                    <View style={{ flexDirection: 'row' }}>
+                                        <View style={{ width: '15%' }}>
+
+                                            <MaterialCommunityIcons name='delete' size={25} color={Colors.darkblue} />
+
+                                        </View>
+                                        <View style={{ width: '85%', justifyContent: 'center' }}>
+                                            <TextComp textVal={language[0][props.language].str_delete} textStyle={{ fontSize: 14, color: Colors.mediumgrey }} Visible={false} />
+                                        </View>
+
+                                    </View>
+                                </TouchableOpacity>
+
+                            </View>}
+
+
+                            {deleteVisible && <View style={{ alignItems: 'center' }}>
+
+                                <MaterialIcons name='error' size={35} color={Colors.red} />
+
+                                <TextComp textVal={language[0][props.language].str_deletephoto} textStyle={{ fontSize: 14, color: Colors.black, fontWeight: 600, marginTop: 20 }} Visible={false} />
+
+                                <TextComp textVal={language[0][props.language].str_deletephotodesc} textStyle={{ fontSize: 14, color: Colors.mediumgrey }} Visible={false} />
+
+
+                                <View style={{ width: '100%', justifyContent: 'space-between', flexDirection: 'row' }}>
+
+                                    <View
+                                        style={{
+                                            width: '48%',
+                                            height: 50,
+                                            marginTop: 25,
+                                            justifyContent: 'flex-end',
+                                            alignItems: 'center',
+                                        }}>
+                                        <TouchableOpacity onPress={() => { hideBottomSheet() }} activeOpacity={0.5} style={{
+                                            width: '88%', height: 50, borderBottomColor: Colors.mediumgrey, borderWidth: 1,
+                                            borderRadius: 45, alignItems: 'center', justifyContent: 'center'
+                                        }}>
+                                            <View>
+
+                                                <TextComp textVal={language[0][props.language].str_cancel} textStyle={{ color: Colors.darkblue, fontSize: 13, fontWeight: 600 }} />
+
+                                            </View>
+                                        </TouchableOpacity>
+                                    </View>
+
+
+                                    <View
+                                        style={{
+                                            width: '48%',
+                                            height: 50,
+                                            marginTop: 25,
+                                            justifyContent: 'flex-end',
+                                            alignItems: 'center',
+                                        }}>
+                                        <TouchableOpacity onPress={() => { deletePhoto() }} activeOpacity={10} style={{
+                                            width: '88%', height: 50, backgroundColor: '#0294ff',
+                                            borderRadius: 45, alignItems: 'center', justifyContent: 'center'
+                                        }}>
+                                            <View >
+
+                                                <TextComp textVal={language[0][props.language].str_yesdelete} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 600 }} />
+
+                                            </View>
+                                        </TouchableOpacity>
+                                    </View>
+
+                                </View>
+
+                            </View>}
+
+                            {/*                             
+
+                            <View style={{width:'100%',flexDirection:'row',marginTop:25,marginBottom:20}}>
+                            <View style={{ width: '15%' }}>
+
+                            <MaterialIcons name='error' size={25} color={Colors.darkblue} />
+
+                            </View>
+                            <View style={{width: '85%',justifyContent:'center'}}>
+                            <TextComp textVal={language[0][props.language].str_details} textStyle={{  fontSize: 14, color: Colors.mediumgrey }} Visible={false} />
+                            </View>
+                            
+                            </View> */}
+
+                        </View>
+                    </Modal>
+
+
+                    <Modal
+                                    isVisible={photoOptionvisible}
+                                    onBackdropPress={hidephotoBottomSheet}
+                                    style={styles.modal}
+                                    >
+
+                                        <View style={styles.modalContent}>
+                                    <TouchableOpacity onPress={()=>(hidephotoBottomSheet())} style={{width:33,height:33,position:'absolute',right:0,
+                                      alignItems:'center',justifyContent:'center',
+                                      zIndex:1,backgroundColor:Colors.common,borderBottomStartRadius:10}}>
+                                     <AntDesign name='close' size={18} color={Colors.black} />
+                                     </TouchableOpacity>
+                                
+                                    <View style={{width:'100%',flexDirection:'row',alignItems:'center',justifyContent:'center'}}>
+                                      <View style={{width:'30%',alignItems:'center'}}>
+                                      <TouchableOpacity onPress={()=>pickImage()} activeOpacity={11}>
+                                      <View style={{width:53,height:53,borderRadius:53,backgroundColor:'#E74C3C',
+                                        alignItems:'center',justifyContent:'center'}}>
+                                      <Ionicons  name='camera-outline' size={31} color={Colors.white}/>
+                                      </View>
+                                      </TouchableOpacity>
+                                      <Text style={{fontSize:14,color:Colors.black,marginTop:7}}>Camera</Text>
+                                      </View>
+                                      <View style={{width:'30%',alignItems:'center'}}>
+                                        <TouchableOpacity onPress={()=>selectImage()} activeOpacity={11}>
+                                      <View style={{width:53,height:53,borderRadius:53,backgroundColor:'#8E44AD',
+                                        alignItems:'center',justifyContent:'center'}}>
+                                        <Ionicons  name='image-outline' size={27} color={Colors.white}/>
+                                      </View>
+                                      </TouchableOpacity>
+                                      <Text style={{fontSize:14,color:Colors.black,marginTop:7}}>Gallery</Text>
+                                      </View>
+                                      
+                                    </View>
+                                    </View>
+                                    </Modal>
+
+
+
 
                     <View style={{
                         width: '100%', height: 56, alignItems: 'center', justifyContent: 'center',
@@ -218,11 +515,40 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
                         </View>
 
-                        <View style={{ width: '90%', height:50, marginTop: 3, paddingHorizontal: 0, borderRadius: 10, backgroundColor: '#e2e2e2' }}>
+
+                        {visible && <TouchableOpacity onPress={() => { setphotoOptionvisible(true) }} style={{ width: '90%', height: 170, justifyContent: 'center', alignItems: 'center', marginTop: 10, paddingHorizontal: 0, borderRadius: 10, backgroundColor: '#e2e2e2' }}>
+                            <View >
+
+                                <Entypo name='camera' size={25} color={Colors.darkblack} />
 
 
+                            </View>
+                        </TouchableOpacity>}
 
-                        </View>
+
+                        {!visible && <View style={{ width: '90%', height: 170, justifyContent: 'center', alignItems: 'center', marginTop: 10, paddingHorizontal: 0, borderRadius: 10, backgroundColor: '#e2e2e2' }}>
+
+
+                            <Image
+                                source={{ uri: imageUri }}
+                                style={{ width: '100%', height: 170, borderRadius: 10 }}
+                            />
+
+                        </View>}
+
+                        {!visible && <View style={{ width: '90%', justifyContent: 'center', marginTop: 15, paddingHorizontal: 0, flexDirection: 'row' }}>
+
+
+                            <TextComp textVal="Customerphoto.png" textStyle={{ width: '90%', fontSize: 14, color: Colors.mediumgrey }} Visible={false} />
+
+                            <TouchableOpacity onPress={() => { showBottomSheet(); setDeleteVisible(false) }}>
+
+                                <Entypo name='dots-three-vertical' size={25} color={Colors.darkblue} />
+
+                            </TouchableOpacity>
+
+
+                        </View>}
 
 
 
@@ -257,33 +583,33 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
 
                     <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
-                    
+
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: '#e2e2e2' }}>
 
 
-                        <MapView
-          style={{width:'100%',height:200,marginTop:15}}
-          ref={mapRef}
-          initialRegion={{
-            latitude: currentLatitude,
-            longitude: currentLongitude,
-            latitudeDelta: 0.02,
-            longitudeDelta: 0.02,
-          }}
-          >
-          <Marker
-        
-            coordinate={{
-              latitude: parseFloat(currentLatitude),
-              longitude: parseFloat(currentLongitude),
-            }}
-            onDragEnd={
-              (e) => alert(JSON.stringify(e.nativeEvent.coordinate))
-            }
-            title={'Test Marker'}
-            description={'This is a description of the marker'}
-          />
-        </MapView>
+                            <MapView
+                                style={{ width: '100%', height: 200, marginTop: 15 }}
+                                ref={mapRef}
+                                initialRegion={{
+                                    latitude: currentLatitude,
+                                    longitude: currentLongitude,
+                                    latitudeDelta: 0.02,
+                                    longitudeDelta: 0.02,
+                                }}
+                            >
+                                <Marker
+
+                                    coordinate={{
+                                        latitude: parseFloat(currentLatitude),
+                                        longitude: parseFloat(currentLongitude),
+                                    }}
+                                    onDragEnd={
+                                        (e) => alert(JSON.stringify(e.nativeEvent.coordinate))
+                                    }
+                                    title={'Test Marker'}
+                                    description={'This is a description of the marker'}
+                                />
+                            </MapView>
 
                         </View>
 
@@ -304,7 +630,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                         justifyContent: 'flex-end',
                         alignItems: 'center',
                     }}>
-                    <TouchableOpacity onPress={() => { }} activeOpacity={10} style={{
+                    <TouchableOpacity onPress={() => { zoomToMarker() }} activeOpacity={10} style={{
                         width: '88%', height: 50, backgroundColor: '#0294ff',
                         borderRadius: 45, alignItems: 'center', justifyContent: 'center'
                     }}>
@@ -315,6 +641,12 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                         </View>
                     </TouchableOpacity>
                 </View>
+
+
+
+
+              
+
 
             </ScrollView>
         </SafeAreaView>
@@ -348,6 +680,16 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#ccc',
         textAlign: 'center'
+    },
+    modal: {
+        justifyContent: 'flex-end',
+        margin: 0,
+    },
+    modalContent: {
+        backgroundColor: 'white',
+        padding: 16,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
     },
 });
 
