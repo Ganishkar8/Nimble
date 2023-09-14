@@ -63,6 +63,7 @@ const LoginScreen = (props, { navigation }) => {
                 setLoading(false)
                 global.USERNAME = decodedToken.userName;
                 global.USERID = decodedToken.userId;
+                global.RefreshToken = response.data.jwtRefreshToken;
                 loginHandle();
 
             })

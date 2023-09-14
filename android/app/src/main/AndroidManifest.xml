@@ -1,6 +1,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission
+   android:name="android.permission.ACCESS_FINE_LOCATION"
+/>
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+<uses-permission android:name="android.permission.CAMERA"/>
+     <uses-feature android:name="android.hardware.camera" android:required="false" />
+     <uses-feature android:name="android.hardware.camera.front" android:required="false"/> 
+     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+     <uses-permission
+  android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+/>
+<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
     <application
       android:name=".MainApplication"
@@ -9,7 +21,11 @@
       android:roundIcon="@drawable/loginbg"
       android:allowBackup="false"
       android:usesCleartextTraffic="true"
-      android:theme="@style/AppTheme">
+      android:theme="@style/AppTheme"
+      android:requestLegacyExternalStorage="true">
+      <meta-data
+  android:name="com.google.android.geo.API_KEY"
+  android:value="AIzaSyBRNWfeiGXqq11m19ubGjx3DWhhWFutd9s"/>
       <activity
         android:name=".MainActivity"
         android:label="@string/app_name"

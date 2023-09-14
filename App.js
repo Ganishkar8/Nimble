@@ -10,11 +10,13 @@ import { Provider } from 'react-redux';
 import store from './src/Utils/redux/store';
 import AppContainer from './src/Routes/Routes';
 import './src/Utils/Global';
+import { ModalPortal } from 'react-native-modals';
 
 const App = () => {
   return (
     <Provider store={store}>
     <AppContainer />
+    <ModalPortal />
     </Provider>
   );
 };

@@ -410,7 +410,7 @@ const LoanApplicationTracker = (props, { navigation }) => {
                                 keyExtractor={(item, index) => index.toString()}
                                 renderItem={({ item, index }) => {
                                     return (
-                                        <TouchableOpacity onPress={() => updateMainFilteredData(item, index)} activeOpacity={11}>
+                                        <TouchableOpacity onPress={() => updateMainFilteredData(item, index)} activeOpacity={0.5}>
                                             <View style={[styles.viewStyleFilter, { flexDirection: 'row', marginTop: 5 }]}>
 
                                                 {item.isSelected ?

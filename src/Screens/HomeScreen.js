@@ -113,18 +113,18 @@ const HomeScreen = ({ navigation }) => {
                                 <View style={{ width: '93%', height: 170, justifyContent: 'space-between', flexDirection: 'row', marginTop: '4%' }}>
 
 
-                                <TouchableOpacity onPress={() => navigation.navigate('LeadCreationBasic')} activeOpacity={0.5} style={{ width: '48%', height: '100%', backgroundColor: '#ffffff99', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
-                                    <View>
+                                    <TouchableOpacity style={{ width: '48%', height: '100%', backgroundColor: '#ffffff99', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
+                                        <View>
 
-                                        <View style={{ flexDirection: 'column' }}>
-                                            <View style={styles.circularView1}>
-                                                <Image source={require('../Images/profile.png')}
-                                                    style={{ width: 20, height: 25 }} />
+                                            <View style={{ flexDirection: 'column' }}>
+                                                <View style={styles.circularView1}>
+                                                    <Image source={require('../Images/profile.png')}
+                                                        style={{ width: 20, height: 25 }} />
+                                                </View>
+                                                <Text style={{ fontSize: 12, color: '#707070', marginTop: 8, textAlign: 'center' }}>Lead{'\n'}Tracker</Text>
                                             </View>
-                                            <Text style={{ fontSize: 12, color: '#707070', marginTop: 8, textAlign: 'center' }}>Lead{'\n'}Tracker</Text>
-                                        </View>
 
-                                    </View>
+                                        </View>
                                     </TouchableOpacity>
 
                                     <TouchableOpacity onPress={() => navigation.navigate('LoanApplicationTracker')} activeOpacity={0.5} style={{ width: '48%', height: '100%', backgroundColor: '#ffffff99', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
@@ -158,11 +158,14 @@ const HomeScreen = ({ navigation }) => {
 
                                             <View style={{ width: '25%' }}>
 
-                                                <View style={{ width: '70%', height: '100%', backgroundColor: '#0294ff', borderRadius: 25, alignItems: 'center', justifyContent: 'center' }}>
-                                                    <Image source={require('../Images/forward_icon.png')}
-                                                        style={{ width: 15, height: 9 }} />
-                                                </View>
+                                                <TouchableOpacity onPress={() => navigation.navigate('LeadCreationBasic')} activeOpacity={0.5} style={{ width: '70%', height: '100%', backgroundColor: '#0294ff', borderRadius: 25, alignItems: 'center', justifyContent: 'center' }}>
+                                                    <View >
+                                                        <Image source={require('../Images/forward_icon.png')}
+                                                            style={{ width: 15, height: 9 }} />
+                                                    </View>
+                                                </TouchableOpacity>
                                             </View>
+
 
                                         </View>
 
