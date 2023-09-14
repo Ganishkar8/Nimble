@@ -39,6 +39,7 @@ import tbl_SystemCodeDetails from '../Database/Table/tbl_SystemCodeDetails';
 import tbl_SystemMandatoryFields from '../Database/Table/tbl_SystemMandatoryFields';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Modal from 'react-native-modal';
+import apiInstancelocal from '../Utils/apiInstancelocal';
 
 const LeadCreationBusiness = (props, { navigation }) => {
     const [errMsg, setErrMsg] = useState('');
@@ -213,43 +214,48 @@ const LeadCreationBusiness = (props, { navigation }) => {
 
         if (validate()) {
             showBottomSheet();
-        } else {
+        }
+        else {
 
-            // const appDetails = {
-            //     "createdBy": global.USERID,
-            //     "createdOn": '',
-            //     "isActive" : true,
-            //     "leadCreationBasicDetails":{
-            //         "createdBy": global.USERID,
-            //         "createdOn": '',
-            //         "customerCategoryId": custCatgLabel,
-            //         "firstName": firstName,
-            //         "middleName": middleName,
-            //         "lastName": lastName,
-            //         "mobileNumber": mobileNumber
-            //     },
-            //     "leadCreationBusinessDetails":{},
-            //     "leadCreationLoanDetails":{},
-            //     "leadCreationDms":{}
-            // }
-            // const baseURL = '8090'
-            // setLoading(true)
-            // apiInstance(baseURL,global.RefreshToken).post('/api/v1/lead-creation-initiation', appDetails)
-            //     .then(async (response) => {
-            //         // Handle the response data
-            //         console.log("LeadCreationBasicApiResponse::" + JSON.stringify(response.data));
+            const appDetails = {
+                "createdBy": global.USERID,
+                "createdOn": '',
+                "id": global.leadID,
+                "isActive": true,
+                "branchId": 1180,
+                "leadCreationBasicDetails": {
+                    
+                },
+                "leadCreationBusinessDetails": {
+                    "createdBy": global.USERID,
+                    "createdOn": '',
+                    "businessName": businessName,
+                    "industryType": 5,
+                    "incomeBusinessTurnover": 5000,
+                    "businessVintageYear": 2,
+                    "businessVintageMonth": 5
+                },
+                "leadCreationLoanDetails": {},
+                "leadCreationDms": {}
+            }
+            const baseURL = '8901'
+            setLoading(true)
+            apiInstancelocal(baseURL).post('/api/v1/lead-creation-initiation', appDetails)
+                .then(async (response) => {
+                    // Handle the response data
+                    console.log("LeadCreationBusinessApiResponse::" + JSON.stringify(response.data));
+                    setLoading(false)
+                    props.navigation.navigate('LeadCreationLoan')
 
-            //         setLoading(false)
+                })
+                .catch((error) => {
+                    // Handle the error
+                    console.log("Error" + JSON.stringify(error.response))
+                    setLoading(false)
+                    alert(error);
+                });
 
 
-            //     })
-            //     .catch((error) => {
-            //         // Handle the error
-            //         setLoading(false)
-            //         alert(error);
-            //     });
-
-            props.navigation.navigate('LeadCreationLoan')
         }
 
 

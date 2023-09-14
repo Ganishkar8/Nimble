@@ -222,39 +222,34 @@ const LeadCreationBasic = (props, { navigation }) => {
 
         if (validate()) {
             showBottomSheet();
-        } else {
+        }
+         else {
 
             const appDetails = {
                 "createdBy": global.USERID,
                 "createdOn": '',
                 "isActive" : true,
+                "branchId": 1180,
                 "leadCreationBasicDetails":{
                     "createdBy": global.USERID,
                     "createdOn": '',
-                    "customerCategoryId": custCatgLabel,
+                    "customerCategoryId": 5,
                     "firstName": firstName,
                     "middleName": middleName,
                     "lastName": lastName,
-                    "mobileNumber": mobileNumber
+                    "mobileNumber": 7647865789
                 },
                 "leadCreationBusinessDetails":{},
                 "leadCreationLoanDetails":{},
                 "leadCreationDms":{}
             }
-            const baseURL = '8999'
+            const baseURL = '8901'
             setLoading(true)
-            apiInstancelocal(baseURL).post('/api/v1/lead-creation-initiation',{
-                 headers:{
-                    'accept': 'application/json',
-                 },
-                 params: {
-                    appDetails
-                 }
-                })
+            apiInstancelocal(baseURL).post('/api/v1/lead-creation-initiation',appDetails)
                 .then(async (response) => {
                     // Handle the response data
-                    console.log("LeadCreationBasicApiResponse::" + JSON.stringify(response));
-                    
+                    console.log("LeadCreationBasicApiResponse::" + JSON.stringify(response.data));
+                    global.leadID = response.data.id;
                     setLoading(false)
                     props.navigation.navigate('LeadCreationBusiness')
     

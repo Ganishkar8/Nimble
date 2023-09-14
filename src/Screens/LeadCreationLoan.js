@@ -41,6 +41,8 @@ import tbl_SystemMandatoryFields from '../Database/Table/tbl_SystemMandatoryFiel
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Modal from 'react-native-modal';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
+import Geolocation from 'react-native-geolocation-service';
+import apiInstancelocal from '../Utils/apiInstancelocal';
 
 
 const LeadCreationLoan = (props, { navigation }) => {
@@ -79,6 +81,11 @@ const LeadCreationLoan = (props, { navigation }) => {
     const showBottomSheet = () => setBottomErrorSheetVisible(true);
     const hideBottomSheet = () => setBottomErrorSheetVisible(false);
 
+    const showLocationBottomSheet = () => setLocationSheetVisible(true);
+    const hideLocationBottomSheet = () => setLocationSheetVisible(false);
+
+    const [locationSheetVisible, setLocationSheetVisible] = useState(false);
+
 
     useEffect(() => {
         pickerData();
@@ -86,74 +93,80 @@ const LeadCreationLoan = (props, { navigation }) => {
     }, []);
 
 
- 
 
-  const checkPermissions = async () => {
-    const permissionsToRequest = [];
 
-    if (Platform.OS === 'android') {
-      // Camera permission
-      const cameraPermission = await PermissionsAndroid.check(
-        PermissionsAndroid.PERMISSIONS.CAMERA
-      );
-      if (cameraPermission !== PermissionsAndroid.RESULTS.GRANTED) {
-        permissionsToRequest.push(PermissionsAndroid.PERMISSIONS.CAMERA);
-      }
+    const checkPermissions = async () => {
+        const permissionsToRequest = [];
 
-      // Location permission
-      const locationPermission = await PermissionsAndroid.check(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-      );
-      if (locationPermission !== PermissionsAndroid.RESULTS.GRANTED) {
-        permissionsToRequest.push(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
-      }
+        if (Platform.OS === 'android') {
+            // Camera permission
+            const cameraPermission = await PermissionsAndroid.check(
+                PermissionsAndroid.PERMISSIONS.CAMERA
+            );
+            if (cameraPermission !== PermissionsAndroid.RESULTS.GRANTED) {
+                permissionsToRequest.push(PermissionsAndroid.PERMISSIONS.CAMERA);
+            }
 
-      // Request all pending permissions
-      requestPermissions(permissionsToRequest);
-    } else {
-      // For iOS and other platforms, use react-native-permissions
-      const cameraResult = await check(PERMISSIONS.IOS.CAMERA);
-      const locationResult = await check(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
+            // Location permission
+            const locationPermission = await PermissionsAndroid.check(
+                PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+            );
+            if (locationPermission !== PermissionsAndroid.RESULTS.GRANTED) {
+                permissionsToRequest.push(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+            }
 
-      const permissionsToRequest = [];
-
-      if (cameraResult !== RESULTS.GRANTED) {
-        permissionsToRequest.push(PERMISSIONS.IOS.CAMERA);
-      }
-
-      if (locationResult !== RESULTS.GRANTED) {
-        permissionsToRequest.push(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
-      }
-
-      // Request all pending permissions
-      request(permissionsToRequest);
-    }
-  };
-
-  const requestPermissions = async (permissions) => {
-    if (Platform.OS === 'android') {
-      try {
-        const grantedPermissions = await PermissionsAndroid.requestMultiple(permissions);
-        
-        if (grantedPermissions === PermissionsAndroid.RESULTS.GRANTED) {
-          // All permissions granted
+            // Request all pending permissions
+            return requestPermissions(permissionsToRequest);
         } else {
-          // Handle denied permissions
+            // For iOS and other platforms, use react-native-permissions
+            const cameraResult = await check(PERMISSIONS.IOS.CAMERA);
+            const locationResult = await check(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
+
+            const permissionsToRequest = [];
+
+            if (cameraResult !== RESULTS.GRANTED) {
+                permissionsToRequest.push(PERMISSIONS.IOS.CAMERA);
+            }
+
+            if (locationResult !== RESULTS.GRANTED) {
+                permissionsToRequest.push(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
+            }
+
+            // Request all pending permissions
+            request(permissionsToRequest);
         }
-      } catch (error) {
-        console.error(error);
-      }
-    } else {
-      // For iOS and other platforms, use react-native-permissions
-      const results = await request(permissions);
-      
-      if (results.every(result => result === RESULTS.GRANTED)) {
-        // All permissions granted
-      } else {
-        // Handle denied permissions
-      }
-    }
-  };
+    };
+
+    const requestPermissions = async (permissions) => {
+        if (Platform.OS === 'android') {
+            try {
+                const grantedPermissions = await PermissionsAndroid.requestMultiple(permissions);
+                const allPermissionsGranted = Object.values(grantedPermissions).every(
+                    status => status === PermissionsAndroid.RESULTS.GRANTED
+                );
+
+                if (allPermissionsGranted) {
+                    // All permissions granted
+
+                } else {
+
+                    // Handle denied permissions
+                }
+                return allPermissionsGranted
+            } catch (error) {
+                console.error(error);
+            }
+        } else {
+            // For iOS and other platforms, use react-native-permissions
+            const results = await request(permissions);
+
+            if (results.every(result => result === RESULTS.GRANTED)) {
+                // All permissions granted
+            } else {
+                // Handle denied permissions
+            }
+        }
+    };
 
 
     const pickerData = async () => {
@@ -298,47 +311,90 @@ const LeadCreationLoan = (props, { navigation }) => {
 
         if (validate()) {
             showBottomSheet();
-        } else {
+        }
 
-            // const appDetails = {
-            //     "createdBy": global.USERID,
-            //     "createdOn": '',
-            //     "isActive" : true,
-            //     "leadCreationBasicDetails":{
-            //         "createdBy": global.USERID,
-            //         "createdOn": '',
-            //         "customerCategoryId": custCatgLabel,
-            //         "firstName": firstName,
-            //         "middleName": middleName,
-            //         "lastName": lastName,
-            //         "mobileNumber": mobileNumber
-            //     },
-            //     "leadCreationBusinessDetails":{},
-            //     "leadCreationLoanDetails":{},
-            //     "leadCreationDms":{}
-            // }
-            // const baseURL = '8090'
-            // setLoading(true)
-            // apiInstance(baseURL,global.RefreshToken).post('/api/v1/lead-creation-initiation', appDetails)
-            //     .then(async (response) => {
-            //         // Handle the response data
-            //         console.log("LeadCreationBasicApiResponse::" + JSON.stringify(response.data));
+        else {
 
-            //         setLoading(false)
+            const appDetails = {
+                "createdBy": global.USERID,
+                "createdOn": '',
+                "isActive": true,
+                "branchId": 1180,
+                "id": global.leadID,
+                "leadCreationBasicDetails": {},
+                "leadCreationBusinessDetails": {},
+                "leadCreationLoanDetails": {
+                    "createdBy": global.USERID,
+                    "createdOn": '',
+                    "loanTypeId": 5,
+                    "loanPurposeId": 6,
+                    "leadTypeId": 7,
+                    "loanAmount": loanAmount
+                },
+                "leadCreationDms": {}
+            }
+            const baseURL = '8901'
+            setLoading(true)
+            apiInstancelocal(baseURL).post('/api/v1/lead-creation-initiation', appDetails)
+                .then(async (response) => {
+                    // Handle the response data
+                    console.log("LeadCreationLoanApiResponse::" + JSON.stringify(response.data));
+
+                    checkPermissions().then(res => {
+                        if (res == true) {
+                            getOneTimeLocation();
+                            setLoading(false)
+                        } else {
+                            setLoading(false)
+                            alert('Permission Not Granted')
+                        }
+                    });
+
+                })
+                .catch((error) => {
+                    // Handle the error
+                    console.log("Error" + JSON.stringify(error.response))
+                    setLoading(false)
+                    alert(error);
+                });
 
 
-            //     })
-            //     .catch((error) => {
-            //         // Handle the error
-            //         setLoading(false)
-            //         alert(error);
-            //     });
-            checkPermissions();
-           // props.navigation.navigate('LeadCreationCustomerPhoto')
         }
 
 
     }
+
+    const getOneTimeLocation = () => {
+       showLocationBottomSheet();
+        Geolocation.getCurrentPosition(
+            //Will give you the current location
+            (position) => {
+
+
+
+                //getting the Longitude from the location json
+                const currentLongitude =
+                    JSON.stringify(position.coords.longitude);
+
+                //getting the Latitude from the location json
+                const currentLatitude =
+                    JSON.stringify(position.coords.latitude);
+
+                hideLocationBottomSheet();
+                props.navigation.navigate('LeadCreationCustomerPhoto')
+
+            },
+            (error) => {
+
+                console.log(error)
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 30000,
+                maximumAge: 1000
+            },
+        );
+    };
 
     const validate = () => {
         var flag = false; var i = 1;
@@ -365,8 +421,8 @@ const LeadCreationLoan = (props, { navigation }) => {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + loanAmountCaption + '\n';
                 i++;
                 flag = true;
-            }else if (!isMultipleOf5000(loanAmount)) {
-                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + loanAmountCaption+ ' '+ language[0][props.language].str_mulfive + '\n';
+            } else if (!isMultipleOf5000(loanAmount)) {
+                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + loanAmountCaption + ' ' + language[0][props.language].str_mulfive + '\n';
                 i++;
                 flag = true;
             }
@@ -386,7 +442,7 @@ const LeadCreationLoan = (props, { navigation }) => {
 
     function isMultipleOf5000(number) {
         return number % 5000 === 0;
-      }
+    }
 
 
     return (
@@ -448,6 +504,32 @@ const LeadCreationLoan = (props, { navigation }) => {
                                     </View>
 
                                 </View>
+
+                            </View>
+
+
+                        </View>
+                    </Modal>
+
+
+                    <Modal
+                        isVisible={locationSheetVisible}
+                        onBackdropPress={() => {}}
+                        backdropOpacity={0.5}
+                        style={styles.modal}
+                    >
+                        <View style={styles.modalContent}>
+                            <View style={{ alignItems: 'center' }}>
+
+                                <View style={{ width: '100%', flexDirection: 'row',alignItems:'center',justifyContent:'center' }}>
+
+                                    <TextComp textVal={"Fetching Location......"} textStyle={{ fontSize: 14, color: Colors.black, fontWeight: 600,marginTop:30,marginBottom:30 }} Visible={false} />
+
+                                
+                                </View>
+
+                            
+
 
                             </View>
 

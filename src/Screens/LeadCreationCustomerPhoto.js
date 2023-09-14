@@ -37,7 +37,7 @@ import HeadComp from '../Components/HeadComp';
 import { ProgressBar, MD3Colors } from 'react-native-paper';
 import { Picker } from '@react-native-picker/picker';
 import ProgressComp from '../Components/ProgressComp';
-import Geolocation from '@react-native-community/geolocation';
+import Geolocation from 'react-native-geolocation-service';
 import RNAndroidLocationEnabler from 'react-native-android-location-enabler';
 import MapView, { Marker } from 'react-native-maps';
 import Entypo from 'react-native-vector-icons/Entypo';
@@ -48,8 +48,10 @@ import Fontisto from 'react-native-vector-icons/Fontisto';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import ImagePicker, { ImageOrVideo } from 'react-native-image-crop-picker';
 import { tr } from 'react-native-paper-dates';
-import  Modal from 'react-native-modal';
+import Modal from 'react-native-modal';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import apiInstancelocal from '../Utils/apiInstancelocal';
+import axios from 'axios';
 
 const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
@@ -73,6 +75,11 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
     const [imageFile, setImageFile] = useState([]);
     const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
     const [deleteVisible, setDeleteVisible] = useState(false);
+    const [errMsg, setErrMsg] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [docID, setDocID] = useState('');
+    const [fileName, setFileName] = useState('');
+    const [fileType, setFileType] = useState('');
 
 
     const showBottomSheet = () => setBottomSheetVisible(true);
@@ -83,80 +90,89 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
 
     useEffect(() => {
-        const requestLocationPermission = async () => {
-            if (Platform.OS === 'ios') {
-                getOneTimeLocation();
-                //subscribeLocationLocation();
-            } else {
-                try {
-                    const granted = await PermissionsAndroid.request(
-                        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-                        {
-                            title: 'Location Access Required',
-                            message: 'This App needs to Access your location',
-                        },
-                    );
-                    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-                        // RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
-                        //     interval: 10000,
-                        //     fastInterval: 5000,
-                        //   })
-                        //     .then((data) => {
-                        getOneTimeLocation();
-                        //subscribeLocationLocation();
-                        // })
-                        // .catch((err) => {
-                        // The user has not accepted to enable the location services or something went wrong during the process
-                        // "err" : { "code" : "ERR00|ERR01|ERR02|ERR03", "message" : "message"}
-                        // codes :
-                        //  - ERR00 : The user has clicked on Cancel button in the popup
-                        //  - ERR01 : If the Settings change are unavailable
-                        //  - ERR02 : If the popup has failed to open
-                        //  - ERR03 : Internal error
-                        // });
 
+        getOneTimeLocation();
 
-
-                    } else {
-                        setLocationStatus('Permission Denied');
-                    }
-                } catch (err) {
-                    console.warn(err);
-                }
-            }
-        };
-        requestLocationPermission();
-        requestCameraPermission();
-        
-
-        return () => {
-            // Geolocation.clearWatch(watchID);
-        };
     }, [gpslatlon]);
 
 
-    
 
-    const requestExternalStoragePermission = async () => {
-      
-        try {
-          const granted = await PermissionsAndroid.requestMultiple([
-            PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-            PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-          ]);
-    
-          if (
-            granted['android.permission.READ_EXTERNAL_STORAGE'] === 'granted' &&
-            granted['android.permission.WRITE_EXTERNAL_STORAGE'] === 'granted'
-          ) {
-            console.log('External storage permissions granted');
-          } else {
-            console.log('External storage permissions denied');
-          }
-        } catch (err) {
-          console.warn(err);
+    const uploadImage = async () => {
+        if (imageUri) {
+            setLoading(true);
+            const formData = new FormData();
+            formData.append('file', {
+                uri: imageUri,
+                type: fileType,
+                name: fileName,
+            });
+
+            try {
+                const response = await fetch('http://192.168.1.120:8094/api/documents', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    // Handle the response from Cloudinary
+
+                    console.log('Upload success:', data);
+                    setDocID(response.docId);
+                    updateLeadDetails();
+                } else {
+                    console.log('Upload failed:', response.status);
+                }
+            } catch (error) {
+                console.log('Upload error:', error);
+            } finally {
+                setLoading(false);
+            }
         }
-      };
+    };
+
+    const updateLeadDetails = () => {
+
+
+        const appDetails = {
+            "createdBy": global.USERID,
+            "createdOn": '',
+            "isActive": true,
+            "branchId": 1180,
+            "id": global.leadID,
+            "leadCreationBasicDetails": {},
+            "leadCreationBusinessDetails": {},
+            "leadCreationLoanDetails": {},
+            "leadCreationDms": {
+                "createdBy": global.USERID,
+                "createdOn": '',
+                "dmsId": docID,
+                "fileName": "Photo.jpg",
+                "fileType": fileType,
+                "fileInfo": "",
+                "comments": "",
+                "geoLocation": currentLatitude+","+currentLongitude
+            }
+        }
+        const baseURL = '8901'
+        apiInstancelocal(baseURL).post('/api/v1/lead-creation-initiation', appDetails)
+            .then(async (response) => {
+                // Handle the response data
+                console.log("FinalLeadCreationApiResponse::" + JSON.stringify(response.data));
+
+                alert('Lead Created')
+
+            })
+            .catch((error) => {
+                // Handle the error
+                console.log("Error" + JSON.stringify(error.response))
+                setLoading(false)
+                alert(error);
+            });
+
+    }
 
     const zoomToMarker = () => {
         if (mapRef.current) {
@@ -175,7 +191,8 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
 
     const pickImage = () => {
-       // setVisible(false)
+        // setVisible(false)
+       
         hidephotoBottomSheet();
         ImagePicker.openCamera({
             width: 300,
@@ -183,7 +200,9 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
             cropping: true,
         }).then(image => {
             setImageFile(image)
-            //alert(JSON.stringify(image.path))
+            const imageName = image.path.split('/').pop();
+            setFileType(image.mime)
+            setFileName(imageName)
             setImageUri(image.path)
             setVisible(false)
             props.onChange?.(image);
@@ -191,23 +210,27 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
     };
 
-    const selectImage = async() => {
-       // setVisible(false)
-       let isStoragePermitted = await requestExternalStoragePermission();
+    const selectImage = async () => {
+        // setVisible(false)
+
         hidephotoBottomSheet();
         ImagePicker.openPicker({
-          width: 300,
-          height: 400,
-          cropping: true,
+            width: 300,
+            height: 400,
+            cropping: true,
         }).then(image => {
             setImageFile(image)
-            //alert(JSON.stringify(image.path))
+            
+            const imageName = image.path.split('/').pop();
+            alert(imageName)
+            setFileType(image.mime)
+            setFileName(imageName)
             setImageUri(image.path)
             setVisible(false)
-           props.onChange?.(image);
+            props.onChange?.(image);
         })
 
-       };
+    };
 
 
     const getOneTimeLocation = () => {
@@ -316,11 +339,11 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
             <ScrollView style={styles.scrollView}
                 contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-
+                {loading ? <Loading /> : null}
                 <View style={{ flex: 1 }}>
 
-                  
-                <Modal
+
+                    <Modal
                         isVisible={bottomSheetVisible}
                         onBackdropPress={hideBottomSheet}
                         style={styles.modal}
@@ -448,41 +471,47 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
 
                     <Modal
-                                    isVisible={photoOptionvisible}
-                                    onBackdropPress={hidephotoBottomSheet}
-                                    style={styles.modal}
-                                    >
+                        isVisible={photoOptionvisible}
+                        onBackdropPress={hidephotoBottomSheet}
+                        style={styles.modal}
+                    >
 
-                                        <View style={styles.modalContent}>
-                                    <TouchableOpacity onPress={()=>(hidephotoBottomSheet())} style={{width:33,height:33,position:'absolute',right:0,
-                                      alignItems:'center',justifyContent:'center',
-                                      zIndex:1,backgroundColor:Colors.common,borderBottomStartRadius:10}}>
-                                     <AntDesign name='close' size={18} color={Colors.black} />
-                                     </TouchableOpacity>
-                                
-                                    <View style={{width:'100%',flexDirection:'row',alignItems:'center',justifyContent:'center'}}>
-                                      <View style={{width:'30%',alignItems:'center'}}>
-                                      <TouchableOpacity onPress={()=>pickImage()} activeOpacity={11}>
-                                      <View style={{width:53,height:53,borderRadius:53,backgroundColor:'#E74C3C',
-                                        alignItems:'center',justifyContent:'center'}}>
-                                      <Ionicons  name='camera-outline' size={31} color={Colors.white}/>
-                                      </View>
-                                      </TouchableOpacity>
-                                      <Text style={{fontSize:14,color:Colors.black,marginTop:7}}>Camera</Text>
-                                      </View>
-                                      <View style={{width:'30%',alignItems:'center'}}>
-                                        <TouchableOpacity onPress={()=>selectImage()} activeOpacity={11}>
-                                      <View style={{width:53,height:53,borderRadius:53,backgroundColor:'#8E44AD',
-                                        alignItems:'center',justifyContent:'center'}}>
-                                        <Ionicons  name='image-outline' size={27} color={Colors.white}/>
-                                      </View>
-                                      </TouchableOpacity>
-                                      <Text style={{fontSize:14,color:Colors.black,marginTop:7}}>Gallery</Text>
-                                      </View>
-                                      
-                                    </View>
-                                    </View>
-                                    </Modal>
+                        <View style={styles.modalContent}>
+                            <TouchableOpacity onPress={() => (hidephotoBottomSheet())} style={{
+                                width: 33, height: 33, position: 'absolute', right: 0,
+                                alignItems: 'center', justifyContent: 'center',
+                                zIndex: 1, backgroundColor: Colors.common, borderBottomStartRadius: 10
+                            }}>
+                                <AntDesign name='close' size={18} color={Colors.black} />
+                            </TouchableOpacity>
+
+                            <View style={{ width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                                <View style={{ width: '30%', alignItems: 'center' }}>
+                                    <TouchableOpacity onPress={() => pickImage()} activeOpacity={11}>
+                                        <View style={{
+                                            width: 53, height: 53, borderRadius: 53, backgroundColor: '#E74C3C',
+                                            alignItems: 'center', justifyContent: 'center'
+                                        }}>
+                                            <Ionicons name='camera-outline' size={31} color={Colors.white} />
+                                        </View>
+                                    </TouchableOpacity>
+                                    <Text style={{ fontSize: 14, color: Colors.black, marginTop: 7 }}>Camera</Text>
+                                </View>
+                                <View style={{ width: '30%', alignItems: 'center' }}>
+                                    <TouchableOpacity onPress={() => selectImage()} activeOpacity={11}>
+                                        <View style={{
+                                            width: 53, height: 53, borderRadius: 53, backgroundColor: '#8E44AD',
+                                            alignItems: 'center', justifyContent: 'center'
+                                        }}>
+                                            <Ionicons name='image-outline' size={27} color={Colors.white} />
+                                        </View>
+                                    </TouchableOpacity>
+                                    <Text style={{ fontSize: 14, color: Colors.black, marginTop: 7 }}>Gallery</Text>
+                                </View>
+
+                            </View>
+                        </View>
+                    </Modal>
 
 
 
@@ -630,7 +659,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                         justifyContent: 'flex-end',
                         alignItems: 'center',
                     }}>
-                    <TouchableOpacity onPress={() => { zoomToMarker() }} activeOpacity={10} style={{
+                    <TouchableOpacity onPress={() => { uploadImage() }} activeOpacity={10} style={{
                         width: '88%', height: 50, backgroundColor: '#0294ff',
                         borderRadius: 45, alignItems: 'center', justifyContent: 'center'
                     }}>
@@ -645,7 +674,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
 
 
-              
+
 
 
             </ScrollView>
