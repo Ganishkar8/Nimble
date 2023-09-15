@@ -15,5 +15,11 @@ export default {
     skyBlue :'#0294ff',
     dimText :'#a1a5b7',
     dimmText :'#707070',
-    red:'#FC2C57'
+    red:'#FC2C57',
+    pendingBorder :'#ffce20',
+    pendingBg : '#fff9e3',
+    approvedBorder :'#178e39',
+    approvedBg : '#f5f8fa',
+    skyblue : '#f5f8fa',
+    disableBg : '#dfe6ea'
 }

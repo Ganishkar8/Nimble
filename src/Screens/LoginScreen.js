@@ -61,6 +61,8 @@ const LoginScreen = (props, { navigation }) => {
                 const decodedToken = await jwtDecode(response.data.jwtToken);
                 console.log("LoginJWTDecode::" + JSON.stringify(decodedToken));
                 setLoading(false)
+                setUserID('')
+                setPassword('')
                 global.USERNAME = decodedToken.userName;
                 global.USERID = decodedToken.userId;
                 global.RefreshToken = response.data.jwtRefreshToken;

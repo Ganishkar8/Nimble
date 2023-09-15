@@ -408,7 +408,7 @@ const LeadCreationBasic = (props, { navigation }) => {
 
                     </View>
 
-                    <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+                    {custCatgVisible &&<View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
                             <TextComp textVal={custCatgCaption} textStyle={Commonstyles.inputtextStyle} Visible={custCatgMan} />
 
@@ -420,6 +420,7 @@ const LeadCreationBasic = (props, { navigation }) => {
                             <Picker
                                 selectedValue={custCatgLabel}
                                 style={styles.picker}
+                                enabled={!custCatgDisable}
                                 onValueChange={(itemValue, itemIndex) => {
                                     setCustCatgLabel(itemValue);
                                     setCustCatgIndex(itemIndex);
@@ -437,10 +438,10 @@ const LeadCreationBasic = (props, { navigation }) => {
                             width: '90%', marginTop: 6, flexDirection: 'row',
                             borderBottomWidth: 1, borderBottomColor: '#e2e2e2', position: 'absolute', bottom: 3
                         }}></View>
-                    </View>
+                    </View>}
 
 
-                    <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
+                    {firstNameVisible &&<View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
 
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
                             <TextComp textVal={firstNameCaption} textStyle={Commonstyles.inputtextStyle} Visible={firstNameMan} />
@@ -452,6 +453,7 @@ const LeadCreationBasic = (props, { navigation }) => {
                                 value={firstName}
                                 onChangeText={txt => setFirstName(txt)}
                                 placeholder={''}
+                                editable={!firstNameDisable}
                                 placeholderTextColor={Colors.lightgrey}
                                 secureTextEntry={false}
                                 autoCapitalize="characters"
@@ -463,9 +465,9 @@ const LeadCreationBasic = (props, { navigation }) => {
 
                         </View>
 
-                    </View>
+                    </View>}
 
-                    <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
+                    {middleNameVisible && <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
 
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
                             <TextComp textVal={middleNameCaption} textStyle={Commonstyles.inputtextStyle} Visible={middleNameMan} />
@@ -479,6 +481,7 @@ const LeadCreationBasic = (props, { navigation }) => {
                                 placeholder={''}
                                 placeholderTextColor={Colors.lightgrey}
                                 secureTextEntry={false}
+                                editable={!middleNameDisable}
                                 autoCapitalize="characters"
                                 style={Commonstyles.textinputtextStyle}
                                 ref={middleNameRef}
@@ -488,9 +491,9 @@ const LeadCreationBasic = (props, { navigation }) => {
 
                         </View>
 
-                    </View>
+                    </View>}
 
-                    <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
+                    {lastNameVisible &&<View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
 
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
                             <TextComp textVal={lastNameCaption} textStyle={Commonstyles.inputtextStyle} Visible={lastNameMan} />
@@ -504,6 +507,7 @@ const LeadCreationBasic = (props, { navigation }) => {
                                 placeholder={''}
                                 placeholderTextColor={Colors.lightgrey}
                                 secureTextEntry={false}
+                                editable={!lastNameDisable}
                                 autoCapitalize="characters"
                                 style={Commonstyles.textinputtextStyle}
                                 ref={lastNameRef}
@@ -513,9 +517,9 @@ const LeadCreationBasic = (props, { navigation }) => {
 
                         </View>
 
-                    </View>
+                    </View>}
 
-                    <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
+                    {mobileNumberVisible &&<View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
 
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
                             <TextComp textVal={mobileNumberCaption} textStyle={Commonstyles.inputtextStyle} Visible={mobileNumberMan} />
@@ -530,6 +534,7 @@ const LeadCreationBasic = (props, { navigation }) => {
                                 keyboardType="numeric"
                                 placeholderTextColor={Colors.lightgrey}
                                 secureTextEntry={false}
+                                editable={!mobileNumberDisable}
                                 autoCapitalize="characters"
                                 style={Commonstyles.textinputtextStyle}
                                 ref={mobileNumberRef}
@@ -538,7 +543,7 @@ const LeadCreationBasic = (props, { navigation }) => {
 
                         </View>
 
-                    </View>
+                    </View>}
 
                 </View>
 

@@ -16,10 +16,11 @@ import Entypo from 'react-native-vector-icons/Entypo';
 
 
 
-const PersonalDetailsScreen = ({ navigation }) => {
+
+const PersonalDetailsScreen = ({ navigation, route }) => {
 
     useEffect(() => {
-        
+
     }, []);
 
 
@@ -27,34 +28,34 @@ const PersonalDetailsScreen = ({ navigation }) => {
         // enclose all components in this View tag
         <SafeAreaView style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
 
-<MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
+            <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
 
             <ScrollView style={styles.scrollView}
                 contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
 
                 <View style={{ flex: 1 }}>
-                
-                <View style={{
-                    width: '100%', height: 56, alignItems: 'center', justifyContent: 'center',
-                    
-                 }}>
-                    <View style={{width:'92%',flexDirection: 'row'}}>
-                    <TouchableOpacity onPress={()=>navigation.goBack()} style={{ width: '10%', height: 56, justifyContent: 'center' }}>
-                    <View >
-                    
-                    <Entypo name='chevron-left' size={25} color={Colors.darkblack} />
-                    
-                    </View>
-                    </TouchableOpacity>
-                    <View style={{ width: '80%', height: 56, justifyContent: 'center' }}>
-                        <Text style={{ fontSize: 18, color: Colors.darkblack }}>Personal Details</Text>
-                    </View>
-                    </View>
-                </View>
 
-                <View style={{width:'100%',alignItems:'center',marginTop:'6%'}}>
+                    <View style={{
+                        width: '100%', height: 56, alignItems: 'center', justifyContent: 'center',
 
-                <View style={{width: '90%', marginTop: 3,}}>
+                    }}>
+                        <View style={{ width: '92%', flexDirection: 'row' }}>
+                            <TouchableOpacity onPress={() => navigation.goBack()} style={{ width: '10%', height: 56, justifyContent: 'center' }}>
+                                <View >
+
+                                    <Entypo name='chevron-left' size={25} color={Colors.darkblack} />
+
+                                </View>
+                            </TouchableOpacity>
+                            <View style={{ width: '80%', height: 56, justifyContent: 'center' }}>
+                                <Text style={{ fontSize: 18, color: Colors.darkblack }}>Personal Details</Text>
+                            </View>
+                        </View>
+                    </View>
+
+                    <View style={{ width: '100%', alignItems: 'center', marginTop: '6%' }}>
+
+                        <View style={{ width: '90%', marginTop: 3, }}>
                             <Text
                                 style={{
                                     color: Colors.lightgrey,
@@ -67,15 +68,15 @@ const PersonalDetailsScreen = ({ navigation }) => {
                                 style={{
                                     color: Colors.darkblack,
                                     fontSize: 14,
-                                    marginTop:10
+                                    marginTop: 10
                                 }}>
-                                {global.USERID}
+                                {route.params.Info.userId}
                             </Text>
 
                         </View>
                         <View style={styles.line}></View>
 
-                        <View style={{width: '90%', marginTop: 20,}}>
+                        <View style={{ width: '90%', marginTop: 20, }}>
                             <Text
                                 style={{
                                     color: Colors.lightgrey,
@@ -88,16 +89,16 @@ const PersonalDetailsScreen = ({ navigation }) => {
                                 style={{
                                     color: Colors.darkblack,
                                     fontSize: 14,
-                                    marginTop:10
+                                    marginTop: 10
                                 }}>
-                                {global.USERNAME}
+                                {route.params.Info.firstName}
                             </Text>
 
                         </View>
                         <View style={styles.line}></View>
 
 
-                        <View style={{width: '90%', marginTop: 20,}}>
+                        <View style={{ width: '90%', marginTop: 20, }}>
                             <Text
                                 style={{
                                     color: Colors.lightgrey,
@@ -110,15 +111,15 @@ const PersonalDetailsScreen = ({ navigation }) => {
                                 style={{
                                     color: Colors.darkblack,
                                     fontSize: 14,
-                                    marginTop:10
+                                    marginTop: 10
                                 }}>
-                                9868654578
+                                {route.params.Info.mobileNumber}
                             </Text>
 
                         </View>
                         <View style={styles.line}></View>
 
-                        <View style={{width: '90%', marginTop: 20,}}>
+                        <View style={{ width: '90%', marginTop: 20, }}>
                             <Text
                                 style={{
                                     color: Colors.lightgrey,
@@ -131,15 +132,15 @@ const PersonalDetailsScreen = ({ navigation }) => {
                                 style={{
                                     color: Colors.darkblack,
                                     fontSize: 14,
-                                    marginTop:10
+                                    marginTop: 10
                                 }}>
-                                sriram.ganesan@example.com
+                                {route.params.Info.emailId}
                             </Text>
 
                         </View>
                         <View style={styles.line}></View>
 
-                        <View style={{width: '90%', marginTop: 20,}}>
+                        <View style={{ width: '90%', marginTop: 20, }}>
                             <Text
                                 style={{
                                     color: Colors.lightgrey,
@@ -152,20 +153,20 @@ const PersonalDetailsScreen = ({ navigation }) => {
                                 style={{
                                     color: Colors.darkblack,
                                     fontSize: 14,
-                                    marginTop:10
+                                    marginTop: 10
                                 }}>
-                                ABC Industrial Area, J P Nagar, Bangalore
+                                {route.params.Info.addressDto[0].address}
                             </Text>
 
                         </View>
                         <View style={styles.line}></View>
 
 
+                    </View>
+
+
+
                 </View>
-                
-
-
-            </View>
             </ScrollView>
         </SafeAreaView>
     );

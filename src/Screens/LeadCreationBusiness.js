@@ -218,14 +218,6 @@ const LeadCreationBusiness = (props, { navigation }) => {
         else {
 
             const appDetails = {
-                "createdBy": global.USERID,
-                "createdOn": '',
-                "id": global.leadID,
-                "isActive": true,
-                "branchId": 1180,
-                "leadCreationBasicDetails": {
-                    
-                },
                 "leadCreationBusinessDetails": {
                     "createdBy": global.USERID,
                     "createdOn": '',
@@ -234,13 +226,11 @@ const LeadCreationBusiness = (props, { navigation }) => {
                     "incomeBusinessTurnover": 5000,
                     "businessVintageYear": 2,
                     "businessVintageMonth": 5
-                },
-                "leadCreationLoanDetails": {},
-                "leadCreationDms": {}
+                }
             }
             const baseURL = '8901'
             setLoading(true)
-            apiInstancelocal(baseURL).post('/api/v1/lead-creation-initiation', appDetails)
+            apiInstancelocal(baseURL).put(`/api/v1/lead-creation-initiation/${global.leadID}`, appDetails)
                 .then(async (response) => {
                     // Handle the response data
                     console.log("LeadCreationBusinessApiResponse::" + JSON.stringify(response.data));
@@ -394,7 +384,7 @@ const LeadCreationBusiness = (props, { navigation }) => {
 
                     </View>
 
-                    <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
+                    {businessNameVisible && <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
 
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
                             <TextComp textVal={businessNameCaption} textStyle={Commonstyles.inputtextStyle} Visible={businessNameMan} />
@@ -406,6 +396,7 @@ const LeadCreationBusiness = (props, { navigation }) => {
                                 value={businessName}
                                 onChangeText={txt => setBusinessName(txt)}
                                 placeholder={''}
+                                editable={!businessNameDisable}
                                 placeholderTextColor={Colors.lightgrey}
                                 secureTextEntry={false}
                                 autoCapitalize="characters"
@@ -417,9 +408,9 @@ const LeadCreationBusiness = (props, { navigation }) => {
 
                         </View>
 
-                    </View>
+                    </View>}
 
-                    <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+                    {industryTypeVisible && <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
                             <TextComp textVal={industryTypeCaption} textStyle={Commonstyles.inputtextStyle} Visible={industryTypeMan} />
 
@@ -431,6 +422,7 @@ const LeadCreationBusiness = (props, { navigation }) => {
                             <Picker
                                 selectedValue={industryTypeLabel}
                                 style={styles.picker}
+                                enabled={!industryTypeDisable}
                                 onValueChange={(itemValue, itemIndex) => {
                                     setIndustryTypeLabel(itemValue);
                                     setIndustryTypeIndex(itemIndex);
@@ -447,10 +439,10 @@ const LeadCreationBusiness = (props, { navigation }) => {
                             width: '90%', marginTop: 6, flexDirection: 'row',
                             borderBottomWidth: 1, borderBottomColor: '#e2e2e2', position: 'absolute', bottom: 3
                         }}></View>
-                    </View>
+                    </View>}
 
 
-                    <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
+                    {incomeTurnOverVisible && <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
 
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
                             <TextComp textVal={incomeTurnOverCaption} Visible={incomeTurnOverMan} textStyle={Commonstyles.inputtextStyle} />
@@ -464,7 +456,9 @@ const LeadCreationBusiness = (props, { navigation }) => {
                                 placeholder={''}
                                 placeholderTextColor={Colors.lightgrey}
                                 secureTextEntry={false}
+                                editable={!incomeTurnOverDisable}
                                 autoCapitalize="characters"
+                                keyboardType="numeric"
                                 style={Commonstyles.textinputtextStyle}
                                 ref={incomeTurnOverRef}
                                 returnKeyType="next"
@@ -473,7 +467,7 @@ const LeadCreationBusiness = (props, { navigation }) => {
 
                         </View>
 
-                    </View>
+                    </View>}
 
                     <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
 
@@ -483,7 +477,7 @@ const LeadCreationBusiness = (props, { navigation }) => {
 
                         <View style={{ width: '90%', flexDirection: 'row', justifyContent: 'space-between' }}>
 
-                            <View style={{ width: '48%', marginTop: 20 }}>
+                            {yearVisible && <View style={{ width: '48%', marginTop: 20 }}>
 
                                 <TextComp textVal={yearCaption} textStyle={Commonstyles.inputtextStyle} Visible={yearMan} />
                                 <View style={{ width: '100%', marginTop: 3, paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: '#e2e2e2' }}>
@@ -494,6 +488,8 @@ const LeadCreationBusiness = (props, { navigation }) => {
                                         placeholder={''}
                                         placeholderTextColor={Colors.lightgrey}
                                         secureTextEntry={false}
+                                        editable={yearDisable}
+                                        keyboardType="numeric"
                                         autoCapitalize="characters"
                                         style={Commonstyles.textinputtextStyle}
                                         ref={yearRef}
@@ -502,10 +498,10 @@ const LeadCreationBusiness = (props, { navigation }) => {
                                     />
 
                                 </View>
-                            </View>
+                            </View>}
 
 
-                            <View style={{ width: '48%', marginTop: 20 }}>
+                            {monthsVisible && <View style={{ width: '48%', marginTop: 20 }}>
 
                                 <TextComp textVal={monthsCaption} textStyle={Commonstyles.inputtextStyle} Visible={monthsMan} />
                                 <View style={{ width: '100%', marginTop: 3, paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: '#e2e2e2' }}>
@@ -514,8 +510,10 @@ const LeadCreationBusiness = (props, { navigation }) => {
                                         value={months}
                                         onChangeText={txt => setMonths(txt)}
                                         placeholder={''}
+                                        keyboardType="numeric"
                                         placeholderTextColor={Colors.lightgrey}
                                         secureTextEntry={false}
+                                        editable={monthsDisable}
                                         autoCapitalize="characters"
                                         style={Commonstyles.textinputtextStyle}
                                         ref={monthsRef}
@@ -523,7 +521,7 @@ const LeadCreationBusiness = (props, { navigation }) => {
                                     />
 
                                 </View>
-                            </View>
+                            </View>}
 
                         </View>
 

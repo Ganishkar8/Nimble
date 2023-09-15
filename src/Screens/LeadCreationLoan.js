@@ -316,13 +316,6 @@ const LeadCreationLoan = (props, { navigation }) => {
         else {
 
             const appDetails = {
-                "createdBy": global.USERID,
-                "createdOn": '',
-                "isActive": true,
-                "branchId": 1180,
-                "id": global.leadID,
-                "leadCreationBasicDetails": {},
-                "leadCreationBusinessDetails": {},
                 "leadCreationLoanDetails": {
                     "createdBy": global.USERID,
                     "createdOn": '',
@@ -330,12 +323,11 @@ const LeadCreationLoan = (props, { navigation }) => {
                     "loanPurposeId": 6,
                     "leadTypeId": 7,
                     "loanAmount": loanAmount
-                },
-                "leadCreationDms": {}
+                }
             }
             const baseURL = '8901'
             setLoading(true)
-            apiInstancelocal(baseURL).post('/api/v1/lead-creation-initiation', appDetails)
+            apiInstancelocal(baseURL).put(`/api/v1/lead-creation-initiation/${global.leadID}`, appDetails)
                 .then(async (response) => {
                     // Handle the response data
                     console.log("LeadCreationLoanApiResponse::" + JSON.stringify(response.data));
@@ -559,7 +551,7 @@ const LeadCreationLoan = (props, { navigation }) => {
 
 
 
-                    <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+                    {loanTypeVisible &&<View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
                             <TextComp textVal={loanTypeCaption} textStyle={Commonstyles.inputtextStyle} Visible={loanTypeMan} />
 
@@ -571,6 +563,7 @@ const LeadCreationLoan = (props, { navigation }) => {
                             <Picker
                                 selectedValue={loanTypeLabel}
                                 style={styles.picker}
+                                enabled={loanTypeDisable}
                                 onValueChange={(itemValue, itemIndex) => {
                                     setLoanTypeLabel(itemValue);
                                     setLoanTypeIndex(itemIndex);
@@ -587,10 +580,10 @@ const LeadCreationLoan = (props, { navigation }) => {
                             width: '90%', marginTop: 6, flexDirection: 'row',
                             borderBottomWidth: 1, borderBottomColor: '#e2e2e2', position: 'absolute', bottom: 3
                         }}></View>
-                    </View>
+                    </View>}
 
 
-                    <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+                    {loanPurposeVisible &&<View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
                             <TextComp textVal={loanPurposeCaption} textStyle={Commonstyles.inputtextStyle} Visible={loanPurposeMan} />
 
@@ -602,6 +595,7 @@ const LeadCreationLoan = (props, { navigation }) => {
                             <Picker
                                 selectedValue={loanPurposeLabel}
                                 style={styles.picker}
+                                enabled={loanPurposeDisable}
                                 onValueChange={(itemValue, itemIndex) => {
                                     setLoanPurposeLabel(itemValue);
                                     setLoanPurposeIndex(itemIndex);
@@ -618,10 +612,10 @@ const LeadCreationLoan = (props, { navigation }) => {
                             width: '90%', marginTop: 6, flexDirection: 'row',
                             borderBottomWidth: 1, borderBottomColor: '#e2e2e2', position: 'absolute', bottom: 3
                         }}></View>
-                    </View>
+                    </View>}
 
 
-                    <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
+                    {loanAmountVisible &&<View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
 
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
                             <TextComp textVal={loanAmountCaption} textStyle={Commonstyles.inputtextStyle} Visible={loanAmountMan} />
@@ -633,6 +627,7 @@ const LeadCreationLoan = (props, { navigation }) => {
                                 value={loanAmount}
                                 onChangeText={txt => setLoanAmount(txt)}
                                 placeholder={''}
+                                editable={loanAmountDisable}
                                 placeholderTextColor={Colors.lightgrey}
                                 secureTextEntry={false}
                                 autoCapitalize="none"
@@ -642,10 +637,10 @@ const LeadCreationLoan = (props, { navigation }) => {
 
                         </View>
 
-                    </View>
+                    </View>}
 
 
-                    <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+                    {leadTypeVisible &&<View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
                             <TextComp textVal={leadTypeCaption} textStyle={Commonstyles.inputtextStyle} Visible={leadTypeMan} />
 
@@ -657,6 +652,7 @@ const LeadCreationLoan = (props, { navigation }) => {
                             <Picker
                                 selectedValue={leadTypeLabel}
                                 style={styles.picker}
+                                enabled={leadTypeDisable}
                                 onValueChange={(itemValue, itemIndex) => {
                                     setLeadTypeLabel(itemValue);
                                     setLeadTypeIndex(itemIndex);
@@ -673,7 +669,7 @@ const LeadCreationLoan = (props, { navigation }) => {
                             width: '90%', marginTop: 6, flexDirection: 'row',
                             borderBottomWidth: 1, borderBottomColor: '#e2e2e2', position: 'absolute', bottom: 3
                         }}></View>
-                    </View>
+                    </View>}
 
 
 

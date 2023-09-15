@@ -85,6 +85,11 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
     const showBottomSheet = () => setBottomSheetVisible(true);
     const hideBottomSheet = () => setBottomSheetVisible(false);
 
+    const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
+    const showBottomErrorSheet = () => setBottomErrorSheetVisible(true);
+    const hideBottomErrorSheet = () => setBottomErrorSheetVisible(false);
+
+
     const showphotoBottomSheet = () => setphotoOptionvisible(true);
     const hidephotoBottomSheet = () => setphotoOptionvisible(false);
 
@@ -98,6 +103,12 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
 
     const uploadImage = async () => {
+
+        if (validate()) {
+            showBottomErrorSheet();
+            return;
+        }
+
         if (imageUri) {
             setLoading(true);
             const formData = new FormData();
@@ -137,14 +148,6 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
 
         const appDetails = {
-            "createdBy": global.USERID,
-            "createdOn": '',
-            "isActive": true,
-            "branchId": 1180,
-            "id": global.leadID,
-            "leadCreationBasicDetails": {},
-            "leadCreationBusinessDetails": {},
-            "leadCreationLoanDetails": {},
             "leadCreationDms": {
                 "createdBy": global.USERID,
                 "createdOn": '',
@@ -153,16 +156,17 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                 "fileType": fileType,
                 "fileInfo": "",
                 "comments": "",
-                "geoLocation": currentLatitude+","+currentLongitude
+                "geoLocation": currentLatitude + "," + currentLongitude
             }
         }
         const baseURL = '8901'
-        apiInstancelocal(baseURL).post('/api/v1/lead-creation-initiation', appDetails)
+        apiInstancelocal(baseURL).put(`/api/v1/lead-creation-initiation/${global.leadID}`, appDetails)
             .then(async (response) => {
                 // Handle the response data
+                
                 console.log("FinalLeadCreationApiResponse::" + JSON.stringify(response.data));
-
-                alert('Lead Created')
+                props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
+                setLoading(false)
 
             })
             .catch((error) => {
@@ -192,7 +196,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
     const pickImage = () => {
         // setVisible(false)
-       
+
         hidephotoBottomSheet();
         ImagePicker.openCamera({
             width: 300,
@@ -220,9 +224,9 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
             cropping: true,
         }).then(image => {
             setImageFile(image)
-            
+
             const imageName = image.path.split('/').pop();
-            alert(imageName)
+
             setFileType(image.mime)
             setFileName(imageName)
             setImageUri(image.path)
@@ -330,6 +334,21 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
         hideBottomSheet();
     };
 
+    const validate = () => {
+        var flag = false; var i = 1;
+        var errorMessage = '';
+
+        if (imageUri == null) {
+            errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_errorimage + '\n';
+            i++;
+            flag = true;
+        }
+
+
+        setErrMsg(errorMessage);
+        return flag;
+    }
+
 
     return (
         // enclose all components in this View tag
@@ -342,6 +361,60 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                 {loading ? <Loading /> : null}
                 <View style={{ flex: 1 }}>
 
+                    <Modal
+                        isVisible={bottomErrorSheetVisible}
+                        onBackdropPress={hideBottomSheet}
+                        style={styles.modal}
+                    >
+                        <View style={styles.modalContent}>
+                            <View style={{ alignItems: 'center' }}>
+
+                                <View style={{ width: '100%', flexDirection: 'row', }}>
+
+                                    <TextComp textVal={language[0][props.language].str_error} textStyle={{ fontSize: 14, color: Colors.black, fontWeight: 600 }} Visible={false} />
+
+                                    <MaterialIcons name='error' size={20} color={Colors.red} />
+
+                                </View>
+
+                                <View style={{ width: '100%', marginTop: 15 }}>
+                                    <TextComp textVal={errMsg} textStyle={{ fontSize: 14, color: Colors.black, lineHeight: 20 }} Visible={false} />
+                                </View>
+
+
+
+
+                                <View style={{ width: '100%', justifyContent: 'flex-end', alignItems: 'flex-end', flexDirection: 'row' }}>
+
+
+
+
+                                    <View
+                                        style={{
+                                            width: '25%',
+                                            height: 40,
+                                            justifyContent: 'flex-end',
+                                            alignItems: 'center',
+                                        }}>
+                                        <TouchableOpacity onPress={() => { hideBottomErrorSheet() }} activeOpacity={0.5} style={{
+                                            width: '88%', height: 40, backgroundColor: '#0294ff',
+                                            borderRadius: 35, alignItems: 'center', justifyContent: 'center'
+                                        }}>
+                                            <View >
+
+                                                <TextComp textVal={language[0][props.language].str_ok} textStyle={{ color: Colors.white, fontSize: 15, fontWeight: 600 }} />
+
+                                            </View>
+                                        </TouchableOpacity>
+                                    </View>
+
+                                </View>
+
+                            </View>
+
+
+                        </View>
+                    </Modal>
 
                     <Modal
                         isVisible={bottomSheetVisible}
@@ -352,7 +425,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
                             {!deleteVisible && <View>
 
-                                <TextComp textVal="Customerphoto.png" textStyle={{ width: '90%', fontSize: 14, color: Colors.mediumgrey, marginTop: 15 }} Visible={false} />
+                                <TextComp textVal={fileName} textStyle={{ width: '90%', fontSize: 14, color: Colors.mediumgrey, marginTop: 15 }} Visible={false} />
                                 <View style={{ width: '100%', flexDirection: 'row', marginTop: 15, paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: '#e2e2e2' }} />
 
                                 <View style={{ width: '100%', flexDirection: 'row', marginTop: 25 }}>
@@ -568,7 +641,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                         {!visible && <View style={{ width: '90%', justifyContent: 'center', marginTop: 15, paddingHorizontal: 0, flexDirection: 'row' }}>
 
 
-                            <TextComp textVal="Customerphoto.png" textStyle={{ width: '90%', fontSize: 14, color: Colors.mediumgrey }} Visible={false} />
+                            <TextComp textVal={fileName} textStyle={{ width: '90%', fontSize: 14, color: Colors.mediumgrey }} Visible={false} />
 
                             <TouchableOpacity onPress={() => { showBottomSheet(); setDeleteVisible(false) }}>
 
@@ -603,7 +676,10 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                                 style={Commonstyles.textinputtextStyle}
                             />
 
-                            <FontAwesome6 name='location-dot' size={23} color={Colors.darkblue} />
+                            <TouchableOpacity onPress={() =>{getOneTimeLocation()}} activeOpacity={0.5}>
+                                <FontAwesome6 name='location-dot' size={23} color={Colors.darkblue} />
+                            </TouchableOpacity>
+
 
 
                         </View>

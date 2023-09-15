@@ -8,6 +8,7 @@ import BottomNavigation from '../Navigation/BottomNavigation';
 import LoginScreen from '../Screens/LoginScreen';
 import LoanApplicationTracker from '../Screens/LoanApplicationTracker';
 
+
 const Route = () => {
 
   return (
