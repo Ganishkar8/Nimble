@@ -87,7 +87,7 @@ const LanguageSettingsScreen = ({ navigation }) => {
                                 </View>
                             </View>
 
-                            <View style={{ flexDirection: 'row', marginTop: '3%' }}>
+                            {/* <View style={{ flexDirection: 'row', marginTop: '3%' }}>
                                 <View style={{ width: '80%' }}>
                                     <Text
                                         style={{
@@ -106,7 +106,7 @@ const LanguageSettingsScreen = ({ navigation }) => {
                                         onPress={() => setChecked('second')}
                                     />
                                 </View>
-                            </View>
+                            </View> */}
 
 
 

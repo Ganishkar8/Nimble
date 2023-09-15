@@ -65,8 +65,8 @@ const LeadLog = (props, { navigation }) => {
     const [labels, setLabels] = useState(typeDataArr);
     //const labels = ["Cart", "Delivery Address"];
     const customStyles = {
-        stepIndicatorSize: 25,
-        currentStepIndicatorSize: 30,
+        stepIndicatorSize: 15,
+        currentStepIndicatorSize: 15,
         separatorStrokeWidth: 1,
         currentStepStrokeWidth: 3,
         stepStrokeCurrentColor: Colors.green,

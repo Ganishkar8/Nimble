@@ -57,10 +57,11 @@ const typeDataArr = [
 
 ]
 
-const LeadDetails = (props, { navigation }) => {
+const LeadDetails = (props, { navigation,route }) => {
 
 
     const [mainFilterData, setMainFilteredData] = useState(mainFilterDataArr);
+    const [leadData, setLeadData] = useState(props.route.params.leadData);
     const [loading, setLoading] = useState(false);
     const [visible, setVisible] = useState(false);
 
@@ -126,7 +127,7 @@ const LeadDetails = (props, { navigation }) => {
                             <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_customername}</Text>
                         </View>
                         <View style={{ width: '45%' }}>
-                            <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  Data</Text>
+                            <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {leadData.leadCreationBasicDetails.firstName} {leadData.leadCreationBasicDetails.middleName} {leadData.leadCreationBasicDetails.lastName}</Text>
                         </View>
                     </View>
                     <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
@@ -134,7 +135,7 @@ const LeadDetails = (props, { navigation }) => {
                             <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_leadid}</Text>
                         </View>
                         <View style={{ width: '45%' }}>
-                            <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  Data</Text>
+                            <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {leadData.leadNumber}</Text>
                         </View>
                     </View>
                     <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
@@ -142,7 +143,7 @@ const LeadDetails = (props, { navigation }) => {
                             <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_leadtype}</Text>
                         </View>
                         <View style={{ width: '45%' }}>
-                            <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  Data</Text>
+                            <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  Hot</Text>
                         </View>
                     </View>
                     {/* hide */}
@@ -153,7 +154,7 @@ const LeadDetails = (props, { navigation }) => {
                                 <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_approvername}</Text>
                             </View>
                             <View style={{ width: '45%' }}>
-                                <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  Data</Text>
+                                <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  </Text>
                             </View>
                         </View>
 
@@ -162,16 +163,16 @@ const LeadDetails = (props, { navigation }) => {
                                 <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_loanamount}</Text>
                             </View>
                             <View style={{ width: '45%' }}>
-                                <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  Data</Text>
+                                <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {leadData.leadCreationLoanDetails.loanAmount}</Text>
                             </View>
                         </View>
 
                         <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
                             <View style={{ width: '55%' }}>
-                                <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_leadtype}</Text>
+                                <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_loantype}</Text>
                             </View>
                             <View style={{ width: '45%' }}>
-                                <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  Data</Text>
+                                <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  Business</Text>
                             </View>
                         </View>
 
@@ -180,7 +181,7 @@ const LeadDetails = (props, { navigation }) => {
                                 <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_creationdate}</Text>
                             </View>
                             <View style={{ width: '45%' }}>
-                                <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  Data</Text>
+                                <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  15-09-2023</Text>
                             </View>
                         </View>
 
@@ -189,7 +190,7 @@ const LeadDetails = (props, { navigation }) => {
                                 <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_completiondate}</Text>
                             </View>
                             <View style={{ width: '45%' }}>
-                                <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  Data</Text>
+                                <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  </Text>
                             </View>
                         </View>
 
@@ -198,7 +199,7 @@ const LeadDetails = (props, { navigation }) => {
                                 <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_ageing}</Text>
                             </View>
                             <View style={{ width: '45%' }}>
-                                <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  Data</Text>
+                                <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  0</Text>
                             </View>
                         </View>
                     </View>
@@ -244,7 +245,7 @@ const LeadDetails = (props, { navigation }) => {
 
                 <View style={styles.line}></View>
 
-                <TouchableOpacity onPress={() => alert('hi')} activeOpacity={0.5} style={{ width: '100%', marginTop: '8%', alignItems: 'center' }}>
+                <TouchableOpacity onPress={() =>  props.navigation.navigate('LeadLog')} activeOpacity={0.5} style={{ width: '100%', marginTop: '8%', alignItems: 'center' }}>
                     <View style={{ flexDirection: 'row' }}>
 
                         <View style={{ width: '70%', justifyContent: 'center' }}>

@@ -113,7 +113,7 @@ const HomeScreen = ({ navigation }) => {
                                 <View style={{ width: '93%', height: 170, justifyContent: 'space-between', flexDirection: 'row', marginTop: '4%' }}>
 
 
-                                    <TouchableOpacity style={{ width: '48%', height: '100%', backgroundColor: '#ffffff99', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
+                                    <TouchableOpacity onPress={() => navigation.navigate('LeadManagement',{fromScreen:'HomeScreen'})} activeOpacity={0.5} style={{ width: '48%', height: '100%', backgroundColor: '#ffffff99', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
                                         <View>
 
                                             <View style={{ flexDirection: 'column' }}>

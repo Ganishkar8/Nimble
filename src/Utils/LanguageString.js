@@ -79,6 +79,7 @@ export const language = [{
         str_customername : 'Customer Name',
         str_leadid : 'Lead ID',
         str_leadtype : 'Lead Type',
+        str_loantype : 'Loan Type',
         str_creationdate : 'Creation Date',
         str_completiondate : 'Completion Date',
         str_completiontime : 'Completion Time',
@@ -94,6 +95,7 @@ export const language = [{
         str_leadlog : 'Lead Log',
         str_initiateloanapplication : 'Initiate Loan Application',
         str_leadcreation : 'Lead Creation',
+        str_errorimage : 'Please Capture Image',
       },
       ta: {
         first: 'comment allez vous',

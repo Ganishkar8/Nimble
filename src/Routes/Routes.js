@@ -7,9 +7,7 @@ import SplashScreen from '../Screens/SplashScreen';
 import BottomNavigation from '../Navigation/BottomNavigation';
 import LoginScreen from '../Screens/LoginScreen';
 import LoanApplicationTracker from '../Screens/LoanApplicationTracker';
-import LeadManagement from '../Screens/LeadManagement';
-import LeadDetails from '../Screens/LeadDetails';
-import LeadLog from '../Screens/LeadLog';
+
 
 const Route = () => {
 

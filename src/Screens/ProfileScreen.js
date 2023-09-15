@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect , useState} from 'react';
 import {
     SafeAreaView,
     StyleSheet,
@@ -14,13 +14,49 @@ import {
 import Colors from '../Utils/Colors';
 import Commonstyles from '../Utils/Commonstyles';
 import Entypo from 'react-native-vector-icons/Entypo';
+import Loading from './Loading';
+import apiInstance from '../Utils/apiInstance';
+import apiInstancelocal from '../Utils/apiInstancelocal';
+import {useIsFocused} from '@react-navigation/native';
 
-const ProfileScreen = ({navigation}) => {
+const ProfileScreen = ({ navigation }) => {
+
+    const [loading, setLoading] = useState(false);
+    const [personalInfo, setpersonalInfo] = useState(false);
+    const isScreenVisible = useIsFocused();
 
     useEffect(() => {
 
+       // if (isScreenVisible) {
+            getProfileDetails();
+      //  }
+        
 
     }, []);
+
+
+    const getProfileDetails = () => {
+
+            const baseURL = '8908'
+            setLoading(true)
+            apiInstancelocal(baseURL).get(`/api/users/1`)
+                .then(async (response) => {
+                    // Handle the response data
+                    console.log("ProfileApiResponse::" + JSON.stringify(response.data));
+                    setLoading(false)
+                    setpersonalInfo(response.data)
+
+                })
+                .catch((error) => {
+                    // Handle the error
+                    console.log("Error" + JSON.stringify(error.response))
+                    setLoading(false)
+                    alert(error);
+                });
+
+
+
+    }
 
 
     return (
@@ -31,7 +67,7 @@ const ProfileScreen = ({navigation}) => {
 
             <ScrollView style={styles.scrollView}
                 contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-
+                {loading ? <Loading /> : null}
                 <View style={{ flex: 1 }}>
 
                     <View style={{ width: '100%', justifyContent: 'center', alignItems: 'center' }}>
@@ -54,62 +90,62 @@ const ProfileScreen = ({navigation}) => {
                         </View>
 
 
-                        <TouchableOpacity onPress={()=>navigation.navigate('PersonalDetailsScreen')} activeOpacity={0.5} style={{ width: '92%', marginTop: '15%', alignItems: 'center' }}>
-                        <View style={{flexDirection: 'row'}}>
+                        <TouchableOpacity onPress={() => navigation.navigate('PersonalDetailsScreen',{Info: personalInfo})} activeOpacity={0.5} style={{ width: '92%', marginTop: '15%', alignItems: 'center' }}>
+                            <View style={{ flexDirection: 'row' }}>
 
-                            <View style={{ width: '15%' }}>
-                                <Image source={require('../Images/about.png')}
-                                    style={{ width: 21.5, height: 25 }} />
+                                <View style={{ width: '15%' }}>
+                                    <Image source={require('../Images/about.png')}
+                                        style={{ width: 21.5, height: 25 }} />
+                                </View>
+
+                                <View style={{ width: '67%', justifyContent: 'center' }}>
+                                    <Text style={{ fontSize: 16, color: Colors.mediumgrey, marginTop: 5, }}>Personal Details</Text>
+                                </View>
+
+                                <View style={{ width: '10%' }}></View>
+                                <Entypo name='chevron-right' size={23} color={Colors.darkblack} />
+
                             </View>
-
-                            <View style={{ width: '67%', justifyContent: 'center' }}>
-                                <Text style={{ fontSize: 16, color: Colors.mediumgrey, marginTop: 5, }}>Personal Details</Text>
-                            </View>
-
-                            <View style={{ width: '10%' }}></View>
-                            <Entypo name='chevron-right' size={23} color={Colors.darkblack} />
-
-                        </View>
                         </TouchableOpacity>
 
                         <View style={styles.line}></View>
 
-                        <TouchableOpacity onPress={()=>navigation.navigate('ProfessionalDetailsScreen')} activeOpacity={0.5} style={{ width: '92%', marginTop: '8%', alignItems: 'center' }}>
-                        <View style={{ flexDirection: 'row' }}>
+                        <TouchableOpacity onPress={() => navigation.navigate('ProfessionalDetailsScreen')} activeOpacity={0.5} style={{ width: '92%', marginTop: '8%', alignItems: 'center' }}>
+                            <View style={{ flexDirection: 'row' }}>
 
-                            <View style={{ width: '15%' }}>
-                                <Image source={require('../Images/professional.png')}
-                                    style={{ width: 25, height: 25 }} />
+                                <View style={{ width: '15%' }}>
+                                    <Image source={require('../Images/professional.png')}
+                                        style={{ width: 25, height: 25 }} />
+                                </View>
+
+                                <View style={{ width: '67%', justifyContent: 'center' }}>
+                                    <Text style={{ fontSize: 16, color: Colors.mediumgrey, marginTop: 5, }}>Professional Details</Text>
+                                </View>
+
+                                <View style={{ width: '10%' }}></View>
+                                <Entypo name='chevron-right' size={23} color={Colors.darkblack} />
+
                             </View>
-
-                            <View style={{ width: '67%', justifyContent: 'center' }}>
-                                <Text style={{ fontSize: 16, color: Colors.mediumgrey, marginTop: 5, }}>Professional Details</Text>
-                            </View>
-
-                            <View style={{ width: '10%' }}></View>
-                            <Entypo name='chevron-right' size={23} color={Colors.darkblack} />
-
-                        </View>
                         </TouchableOpacity>
 
                         <View style={styles.line}></View>
 
-                        <TouchableOpacity onPress={()=>navigation.navigate('LanguageSettingsScreen')} activeOpacity={0.5} style={{ width: '92%', marginTop: '8%', alignItems: 'center' }}>
-                        <View style={{ flexDirection: 'row' }}>
+                        <TouchableOpacity onPress={() => navigation.navigate('LanguageSettingsScreen')} activeOpacity={0.5} style={{ width: '92%', marginTop: '8%', alignItems: 'center' }}>
+                            <View style={{ flexDirection: 'row' }}>
 
-                            <View style={{ width: '15%' }}>
-                                <Image source={require('../Images/language.png')}
-                                    style={{ width: 23, height: 25 }} />
+                                <View style={{ width: '15%' }}>
+                                    <Image source={require('../Images/language.png')}
+                                        style={{ width: 23, height: 25 }} />
+                                </View>
+
+                                <View style={{ width: '67%', justifyContent: 'center' }}>
+                                    <Text style={{ fontSize: 16, color: Colors.mediumgrey, marginTop: 5, }}>Language Settings</Text>
+                                </View>
+
+                                <View style={{ width: '10%' }}></View>
+                                <Entypo name='chevron-right' size={23} color={Colors.darkblack} />
+
                             </View>
-
-                            <View style={{ width: '67%', justifyContent: 'center' }}>
-                                <Text style={{ fontSize: 16, color: Colors.mediumgrey, marginTop: 5, }}>Language Settings</Text>
-                            </View>
-
-                            <View style={{ width: '10%' }}></View>
-                            <Entypo name='chevron-right' size={23} color={Colors.darkblack} />
-
-                        </View>
                         </TouchableOpacity>
 
                         <View style={styles.line}></View>
@@ -120,12 +156,14 @@ const ProfileScreen = ({navigation}) => {
 
                 </View>
 
-                <View style={{width:'100%',justifyContent:'flex-end',alignItems:'center'}}>
-    <View style={{width:'92%'}}>
-    <Text style={{ fontSize: 16, color: Colors.darkblue, marginTop: 5, }}>Logout</Text>
-    <Text style={{ fontSize: 12, color: Colors.lightgrey, marginTop: 5, }}>Version 1.0.0</Text>
-    </View>
-</View>
+                <View style={{ width: '100%', justifyContent: 'flex-end', alignItems: 'center' }}>
+                    <View style={{ width: '92%' }}>
+                        <TouchableOpacity activeOpacity={0.5} onPress={() =>{navigation.navigate('LoginScreen')}}>
+                        <Text style={{ fontSize: 16, color: Colors.darkblue, marginTop: 5, }}>Logout</Text>
+                        </TouchableOpacity>
+                        <Text style={{ fontSize: 12, color: Colors.lightgrey, marginTop: 5, }}>Version 1.0.0</Text>
+                    </View>
+                </View>
 
             </ScrollView>
 
