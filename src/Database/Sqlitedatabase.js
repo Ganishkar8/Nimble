@@ -8,8 +8,19 @@ const createTables = async () => {
     db = databaseInstance.getInstance()
 
     const queries = [
+        // Bank_Detail_Table
+        `CREATE TABLE IF NOT EXISTS Bank_Detail_Table (
+            BankID TEXT NOT NULL,
+            BankURL TEXT,
+            IsRegistered TEXT,
+            BankURL1 TEXT,
+            BankURL2 TEXT,
+            ConfigVersion TEXT,
+            CertificateHash TEXT,
+            PRIMARY KEY(BankID)
+          )`,
         // tbl_SystemMandatoryFields
-       `CREATE TABLE IF NOT EXISTS tbl_SystemMandatoryFields (
+        `CREATE TABLE IF NOT EXISTS tbl_SystemMandatoryFields (
         ModuleID TEXT,
         FieldName TEXT,
         IsMandatory TEXT,
@@ -23,7 +34,7 @@ const createTables = async () => {
         MinLength TEXT,
         MaxLength TEXT
       )`,
-      `CREATE TABLE IF NOT EXISTS tbl_SystemCodeDetails (
+        `CREATE TABLE IF NOT EXISTS tbl_SystemCodeDetails (
         Identity TEXT,
         Id TEXT,
         SubCodeID TEXT,
@@ -31,7 +42,7 @@ const createTables = async () => {
         DisplayOrder TEXT,
         IsDefault TEXT
       )`,
-      `CREATE TABLE IF NOT EXISTS tbl_UserCodeDetails (
+        `CREATE TABLE IF NOT EXISTS tbl_UserCodeDetails (
         Identity TEXT,
         Id TEXT,
         SubCodeID TEXT,
@@ -40,17 +51,17 @@ const createTables = async () => {
         IsDefault TEXT
       )`,
 
-       
+
 
         // Add more CREATE TABLE queries for other tables...
     ];
 
     const dropqueries = [
         // tbl_SystemMandatoryFields
-       `DROP TABLE IF EXISTS tbl_SystemMandatoryFields`,
-     ,
+        `DROP TABLE IF EXISTS tbl_SystemMandatoryFields`,
+        ,
 
-       
+
 
         // Add more CREATE TABLE queries for other tables...
     ];

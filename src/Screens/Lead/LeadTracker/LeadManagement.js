@@ -15,19 +15,19 @@ import { DatePickerModal } from 'react-native-paper-dates';
 import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import apiInstance from '../Utils/apiInstance';
-import Colors from '../Utils/Colors';
-import MyStatusBar from './ MyStatusBar';
-import Loading from './Loading';
+import apiInstance from '../../../Utils/apiInstance';
+import Colors from '../../../Utils/Colors';
+import MyStatusBar from '../../../Components/ MyStatusBar';
+import Loading from '../../../Components/Loading';
 import { BottomSheet } from 'react-native-btr';
 import { connect } from 'react-redux';
-import { languageAction } from '../Utils/redux/actions/languageAction';
-import { language } from '../Utils/LanguageString';
+import { languageAction } from '../../../Utils/redux/actions/languageAction';
+import { language } from '../../../Utils/LanguageString';
 import { FAB } from 'react-native-paper';
 import Modal from 'react-native-modal';
-import TextComp from '../Components/TextComp';
-import apiInstancelocal from '../Utils/apiInstancelocal';
-import {useIsFocused} from '@react-navigation/native';
+import TextComp from '../../../Components/TextComp';
+import apiInstancelocal from '../../../Utils/apiInstancelocal';
+import { useIsFocused } from '@react-navigation/native';
 
 const data = [
 
@@ -62,12 +62,12 @@ const typeDataArr = [
 
 ]
 
-const LeadManagement = (props, { navigation,route }) => {
+const LeadManagement = (props, { navigation, route }) => {
 
     const [click, setClick] = useState('');
     const [search, setSearch] = useState('');
     const [pendingData, setPendingData] = useState([]);
-    const [filteredData, setFilteredData] = useState(typeDataArr);
+    const [filteredData, setFilteredData] = useState([]);
     const [mainFilterData, setMainFilteredData] = useState(mainFilterDataArr);
     const [loading, setLoading] = useState(false);
     const [visible, setVisible] = useState(false);
@@ -93,19 +93,19 @@ const LeadManagement = (props, { navigation,route }) => {
 
     useEffect(() => {
         //getPendingData()
-        if(props.route.params.fromScreen == "LeadCompletion"){
+        if (props.route.params.fromScreen == "LeadCompletion") {
             showBottomSheet();
         }
-        if(isScreenVisible){
+        if (isScreenVisible) {
             getPendingData();
         }
-        
+
         setFilterVisible(mainFilterData[0].id)
         //below code is used for hiding  bottom tab
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         return () =>
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
-    }, [navigation,isScreenVisible]);
+    }, [navigation, isScreenVisible]);
 
     const toggleBottomNavigationView = () => {
         //Toggling the visibility state of the bottom sheet
@@ -113,7 +113,7 @@ const LeadManagement = (props, { navigation,route }) => {
     };
 
     const getPendingData = () => {
-        
+
         const baseURL = '8901'
         setLoading(true)
         apiInstancelocal(baseURL).get('api/v1/lead-creation-initiation')
@@ -146,83 +146,83 @@ const LeadManagement = (props, { navigation,route }) => {
 
         return (
             <View>
-                <TouchableOpacity onPress={() => props.navigation.navigate('LeadDetails',{leadData:item})} activeOpacity={0.5}>
-            <View style={{
-                width: '92%', margin: 13, backgroundColor: 'white',
-                elevation: 4, borderRadius: 8, paddingHorizontal: 0,
-                shadowColor: 'black',
-                shadowOpacity: 0.2,
-                shadowOffset: {
-                    width: 0,
-                    height: 2,
-                }, alignItems: 'center'
-            }}>
+                <TouchableOpacity onPress={() => props.navigation.navigate('LeadDetails', { leadData: item })} activeOpacity={0.9}>
+                    <View style={{
+                        width: '92%', margin: 13, backgroundColor: 'white',
+                        elevation: 4, borderRadius: 8, paddingHorizontal: 0,
+                        shadowColor: 'black',
+                        shadowOpacity: 0.2,
+                        shadowOffset: {
+                            width: 0,
+                            height: 2,
+                        }, alignItems: 'center'
+                    }}>
 
-                <View style={{ width: '100%', flexDirection: 'row', marginTop: 13 }}>
-                    <View style={{ width: '60%', flexDirection: 'row', alignItems: 'center' }}>
-                        <Text style={{ color: Colors.black, fontSize: 14, fontWeight: '100', marginLeft: 20 }}>{language[0][props.language].str_leadapprovalstatus}</Text>
-                    </View>
-                    <View style={{ width: '40%', flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'flex-start' }}>
-                        <View style={styles.pendingbackground}>
-                            <Text style={{ color: Colors.black, fontSize: 14, fontWeight: '100' }}>Pending</Text>
+                        <View style={{ width: '100%', flexDirection: 'row', marginTop: 13 }}>
+                            <View style={{ width: '60%', flexDirection: 'row', alignItems: 'center' }}>
+                                <Text style={{ color: Colors.black, fontSize: 14, fontWeight: '100', marginLeft: 20 }}>{language[0][props.language].str_leadapprovalstatus}</Text>
+                            </View>
+                            <View style={{ width: '40%', flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'flex-start' }}>
+                                <View style={styles.pendingbackground}>
+                                    <Text style={{ color: Colors.black, fontSize: 14, fontWeight: '100' }}>Pending</Text>
+                                </View>
+                            </View>
                         </View>
-                    </View>
-                </View>
-                <View style={{ width: '100%', height: .9, backgroundColor: Colors.line, marginTop: 13 }} />
+                        <View style={{ width: '100%', height: .9, backgroundColor: Colors.line, marginTop: 13 }} />
 
-                <View style={{ width: '100%', flexDirection: 'row', marginTop: 13, }}>
-                    <View style={{ width: '45%' }}>
-                        <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_customername}</Text>
-                    </View>
-                    <View style={{ width: '55%' }}>
-                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {item.leadCreationBasicDetails.firstName} {item.leadCreationBasicDetails.middleName} {item.leadCreationBasicDetails.lastName}</Text>
-                    </View>
-                </View>
-                <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                    <View style={{ width: '45%' }}>
-                        <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_leadid}</Text>
-                    </View>
-                    <View style={{ width: '55%' }}>
-                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {item.leadNumber}</Text>
-                    </View>
-                </View>
-                <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                    <View style={{ width: '45%' }}>
-                        <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_leadtype}</Text>
-                    </View>
-                    <View style={{ width: '55%' }}>
-                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  Hot</Text>
-                    </View>
-                </View>
-                <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                    <View style={{ width: '45%' }}>
-                        <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_creationdate}</Text>
-                    </View>
-                    <View style={{ width: '55%' }}>
-                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  15-09-2023</Text>
-                    </View>
-                </View>
-                <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                    <View style={{ width: '45%' }}>
-                        <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_completiondate}</Text>
-                    </View>
-                    <View style={{ width: '55%' }}>
-                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  </Text>
-                    </View>
-                </View>
-                <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                    <View style={{ width: '45%' }}>
-                        <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_ageing}</Text>
-                    </View>
-                    <View style={{ width: '55%' }}>
-                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  0</Text>
-                    </View>
-                </View>
-                <View style={{ width: '100%', height: 5, backgroundColor: Colors.pendingBorder, marginTop: 13, borderBottomLeftRadius: 8, borderBottomRightRadius: 8 }} />
+                        <View style={{ width: '100%', flexDirection: 'row', marginTop: 13, }}>
+                            <View style={{ width: '45%' }}>
+                                <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_customername}</Text>
+                            </View>
+                            <View style={{ width: '55%' }}>
+                                <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {item.leadCreationBasicDetails.firstName} {item.leadCreationBasicDetails.middleName} {item.leadCreationBasicDetails.lastName}</Text>
+                            </View>
+                        </View>
+                        <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
+                            <View style={{ width: '45%' }}>
+                                <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_leadid}</Text>
+                            </View>
+                            <View style={{ width: '55%' }}>
+                                <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {item.leadNumber}</Text>
+                            </View>
+                        </View>
+                        <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
+                            <View style={{ width: '45%' }}>
+                                <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_leadtype}</Text>
+                            </View>
+                            <View style={{ width: '55%' }}>
+                                <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  Hot</Text>
+                            </View>
+                        </View>
+                        <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
+                            <View style={{ width: '45%' }}>
+                                <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_creationdate}</Text>
+                            </View>
+                            <View style={{ width: '55%' }}>
+                                <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  15-09-2023</Text>
+                            </View>
+                        </View>
+                        <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
+                            <View style={{ width: '45%' }}>
+                                <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_completiondate}</Text>
+                            </View>
+                            <View style={{ width: '55%' }}>
+                                <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  </Text>
+                            </View>
+                        </View>
+                        <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
+                            <View style={{ width: '45%' }}>
+                                <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_ageing}</Text>
+                            </View>
+                            <View style={{ width: '55%' }}>
+                                <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  0</Text>
+                            </View>
+                        </View>
+                        <View style={{ width: '100%', height: 5, backgroundColor: Colors.pendingBorder, marginTop: 13, borderBottomLeftRadius: 8, borderBottomRightRadius: 8 }} />
 
 
-            </View>
-            </TouchableOpacity>
+                    </View>
+                </TouchableOpacity>
             </View>
 
         )
@@ -236,11 +236,12 @@ const LeadManagement = (props, { navigation,route }) => {
             // Update FilteredDataSource
             const newData = pendingData.filter(
                 function (item) {
-                    const itemData = item.actionBy
-                        ? item.actionBy.toUpperCase()
+                    const name = item.leadCreationBasicDetails.firstName + item.leadCreationBasicDetails.middleName + item.leadCreationBasicDetails.lastName
+                    const itemData = name
+                        ? name.toUpperCase()
                         : ''.toUpperCase();
-                    const itemDataID = item.loanAppId
-                        ? item.loanAppId.toString()
+                    const itemDataID = item.leadNumber
+                        ? item.leadNumber.toString()
                         : ''.toUpperCase();
                     const regex = /^[0-9]+$/;
                     let textData = ''
@@ -271,32 +272,32 @@ const LeadManagement = (props, { navigation,route }) => {
             {loading ? <Loading /> : null}
             <View style={styles.headerView}>
 
-            <Modal
-                        isVisible={bottomLeadSheetVisible}
-                        onBackdropPress={hideBottomSheet}
-                        backdropOpacity={0}
-                        style={styles.modal}
-                    >
-                        <View style={styles.modalContent}>
-                            <View style={{ alignItems: 'center' }}>
-
-                              
-                                <View style={{ width: '100%',height: 30 }}>
-                                    <TextComp textVal={"Lead ID Created"} textStyle={{ fontSize: 14, color: Colors.white, lineHeight: 20 }} Visible={false} />
-                                </View>
+                <Modal
+                    isVisible={bottomLeadSheetVisible}
+                    onBackdropPress={hideBottomSheet}
+                    backdropOpacity={0}
+                    style={styles.modal}
+                >
+                    <View style={styles.modalContent}>
+                        <View style={{ alignItems: 'center' }}>
 
 
+                            <View style={{ width: '100%', height: 30 }}>
+                                <TextComp textVal={"Lead ID Created"} textStyle={{ fontSize: 14, color: Colors.white, lineHeight: 20 }} Visible={false} />
                             </View>
 
 
                         </View>
-                    </Modal>
+
+
+                    </View>
+                </Modal>
 
                 <View style={{
                     width: '100%', height: 56, alignItems: 'center', justifyContent: 'center',
                     flexDirection: 'row'
                 }}>
-                    <TouchableOpacity onPress={() =>  props.navigation.navigate('HomeScreen')} style={{ width: '15%', height: 56, alignItems: 'center', justifyContent: 'center' }}>
+                    <TouchableOpacity onPress={() => props.navigation.navigate('HomeScreen')} style={{ width: '15%', height: 56, alignItems: 'center', justifyContent: 'center' }}>
                         <View >
 
                             <Entypo name='chevron-left' size={25} color='#4e4e4e' />
@@ -320,7 +321,7 @@ const LeadManagement = (props, { navigation,route }) => {
                                     <View style={[styles.viewStyle, { flexDirection: 'row' }]}>
                                         <Text style={[styles.textColor, { marginRight: 8, }]}>{item.name}</Text>
                                         {item.name === 'Filter' &&
-                                            <Image source={require('../Images/filter.png')}
+                                            <Image source={require('../../../Images/filter.png')}
                                                 style={{ width: 15, height: 15, resizeMode: 'contain', marginStart: 8 }} />
                                         }
                                         {item.name === 'Sort by' &&
@@ -354,7 +355,7 @@ const LeadManagement = (props, { navigation,route }) => {
 
                     <TextInput
                         value={search}
-                        // onChangeText={search => searchFilterFunction(search)}
+                        onChangeText={search => searchFilterFunction(search)}
                         placeholder={'Search for Name or Lead ID'}
                         placeholderTextColor={'gray'}
                         keyboardType='default'
@@ -373,7 +374,7 @@ const LeadManagement = (props, { navigation,route }) => {
 
             <View style={{ width: '100%', justifyContent: 'center', marginBottom: 200 }}>
                 <FlatList
-                    data={pendingData}
+                    data={filteredData}
                     renderItem={listView}
                     showsVerticalScrollIndicator={false}
                     keyExtractor={(item, index) => index.toString()}
@@ -381,7 +382,7 @@ const LeadManagement = (props, { navigation,route }) => {
             </View>
             <FAB
                 icon="plus"
-                color= {Colors.white}
+                color={Colors.white}
                 style={styles.fab}
                 label='Create New Lead'
                 onPress={() => props.navigation.navigate('LeadCreationBasic')}
@@ -468,7 +469,7 @@ const styles = StyleSheet.create({
         right: 0,
         bottom: 0,
         backgroundColor: Colors.darkblue,
-        borderRadius : 30
+        borderRadius: 30
     },
     modal: {
         justifyContent: 'flex-end',
@@ -477,7 +478,7 @@ const styles = StyleSheet.create({
     modalContent: {
         backgroundColor: '#362F2F',
         padding: 16,
-        borderRadius:10,
+        borderRadius: 10,
     },
 
 });

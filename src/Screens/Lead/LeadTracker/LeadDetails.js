@@ -14,14 +14,14 @@ import { DatePickerModal, tr } from 'react-native-paper-dates';
 
 import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import TextComp from '../Components/TextComp';
-import Colors from '../Utils/Colors';
-import MyStatusBar from './ MyStatusBar';
-import Loading from './Loading';
+import TextComp from '../../../Components/TextComp';
+import Colors from '../../../Utils/Colors';
+import MyStatusBar from '../../../Components/ MyStatusBar';
+import Loading from '../../../Components/Loading';
 import { BottomSheet } from 'react-native-btr';
 import { connect } from 'react-redux';
-import { languageAction } from '../Utils/redux/actions/languageAction';
-import { language } from '../Utils/LanguageString';
+import { languageAction } from '../../../Utils/redux/actions/languageAction';
+import { language } from '../../../Utils/LanguageString';
 import { FAB } from 'react-native-paper';
 
 const data = [
@@ -57,13 +57,14 @@ const typeDataArr = [
 
 ]
 
-const LeadDetails = (props, { navigation,route }) => {
+const LeadDetails = (props, { navigation, route }) => {
 
 
     const [mainFilterData, setMainFilteredData] = useState(mainFilterDataArr);
     const [leadData, setLeadData] = useState(props.route.params.leadData);
     const [loading, setLoading] = useState(false);
     const [visible, setVisible] = useState(false);
+    const [status, setStatus] = useState('COMP');
 
 
     useEffect(() => {
@@ -215,7 +216,7 @@ const LeadDetails = (props, { navigation,route }) => {
 
                 </View>
 
-                <TouchableOpacity onPress={() =>  alert('hi')} activeOpacity={0.5} style={{ width: '100%', marginTop: '5%', alignItems: 'center' }}>
+                <TouchableOpacity onPress={() => alert('hi')} activeOpacity={0.5} style={{ width: '100%', marginTop: '5%', alignItems: 'center' }}>
                     <View style={{ flexDirection: 'row' }}>
 
                         <View style={{ width: '70%', justifyContent: 'center' }}>
@@ -230,7 +231,33 @@ const LeadDetails = (props, { navigation,route }) => {
 
                 <View style={styles.line}></View>
 
-                <TouchableOpacity onPress={() =>  alert('hi')} activeOpacity={0.5} style={{ width: '100%', marginTop: '8%', alignItems: 'center' }}>
+                {(status == 'PEND') ? <TouchableOpacity onPress={() => alert('Cant ReAssign')} activeOpacity={0.5} style={{ width: '100%', marginTop: '5%', alignItems: 'center' }}>
+                    <View style={{ flexDirection: 'row' }}>
+
+                        <View style={{ width: '70%', justifyContent: 'center' }}>
+                            <Text style={{ fontSize: 16, color: Colors.lightgrey, marginTop: 5, }}>{language[0][props.language].str_reassign}</Text>
+                        </View>
+
+                        <View style={{ width: '10%' }}></View>
+                        <Entypo name='chevron-right' size={23} color={Colors.lightgrey} style={{ marginLeft: 10 }} />
+
+                    </View>
+                </TouchableOpacity> : <TouchableOpacity onPress={() => props.navigation.navigate('ReAssign')} activeOpacity={0.5} style={{ width: '100%', marginTop: '5%', alignItems: 'center' }}>
+                    <View style={{ flexDirection: 'row' }}>
+
+                        <View style={{ width: '70%', justifyContent: 'center' }}>
+                            <Text style={{ fontSize: 16, color: Colors.mediumgrey, marginTop: 5, }}>{language[0][props.language].str_reassign}</Text>
+                        </View>
+
+                        <View style={{ width: '10%' }}></View>
+                        <Entypo name='chevron-right' size={23} color={Colors.darkblack} style={{ marginLeft: 10 }} />
+
+                    </View>
+                </TouchableOpacity>}
+
+                <View style={styles.line}></View>
+
+                <TouchableOpacity onPress={() => props.navigation.navigate('LeadApproval')} activeOpacity={0.5} style={{ width: '100%', marginTop: '8%', alignItems: 'center' }}>
                     <View style={{ flexDirection: 'row' }}>
 
                         <View style={{ width: '70%', justifyContent: 'center' }}>
@@ -245,7 +272,7 @@ const LeadDetails = (props, { navigation,route }) => {
 
                 <View style={styles.line}></View>
 
-                <TouchableOpacity onPress={() =>  props.navigation.navigate('LeadLog')} activeOpacity={0.5} style={{ width: '100%', marginTop: '8%', alignItems: 'center' }}>
+                <TouchableOpacity onPress={() => props.navigation.navigate('LeadLog')} activeOpacity={0.5} style={{ width: '100%', marginTop: '8%', alignItems: 'center' }}>
                     <View style={{ flexDirection: 'row' }}>
 
                         <View style={{ width: '70%', justifyContent: 'center' }}>

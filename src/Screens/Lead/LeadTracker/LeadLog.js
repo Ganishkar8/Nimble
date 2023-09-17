@@ -14,14 +14,14 @@ import { DatePickerModal, tr } from 'react-native-paper-dates';
 
 import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import TextComp from '../Components/TextComp';
-import Colors from '../Utils/Colors';
-import MyStatusBar from './ MyStatusBar';
-import Loading from './Loading';
+import TextComp from '../../../Components/TextComp';
+import Colors from '../../../Utils/Colors';
+import MyStatusBar from '../../../Components/ MyStatusBar';
+import Loading from '../../../Components/Loading';
 import { BottomSheet } from 'react-native-btr';
 import { connect } from 'react-redux';
-import { languageAction } from '../Utils/redux/actions/languageAction';
-import { language } from '../Utils/LanguageString';
+import { languageAction } from '../../../Utils/redux/actions/languageAction';
+import { language } from '../../../Utils/LanguageString';
 import StepIndicator from 'react-native-step-indicator';
 
 const data = [
@@ -83,7 +83,7 @@ const LeadLog = (props, { navigation }) => {
         stepIndicatorLabelCurrentColor: Colors.green,
         stepIndicatorLabelFinishedColor: Colors.green,
         stepIndicatorLabelUnFinishedColor: Colors.green,
-      };
+    };
 
 
     useEffect(() => {
@@ -151,61 +151,61 @@ const LeadLog = (props, { navigation }) => {
 
             <View style={{ width: '100%', justifyContent: 'center' }}>
                 <Text style={{
-                    fontSize: 16, color: '#000', marginLeft: 23,marginTop : 10,
+                    fontSize: 16, color: '#000', marginLeft: 23, marginTop: 10,
                 }}>{language[0][props.language].str_leadlog}</Text>
 
             </View>
-            <View style={{ width: '100%', height: '40%', justifyContent: 'center',marginLeft:20 }}>
-               
-            <StepIndicator
-                customStyles={customStyles}
-                currentPosition={currentPosition}
-                labels={labels}
-                direction={'vertical'}
-                stepCount={2}
-                renderLabel={({ position, stepStatus, label, currentPosition }) => {
-                    return (
-                        <View style={{ width: '100%', marginTop: 110 }}>
-                            <Text style={{
-                                fontSize: 16, color: '#000', marginLeft: 10,
-                            }}>{language[0][props.language].str_leadcreation}</Text>
-                            <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                                <View style={{ width: '50%' }}>
-                                    <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 10 }}>{language[0][props.language].str_completiondate}:</Text>
+            <View style={{ width: '100%', height: '40%', justifyContent: 'center', marginLeft: 20 }}>
+
+                <StepIndicator
+                    customStyles={customStyles}
+                    currentPosition={currentPosition}
+                    labels={labels}
+                    direction={'vertical'}
+                    stepCount={2}
+                    renderLabel={({ position, stepStatus, label, currentPosition }) => {
+                        return (
+                            <View style={{ width: '100%', marginTop: 110 }}>
+                                <Text style={{
+                                    fontSize: 16, color: '#000', marginLeft: 10,
+                                }}>{language[0][props.language].str_leadcreation}</Text>
+                                <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
+                                    <View style={{ width: '50%' }}>
+                                        <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 10 }}>{language[0][props.language].str_completiondate}:</Text>
+                                    </View>
+                                    <View style={{ width: '40%' }}>
+                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>{label.name}</Text>
+                                    </View>
                                 </View>
-                                <View style={{ width: '40%' }}>
-                                    <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>{label.name}</Text>
+                                <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
+                                    <View style={{ width: '50%' }}>
+                                        <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 10 }}>{language[0][props.language].str_completiontime}:</Text>
+                                    </View>
+                                    <View style={{ width: '40%' }}>
+                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>Data</Text>
+                                    </View>
+                                </View>
+                                <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
+                                    <View style={{ width: '50%' }}>
+                                        <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 10 }}>{language[0][props.language].str_userid}:</Text>
+                                    </View>
+                                    <View style={{ width: '40%' }}>
+                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>Data</Text>
+                                    </View>
+                                </View>
+                                <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
+                                    <View style={{ width: '50%' }}>
+                                        <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 10 }}>{language[0][props.language].str_username}:</Text>
+                                    </View>
+                                    <View style={{ width: '40%' }}>
+                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>Data</Text>
+                                    </View>
                                 </View>
                             </View>
-                            <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                                <View style={{ width: '50%' }}>
-                                    <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 10 }}>{language[0][props.language].str_completiontime}:</Text>
-                                </View>
-                                <View style={{ width: '40%' }}>
-                                    <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>Data</Text>
-                                </View>
-                            </View>
-                            <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                                <View style={{ width: '50%' }}>
-                                    <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 10 }}>{language[0][props.language].str_userid}:</Text>
-                                </View>
-                                <View style={{ width: '40%' }}>
-                                    <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>Data</Text>
-                                </View>
-                            </View>
-                            <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                                <View style={{ width: '50%' }}>
-                                    <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 10 }}>{language[0][props.language].str_username}:</Text>
-                                </View>
-                                <View style={{ width: '40%' }}>
-                                    <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>Data</Text>
-                                </View>
-                            </View>
-                        </View>
-                    );
-                }} />
+                        );
+                    }} />
             </View>
-            
+
             <View>
 
             </View>

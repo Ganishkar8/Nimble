@@ -1,22 +1,22 @@
 
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import DashboardScreen from '../Screens/DashboardScreen';
+import DashboardScreen from '../Screens/DashBoard/DashboardScreen';
 
 const Stack = createNativeStackNavigator();
 
-export default DashboardStack = () => { 
+export default DashboardStack = () => {
 
   return (
 
-      <Stack.Navigator >
-        
+    <Stack.Navigator >
+
       <Stack.Screen
         name="DashboardScreen"
         component={DashboardScreen}
-        options={{headerShown: false}}
-        />
-    
+        options={{ headerShown: false }}
+      />
+
     </Stack.Navigator>
   );
 };

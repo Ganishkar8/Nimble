@@ -15,19 +15,19 @@ import { DatePickerModal } from 'react-native-paper-dates';
 import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import apiInstance from '../Utils/apiInstance';
-import Colors from '../Utils/Colors';
-import MyStatusBar from './ MyStatusBar';
-import Loading from './Loading';
+import apiInstance from '../../../Utils/apiInstance';
+import Colors from '../../../Utils/Colors';
+import MyStatusBar from '../../../Components/ MyStatusBar';
+import Loading from '../../../Components/Loading';
 import { BottomSheet } from 'react-native-btr';
 import { connect } from 'react-redux';
-import { languageAction } from '../Utils/redux/actions/languageAction';
-import { language } from '../Utils/LanguageString';
+import { languageAction } from '../../../Utils/redux/actions/languageAction';
+import { language } from '../../../Utils/LanguageString';
 import { RadioButton } from 'react-native-paper';
-import Commonstyles from '../Utils/Commonstyles';
+import Commonstyles from '../../../Utils/Commonstyles';
 import Feather from 'react-native-vector-icons/Feather';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import TextComp from '../Components/TextComp';
+import TextComp from '../../../Components/TextComp';
 import { Picker } from '@react-native-picker/picker';
 
 const data = [
@@ -125,9 +125,9 @@ const LoanApplicationTracker = (props, { navigation }) => {
 
     const handleclick = (value, index) => {
         //alert(JSON.stringify(value))
-        if(value.name == 'Filter'){
+        if (value.name == 'Filter') {
             setVisible(true)
-        }else{
+        } else {
             alert('Please go..tata bye')
         }
     }
@@ -312,7 +312,7 @@ const LoanApplicationTracker = (props, { navigation }) => {
                                     <View style={[styles.viewStyle, { flexDirection: 'row' }]}>
                                         <Text style={[styles.textColor, { marginRight: 8, }]}>{item.name}</Text>
                                         {item.name === 'Filter' &&
-                                            <Image source={require('../Images/filter.png')}
+                                            <Image source={require('../../../Images/filter.png')}
                                                 style={{ width: 15, height: 15, resizeMode: 'contain', marginStart: 8 }} />
                                         }
                                         {item.name === 'Sort by' &&

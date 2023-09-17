@@ -1,4 +1,4 @@
-import React, { useEffect , useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     SafeAreaView,
     StyleSheet,
@@ -11,13 +11,13 @@ import {
     ScrollView,
     TouchableOpacity
 } from 'react-native';
-import Colors from '../Utils/Colors';
-import Commonstyles from '../Utils/Commonstyles';
+import Colors from '../../Utils/Colors';
+import Commonstyles from '../../Utils/Commonstyles';
 import Entypo from 'react-native-vector-icons/Entypo';
-import Loading from './Loading';
-import apiInstance from '../Utils/apiInstance';
-import apiInstancelocal from '../Utils/apiInstancelocal';
-import {useIsFocused} from '@react-navigation/native';
+import Loading from '../../Components/Loading';
+import apiInstance from '../../Utils/apiInstance';
+import apiInstancelocal from '../../Utils/apiInstancelocal';
+import { useIsFocused } from '@react-navigation/native';
 
 const ProfileScreen = ({ navigation }) => {
 
@@ -27,32 +27,32 @@ const ProfileScreen = ({ navigation }) => {
 
     useEffect(() => {
 
-       // if (isScreenVisible) {
-            getProfileDetails();
-      //  }
-        
+        // if (isScreenVisible) {
+        getProfileDetails();
+        //  }
+
 
     }, []);
 
 
     const getProfileDetails = () => {
 
-            const baseURL = '8908'
-            setLoading(true)
-            apiInstancelocal(baseURL).get(`/api/users/1`)
-                .then(async (response) => {
-                    // Handle the response data
-                    console.log("ProfileApiResponse::" + JSON.stringify(response.data));
-                    setLoading(false)
-                    setpersonalInfo(response.data)
+        const baseURL = '8908'
+        setLoading(true)
+        apiInstancelocal(baseURL).get(`/api/users/1`)
+            .then(async (response) => {
+                // Handle the response data
+                console.log("ProfileApiResponse::" + JSON.stringify(response.data));
+                setLoading(false)
+                setpersonalInfo(response.data)
 
-                })
-                .catch((error) => {
-                    // Handle the error
-                    console.log("Error" + JSON.stringify(error.response))
-                    setLoading(false)
-                    alert(error);
-                });
+            })
+            .catch((error) => {
+                // Handle the error
+                console.log("Error" + JSON.stringify(error.response))
+                setLoading(false)
+                alert(error);
+            });
 
 
 
@@ -75,7 +75,7 @@ const ProfileScreen = ({ navigation }) => {
                         <View style={{ width: '92%', flexDirection: 'row', marginTop: '12%' }}>
                             <View style={{ width: '25%' }}>
                                 <View style={[Commonstyles.circularView, { backgroundColor: Colors.lightblue }]}>
-                                    <Image source={require('../Images/profile_user.png')}
+                                    <Image source={require('../../Images/profile_user.png')}
                                         style={{ width: 35, height: 35 }} />
                                 </View>
                             </View>
@@ -90,11 +90,11 @@ const ProfileScreen = ({ navigation }) => {
                         </View>
 
 
-                        <TouchableOpacity onPress={() => navigation.navigate('PersonalDetailsScreen',{Info: personalInfo})} activeOpacity={0.5} style={{ width: '92%', marginTop: '15%', alignItems: 'center' }}>
+                        <TouchableOpacity onPress={() => navigation.navigate('PersonalDetailsScreen', { Info: personalInfo })} activeOpacity={0.5} style={{ width: '92%', marginTop: '15%', alignItems: 'center' }}>
                             <View style={{ flexDirection: 'row' }}>
 
                                 <View style={{ width: '15%' }}>
-                                    <Image source={require('../Images/about.png')}
+                                    <Image source={require('../../Images/about.png')}
                                         style={{ width: 21.5, height: 25 }} />
                                 </View>
 
@@ -114,7 +114,7 @@ const ProfileScreen = ({ navigation }) => {
                             <View style={{ flexDirection: 'row' }}>
 
                                 <View style={{ width: '15%' }}>
-                                    <Image source={require('../Images/professional.png')}
+                                    <Image source={require('../../Images/professional.png')}
                                         style={{ width: 25, height: 25 }} />
                                 </View>
 
@@ -134,7 +134,7 @@ const ProfileScreen = ({ navigation }) => {
                             <View style={{ flexDirection: 'row' }}>
 
                                 <View style={{ width: '15%' }}>
-                                    <Image source={require('../Images/language.png')}
+                                    <Image source={require('../../Images/language.png')}
                                         style={{ width: 23, height: 25 }} />
                                 </View>
 
@@ -158,8 +158,8 @@ const ProfileScreen = ({ navigation }) => {
 
                 <View style={{ width: '100%', justifyContent: 'flex-end', alignItems: 'center' }}>
                     <View style={{ width: '92%' }}>
-                        <TouchableOpacity activeOpacity={0.5} onPress={() =>{navigation.navigate('LoginScreen')}}>
-                        <Text style={{ fontSize: 16, color: Colors.darkblue, marginTop: 5, }}>Logout</Text>
+                        <TouchableOpacity activeOpacity={0.5} onPress={() => { navigation.navigate('LoginScreen') }}>
+                            <Text style={{ fontSize: 16, color: Colors.darkblue, marginTop: 5, }}>Logout</Text>
                         </TouchableOpacity>
                         <Text style={{ fontSize: 12, color: Colors.lightgrey, marginTop: 5, }}>Version 1.0.0</Text>
                     </View>

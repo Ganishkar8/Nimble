@@ -19,25 +19,29 @@ import {
 } from 'react-native';
 
 import Feather from 'react-native-vector-icons/Feather';
-import apiInstance from '../Utils/apiInstance';
+import apiInstance from '../../Utils/apiInstance';
 import jwtDecode from 'jwt-decode';
-import Colors from '../Utils/Colors';
-import MyStatusBar from './ MyStatusBar';
-import Loading from './Loading';
-import TextComp from '../Components/TextComp';
+import Colors from '../../Utils/Colors';
+import MyStatusBar from '../../Components/ MyStatusBar';
+import Loading from '../../Components/Loading';
+import TextComp from '../../Components/TextComp';
 import { connect } from 'react-redux';
-import { languageAction } from '../Utils/redux/actions/languageAction';
-import { language } from '../Utils/LanguageString';
-import Commonstyles from '../Utils/Commonstyles';
-import ImageComp from '../Components/ImageComp';
+import { languageAction } from '../../Utils/redux/actions/languageAction';
+import { language } from '../../Utils/LanguageString';
+import Commonstyles from '../../Utils/Commonstyles';
+import ImageComp from '../../Components/ImageComp';
+import ActivationCodeModal from '../../Components/ActivationCodeModal';
+import CenteredModal from '../../Components/CenteredModal';
 
 const LoginScreen = (props, { navigation }) => {
 
     const [userID, setUserID] = useState('');
     const [password, setPassword] = useState('');
+    const [activationCode, setActivationCode] = useState('');
     const [secureTextEntry, setSecureTextEntry] = useState(true);
     const [loading, setLoading] = useState(false);
-
+    const [Visible, setVisible] = useState(false);
+    const [activationSuccess, setActivationSuccess] = useState(false);
 
     useEffect(() => {
 
@@ -66,7 +70,8 @@ const LoginScreen = (props, { navigation }) => {
                 global.USERNAME = decodedToken.userName;
                 global.USERID = decodedToken.userId;
                 global.RefreshToken = response.data.jwtRefreshToken;
-                loginHandle();
+                setVisible(true);
+                //loginHandle();
 
             })
             .catch((error) => {
@@ -86,7 +91,23 @@ const LoginScreen = (props, { navigation }) => {
     };
 
     const loginHandle = () => {
+        setActivationSuccess(false);
         props.navigation.navigate('BottomNavigation');
+    };
+
+    const handleClick = (name, text) => {
+        //alert(institutionID)
+        setActivationCode(text)
+    };
+
+    const onClose = (name) => {
+        if (name == 'Proceed') {
+            setVisible(false);
+            setActivationSuccess(true);
+        } else {
+            setVisible(false);
+        }
+
     };
 
     return (
@@ -101,7 +122,7 @@ const LoginScreen = (props, { navigation }) => {
                     <View style={{ width: '100%', flexDirection: 'row', }}>
 
                         <View style={{ width: '100%', }}>
-                            <ImageComp imageSrc={require('../Images/loginbg.png')} imageStylee={{ width: 140, height: 140, resizeMode: 'contain' }} />
+                            <ImageComp imageSrc={require('../../Images/loginbg.png')} imageStylee={{ width: 140, height: 140, resizeMode: 'contain' }} />
                         </View>
 
                         <View style={{ width: '55%', }}>
@@ -228,8 +249,8 @@ const LoginScreen = (props, { navigation }) => {
                             borderRadius: 45, alignItems: 'center', justifyContent: 'center'
                         }}>
                             <View >
-                            <TextComp textVal={language[0][props.language].str_login.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13,fontWeight:500 }} />
-                                
+                                <TextComp textVal={language[0][props.language].str_login.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} />
+
                             </View>
                         </TouchableOpacity>
                     </View>
@@ -245,7 +266,7 @@ const LoginScreen = (props, { navigation }) => {
                     }}>
                         <View style={{ alignItems: 'flex-start', flex: 0.5 }}>
                             <Image style={{ width: 60, height: 26, resizeMode: 'contain' }}
-                                source={require('../Images/nimble.png')} />
+                                source={require('../../Images/nimble.png')} />
                             <View style={{ alignItems: 'center' }}>
                                 <Text style={{
                                     marginLeft: 14, color: '#4e4e4e',
@@ -256,7 +277,7 @@ const LoginScreen = (props, { navigation }) => {
 
                         <View style={{ flex: 0.5, alignItems: 'flex-end' }}>
                             <Image style={{ width: 60, height: 40, resizeMode: 'contain', marginTop: 9 }}
-                                source={require('../Images/cslogo.png')} />
+                                source={require('../../Images/cslogo.png')} />
                         </View>
 
                     </View>
@@ -268,6 +289,12 @@ const LoginScreen = (props, { navigation }) => {
                         <Text style={{ color: '#8a8f9d', fontSize: 13, }}>{language[0][props.language].str_version}:{global.APPVERSIONNO}</Text>
                     </View>
                 </View>
+
+
+                <ActivationCodeModal isVisible={Visible} onClose={onClose} textValue={language[0][props.language].str_plsenteractv} textValue1={language[0][props.language].str_actvcode}
+                    textinputValue={activationCode} handleClick={handleClick} textCancel={language[0][props.language].str_cancel} textProceed={language[0][props.language].str_proceed} />
+
+                <CenteredModal isVisible={activationSuccess} onClose={loginHandle} textContent={language[0][props.language].str_actvsuccess} textClose={language[0][props.language].str_ok} />
 
             </ScrollView>
 

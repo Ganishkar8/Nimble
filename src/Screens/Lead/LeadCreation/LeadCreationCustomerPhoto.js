@@ -21,22 +21,22 @@ import {
 } from 'react-native';
 
 import Feather from 'react-native-vector-icons/Feather';
-import apiInstance from '../Utils/apiInstance';
+import apiInstance from '../../../Utils/apiInstance';
 import jwtDecode from 'jwt-decode';
-import Colors from '../Utils/Colors';
-import MyStatusBar from './ MyStatusBar';
-import Loading from './Loading';
-import TextComp from '../Components/TextComp';
+import Colors from '../../../Utils/Colors';
+import MyStatusBar from '../../../Components/ MyStatusBar';
+import Loading from '../../../Components/Loading';
+import TextComp from '../../../Components/TextComp';
 import { connect } from 'react-redux';
-import { languageAction } from '../Utils/redux/actions/languageAction';
-import { language } from '../Utils/LanguageString';
-import Commonstyles from '../Utils/Commonstyles';
-import ImageComp from '../Components/ImageComp';
+import { languageAction } from '../../../Utils/redux/actions/languageAction';
+import { language } from '../../../Utils/LanguageString';
+import Commonstyles from '../../../Utils/Commonstyles';
+import ImageComp from '../../../Components/ImageComp';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
-import HeadComp from '../Components/HeadComp';
+import HeadComp from '../../../Components/HeadComp';
 import { ProgressBar, MD3Colors } from 'react-native-paper';
 import { Picker } from '@react-native-picker/picker';
-import ProgressComp from '../Components/ProgressComp';
+import ProgressComp from '../../../Components/ProgressComp';
 import Geolocation from 'react-native-geolocation-service';
 import RNAndroidLocationEnabler from 'react-native-android-location-enabler';
 import MapView, { Marker } from 'react-native-maps';
@@ -50,7 +50,7 @@ import ImagePicker, { ImageOrVideo } from 'react-native-image-crop-picker';
 import { tr } from 'react-native-paper-dates';
 import Modal from 'react-native-modal';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import apiInstancelocal from '../Utils/apiInstancelocal';
+import apiInstancelocal from '../../../Utils/apiInstancelocal';
 import axios from 'axios';
 
 const LeadCreationCustomerPhoto = (props, { navigation }) => {
@@ -163,7 +163,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
         apiInstancelocal(baseURL).put(`/api/v1/lead-creation-initiation/${global.leadID}`, appDetails)
             .then(async (response) => {
                 // Handle the response data
-                
+
                 console.log("FinalLeadCreationApiResponse::" + JSON.stringify(response.data));
                 props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
                 setLoading(false)
@@ -430,7 +430,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
                                 <View style={{ width: '100%', flexDirection: 'row', marginTop: 25 }}>
                                     <View style={{ width: '15%' }}>
-                                        <Image source={require('../Images/preview.png')}
+                                        <Image source={require('../../../Images/preview.png')}
                                             style={{ width: 20, height: 20 }} />
                                     </View>
                                     <View style={{ width: '85%', justifyContent: 'center' }}>
@@ -442,7 +442,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                                 <TouchableOpacity onPress={() => { setphotoOptionvisible(true); hideBottomSheet() }} activeOpacity={0.5} style={{ width: '100%', flexDirection: 'row', marginTop: 25 }}>
                                     <View style={{ flexDirection: 'row' }} >
                                         <View style={{ width: '15%' }}>
-                                            <Image source={require('../Images/fileupload.png')}
+                                            <Image source={require('../../../Images/fileupload.png')}
                                                 style={{ width: 16, height: 20 }} />
                                         </View>
                                         <View style={{ width: '85%', justifyContent: 'center' }}>
@@ -676,7 +676,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                                 style={Commonstyles.textinputtextStyle}
                             />
 
-                            <TouchableOpacity onPress={() =>{getOneTimeLocation()}} activeOpacity={0.5}>
+                            <TouchableOpacity onPress={() => { getOneTimeLocation() }} activeOpacity={0.5}>
                                 <FontAwesome6 name='location-dot' size={23} color={Colors.darkblue} />
                             </TouchableOpacity>
 
