@@ -20,29 +20,29 @@ import {
 } from 'react-native';
 
 import Feather from 'react-native-vector-icons/Feather';
-import apiInstance from '../Utils/apiInstance';
+import apiInstance from '../../../Utils/apiInstance';
 import jwtDecode from 'jwt-decode';
-import Colors from '../Utils/Colors';
-import MyStatusBar from './ MyStatusBar';
-import Loading from './Loading';
-import TextComp from '../Components/TextComp';
+import Colors from '../../../Utils/Colors';
+import MyStatusBar from '../../../Components/ MyStatusBar';
+import Loading from '../../../Components/Loading';
+import TextComp from '../../../Components/TextComp';
 import { connect } from 'react-redux';
-import { languageAction } from '../Utils/redux/actions/languageAction';
-import { language } from '../Utils/LanguageString';
-import Commonstyles from '../Utils/Commonstyles';
-import ImageComp from '../Components/ImageComp';
+import { languageAction } from '../../../Utils/redux/actions/languageAction';
+import { language } from '../../../Utils/LanguageString';
+import Commonstyles from '../../../Utils/Commonstyles';
+import ImageComp from '../../../Components/ImageComp';
 import Entypo from 'react-native-vector-icons/Entypo';
-import HeadComp from '../Components/HeadComp';
+import HeadComp from '../../../Components/HeadComp';
 import { ProgressBar, MD3Colors } from 'react-native-paper';
 import { Picker } from '@react-native-picker/picker';
-import ProgressComp from '../Components/ProgressComp';
-import tbl_SystemCodeDetails from '../Database/Table/tbl_SystemCodeDetails';
-import tbl_SystemMandatoryFields from '../Database/Table/tbl_SystemMandatoryFields';
+import ProgressComp from '../../../Components/ProgressComp';
+import tbl_SystemCodeDetails from '../../../Database/Table/tbl_SystemCodeDetails';
+import tbl_SystemMandatoryFields from '../../../Database/Table/tbl_SystemMandatoryFields';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Modal from 'react-native-modal';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import Geolocation from 'react-native-geolocation-service';
-import apiInstancelocal from '../Utils/apiInstancelocal';
+import apiInstancelocal from '../../../Utils/apiInstancelocal';
 
 
 const LeadCreationLoan = (props, { navigation }) => {
@@ -357,7 +357,7 @@ const LeadCreationLoan = (props, { navigation }) => {
     }
 
     const getOneTimeLocation = () => {
-       showLocationBottomSheet();
+        showLocationBottomSheet();
         Geolocation.getCurrentPosition(
             //Will give you the current location
             (position) => {
@@ -506,21 +506,21 @@ const LeadCreationLoan = (props, { navigation }) => {
 
                     <Modal
                         isVisible={locationSheetVisible}
-                        onBackdropPress={() => {}}
+                        onBackdropPress={() => { }}
                         backdropOpacity={0.5}
                         style={styles.modal}
                     >
                         <View style={styles.modalContent}>
                             <View style={{ alignItems: 'center' }}>
 
-                                <View style={{ width: '100%', flexDirection: 'row',alignItems:'center',justifyContent:'center' }}>
+                                <View style={{ width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
 
-                                    <TextComp textVal={"Fetching Location......"} textStyle={{ fontSize: 14, color: Colors.black, fontWeight: 600,marginTop:30,marginBottom:30 }} Visible={false} />
+                                    <TextComp textVal={"Fetching Location......"} textStyle={{ fontSize: 14, color: Colors.black, fontWeight: 600, marginTop: 30, marginBottom: 30 }} Visible={false} />
 
-                                
+
                                 </View>
 
-                            
+
 
 
                             </View>
@@ -551,7 +551,7 @@ const LeadCreationLoan = (props, { navigation }) => {
 
 
 
-                    {loanTypeVisible &&<View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+                    {loanTypeVisible && <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
                             <TextComp textVal={loanTypeCaption} textStyle={Commonstyles.inputtextStyle} Visible={loanTypeMan} />
 
@@ -583,7 +583,7 @@ const LeadCreationLoan = (props, { navigation }) => {
                     </View>}
 
 
-                    {loanPurposeVisible &&<View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+                    {loanPurposeVisible && <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
                             <TextComp textVal={loanPurposeCaption} textStyle={Commonstyles.inputtextStyle} Visible={loanPurposeMan} />
 
@@ -615,7 +615,7 @@ const LeadCreationLoan = (props, { navigation }) => {
                     </View>}
 
 
-                    {loanAmountVisible &&<View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
+                    {loanAmountVisible && <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
 
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
                             <TextComp textVal={loanAmountCaption} textStyle={Commonstyles.inputtextStyle} Visible={loanAmountMan} />
@@ -640,7 +640,7 @@ const LeadCreationLoan = (props, { navigation }) => {
                     </View>}
 
 
-                    {leadTypeVisible &&<View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+                    {leadTypeVisible && <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
                             <TextComp textVal={leadTypeCaption} textStyle={Commonstyles.inputtextStyle} Visible={leadTypeMan} />
 

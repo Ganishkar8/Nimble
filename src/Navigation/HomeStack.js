@@ -1,16 +1,17 @@
 
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import ApplicationScreen from '../Screens/ApplicationScreen';
-import HomeScreen from '../Screens/HomeScreen';
-import LoanApplicationTracker from '../Screens/LoanApplicationTracker';
-import LeadCreationBasic from '../Screens/LeadCreationBasic';
-import LeadCreationBusiness from '../Screens/LeadCreationBusiness';
-import LeadCreationLoan from '../Screens/LeadCreationLoan';
-import LeadCreationCustomerPhoto from '../Screens/LeadCreationCustomerPhoto';
-import LeadManagement from '../Screens/LeadManagement';
-import LeadDetails from '../Screens/LeadDetails';
-import LeadLog from '../Screens/LeadLog';
+import HomeScreen from '../Screens/Login/HomeScreen';
+import LoanApplicationTracker from '../Screens/Application/ApplicationTracker/LoanApplicationTracker';
+import LeadCreationBasic from '../Screens/Lead/LeadCreation/LeadCreationBasic';
+import LeadCreationBusiness from '../Screens/Lead/LeadCreation/LeadCreationBusiness';
+import LeadCreationLoan from '../Screens/Lead/LeadCreation/LeadCreationLoan';
+import LeadCreationCustomerPhoto from '../Screens/Lead/LeadCreation/LeadCreationCustomerPhoto';
+import LeadManagement from '../Screens/Lead/LeadTracker/LeadManagement';
+import LeadDetails from '../Screens/Lead/LeadTracker/LeadDetails';
+import LeadLog from '../Screens/Lead/LeadTracker/LeadLog';
+import LeadApproval from '../Screens/Lead/LeadTracker/LeadApproval';
+import ReAssign from '../Screens/Lead/LeadTracker/ReAssign';
 
 const Stack = createNativeStackNavigator();
 
@@ -48,13 +49,22 @@ export default HomeStack = () => {
       />
 
       <Stack.Screen
+        name="LeadApproval"
+        component={LeadApproval}
+        options={{ headerShown: false, tabBarVisible: false }}
+
+      />
+
+      <Stack.Screen
+        name="ReAssign"
+        component={ReAssign}
+        options={{ headerShown: false, tabBarVisible: false }}
+
+      />
+
+      <Stack.Screen
         name="LoanApplicationTracker"
         component={LoanApplicationTracker}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="ApplicationScreen"
-        component={ApplicationScreen}
         options={{ headerShown: false }}
       />
 

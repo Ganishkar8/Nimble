@@ -13,10 +13,10 @@ import {
     ScrollView
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import Colors from '../Utils/Colors';
+import Colors from '../../Utils/Colors';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import MyStatusBar from './ MyStatusBar';
-import Loading from './Loading';
+import MyStatusBar from '../../Components/ MyStatusBar';
+import Loading from '../../Components/Loading';
 import { Dimensions } from 'react-native';
 
 
@@ -37,7 +37,7 @@ const HomeScreen = ({ navigation }) => {
         <View style={{ flex: 1 }}>
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
             {loading ? <Loading /> : null}
-            <ImageBackground style={{ flex: 1 }} source={require('../Images/home_bg.png')}>
+            <ImageBackground style={{ flex: 1 }} source={require('../../Images/home_bg.png')}>
 
                 <View style={{ flex: 1 }}>
                     <ScrollView style={styles.scrollView}
@@ -51,7 +51,7 @@ const HomeScreen = ({ navigation }) => {
 
                                 <Text style={{ textAlign: 'left', flex: 0.9, fontSize: 20, color: '#4e4e4e' }}>Hi! {global.USERNAME}</Text>
 
-                                <Image source={require('../Images/notification_bellicon.png')}
+                                <Image source={require('../../Images/notification_bellicon.png')}
                                     style={styles.tinyLogo} />
 
                             </View>
@@ -113,12 +113,12 @@ const HomeScreen = ({ navigation }) => {
                                 <View style={{ width: '93%', height: 170, justifyContent: 'space-between', flexDirection: 'row', marginTop: '4%' }}>
 
 
-                                    <TouchableOpacity onPress={() => navigation.navigate('LeadManagement',{fromScreen:'HomeScreen'})} activeOpacity={0.5} style={{ width: '48%', height: '100%', backgroundColor: '#ffffff99', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
+                                    <TouchableOpacity onPress={() => navigation.navigate('LeadManagement', { fromScreen: 'HomeScreen' })} activeOpacity={0.5} style={{ width: '48%', height: '100%', backgroundColor: '#ffffff99', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
                                         <View>
 
                                             <View style={{ flexDirection: 'column' }}>
                                                 <View style={styles.circularView1}>
-                                                    <Image source={require('../Images/profile.png')}
+                                                    <Image source={require('../../Images/profile.png')}
                                                         style={{ width: 20, height: 25 }} />
                                                 </View>
                                                 <Text style={{ fontSize: 12, color: '#707070', marginTop: 8, textAlign: 'center' }}>Lead{'\n'}Tracker</Text>
@@ -131,7 +131,7 @@ const HomeScreen = ({ navigation }) => {
                                         <View >
                                             <View style={{ flexDirection: 'column' }}>
                                                 <View style={styles.circularView1}>
-                                                    <Image source={require('../Images/lead_list.png')}
+                                                    <Image source={require('../../Images/lead_list.png')}
                                                         style={{ width: 22.5, height: 25 }} />
                                                 </View>
                                                 <Text style={{ fontSize: 12, color: '#707070', marginTop: 8, textAlign: 'center' }}>Application{'\n'}Tracker</Text>
@@ -145,7 +145,7 @@ const HomeScreen = ({ navigation }) => {
 
                                     <View style={{ flexDirection: 'column' }}>
                                         <View style={[styles.circularView1, { marginTop: '4%', marginLeft: '4%' }]}>
-                                            <Image source={require('../Images/profile.png')}
+                                            <Image source={require('../../Images/profile.png')}
                                                 style={{ width: 20, height: 25 }} />
                                         </View>
 
@@ -160,7 +160,7 @@ const HomeScreen = ({ navigation }) => {
 
                                                 <TouchableOpacity onPress={() => navigation.navigate('LeadCreationBasic')} activeOpacity={0.5} style={{ width: '70%', height: '100%', backgroundColor: '#0294ff', borderRadius: 25, alignItems: 'center', justifyContent: 'center' }}>
                                                     <View >
-                                                        <Image source={require('../Images/forward_icon.png')}
+                                                        <Image source={require('../../Images/forward_icon.png')}
                                                             style={{ width: 15, height: 9 }} />
                                                     </View>
                                                 </TouchableOpacity>
@@ -177,7 +177,7 @@ const HomeScreen = ({ navigation }) => {
 
                                     <View style={{ flexDirection: 'column' }}>
                                         <View style={[styles.circularView1, { marginTop: '4%', marginLeft: '4%' }]}>
-                                            <Image source={require('../Images/lead_list.png')}
+                                            <Image source={require('../../Images/lead_list.png')}
                                                 style={{ width: 22.5, height: 25 }} />
                                         </View>
 
@@ -191,7 +191,7 @@ const HomeScreen = ({ navigation }) => {
                                             <View style={{ width: '25%' }}>
 
                                                 <View style={{ width: '70%', height: '100%', backgroundColor: '#0294ff', borderRadius: 25, alignItems: 'center', justifyContent: 'center' }}>
-                                                    <Image source={require('../Images/forward_icon.png')}
+                                                    <Image source={require('../../Images/forward_icon.png')}
                                                         style={{ width: 15, height: 9 }} />
                                                 </View>
                                             </View>
