@@ -16,7 +16,7 @@ const CenteredModal = ({ isVisible, onClose, textContent, textClose }) => {
 
                     <View style={{ minHeight: 150, justifyContent: 'center' }}>
 
-                        <ImageComp imageSrc={require('../Images/locationanim.gif')} imageStylee={{ width: 50, height: 50, resizeMode: 'contain' }} />
+                        <ImageComp imageSrc={require('../Images/successanim.gif')} imageStylee={{ width: 100, height: 100, resizeMode: 'contain' }} />
 
                     </View>
                     <Text style={{ color: Colors.black }}>{textContent}</Text>

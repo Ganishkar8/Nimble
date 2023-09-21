@@ -24,11 +24,14 @@ import Commonstyles from '../../../Utils/Commonstyles';
 import tbl_SystemCodeDetails from '../../../Database/Table/tbl_SystemCodeDetails';
 import PickerComp from '../../../Components/PickerComp';
 import TextInputComp from '../../../Components/TextInputComp';
+import ErrorMessageModal from '../../../Components/ErrorMessageModal';
+import apiInstancelocal from '../../../Utils/apiInstancelocal';
+
 
 
 const LeadApproval = (props, { navigation }) => {
 
-
+    const [errMsg, setErrMsg] = useState('');
     const [currentPosition, setCurrentPosition] = useState(0);
     const [loading, setLoading] = useState(false);
     const [visible, setVisible] = useState(false);
@@ -36,6 +39,9 @@ const LeadApproval = (props, { navigation }) => {
     const [leadStatusLabel, setLeadStatusLabel] = useState('');
     const [leadStatusIndex, setLeadStatusIndex] = useState('');
     const [leadStatusData, setLeadStatusData] = useState([]);
+    const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
+    const showBottomSheet = () => setBottomErrorSheetVisible(true);
+    const hideBottomSheet = () => setBottomErrorSheetVisible(false);
 
 
 
@@ -85,8 +91,55 @@ const LeadApproval = (props, { navigation }) => {
 
     }
 
+    const validate = () => {
+        var flag = false; var i = 1;
+        var errorMessage = '';
 
-    const leadApproval = () => { }
+
+        if (leadStatusLabel === '') {
+            errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + "LEAD STATUS" + '\n';
+            i++;
+            flag = true;
+        }
+
+
+        if (approverComment.length <= 0) {
+            errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + "APPROVER COMMENT" + '\n';
+            i++;
+            flag = true;
+        }
+
+
+        setErrMsg(errorMessage);
+        return flag;
+    }
+
+    const leadApproval = () => {
+        if (validate()) {
+            showBottomSheet();
+            return;
+        }
+
+        const appDetails = {
+            "status": leadStatusLabel,
+            "comments": approverComment,
+            "userName": global.USERID
+        }
+        const baseURL = '8081'
+        setLoading(true)
+        apiInstancelocal(baseURL).post(`/api/v1/lead-Approved/ByBm/${global.leadID}`, appDetails)
+            .then(async (response) => {
+                // Handle the response data
+                setLoading(false)
+
+
+            })
+            .catch((error) => {
+                // Handle the error
+                setLoading(false)
+                alert(error);
+            });
+    }
 
     return (
 
@@ -99,6 +152,9 @@ const LeadApproval = (props, { navigation }) => {
                 {loading ? <Loading /> : null}
 
                 <View style={{ flex: 1 }}>
+
+                    <ErrorMessageModal isVisible={bottomErrorSheetVisible} hideBottomSheet={hideBottomSheet} errMsg={errMsg} textError={language[0][props.language].str_error} textClose={language[0][props.language].str_ok} />
+
 
                     <View style={{ width: '100%', height: 56, alignItems: 'center', justifyContent: 'center', }}>
 

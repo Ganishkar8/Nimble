@@ -59,9 +59,9 @@ const SplashScreen = ({ navigation }) => {
             tbl_UserCodeDetails.deleteAllUserCodeDetails().then(response => {
 
             })
-            //setTimeout(() => {
-            navigation.replace('BankRegistration')
-            // }, 1000);
+            setTimeout(() => {
+                navigation.replace('BankRegistration')
+            }, 2000);
         });
 
     }, []);
@@ -73,9 +73,9 @@ const SplashScreen = ({ navigation }) => {
 
             <View style={styles.parentView}>
 
-                <Image source={require('../../Images/splashlogo.png')} style={{ width: 100, height: 35 }} />
+                <Image source={require('../../Images/logoanim.gif')} style={{ width: 175, height: 175 }} />
 
-                <Text style={{ color: Colors.darkblack, fontSize: 12, marginLeft: 34 }}>Business Loan</Text>
+                {/* <Text style={{ color: Colors.darkblack, fontSize: 12, marginLeft: 34 }}>Business Loan</Text> */}
 
 
             </View>
@@ -89,7 +89,8 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        backgroundColor: Colors.white
     },
     imageStyle: {
         width: '100%',

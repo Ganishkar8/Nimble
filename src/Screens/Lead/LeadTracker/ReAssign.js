@@ -27,6 +27,7 @@ import PickerComp from '../../../Components/PickerComp';
 import TextInputComp from '../../../Components/TextInputComp';
 import ImageComp from '../../../Components/ImageComp';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 
 const statusDataArr = [
 
@@ -50,7 +51,10 @@ const ReAssign = (props, { navigation }) => {
     const [search, setSearch] = useState('');
     const [filteredData, setFilteredData] = useState(statusDataArr);
     const [nonFilteredData, setNonFilteredData] = useState(statusDataArr);
-
+    const [errMsg, setErrMsg] = useState('');
+    const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
+    const showBottomSheet = () => setBottomErrorSheetVisible(true);
+    const hideBottomSheet = () => setBottomErrorSheetVisible(false);
 
 
     useEffect(() => {
@@ -163,7 +167,35 @@ const ReAssign = (props, { navigation }) => {
         )
     }
 
-    const leadApproval = () => { }
+    const leadApproval = () => {
+        if (validate()) {
+            showBottomSheet();
+            return;
+        }
+    }
+
+    const validate = () => {
+        var flag = false; var i = 1;
+        var errorMessage = '';
+
+
+        if (reAssignedto.length <= 0) {
+            errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + "RE-ASSIGNED TO" + '\n';
+            i++;
+            flag = true;
+        }
+
+
+        if (reasonLabel.length <= 0) {
+            errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + "REASON" + '\n';
+            i++;
+            flag = true;
+        }
+
+
+        setErrMsg(errorMessage);
+        return flag;
+    }
 
     return (
 
@@ -222,6 +254,9 @@ const ReAssign = (props, { navigation }) => {
                         </View>
                     </View>
                 </Modal>
+
+                <ErrorMessageModal isVisible={bottomErrorSheetVisible} hideBottomSheet={hideBottomSheet} errMsg={errMsg} textError={language[0][props.language].str_error} textClose={language[0][props.language].str_ok} />
+
 
                 <View style={{ flex: 1 }}>
 
