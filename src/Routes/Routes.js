@@ -24,7 +24,7 @@ const Route = () => {
 
         <Stack.Screen
           name="SplashScreen"
-          component={LoanApplicationMain}
+          component={SplashScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen
