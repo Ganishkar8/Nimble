@@ -11,6 +11,7 @@ const Stack = createNativeStackNavigator();
 
 //dev imports 
 import LeadManagement from '../Screens/Lead/LeadTracker/LeadManagement';
+import LoanApplicationMain from '../Screens/LoanApplication/LoanApplicationMain';
 
 
 const Route = () => {
@@ -23,7 +24,7 @@ const Route = () => {
 
         <Stack.Screen
           name="SplashScreen"
-          component={SplashScreen}
+          component={LoanApplicationMain}
           options={{ headerShown: false }}
         />
         <Stack.Screen

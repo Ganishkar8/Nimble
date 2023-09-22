@@ -118,6 +118,9 @@ export const language = [{
     str_leadowner: 'LEAD OWNER',
     str_reason: 'REASON',
     str_reassignedto: 'RE-ASSIGNED TO',
+    str_loanapplication: 'Loan Application',
+    str_applicationNumber: 'Application Number',
+    str_applicationStatus: 'Application Status',
   },
   ta: {
     first: 'comment allez vous',
