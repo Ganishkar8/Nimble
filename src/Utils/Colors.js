@@ -21,5 +21,6 @@ export default {
     approvedBorder :'#178e39',
     approvedBg : '#f5f8fa',
     skyblue : '#f5f8fa',
-    disableBg : '#dfe6ea'
+    disableBg : '#dfe6ea',
+    maroon : '#FFF2C5'
 }
