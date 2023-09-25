@@ -121,6 +121,10 @@ export const language = [{
     str_loanapplication: 'Loan Application',
     str_applicationNumber: 'Application Number',
     str_applicationStatus: 'Application Status',
+    str_enterbank: 'Please Enter Instituion ID',
+    str_enterchallenge: 'Please Enter Challenge Code',
+    str_entervalidbank: 'Please Enter Valid Institution ID',
+    str_entervalidchallenge: 'Please Enter Valid Challenge Code',
     str_cbresponseheader: 'CB Check (CB Response)',
     str_accholdername: 'Account Holder Name',
     str_cb: 'Credit Bureau',
@@ -139,10 +143,7 @@ export const language = [{
     str_cbmace: 'Maximun allowed credit enquiries',
     str_cbloanstatus: 'Loan Status',
     str_cbotherstatus: 'Other Status',
-    str_enterbank: 'Please Enter Instituion ID',
-    str_enterchallenge: 'Please Enter Challenge Code',
-    str_entervalidbank: 'Please Enter Valid Institution ID',
-    str_entervalidchallenge: 'Please Enter Valid Challenge Code',
+
   },
   ta: {
     first: 'comment allez vous',
