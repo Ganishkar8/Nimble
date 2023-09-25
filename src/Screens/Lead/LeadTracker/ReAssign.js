@@ -28,6 +28,7 @@ import TextInputComp from '../../../Components/TextInputComp';
 import ImageComp from '../../../Components/ImageComp';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
+import apiInstancelocal from '../../../Utils/apiInstancelocal';
 
 const statusDataArr = [
 
@@ -49,8 +50,8 @@ const ReAssign = (props, { navigation }) => {
     const [reasonData, setReasonData] = useState([]);
     const [reAssignedto, setReAssignedto] = useState('');
     const [search, setSearch] = useState('');
-    const [filteredData, setFilteredData] = useState(statusDataArr);
-    const [nonFilteredData, setNonFilteredData] = useState(statusDataArr);
+    const [filteredData, setFilteredData] = useState([]);
+    const [nonFilteredData, setNonFilteredData] = useState([]);
     const [errMsg, setErrMsg] = useState('');
     const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
     const showBottomSheet = () => setBottomErrorSheetVisible(true);
@@ -60,7 +61,8 @@ const ReAssign = (props, { navigation }) => {
     useEffect(() => {
         //below code is used for hiding  bottom tab
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
-        pickerData();
+        // pickerData();
+        callPickerApi();
         return () =>
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
     }, [navigation]);
@@ -82,6 +84,45 @@ const ReAssign = (props, { navigation }) => {
 
             }
         })
+    }
+
+    const callPickerApi = () => {
+
+        const baseURL = '8082'
+        setLoading(true)
+
+        var reasonresponse = false; var userresponse = false;
+
+        apiInstancelocal(baseURL).get('/api/v1/system-code/master/RE_ASSIGN_REASON')
+            .then(async (response) => {
+                reasonresponse = true;
+                if (reasonresponse && userresponse) {
+                    setLoading(false);
+                }
+                setReasonData(response.data)
+            })
+            .catch((error) => {
+                if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
+                setLoading(false)
+                alert(error);
+            });
+
+        apiInstancelocal(baseURL).get('/api/v1/userIdAndUserName')
+            .then(async (response) => {
+                var userresponse = true;
+                if (reasonresponse && userresponse) {
+                    setLoading(false);
+                }
+                setFilteredData(response.data)
+                setNonFilteredData(response.data)
+            })
+            .catch((error) => {
+                if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
+                setLoading(false)
+                alert(error);
+            });
+
+
     }
 
     const handleClick = (componentName, textValue) => {
@@ -112,8 +153,8 @@ const ReAssign = (props, { navigation }) => {
             const newData = nonFilteredData.filter(
                 function (item) {
 
-                    const itemData = item.name
-                        ? item.name.toUpperCase()
+                    const itemData = item.userIdAndUserName
+                        ? item.userIdAndUserName.toUpperCase()
                         : ''.toUpperCase();
                     const itemDataID = item.id
                         ? item.id.toString()
@@ -145,7 +186,7 @@ const ReAssign = (props, { navigation }) => {
 
         return (
             <View>
-                <TouchableOpacity onPress={() => { setReAssignedto(item.name); setVisible(false); setSearch(''); setFilteredData(nonFilteredData) }} activeOpacity={0.9}>
+                <TouchableOpacity onPress={() => { setReAssignedto(item.userIdAndUserName); setVisible(false); setSearch(''); setFilteredData(nonFilteredData) }} activeOpacity={0.9}>
                     <View style={{
                         width: '92%', margin: 13, backgroundColor: 'white',
                         alignItems: 'center'
@@ -154,7 +195,7 @@ const ReAssign = (props, { navigation }) => {
 
                         <View style={{ width: '100%', flexDirection: 'row', }}>
 
-                            <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>{item.name}</Text>
+                            <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>{item.userIdAndUserName}</Text>
 
                         </View>
 
@@ -211,7 +252,6 @@ const ReAssign = (props, { navigation }) => {
                     visible={visible}
                     animationType="slide"
                     transparent={true}
-
                 >
                     <View style={styles.modalContainer}>
                         <View style={styles.modalContent}>
@@ -243,8 +283,9 @@ const ReAssign = (props, { navigation }) => {
                                     <Ionicons name="search" style={{ marginStart: 32 }} size={20} color={'#aaaaaa'} />
                                 </View>
                             </View>
-                            <View style={{ width: '100%', justifyContent: 'center' }}>
+                            <View style={{ width: '100%', marginBottom: 50, justifyContent: 'center' }}>
                                 <FlatList
+
                                     data={filteredData}
                                     renderItem={listView}
                                     showsVerticalScrollIndicator={false}
@@ -322,7 +363,7 @@ const ReAssign = (props, { navigation }) => {
 
 
             </ScrollView>
-        </SafeAreaView>
+        </SafeAreaView >
     );
 };
 
@@ -436,6 +477,7 @@ const styles = StyleSheet.create({
     },
     modalContent: {
         width: '80%',
+        height: '50%',
         backgroundColor: 'white',
         padding: 20,
         borderRadius: 20,

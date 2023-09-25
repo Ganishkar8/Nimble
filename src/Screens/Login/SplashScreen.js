@@ -23,6 +23,8 @@ const SplashScreen = ({ navigation }) => {
         Sqlitedatabase.createTables().then(table => {
             tbl_SystemMandatoryFields.deleteAllSystemMandatoryFields().then(response => {
                 tbl_SystemMandatoryFields.insertSystemMandatoryFields('7711', 'CUSTOMER CATEGORY', '1', 'sp_custcatg', '', '', '0', '0', '', '0', '', '')
+                tbl_SystemMandatoryFields.insertSystemMandatoryFields('7711', 'TITLE', '1', 'sp_title', '', '', '0', '0', '', '0', '', '')
+                tbl_SystemMandatoryFields.insertSystemMandatoryFields('7711', 'GENDER', '1', 'sp_gender', '', '', '0', '0', '', '0', '', '')
                 tbl_SystemMandatoryFields.insertSystemMandatoryFields('7711', 'FIRST NAME', '1', 'et_firstname', '', '', '0', '0', '0', '', '', '')
                 tbl_SystemMandatoryFields.insertSystemMandatoryFields('7711', 'MIDDLE NAME', '0', 'et_middlename', '', '', '0', '0', '0', '', '', '')
                 tbl_SystemMandatoryFields.insertSystemMandatoryFields('7711', 'LAST NAME', '1', 'et_lastname', '', '', '0', '0', '0', '', '', '')

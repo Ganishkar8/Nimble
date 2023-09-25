@@ -48,7 +48,8 @@ const LeadApproval = (props, { navigation }) => {
     useEffect(() => {
         //below code is used for hiding  bottom tab
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
-        pickerData();
+        //pickerData();
+        callPickerApi();
         return () =>
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
     }, [navigation]);
@@ -114,6 +115,26 @@ const LeadApproval = (props, { navigation }) => {
         return flag;
     }
 
+    const callPickerApi = () => {
+
+        const baseURL = '8082'
+        setLoading(true)
+
+        apiInstancelocal(baseURL).get('/api/v1/system-code/master/LEAD_STATUS')
+            .then(async (response) => {
+
+                setLoading(false);
+                setLeadStatusData(response.data)
+            })
+            .catch((error) => {
+                if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
+                setLoading(false)
+                alert(error);
+            });
+
+
+    }
+
     const leadApproval = () => {
         if (validate()) {
             showBottomSheet();
@@ -125,7 +146,7 @@ const LeadApproval = (props, { navigation }) => {
             "comments": approverComment,
             "userName": global.USERID
         }
-        const baseURL = '8081'
+        const baseURL = '8901'
         setLoading(true)
         apiInstancelocal(baseURL).post(`/api/v1/lead-Approved/ByBm/${global.leadID}`, appDetails)
             .then(async (response) => {

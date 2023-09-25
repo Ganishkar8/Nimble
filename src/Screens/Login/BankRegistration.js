@@ -316,18 +316,12 @@ const BankRegistration = (props, { navigation }) => {
                 const bankDetails = result.Main.BankDetails[0];
                 global.BANKID = bankDetails.BankID[0];
                 var bankURL = bankDetails.BankURL[0];
-                bankURL = bankURL.slice(0, -1);
-                bankURL = bankURL + ':';
                 global.BASEURL = bankURL;
                 AsyncStorage.setItem('IsBankRegistered', 'true');
                 //global.ISBRCONNECT = bankDetails.IsBRConnect[0];
                 global.BRCONNECTVERSION = bankDetails.BRConnectVersionNo[0];
                 global.BRCONNECTCERTIFICATEHASH = bankDetails.CertificateHash[0];
                 var bankURL1 = bankDetails.BankURL1[0];
-                bankURL1 = bankURL1.slice(0, -1);
-                bankURL1 = bankURL1 + ':';
-
-
                 const configVersion = bankDetails.ConfigVersion[0];
                 const certificateHash = bankDetails.CertificateHash[0];
                 global.BRCONNECTAPIKEY = bankDetails.BRConnectAPIKey[0];
