@@ -12,6 +12,8 @@ const Stack = createNativeStackNavigator();
 //dev imports 
 import LeadManagement from '../Screens/Lead/LeadTracker/LeadManagement';
 import LoanApplicationMain from '../Screens/LoanApplication/LoanApplicationMain';
+import CBResponseScreen from '../Screens/CreditBureau/CBResponseScreen';
+import CBStatus from '../Screens/CreditBureau/CBStatus';
 
 
 const Route = () => {
