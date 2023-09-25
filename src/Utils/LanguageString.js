@@ -118,6 +118,10 @@ export const language = [{
     str_leadowner: 'LEAD OWNER',
     str_reason: 'REASON',
     str_reassignedto: 'RE-ASSIGNED TO',
+    str_enterbank: 'Please Enter Instituion ID',
+    str_enterchallenge: 'Please Enter Challenge Code',
+    str_entervalidbank: 'Please Enter Valid Institution ID',
+    str_entervalidchallenge: 'Please Enter Valid Challenge Code',
   },
   ta: {
     first: 'comment allez vous',

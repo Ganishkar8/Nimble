@@ -15,7 +15,7 @@ import Sqlitedatabase from '../../Database/Sqlitedatabase';
 import tbl_SystemMandatoryFields from '../../Database/Table/tbl_SystemMandatoryFields';
 import tbl_UserCodeDetails from '../../Database/Table/tbl_UserCodeDetails';
 import tbl_SystemCodeDetails from '../../Database/Table/tbl_SystemCodeDetails';
-
+import Bank_Detail_Table from '../../Database/Table/Bank_Detail_Table';
 
 const SplashScreen = ({ navigation }) => {
 
@@ -60,7 +60,24 @@ const SplashScreen = ({ navigation }) => {
 
             })
             setTimeout(() => {
-                navigation.replace('BankRegistration')
+                AsyncStorage.getItem('IsBankRegistered').then(value => {
+                    if (value == 'true') {
+                        Bank_Detail_Table.getAllBankDetails().then(value => {
+                            global.BASEURL = value[0].BankURL;
+                            AsyncStorage.getItem('IsLogin').then(value => {
+                                if (value == 'true') {
+                                    navigation.replace('BottomNavigation')
+                                } else {
+                                    navigation.replace('LoginScreen')
+                                }
+                            });
+                        })
+
+                    } else {
+                        navigation.replace('BankRegistration')
+                    }
+                });
+
             }, 2000);
         });
 

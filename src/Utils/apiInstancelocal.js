@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const apiInstancelocal = (baseURL) => {
 
-    const baseURLFinal = 'http://192.168.1.120:'+baseURL
+    const baseURLFinal = global.BASEURL + baseURL
     const instance = axios.create({
         baseURL: baseURLFinal,
         timeout: 500000, // Set your desired timeout
