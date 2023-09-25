@@ -5,6 +5,7 @@ export default {
     darkblue: '#0294ff',
     lightwhite:'#fefefe',
     black:'#000000',
+    dimblack:'#00000099',
     primaryTextcolour:'#6b6b6b',
     lightgrey: '#9f9f9f',
     mediumgrey: '#707070',
