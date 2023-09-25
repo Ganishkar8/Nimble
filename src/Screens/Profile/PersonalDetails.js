@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#dbdbdb', // Change the color as needed
         height: 1,
         width: '90%',
-        marginTop: '5%'           // Adjust the height as needed
+        marginTop: '3%'           // Adjust the height as needed
     },
 });
 

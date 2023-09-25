@@ -40,6 +40,7 @@ import tbl_SystemMandatoryFields from '../../../Database/Table/tbl_SystemMandato
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Modal from 'react-native-modal';
 import apiInstancelocal from '../../../Utils/apiInstancelocal';
+import PickerComp from '../../../Components/PickerComp';
 
 const LeadCreationBusiness = (props, { navigation }) => {
     const [errMsg, setErrMsg] = useState('');
@@ -84,7 +85,8 @@ const LeadCreationBusiness = (props, { navigation }) => {
     useEffect(() => {
 
         makeSystemMandatoryFields();
-        pickerData();
+        // pickerData();
+        callPickerApi();
 
     }, []);
 
@@ -222,7 +224,7 @@ const LeadCreationBusiness = (props, { navigation }) => {
                     "createdBy": global.USERID,
                     "createdOn": '',
                     "businessName": businessName,
-                    "industryType": 5,
+                    "industryType": industryTypeLabel,
                     "incomeBusinessTurnover": 5000,
                     "businessVintageYear": 2,
                     "businessVintageMonth": 5
@@ -243,6 +245,7 @@ const LeadCreationBusiness = (props, { navigation }) => {
                     console.log("Error" + JSON.stringify(error.response))
                     setLoading(false)
                     alert(error);
+                    props.navigation.navigate('LeadCreationLoan')
                 });
 
 
@@ -294,6 +297,36 @@ const LeadCreationBusiness = (props, { navigation }) => {
         }
         setErrMsg(errorMessage);
         return flag;
+    }
+
+    const callPickerApi = () => {
+
+        const baseURL = '8082'
+        setLoading(true)
+
+        apiInstancelocal(baseURL).get('/api/v1/generic-master/type?size=100&type=CREDIT_SCORE_INDUSTRY_TYPE_SUB_CATEGORY')
+            .then(async (response) => {
+
+                setLoading(false);
+                //alert(JSON.stringify(response.data.content))
+                setIndustryTypeData(response.data.content)
+            })
+            .catch((error) => {
+                if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
+                setLoading(false)
+                alert(error);
+            });
+
+
+    }
+
+    const handlePickerClick = (componentName, label, index) => {
+
+        if (componentName === 'industryPicker') {
+            setIndustryTypeLabel(label);
+            setIndustryTypeIndex(index);
+        }
+
     }
 
 
@@ -412,33 +445,14 @@ const LeadCreationBusiness = (props, { navigation }) => {
 
                     {industryTypeVisible && <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
+
                             <TextComp textVal={industryTypeCaption} textStyle={Commonstyles.inputtextStyle} Visible={industryTypeMan} />
 
                         </View>
-                        <View style={{
-                            width: '95%',
-                        }}>
 
-                            <Picker
-                                selectedValue={industryTypeLabel}
-                                style={styles.picker}
-                                enabled={!industryTypeDisable}
-                                onValueChange={(itemValue, itemIndex) => {
-                                    setIndustryTypeLabel(itemValue);
-                                    setIndustryTypeIndex(itemIndex);
-                                }}>
-                                {
-                                    industryTypeData.map(item => {
-                                        return <Picker.Item value={item.SubCodeID} label={item.Label} />
-                                    })
-                                }
-                            </Picker>
+                        <PickerComp textLabel={industryTypeLabel} pickerStyle={Commonstyles.picker} Disable={industryTypeDisable} pickerdata={industryTypeData} componentName='industryPicker' handlePickerClick={handlePickerClick} />
 
-                        </View>
-                        <View style={{
-                            width: '90%', marginTop: 6, flexDirection: 'row',
-                            borderBottomWidth: 1, borderBottomColor: '#e2e2e2', position: 'absolute', bottom: 3
-                        }}></View>
+
                     </View>}
 
 
@@ -488,7 +502,7 @@ const LeadCreationBusiness = (props, { navigation }) => {
                                         placeholder={''}
                                         placeholderTextColor={Colors.lightgrey}
                                         secureTextEntry={false}
-                                        editable={yearDisable}
+                                        editable={!yearDisable}
                                         keyboardType="numeric"
                                         autoCapitalize="characters"
                                         style={Commonstyles.textinputtextStyle}
@@ -513,7 +527,7 @@ const LeadCreationBusiness = (props, { navigation }) => {
                                         keyboardType="numeric"
                                         placeholderTextColor={Colors.lightgrey}
                                         secureTextEntry={false}
-                                        editable={monthsDisable}
+                                        editable={!monthsDisable}
                                         autoCapitalize="characters"
                                         style={Commonstyles.textinputtextStyle}
                                         ref={monthsRef}

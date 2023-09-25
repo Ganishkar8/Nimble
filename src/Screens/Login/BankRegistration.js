@@ -31,7 +31,7 @@ import axios from 'axios';
 import parser from 'react-native-xml2js';
 import { useIsFocused } from '@react-navigation/native';
 import CenteredModal from '../../Components/CenteredModal';
-
+import ErrorMessageModal from '../../Components/ErrorMessageModal';
 import {
     CodeField,
     Cursor,
@@ -39,7 +39,7 @@ import {
     useClearByFocusCell,
 } from 'react-native-confirmation-code-field';
 const { Value, Text: AnimatedText } = Animated;
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const CELL_COUNT = 3;
 const CELL_SIZE = 46;
 const CELL_BORDER_RADIUS = 8;
@@ -69,8 +69,12 @@ const BankRegistration = (props, { navigation }) => {
     const [challengeCode, setChallengeCode] = useState('');
     const [loading, setLoading] = useState(false);
     const [Visible, setVisible] = useState(false);
+    const [errMsg, setErrMsg] = useState('');
     const { confirmCode, timer } = props;
     const [value, setValue] = useState('');
+    const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
+    const showBottomSheet = () => setBottomErrorSheetVisible(true);
+    const hideBottomSheet = () => setBottomErrorSheetVisible(false);
     const ref = useBlurOnFulfill({ value, cellCount: CELL_COUNT });
     const [, getCellOnLayoutHandler] = useClearByFocusCell({
         value,
@@ -179,7 +183,44 @@ const BankRegistration = (props, { navigation }) => {
     };
 
 
+    const validate = () => {
+        var flag = false; var i = 1;
+        var errorMessage = '';
+
+        if (institutionID.length <= 0) {
+            errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_enterbank + '\n';
+            i++;
+            flag = true;
+        }
+
+        if (challengeCode.length <= 0) {
+            errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_enterchallenge + '\n';
+            i++;
+            flag = true;
+        }
+
+        if (institutionID.length < 3 && institutionID.length > 0) {
+            errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_entervalidbank + '\n';
+            i++;
+            flag = true;
+        }
+
+        if (challengeCode.length < 6 && challengeCode.length > 0) {
+            errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_entervalidchallenge + '\n';
+            i++;
+            flag = true;
+        }
+
+        setErrMsg(errorMessage);
+        return flag;
+    }
+
+
     const callMBSREG = () => {
+        if (validate()) {
+            showBottomSheet();
+            return;
+        }
         const callApi = () => callRetrofitApi(global.DEVICENO, global.DEVICEMODELNAME);
         retryCall(callApi, 2);
     }
@@ -188,11 +229,11 @@ const BankRegistration = (props, { navigation }) => {
         setLoading(true);
         const formData = new URLSearchParams();
         formData.append('WsName', 'getBank');
-        formData.append('BankID', global.BANKID);
+        formData.append('BankID', institutionID);
         formData.append('DeviceNO', deviceNo);
         formData.append('DeviceModelName', deviceModelName);
         formData.append('PlatFormID', Platform.OS);
-        formData.append('ChallengeCode', global.CHANLLENGECODE);
+        formData.append('ChallengeCode', challengeCode);
         formData.append('AppInstance', global.INSTANCE);
         formData.append('AppID', global.APPID);
         formData.append('AppVersionNo', global.APPVERSIONNO);
@@ -274,11 +315,13 @@ const BankRegistration = (props, { navigation }) => {
                 if (global.DEBUG_MODE) console.log('Parsed XML:', JSON.stringify(result.Main.BankDetails[0].BankURL[0]));
                 const bankDetails = result.Main.BankDetails[0];
                 global.BANKID = bankDetails.BankID[0];
-                global.BASEURL = bankDetails.BankURL[0];
-                global.ISBRCONNECT = bankDetails.IsBRConnect[0];
+                var bankURL = bankDetails.BankURL[0];
+                global.BASEURL = bankURL;
+                AsyncStorage.setItem('IsBankRegistered', 'true');
+                //global.ISBRCONNECT = bankDetails.IsBRConnect[0];
                 global.BRCONNECTVERSION = bankDetails.BRConnectVersionNo[0];
                 global.BRCONNECTCERTIFICATEHASH = bankDetails.CertificateHash[0];
-                const bankURL1 = bankDetails.BankURL1[0];
+                var bankURL1 = bankDetails.BankURL1[0];
                 const configVersion = bankDetails.ConfigVersion[0];
                 const certificateHash = bankDetails.CertificateHash[0];
                 global.BRCONNECTAPIKEY = bankDetails.BRConnectAPIKey[0];
@@ -325,7 +368,7 @@ const BankRegistration = (props, { navigation }) => {
         setVisible(false);
         setInstitutionID('');
         setChallengeCode('');
-        props.navigation.navigate('SetUpMPIN');
+        props.navigation.navigate('LoginScreen');
     };
 
     return (
@@ -336,6 +379,9 @@ const BankRegistration = (props, { navigation }) => {
             <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" >
                 {loading ? <Loading /> : null}
                 <View style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-start' }}>
+
+                    <ErrorMessageModal isVisible={bottomErrorSheetVisible} hideBottomSheet={hideBottomSheet} errMsg={errMsg} textError={language[0][props.language].str_error} textClose={language[0][props.language].str_ok} />
+
 
                     <View style={{ width: '100%', flexDirection: 'row', }}>
 

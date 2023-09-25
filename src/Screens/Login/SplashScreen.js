@@ -15,7 +15,7 @@ import Sqlitedatabase from '../../Database/Sqlitedatabase';
 import tbl_SystemMandatoryFields from '../../Database/Table/tbl_SystemMandatoryFields';
 import tbl_UserCodeDetails from '../../Database/Table/tbl_UserCodeDetails';
 import tbl_SystemCodeDetails from '../../Database/Table/tbl_SystemCodeDetails';
-
+import Bank_Detail_Table from '../../Database/Table/Bank_Detail_Table';
 
 const SplashScreen = ({ navigation }) => {
 
@@ -23,6 +23,8 @@ const SplashScreen = ({ navigation }) => {
         Sqlitedatabase.createTables().then(table => {
             tbl_SystemMandatoryFields.deleteAllSystemMandatoryFields().then(response => {
                 tbl_SystemMandatoryFields.insertSystemMandatoryFields('7711', 'CUSTOMER CATEGORY', '1', 'sp_custcatg', '', '', '0', '0', '', '0', '', '')
+                tbl_SystemMandatoryFields.insertSystemMandatoryFields('7711', 'TITLE', '1', 'sp_title', '', '', '0', '0', '', '0', '', '')
+                tbl_SystemMandatoryFields.insertSystemMandatoryFields('7711', 'GENDER', '1', 'sp_gender', '', '', '0', '0', '', '0', '', '')
                 tbl_SystemMandatoryFields.insertSystemMandatoryFields('7711', 'FIRST NAME', '1', 'et_firstname', '', '', '0', '0', '0', '', '', '')
                 tbl_SystemMandatoryFields.insertSystemMandatoryFields('7711', 'MIDDLE NAME', '0', 'et_middlename', '', '', '0', '0', '0', '', '', '')
                 tbl_SystemMandatoryFields.insertSystemMandatoryFields('7711', 'LAST NAME', '1', 'et_lastname', '', '', '0', '0', '0', '', '', '')
@@ -59,9 +61,26 @@ const SplashScreen = ({ navigation }) => {
             tbl_UserCodeDetails.deleteAllUserCodeDetails().then(response => {
 
             })
-            //setTimeout(() => {
-            navigation.replace('BankRegistration')
-            // }, 1000);
+            setTimeout(() => {
+                AsyncStorage.getItem('IsBankRegistered').then(value => {
+                    if (value == 'true') {
+                        Bank_Detail_Table.getAllBankDetails().then(value => {
+                            global.BASEURL = value[0].BankURL;
+                            AsyncStorage.getItem('IsLogin').then(value => {
+                                if (value == 'true') {
+                                    navigation.replace('BottomNavigation')
+                                } else {
+                                    navigation.replace('LoginScreen')
+                                }
+                            });
+                        })
+
+                    } else {
+                        navigation.replace('BankRegistration')
+                    }
+                });
+
+            }, 2000);
         });
 
     }, []);
@@ -73,9 +92,9 @@ const SplashScreen = ({ navigation }) => {
 
             <View style={styles.parentView}>
 
-                <Image source={require('../../Images/splashlogo.png')} style={{ width: 100, height: 35 }} />
+                <Image source={require('../../Images/logoanim.gif')} style={{ width: 175, height: 175 }} />
 
-                <Text style={{ color: Colors.darkblack, fontSize: 12, marginLeft: 34 }}>Business Loan</Text>
+                {/* <Text style={{ color: Colors.darkblack, fontSize: 12, marginLeft: 34 }}>Business Loan</Text> */}
 
 
             </View>
@@ -89,7 +108,8 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        backgroundColor: Colors.white
     },
     imageStyle: {
         width: '100%',

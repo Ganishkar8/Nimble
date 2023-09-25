@@ -24,7 +24,18 @@ const PickerComp = ({ textLabel, pickerStyle, Disable, pickerdata, componentName
 
                     {
                         pickerdata.map(item => {
-                            return <Picker.Item value={item.SubCodeID} label={item.Label} />
+                            let labelValue;
+
+                            switch (componentName) {
+                                case 'industryPicker':
+                                case 'loanTypePicker':
+                                case 'productIdPicker':
+                                    labelValue = item.genericName;
+                                    break;
+                                default:
+                                    labelValue = item.label;
+                            }
+                            return <Picker.Item value={item.id} label={labelValue} />
                         })
                     }
                 </Picker>
