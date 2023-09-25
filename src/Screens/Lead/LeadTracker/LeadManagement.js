@@ -8,9 +8,8 @@ import {
     StyleSheet,
     TextInput,
     TouchableOpacity,
-    SafeAreaView,
+    SafeAreaView
 } from 'react-native';
-import { DatePickerModal } from 'react-native-paper-dates';
 
 import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -28,6 +27,14 @@ import Modal from 'react-native-modal';
 import TextComp from '../../../Components/TextComp';
 import apiInstancelocal from '../../../Utils/apiInstancelocal';
 import { useIsFocused } from '@react-navigation/native';
+import Feather from 'react-native-vector-icons/Feather';
+
+//
+import SortByComp from '../../../Components/Filter/SortByComp';
+import StatusComp from '../../../Components/Filter/StatusComp';
+import TypeComp from '../../../Components/Filter/TypeComp';
+import AgeingComp from '../../../Components/Filter/AgeingComp';
+import DateComp from '../../../Components/Filter/DateComp';
 
 const data = [
 
@@ -47,7 +54,7 @@ const mainFilterDataArr = [
 
 const statusDataArr = [
 
-    { name: 'Approve', id: 'APR', checked: true },
+    { name: 'Approve', id: 'APR', checked: false },
     { name: 'Pending', id: 'PEN', checked: false },
     { name: 'Rejected', id: 'REJ', checked: false },
     { name: 'Draft', id: 'DFT', checked: false },
@@ -56,7 +63,7 @@ const statusDataArr = [
 
 const typeDataArr = [
 
-    { name: 'Hot', id: 'HOT', checked: true },
+    { name: 'Hot', id: 'HOT', checked: false },
     { name: 'Warm', id: 'WARM', checked: false },
     { name: 'Cold', id: 'COLD', checked: false }
 
@@ -64,31 +71,23 @@ const typeDataArr = [
 
 const LeadManagement = (props, { navigation, route }) => {
 
-    const [click, setClick] = useState('');
     const [search, setSearch] = useState('');
     const [pendingData, setPendingData] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
     const [mainFilterData, setMainFilteredData] = useState(mainFilterDataArr);
     const [loading, setLoading] = useState(false);
     const [visible, setVisible] = useState(false);
-    const [checked, setChecked] = useState('first');
     const [filterVisible, setFilterVisible] = useState('');
-    const [statusData, setStatusData] = useState(statusDataArr);
-    const [typeData, setTypeData] = useState(typeDataArr);
-    const [refreshFlatlist, setRefreshFlatList] = useState(false);
-    const [refreshTypeFlatlist, setRefreshTypeFlatList] = useState(false);
-    const [fromDate, setFromDate] = useState('10/09/2023');
-    const [toDate, setToDate] = useState('11/09/2023');
-    const [choosenLabel, setChoosenLabel] = useState('Native');
-    const [choosenIndex, setChoosenIndex] = useState('2');
-    const [age, setAge] = useState('25');
     const [bottomLeadSheetVisible, setBottomLeadSheetVisible] = useState(false);
     const showBottomSheet = () => setBottomLeadSheetVisible(true);
     const hideBottomSheet = () => setBottomLeadSheetVisible(false);
     const isScreenVisible = useIsFocused();
 
-
-
+    const [sortedFilterValue, setSortedFilterValue] = useState('');
+    const [statusFilterValue, setStatusFilterValue] = useState('');
+    const [typeFilterValue, setTypeFilterValue] = useState('');
+    const [dateFilterValue, setDateFilterValue] = useState('');
+    const [ageFilterValue, setAgeFilterValue] = useState('');
 
 
     useEffect(() => {
@@ -106,6 +105,50 @@ const LeadManagement = (props, { navigation, route }) => {
         return () =>
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
     }, [navigation, isScreenVisible]);
+
+    const filterClick = (type, value) => {
+        console.log('SortedValues::' + JSON.stringify(value))
+        if (type == 'SO') {
+            setSortedFilterValue(value)
+        }
+        if (type == 'ST') {
+            setStatusFilterValue(value)
+        }
+        if (type == 'DT') {
+            setDateFilterValue(value)
+        }
+        if (type == 'TP') {
+            setTypeFilterValue(value)
+        }
+        if (type == 'AG') {
+            setAgeFilterValue(value)
+        }
+    }
+
+    const applyFilter = () => {
+        let sort = sortedFilterValue;
+        let status = '';
+        for (let i = 0; i < statusFilterValue.length; i++) {
+            if (statusFilterValue[i].checked == true) {
+                status = statusFilterValue[i].id
+                break
+            }
+        }
+        let from = dateFilterValue.FromDate
+        let to = dateFilterValue.ToDate
+        let type = '';
+        for (let i = 0; i < typeFilterValue.length; i++) {
+            if (typeFilterValue[i].checked == true) {
+                type = typeFilterValue[i].id
+                break
+            }
+        }
+        let age = ageFilterValue.AGE
+        let operator = ageFilterValue.Label
+        console.log("ApplyFilterData::" + "Sort::" + sort + " Status::" + status 
+        + " FromDate::" + from + " ToDate::" + to + " Type::" + type
+        + " Age::" + age + " Operator::" + operator)
+    }
 
     const toggleBottomNavigationView = () => {
         //Toggling the visibility state of the bottom sheet
@@ -136,10 +179,24 @@ const LeadManagement = (props, { navigation, route }) => {
     const handleclick = (value, index) => {
         //alert(JSON.stringify(value))
         if (value.name == 'Filter') {
-            // setVisible(true)
+            setVisible(true)
         } else {
             alert('Please go..tata bye')
         }
+    }
+
+    const updateMainFilteredData = (item, index) => {
+        let fiterPosition = mainFilterData
+        for (let i = 0; i < fiterPosition.length; i++) {
+            if (fiterPosition[i].id == item.id) {
+                fiterPosition[i].isSelected = true
+                setFilterVisible(fiterPosition[i].id)
+            } else {
+                fiterPosition[i].isSelected = false
+            }
+        }
+        //alert(JSON.stringify(fiterPosition))
+        setMainFilteredData(fiterPosition)
     }
 
     const listView = ({ item }) => {
@@ -380,6 +437,106 @@ const LeadManagement = (props, { navigation, route }) => {
                     keyExtractor={(item, index) => index.toString()}
                 />
             </View>
+
+            <BottomSheet
+                visible={visible}
+                //setting the visibility state of the bottom shee
+                onBackButtonPress={toggleBottomNavigationView}
+                //Toggling the visibility state
+                onBackdropPress={toggleBottomNavigationView}
+            //Toggling the visibility state
+            >
+                {/*Bottom Sheet inner View*/}
+                <View style={styles.bottomNavigationView}>
+                    <View
+                        style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                        <Text
+                            style={{
+                                padding: 15,
+                                fontSize: 16,
+                                color: Colors.black
+                            }}>
+                            {language[0][props.language].str_filter}
+                        </Text>
+                        <TouchableOpacity onPress={toggleBottomNavigationView} activeOpacity={9} style={{ justifyContent: 'center', alignItems: 'center', marginRight: 10 }}>
+                            <View >
+                                <Feather name='x' size={25} color={Colors.dimText} />
+                            </View>
+                        </TouchableOpacity>
+
+
+                    </View>
+                    <View style={{ height: 1, width: '100%', backgroundColor: Colors.line }} />
+                    <View style={{ width: '100%', flexDirection: 'row' }}>
+                        <View style={{ width: '35%' }}>
+                            <FlatList
+                                data={mainFilterData}
+                                horizontal={false}
+                                showsVerticalScrollIndicator={false}
+                                keyExtractor={(item, index) => index.toString()}
+                                renderItem={({ item, index }) => {
+                                    return (
+                                        <TouchableOpacity onPress={() => updateMainFilteredData(item, index)} activeOpacity={0.5}>
+                                            <View style={[styles.viewStyleFilter, { flexDirection: 'row', marginTop: 5 }]}>
+
+                                                {item.isSelected ?
+                                                    (<View style={{ width: 7, height: 35, backgroundColor: Colors.skyBlue }} />) : null}
+                                                <View style={{ width: '95%', padding: 17 }}>
+                                                    <Text style={[styles.textColor, { marginRight: 8, textAlign: 'left' }]}>{item.name}</Text>
+                                                </View>
+                                            </View>
+                                        </TouchableOpacity>
+                                    )
+                                }}
+                            />
+                        </View>
+                        <View style={{ width: 1, height: 400, backgroundColor: Colors.line }} />
+                        <View style={{ width: '65%' }}>
+                            {filterVisible === 'SO' &&
+                                <SortByComp props={props} filterClick={filterClick} />
+                            }
+
+                            {filterVisible === 'ST' &&
+                                <StatusComp props={props} statusData={statusDataArr} filterClick={filterClick} />
+                            }
+
+                            {filterVisible === 'DT' &&
+                                <DateComp props={props} filterClick={filterClick} />
+                            }
+
+                            {filterVisible === 'TP' &&
+                                <TypeComp props={props} typeData={typeDataArr} filterClick={filterClick} />
+                            }
+
+                            {filterVisible === 'AG' &&
+                                <AgeingComp props={props} filterClick={filterClick} />
+                            }
+
+                        </View>
+
+                    </View>
+                </View>
+                <View style={{
+                    backgroundColor: Colors.white, height: 90, width: '100%', shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 5 },
+                    shadowOpacity: 0.7,
+                    shadowRadius: 2,
+                    elevation: 6, justifyContent: 'space-between', alignItems: 'center', flexDirection: 'row'
+                }}>
+                    <View style={{ padding: 25 }}>
+                        <TextComp textStyle={{ marginTop: 0, fontSize: 18, color: Colors.dimmText, marginLeft: 3 }} textVal={language[0][props.language].str_clearfilters} Visible={false}></TextComp>
+                    </View>
+                    <TouchableOpacity activeOpacity={10} onPress={applyFilter} style={{
+                        width: '40%', height: 45, backgroundColor: Colors.darkblue, alignItems: 'center', justifyContent: 'center', marginRight: 20,
+                        borderRadius: 25
+                    }}>
+                        <View>
+                            <TextComp textStyle={{ marginTop: 0, fontSize: 14, color: Colors.white, marginLeft: 3 }} textVal={language[0][props.language].str_apply} Visible={false}></TextComp>
+                        </View>
+                    </TouchableOpacity>
+
+                </View>
+            </BottomSheet>
             <FAB
                 icon="plus"
                 color={Colors.white}

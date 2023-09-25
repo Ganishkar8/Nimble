@@ -5,6 +5,7 @@ export default {
     darkblue: '#0294ff',
     lightwhite:'#fefefe',
     black:'#000000',
+    dimblack:'#00000099',
     primaryTextcolour:'#6b6b6b',
     lightgrey: '#9f9f9f',
     mediumgrey: '#707070',
@@ -21,5 +22,6 @@ export default {
     approvedBorder :'#178e39',
     approvedBg : '#f5f8fa',
     skyblue : '#f5f8fa',
-    disableBg : '#dfe6ea'
+    disableBg : '#dfe6ea',
+    maroon : '#FFF2C5'
 }
