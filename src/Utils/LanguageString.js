@@ -143,6 +143,7 @@ export const language = [{
     str_cbmace: 'Maximun allowed credit enquiries',
     str_cbloanstatus: 'Loan Status',
     str_cbotherstatus: 'Other Status',
+
   },
   ta: {
     first: 'comment allez vous',

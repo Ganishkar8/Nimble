@@ -24,13 +24,15 @@ export default {
         fontSize: 15,
         fontWeight: '400',
         height: 43,
+        color: '#000000'
     }, picker: {
         height: 50,
         width: '100%',
         borderRadius: 8,
         borderWidth: 1,
         borderColor: '#ccc',
-        textAlign: 'center'
+        textAlign: 'center',
+        color: '#000000'
     }, buttonView: {
         width: '100%',
         height: 50,

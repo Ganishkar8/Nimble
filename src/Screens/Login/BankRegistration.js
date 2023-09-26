@@ -70,8 +70,10 @@ const BankRegistration = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
     const [Visible, setVisible] = useState(false);
     const [errMsg, setErrMsg] = useState('');
+    const [responseErrMsg, setResponseErrMsg] = useState('');
     const { confirmCode, timer } = props;
     const [value, setValue] = useState('');
+    const [status, setStatus] = useState('');
     const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
     const showBottomSheet = () => setBottomErrorSheetVisible(true);
     const hideBottomSheet = () => setBottomErrorSheetVisible(false);
@@ -262,8 +264,9 @@ const BankRegistration = (props, { navigation }) => {
                             if (global.DEBUG_MODE) console.log('isValidResponse:::::', isValidResponse);
                             if (isValidResponse) {
                                 // checkPermissions();
-                                setLoading(false);
-                                setVisible(true);
+
+                                //setLoading(false);
+
 
                             } else {
 
@@ -311,24 +314,33 @@ const BankRegistration = (props, { navigation }) => {
                 if (global.DEBUG_MODE) console.error('Error parsing XML:', error);
                 validresponse = false;
             } else {
-                if (global.DEBUG_MODE) console.log('Parsed XML:', JSON.stringify(result.Main.BankDetails));
-                if (global.DEBUG_MODE) console.log('Parsed XML:', JSON.stringify(result.Main.BankDetails[0].BankURL[0]));
-                const bankDetails = result.Main.BankDetails[0];
-                global.BANKID = bankDetails.BankID[0];
-                var bankURL = bankDetails.BankURL[0];
-                global.BASEURL = bankURL;
-                AsyncStorage.setItem('IsBankRegistered', 'true');
-                //global.ISBRCONNECT = bankDetails.IsBRConnect[0];
-                global.BRCONNECTVERSION = bankDetails.BRConnectVersionNo[0];
-                global.BRCONNECTCERTIFICATEHASH = bankDetails.CertificateHash[0];
-                var bankURL1 = bankDetails.BankURL1[0];
-                const configVersion = bankDetails.ConfigVersion[0];
-                const certificateHash = bankDetails.CertificateHash[0];
-                global.BRCONNECTAPIKEY = bankDetails.BRConnectAPIKey[0];
-                global.BRCONNECTAPPID = bankDetails.BRConnectAPPID[0];
-                Bank_Detail_Table.deleteAllBankRecords().then(deleted => {
-                    handleInsertBankDetail(global.BANKID, global.BASEURL, "1", global.BASEURL, bankURL1, configVersion, certificateHash)
-                })
+                setStatus(result.Main.Response[0].Status)
+                if (result.Main.Response[0].Status == '1') {
+                    if (global.DEBUG_MODE) console.log('Parsed XML:', JSON.stringify(result.Main.BankDetails));
+                    if (global.DEBUG_MODE) console.log('Parsed XML:', JSON.stringify(result.Main.BankDetails[0].BankURL[0]));
+                    const bankDetails = result.Main.BankDetails[0];
+                    global.BANKID = bankDetails.BankID[0];
+                    var bankURL = bankDetails.BankURL[0];
+                    global.BASEURL = bankURL;
+                    AsyncStorage.setItem('IsBankRegistered', 'true');
+                    //global.ISBRCONNECT = bankDetails.IsBRConnect[0];
+                    global.BRCONNECTVERSION = bankDetails.BRConnectVersionNo[0];
+                    global.BRCONNECTCERTIFICATEHASH = bankDetails.CertificateHash[0];
+                    var bankURL1 = bankDetails.BankURL1[0];
+                    const configVersion = bankDetails.ConfigVersion[0];
+                    const certificateHash = bankDetails.CertificateHash[0];
+                    global.BRCONNECTAPIKEY = bankDetails.BRConnectAPIKey[0];
+                    global.BRCONNECTAPPID = bankDetails.BRConnectAPPID[0];
+                    Bank_Detail_Table.deleteAllBankRecords().then(deleted => {
+                        handleInsertBankDetail(global.BANKID, global.BASEURL, "1", global.BASEURL, bankURL1, configVersion, certificateHash)
+                    })
+                    setLoading(false);
+                    setVisible(true);
+                } else {
+                    alert(result.Main.Response[0].ErrMsg)
+                    setLoading(false);
+                    //setResponseErrMsg(result.Main.Response[0].ErrMsg)
+                }
                 validresponse = true;
             }
 
