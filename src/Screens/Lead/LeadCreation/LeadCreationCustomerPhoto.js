@@ -198,7 +198,8 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
         // setVisible(false)
 
         hidephotoBottomSheet();
-        ImagePicker.openCamera({
+        Image
+        .openCamera({
             width: 300,
             height: 400,
             cropping: true,

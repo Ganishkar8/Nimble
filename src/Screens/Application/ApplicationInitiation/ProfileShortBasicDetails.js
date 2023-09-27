@@ -649,7 +649,7 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
       });
   };
 
-  const updateLeadDetails = () => {
+  const updateBasicDetails = () => {
     if (validate()) {
       showBottomSheet();
     } else {
@@ -1527,7 +1527,7 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
           textStyle={{color: Colors.white, fontSize: 13, fontWeight: 500}}
           viewStyle={Commonstyles.buttonView}
           innerStyle={Commonstyles.buttonViewInnerStyle}
-          handleClick={updateLeadDetails}
+          handleClick={updateBasicDetails}
         />
       </ScrollView>
     </SafeAreaView>
