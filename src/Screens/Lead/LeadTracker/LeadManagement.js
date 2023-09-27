@@ -145,9 +145,9 @@ const LeadManagement = (props, { navigation, route }) => {
         }
         let age = ageFilterValue.AGE
         let operator = ageFilterValue.Label
-        console.log("ApplyFilterData::" + "Sort::" + sort + " Status::" + status 
-        + " FromDate::" + from + " ToDate::" + to + " Type::" + type
-        + " Age::" + age + " Operator::" + operator)
+        console.log("ApplyFilterData::" + "Sort::" + sort + " Status::" + status
+            + " FromDate::" + from + " ToDate::" + to + " Type::" + type
+            + " Age::" + age + " Operator::" + operator)
     }
 
     const toggleBottomNavigationView = () => {
@@ -422,7 +422,8 @@ const LeadManagement = (props, { navigation, route }) => {
                             width: '80%',
                             height: 44,
                             fontSize: 14.4,
-                            fontWeight: '400'
+                            fontWeight: '400',
+                            color: Colors.black
                         }}
                     />
                     <Ionicons name="search" style={{ marginStart: 32 }} size={20} color={'#aaaaaa'} />

@@ -69,6 +69,7 @@ const LeadDetails = (props, { navigation, route }) => {
 
     useEffect(() => {
         //below code is used for hiding  bottom tab
+        //alert(JSON.stringify(props.route.params.leadData))
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         return () =>
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
@@ -257,7 +258,7 @@ const LeadDetails = (props, { navigation, route }) => {
 
                 <View style={styles.line}></View>
 
-                <TouchableOpacity onPress={() => props.navigation.navigate('LeadApproval')} activeOpacity={0.5} style={{ width: '100%', marginTop: '8%', alignItems: 'center' }}>
+                <TouchableOpacity onPress={() => props.navigation.navigate('LeadApproval', { leadData: props.route.params.leadData })} activeOpacity={0.5} style={{ width: '100%', marginTop: '8%', alignItems: 'center' }}>
                     <View style={{ flexDirection: 'row' }}>
 
                         <View style={{ width: '70%', justifyContent: 'center' }}>

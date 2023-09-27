@@ -49,6 +49,7 @@ const ReAssign = (props, { navigation }) => {
     const [reasonIndex, setReasonIndex] = useState('');
     const [reasonData, setReasonData] = useState([]);
     const [reAssignedto, setReAssignedto] = useState('');
+    const [reAssignedtoID, setReAssignedtoID] = useState('');
     const [search, setSearch] = useState('');
     const [filteredData, setFilteredData] = useState([]);
     const [nonFilteredData, setNonFilteredData] = useState([]);
@@ -186,7 +187,7 @@ const ReAssign = (props, { navigation }) => {
 
         return (
             <View>
-                <TouchableOpacity onPress={() => { setReAssignedto(item.userIdAndUserName); setVisible(false); setSearch(''); setFilteredData(nonFilteredData) }} activeOpacity={0.9}>
+                <TouchableOpacity onPress={() => { setReAssignedto(item.userIdAndUserName); setReAssignedtoID(item.id); setVisible(false); setSearch(''); setFilteredData(nonFilteredData) }} activeOpacity={0.9}>
                     <View style={{
                         width: '92%', margin: 13, backgroundColor: 'white',
                         alignItems: 'center'
@@ -213,6 +214,25 @@ const ReAssign = (props, { navigation }) => {
             showBottomSheet();
             return;
         }
+        const appDetails = {
+            "reasonId": reasonLabel,
+            "userName": global.USERID,
+            "fausername": reAssignedtoID
+        }
+        const baseURL = '8901'
+        setLoading(true)
+        apiInstancelocal(baseURL).post(`api/v1/lead-Approved/ReAssignedByBm/true/${global.leadID}`, appDetails)
+            .then(async (response) => {
+                // Handle the response data
+                setLoading(false)
+
+
+            })
+            .catch((error) => {
+                // Handle the error
+                setLoading(false)
+                alert(JSON.stringify(error.response));
+            });
     }
 
     const validate = () => {

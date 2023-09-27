@@ -29,7 +29,7 @@ import apiInstancelocal from '../../../Utils/apiInstancelocal';
 
 
 
-const LeadApproval = (props, { navigation }) => {
+const LeadApproval = (props, { navigation, route }) => {
 
     const [errMsg, setErrMsg] = useState('');
     const [currentPosition, setCurrentPosition] = useState(0);
@@ -42,7 +42,7 @@ const LeadApproval = (props, { navigation }) => {
     const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
     const showBottomSheet = () => setBottomErrorSheetVisible(true);
     const hideBottomSheet = () => setBottomErrorSheetVisible(false);
-
+    const [leadData, setLeadData] = useState(props.route.params.leadData);
 
 
     useEffect(() => {
@@ -148,7 +148,7 @@ const LeadApproval = (props, { navigation }) => {
         }
         const baseURL = '8901'
         setLoading(true)
-        apiInstancelocal(baseURL).post(`/api/v1/lead-Approved/ByBm/${global.leadID}`, appDetails)
+        apiInstancelocal(baseURL).post(`/api/v1/lead-Approved/ByBm/${props.route.params.leadData.id}`, appDetails)
             .then(async (response) => {
                 // Handle the response data
                 setLoading(false)
@@ -158,7 +158,7 @@ const LeadApproval = (props, { navigation }) => {
             .catch((error) => {
                 // Handle the error
                 setLoading(false)
-                alert(error);
+                alert(JSON.stringify(error.response));
             });
     }
 
