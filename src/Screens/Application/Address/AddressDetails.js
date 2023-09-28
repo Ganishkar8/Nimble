@@ -1,7 +1,3 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-undef */
-/* eslint-disable react-native/no-inline-styles */
-/* eslint-disable prettier/prettier */
 import {View, Text, ScrollView, SafeAreaView, StyleSheet} from 'react-native';
 import {React, useState, useRef, useEffect} from 'react';
 import MyStatusBar from '../../../Components/ MyStatusBar';
@@ -10,8 +6,6 @@ import {connect} from 'react-redux';
 import {languageAction} from '../../../Utils/redux/actions/languageAction';
 import {language} from '../../../Utils/LanguageString';
 import Commonstyles from '../../../Utils/Commonstyles';
-import TextComp from '../../../Components/TextComp';
-import tbl_SystemMandatoryFields from '../../../Database/Table/tbl_SystemMandatoryFields';
 import Colors from '../../../Utils/Colors';
 import Loading from '../../../Components/Loading';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
@@ -193,6 +187,13 @@ const AddressDetails = (props, {navigation}) => {
       </ScrollView>
     </SafeAreaView>
   );
+};
+
+const mapStateToProps = state => {
+  const {language} = state.languageReducer;
+  return {
+    language: language,
+  };
 };
 
 const mapDispatchToProps = dispatch => ({
