@@ -57,4 +57,31 @@ export default {
     alignItems: 'center',
     justifyContent: 'center',
   },
+  parentView: {
+    flex: 1,
+    backgroundColor: Colors.lightwhite,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  contentContainer: {
+    paddingBottom: 50,
+    flexGrow: 1,
+  },
+  line: {
+    backgroundColor: '#dbdbdb', // Change the color as needed
+    height: 1,
+    width: '90%',
+    marginTop: '5%', // Adjust the height as needed
+  },
+  modal: {
+    justifyContent: 'flex-end',
+    margin: 0,
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 16,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
 };

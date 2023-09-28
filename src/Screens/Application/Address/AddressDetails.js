@@ -24,26 +24,6 @@ const AddressDetails = (props, {navigation}) => {
   const [loading, setLoading] = useState(false);
   const [Data, setNewData] = useState();
   const [DataArray, setNewDataArray] = useState([]);
-  // [{},{},{},{},{},{},{},{},{},]
-  // {
-  //   FieldUiD:'',
-  //   Fieldvalue: '',
-  //   isMandatory: '',
-  //   isHide:'',
-  //   isDisable:'',
-  //   FieldCaption: '',
-  // },
-  // Addressline2: {
-  //   isMandatory: '',
-  //   length: '',
-  //   isFocused: false,
-  // },
-  // Addressline2: {
-  //   isMandatory: '',
-  //   length: '',
-  //   isFocused: false,
-  // },
-
   const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
   const showBottomSheet = () => setBottomErrorSheetVisible(true);
   const hideBottomSheet = () => setBottomErrorSheetVisible(false);
@@ -60,18 +40,6 @@ const AddressDetails = (props, {navigation}) => {
         .getParent()
         ?.setOptions({tabBarStyle: undefined, tabBarVisible: undefined});
   }, [navigation]);
-
-  // const updateDatainParent = (fieldName, newValue) => {
-  //   setNewData(prevData => ({
-  //     ...prevData,
-  //     [fieldName]: newValue,
-  //   }));
-
-  //   console.log(JSON.stringify(Data));
-
-  //   // const isFocusedValue = DataError.Addressline1.isFocused;
-  //   // console.log(isFocusedValue);
-  // };
 
   const updateDatainParent = (
     fieldName,
@@ -118,13 +86,12 @@ const AddressDetails = (props, {navigation}) => {
   const addressSubmit = () => {};
 
   return (
-    <SafeAreaView
-      style={[styles.parentView, {backgroundColor: Colors.lightwhite}]}>
+    <SafeAreaView style={Commonstyles.parentView}>
       <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
 
       <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.contentContainer}
+        style={Commonstyles.scrollView}
+        contentContainerStyle={Commonstyles.contentContainer}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled">
         {loading ? <Loading /> : null}
@@ -226,50 +193,6 @@ const AddressDetails = (props, {navigation}) => {
       </ScrollView>
     </SafeAreaView>
   );
-};
-
-const styles = StyleSheet.create({
-  parentView: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  contentContainer: {
-    paddingBottom: 50,
-    flexGrow: 1,
-  },
-  line: {
-    backgroundColor: '#dbdbdb', // Change the color as needed
-    height: 1,
-    width: '90%',
-    marginTop: '5%', // Adjust the height as needed
-  },
-  picker: {
-    height: 50,
-    width: '100%',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    textAlign: 'center',
-  },
-  modal: {
-    justifyContent: 'flex-end',
-    margin: 0,
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    padding: 16,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-});
-
-const mapStateToProps = state => {
-  const {language} = state.languageReducer;
-  return {
-    language: language,
-  };
 };
 
 const mapDispatchToProps = dispatch => ({
