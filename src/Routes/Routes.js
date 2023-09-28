@@ -11,10 +11,11 @@ import ProfileShortBasicDetails from '../Screens/Application/ApplicationInitiati
 import ProfileShortExistingClientDetails from '../Screens/Application/ApplicationInitiation/ProfileShortExistingClientDetails';
 import ProfileShortKYCVerificationStatus from '../Screens/Application/ApplicationInitiation/ProfileShortKYCVerificationStatus';
 import ProfileShortApplicantDetails from '../Screens/Application/ApplicationInitiation/ProfileShortApplicantDetails';
+import LeadCreationCustomerPhoto from '../Screens/Lead/LeadCreation/LeadCreationCustomerPhoto';
 
 const Stack = createNativeStackNavigator();
 
-//dev imports 
+//dev imports
 import LeadManagement from '../Screens/Lead/LeadTracker/LeadManagement';
 import LoanApplicationMain from '../Screens/LoanApplication/LoanApplicationMain';
 import CBResponseScreen from '../Screens/CreditBureau/CBResponseScreen';
@@ -74,6 +75,11 @@ const Route = () => {
         <Stack.Screen
           name="ProfileShortApplicantDetails"
           component={ProfileShortApplicantDetails}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="LeadCreationCustomerPhoto"
+          component={LeadCreationCustomerPhoto}
           options={{headerShown: false}}
         />
       </Stack.Navigator>

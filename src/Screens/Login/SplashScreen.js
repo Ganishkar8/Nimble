@@ -15,6 +15,7 @@ import Sqlitedatabase from '../../Database/Sqlitedatabase';
 import tbl_SystemMandatoryFields from '../../Database/Table/tbl_SystemMandatoryFields';
 import tbl_UserCodeDetails from '../../Database/Table/tbl_UserCodeDetails';
 import tbl_SystemCodeDetails from '../../Database/Table/tbl_SystemCodeDetails';
+import Bank_Detail_Table from '../../Database/Table/Bank_Detail_Table';
 
 const SplashScreen = ({navigation}) => {
   useEffect(() => {
@@ -921,13 +922,11 @@ const SplashScreen = ({navigation}) => {
     <SafeAreaView>
       <View style={styles.parentView}>
         <Image
-          source={require('../../Images/splashlogo.png')}
-          style={{width: 100, height: 35}}
+          source={require('../../Images/logoanim.gif')}
+          style={{width: 175, height: 175}}
         />
 
-        <Text style={{color: Colors.darkblack, fontSize: 12, marginLeft: 34}}>
-          Business Loan
-        </Text>
+        {/* <Text style={{ color: Colors.darkblack, fontSize: 12, marginLeft: 34 }}>Business Loan</Text> */}
       </View>
     </SafeAreaView>
   );
@@ -939,6 +938,7 @@ const styles = StyleSheet.create({
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: Colors.white,
   },
   imageStyle: {
     width: '100%',

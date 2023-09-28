@@ -43,6 +43,8 @@ import Modal from 'react-native-modal';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import Geolocation from 'react-native-geolocation-service';
 import apiInstancelocal from '../../../Utils/apiInstancelocal';
+import PickerComp from '../../../Components/PickerComp';
+import TextInputComp from '../../../Components/TextInputComp';
 
 
 const LeadCreationLoan = (props, { navigation }) => {
@@ -68,6 +70,15 @@ const LeadCreationLoan = (props, { navigation }) => {
     const [leadTypeMan, setLeadTypeMan] = useState(false);
     const [leadTypeVisible, setLeadTypeVisible] = useState(true);
     const [leadTypeDisable, setLeadTypeDisable] = useState(false);
+
+    const [productIdLabel, setProductIdLabel] = useState('');
+    const [productIdIndex, setProductIdIndex] = useState('');
+    const [productIdCaption, setProductIdCaption] = useState('PRODUCT ID');
+    const [productIdMan, setProductIdMan] = useState(false);
+    const [productIdVisible, setProductIdVisible] = useState(true);
+    const [productIdDisable, setProductIdDisable] = useState(false);
+    const [productIdData, setProductIdData] = useState([]);
+
     const [loanAmount, setLoanAmount] = useState('');
     const [loanAmountCaption, setLoanAmountCaption] = useState("LOAN AMOUNT (MULTIPLE OF 5000's)");
     const [loanAmountMan, setLoanAmountMan] = useState(false);
@@ -85,10 +96,12 @@ const LeadCreationLoan = (props, { navigation }) => {
     const hideLocationBottomSheet = () => setLocationSheetVisible(false);
 
     const [locationSheetVisible, setLocationSheetVisible] = useState(false);
+    const loanAmountRef = useRef(null);
 
 
     useEffect(() => {
-        pickerData();
+        //  pickerData();
+        callPickerApi();
         makeSystemMandatoryFields();
     }, []);
 
@@ -242,6 +255,25 @@ const LeadCreationLoan = (props, { navigation }) => {
             }
         })
 
+        tbl_SystemMandatoryFields.getSystemMandatoryFieldsBasedOnFieldUIID('sp_productid').then(value => {
+            if (value !== undefined && value.length > 0) {
+                console.log(value[0])
+                setProductIdCaption(value[0].FieldName)
+                if (value[0].IsMandatory == "1") {
+                    setProductIdMan(true);
+                }
+                if (value[0].IsHide == "1") {
+                    setProductIdVisible(false);
+                }
+                if (value[0].IsDisable == "1") {
+                    setProductIdDisable(true);
+                }
+                if (value[0].IsCaptionChange == "1") {
+                    setProductIdCaption(value[0].FieldCaptionChange)
+                }
+            }
+        })
+
         //firstName
         tbl_SystemMandatoryFields.getSystemMandatoryFieldsBasedOnFieldUIID('sp_loanpurpose').then(value => {
             if (value !== undefined && value.length > 0) {
@@ -306,7 +338,6 @@ const LeadCreationLoan = (props, { navigation }) => {
 
     }
 
-
     const updateLeadDetails = () => {
 
         if (validate()) {
@@ -356,6 +387,65 @@ const LeadCreationLoan = (props, { navigation }) => {
 
     }
 
+    const callPickerApi = () => {
+
+        const baseURL = '8082'
+        setLoading(true)
+        var loantyperesponse = false; var productidresponse = false; var loanpurposeresponse = false; var leadtyperesponse = false;
+        apiInstancelocal(baseURL).get('/api/v1/generic-master/type?size=100&type=LNTP')
+            .then(async (response) => {
+                loantyperesponse = true;
+                if (loantyperesponse && productidresponse && loanpurposeresponse && leadtyperesponse) {
+                    setLoading(false);
+                }
+                setLoanTypeData(response.data.content)
+            })
+            .catch((error) => {
+                if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
+                setLoading(false)
+                alert(error);
+            });
+        apiInstancelocal(baseURL).get('/api/v1/generic-master/type?size=100&type=PD')
+            .then(async (response) => {
+                productidresponse = true;
+                if (loantyperesponse && productidresponse && loanpurposeresponse && leadtyperesponse) {
+                    setLoading(false);
+                }
+                setProductIdData(response.data.content)
+            })
+            .catch((error) => {
+                if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
+                setLoading(false)
+                alert(error);
+            });
+        apiInstancelocal(baseURL).get('/api/v1/system-code/master/LEAD_TYPE')
+            .then(async (response) => {
+                leadtyperesponse = true;
+                if (loantyperesponse && productidresponse && loanpurposeresponse && leadtyperesponse) {
+                    setLoading(false);
+                }
+                setLeadTypeData(response.data)
+            })
+            .catch((error) => {
+                if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
+                setLoading(false)
+            });
+        apiInstancelocal(baseURL).get('/api/v1/system-code/master/LNPS')
+            .then(async (response) => {
+                loanpurposeresponse = true;
+                if (loantyperesponse && productidresponse && loanpurposeresponse && leadtyperesponse) {
+                    setLoading(false);
+                }
+                setLoanPurposeData(response.data)
+            })
+            .catch((error) => {
+                if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
+                setLoading(false)
+            });
+
+
+    }
+
     const getOneTimeLocation = () => {
         showLocationBottomSheet();
         Geolocation.getCurrentPosition(
@@ -393,8 +483,16 @@ const LeadCreationLoan = (props, { navigation }) => {
         var errorMessage = '';
 
         if (loanTypeMan && loanTypeVisible) {
-            if (loanTypeLabel === 'Select') {
+            if (loanTypeLabel === '') {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + loanTypeCaption + '\n';
+                i++;
+                flag = true;
+            }
+        }
+
+        if (productIdMan && productIdVisible) {
+            if (loanTypeLabel === '') {
+                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + productIdCaption + '\n';
                 i++;
                 flag = true;
             }
@@ -434,6 +532,40 @@ const LeadCreationLoan = (props, { navigation }) => {
 
     function isMultipleOf5000(number) {
         return number % 5000 === 0;
+    }
+
+    const handleClick = (componentName, textValue) => {
+
+        if (componentName === 'loanAmount') {
+            setLoanAmount(textValue)
+        }
+
+    }
+
+    const handleReference = (componentName) => {
+
+        if (componentName === 'loanAmount') {
+
+        }
+
+    };
+
+    const handlePickerClick = (componentName, label, index) => {
+
+        if (componentName === 'loanTypePicker') {
+            setLoanTypeLabel(label);
+            setLoanTypeIndex(index);
+        } else if (componentName === 'productIdPicker') {
+            setProductIdLabel(label);
+            setProductIdIndex(index);
+        } else if (componentName === 'loanPurposePicker') {
+            setLoanPurposeLabel(label);
+            setLoanPurposeIndex(index);
+        } else if (componentName === 'leadTypePicker') {
+            setLeadTypeLabel(label);
+            setLeadTypeIndex(index);
+        }
+
     }
 
 
@@ -551,68 +683,46 @@ const LeadCreationLoan = (props, { navigation }) => {
 
 
 
+
+
                     {loanTypeVisible && <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
+
                             <TextComp textVal={loanTypeCaption} textStyle={Commonstyles.inputtextStyle} Visible={loanTypeMan} />
 
                         </View>
-                        <View style={{
-                            width: '95%',
-                        }}>
 
-                            <Picker
-                                selectedValue={loanTypeLabel}
-                                style={styles.picker}
-                                enabled={loanTypeDisable}
-                                onValueChange={(itemValue, itemIndex) => {
-                                    setLoanTypeLabel(itemValue);
-                                    setLoanTypeIndex(itemIndex);
-                                }}>
-                                {
-                                    loanTypeData.map(item => {
-                                        return <Picker.Item value={item.SubCodeID} label={item.Label} />
-                                    })
-                                }
-                            </Picker>
+                        <PickerComp textLabel={loanTypeLabel} pickerStyle={Commonstyles.picker} Disable={loanTypeDisable} pickerdata={loanTypeData} componentName='loanTypePicker' handlePickerClick={handlePickerClick} />
+
+
+                    </View>}
+
+
+                    {productIdVisible && <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+                        <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
+
+                            <TextComp textVal={productIdCaption} textStyle={Commonstyles.inputtextStyle} Visible={productIdMan} />
 
                         </View>
-                        <View style={{
-                            width: '90%', marginTop: 6, flexDirection: 'row',
-                            borderBottomWidth: 1, borderBottomColor: '#e2e2e2', position: 'absolute', bottom: 3
-                        }}></View>
+
+                        <PickerComp textLabel={productIdLabel} pickerStyle={Commonstyles.picker} Disable={productIdDisable} pickerdata={productIdData} componentName='productIdPicker' handlePickerClick={handlePickerClick} />
+
+
                     </View>}
 
 
                     {loanPurposeVisible && <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
+
                             <TextComp textVal={loanPurposeCaption} textStyle={Commonstyles.inputtextStyle} Visible={loanPurposeMan} />
 
                         </View>
-                        <View style={{
-                            width: '95%',
-                        }}>
 
-                            <Picker
-                                selectedValue={loanPurposeLabel}
-                                style={styles.picker}
-                                enabled={loanPurposeDisable}
-                                onValueChange={(itemValue, itemIndex) => {
-                                    setLoanPurposeLabel(itemValue);
-                                    setLoanPurposeIndex(itemIndex);
-                                }}>
-                                {
-                                    loanPurposeData.map(item => {
-                                        return <Picker.Item value={item.SubCodeID} label={item.Label} />
-                                    })
-                                }
-                            </Picker>
+                        <PickerComp textLabel={loanPurposeLabel} pickerStyle={Commonstyles.picker} Disable={loanPurposeDisable} pickerdata={loanPurposeData} componentName='loanPurposePicker' handlePickerClick={handlePickerClick} />
 
-                        </View>
-                        <View style={{
-                            width: '90%', marginTop: 6, flexDirection: 'row',
-                            borderBottomWidth: 1, borderBottomColor: '#e2e2e2', position: 'absolute', bottom: 3
-                        }}></View>
+
                     </View>}
+
 
 
                     {loanAmountVisible && <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
@@ -621,54 +731,21 @@ const LeadCreationLoan = (props, { navigation }) => {
                             <TextComp textVal={loanAmountCaption} textStyle={Commonstyles.inputtextStyle} Visible={loanAmountMan} />
                         </View>
 
-                        <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: '#e2e2e2' }}>
-
-                            <TextInput
-                                value={loanAmount}
-                                onChangeText={txt => setLoanAmount(txt)}
-                                placeholder={''}
-                                editable={loanAmountDisable}
-                                placeholderTextColor={Colors.lightgrey}
-                                secureTextEntry={false}
-                                autoCapitalize="none"
-                                keyboardType="numeric"
-                                style={Commonstyles.textinputtextStyle}
-                            />
-
-                        </View>
+                        <TextInputComp textValue={loanAmount} textStyle={Commonstyles.textinputtextStyle} type='numeric' Disable={loanAmountDisable} ComponentName='loanAMount' reference={loanAmountRef} returnKey="done" handleClick={handleClick} handleReference={handleReference} />
 
                     </View>}
 
 
                     {leadTypeVisible && <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
+
                             <TextComp textVal={leadTypeCaption} textStyle={Commonstyles.inputtextStyle} Visible={leadTypeMan} />
 
                         </View>
-                        <View style={{
-                            width: '95%',
-                        }}>
 
-                            <Picker
-                                selectedValue={leadTypeLabel}
-                                style={styles.picker}
-                                enabled={leadTypeDisable}
-                                onValueChange={(itemValue, itemIndex) => {
-                                    setLeadTypeLabel(itemValue);
-                                    setLeadTypeIndex(itemIndex);
-                                }}>
-                                {
-                                    leadTypeData.map(item => {
-                                        return <Picker.Item value={item.SubCodeID} label={item.Label} />
-                                    })
-                                }
-                            </Picker>
+                        <PickerComp textLabel={leadTypeLabel} pickerStyle={Commonstyles.picker} Disable={leadTypeDisable} pickerdata={leadTypeData} componentName='leadTypePicker' handlePickerClick={handlePickerClick} />
 
-                        </View>
-                        <View style={{
-                            width: '90%', marginTop: 6, flexDirection: 'row',
-                            borderBottomWidth: 1, borderBottomColor: '#e2e2e2', position: 'absolute', bottom: 3
-                        }}></View>
+
                     </View>}
 
 

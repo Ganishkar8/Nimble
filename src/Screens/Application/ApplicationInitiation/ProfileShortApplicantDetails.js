@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
   ScrollView,
+  TextInput,
 } from 'react-native';
 import apiInstance from '../../../Utils/apiInstance';
 import apiInstancelocal from '../../../Utils/apiInstancelocal';
@@ -54,6 +55,18 @@ const ProfileShortApplicantDetails = (props, {navigation}) => {
   const firstNameRef = useRef(null);
   const middleNameRef = useRef(null);
   const lastNameRef = useRef(null);
+
+  const [gpslatlon, setGPSLatLon] = useState('');
+  const mapRef = useRef(null);
+  const [visible, setVisible] = useState(true);
+  const [photoOptionvisible, setphotoOptionvisible] = useState(false);
+  const [imageUri, setImageUri] = useState(null);
+  const [imageFile, setImageFile] = useState([]);
+  const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
+  const [deleteVisible, setDeleteVisible] = useState(false);
+  const [docID, setDocID] = useState('');
+  const [fileName, setFileName] = useState('');
+  const [fileType, setFileType] = useState('');
 
   const [TitleMan, setTitleMan] = useState(false);
   const [TitleVisible, setTitleVisible] = useState(true);
@@ -489,7 +502,7 @@ const ProfileShortApplicantDetails = (props, {navigation}) => {
         }
       });
     tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_Educationqualification')
+      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_educationqualification')
       .then(value => {
         if (value !== undefined && value.length > 0) {
           console.log(value);

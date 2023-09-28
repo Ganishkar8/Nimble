@@ -1,14 +1,14 @@
 import axios from 'axios';
 
-const apiInstance = (baseURL,authToken) => {
+const apiInstance = (baseURL, authToken) => {
 
-    const baseURLFinal = 'http://nimbleservicebeta.brnetsaas.com:'+baseURL
+    const baseURLFinal = 'http://nimbleservicebeta.brnetsaas.com:' + baseURL
     const instance = axios.create({
         baseURL: baseURLFinal,
         timeout: 500000, // Set your desired timeout
         headers: {
             'Content-Type': 'application/json',
-             'Authorization' : authToken
+            'Authorization': authToken
         },
     });
 

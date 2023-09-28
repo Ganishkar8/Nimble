@@ -1,6 +1,5 @@
 import DeviceInfo from 'react-native-device-info';
 import { getManufacturer } from 'react-native-device-info';
-
 const numberRegex = /^(\d+)?$/;
 const integerPattern = /^[0-9]+$/;
 const CS_URL = "https://mbsreg.brnetsaas.com/MBSConnectREG/frmmbs.aspx";
@@ -11,6 +10,7 @@ const isValidPhoneNumber = (phoneNumber) => {
 
   return phoneRegex.test(phoneNumber);
 };
+
 
 export async function getDeviceName() {
   var manufacturer = await getManufacturer();
