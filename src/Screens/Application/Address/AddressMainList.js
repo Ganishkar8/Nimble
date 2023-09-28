@@ -1,6 +1,14 @@
 /* eslint-disable prettier/prettier */
+/* eslint-disable no-trailing-spaces */
 /* eslint-disable react-native/no-inline-styles */
-import {View, Text, ScrollView, StyleSheet, SafeAreaView,FlatList} from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  SafeAreaView,
+  FlatList,
+} from 'react-native';
 import {React, useState} from 'react';
 import MyStatusBar from '../../../Components/ MyStatusBar';
 import HeadComp from '../../../Components/HeadComp';
@@ -13,64 +21,147 @@ import ProgressComp from '../../../Components/ProgressComp';
 import Colors from '../../../Utils/Colors';
 import Commonstyles from '../../../Utils/Commonstyles';
 import IconButtonViewComp from '../../../Components/IconButtonViewComp';
+import {TouchableOpacity} from 'react-native-gesture-handler';
+
+const FlatView = ({item}) => (
+  <View style={{marginLeft: 10, marginRight: 10}}>
+    <View>
+      <Text style={{fontSize: 14, fontWeight: 'bold', marginTop: 5}}>
+        {item.AddressType}
+      </Text>
+      <Text>{item.Addressline}</Text>
+    </View>
+
+    <View style={{flexDirection: 'row', alignItems: 'flex-start'}}>
+      <View>
+        <IconButtonViewComp
+          textValue={'Edit'.toUpperCase()}
+          textStyle={{
+            color: Colors.skyBlue,
+            fontSize: 13,
+            fontWeight: 500,
+          }}
+          viewStyle={{
+            width: '100%',
+            // height: 50,
+            marginTop: 10,
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+          }}
+          innerStyle={{
+            width: '100%',
+            // height: 50,
+            marginTop: 10,
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+          }}
+        />
+      </View>
+      <View style={{width: '20%'}}>
+        <IconButtonViewComp
+          textValue={'Delete'.toUpperCase()}
+          textStyle={{
+            color: Colors.skyBlue,
+            fontSize: 13,
+            fontWeight: 500,
+          }}
+          viewStyle={{
+            width: '100%',
+            // height: 50,
+            marginTop: 10,
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+          }}
+          innerStyle={{
+            width: '100%',
+            // height: 50,
+            marginTop: 10,
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+          }}
+        />
+      </View>
+    </View>
+
+    <View
+      style={{
+        borderBottomWidth: 1,
+        borderBottomColor: '#DFE6EA',
+        marginVertical: 10,
+        marginHorizontal: 10,
+        paddingBottom: 10,
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+      }}
+    />
+  </View>
+);
 
 const AddressMainList = (props, {navigation}) => {
   const [loading, setLoading] = useState(false);
 
   const Data = [
-    {Addressline : "#687, VAJRA"},
-    {Addressline : "1ST FLOOR, 15TH CROSS, 100 FT ROAD JP NAGAR"}
-  ]
-
-  const FlatView = ({item}) => (
-    <View>
-      <Text>item.Addressline1</Text>
-      <Text>item.Addressline2</Text>
-    </View>
-  )
+    {
+      AddresstypeID: 'P',
+      AddressType: 'Permanent Address',
+      Addressline: '1ST FLOOR, 15TH CROSS, 100 FT ROAD JP NAGAR',
+      Addressline2: '1ST FLOOR, 15TH CROSS, 100 FT ROAD JP NAGAR',
+    },
+    {
+      AddresstypeID: 'R',
+      AddressType: 'Residential Address',
+      Addressline: '#687, VAJRA',
+    },
+  ];
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
-      <ScrollView>
-        {loading ? <Loading /> : null}
-        <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
+    <SafeAreaView style={{flex: 1, backgroundColor: 'white'}}>
+      {loading ? <Loading /> : null}
+      <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
 
-        <View
-          style={{
-            width: '100%',
-            height: 56,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-          <HeadComp
-            textval={language[0][props.language].str_profileshort}
-            props={props}
-          />
-        </View>
-        <View>
-          <ChildHeadComp
-            textval={language[0][props.language].str_profileshort}
-          />
-        </View>
-        <View>
-          <Text style = {{margin:10}}>{language[0][props.language].str_addressdetail}</Text>
-        </View>
-        <ProgressComp  progressvalue={0.25} textvalue="1 of 4" />
+      <View
+        style={{
+          width: '100%',
+          height: 56,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+        <HeadComp
+          textval={language[0][props.language].str_profileshort}
+          props={props}
+        />
+      </View>
+      <View>
+        <ChildHeadComp textval={language[0][props.language].str_profileshort} />
+      </View>
+      <View>
+        <Text style={{margin: 10}}>
+          {language[0][props.language].str_addressdetail}
+        </Text>
+      </View>
 
-        <IconButtonViewComp 
-                        icon={"human"}
-                        textValue={language[0][props.language].str_addressdetail.toUpperCase()} 
-                        textStyle={{ color: Colors.skyBlue, fontSize: 13, fontWeight: 500 }} 
-                        viewStyle={Commonstyles.buttonView} 
-                        innerStyle={Commonstyles.buttonViewBorderStyle}  />
+      <ProgressComp progressvalue={1} textvalue="4 of 4" />
 
-        <FlatList
-              data={Data} 
-              renderItem={FlatView}
-              keyExtractor={item => item.Addressline}
-            />
+      <View style={{marginBottom: 10}}>
+        <IconButtonViewComp
+          icon={'+'}
+          textValue={language[0][
+            props.language
+          ].str_addressdetail.toUpperCase()}
+          textStyle={{color: Colors.skyBlue, fontSize: 13, fontWeight: 500}}
+          viewStyle={Commonstyles.buttonView}
+          innerStyle={Commonstyles.buttonViewBorderStyle}
+        />
+      </View>
 
-      </ScrollView>
+      <FlatList
+        data={Data}
+        renderItem={FlatView}
+        keyExtractor={item => item.AddresstypeID}
+      />
     </SafeAreaView>
   );
 };
