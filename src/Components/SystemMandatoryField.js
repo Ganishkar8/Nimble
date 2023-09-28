@@ -16,8 +16,9 @@ const SystemMandatoryField = props => {
   const [fieldTypeDisable, setFieldTypeDisable] = useState(false);
   const [fieldTypeData, setFieldTypeData] = useState([]);
   const [DataPicker, setDataPicker] = useState([]);
-  const [custCatgLabel, setCustCatgLabel] = useState('');
-  const [custCatgIndex, setCustCatgIndex] = useState('');
+  const [pickerDatalabel, setpickerDatalabel] = useState('');
+  const [pickerDataIndex, setpickerDataIndex] = useState('');
+  // const [pickerSubCodeID, setpickerSubCodeID] = useState('');
   const FieldRef = useRef(null);
 
   useEffect(() => {
@@ -26,18 +27,14 @@ const SystemMandatoryField = props => {
   }, []);
 
   const pickerData = async () => {
-    // console.log(fieldTypeVisible, 'testing');
-
     tbl_SystemCodeDetails
-      .getSystemCodeDetailsBasedOnID('CustomerCategory')
+      .getSystemCodeDetailsBasedOnID('AddressType')
       .then(value => {
         if (value !== undefined && value.length > 0) {
-          console.log(value);
-
           for (var i = 0; i < value.length; i++) {
             if (value[i].IsDefault === '1') {
-              setCustCatgLabel(value[i].SubCodeID);
-              setCustCatgIndex(i + 1);
+              setpickerDatalabel(value[i].SubCodeID);
+              setpickerDataIndex(i + 1);
             }
           }
           setDataPicker(value);
@@ -84,10 +81,9 @@ const SystemMandatoryField = props => {
   };
 
   const handlePickerClick = (FieldTypeCaption, label, index) => {
-    if (FieldTypeCaption === 'AddressType') {
-      setCustCatgLabel(label);
-      setCustCatgIndex(index);
-    }
+    setpickerDatalabel(label);
+    setpickerDataIndex(index);
+    props.updateDataInParent(FieldTypeCaption, label);
   };
 
   const handleClick = (FieldTypeCaption, textValue) => {
@@ -125,11 +121,11 @@ const SystemMandatoryField = props => {
             )}
             {props.isPicker && (
               <PickerComp
-                textLabel={FieldTypeCaption}
+                textLabel={pickerDatalabel}
                 pickerStyle={Commonstyles.picker}
                 Disable={props.Disable}
                 pickerdata={DataPicker}
-                componentName={props.componentName}
+                componentName={FieldTypeCaption}
                 handlePickerClick={handlePickerClick}
               />
             )}
