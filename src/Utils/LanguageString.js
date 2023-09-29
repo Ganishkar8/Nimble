@@ -144,11 +144,8 @@ export const language = [{
     str_cbloanstatus: 'Loan Status',
     str_cbotherstatus: 'Other Status',
 
+    str_profileshort: 'PROFILE SHORT',
+    str_addressdetail: 'Address Details',
+    str_addaddressbutton: 'Add Address',
   },
-  ta: {
-    first: 'comment allez vous',
-    second: 'je vais bien',
-    eng_unableToConnectToServer: 'Unable to connect to server'
-  },
-}]
-
+];

@@ -1,13 +1,14 @@
-import React, { useEffect } from 'react';
+/* eslint-disable prettier/prettier */
+import React, {useEffect} from 'react';
 import {
-    SafeAreaView,
-    StyleSheet,
-    Image,
-    View,
-    Platform,
-    Alert,
-    Text,
-    TouchableOpacity
+  SafeAreaView,
+  StyleSheet,
+  Image,
+  View,
+  Platform,
+  Alert,
+  Text,
+  TouchableOpacity,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Colors from '../../Utils/Colors';
@@ -38,6 +39,16 @@ const SplashScreen = ({ navigation }) => {
                 tbl_SystemMandatoryFields.insertSystemMandatoryFields('7711', 'LOAN PURPOSE', '1', 'sp_loanpurpose', '', '', '0', '0', '', '', '', '')
                 tbl_SystemMandatoryFields.insertSystemMandatoryFields('7711', 'LOAN AMOUNT', '1', 'et_loanamount', '', '', '0', '0', '', '', '', '')
                 tbl_SystemMandatoryFields.insertSystemMandatoryFields('7711', 'LEAD TYPE', '1', 'sp_leadtype', '', '', '0', '0', '', '', '', '')
+                tbl_SystemMandatoryFields.insertSystemMandatoryFields('7711', 'LEAD TYPE', '1', 'sp_leadtype', '', '', '0', '0', '', '', '', '');
+                tbl_SystemMandatoryFields.insertSystemMandatoryFields('7711', 'ADDRESS TYPE', '1', 'sp_addresstype', '', '', '0', '0', '', '', '', '');
+                tbl_SystemMandatoryFields.insertSystemMandatoryFields('7711', 'ADDRESS LINE 1', '1', 'et_addressline1', '', '', '0', '0', '', '', '', '');
+                tbl_SystemMandatoryFields.insertSystemMandatoryFields('7711', 'ADDRESS LINE 2', '0', 'et_addressline2', '', '', '0', '0', '', '1', '', '');
+                tbl_SystemMandatoryFields.insertSystemMandatoryFields('7711', 'LANDMARK', '0', 'et_landmark', '', '', '0', '0', '', '', '', '');
+                tbl_SystemMandatoryFields.insertSystemMandatoryFields('7711', 'PINCODE', '1', 'et_pincode', '', '', '0', '0', '', '', '', '');
+                tbl_SystemMandatoryFields.insertSystemMandatoryFields('7711', 'CITY/VILLAGE', '1', 'et_cityvillage', '', '', '0', '0', '', '', '', '');
+                tbl_SystemMandatoryFields.insertSystemMandatoryFields('7711', 'DISTRICT', '1', 'et_district', '', '', '0', '0', '', '', '', '');
+                tbl_SystemMandatoryFields.insertSystemMandatoryFields('7711', 'STATE', '1', 'et_state', '', '', '0', '0', '', '', '', '');
+                tbl_SystemMandatoryFields.insertSystemMandatoryFields('7711', 'COUNTRY', '1', 'et_country', '', '', '0', '0', '', '', '', '');
             })
 
             tbl_SystemCodeDetails.deleteAllSystemCodeDetails().then(response => {
@@ -56,6 +67,8 @@ const SplashScreen = ({ navigation }) => {
                 tbl_SystemCodeDetails.insertSystemCodeDetails('LeadStatus', '2', 'REJECT', 'Reject', '2', '0');
                 tbl_SystemCodeDetails.insertSystemCodeDetails('Reason', '1', 'LEV', 'On Leave', '1', '0');
                 tbl_SystemCodeDetails.insertSystemCodeDetails('Reason', '2', 'LEFT', 'Discontinued', '2', '0');
+                tbl_SystemCodeDetails.insertSystemCodeDetails('AddressType', '1', 'P', 'Permanent Address', '1', '0');
+                tbl_SystemCodeDetails.insertSystemCodeDetails('AddressType', '2', 'C', 'Communication Address', '2', '0');                
             })
 
             tbl_UserCodeDetails.deleteAllUserCodeDetails().then(response => {
@@ -86,9 +99,14 @@ const SplashScreen = ({ navigation }) => {
     }, []);
 
 
-    return (
-        // enclose all components in this View tag
-        <SafeAreaView>
+  return (
+    // enclose all components in this View tag
+    <SafeAreaView>
+      <View style={styles.parentView}>
+        <Image
+          source={require('../../Images/splashlogo.png')}
+          style={{width: 100, height: 35}}
+        />
 
             <View style={styles.parentView}>
 
@@ -101,7 +119,6 @@ const SplashScreen = ({ navigation }) => {
         </SafeAreaView>
     );
 };
-
 
 const styles = StyleSheet.create({
     parentView: {
@@ -118,6 +135,5 @@ const styles = StyleSheet.create({
         justifyContent: 'center'
     },
 });
-
 
 export default SplashScreen;
