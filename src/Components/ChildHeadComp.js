@@ -6,13 +6,11 @@ import Colors from '../Utils/Colors';
 const ChildHeadComp = ({textval}) => {
   return (
     <View
-      // eslint-disable-next-line react-native/no-inline-styles
       style={{
         width: '100%',
         alignItems: 'center',
       }}>
       <View
-        // eslint-disable-next-line react-native/no-inline-styles
         style={{
           width: '90%',
           flexDirection: 'row',
@@ -20,11 +18,9 @@ const ChildHeadComp = ({textval}) => {
         }}>
         <Image
           source={require('../Images/applicantimage.png')}
-          style={{width: 20, height: 30}}
-          resizeMode="contain"
+          style={{width: 20, height: 42}}
         />
         <Text
-          // eslint-disable-next-line react-native/no-inline-styles
           style={{
             marginLeft: 10,
             fontSize: 14,

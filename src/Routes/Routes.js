@@ -15,6 +15,7 @@ const Stack = createNativeStackNavigator();
 //dev imports
 // eslint-disable-next-line no-unused-vars
 import LeadManagement from '../Screens/Lead/LeadTracker/LeadManagement';
+import LoanApplicationMain from '../Screens/LoanApplication/LoanApplicationMain';
 
 const Route = () => {
   return (
