@@ -18,6 +18,7 @@ import Loading from '../../Components/Loading';
 import apiInstance from '../../Utils/apiInstance';
 import apiInstancelocal from '../../Utils/apiInstancelocal';
 import { useIsFocused } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ProfileScreen = ({ navigation }) => {
 
@@ -158,7 +159,7 @@ const ProfileScreen = ({ navigation }) => {
 
                 <View style={{ width: '100%', justifyContent: 'flex-end', alignItems: 'center' }}>
                     <View style={{ width: '92%' }}>
-                        <TouchableOpacity activeOpacity={0.5} onPress={() => { navigation.navigate('LoginScreen') }}>
+                        <TouchableOpacity activeOpacity={0.5} onPress={() => { navigation.navigate('LoginScreen'); AsyncStorage.setItem('IsLogin', 'false'); }}>
                             <Text style={{ fontSize: 16, color: Colors.darkblue, marginTop: 5, }}>Logout</Text>
                         </TouchableOpacity>
                         <Text style={{ fontSize: 12, color: Colors.lightgrey, marginTop: 5, }}>Version 1.0.0</Text>

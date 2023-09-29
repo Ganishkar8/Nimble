@@ -32,6 +32,7 @@ import Commonstyles from '../../Utils/Commonstyles';
 import ImageComp from '../../Components/ImageComp';
 import ActivationCodeModal from '../../Components/ActivationCodeModal';
 import CenteredModal from '../../Components/CenteredModal';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen = (props, { navigation }) => {
 
@@ -70,8 +71,9 @@ const LoginScreen = (props, { navigation }) => {
                 global.USERNAME = decodedToken.userName;
                 global.USERID = decodedToken.userId;
                 global.RefreshToken = response.data.jwtRefreshToken;
-                setVisible(true);
-                //loginHandle();
+                //setVisible(true);
+                AsyncStorage.setItem('IsLogin', 'true');
+                loginHandle();
 
             })
             .catch((error) => {
@@ -92,7 +94,7 @@ const LoginScreen = (props, { navigation }) => {
 
     const loginHandle = () => {
         setActivationSuccess(false);
-        props.navigation.navigate('BottomNavigation');
+        props.navigation.replace('BottomNavigation');
     };
 
     const handleClick = (name, text) => {

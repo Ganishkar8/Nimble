@@ -58,6 +58,23 @@ const LeadCreationBasic = (props, { navigation }) => {
     const [custCatgVisible, setCustCatgVisible] = useState(true);
     const [custCatgDisable, setCustCatgDisable] = useState(false);
     const [custCatData, setCustCatData] = useState([]);
+
+    const [titleCaption, setTitleCaption] = useState('TITLE');
+    const [titleMan, setTitleMan] = useState(false);
+    const [titleVisible, setTitleVisible] = useState(true);
+    const [titleDisable, setTitleDisable] = useState(false);
+    const [titleLabel, setTitleLabel] = useState('');
+    const [titleIndex, setTitleIndex] = useState('');
+    const [titleData, setTitleData] = useState([]);
+
+
+    const [genderCaption, setGenderCaption] = useState('GENDER');
+    const [genderMan, setGenderMan] = useState(false);
+    const [genderVisible, setGenderVisible] = useState(true);
+    const [genderDisable, setGenderDisable] = useState(false);
+    const [genderLabel, setGenderLabel] = useState('');
+    const [genderIndex, setGenderIndex] = useState('');
+    const [genderData, setGenderData] = useState([]);
     const [errMsg, setErrMsg] = useState('');
     const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
     const showBottomSheet = () => setBottomErrorSheetVisible(true);
@@ -70,8 +87,8 @@ const LeadCreationBasic = (props, { navigation }) => {
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         makeSystemMandatoryFields();
-        pickerData();
-
+        //pickerData();
+        callPickerApi();
         return () =>
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
     }, [navigation]);
@@ -112,6 +129,44 @@ const LeadCreationBasic = (props, { navigation }) => {
                 }
                 if (value[0].IsCaptionChange == "1") {
                     setCustCatgCaption(value[0].FieldCaptionChange)
+                }
+            }
+        })
+
+        tbl_SystemMandatoryFields.getSystemMandatoryFieldsBasedOnFieldUIID('sp_title').then(value => {
+            if (value !== undefined && value.length > 0) {
+                console.log(value[0])
+                setTitleCaption(value[0].FieldName)
+                if (value[0].IsMandatory == "1") {
+                    setTitleMan(true);
+                }
+                if (value[0].IsHide == "1") {
+                    setTitleVisible(false);
+                }
+                if (value[0].IsDisable == "1") {
+                    setTitleDisable(true);
+                }
+                if (value[0].IsCaptionChange == "1") {
+                    setTitleCaption(value[0].FieldCaptionChange)
+                }
+            }
+        })
+
+        tbl_SystemMandatoryFields.getSystemMandatoryFieldsBasedOnFieldUIID('sp_gender').then(value => {
+            if (value !== undefined && value.length > 0) {
+                console.log(value[0])
+                setGenderCaption(value[0].FieldName)
+                if (value[0].IsMandatory == "1") {
+                    setGenderMan(true);
+                }
+                if (value[0].IsHide == "1") {
+                    setGenderVisible(false);
+                }
+                if (value[0].IsDisable == "1") {
+                    setGenderDisable(true);
+                }
+                if (value[0].IsCaptionChange == "1") {
+                    setGenderCaption(value[0].FieldCaptionChange)
                 }
             }
         })
@@ -212,15 +267,13 @@ const LeadCreationBasic = (props, { navigation }) => {
                 "leadCreationBasicDetails": {
                     "createdBy": global.USERID,
                     "createdOn": '',
-                    "customerCategoryId": 5,
+                    "customerCategoryId": custCatgLabel,
+                    "titleId": titleLabel,
                     "firstName": firstName,
                     "middleName": middleName,
                     "lastName": lastName,
-                    "mobileNumber": 7647865789
-                },
-                "leadCreationBusinessDetails": {},
-                "leadCreationLoanDetails": {},
-                "leadCreationDms": {}
+                    "mobileNumber": 7567895434
+                }
             }
             const baseURL = '8901'
             setLoading(true)
@@ -246,6 +299,54 @@ const LeadCreationBasic = (props, { navigation }) => {
 
     }
 
+    const callPickerApi = () => {
+
+        const baseURL = '8082'
+        setLoading(true)
+        var customerresponse = false; var genderresponse = false; var titleresponse = false;
+        apiInstancelocal(baseURL).get('/api/v1/system-code/master/CUSTOMER_CATEGORY')
+            .then(async (response) => {
+                customerresponse = true;
+                if (customerresponse && genderresponse && titleresponse) {
+                    setLoading(false);
+                }
+                setCustCatData(response.data)
+            })
+            .catch((error) => {
+                if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
+                setLoading(false)
+                alert(error);
+            });
+        apiInstancelocal(baseURL).get('/api/v1/user-code/master/TITLE')
+            .then(async (response) => {
+                titleresponse = true;
+                if (customerresponse && genderresponse && titleresponse) {
+                    setLoading(false);
+                }
+                setTitleData(response.data)
+            })
+            .catch((error) => {
+                if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
+                setLoading(false)
+                alert(error);
+            });
+        apiInstancelocal(baseURL).get('/api/v1/system-code/master/GENDER')
+            .then(async (response) => {
+                genderresponse = true;
+                if (customerresponse && genderresponse && titleresponse) {
+                    setLoading(false);
+                }
+                setGenderData(response.data)
+            })
+            .catch((error) => {
+                if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
+                setLoading(false)
+                alert(error);
+            });
+
+
+    }
+
     const validate = () => {
         var flag = false; var i = 1;
         var errorMessage = '';
@@ -253,6 +354,22 @@ const LeadCreationBasic = (props, { navigation }) => {
         if (custCatgMan && custCatgVisible) {
             if (custCatgLabel === 'Select') {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + custCatgCaption + '\n';
+                i++;
+                flag = true;
+            }
+        }
+
+        if (titleMan && titleVisible) {
+            if (custCatgLabel === '') {
+                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + titleCaption + '\n';
+                i++;
+                flag = true;
+            }
+        }
+
+        if (genderMan && genderVisible) {
+            if (genderLabel === '') {
+                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + genderCaption + '\n';
                 i++;
                 flag = true;
             }
@@ -331,6 +448,12 @@ const LeadCreationBasic = (props, { navigation }) => {
         if (componentName === 'custCategoryPicker') {
             setCustCatgLabel(label);
             setCustCatgIndex(index);
+        } else if (componentName === 'titlePicker') {
+            setTitleLabel(label);
+            setTitleIndex(index);
+        } else if (componentName === 'genderPicker') {
+            setGenderLabel(label);
+            setGenderIndex(index);
         }
 
     }
@@ -381,6 +504,20 @@ const LeadCreationBasic = (props, { navigation }) => {
                     </View>}
 
 
+                    {titleVisible && <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+                        <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
+
+                            <TextComp textVal={titleCaption} textStyle={Commonstyles.inputtextStyle} Visible={titleMan} />
+
+                        </View>
+
+                        <PickerComp textLabel={titleLabel} pickerStyle={Commonstyles.picker} Disable={titleDisable} pickerdata={titleData} componentName='titlePicker' handlePickerClick={handlePickerClick} />
+
+
+                    </View>}
+
+
+
                     {firstNameVisible && <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
 
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
@@ -411,6 +548,18 @@ const LeadCreationBasic = (props, { navigation }) => {
                         </View>
 
                         <TextInputComp textValue={lastName} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={lastNameDisable} ComponentName='lastName' reference={lastNameRef} returnKey="next" handleClick={handleClick} handleReference={handleReference} />
+
+
+                    </View>}
+
+                    {genderVisible && <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+                        <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
+
+                            <TextComp textVal={genderCaption} textStyle={Commonstyles.inputtextStyle} Visible={genderMan} />
+
+                        </View>
+
+                        <PickerComp textLabel={genderLabel} pickerStyle={Commonstyles.picker} Disable={genderDisable} pickerdata={genderData} componentName='genderPicker' handlePickerClick={handlePickerClick} />
 
 
                     </View>}
