@@ -1,4 +1,5 @@
 /* eslint-disable prettier/prettier */
+/* prettier-ignore */
 import React, {useEffect} from 'react';
 import {
   SafeAreaView,
@@ -250,21 +251,7 @@ const SplashScreen = ({navigation}) => {
           );
           tbl_SystemMandatoryFields.insertSystemMandatoryFields(
             '7711',
-            'LEAD TYPE',
-            '1',
-            'sp_leadtype',
-            '',
-            '',
-            '0',
-            '0',
-            '',
-            '',
-            '',
-            '',
-          );
-          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-            '7711',
-            'ADDRESS TYPE',
+            'ADDRESSTYPE',
             '1',
             'sp_addresstype',
             '',
@@ -512,7 +499,7 @@ const SplashScreen = ({navigation}) => {
           '0',
         );
         tbl_SystemCodeDetails.insertSystemCodeDetails(
-          'AddressType',
+          'ADDRESSTYPE',
           '1',
           'P',
           'Permanent Address',
@@ -520,7 +507,7 @@ const SplashScreen = ({navigation}) => {
           '0',
         );
         tbl_SystemCodeDetails.insertSystemCodeDetails(
-          'AddressType',
+          'ADDRESSTYPE',
           '2',
           'C',
           'Communication Address',
@@ -539,12 +526,12 @@ const SplashScreen = ({navigation}) => {
                 if (value == 'true') {
                   navigation.replace('BottomNavigation');
                 } else {
-                  navigation.replace('LoginScreen');
+                  navigation.replace('AddressMainList');
                 }
               });
             });
           } else {
-            navigation.replace('BankRegistration');
+            navigation.replace('AddressDetails');
           }
         });
       }, 2000);

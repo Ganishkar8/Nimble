@@ -21,25 +21,31 @@ const SystemMandatoryField = props => {
   // const [pickerSubCodeID, setpickerSubCodeID] = useState('');
   const FieldRef = useRef(null);
 
+  const isPicker = props.isPicker || false;
+
   useEffect(() => {
     makeSystemMandatoryFields();
     pickerData();
   }, []);
 
   const pickerData = async () => {
-    tbl_SystemCodeDetails
-      .getSystemCodeDetailsBasedOnID('AddressType')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          for (var i = 0; i < value.length; i++) {
-            if (value[i].IsDefault === '1') {
-              setpickerDatalabel(value[i].SubCodeID);
-              setpickerDataIndex(i + 1);
+    if (isPicker == 1) {
+      tbl_SystemCodeDetails
+        .getSystemCodeDetailsBasedOnID('ADDRESSTYPE')
+        .then(value => {
+          console.log('Value', value, FieldTypeCaption);
+
+          if (value !== undefined && value.length > 0) {
+            for (var i = 0; i < value.length; i++) {
+              if (value[i].IsDefault === '1') {
+                setpickerDatalabel(value[i].SubCodeID);
+                setpickerDataIndex(i + 1);
+              }
             }
+            setDataPicker(value);
           }
-          setDataPicker(value);
-        }
-      });
+        });
+    }
   };
 
   const makeSystemMandatoryFields = async () => {
@@ -69,6 +75,7 @@ const SystemMandatoryField = props => {
             value[0].IsMandatory,
             value[0].IsHide,
             value[0].IsDisable,
+            isPicker,
           );
         }
       });
@@ -84,6 +91,8 @@ const SystemMandatoryField = props => {
     setpickerDatalabel(label);
     setpickerDataIndex(index);
     props.updateDataInParent(FieldTypeCaption, label);
+    console.log('label', label);
+    console.log('index', index);
   };
 
   const handleClick = (FieldTypeCaption, textValue) => {
