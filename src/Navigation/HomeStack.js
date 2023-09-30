@@ -13,6 +13,7 @@ import LeadLog from '../Screens/Lead/LeadTracker/LeadLog';
 import LeadApproval from '../Screens/Lead/LeadTracker/LeadApproval';
 import ReAssign from '../Screens/Lead/LeadTracker/ReAssign';
 import AddressMainList from '../Screens/Application/Address/AddressMainList';
+import AddressDetails from '../Screens/Application/Address/AddressDetails';
 const Stack = createNativeStackNavigator();
 
 export default HomeStack = () => {
@@ -87,6 +88,12 @@ export default HomeStack = () => {
       <Stack.Screen
         name="AddressMainList"
         component={AddressMainList}
+        options={{headerShown: false, tabBarVisible: false}}
+      />
+
+      <Stack.Screen
+        name="AddressDetails"
+        component={AddressDetails}
         options={{headerShown: false, tabBarVisible: false}}
       />
     </Stack.Navigator>

@@ -9,19 +9,19 @@ import Commonstyles from '../../../Utils/Commonstyles';
 import Colors from '../../../Utils/Colors';
 import Loading from '../../../Components/Loading';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
-import ProgressComp from '../../../Components/ProgressComp';
-import PickerComp from '../../../Components/PickerComp';
 import SystemMandatoryField from '../../../Components/SystemMandatoryField';
 import ButtonViewComp from '../../../Components/ButtonViewComp';
 
 const AddressDetails = (props, {navigation}) => {
   const [loading, setLoading] = useState(false);
-  const [Data, setNewData] = useState();
+  // const [Data, setNewData] = useState();
   const [DataArray, setNewDataArray] = useState([]);
   const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
   const showBottomSheet = () => setBottomErrorSheetVisible(true);
   const hideBottomSheet = () => setBottomErrorSheetVisible(false);
+
   const [errMsg, setErrMsg] = useState('');
+  let errorCounter = 1;
 
   useEffect(() => {
     props.navigation
@@ -41,6 +41,7 @@ const AddressDetails = (props, {navigation}) => {
     isMandatory,
     IsHide,
     IsDisable,
+    isPicker,
   ) => {
     // Find the index of the object in DataArray with the matching fieldName
     const dataIndex = DataArray.findIndex(item => item.fieldName === fieldName);
@@ -57,6 +58,7 @@ const AddressDetails = (props, {navigation}) => {
           isMandatory !== undefined ? isMandatory : existingData.isMandatory,
         isDisable: IsDisable !== undefined ? IsDisable : existingData.isDisable,
         IsHide: IsHide !== undefined ? IsHide : existingData.IsHide,
+        isPicker: existingData.isPicker || false,
       };
 
       // Update the object in DataArray with the merged data
@@ -69,6 +71,7 @@ const AddressDetails = (props, {navigation}) => {
         isMandatory: isMandatory,
         isDisable: IsDisable,
         IsHide: IsHide,
+        isPicker: isPicker || false,
       };
 
       setNewDataArray(prevDataArray => [...prevDataArray, newDataObject]);
@@ -77,7 +80,35 @@ const AddressDetails = (props, {navigation}) => {
     console.log('DataArray:', DataArray);
   };
 
-  const addressSubmit = () => {};
+  const validateData = () => {
+    let flag = false;
+    let errMsg = '';
+
+    DataArray.forEach(item => {
+      if (
+        (item.IsHide === '' || item.IsHide === '0') &&
+        item.isMandatory === '1' &&
+        (item.fieldValue === '' || item.fieldValue === undefined)
+      ) {
+        errMsg += `${errorCounter}) Please Select ${item.fieldName}\n`;
+        errorCounter++;
+        // console.log('errMsg:', errMsg);
+      }
+    });
+
+    if (errMsg !== '') {
+      setErrMsg(errMsg);
+      flag = true;
+    }
+
+    return flag;
+  };
+
+  const addressSubmit = () => {
+    if (validateData()) {
+      showBottomSheet();
+    }
+  };
 
   return (
     <SafeAreaView style={Commonstyles.parentView}>
@@ -101,9 +132,18 @@ const AddressDetails = (props, {navigation}) => {
             props={props}
           />
         </View>
+
+        <ErrorMessageModal
+          isVisible={bottomErrorSheetVisible}
+          hideBottomSheet={hideBottomSheet}
+          errMsg={errMsg}
+          textError={language[0][props.language].str_error}
+          textClose={language[0][props.language].str_ok}
+        />
+
         <SystemMandatoryField
           fielduiid="sp_addresstype"
-          textvalue="First tes"
+          // textvalue=""
           type="email-address"
           // Disable={false}
           isPicker={1}
