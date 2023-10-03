@@ -18,7 +18,7 @@ const AgeingComp = ({ props, filterClick }) => {
     const [age, setAge] = React.useState('');
 
 
-    const updateAgeData = (value,ind,val) => {
+    const updateAgeData = (value, ind, val) => {
         let data = {
             AGE: value,
             Index: ind,
@@ -41,11 +41,9 @@ const AgeingComp = ({ props, filterClick }) => {
                     <TextComp textStyle={{ marginTop: 15, fontSize: 14, color: Colors.dimmText, marginLeft: 3 }} textVal={language[0][props.language].str_operator} Visible={true}></TextComp>
 
                     <View style={{ width: '100%', flexDirection: 'row' }}>
-                        <View style={{ width: '6%', marginTop: 16 }}>
-                            <MaterialIcons name='keyboard-arrow-right' size={20} color={Colors.dimmText} />
-                        </View>
+
                         <View style={{
-                            width: '95%',
+                            width: '100%',
                         }}>
 
                             <Picker
@@ -56,19 +54,21 @@ const AgeingComp = ({ props, filterClick }) => {
                                     borderRadius: 8,
                                     borderWidth: 1,
                                     borderColor: '#ccc',
-                                    textAlign: 'center'
+                                    textAlign: 'center',
+                                    color: Colors.black
                                 }}
+                                mode='dropdown'
+                                dropdownIconColor={Colors.black}
+                                themeVariant='light'
                                 onValueChange={(itemValue, itemIndex) => {
                                     setChoosenLabel(itemValue);
                                     setChoosenIndex(itemIndex);
-                                    updateAgeData(age,itemIndex,itemValue);
+                                    updateAgeData(age, itemIndex, itemValue);
                                 }}>
-                                <Picker.Item label="Hello" value="Hello" />
-                                <Picker.Item label="React" value="React" />
-                                <Picker.Item label="Native" value="Native" />
-                                <Picker.Item label="How" value="How" />
-                                <Picker.Item label="are" value="are" />
-                                <Picker.Item label="you" value="you" />
+                                <Picker.Item label="Less Than" value="<" style={{ backgroundColor: '#fff', color: '#000' }} />
+                                <Picker.Item label="Equal To" value="=" style={{ backgroundColor: '#fff', color: '#000' }} />
+                                <Picker.Item label="Greater Than" value=">" style={{ backgroundColor: '#fff', color: '#000' }} />
+
                             </Picker>
 
                         </View>
@@ -88,7 +88,7 @@ const AgeingComp = ({ props, filterClick }) => {
                                 value={age}
                                 onChangeText={txt => {
                                     setAge(txt);
-                                    updateAgeData(txt,choosenIndex,choosenLabel);
+                                    updateAgeData(txt, choosenIndex, choosenLabel);
                                 }}
                                 placeholder={''}
                                 placeholderTextColor={Colors.lightgrey}
