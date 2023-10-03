@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import * as React from 'react';
 import SplashScreen from '../Screens/Login/SplashScreen';
 import BottomNavigation from '../Navigation/BottomNavigation';
@@ -5,6 +6,8 @@ import LoginScreen from '../Screens/Login/LoginScreen';
 import BankRegistration from '../Screens/Login/BankRegistration';
 import SetUpMPIN from '../Screens/Login/SetUpMPIN';
 import MPINLogin from '../Screens/Login/MPINLogin';
+import AddressMainList from '../Screens/Application/Address/AddressMainList';
+import AddressDetails from '../Screens/Application/Address/AddressDetails';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {NavigationContainer} from '@react-navigation/native';
 import ProfileShortBasicDetails from '../Screens/Application/ApplicationInitiation/ProfileShortBasicDetails';
@@ -16,6 +19,8 @@ import DemographicsGSTDetails from '../Screens/Application/ApplicationInitiation
 
 const Stack = createNativeStackNavigator();
 
+//dev imports
+// eslint-disable-next-line no-unused-vars
 //dev imports
 import LeadManagement from '../Screens/Lead/LeadTracker/LeadManagement';
 import LoanApplicationMain from '../Screens/LoanApplication/LoanApplicationMain';
@@ -67,6 +72,12 @@ const Route = () => {
           component={ProfileShortExistingClientDetails}
           options={{headerShown: false}}
         />
+
+        <Stack.Screen
+          name="AddressMainList"
+          component={AddressMainList}
+          options={{headerShown: false}}
+        />
         <Stack.Screen
           name="ProfileShortKYCVerificationStatus"
           component={ProfileShortKYCVerificationStatus}
@@ -86,6 +97,17 @@ const Route = () => {
         <Stack.Screen
           name="DemographicsGSTDetails"
           component={DemographicsGSTDetails}
+        />
+
+        <Stack.Screen
+          name="AddressMainList"
+          component={AddressMainList}
+          options={{headerShown: false}}
+        />
+
+        <Stack.Screen
+          name="AddressDetails"
+          component={AddressDetails}
           options={{headerShown: false}}
         />
       </Stack.Navigator>
