@@ -196,11 +196,14 @@ const HomeScreen = ({ navigation }) => {
                                                 </View>
 
                                                 <View style={{ width: '25%' }}>
-
-                                                    <View style={{ width: '70%', height: '100%', backgroundColor: '#0294ff', borderRadius: 25, alignItems: 'center', justifyContent: 'center' }}>
-                                                        <Image source={require('../../Images/forward_icon.png')}
-                                                            style={{ width: 15, height: 9 }} />
-                                                    </View>
+                                                    <TouchableOpacity onPress={() => {
+                                                        navigation.navigate('LoanApplicationMain')
+                                                    }} activeOpacity={0.5} style={{ width: '70%', height: '100%', backgroundColor: '#0294ff', borderRadius: 25, alignItems: 'center', justifyContent: 'center' }}>
+                                                        <View >
+                                                            <Image source={require('../../Images/forward_icon.png')}
+                                                                style={{ width: 15, height: 9 }} />
+                                                        </View>
+                                                    </TouchableOpacity>
                                                 </View>
 
                                             </View>

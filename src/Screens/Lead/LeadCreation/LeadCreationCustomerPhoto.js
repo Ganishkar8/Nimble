@@ -136,23 +136,23 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
             setDocID(data.leadCreationDms.dmsId);
             setFileName(data.leadCreationDms.fileName);
             setFileType(data.leadCreationDms.fileType);
-            const latLng = '12.971599,77.594566';
+            const latLng = data.leadCreationDms.geoLocation;
             const [latitude, longitude] = latLng.split(',');
             setCurrentLongitude(parseFloat(longitude));
             setCurrentLatitude(parseFloat(latitude));
-            getImage();
+            getImage(data.leadCreationDms.dmsId);
             zoomToMarker();
             setGPSLatLon(latLng);
         }
 
     }
 
-    const getImage = () => {
+    const getImage = (dmsID) => {
         Common.getNetworkConnection().then(value => {
             if (value.isConnected == true) {
                 setLoading(true)
                 const baseURL = '8094'
-                apiInstance(baseURL).get(`/api/documents/document/${docID}`)
+                apiInstance(baseURL).get(`/api/documents/document/${dmsID}`)
                     .then(async (response) => {
                         // Handle the response data
                         console.log("FinalLeadCreationApiResponse::" + JSON.stringify(response.data));

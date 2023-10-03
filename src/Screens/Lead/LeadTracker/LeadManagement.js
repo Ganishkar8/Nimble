@@ -63,13 +63,8 @@ const LeadManagement = (props, { navigation, route }) => {
         { name: 'Ageing', isSelected: false, id: 'AG' }
     ]
 
-    const statusDataArr = [
-
-    ]
-
-    const typeDataArr = [
-
-    ]
+    const [typeDataArr, setTypeDataArr] = useState([]);
+    const [statusDataArr, setStatusDataArr] = useState([]);
     const [search, setSearch] = useState('');
     const [pendingData, setPendingData] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
@@ -94,8 +89,10 @@ const LeadManagement = (props, { navigation, route }) => {
 
     const [agentData, setAgentData] = useState([]);
     const [agentLabel, setAgentLabel] = useState('');
-    const [ahentIndex, setAgentIndex] = useState('');
+    const [agentIndex, setAgentIndex] = useState('');
 
+    const [statusRefresh, setStatusRefresh] = useState(false);
+    const [typeRefresh, setTypeRefresh] = useState(false);
 
 
     useEffect(() => {
@@ -327,6 +324,9 @@ const LeadManagement = (props, { navigation, route }) => {
         //alert(JSON.stringify(value))
         if (value.name == 'Filter') {
             setVisible(true)
+            callStatusApi();
+            callLeadTypeApi();
+            callAgentNameApi();
         } else if (value.name == 'Pending') {
             getPendingData('1666', null, null, null, null, null, null, null);
         } else if (index == 3) {
@@ -376,9 +376,12 @@ const LeadManagement = (props, { navigation, route }) => {
 
                 setLoading(false);
                 setLeadStatusData(response.data)
+                var data = [];
                 for (var i = 0; i < response.data.length; i++) {
-                    statusDataArr.push({ name: response.data[i].label, id: response.data[i].id, checked: false })
+                    data.push({ name: response.data[i].label, id: response.data[i].id, checked: false })
                 }
+                setStatusDataArr(data)
+                setStatusRefresh(!statusRefresh)
             })
             .catch((error) => {
                 if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
@@ -398,10 +401,12 @@ const LeadManagement = (props, { navigation, route }) => {
             .then(async (response) => {
 
                 setLoading(false);
+                var data = [];
                 setLeadStatusData(response.data)
                 for (var i = 0; i < response.data.length; i++) {
-                    typeDataArr.push({ name: response.data[i].label, id: response.data[i].id, checked: false })
+                    data.push({ name: response.data[i].label, id: response.data[i].id, checked: false })
                 }
+                setTypeDataArr(data)
             })
             .catch((error) => {
                 if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
@@ -782,7 +787,7 @@ const LeadManagement = (props, { navigation, route }) => {
                             }
 
                             {filterVisible === 'ST' &&
-                                <StatusComp props={props} statusData={statusDataArr} filterClick={filterClick} />
+                                <StatusComp props={props} statusData={statusDataArr} filterClick={filterClick} refresh={statusRefresh} />
                             }
 
                             {filterVisible === 'DT' &&

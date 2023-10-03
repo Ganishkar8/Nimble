@@ -55,7 +55,7 @@ const statusDataArr = [
 const LeadLog = (props, { navigation }) => {
 
 
-    const [currentPosition, setCurrentPosition] = useState(0);
+    const [currentPosition, setCurrentPosition] = useState(props.route.params.position);
     const [loading, setLoading] = useState(false);
     const [visible, setVisible] = useState(false);
     const [leadData, setLeadData] = useState(props.route.params.leadData);

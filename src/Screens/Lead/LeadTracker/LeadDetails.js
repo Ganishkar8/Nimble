@@ -136,12 +136,14 @@ const LeadDetails = (props, { navigation, route }) => {
 
         }
 
+        var position = 0;
         if (draftavailable) {
             logArray.push(leadData.leadCreationLeadLogDtoList[insertDraftIndex]);
         }
 
         if (approvalavailable) {
             logArray.push(leadData.leadCreationLeadLogDtoList[insertApprovalIndex]);
+            position = 1;
         } else {
             logArray.push({
                 "createdBy": '',
@@ -154,7 +156,7 @@ const LeadDetails = (props, { navigation, route }) => {
         }
 
         //alert(JSON.stringify(logArray))
-        props.navigation.navigate('LeadLog', { leadData: leadData, logDetail: logArray })
+        props.navigation.navigate('LeadLog', { leadData: leadData, logDetail: logArray, position: position })
 
     }
 

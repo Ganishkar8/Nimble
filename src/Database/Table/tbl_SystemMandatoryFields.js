@@ -1,99 +1,122 @@
-import databaseInstance from "../DatabaseInstance";
+/* eslint-disable prettier/prettier */
+import databaseInstance from '../DatabaseInstance';
 
 const tableName = 'tbl_SystemMandatoryFields';
 
-const insertSystemMandatoryFields = (moduleID, fieldName , isMandatory , fieldUIID , fieldTabID , moduleTypeID , isDisable ,isCaptionChange, fieldCaptionChange, isHide, minLength, maxLength ) => {
-    const db = databaseInstance.getInstance();
+const insertSystemMandatoryFields = (
+  moduleID,
+  fieldName,
+  isMandatory,
+  fieldUIID,
+  fieldTabID,
+  moduleTypeID,
+  isDisable,
+  isCaptionChange,
+  fieldCaptionChange,
+  isHide,
+  minLength,
+  maxLength,
+) => {
+  const db = databaseInstance.getInstance();
 
-    return new Promise((resolve, reject) => {
-        db.transaction(tx => {
-            tx.executeSql(
-                `INSERT INTO ${tableName} (ModuleID, FieldName, IsMandatory, FieldUIID, FieldTabID, ModuleTypeID, IsDisable, IsCaptionChange, FieldCaptionChange , IsHide, MinLength, MaxLength) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                [moduleID, fieldName, isMandatory, fieldUIID, fieldTabID, moduleTypeID, isDisable, isCaptionChange, fieldCaptionChange, isHide, minLength, maxLength],
-                (_, result) => {
-                    resolve(result);
-                },
-                error => {
-                    reject(error);
-                }
-            );
-        });
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        `INSERT INTO ${tableName} (ModuleID, FieldName, IsMandatory, FieldUIID, FieldTabID, ModuleTypeID, IsDisable, IsCaptionChange, FieldCaptionChange , IsHide, MinLength, MaxLength) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          moduleID,
+          fieldName,
+          isMandatory,
+          fieldUIID,
+          fieldTabID,
+          moduleTypeID,
+          isDisable,
+          isCaptionChange,
+          fieldCaptionChange,
+          isHide,
+          minLength,
+          maxLength,
+        ],
+        (_, result) => {
+          resolve(result);
+        },
+        error => {
+          reject(error);
+        },
+      );
     });
+  });
 };
 
 const getAllSystemMandatoryFields = () => {
-    const db = databaseInstance.getInstance();
+  const db = databaseInstance.getInstance();
 
-    return new Promise((resolve, reject) => {
-        db.transaction(tx => {
-            tx.executeSql(
-                `SELECT * FROM ${tableName}`,
-                [],
-                (_, result) => {
-                    const rows = result.rows;
-                    const systemMandatoryFields = [];
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        `SELECT * FROM ${tableName}`,
+        [],
+        (_, result) => {
+          const rows = result.rows;
+          const systemMandatoryFields = [];
 
-                    for (let i = 0; i < rows.length; i++) {
-                        systemMandatoryFields.push(rows.item(i));
-                    }
+          for (let i = 0; i < rows.length; i++) {
+            systemMandatoryFields.push(rows.item(i));
+          }
 
-                    resolve(systemMandatoryFields);
-                },
-                error => {
-                    reject(error);
-                }
-            );
-        });
+          resolve(systemMandatoryFields);
+        },
+        error => {
+          reject(error);
+        },
+      );
     });
+  });
 };
 
-const getSystemMandatoryFieldsBasedOnFieldUIID = (fielduiid) => {
-    const db = databaseInstance.getInstance();
+const getSystemMandatoryFieldsBasedOnFieldUIID = fielduiid => {
+  const db = databaseInstance.getInstance();
 
-    return new Promise((resolve, reject) => {
-        db.transaction(tx => {
-            tx.executeSql(
-                `SELECT * FROM ${tableName} WHERE FieldUIID = ?`,
-                [fielduiid],
-                (_, result) => {
-                    const rows = result.rows;
-                    const systemMandatoryFields = [];
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        `SELECT * FROM ${tableName} WHERE FieldUIID = ?`,
+        [fielduiid],
+        (_, result) => {
+          const rows = result.rows;
+          const systemMandatoryFields = [];
 
-                    for (let i = 0; i < rows.length; i++) {
-                        systemMandatoryFields.push(rows.item(i));
-                    }
+          for (let i = 0; i < rows.length; i++) {
+            systemMandatoryFields.push(rows.item(i));
+          }
 
-                    resolve(systemMandatoryFields);
-                },
-                error => {
-                    reject(error);
-                }
-            );
-        });
+          resolve(systemMandatoryFields);
+        },
+        error => {
+          reject(error);
+        },
+      );
     });
+  });
 };
 
 const deleteAllSystemMandatoryFields = async () => {
-    try {
+  try {
+    const db = databaseInstance.getInstance(); // Execute the DELETE query
 
-        const db = databaseInstance.getInstance();  // Execute the DELETE query
+    const query = `DELETE FROM ${tableName}`;
 
-        const query = `DELETE FROM ${tableName}`;
+    const [rowsAffected] = await db.executeSql(query);
 
-        const [rowsAffected] = await db.executeSql(query);
-
-        console.log(`${rowsAffected} records deleted`);
-
-
-
-    } catch (error) {
-        console.error('Error deleting records:', error);
-    }
+    console.log(`${rowsAffected} records deleted`);
+  } catch (error) {
+    console.error('Error deleting records:', error);
+  }
 };
 
 export default {
-    getAllSystemMandatoryFields,
-    insertSystemMandatoryFields,
-    deleteAllSystemMandatoryFields,
-    getSystemMandatoryFieldsBasedOnFieldUIID
+  getAllSystemMandatoryFields,
+  insertSystemMandatoryFields,
+  deleteAllSystemMandatoryFields,
+  getSystemMandatoryFieldsBasedOnFieldUIID,
 };

@@ -4,8 +4,14 @@ import Colors from '../Utils/Colors';
 import Commonstyles from '../Utils/Commonstyles';
 import { Picker } from '@react-native-picker/picker';
 
-const PickerComp = ({ textLabel, pickerStyle, Disable, pickerdata, componentName, handlePickerClick }) => {
-
+const PickerComp = ({
+    textLabel,
+    pickerStyle,
+    Disable,
+    pickerdata,
+    componentName,
+    handlePickerClick,
+}) => {
     const setPicker = (label, index) => {
         handlePickerClick(componentName, label, index);
     };
@@ -49,11 +55,16 @@ const PickerComp = ({ textLabel, pickerStyle, Disable, pickerdata, componentName
                 </Picker>
             </View>
 
-            <View style={{
-                width: '90%', marginTop: 6, flexDirection: 'row',
-                borderBottomWidth: 1, borderBottomColor: '#e2e2e2', position: 'absolute', bottom: 3
-            }}></View>
-
+            <View
+                style={{
+                    width: '90%',
+                    marginTop: 6,
+                    flexDirection: 'row',
+                    borderBottomWidth: 1,
+                    borderBottomColor: '#e2e2e2',
+                    position: 'absolute',
+                    bottom: 3,
+                }}></View>
         </View>
     );
 };

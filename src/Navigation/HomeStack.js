@@ -1,4 +1,4 @@
-
+/* eslint-disable prettier/prettier */
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from '../Screens/Login/HomeScreen';
@@ -13,15 +13,15 @@ import LeadLog from '../Screens/Lead/LeadTracker/LeadLog';
 import LeadApproval from '../Screens/Lead/LeadTracker/LeadApproval';
 import ReAssign from '../Screens/Lead/LeadTracker/ReAssign';
 import PreviewImage from '../Components/PreviewImage';
+import AddressMainList from '../Screens/Application/Address/AddressMainList';
+import AddressDetails from '../Screens/Application/Address/AddressDetails';
+import LoanApplicationMain from '../Screens/LoanApplication/LoanApplicationMain';
 
 const Stack = createNativeStackNavigator();
 
 export default HomeStack = () => {
-
   return (
-
-    <Stack.Navigator >
-
+    <Stack.Navigator>
       <Stack.Screen
         name="HomeScreen"
         component={HomeScreen}
@@ -32,35 +32,30 @@ export default HomeStack = () => {
         name="LeadManagement"
         component={LeadManagement}
         options={{ headerShown: false, tabBarVisible: false }}
-
       />
 
       <Stack.Screen
         name="LeadDetails"
         component={LeadDetails}
         options={{ headerShown: false, tabBarVisible: false }}
-
       />
 
       <Stack.Screen
         name="LeadLog"
         component={LeadLog}
         options={{ headerShown: false, tabBarVisible: false }}
-
       />
 
       <Stack.Screen
         name="LeadApproval"
         component={LeadApproval}
         options={{ headerShown: false, tabBarVisible: false }}
-
       />
 
       <Stack.Screen
         name="ReAssign"
         component={ReAssign}
         options={{ headerShown: false, tabBarVisible: false }}
-
       />
 
       <Stack.Screen
@@ -73,7 +68,6 @@ export default HomeStack = () => {
         name="LeadCreationBasic"
         component={LeadCreationBasic}
         options={{ headerShown: false }}
-
       />
 
       <Stack.Screen
@@ -87,27 +81,40 @@ export default HomeStack = () => {
         name="LeadCreationBusiness"
         component={LeadCreationBusiness}
         options={{ headerShown: false }}
-
       />
-
 
       <Stack.Screen
         name="LeadCreationLoan"
         component={LeadCreationLoan}
         options={{ headerShown: false, tabBarVisible: false }}
-
       />
-
 
       <Stack.Screen
         name="LeadCreationCustomerPhoto"
         component={LeadCreationCustomerPhoto}
         options={{ headerShown: false, tabBarVisible: false }}
-
       />
 
+      <Stack.Screen
+        name="AddressMainList"
+        component={AddressMainList}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
 
+      <Stack.Screen
+        name="AddressDetails"
+        component={AddressDetails}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="LoanApplicationMain"
+        component={LoanApplicationMain}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
 
     </Stack.Navigator>
+
+
   );
 };
