@@ -12,6 +12,7 @@ import ProfileShortExistingClientDetails from '../Screens/Application/Applicatio
 import ProfileShortKYCVerificationStatus from '../Screens/Application/ApplicationInitiation/ProfileShortKYCVerificationStatus';
 import ProfileShortApplicantDetails from '../Screens/Application/ApplicationInitiation/ProfileShortApplicantDetails';
 import LeadCreationCustomerPhoto from '../Screens/Lead/LeadCreation/LeadCreationCustomerPhoto';
+import DemographicsGSTDetails from '../Screens/Application/ApplicationInitiation/DemographicsGSTDetails';
 
 const Stack = createNativeStackNavigator();
 
@@ -80,6 +81,11 @@ const Route = () => {
         <Stack.Screen
           name="LeadCreationCustomerPhoto"
           component={LeadCreationCustomerPhoto}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="DemographicsGSTDetails"
+          component={DemographicsGSTDetails}
           options={{headerShown: false}}
         />
       </Stack.Navigator>

@@ -150,6 +150,11 @@ export const language = [
       str_basicdetails: 'Basic Details',
       str_existingclientdetails: 'Existing Client Details',
       str_kycverificationstatus: 'KYC Verification StatusBar',
+      str_loandemographics: 'Loan (Demographics)',
+      str_gstdetails: 'GST Details',
+      str_gstregistration: 'GST Registration',
+      str_available: 'Available',
+      str_notavailable: 'Not Available',
     },
     ta: {
       first: 'comment allez vous',
