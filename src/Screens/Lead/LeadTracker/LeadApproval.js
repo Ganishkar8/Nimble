@@ -144,15 +144,16 @@ const LeadApproval = (props, { navigation, route }) => {
         const appDetails = {
             "status": leadStatusLabel,
             "comments": approverComment,
-            "userName": global.USERID
+            "userId": global.USERID
         }
         const baseURL = '8901'
         setLoading(true)
+        // alert(props.route.params.leadData.id)
         apiInstancelocal(baseURL).post(`/api/v1/lead-Approved/ByBm/${props.route.params.leadData.id}`, appDetails)
             .then(async (response) => {
                 // Handle the response data
                 setLoading(false)
-
+                props.navigation.navigate('LeadManagement', { fromScreen: 'LeadApproval' })
 
             })
             .catch((error) => {
@@ -186,8 +187,8 @@ const LeadApproval = (props, { navigation, route }) => {
 
                     <View style={{ width: '100%', height: 50, justifyContent: 'center' }}>
                         <Text style={{
-                            fontSize: 16, color: Colors.lightgrey, marginLeft: 23,
-                        }}>{language[0][props.language].str_leadid} <Text style={{ color: Colors.black }}>: LX127</Text></Text>
+                            fontSize: 16, color: Colors.mediumgrey, marginLeft: 23,
+                        }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black }}>{leadData.leadNumber}</Text></Text>
                     </View>
 
 

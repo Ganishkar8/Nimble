@@ -20,7 +20,7 @@ const TextInputComp = ({ textValue, textStyle, Disable, type, ComponentName, ref
                 secureTextEntry={false}
                 keyboardType={type}
                 autoCapitalize="characters"
-                style={textStyle}
+                style={[textStyle, { color: !Disable ? Colors.black : Colors.lightgrey }]}
                 ref={reference}
                 returnKeyType={returnKey}
                 onSubmitEditing={() => { handleReference(ComponentName) }}

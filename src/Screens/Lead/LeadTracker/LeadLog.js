@@ -23,6 +23,8 @@ import { connect } from 'react-redux';
 import { languageAction } from '../../../Utils/redux/actions/languageAction';
 import { language } from '../../../Utils/LanguageString';
 import StepIndicator from 'react-native-step-indicator';
+import Common from '../../../Utils/Common';
+import { getAvailableLocationProviders } from 'react-native-device-info';
 
 const data = [
 
@@ -49,12 +51,6 @@ const statusDataArr = [
 
 ]
 
-const typeDataArr = [
-
-    { name: 'Hot', id: 'HOT', checked: true },
-    { name: 'Warm', id: 'WARM', checked: false },
-
-]
 
 const LeadLog = (props, { navigation }) => {
 
@@ -62,7 +58,9 @@ const LeadLog = (props, { navigation }) => {
     const [currentPosition, setCurrentPosition] = useState(0);
     const [loading, setLoading] = useState(false);
     const [visible, setVisible] = useState(false);
-    const [labels, setLabels] = useState(typeDataArr);
+    const [leadData, setLeadData] = useState(props.route.params.leadData);
+    //const [labels, setLabels] = useState(typeDataArr);
+    const [logData, setLogData] = useState(props.route.params.logDetail);
     //const labels = ["Cart", "Delivery Address"];
     const customStyles = {
         stepIndicatorSize: 15,
@@ -88,6 +86,7 @@ const LeadLog = (props, { navigation }) => {
 
     useEffect(() => {
         //below code is used for hiding  bottom tab
+        //alert(JSON.stringify(props.route.params.leadData.leadCreationLeadLogDtoList))
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         return () =>
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
@@ -143,15 +142,15 @@ const LeadLog = (props, { navigation }) => {
 
             <View style={{ width: '100%', height: 50, justifyContent: 'center' }}>
                 <Text style={{
-                    fontSize: 16, color: '#000', marginLeft: 23,
-                }}>{language[0][props.language].str_leadid} : LX127</Text>
+                    fontSize: 16, color: Colors.mediumgrey, marginLeft: 23,
+                }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black }}>{leadData.leadNumber}</Text></Text>
             </View>
 
             <View style={{ width: '100%', height: 5, backgroundColor: Colors.skyblue }} />
 
             <View style={{ width: '100%', justifyContent: 'center' }}>
                 <Text style={{
-                    fontSize: 16, color: '#000', marginLeft: 23, marginTop: 10,
+                    fontSize: 16, color: '#000', marginLeft: 23, marginTop: 10
                 }}>{language[0][props.language].str_leadlog}</Text>
 
             </View>
@@ -160,21 +159,21 @@ const LeadLog = (props, { navigation }) => {
                 <StepIndicator
                     customStyles={customStyles}
                     currentPosition={currentPosition}
-                    labels={labels}
+                    labels={logData}
                     direction={'vertical'}
-                    stepCount={2}
+                    stepCount={logData.length}
                     renderLabel={({ position, stepStatus, label, currentPosition }) => {
                         return (
                             <View style={{ width: '100%', marginTop: 110 }}>
                                 <Text style={{
                                     fontSize: 16, color: '#000', marginLeft: 10,
-                                }}>{language[0][props.language].str_leadcreation}</Text>
+                                }}>{label.leadStatus == '1667' ? language[0][props.language].str_leadapproval : language[0][props.language].str_leadcreation}</Text>
                                 <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
                                     <View style={{ width: '50%' }}>
                                         <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 10 }}>{language[0][props.language].str_completiondate}:</Text>
                                     </View>
                                     <View style={{ width: '40%' }}>
-                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>{label.name}</Text>
+                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>{label.leadStatus == '1667' ? label.approvedOn != '' ? Common.formatDate(label.approvedOn) : '' : Common.formatDate(label.createdOn)}</Text>
                                     </View>
                                 </View>
                                 <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
@@ -182,7 +181,7 @@ const LeadLog = (props, { navigation }) => {
                                         <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 10 }}>{language[0][props.language].str_completiontime}:</Text>
                                     </View>
                                     <View style={{ width: '40%' }}>
-                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>Data</Text>
+                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>{label.leadStatus == '1667' ? label.approvedOn != '' ? Common.formatTime(label.approvedOn) : '' : Common.formatTime(label.createdOn)}</Text>
                                     </View>
                                 </View>
                                 <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
@@ -190,7 +189,7 @@ const LeadLog = (props, { navigation }) => {
                                         <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 10 }}>{language[0][props.language].str_userid}:</Text>
                                     </View>
                                     <View style={{ width: '40%' }}>
-                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>Data</Text>
+                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>{label.createdBy}</Text>
                                     </View>
                                 </View>
                                 <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
@@ -198,7 +197,7 @@ const LeadLog = (props, { navigation }) => {
                                         <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 10 }}>{language[0][props.language].str_username}:</Text>
                                     </View>
                                     <View style={{ width: '40%' }}>
-                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>Data</Text>
+                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>userName</Text>
                                     </View>
                                 </View>
                             </View>

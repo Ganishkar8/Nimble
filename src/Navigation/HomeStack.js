@@ -12,6 +12,7 @@ import LeadDetails from '../Screens/Lead/LeadTracker/LeadDetails';
 import LeadLog from '../Screens/Lead/LeadTracker/LeadLog';
 import LeadApproval from '../Screens/Lead/LeadTracker/LeadApproval';
 import ReAssign from '../Screens/Lead/LeadTracker/ReAssign';
+import PreviewImage from '../Components/PreviewImage';
 
 const Stack = createNativeStackNavigator();
 
@@ -71,6 +72,13 @@ export default HomeStack = () => {
       <Stack.Screen
         name="LeadCreationBasic"
         component={LeadCreationBasic}
+        options={{ headerShown: false }}
+
+      />
+
+      <Stack.Screen
+        name="PreviewImage"
+        component={PreviewImage}
         options={{ headerShown: false }}
 
       />

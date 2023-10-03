@@ -19,16 +19,19 @@ const DateComp = ({ props, filterClick }) => {
     const year = currentDate.getFullYear();
 
     // Create the formatted date string
-    const formattedDatee = `${day}/${month}/${year}`;
+    const formattedDatee = `${day}-${month}-${year}`;
+    const formattedServerDatee = `${year}-${month}-${day}`;
     const [fromDate, setFromDate] = React.useState(formattedDatee);
     const [toDate, setToDate] = React.useState(formattedDatee);
+    const [fromServerDate, setFromServerDate] = React.useState(formattedServerDatee);
+    const [toServerDate, setToServerDate] = React.useState(formattedServerDatee);
     const [mydate, setDate] = React.useState(new Date());
     const [mydateTo, setTooDate] = React.useState(new Date());
     const [displaymode, setMode] = React.useState('date');
     const [isDisplayDate, setShow] = React.useState(false);
     const [isDisplayDateTo, setShowTo] = React.useState(false);
     React.useEffect(() => {
-        updateAgeData(formattedDatee, formattedDatee)
+        updateAgeData(formattedServerDatee, formattedServerDatee)
     }, []);
     const displayDatepicker = (type) => {
         if (type == 1) {
@@ -58,10 +61,11 @@ const DateComp = ({ props, filterClick }) => {
         const year = date.getFullYear();
 
         // Create the formatted date string
-        const formattedDate = `${day}/${month}/${year}`;
-        console.log("FormattedDate::" + formattedDate)
+        const formattedDate = `${day}-${month}-${year}`;
+        const formattedServerDate = `${year}-${month}-${day}`;
+        console.log("FormattedDate::" + formattedServerDate)
         console.log("Event::" + JSON.stringify(event))
-        updateAgeData(formattedDate, toDate)
+        updateAgeData(formattedServerDate, toServerDate)
         setFromDate(formattedDate);
 
     };
@@ -78,10 +82,11 @@ const DateComp = ({ props, filterClick }) => {
         const year = date.getFullYear();
 
         // Create the formatted date string
-        const formattedDate = `${day}/${month}/${year}`;
-        console.log("FormattedDate::" + formattedDate)
+        const formattedDate = `${day}-${month}-${year}`;
+        const formattedServerDate = `${year}-${month}-${day}`;
+        console.log("FormattedDate::" + formattedServerDate)
         console.log("Event::" + JSON.stringify(event))
-        updateAgeData(fromDate, formattedDate)
+        updateAgeData(fromServerDate, formattedServerDate)
         setToDate(formattedDate);
 
     };

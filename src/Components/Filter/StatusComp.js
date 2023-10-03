@@ -46,7 +46,7 @@ const StatusComp = ({ props, statusData, filterClick }) => {
                         keyExtractor={(item, index) => item.id}
                         renderItem={({ item, index }) => {
                             return (
-                                <View style={{ flexDirection: 'row', marginTop: 2 ,alignItems:'center'}}>
+                                <View style={{ flexDirection: 'row', marginTop: 2, alignItems: 'center' }}>
 
                                     <View style={{ flexDirection: 'row', marginTop: '2%' }}>
                                         <View style={{ width: '18%', justifyContent: 'center' }}>

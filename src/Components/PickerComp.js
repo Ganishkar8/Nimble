@@ -16,16 +16,20 @@ const PickerComp = ({ textLabel, pickerStyle, Disable, pickerdata, componentName
 
                 <Picker
                     selectedValue={textLabel}
-                    style={pickerStyle}
+                    style={[pickerStyle, { color: !Disable ? Colors.black : Colors.lightgrey }]}
                     enabled={!Disable}
                     mode='dropdown'
-                    dropdownIconColor='#000'
+                    dropdownIconColor={!Disable ? Colors.black : Colors.lightgrey}
                     themeVariant='light'
                     onValueChange={(itemValue, itemIndex) => {
                         setPicker(itemValue, itemIndex)
                     }}>
+                    {componentName == 'productIdPicker' &&
+                        <Picker.Item value='' label='Select' style={{ backgroundColor: '#fff', color: '#000' }} />
+                    }
 
                     {
+
                         pickerdata.map(item => {
                             let labelValue;
 
@@ -38,6 +42,7 @@ const PickerComp = ({ textLabel, pickerStyle, Disable, pickerdata, componentName
                                 default:
                                     labelValue = item.label;
                             }
+
                             return <Picker.Item value={item.id} label={labelValue} style={{ backgroundColor: '#fff', color: '#000' }} />
                         })
                     }

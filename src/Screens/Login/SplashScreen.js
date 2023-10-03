@@ -45,17 +45,21 @@ const SplashScreen = ({ navigation }) => {
                 tbl_SystemCodeDetails.insertSystemCodeDetails('CustomerCategory', '2', 'BUSINESS', 'Business', '2', '1')
                 tbl_SystemCodeDetails.insertSystemCodeDetails('IndustryType', '1', 'SERVICES', 'Services', '1', '0');
                 tbl_SystemCodeDetails.insertSystemCodeDetails('IndustryType', '2', 'MANUFACTURING', 'Manufacturing', '2', '1')
-                tbl_SystemCodeDetails.insertSystemCodeDetails('LNTP', '1', 'UNSEC', 'UnSecured', '1', '0');
-                tbl_SystemCodeDetails.insertSystemCodeDetails('LNTP', '2', 'SEC', 'Secured', '2', '0');
+                tbl_SystemCodeDetails.insertSystemCodeDetails('LNTP', '1', '440', 'UnSecured', '1', '0');
+                tbl_SystemCodeDetails.insertSystemCodeDetails('LNTP', '2', '441', 'Secured', '2', '0');
                 tbl_SystemCodeDetails.insertSystemCodeDetails('LNPUR', '1', 'RAW', 'Purchase of Raw Materials', '1', '0');
                 tbl_SystemCodeDetails.insertSystemCodeDetails('LNPUR', '2', 'MARR', 'Marriage', '2', '0')
                 tbl_SystemCodeDetails.insertSystemCodeDetails('LeadType', '1', 'HOT', 'Hot', '1', '0');
                 tbl_SystemCodeDetails.insertSystemCodeDetails('LeadType', '2', 'WARM', 'Warm', '2', '0')
                 tbl_SystemCodeDetails.insertSystemCodeDetails('LeadType', '3', 'COLD', 'Cold', '3', '0')
-                tbl_SystemCodeDetails.insertSystemCodeDetails('LeadStatus', '1', 'APPROVE', 'Approve', '1', '0');
-                tbl_SystemCodeDetails.insertSystemCodeDetails('LeadStatus', '2', 'REJECT', 'Reject', '2', '0');
+                tbl_SystemCodeDetails.insertSystemCodeDetails('LeadStatus', '1', '1666', 'Pending', '1', '0');
+                tbl_SystemCodeDetails.insertSystemCodeDetails('LeadStatus', '2', '1667', 'Approved', '2', '0');
+                tbl_SystemCodeDetails.insertSystemCodeDetails('LeadStatus', '3', '1668', 'Rejected', '3', '0');
+                tbl_SystemCodeDetails.insertSystemCodeDetails('LeadStatus', '4', '1669', 'Draft', '4', '0');
                 tbl_SystemCodeDetails.insertSystemCodeDetails('Reason', '1', 'LEV', 'On Leave', '1', '0');
                 tbl_SystemCodeDetails.insertSystemCodeDetails('Reason', '2', 'LEFT', 'Discontinued', '2', '0');
+                tbl_SystemCodeDetails.insertSystemCodeDetails('UserType', '1', '1164', 'BM', '1', '0');
+                tbl_SystemCodeDetails.insertSystemCodeDetails('UserType', '2', '1163', 'FA', '2', '0');
             })
 
             tbl_UserCodeDetails.deleteAllUserCodeDetails().then(response => {

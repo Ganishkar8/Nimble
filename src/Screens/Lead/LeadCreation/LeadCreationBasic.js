@@ -27,9 +27,12 @@ import TextInputComp from '../../../Components/TextInputComp';
 import PickerComp from '../../../Components/PickerComp';
 import ButtonViewComp from '../../../Components/ButtonViewComp';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
+import tbl_lead_creation_lead_details from '../../../Database/Table/tbl_lead_creation_lead_details';
+import tbl_lead_creation_loan_details from '../../../Database/Table/tbl_lead_creation_loan_details';
+import tbl_lead_creation_basic_details from '../../../Database/Table/tbl_lead_creation_basic_details';
 
-const LeadCreationBasic = (props, { navigation }) => {
-
+const LeadCreationBasic = (props, { navigation, route }) => {
+    const [leadType, setLeadType] = useState(global.LEADTYPE);
     const [loading, setLoading] = useState(false);
     const [custCatgLabel, setCustCatgLabel] = useState('');
     const [custCatgIndex, setCustCatgIndex] = useState('');
@@ -86,9 +89,12 @@ const LeadCreationBasic = (props, { navigation }) => {
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
+
         makeSystemMandatoryFields();
         //pickerData();
-        callPickerApi();
+        getData();
+
+        //callPickerApi();
         return () =>
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
     }, [navigation]);
@@ -254,8 +260,13 @@ const LeadCreationBasic = (props, { navigation }) => {
 
     const updateLeadDetails = () => {
 
-        if (validate()) {
+        if (global.LEADTYPE == 'COMP') {
+            props.navigation.navigate('LeadCreationBusiness', { leadData: props.route.params.leadData })
+        } else if (validate()) {
             showBottomSheet();
+        } else if (global.leadID.length != '') {
+            props.navigation.navigate('LeadCreationBusiness', { leadData: [] })
+
         }
         else {
 
@@ -272,8 +283,14 @@ const LeadCreationBasic = (props, { navigation }) => {
                     "firstName": firstName,
                     "middleName": middleName,
                     "lastName": lastName,
-                    "mobileNumber": 7567895434
-                }
+                    "mobileNumber": mobileNumber,
+                    "genderId": genderLabel
+                },
+                "leadCreationBusinessDetails": {},
+
+                "leadCreationLoanDetails": {},
+
+                "leadCreationDms": {}
             }
             const baseURL = '8901'
             setLoading(true)
@@ -283,7 +300,8 @@ const LeadCreationBasic = (props, { navigation }) => {
                     console.log("LeadCreationBasicApiResponse::" + JSON.stringify(response.data));
                     global.leadID = response.data.id;
                     setLoading(false)
-                    props.navigation.navigate('LeadCreationBusiness')
+                    //alert(JSON.stringify(response.data))
+                    insertLead(response.data)
 
                 })
                 .catch((error) => {
@@ -296,6 +314,61 @@ const LeadCreationBasic = (props, { navigation }) => {
 
         }
 
+
+    }
+
+    const insertLead = async (leadData) => {
+        await tbl_lead_creation_lead_details.insertLeadCreationLeadDetails(leadData.id, leadData.leadNumber, leadData.branchId, leadData.isActive, leadData.createdBy);
+        await tbl_lead_creation_basic_details.insertLeadCreationBasicDetails(leadData.id, custCatgLabel, titleLabel, firstName, middleName, lastName, genderLabel, mobileNumber, global.USERID);
+
+        tbl_lead_creation_lead_details.getLeadCreationLeadDetailsBasedOnLeadID(leadData.id).then(value => {
+            console.log("LeadDetails::::" + JSON.stringify(value))
+        })
+
+        tbl_lead_creation_basic_details.getLeadCreationBasicDetailsBasedOnLeadID(leadData.id).then(value => {
+            console.log("LeadBasicDetails::::" + JSON.stringify(value))
+        })
+        props.navigation.navigate('LeadCreationBusiness', { leadData: [] })
+
+    }
+
+    const getData = () => {
+
+        if (leadType == 'DRAFT') {
+            setLoading(true);
+            tbl_lead_creation_basic_details.getLeadCreationBasicDetailsBasedOnLeadID(global.leadID).then(value => {
+                if (value !== undefined && value.length > 0) {
+                    setCustCatgLabel(parseInt(value[0].customer_category_id.toString()));
+                    setFirstName(value[0].first_name);
+                    setMiddleName(value[0].middle_name);
+                    setLastName(value[0].last_name);
+                    setGenderLabel(parseInt(value[0].gender_id));
+                    setTitleLabel(parseInt(value[0].title_id));
+                    setMobileNumber(value[0].mobile_number);
+                    callPickerApi();
+
+                }
+            })
+        } else if (leadType == 'NEW') {
+            callPickerApi();
+        } else if (leadType == 'COMP') {
+            const data = props.route.params.leadData;
+            setCustCatgLabel(parseInt(data.leadCreationBasicDetails.customerCategoryId));
+            setFirstName(data.leadCreationBasicDetails.firstName);
+            setMiddleName(data.leadCreationBasicDetails.middleName);
+            setLastName(data.leadCreationBasicDetails.lastName);
+            setGenderLabel(parseInt(data.leadCreationBasicDetails.genderId));
+            setTitleLabel(parseInt(data.leadCreationBasicDetails.titleId));
+            setMobileNumber(data.leadCreationBasicDetails.mobileNumber.toString());
+            callPickerApi();
+            setCustCatgDisable(true)
+            setTitleDisable(true)
+            setFirstNameDisable(true)
+            setMiddleNameDisable(true)
+            setLastNameDisable(true)
+            setGenderDisable(true)
+            setMobileNumberDisable(true)
+        }
 
     }
 

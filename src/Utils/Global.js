@@ -1,6 +1,7 @@
 global.DEBUG_MODE = true
 global.USERNAME = 'UserName'
-global.USERID = '1'
+global.USERID = ''
+global.USERTYPEID = ''
 global.RefreshToken = ''
 global.leadID = ''
 global.BASEURL = "";
@@ -18,3 +19,4 @@ global.DEVICEMODELNAME = '';
 global.AUTHTOKEN = '230UAT';
 global.BRCONNECTAPIKEY = "";
 global.BRCONNECTAPPID = "";
+global.LEADTYPE = ''

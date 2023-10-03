@@ -6,16 +6,16 @@ import { connect } from 'react-redux';
 import { languageAction } from '../../Utils/redux/actions/languageAction';
 import { language } from '../../Utils/LanguageString';
 
-const SortByComp = ({ props, filterClick }) => {
+const SortByComp = ({ props, filterClick, selectedValue, from }) => {
 
-    const [sortValue, setSortValue] = React.useState('');
+    const [sortValue, setSortValue] = React.useState(selectedValue);
     const setFilterVal = (value) => {
         if (value == 1) {
-            setSortValue('LTO')
-            filterClick('SO', 'LTO')
+            setSortValue('ASC')
+            filterClick('SO', 'ASC', from)
         } else {
-            setSortValue('OTL')
-            filterClick('SO', 'OTL')
+            setSortValue('DESC')
+            filterClick('SO', 'DESC', from)
         }
     }
     return (
@@ -38,9 +38,9 @@ const SortByComp = ({ props, filterClick }) => {
                         <View style={{ width: '18%', justifyContent: 'center' }}>
                             <RadioButton
                                 uncheckedColor={Colors.darkblue}
-                                value="LTO"
+                                value="ASC"
                                 color={Colors.darkblue}
-                                status={sortValue === 'LTO' ? 'checked' : 'unchecked'}
+                                status={sortValue === 'ASC' ? 'checked' : 'unchecked'}
                                 onPress={() => setFilterVal(1)}
                             />
                         </View>
@@ -60,9 +60,9 @@ const SortByComp = ({ props, filterClick }) => {
                         <View style={{ width: '18%', justifyContent: 'center' }}>
                             <RadioButton
                                 uncheckedColor={Colors.darkblue}
-                                value="OTL"
+                                value="DESC"
                                 color={Colors.darkblue}
-                                status={sortValue === 'OTL' ? 'checked' : 'unchecked'}
+                                status={sortValue === 'DESC' ? 'checked' : 'unchecked'}
                                 onPress={() => setFilterVal(2)}
                             />
                         </View>

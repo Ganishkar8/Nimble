@@ -45,10 +45,12 @@ import Geolocation from 'react-native-geolocation-service';
 import apiInstancelocal from '../../../Utils/apiInstancelocal';
 import PickerComp from '../../../Components/PickerComp';
 import TextInputComp from '../../../Components/TextInputComp';
+import tbl_lead_creation_loan_details from '../../../Database/Table/tbl_lead_creation_loan_details';
+import Common from '../../../Utils/Common';
 
 
 const LeadCreationLoan = (props, { navigation }) => {
-
+    const [leadType, setLeadType] = useState(global.LEADTYPE);
     const [errMsg, setErrMsg] = useState('');
     const [loading, setLoading] = useState(false);
     const [checked, setChecked] = React.useState('');
@@ -98,11 +100,16 @@ const LeadCreationLoan = (props, { navigation }) => {
     const [locationSheetVisible, setLocationSheetVisible] = useState(false);
     const loanAmountRef = useRef(null);
 
+    const [minLoanAmount, setMinLoanAmount] = useState(0);
+    const [maxLoanAmount, setMaxLoanAmount] = useState(0);
+
 
     useEffect(() => {
         //  pickerData();
-        callPickerApi();
+        // callPickerApi();
         makeSystemMandatoryFields();
+        getData();
+
     }, []);
 
 
@@ -339,52 +346,107 @@ const LeadCreationLoan = (props, { navigation }) => {
     }
 
     const updateLeadDetails = () => {
-
-        if (validate()) {
+        if (global.LEADTYPE == 'COMP') {
+            props.navigation.navigate('LeadCreationCustomerPhoto', { leadData: props.route.params.leadData })
+        } else if (validate()) {
             showBottomSheet();
         }
-
         else {
-
-            const appDetails = {
-                "leadCreationLoanDetails": {
-                    "createdBy": global.USERID,
-                    "createdOn": '',
-                    "loanTypeId": 5,
-                    "loanPurposeId": 6,
-                    "leadTypeId": 7,
-                    "loanAmount": loanAmount
+            Common.getNetworkConnection().then(value => {
+                if (value.isConnected == true) {
+                    callLeadApi();
+                } else {
+                    insertLead(global.leadID, true)
                 }
-            }
-            const baseURL = '8901'
-            setLoading(true)
-            apiInstancelocal(baseURL).put(`/api/v1/lead-creation-initiation/${global.leadID}`, appDetails)
-                .then(async (response) => {
-                    // Handle the response data
-                    console.log("LeadCreationLoanApiResponse::" + JSON.stringify(response.data));
-
-                    checkPermissions().then(res => {
-                        if (res == true) {
-                            getOneTimeLocation();
-                            setLoading(false)
-                        } else {
-                            setLoading(false)
-                            alert('Permission Not Granted')
-                        }
-                    });
-
-                })
-                .catch((error) => {
-                    // Handle the error
-                    console.log("Error" + JSON.stringify(error.response))
-                    setLoading(false)
-                    alert(error);
-                });
+            })
 
 
         }
 
 
+    }
+
+    const callLeadApi = () => {
+        insertLead(global.leadID, false)
+        const appDetails = {
+            "leadCreationLoanDetails": {
+                "createdBy": global.USERID,
+                "createdOn": '',
+                "loanTypeId": loanTypeLabel,
+                "loanPurposeId": loanPurposeLabel,
+                "leadTypeId": leadTypeLabel,
+                "loanAmount": loanAmount
+            }
+        }
+        const baseURL = '8901'
+        setLoading(true)
+        apiInstancelocal(baseURL).put(`/api/v1/lead-creation-initiation/${global.leadID}`, appDetails)
+            .then(async (response) => {
+                // Handle the response data
+                console.log("LeadCreationLoanApiResponse::" + JSON.stringify(response.data));
+                checkPermissions().then(res => {
+                    if (res == true) {
+                        getOneTimeLocation();
+                        setLoading(false)
+                    } else {
+                        setLoading(false)
+                        alert('Permission Not Granted')
+                    }
+                });
+            })
+            .catch((error) => {
+                // Handle the error
+                console.log("Error" + JSON.stringify(error.response))
+                setLoading(false)
+                alert(error);
+            });
+
+    }
+
+
+    const insertLead = async (leadID, nav) => {
+        await tbl_lead_creation_loan_details.insertLeadCreationLoanDetails(leadID, loanTypeLabel, productIdLabel, loanPurposeLabel, loanAmount, leadTypeLabel, global.USERID);
+
+        tbl_lead_creation_loan_details.getLeadCreationLoanDetailsBasedOnLeadID(leadID).then(value => {
+            console.log("LeadLoanDetails::::" + JSON.stringify(value))
+        })
+
+        if (nav == true) {
+            checkPermissions().then(res => {
+                if (res == true) {
+                    getOneTimeLocation();
+                    setLoading(false)
+                } else {
+                    setLoading(false)
+                    alert('Permission Not Granted')
+                }
+            });
+        }
+    }
+
+    const callLoanAmount = (productID) => {
+        const baseURL = '8083'
+        setLoading(true)
+        apiInstancelocal(baseURL).get(`/api/v1/Product-Loan/productId=${productID}`)
+            .then(async (response) => {
+                setLoading(false);
+                if (response.data.minLoanAmount.length > 0) {
+                    const minAmount = parseInt(response.data.minLoanAmount, 10);
+                    setMinLoanAmount(minAmount)
+                }
+
+                if (response.data.maxLoanAmount.length > 0) {
+                    const maxAmount = parseInt(response.data.maxLoanAmount, 10);
+                    setMaxLoanAmount(maxAmount)
+                }
+
+
+            })
+            .catch((error) => {
+                if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
+                setLoading(false)
+                alert(error);
+            });
     }
 
     const callPickerApi = () => {
@@ -446,6 +508,43 @@ const LeadCreationLoan = (props, { navigation }) => {
 
     }
 
+    const getData = () => {
+
+        if (leadType == 'DRAFT') {
+            setLoading(true);
+            tbl_lead_creation_loan_details.getLeadCreationLoanDetailsBasedOnLeadID(global.leadID).then(value => {
+                if (value !== undefined && value.length > 0) {
+                    setLoanTypeLabel(parseInt(value[0].loan_type_id));
+                    setProductIdLabel(988);
+                    setLoanPurposeLabel(parseInt(value[0].loan_purpose_id));
+                    setLoanAmount(value[0].loan_amount);
+                    setLeadTypeLabel(parseInt(value[0].lead_type_id));
+                    callLoanAmount(988);
+                    callPickerApi();
+                } else {
+                    callPickerApi();
+                }
+            })
+        } else if (leadType == 'NEW') {
+            callPickerApi();
+        } else if (leadType == 'COMP') {
+            const data = props.route.params.leadData;
+            setLoanTypeLabel(parseInt(data.leadCreationLoanDetails.loanTypeId))
+            setProductIdLabel(988);
+            setLoanPurposeLabel(parseInt(data.leadCreationLoanDetails.loanPurposeId));
+            setLoanAmount(data.leadCreationLoanDetails.loanAmount.toString());
+            setLeadTypeLabel(parseInt(data.leadCreationLoanDetails.leadTypeId));
+            callLoanAmount(988);
+            setLoanTypeDisable(true)
+            setProductIdDisable(true)
+            setLoanPurposeDisable(true)
+            setLoanAmountDisable(true)
+            setLeadTypeDisable(true)
+            callPickerApi();
+        }
+
+    }
+
     const getOneTimeLocation = () => {
         showLocationBottomSheet();
         Geolocation.getCurrentPosition(
@@ -463,7 +562,7 @@ const LeadCreationLoan = (props, { navigation }) => {
                     JSON.stringify(position.coords.latitude);
 
                 hideLocationBottomSheet();
-                props.navigation.navigate('LeadCreationCustomerPhoto')
+                props.navigation.navigate('LeadCreationCustomerPhoto', { leadData: [] })
 
             },
             (error) => {
@@ -491,7 +590,7 @@ const LeadCreationLoan = (props, { navigation }) => {
         }
 
         if (productIdMan && productIdVisible) {
-            if (loanTypeLabel === '') {
+            if (productIdLabel.length <= 0) {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + productIdCaption + '\n';
                 i++;
                 flag = true;
@@ -499,7 +598,7 @@ const LeadCreationLoan = (props, { navigation }) => {
         }
 
         if (loanPurposeMan && loanPurposeVisible) {
-            if (loanPurposeLabel === 'Select') {
+            if (loanPurposeLabel === '') {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + loanPurposeCaption + '\n';
                 i++;
                 flag = true;
@@ -515,6 +614,16 @@ const LeadCreationLoan = (props, { navigation }) => {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + loanAmountCaption + ' ' + language[0][props.language].str_mulfive + '\n';
                 i++;
                 flag = true;
+            } else if (productIdLabel != '') {
+                if (loanAmount < minLoanAmount) {
+                    errorMessage = errorMessage + i + ')' + ' ' + loanAmountCaption + ' ' + language[0][props.language].str_cannotlessthan + ' ' + minLoanAmount + '\n';
+                    i++;
+                    flag = true;
+                } else if (loanAmount > maxLoanAmount) {
+                    errorMessage = errorMessage + i + ')' + ' ' + loanAmountCaption + ' ' + language[0][props.language].str_cannotgreaterthan + ' ' + maxLoanAmount + '\n';
+                    i++;
+                    flag = true;
+                }
             }
         }
 
@@ -558,6 +667,12 @@ const LeadCreationLoan = (props, { navigation }) => {
         } else if (componentName === 'productIdPicker') {
             setProductIdLabel(label);
             setProductIdIndex(index);
+            if (label != '') {
+                callLoanAmount(label);
+            } else {
+                setMinLoanAmount(0);
+                setMaxLoanAmount(0);
+            }
         } else if (componentName === 'loanPurposePicker') {
             setLoanPurposeLabel(label);
             setLoanPurposeIndex(index);
@@ -731,7 +846,7 @@ const LeadCreationLoan = (props, { navigation }) => {
                             <TextComp textVal={loanAmountCaption} textStyle={Commonstyles.inputtextStyle} Visible={loanAmountMan} />
                         </View>
 
-                        <TextInputComp textValue={loanAmount} textStyle={Commonstyles.textinputtextStyle} type='numeric' Disable={loanAmountDisable} ComponentName='loanAMount' reference={loanAmountRef} returnKey="done" handleClick={handleClick} handleReference={handleReference} />
+                        <TextInputComp textValue={loanAmount} textStyle={Commonstyles.textinputtextStyle} type='numeric' Disable={loanAmountDisable} ComponentName='loanAmount' reference={loanAmountRef} returnKey="done" handleClick={handleClick} handleReference={handleReference} />
 
                     </View>}
 

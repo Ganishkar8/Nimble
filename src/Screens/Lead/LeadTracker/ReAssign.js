@@ -40,7 +40,7 @@ const statusDataArr = [
 
 const ReAssign = (props, { navigation }) => {
 
-
+    const [leadData, setLeadData] = useState(props.route.params.leadData);
     const [currentPosition, setCurrentPosition] = useState(0);
     const [loading, setLoading] = useState(false);
     const [visible, setVisible] = useState(false);
@@ -108,7 +108,7 @@ const ReAssign = (props, { navigation }) => {
                 alert(error);
             });
 
-        apiInstancelocal(baseURL).get('/api/v1/userIdAndUserName')
+        apiInstancelocal('8901').post('/api/v1/lead-Approved/ReAssignedDrowdown/1180')
             .then(async (response) => {
                 var userresponse = true;
                 if (reasonresponse && userresponse) {
@@ -154,8 +154,8 @@ const ReAssign = (props, { navigation }) => {
             const newData = nonFilteredData.filter(
                 function (item) {
 
-                    const itemData = item.userIdAndUserName
-                        ? item.userIdAndUserName.toUpperCase()
+                    const itemData = item.userName
+                        ? item.userName.toUpperCase()
                         : ''.toUpperCase();
                     const itemDataID = item.id
                         ? item.id.toString()
@@ -187,7 +187,7 @@ const ReAssign = (props, { navigation }) => {
 
         return (
             <View>
-                <TouchableOpacity onPress={() => { setReAssignedto(item.userIdAndUserName); setReAssignedtoID(item.id); setVisible(false); setSearch(''); setFilteredData(nonFilteredData) }} activeOpacity={0.9}>
+                <TouchableOpacity onPress={() => { setReAssignedto(item.userName); setReAssignedtoID(item.userId); setVisible(false); setSearch(''); setFilteredData(nonFilteredData) }} activeOpacity={0.9}>
                     <View style={{
                         width: '92%', margin: 13, backgroundColor: 'white',
                         alignItems: 'center'
@@ -196,7 +196,7 @@ const ReAssign = (props, { navigation }) => {
 
                         <View style={{ width: '100%', flexDirection: 'row', }}>
 
-                            <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>{item.userIdAndUserName}</Text>
+                            <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>{item.userName}</Text>
 
                         </View>
 
@@ -225,7 +225,7 @@ const ReAssign = (props, { navigation }) => {
             .then(async (response) => {
                 // Handle the response data
                 setLoading(false)
-
+                props.navigation.goBack();
 
             })
             .catch((error) => {
@@ -297,7 +297,8 @@ const ReAssign = (props, { navigation }) => {
                                             width: '80%',
                                             height: 44,
                                             fontSize: 14.4,
-                                            fontWeight: '400'
+                                            fontWeight: '400',
+                                            color: Colors.black
                                         }}
                                     />
                                     <Ionicons name="search" style={{ marginStart: 32 }} size={20} color={'#aaaaaa'} />
@@ -330,8 +331,8 @@ const ReAssign = (props, { navigation }) => {
 
                     <View style={{ width: '100%', height: 50, justifyContent: 'center' }}>
                         <Text style={{
-                            fontSize: 16, color: Colors.lightgrey, marginLeft: 23,
-                        }}>{language[0][props.language].str_leadid} <Text style={{ color: Colors.black }}>: LX127</Text></Text>
+                            fontSize: 16, color: Colors.mediumgrey, marginLeft: 23,
+                        }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black }}>{leadData.leadNumber}</Text></Text>
                     </View>
 
                     <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>

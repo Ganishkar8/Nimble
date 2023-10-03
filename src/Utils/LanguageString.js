@@ -15,6 +15,7 @@ export const language = [{
     str_privacypolicy: 'Privacy policy',
     str_errlogin: 'Please Enter Valid Details',
     str_leadcreation: 'Lead Creation',
+    str_leadapproval: 'Lead Approval',
     str_basicdetails: 'Basic Details',
     str_customercatg: 'CUSTOMER CATEGORY',
     str_firstname: 'FIRST NAME',
@@ -33,6 +34,7 @@ export const language = [{
     str_statuscap: 'STATUS',
     str_cdcaps: 'CREATION DATE',
     str_leadtype: 'LEAD TYPE',
+    str_agentname: 'AGENT NAME',
     str_from: 'FROM',
     str_to: 'TO',
     str_ageingcap: 'AGEING',
@@ -143,6 +145,11 @@ export const language = [{
     str_cbmace: 'Maximun allowed credit enquiries',
     str_cbloanstatus: 'Loan Status',
     str_cbotherstatus: 'Other Status',
+    str_cannotlessthan: 'Cannot be less than',
+    str_cannotgreaterthan: 'Cannot be greater than',
+    str_errinternet: 'Internet is not Connected',
+    str_errinternetimage: 'Internet is not Connected so Unable to load Image',
+    str_previous: 'PREVIOUS',
 
   },
   ta: {

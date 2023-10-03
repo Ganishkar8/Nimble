@@ -33,6 +33,8 @@ import ImageComp from '../../Components/ImageComp';
 import ActivationCodeModal from '../../Components/ActivationCodeModal';
 import CenteredModal from '../../Components/CenteredModal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Common from '../../Utils/Common';
+
 
 const LoginScreen = (props, { navigation }) => {
 
@@ -53,11 +55,26 @@ const LoginScreen = (props, { navigation }) => {
             alert(language[0][props.language].str_errlogin)
             return;
         }
+
+
+        Common.getNetworkConnection().then(value => {
+            if (value.isConnected == true) {
+                callLogin();
+            } else {
+                alert(language[0][props.language].str_errinternet)
+            }
+
+        })
+
+
+    }
+
+    const callLogin = () => {
         const appDetails = {
             "username": userID,
             "password": password
         }
-        const baseURL = '8081'
+        const baseURL = '8908'
         setLoading(true)
         apiInstance(baseURL).post('/api/auth/login', appDetails)
             .then(async (response) => {
@@ -70,9 +87,10 @@ const LoginScreen = (props, { navigation }) => {
                 setPassword('')
                 global.USERNAME = decodedToken.userName;
                 global.USERID = decodedToken.userId;
+                global.USERTYPEID = decodedToken.userTypeId;
                 global.RefreshToken = response.data.jwtRefreshToken;
                 //setVisible(true);
-                AsyncStorage.setItem('IsLogin', 'true');
+                //AsyncStorage.setItem('IsLogin', 'true');
                 loginHandle();
 
             })
@@ -82,7 +100,6 @@ const LoginScreen = (props, { navigation }) => {
                 alert(error);
             });
     }
-
 
     const updateSecureTextEntry = () => {
         if (!secureTextEntry) {
