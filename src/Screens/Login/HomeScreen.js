@@ -140,67 +140,78 @@ const HomeScreen = ({ navigation }) => {
                                     </TouchableOpacity>
                                 </View>
 
+                                {global.USERTYPEID == '1164' &&
+                                    <View style={{ width: '93%', height: 150, backgroundColor: '#ffffff99', marginTop: '3.5%', borderRadius: 10 }}>
 
-                                <View style={{ width: '93%', height: 150, backgroundColor: '#ffffff99', marginTop: '3.5%', borderRadius: 10 }}>
-
-                                    <View style={{ flexDirection: 'column' }}>
-                                        <View style={[styles.circularView1, { marginTop: '4%', marginLeft: '4%' }]}>
-                                            <Image source={require('../../Images/profile.png')}
-                                                style={{ width: 20, height: 25 }} />
-                                        </View>
-
-                                        <View style={{ width: '100%', height: '23%', flexDirection: 'row', marginTop: 23 }}>
-
-                                            <View style={{ width: '75%', justifyContent: 'flex-end' }}>
-                                                <Text style={{ fontSize: 15, color: '#707070', marginLeft: '4%', }}>New Lead Initiation</Text>
-
+                                        <View style={{ flexDirection: 'column' }}>
+                                            <View style={[styles.circularView1, { marginTop: '4%', marginLeft: '4%' }]}>
+                                                <Image source={require('../../Images/profile.png')}
+                                                    style={{ width: 20, height: 25 }} />
                                             </View>
 
-                                            <View style={{ width: '25%' }}>
+                                            <View style={{ width: '100%', height: '23%', flexDirection: 'row', marginTop: 23 }}>
 
-                                                <TouchableOpacity onPress={() => navigation.navigate('LeadCreationBasic')} activeOpacity={0.5} style={{ width: '70%', height: '100%', backgroundColor: '#0294ff', borderRadius: 25, alignItems: 'center', justifyContent: 'center' }}>
-                                                    <View >
-                                                        <Image source={require('../../Images/forward_icon.png')}
-                                                            style={{ width: 15, height: 9 }} />
-                                                    </View>
-                                                </TouchableOpacity>
-                                            </View>
+                                                <View style={{ width: '75%', justifyContent: 'flex-end' }}>
+                                                    <Text style={{ fontSize: 15, color: '#707070', marginLeft: '4%', }}>New Lead Initiation</Text>
 
-
-                                        </View>
-
-                                    </View>
-
-                                </View>
-
-                                <View style={{ width: '93%', height: 150, backgroundColor: '#ffffff99', marginTop: '3.5%', borderRadius: 10 }}>
-
-                                    <View style={{ flexDirection: 'column' }}>
-                                        <View style={[styles.circularView1, { marginTop: '4%', marginLeft: '4%' }]}>
-                                            <Image source={require('../../Images/lead_list.png')}
-                                                style={{ width: 22.5, height: 25 }} />
-                                        </View>
-
-                                        <View style={{ width: '100%', height: '23%', flexDirection: 'row', marginTop: 23 }}>
-
-                                            <View style={{ width: '75%', justifyContent: 'flex-end' }}>
-                                                <Text style={{ fontSize: 15, color: '#707070', marginLeft: '4%', }}>New Application Initiation</Text>
-
-                                            </View>
-
-                                            <View style={{ width: '25%' }}>
-
-                                                <View style={{ width: '70%', height: '100%', backgroundColor: '#0294ff', borderRadius: 25, alignItems: 'center', justifyContent: 'center' }}>
-                                                    <Image source={require('../../Images/forward_icon.png')}
-                                                        style={{ width: 15, height: 9 }} />
                                                 </View>
+
+                                                <View style={{ width: '25%' }}>
+
+                                                    <TouchableOpacity onPress={() => {
+                                                        global.LEADTYPE = 'NEW';
+                                                        global.leadID = '';
+                                                        navigation.navigate('LeadCreationBasic', { leadData: [] })
+                                                    }} activeOpacity={0.5} style={{ width: '70%', height: '100%', backgroundColor: '#0294ff', borderRadius: 25, alignItems: 'center', justifyContent: 'center' }}>
+                                                        <View >
+                                                            <Image source={require('../../Images/forward_icon.png')}
+                                                                style={{ width: 15, height: 9 }} />
+                                                        </View>
+                                                    </TouchableOpacity>
+                                                </View>
+
+
                                             </View>
 
                                         </View>
 
                                     </View>
+                                }
 
-                                </View>
+
+                                {global.USERTYPEID == '1164' &&
+                                    <View style={{ width: '93%', height: 150, backgroundColor: '#ffffff99', marginTop: '3.5%', borderRadius: 10 }}>
+
+                                        <View style={{ flexDirection: 'column' }}>
+                                            <View style={[styles.circularView1, { marginTop: '4%', marginLeft: '4%' }]}>
+                                                <Image source={require('../../Images/lead_list.png')}
+                                                    style={{ width: 22.5, height: 25 }} />
+                                            </View>
+
+                                            <View style={{ width: '100%', height: '23%', flexDirection: 'row', marginTop: 23 }}>
+
+                                                <View style={{ width: '75%', justifyContent: 'flex-end' }}>
+                                                    <Text style={{ fontSize: 15, color: '#707070', marginLeft: '4%', }}>New Application Initiation</Text>
+
+                                                </View>
+
+                                                <View style={{ width: '25%' }}>
+                                                    <TouchableOpacity onPress={() => {
+                                                        navigation.navigate('LoanApplicationMain')
+                                                    }} activeOpacity={0.5} style={{ width: '70%', height: '100%', backgroundColor: '#0294ff', borderRadius: 25, alignItems: 'center', justifyContent: 'center' }}>
+                                                        <View >
+                                                            <Image source={require('../../Images/forward_icon.png')}
+                                                                style={{ width: 15, height: 9 }} />
+                                                        </View>
+                                                    </TouchableOpacity>
+                                                </View>
+
+                                            </View>
+
+                                        </View>
+
+                                    </View>
+                                }
 
 
                             </View>

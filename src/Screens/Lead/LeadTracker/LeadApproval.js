@@ -29,7 +29,7 @@ import apiInstancelocal from '../../../Utils/apiInstancelocal';
 
 
 
-const LeadApproval = (props, { navigation }) => {
+const LeadApproval = (props, { navigation, route }) => {
 
     const [errMsg, setErrMsg] = useState('');
     const [currentPosition, setCurrentPosition] = useState(0);
@@ -42,7 +42,7 @@ const LeadApproval = (props, { navigation }) => {
     const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
     const showBottomSheet = () => setBottomErrorSheetVisible(true);
     const hideBottomSheet = () => setBottomErrorSheetVisible(false);
-
+    const [leadData, setLeadData] = useState(props.route.params.leadData);
 
 
     useEffect(() => {
@@ -144,21 +144,22 @@ const LeadApproval = (props, { navigation }) => {
         const appDetails = {
             "status": leadStatusLabel,
             "comments": approverComment,
-            "userName": global.USERID
+            "userId": global.USERID
         }
         const baseURL = '8901'
         setLoading(true)
-        apiInstancelocal(baseURL).post(`/api/v1/lead-Approved/ByBm/${global.leadID}`, appDetails)
+        // alert(props.route.params.leadData.id)
+        apiInstancelocal(baseURL).post(`/api/v1/lead-Approved/ByBm/${props.route.params.leadData.id}`, appDetails)
             .then(async (response) => {
                 // Handle the response data
                 setLoading(false)
-
+                props.navigation.navigate('LeadManagement', { fromScreen: 'LeadApproval' })
 
             })
             .catch((error) => {
                 // Handle the error
                 setLoading(false)
-                alert(error);
+                alert(JSON.stringify(error.response));
             });
     }
 
@@ -186,8 +187,8 @@ const LeadApproval = (props, { navigation }) => {
 
                     <View style={{ width: '100%', height: 50, justifyContent: 'center' }}>
                         <Text style={{
-                            fontSize: 16, color: Colors.lightgrey, marginLeft: 23,
-                        }}>{language[0][props.language].str_leadid} <Text style={{ color: Colors.black }}>: LX127</Text></Text>
+                            fontSize: 16, color: Colors.mediumgrey, marginLeft: 23,
+                        }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black }}>{leadData.leadNumber}</Text></Text>
                     </View>
 
 
