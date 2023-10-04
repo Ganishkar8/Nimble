@@ -13,7 +13,7 @@ import SystemMandatoryField from '../../Components/SystemMandatoryField';
 import ButtonViewComp from '../../Components/ButtonViewComp';
 
 const DemographicsAddressDetails = (props, {navigation}) => {
-  const moduleID = '7711';
+  const moduleID = '7712';
   const [loading, setLoading] = useState(false);
   const [DataArray, setNewDataArray] = useState([]);
   const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
@@ -129,7 +129,7 @@ const DemographicsAddressDetails = (props, {navigation}) => {
         />
 
         <SystemMandatoryField
-          fielduiid="et_addressline1"
+          fielduiid="sp_addresstype"
           type="email-address"
           textvalue="First tes"
           // Disable={false}
