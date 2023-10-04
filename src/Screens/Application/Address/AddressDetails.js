@@ -156,7 +156,6 @@ const AddressDetails = (props, {navigation}) => {
           // Disable={false}
           isInput={1}
           updateDataInParent={updateDatainParent}
-          // updateDataErrorinParent={updateDataErrorinParent}
         />
         <SystemMandatoryField
           fielduiid="et_addressline2"

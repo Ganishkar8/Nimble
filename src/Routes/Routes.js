@@ -10,6 +10,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {NavigationContainer} from '@react-navigation/native';
 import AddressMainList from '../Screens/Application/Address/AddressMainList';
 import AddressDetails from '../Screens/Application/Address/AddressDetails';
+import DemographicsAddressDetails from '../Screens/LoanDemographics/DemographicsAddressDetails';
 const Stack = createNativeStackNavigator();
 
 //dev imports
@@ -64,6 +65,12 @@ const Route = () => {
         <Stack.Screen
           name="AddressDetails"
           component={AddressDetails}
+          options={{headerShown: false}}
+        />
+
+        <Stack.Screen
+          name="DemographicsAddressDetails"
+          component={DemographicsAddressDetails}
           options={{headerShown: false}}
         />
       </Stack.Navigator>
