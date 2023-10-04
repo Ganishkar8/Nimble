@@ -2,14 +2,14 @@
 /* prettier-ignore */
 import React, { useEffect } from 'react';
 import {
-    SafeAreaView,
-    StyleSheet,
-    Image,
-    View,
-    Platform,
-    Alert,
-    Text,
-    TouchableOpacity,
+  SafeAreaView,
+  StyleSheet,
+  Image,
+  View,
+  Platform,
+  Alert,
+  Text,
+  TouchableOpacity,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Colors from '../../Utils/Colors';
@@ -461,103 +461,228 @@ const SplashScreen = ({navigation}) => {
           );
         });
 
-            tbl_SystemCodeDetails.deleteAllSystemCodeDetails().then(response => {
-                tbl_SystemCodeDetails.insertSystemCodeDetails('CustomerCategory', '1', 'INDIVIDUAL', 'Individual', '1', '0');
-                tbl_SystemCodeDetails.insertSystemCodeDetails('CustomerCategory', '2', 'BUSINESS', 'Business', '2', '1')
-                tbl_SystemCodeDetails.insertSystemCodeDetails('IndustryType', '1', 'SERVICES', 'Services', '1', '0');
-                tbl_SystemCodeDetails.insertSystemCodeDetails('IndustryType', '2', 'MANUFACTURING', 'Manufacturing', '2', '1')
-                tbl_SystemCodeDetails.insertSystemCodeDetails('LNTP', '1', '440', 'UnSecured', '1', '0');
-                tbl_SystemCodeDetails.insertSystemCodeDetails('LNTP', '2', '441', 'Secured', '2', '0');
-                tbl_SystemCodeDetails.insertSystemCodeDetails('LNPUR', '1', 'RAW', 'Purchase of Raw Materials', '1', '0');
-                tbl_SystemCodeDetails.insertSystemCodeDetails('LNPUR', '2', 'MARR', 'Marriage', '2', '0')
-                tbl_SystemCodeDetails.insertSystemCodeDetails('LeadType', '1', 'HOT', 'Hot', '1', '0');
-                tbl_SystemCodeDetails.insertSystemCodeDetails('LeadType', '2', 'WARM', 'Warm', '2', '0')
-                tbl_SystemCodeDetails.insertSystemCodeDetails('LeadType', '3', 'COLD', 'Cold', '3', '0')
-                tbl_SystemCodeDetails.insertSystemCodeDetails('LeadStatus', '1', '1666', 'Pending', '1', '0');
-                tbl_SystemCodeDetails.insertSystemCodeDetails('LeadStatus', '2', '1667', 'Approved', '2', '0');
-                tbl_SystemCodeDetails.insertSystemCodeDetails('LeadStatus', '3', '1668', 'Rejected', '3', '0');
-                tbl_SystemCodeDetails.insertSystemCodeDetails('LeadStatus', '4', '1669', 'Draft', '4', '0');
-                tbl_SystemCodeDetails.insertSystemCodeDetails('Reason', '1', 'LEV', 'On Leave', '1', '0');
-                tbl_SystemCodeDetails.insertSystemCodeDetails('Reason', '2', 'LEFT', 'Discontinued', '2', '0');
-                tbl_SystemCodeDetails.insertSystemCodeDetails('UserType', '1', '1164', 'BM', '1', '0');
-                tbl_SystemCodeDetails.insertSystemCodeDetails('UserType', '2', '1163', 'FA', '2', '0');
-                tbl_SystemCodeDetails.insertSystemCodeDetails(
-                    'ADDRESSTYPE',
-                    '1',
-                    'P',
-                    'Permanent Address',
-                    '1',
-                    '0',
-                );
-                tbl_SystemCodeDetails.insertSystemCodeDetails(
-                    'ADDRESSTYPE',
-                    '2',
-                    'C',
-                    'Communication Address',
-                    '2',
-                    '0',
-                );
-            })
+      tbl_SystemCodeDetails.deleteAllSystemCodeDetails().then(response => {
+        tbl_SystemCodeDetails.insertSystemCodeDetails(
+          'CustomerCategory',
+          '1',
+          'INDIVIDUAL',
+          'Individual',
+          '1',
+          '0',
+        );
+        tbl_SystemCodeDetails.insertSystemCodeDetails(
+          'CustomerCategory',
+          '2',
+          'BUSINESS',
+          'Business',
+          '2',
+          '1',
+        );
+        tbl_SystemCodeDetails.insertSystemCodeDetails(
+          'IndustryType',
+          '1',
+          'SERVICES',
+          'Services',
+          '1',
+          '0',
+        );
+        tbl_SystemCodeDetails.insertSystemCodeDetails(
+          'IndustryType',
+          '2',
+          'MANUFACTURING',
+          'Manufacturing',
+          '2',
+          '1',
+        );
+        tbl_SystemCodeDetails.insertSystemCodeDetails(
+          'LNTP',
+          '1',
+          '440',
+          'UnSecured',
+          '1',
+          '0',
+        );
+        tbl_SystemCodeDetails.insertSystemCodeDetails(
+          'LNTP',
+          '2',
+          '441',
+          'Secured',
+          '2',
+          '0',
+        );
+        tbl_SystemCodeDetails.insertSystemCodeDetails(
+          'LNPUR',
+          '1',
+          'RAW',
+          'Purchase of Raw Materials',
+          '1',
+          '0',
+        );
+        tbl_SystemCodeDetails.insertSystemCodeDetails(
+          'LNPUR',
+          '2',
+          'MARR',
+          'Marriage',
+          '2',
+          '0',
+        );
+        tbl_SystemCodeDetails.insertSystemCodeDetails(
+          'LeadType',
+          '1',
+          'HOT',
+          'Hot',
+          '1',
+          '0',
+        );
+        tbl_SystemCodeDetails.insertSystemCodeDetails(
+          'LeadType',
+          '2',
+          'WARM',
+          'Warm',
+          '2',
+          '0',
+        );
+        tbl_SystemCodeDetails.insertSystemCodeDetails(
+          'LeadType',
+          '3',
+          'COLD',
+          'Cold',
+          '3',
+          '0',
+        );
+        tbl_SystemCodeDetails.insertSystemCodeDetails(
+          'LeadStatus',
+          '1',
+          '1666',
+          'Pending',
+          '1',
+          '0',
+        );
+        tbl_SystemCodeDetails.insertSystemCodeDetails(
+          'LeadStatus',
+          '2',
+          '1667',
+          'Approved',
+          '2',
+          '0',
+        );
+        tbl_SystemCodeDetails.insertSystemCodeDetails(
+          'LeadStatus',
+          '3',
+          '1668',
+          'Rejected',
+          '3',
+          '0',
+        );
+        tbl_SystemCodeDetails.insertSystemCodeDetails(
+          'LeadStatus',
+          '4',
+          '1669',
+          'Draft',
+          '4',
+          '0',
+        );
+        tbl_SystemCodeDetails.insertSystemCodeDetails(
+          'Reason',
+          '1',
+          'LEV',
+          'On Leave',
+          '1',
+          '0',
+        );
+        tbl_SystemCodeDetails.insertSystemCodeDetails(
+          'Reason',
+          '2',
+          'LEFT',
+          'Discontinued',
+          '2',
+          '0',
+        );
+        tbl_SystemCodeDetails.insertSystemCodeDetails(
+          'UserType',
+          '1',
+          '1164',
+          'BM',
+          '1',
+          '0',
+        );
+        tbl_SystemCodeDetails.insertSystemCodeDetails(
+          'UserType',
+          '2',
+          '1163',
+          'FA',
+          '2',
+          '0',
+        );
+        tbl_SystemCodeDetails.insertSystemCodeDetails(
+          'ADDRESSTYPE',
+          '1',
+          'P',
+          'Permanent Address',
+          '1',
+          '0',
+        );
+        tbl_SystemCodeDetails.insertSystemCodeDetails(
+          'ADDRESSTYPE',
+          '2',
+          'C',
+          'Communication Address',
+          '2',
+          '0',
+        );
+      });
 
-            tbl_UserCodeDetails.deleteAllUserCodeDetails().then(response => {
-
-            })
-            setTimeout(() => {
-                AsyncStorage.getItem('IsBankRegistered').then(value => {
-                    if (value == 'true') {
-                        Bank_Detail_Table.getAllBankDetails().then(value => {
-                            global.BASEURL = value[0].BankURL;
-                            AsyncStorage.getItem('IsLogin').then(value => {
-                                if (value == 'true') {
-                                    navigation.replace('BottomNavigation')
-                                } else {
-                                    navigation.replace('LoginScreen')
-                                }
-                            });
-                        })
-
-                    } else {
-                        navigation.replace('BankRegistration')
-                    }
-                });
-
-            }, 2000);
+      tbl_UserCodeDetails.deleteAllUserCodeDetails().then(response => {});
+      setTimeout(() => {
+        AsyncStorage.getItem('IsBankRegistered').then(value => {
+          if (value == 'true') {
+            Bank_Detail_Table.getAllBankDetails().then(value => {
+              global.BASEURL = value[0].BankURL;
+              AsyncStorage.getItem('IsLogin').then(value => {
+                if (value == 'true') {
+                  navigation.replace('BottomNavigation');
+                } else {
+                  navigation.replace('LoginScreen');
+                }
+              });
+            });
+          } else {
+            navigation.replace('DemographicsAddressDetails');
+          }
         });
+      }, 2000);
+    });
+  }, []);
 
-    }, []);
+  return (
+    // enclose all components in this View tag
+    <SafeAreaView>
+      <View style={styles.parentView}>
+        <Image
+          source={require('../../Images/logoanim.gif')}
+          style={{width: 175, height: 175}}
+        />
 
-
-    return (
-        // enclose all components in this View tag
-        <SafeAreaView>
-            <View style={styles.parentView}>
-
-                <Image
-                    source={require('../../Images/logoanim.gif')}
-                    style={{ width: 175, height: 175 }}
-                />
-
-                {/* <Text style={{ color: Colors.darkblack, fontSize: 12, marginLeft: 34 }}>Business Loan</Text> */}
-
-            </View>
-        </SafeAreaView>
-    );
+        {/* <Text style={{ color: Colors.darkblack, fontSize: 12, marginLeft: 34 }}>Business Loan</Text> */}
+      </View>
+    </SafeAreaView>
+  );
 };
 
 const styles = StyleSheet.create({
-    parentView: {
-        width: '100%',
-        height: '100%',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: Colors.white,
-    },
-    imageStyle: {
-        width: '100%',
-        height: '100%',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
+  parentView: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.white,
+  },
+  imageStyle: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });
 
 export default SplashScreen;

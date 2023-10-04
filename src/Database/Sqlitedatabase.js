@@ -2,10 +2,8 @@ import databaseInstance from './DatabaseInstance';
 
 let db;
 
-
 const createTables = async () => {
-
-  db = databaseInstance.getInstance()
+  db = databaseInstance.getInstance();
 
   const queries = [
     // Bank_Detail_Table
@@ -24,7 +22,7 @@ const createTables = async () => {
         ModuleID TEXT,
         FieldName TEXT,
         IsMandatory TEXT,
-        FieldUIID TEXT PRIMARY KEY,
+        FieldUIID TEXT ,
         FieldTabID TEXT,
         ModuleTypeID TEXT,
         IsDisable TEXT,
@@ -109,19 +107,16 @@ const createTables = async () => {
       created_by TEXT
     );`,
 
-
-
     // Add more CREATE TABLE queries for other tables...
   ];
 
   const dropqueries = [
     // tbl_SystemMandatoryFields
     `DROP TABLE IF EXISTS tbl_SystemMandatoryFields`,
-    ,
-
-
 
     // Add more CREATE TABLE queries for other tables...
+
+    ,
   ];
 
   await db.transaction(tx => {
@@ -134,7 +129,7 @@ const createTables = async () => {
         },
         error => {
           console.error('Error dropping table:', error);
-        }
+        },
       );
     });
   });
@@ -149,13 +144,12 @@ const createTables = async () => {
         },
         error => {
           console.error('Error creating table:', error);
-        }
+        },
       );
     });
   });
 };
 
-
 export default {
-  createTables
+  createTables,
 };
