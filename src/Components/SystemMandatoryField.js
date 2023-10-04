@@ -22,6 +22,7 @@ const SystemMandatoryField = props => {
   const FieldRef = useRef(null);
 
   const isPicker = props.isPicker || false;
+  const moduleID = props.moduleID || 7711;
 
   useEffect(() => {
     makeSystemMandatoryFields();
@@ -52,7 +53,7 @@ const SystemMandatoryField = props => {
     tbl_SystemMandatoryFields
       .getSystemMandatoryFieldsBasedOnFieldUIIDModuleID(
         props.fielduiid,
-        props.moduleID,
+        moduleID,
       )
       .then(value => {
         // console.log(value);
