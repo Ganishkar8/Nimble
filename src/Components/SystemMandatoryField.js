@@ -50,7 +50,10 @@ const SystemMandatoryField = props => {
 
   const makeSystemMandatoryFields = async () => {
     tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID(props.fielduiid)
+      .getSystemMandatoryFieldsBasedOnFieldUIIDModuleID(
+        props.fielduiid,
+        props.moduleID,
+      )
       .then(value => {
         // console.log(value);
         if (value !== undefined && value.length > 0) {
