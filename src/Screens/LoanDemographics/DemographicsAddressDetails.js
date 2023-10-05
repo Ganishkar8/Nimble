@@ -1,5 +1,5 @@
-import {View, Text, ScrollView, SafeAreaView, StyleSheet} from 'react-native';
-import {React, useState, useRef, useEffect} from 'react';
+import {View, ScrollView, SafeAreaView} from 'react-native';
+import {React, useState} from 'react';
 import MyStatusBar from '../../Components/ MyStatusBar';
 import HeadComp from '../../Components/HeadComp';
 import {connect} from 'react-redux';
@@ -11,42 +11,17 @@ import Loading from '../../Components/Loading';
 import ErrorMessageModal from '../../Components/ErrorMessageModal';
 import SystemMandatoryField from '../../Components/SystemMandatoryField';
 import ButtonViewComp from '../../Components/ButtonViewComp';
+import {validateData} from '../../Components/helpers/validateData';
 
 const DemographicsAddressDetails = (props, {navigation}) => {
-  const moduleID = '7712';
   const [loading, setLoading] = useState(false);
   const [DataArray, setNewDataArray] = useState([]);
   const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
   const showBottomSheet = () => setBottomErrorSheetVisible(true);
   const hideBottomSheet = () => setBottomErrorSheetVisible(false);
   const [errMsg, setErrMsg] = useState('');
-  let errorCounter = 1;
 
-  const validateData = () => {
-    let flag = false;
-    let errMsg = '';
-
-    DataArray.forEach(item => {
-      if (
-        (item.IsHide === '' || item.IsHide === '0') &&
-        item.isMandatory === '1' &&
-        (item.fieldValue === '' || item.fieldValue === undefined)
-      ) {
-        errMsg += `${errorCounter}) Please Select ${item.fieldName}\n`;
-        errorCounter++;
-        // console.log('errMsg:', errMsg);
-      }
-    });
-
-    if (errMsg !== '') {
-      setErrMsg(errMsg);
-      flag = true;
-    }
-
-    return flag;
-  };
-
-  const updateDatainParent = (
+  const updateDataInParent = (
     fieldName,
     newValue,
     isMandatory,
@@ -91,10 +66,49 @@ const DemographicsAddressDetails = (props, {navigation}) => {
     console.log('DataArray:', DataArray);
   };
 
+  const validateDataWrapper = () => {
+    // eslint-disable-next-line no-shadow
+    const {flag, errMsg} = validateData(DataArray);
+    setErrMsg(errMsg);
+    return flag;
+  };
+
   const demographicAddressSubmit = () => {
-    if (validateData()) {
+    if (validateDataWrapper()) {
       showBottomSheet();
     }
+  };
+
+  const renderMandatoryFields = () => {
+    const fieldUIIDs = [
+      {fielduiid: 'sp_addresstype', isPicker: true},
+      {fielduiid: 'et_addressline1', isInput: true},
+      {fielduiid: 'et_addressline2', isInput: true},
+      {fielduiid: 'et_landmark', isInput: true},
+      {fielduiid: 'et_pincode', isInput: true},
+      {fielduiid: 'et_cityvillage', isInput: true},
+      {fielduiid: 'et_cityvillage', isInput: true},
+      {fielduiid: 'et_district', isInput: true},
+      {fielduiid: 'et_state', isInput: true},
+      {fielduiid: 'et_country', isInput: true},
+      {fielduiid: 'et_mobilenumber', isInput: true},
+      {fielduiid: 'et_email', isInput: true},
+      {fielduiid: 'sp_addressownershiptype', isPicker: true},
+      {fielduiid: 'sp_ownerdetails', isInput: true},
+      {fielduiid: 'et_ownername', isInput: true},
+    ];
+
+    return fieldUIIDs.map(({fielduiid, isPicker, isInput}) => (
+      <SystemMandatoryField
+        key={fielduiid}
+        fielduiid={fielduiid}
+        type="email-address"
+        moduleID={'7712'}
+        isInput={isInput || false} // Default to 0 if not provided
+        isPicker={isPicker || false} // Default to 0 if not provided
+        updateDataInParent={updateDataInParent}
+      />
+    ));
   };
 
   return (
@@ -128,15 +142,7 @@ const DemographicsAddressDetails = (props, {navigation}) => {
           textClose={language[0][props.language].str_ok}
         />
 
-        <SystemMandatoryField
-          fielduiid="sp_addresstype"
-          type="email-address"
-          textvalue="First tes"
-          // Disable={false}
-          moduleID={moduleID}
-          isInput={1}
-          updateDataInParent={updateDatainParent}
-        />
+        {renderMandatoryFields()}
 
         <ButtonViewComp
           textValue={language[0][props.language].str_next.toUpperCase()}
@@ -151,6 +157,7 @@ const DemographicsAddressDetails = (props, {navigation}) => {
 };
 
 const mapStateToProps = state => {
+  // eslint-disable-next-line no-shadow
   const {language} = state.languageReducer;
   return {
     language: language,
