@@ -155,6 +155,9 @@ export const language = [
       str_profileshort: 'PROFILE SHORT',
       str_addressdetail: 'Address Details',
       str_addaddressbutton: 'Add Address',
+      str_loanDemographics: 'Loan (Demographics)',
+      str_Guarantor: 'Guarantor',
+      str_bankDetailsOptional: 'Bank Details (Optional)',
     },
     ta: {
       first: 'comment allez vous',

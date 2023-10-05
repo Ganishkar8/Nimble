@@ -656,6 +656,90 @@ const SplashScreen = ({navigation}) => {
               '',
               '',
             );
+            tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+              '7712',
+              'ACCOUNT TYPE',
+              '0',
+              'sp_accounttype',
+              '',
+              '',
+              '0',
+              '0',
+              '',
+              '',
+              '',
+              '',
+            );
+            tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+              '7712',
+              'ACCOUNT HOLDER NAME AS PER BANK',
+              '0',
+              'et_accountholdernameasbank',
+              '',
+              '',
+              '0',
+              '0',
+              '',
+              '',
+              '',
+              '',
+            );
+            tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+              '7712',
+              'IFSC CODE',
+              '0',
+              'et_ifsccode',
+              '',
+              '',
+              '0',
+              '0',
+              '',
+              '',
+              '',
+              '',
+            );
+            tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+              '7712',
+              'BANK NAME',
+              '0',
+              'et_bankname',
+              '',
+              '',
+              '0',
+              '0',
+              '',
+              '',
+              '',
+              '',
+            );
+            tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+              '7712',
+              'BRANCH NAME',
+              '0',
+              'st_branchname',
+              '',
+              '',
+              '0',
+              '0',
+              '',
+              '',
+              '',
+              '',
+            );
+            tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+              '7712',
+              'ACCOUNT NUMBER',
+              '0',
+              'et_accountnumber',
+              '',
+              '',
+              '0',
+              '0',
+              '',
+              '',
+              '',
+              '',
+            );
         });
 
       tbl_SystemCodeDetails.deleteAllSystemCodeDetails().then(response => {
@@ -844,7 +928,7 @@ const SplashScreen = ({navigation}) => {
               });
             });
           } else {
-            navigation.replace('DemographicsAddressDetails');
+            navigation.replace('BankDetails');
           }
         });
       }, 2000);

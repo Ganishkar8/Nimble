@@ -1,19 +1,22 @@
-import {View, ScrollView, SafeAreaView} from 'react-native';
+import {View, ScrollView, SafeAreaView, Text} from 'react-native';
 import {React, useState} from 'react';
-import MyStatusBar from '../../Components/ MyStatusBar';
-import HeadComp from '../../Components/HeadComp';
+import MyStatusBar from '../../../Components/ MyStatusBar';
+import HeadComp from '../../../Components/HeadComp';
 import {connect} from 'react-redux';
-import {languageAction} from '../../Utils/redux/actions/languageAction';
-import {language} from '../../Utils/LanguageString';
-import Commonstyles from '../../Utils/Commonstyles';
-import Colors from '../../Utils/Colors';
-import Loading from '../../Components/Loading';
-import ErrorMessageModal from '../../Components/ErrorMessageModal';
-import SystemMandatoryField from '../../Components/SystemMandatoryField';
-import ButtonViewComp from '../../Components/ButtonViewComp';
-import {validateData} from '../../Components/helpers/validateData';
+import {languageAction} from '../../../Utils/redux/actions/languageAction';
+import {language} from '../../../Utils/LanguageString';
+import Commonstyles from '../../../Utils/Commonstyles';
+import Colors from '../../../Utils/Colors';
+import Loading from '../../../Components/Loading';
+import ErrorMessageModal from '../../../Components/ErrorMessageModal';
+import SystemMandatoryField from '../../../Components/SystemMandatoryField';
+import ButtonViewComp from '../../../Components/ButtonViewComp';
+import {validateData} from '../../../Components/helpers/validateData';
+import ProgressComp from '../../../Components/ProgressComp';
+import ChildHeadComp from '../../../Components/ChildHeadComp';
+import commonstyles from '../../../Utils/Commonstyles';
 
-const DemographicsAddressDetails = (props, {navigation}) => {
+const BankDetails = (props, {navigation}) => {
   const [loading, setLoading] = useState(false);
   const [DataArray, setNewDataArray] = useState([]);
   const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
@@ -81,21 +84,12 @@ const DemographicsAddressDetails = (props, {navigation}) => {
 
   const renderMandatoryFields = () => {
     const fieldUIIDs = [
-      {fielduiid: 'sp_addresstype', isPicker: true},
-      {fielduiid: 'et_addressline1', isInput: true},
-      {fielduiid: 'et_addressline2', isInput: true},
-      {fielduiid: 'et_landmark', isInput: true},
-      {fielduiid: 'et_pincode', isInput: true},
-      {fielduiid: 'et_cityvillage', isInput: true},
-      {fielduiid: 'et_cityvillage', isInput: true},
-      {fielduiid: 'et_district', isInput: true},
-      {fielduiid: 'et_state', isInput: true},
-      {fielduiid: 'et_country', isInput: true},
-      {fielduiid: 'et_mobilenumber', isInput: true},
-      {fielduiid: 'et_email', isInput: true},
-      {fielduiid: 'sp_addressownershiptype', isPicker: true},
-      {fielduiid: 'sp_ownerdetails', isInput: true},
-      {fielduiid: 'et_ownername', isInput: true},
+      {fielduiid: 'sp_accounttype', isPicker: true},
+      {fielduiid: 'et_accountholdernameasbank', isInput: true},
+      {fielduiid: 'et_ifsccode', isInput: true},
+      {fielduiid: 'et_bankname', isInput: true},
+      {fielduiid: 'st_branchname', isInput: true},
+      {fielduiid: 'et_accountnumber', isInput: true},
     ];
 
     return fieldUIIDs.map(({fielduiid, isPicker, isInput}) => (
@@ -110,7 +104,6 @@ const DemographicsAddressDetails = (props, {navigation}) => {
       />
     ));
   };
-
   return (
     <SafeAreaView style={Commonstyles.parentView}>
       <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
@@ -129,10 +122,29 @@ const DemographicsAddressDetails = (props, {navigation}) => {
             justifyContent: 'center',
           }}>
           <HeadComp
-            textval={language[0][props.language].str_addaddressbutton}
+            textval={language[0][props.language].str_loanDemographics}
             props={props}
           />
         </View>
+
+        <View>
+          <ChildHeadComp textval={language[0][props.language].str_Guarantor} />
+        </View>
+
+        <View
+          style={{width: '90%', flexDirection: 'row', alignItems: 'center',marginTop:15}}>
+          <Text
+            style={{
+              marginLeft: 10,
+              fontSize: 14,
+              fontWeight: 500,
+              color: Colors.mediumgrey,
+            }}>
+            {language[0][props.language].str_bankDetailsOptional}
+          </Text>
+        </View>
+
+        <ProgressComp progressvalue={1} textvalue="6 of 6" />
 
         <ErrorMessageModal
           isVisible={bottomErrorSheetVisible}
@@ -168,7 +180,4 @@ const mapDispatchToProps = dispatch => ({
   languageAction: item => dispatch(languageAction(item)),
 });
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(DemographicsAddressDetails);
+export default connect(mapStateToProps, mapDispatchToProps)(BankDetails);

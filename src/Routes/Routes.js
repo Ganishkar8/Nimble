@@ -10,7 +10,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {NavigationContainer} from '@react-navigation/native';
 import AddressMainList from '../Screens/Application/Address/AddressMainList';
 import AddressDetails from '../Screens/Application/Address/AddressDetails';
-import DemographicsAddressDetails from '../Screens/LoanDemographics/DemographicsAddressDetails';
+import DemographicsAddressDetails from '../Screens/LoanDemographics/DemoGraphicAddress/DemographicsAddressDetails';
 const Stack = createNativeStackNavigator();
 
 //dev imports
@@ -19,6 +19,7 @@ import LeadManagement from '../Screens/Lead/LeadTracker/LeadManagement';
 import LoanApplicationMain from '../Screens/LoanApplication/LoanApplicationMain';
 import CBResponseScreen from '../Screens/CreditBureau/CBResponseScreen';
 import CBStatus from '../Screens/CreditBureau/CBStatus';
+import BankDetails from '../Screens/LoanDemographics/bankDetails/BankDetails';
 
 const Route = () => {
   return (
@@ -73,6 +74,13 @@ const Route = () => {
           component={DemographicsAddressDetails}
           options={{headerShown: false}}
         />
+
+        <Stack.Screen
+          name="BankDetails"
+          component={BankDetails}
+          options={{headerShown: false}}
+        />
+
       </Stack.Navigator>
     </NavigationContainer>
   );
