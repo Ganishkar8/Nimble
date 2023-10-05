@@ -459,6 +459,20 @@ const SplashScreen = ({navigation}) => {
             '',
             '',
           );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'ADDRESS TYPE',
+            '0',
+            'sp_addresstype',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
         });
 
       tbl_SystemCodeDetails.deleteAllSystemCodeDetails().then(response => {
