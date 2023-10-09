@@ -30,7 +30,7 @@ const SystemMandatoryField = props => {
   }, []);
 
   const pickerData = async () => {
-    if (isPicker == 1) {
+    if (isPicker) {
       tbl_SystemCodeDetails
         .getSystemCodeDetailsBasedOnID('ADDRESSTYPE')
         .then(value => {

@@ -1,52 +1,30 @@
-import {View, Text, ScrollView, SafeAreaView, StyleSheet} from 'react-native';
-import {React, useState, useRef, useEffect} from 'react';
-import MyStatusBar from '../../Components/ MyStatusBar';
-import HeadComp from '../../Components/HeadComp';
+import {View, ScrollView, SafeAreaView, Text} from 'react-native';
+import {React, useState} from 'react';
+import MyStatusBar from '../../../Components/ MyStatusBar';
+import HeadComp from '../../../Components/HeadComp';
 import {connect} from 'react-redux';
-import {languageAction} from '../../Utils/redux/actions/languageAction';
-import {language} from '../../Utils/LanguageString';
-import Commonstyles from '../../Utils/Commonstyles';
-import Colors from '../../Utils/Colors';
-import Loading from '../../Components/Loading';
-import ErrorMessageModal from '../../Components/ErrorMessageModal';
-import SystemMandatoryField from '../../Components/SystemMandatoryField';
-import ButtonViewComp from '../../Components/ButtonViewComp';
+import {languageAction} from '../../../Utils/redux/actions/languageAction';
+import {language} from '../../../Utils/LanguageString';
+import Commonstyles from '../../../Utils/Commonstyles';
+import Colors from '../../../Utils/Colors';
+import Loading from '../../../Components/Loading';
+import ErrorMessageModal from '../../../Components/ErrorMessageModal';
+import SystemMandatoryField from '../../../Components/SystemMandatoryField';
+import ButtonViewComp from '../../../Components/ButtonViewComp';
+import {validateData} from '../../../Components/helpers/validateData';
+import ProgressComp from '../../../Components/ProgressComp';
+import ChildHeadComp from '../../../Components/ChildHeadComp';
+import commonstyles from '../../../Utils/Commonstyles';
 
-const DemographicsAddressDetails = (props, {navigation}) => {
-  const moduleID = '7712';
+const BankDetails = (props, {navigation}) => {
   const [loading, setLoading] = useState(false);
   const [DataArray, setNewDataArray] = useState([]);
   const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
   const showBottomSheet = () => setBottomErrorSheetVisible(true);
   const hideBottomSheet = () => setBottomErrorSheetVisible(false);
   const [errMsg, setErrMsg] = useState('');
-  let errorCounter = 1;
 
-  const validateData = () => {
-    let flag = false;
-    let errMsg = '';
-
-    DataArray.forEach(item => {
-      if (
-        (item.IsHide === '' || item.IsHide === '0') &&
-        item.isMandatory === '1' &&
-        (item.fieldValue === '' || item.fieldValue === undefined)
-      ) {
-        errMsg += `${errorCounter}) Please Select ${item.fieldName}\n`;
-        errorCounter++;
-        // console.log('errMsg:', errMsg);
-      }
-    });
-
-    if (errMsg !== '') {
-      setErrMsg(errMsg);
-      flag = true;
-    }
-
-    return flag;
-  };
-
-  const updateDatainParent = (
+  const updateDataInParent = (
     fieldName,
     newValue,
     isMandatory,
@@ -91,12 +69,41 @@ const DemographicsAddressDetails = (props, {navigation}) => {
     console.log('DataArray:', DataArray);
   };
 
+  const validateDataWrapper = () => {
+    // eslint-disable-next-line no-shadow
+    const {flag, errMsg} = validateData(DataArray);
+    setErrMsg(errMsg);
+    return flag;
+  };
+
   const demographicAddressSubmit = () => {
-    if (validateData()) {
+    if (validateDataWrapper()) {
       showBottomSheet();
     }
   };
 
+  const renderMandatoryFields = () => {
+    const fieldUIIDs = [
+      {fielduiid: 'sp_accounttype', isPicker: true},
+      {fielduiid: 'et_accountholdernameasbank', isInput: true},
+      {fielduiid: 'et_ifsccode', isInput: true},
+      {fielduiid: 'et_bankname', isInput: true},
+      {fielduiid: 'st_branchname', isInput: true},
+      {fielduiid: 'et_accountnumber', isInput: true},
+    ];
+
+    return fieldUIIDs.map(({fielduiid, isPicker, isInput}) => (
+      <SystemMandatoryField
+        key={fielduiid}
+        fielduiid={fielduiid}
+        type="email-address"
+        moduleID={'7712'}
+        isInput={isInput || false} // Default to 0 if not provided
+        isPicker={isPicker || false} // Default to 0 if not provided
+        updateDataInParent={updateDataInParent}
+      />
+    ));
+  };
   return (
     <SafeAreaView style={Commonstyles.parentView}>
       <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
@@ -115,10 +122,29 @@ const DemographicsAddressDetails = (props, {navigation}) => {
             justifyContent: 'center',
           }}>
           <HeadComp
-            textval={language[0][props.language].str_addaddressbutton}
+            textval={language[0][props.language].str_loanDemographics}
             props={props}
           />
         </View>
+
+        <View>
+          <ChildHeadComp textval={language[0][props.language].str_Guarantor} />
+        </View>
+
+        <View
+          style={{width: '90%', flexDirection: 'row', alignItems: 'center',marginTop:15}}>
+          <Text
+            style={{
+              marginLeft: 10,
+              fontSize: 14,
+              fontWeight: 500,
+              color: Colors.mediumgrey,
+            }}>
+            {language[0][props.language].str_bankDetailsOptional}
+          </Text>
+        </View>
+
+        <ProgressComp progressvalue={1} textvalue="6 of 6" />
 
         <ErrorMessageModal
           isVisible={bottomErrorSheetVisible}
@@ -128,15 +154,7 @@ const DemographicsAddressDetails = (props, {navigation}) => {
           textClose={language[0][props.language].str_ok}
         />
 
-        <SystemMandatoryField
-          fielduiid="sp_addresstype"
-          type="email-address"
-          textvalue="First tes"
-          // Disable={false}
-          moduleID={moduleID}
-          isInput={1}
-          updateDataInParent={updateDatainParent}
-        />
+        {renderMandatoryFields()}
 
         <ButtonViewComp
           textValue={language[0][props.language].str_next.toUpperCase()}
@@ -151,6 +169,7 @@ const DemographicsAddressDetails = (props, {navigation}) => {
 };
 
 const mapStateToProps = state => {
+  // eslint-disable-next-line no-shadow
   const {language} = state.languageReducer;
   return {
     language: language,
@@ -161,7 +180,4 @@ const mapDispatchToProps = dispatch => ({
   languageAction: item => dispatch(languageAction(item)),
 });
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(DemographicsAddressDetails);
+export default connect(mapStateToProps, mapDispatchToProps)(BankDetails);
