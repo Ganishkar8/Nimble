@@ -216,6 +216,58 @@ const AddressDetails = (props, { navigation }) => {
           isInput={1}
           updateDataInParent={updateDatainParent}
         />
+        <SystemMandatoryField
+          fielduiid="sp_geoclassification"
+          // textvalue="craftsilicon "
+          type="email-address"
+          // Disable={false}
+          isPicker={1}
+          updateDataInParent={updateDatainParent}
+        />
+        <SystemMandatoryField
+          fielduiid="et_yearsatresidence"
+          // textvalue="craftsilicon "
+          type="email-address"
+          // Disable={false}
+          isInput={1}
+          updateDataInParent={updateDatainParent}
+        />
+
+        <SystemMandatoryField
+          fielduiid="et_yearsincurrentcitytown"
+          // textvalue="craftsilicon "
+          type="email-address"
+          // Disable={false}
+          isInput={1}
+          updateDataInParent={updateDatainParent}
+        />
+
+        <SystemMandatoryField
+          fielduiid="sp_addressownershiptype"
+          // textvalue="craftsilicon "
+          type="email-address"
+          // Disable={false}
+          isPicker={1}
+          updateDataInParent={updateDatainParent}
+        />
+
+        <SystemMandatoryField
+          fielduiid="sp_ownerdetails"
+          // textvalue="craftsilicon "
+          type="email-address"
+          // Disable={false}
+          isPicker={1}
+          updateDataInParent={updateDatainParent}
+        />
+
+        <SystemMandatoryField
+          fielduiid="et_ownername"
+          // textvalue="craftsilicon "
+          type="email-address"
+          // Disable={false}
+          isInput={1}
+          updateDataInParent={updateDatainParent}
+        />
 
         <ButtonViewComp
           textValue={language[0][props.language].str_next.toUpperCase()}

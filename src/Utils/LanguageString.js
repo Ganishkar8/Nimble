@@ -164,6 +164,9 @@ export const language = [
       str_reassignfrom: 'FROM',
       str_reassignto: 'TO',
       str_reassignby: 'BY',
+      str_loanDemographics: 'Loan (Demographics)',
+      str_Guarantor: 'Guarantor',
+      str_bankDetailsOptional: 'Bank Details (Optional)',
     },
 
     ta: {
