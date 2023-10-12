@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState, forwardRef } from 'react';
 import { View, Text } from 'react-native';
 import { RadioButton } from 'react-native-paper';
 import Colors from '../../Utils/Colors';
@@ -9,6 +9,16 @@ import { language } from '../../Utils/LanguageString';
 const SortByComp = ({ props, filterClick, selectedValue, from }) => {
 
     const [sortValue, setSortValue] = React.useState(selectedValue);
+
+    useEffect(() => {
+
+        if (selectedValue) {
+            setSortValue(selectedValue)
+
+        }
+    }, [selectedValue]);
+
+
     const setFilterVal = (value) => {
         if (value == 1) {
             setSortValue('ASC')

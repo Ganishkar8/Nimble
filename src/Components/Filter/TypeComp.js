@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, Text, FlatList } from 'react-native';
 import { RadioButton } from 'react-native-paper';
 import Colors from '../../Utils/Colors';
@@ -6,12 +5,18 @@ import Colors from '../../Utils/Colors';
 import { connect } from 'react-redux';
 import { languageAction } from '../../Utils/redux/actions/languageAction';
 import { language } from '../../Utils/LanguageString';
+import React, { useState, useRef, useEffect, createRef } from 'react';
 
 const TypeComp = ({ props, typeData, filterClick }) => {
 
     const [typeFilterData, setTypeFilterData] = React.useState(typeData);
     const [refreshFlatlist, setRefreshFlatList] = React.useState(false);
 
+    useEffect(() => {
+        if (typeData) {
+            setTypeFilterData(typeData)
+        }
+    }, [typeData]);
 
     const updateTypeData = (item) => {
         let fiterStatusPosition = typeFilterData
@@ -46,7 +51,7 @@ const TypeComp = ({ props, typeData, filterClick }) => {
                         keyExtractor={(item, index) => item.id}
                         renderItem={({ item, index }) => {
                             return (
-                                <View style={{flexDirection: 'row', marginTop: 2 ,alignItems :'center'}}>
+                                <View style={{ flexDirection: 'row', marginTop: 2, alignItems: 'center' }}>
 
                                     <View style={{ flexDirection: 'row', marginTop: '2%' }}>
                                         <View style={{ width: '18%', justifyContent: 'center' }}>

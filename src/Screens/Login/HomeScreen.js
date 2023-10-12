@@ -18,17 +18,48 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import MyStatusBar from '../../Components/ MyStatusBar';
 import Loading from '../../Components/Loading';
 import { Dimensions } from 'react-native';
+import apiInstance from '../../Utils/apiInstance';
+import { connect } from 'react-redux';
+import { languageAction } from '../../Utils/redux/actions/languageAction';
+import { profileAction } from '../../Utils/redux/actions/ProfileAction';
 
 
-const HomeScreen = ({ navigation }) => {
+const HomeScreen = (props, { navigation }) => {
 
     const [loading, setLoading] = useState(false);
     const screenWidth = Dimensions.get('window').width;
     const screenHeight = Dimensions.get('window').height;
+    const [userName, setUserName] = useState('');
 
     useEffect(() => {
-
+        getProfileDetails();
     }, []);
+
+
+    const getProfileDetails = () => {
+
+        const baseURL = '8901'
+        setLoading(true)
+        apiInstance(baseURL).post(`api/v1/user-personal-details/userID/${global.USERID}`)
+            .then(async (response) => {
+                // Handle the response data
+                console.log("ProfileApiResponse::" + JSON.stringify(response.data));
+                setLoading(false)
+                global.USERNAME = response.data.userPersonalDetailsDto.userName;
+                setUserName(response.data.userPersonalDetailsDto.userName);
+                props.profileAction(response.data)
+
+            })
+            .catch((error) => {
+                // Handle the error
+                console.log("Error" + JSON.stringify(error.response))
+                setLoading(false)
+                alert(error);
+            });
+
+
+
+    }
 
     return (
 
@@ -49,7 +80,7 @@ const HomeScreen = ({ navigation }) => {
                                 flexDirection: 'row', alignItems: 'center', paddingHorizontal: 5
                             }}>
 
-                                <Text style={{ textAlign: 'left', flex: 0.9, fontSize: 20, color: '#4e4e4e' }}>Hi! {global.USERNAME}</Text>
+                                <Text style={{ textAlign: 'left', flex: 0.9, fontSize: 20, color: '#4e4e4e' }}>Hi! {userName}</Text>
 
                                 <Image source={require('../../Images/notification_bellicon.png')}
                                     style={styles.tinyLogo} />
@@ -113,7 +144,7 @@ const HomeScreen = ({ navigation }) => {
                                 <View style={{ width: '93%', height: 170, justifyContent: 'space-between', flexDirection: 'row', marginTop: '4%' }}>
 
 
-                                    <TouchableOpacity onPress={() => navigation.navigate('LeadManagement', { fromScreen: 'HomeScreen' })} activeOpacity={0.5} style={{ width: '48%', height: '100%', backgroundColor: '#ffffff99', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
+                                    <TouchableOpacity onPress={() => props.navigation.navigate('LeadManagement', { fromScreen: 'HomeScreen' })} activeOpacity={0.5} style={{ width: '48%', height: '100%', backgroundColor: '#ffffff99', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
                                         <View>
 
                                             <View style={{ flexDirection: 'column' }}>
@@ -127,7 +158,7 @@ const HomeScreen = ({ navigation }) => {
                                         </View>
                                     </TouchableOpacity>
 
-                                    <TouchableOpacity onPress={() => navigation.navigate('LoanApplicationTracker')} activeOpacity={0.5} style={{ width: '48%', height: '100%', backgroundColor: '#ffffff99', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
+                                    <TouchableOpacity onPress={() => props.navigation.navigate('LoanApplicationTracker')} activeOpacity={0.5} style={{ width: '48%', height: '100%', backgroundColor: '#ffffff99', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
                                         <View >
                                             <View style={{ flexDirection: 'column' }}>
                                                 <View style={styles.circularView1}>
@@ -161,7 +192,8 @@ const HomeScreen = ({ navigation }) => {
                                                     <TouchableOpacity onPress={() => {
                                                         global.LEADTYPE = 'NEW';
                                                         global.leadID = '';
-                                                        navigation.navigate('LeadCreationBasic', { leadData: [] })
+                                                        global.leadNumber = '';
+                                                        props.navigation.navigate('LeadCreationBasic', { leadData: [] })
                                                     }} activeOpacity={0.5} style={{ width: '70%', height: '100%', backgroundColor: '#0294ff', borderRadius: 25, alignItems: 'center', justifyContent: 'center' }}>
                                                         <View >
                                                             <Image source={require('../../Images/forward_icon.png')}
@@ -197,7 +229,7 @@ const HomeScreen = ({ navigation }) => {
 
                                                 <View style={{ width: '25%' }}>
                                                     <TouchableOpacity onPress={() => {
-                                                        navigation.navigate('LoanApplicationMain')
+                                                        props.navigation.navigate('LoanApplicationMain')
                                                     }} activeOpacity={0.5} style={{ width: '70%', height: '100%', backgroundColor: '#0294ff', borderRadius: 25, alignItems: 'center', justifyContent: 'center' }}>
                                                         <View >
                                                             <Image source={require('../../Images/forward_icon.png')}
@@ -342,5 +374,20 @@ const styles = StyleSheet.create({
     }
 });
 
+const mapStateToProps = (state) => {
+    const { language } = state.languageReducer;
+    const { profiledetail } = state.profileReducer;
+    return {
+        language: language,
+        profiledetail: profiledetail,
+    }
+}
 
-export default HomeScreen;
+const mapDispatchToProps = (dispatch) => ({
+    languageAction: (item) => dispatch(languageAction(item)),
+    profileAction: (item) => dispatch(profileAction(item)),
+});
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(HomeScreen);
+

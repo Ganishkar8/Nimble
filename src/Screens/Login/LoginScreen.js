@@ -72,32 +72,39 @@ const LoginScreen = (props, { navigation }) => {
     const callLogin = () => {
         const appDetails = {
             "username": userID,
-            "password": password
+            "password": password,
         }
         const baseURL = '8908'
         setLoading(true)
         apiInstance(baseURL).post('/api/auth/login', appDetails)
             .then(async (response) => {
                 // Handle the response data
-                console.log("ResponseLoginApi::" + JSON.stringify(response.data));
-                const decodedToken = await jwtDecode(response.data.jwtToken);
-                console.log("LoginJWTDecode::" + JSON.stringify(decodedToken));
-                setLoading(false)
-                setUserID('')
-                setPassword('')
-                global.USERNAME = decodedToken.userName;
-                global.USERID = decodedToken.userId;
-                global.USERTYPEID = decodedToken.userTypeId;
-                global.RefreshToken = response.data.jwtRefreshToken;
-                //setVisible(true);
-                //AsyncStorage.setItem('IsLogin', 'true');
-                loginHandle();
+                if (response.status == 200) {
+                    console.log("ResponseLoginApi::" + JSON.stringify(response.data));
+                    const decodedToken = await jwtDecode(response.data.jwtToken);
+                    console.log("LoginJWTDecode::" + JSON.stringify(decodedToken));
+                    setLoading(false)
+                    setUserID('')
+                    setPassword('')
+                    global.USERNAME = decodedToken.userName;
+                    global.USERID = decodedToken.userId;
+                    global.USERTYPEID = decodedToken.userTypeId;
+                    global.RefreshToken = response.data.jwtRefreshToken;
+                    //setVisible(true);
+                    //AsyncStorage.setItem('IsLogin', 'true');
+
+                    loginHandle();
+                } else if (response.status == 500) {
+                    alert('Login Failed');
+                } else {
+                    alert('Login Failed');
+                }
 
             })
             .catch((error) => {
                 // Handle the error
                 setLoading(false)
-                alert(error);
+                alert('Login Failed');
             });
     }
 
@@ -173,6 +180,7 @@ const LoginScreen = (props, { navigation }) => {
                                 placeholderTextColor={Colors.lightgrey}
                                 secureTextEntry={false}
                                 autoCapitalize="none"
+                                contextMenuHidden={true}
                                 style={Commonstyles.textinputtextStyle}
                             />
 
@@ -202,6 +210,7 @@ const LoginScreen = (props, { navigation }) => {
                                 placeholderTextColor={Colors.lightgrey}
                                 secureTextEntry={secureTextEntry ? true : false}
                                 style={Commonstyles.textinputtextStyle}
+                                contextMenuHidden={true}
                             />
 
 

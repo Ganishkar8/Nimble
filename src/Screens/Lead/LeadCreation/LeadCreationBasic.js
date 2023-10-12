@@ -3,6 +3,7 @@ import {
     StyleSheet,
     View,
     TouchableOpacity,
+    Text,
     SafeAreaView,
     ScrollView,
 } from 'react-native';
@@ -30,8 +31,12 @@ import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import tbl_lead_creation_lead_details from '../../../Database/Table/tbl_lead_creation_lead_details';
 import tbl_lead_creation_loan_details from '../../../Database/Table/tbl_lead_creation_loan_details';
 import tbl_lead_creation_basic_details from '../../../Database/Table/tbl_lead_creation_basic_details';
+import SystemMandatoryField from '../../../Components/SystemMandatoryField';
+import { profileAction } from '../../../Utils/redux/actions/ProfileAction';
 
 const LeadCreationBasic = (props, { navigation, route }) => {
+    const [profileDetail, setProfileDetail] = useState(props.profiledetail.userPersonalDetailsDto);
+
     const [leadType, setLeadType] = useState(global.LEADTYPE);
     const [loading, setLoading] = useState(false);
     const [custCatgLabel, setCustCatgLabel] = useState('');
@@ -42,6 +47,7 @@ const LeadCreationBasic = (props, { navigation, route }) => {
     const [firstNameMan, setFirstNameMan] = useState(false);
     const [firstNameVisible, setFirstNameVisible] = useState(true);
     const [firstNameDisable, setFirstNameDisable] = useState(false);
+    const [firstNameErrorVisible, setFirstNameErrorVisible] = useState(true);
     const [middleName, setMiddleName] = useState('');
     const [middleNameMan, setMiddleNameMan] = useState(false);
     const [middleNameCaption, setMiddleNameCaption] = useState('MIDDLE NAME');
@@ -86,6 +92,9 @@ const LeadCreationBasic = (props, { navigation, route }) => {
     const middleNameRef = useRef(null);
     const lastNameRef = useRef(null);
     const mobileNumberRef = useRef(null);
+
+    const [DataArray, setNewDataArray] = useState([]);
+    let errorCounter = 1;
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
@@ -258,67 +267,112 @@ const LeadCreationBasic = (props, { navigation, route }) => {
 
     }
 
-    const updateLeadDetails = () => {
+    const updateLeadDetails = async () => {
 
         if (global.LEADTYPE == 'COMP') {
             props.navigation.navigate('LeadCreationBusiness', { leadData: props.route.params.leadData })
         } else if (validate()) {
             showBottomSheet();
         } else if (global.leadID.length != '') {
-            props.navigation.navigate('LeadCreationBusiness', { leadData: [] })
-
+            Common.getNetworkConnection().then(async (value) => {
+                if (value.isConnected == true) {
+                    leadPutApi();
+                } else {
+                    //insertLead(global.leadID, true)
+                    await tbl_lead_creation_basic_details.insertLeadCreationBasicDetails(global.leadID, custCatgLabel, titleLabel, firstName, middleName, lastName, genderLabel, mobileNumber, global.USERID);
+                    props.navigation.navigate('LeadCreationBusiness', { leadData: [] })
+                }
+            })
         }
         else {
-
-            const appDetails = {
-                "createdBy": global.USERID,
-                "createdOn": '',
-                "isActive": true,
-                "branchId": 1180,
-                "leadCreationBasicDetails": {
-                    "createdBy": global.USERID,
-                    "createdOn": '',
-                    "customerCategoryId": custCatgLabel,
-                    "titleId": titleLabel,
-                    "firstName": firstName,
-                    "middleName": middleName,
-                    "lastName": lastName,
-                    "mobileNumber": mobileNumber,
-                    "genderId": genderLabel
-                },
-                "leadCreationBusinessDetails": {},
-
-                "leadCreationLoanDetails": {},
-
-                "leadCreationDms": {}
-            }
-            const baseURL = '8901'
-            setLoading(true)
-            apiInstancelocal(baseURL).post('/api/v1/lead-creation-initiation', appDetails)
-                .then(async (response) => {
-                    // Handle the response data
-                    console.log("LeadCreationBasicApiResponse::" + JSON.stringify(response.data));
-                    global.leadID = response.data.id;
-                    setLoading(false)
-                    //alert(JSON.stringify(response.data))
-                    insertLead(response.data)
-
-                })
-                .catch((error) => {
-                    // Handle the error
-                    console.log("Error" + JSON.stringify(error.response))
-                    setLoading(false)
-                    alert(error);
-                });
-
-
+            leadPostApi();
         }
 
 
     }
 
+    const leadPostApi = () => {
+        const appDetails = {
+            "createdBy": global.USERID,
+            "createdOn": '',
+            "isActive": true,
+            "branchId": profileDetail.branchId,
+            "leadCreationBasicDetails": {
+                "createdBy": global.USERID,
+                "createdOn": '',
+                "customerCategoryId": custCatgLabel,
+                "titleId": titleLabel,
+                "firstName": firstName,
+                "middleName": middleName,
+                "lastName": lastName,
+                "mobileNumber": mobileNumber,
+                "genderId": genderLabel
+            },
+            "leadCreationBusinessDetails": {},
+
+            "leadCreationLoanDetails": {},
+
+            "leadCreationDms": {}
+        }
+        const baseURL = '8901'
+        setLoading(true)
+        apiInstancelocal(baseURL).post('/api/v1/lead-creation-initiation', appDetails)
+            .then(async (response) => {
+                // Handle the response data
+                console.log("LeadCreationBasicApiResponse::" + JSON.stringify(response.data));
+                global.leadID = response.data.id;
+                global.leadNumber = response.data.leadNumber;
+                setLoading(false)
+                //alert(JSON.stringify(response.data))
+                insertLead(response.data)
+
+            })
+            .catch((error) => {
+                // Handle the error
+                console.log("Error" + JSON.stringify(error.response))
+                setLoading(false)
+                alert(error);
+            });
+    }
+
+    const leadPutApi = () => {
+        const appDetails = {
+
+            "leadCreationBasicDetails": {
+                "createdBy": global.USERID,
+                "createdOn": '',
+                "customerCategoryId": custCatgLabel,
+                "titleId": titleLabel,
+                "firstName": firstName,
+                "middleName": middleName,
+                "lastName": lastName,
+                "mobileNumber": mobileNumber,
+                "genderId": genderLabel
+            }
+        }
+        const baseURL = '8901'
+        setLoading(true)
+        apiInstancelocal(baseURL).put(`/api/v1/lead-creation-initiation/${global.leadID}`, appDetails)
+            .then(async (response) => {
+                // Handle the response data
+                console.log("LeadCreationBasicApiResponse::" + JSON.stringify(response.data));
+                global.leadID = response.data.id;
+                global.leadNumber = response.data.leadNumber;
+                setLoading(false)
+                //alert(JSON.stringify(response.data))
+                insertLead(response.data)
+
+            })
+            .catch((error) => {
+                // Handle the error
+                console.log("Error" + JSON.stringify(error.response))
+                setLoading(false)
+                alert(error);
+            });
+    }
+
     const insertLead = async (leadData) => {
-        await tbl_lead_creation_lead_details.insertLeadCreationLeadDetails(leadData.id, leadData.leadNumber, leadData.branchId, leadData.isActive, leadData.createdBy);
+        await tbl_lead_creation_lead_details.insertLeadCreationLeadDetails(leadData.id, leadData.leadNumber, leadData.branchId, leadData.isActive, leadData.createdBy, Common.getCurrentDateTime());
         await tbl_lead_creation_basic_details.insertLeadCreationBasicDetails(leadData.id, custCatgLabel, titleLabel, firstName, middleName, lastName, genderLabel, mobileNumber, global.USERID);
 
         tbl_lead_creation_lead_details.getLeadCreationLeadDetailsBasedOnLeadID(leadData.id).then(value => {
@@ -485,14 +539,98 @@ const LeadCreationBasic = (props, { navigation, route }) => {
         return flag;
     }
 
+    const updateDatainParent = (
+        fieldName,
+        newValue,
+        isMandatory,
+        IsHide,
+        IsDisable,
+        isPicker,
+    ) => {
+        // Find the index of the object in DataArray with the matching fieldName
+        const dataIndex = DataArray.findIndex(item => item.fieldName === fieldName);
+
+        if (dataIndex !== -1) {
+            // If the object with the same fieldName exists, get the existing object
+            const existingData = DataArray[dataIndex];
+
+            // Create a new object by merging the existingData with the new data
+            const newDataObject = {
+                fieldName: fieldName,
+                fieldValue: newValue,
+                isMandatory:
+                    isMandatory !== undefined ? isMandatory : existingData.isMandatory,
+                isDisable: IsDisable !== undefined ? IsDisable : existingData.isDisable,
+                IsHide: IsHide !== undefined ? IsHide : existingData.IsHide,
+                isPicker: existingData.isPicker || false,
+            };
+
+            // Update the object in DataArray with the merged data
+            DataArray[dataIndex] = newDataObject;
+        } else {
+            // If not, add the new object to the array with the provided data
+            const newDataObject = {
+                fieldName: fieldName,
+                fieldValue: newValue,
+                isMandatory: isMandatory,
+                isDisable: IsDisable,
+                IsHide: IsHide,
+                isPicker: isPicker || false,
+            };
+
+            setNewDataArray(prevDataArray => [...prevDataArray, newDataObject]);
+        }
+
+        console.log('DataArray:', DataArray);
+    };
+
+    const validateData = () => {
+        let flag = false;
+        let errMsg = '';
+
+        DataArray.forEach(item => {
+            if (
+                (item.IsHide === '' || item.IsHide === '0') &&
+                item.isMandatory === '1' &&
+                (item.fieldValue === '' || item.fieldValue === undefined)
+            ) {
+                errMsg += `${errorCounter}) Please Select ${item.fieldName}\n`;
+                errorCounter++;
+                // console.log('errMsg:', errMsg);
+            }
+        });
+
+        if (errMsg !== '') {
+            setErrMsg(errMsg);
+            flag = true;
+        }
+
+        return flag;
+    };
+
     const handleClick = (componentName, textValue) => {
 
         if (componentName === 'firstName') {
-            setFirstName(textValue)
+            if (textValue.length > 0) {
+                if (Common.isValidText(textValue))
+                    setFirstName(textValue)
+            } else {
+                setFirstName(textValue)
+            }
         } else if (componentName === 'middleName') {
-            setMiddleName(textValue)
+            if (textValue.length > 0) {
+                if (Common.isValidText(textValue))
+                    setMiddleName(textValue)
+            } else {
+                setMiddleName(textValue)
+            }
         } else if (componentName === 'lastName') {
-            setLastName(textValue)
+            if (textValue.length > 0) {
+                if (Common.isValidText(textValue))
+                    setLastName(textValue)
+            } else {
+                setLastName(textValue)
+            }
         } else if (componentName === 'mobileNumber') {
             if (textValue.length > 0) {
                 if (Common.numberRegex.test(textValue))
@@ -507,11 +645,22 @@ const LeadCreationBasic = (props, { navigation, route }) => {
     const handleReference = (componentName) => {
 
         if (componentName === 'firstName') {
-            middleNameRef.current.focus();
+            if (middleNameVisible) {
+                middleNameRef.current.focus();
+            } else if (lastNameVisible) {
+                lastNameRef.current.focus();
+            } else if (mobileNumberVisible) {
+                mobileNumberRef.current.focus();
+            }
         } else if (componentName === 'middleName') {
-            lastNameRef.current.focus();
+            if (lastNameVisible) {
+                lastNameRef.current.focus();
+            } else if (mobileNumberVisible) {
+                mobileNumberRef.current.focus();
+            }
         } else if (componentName === 'lastName') {
-            mobileNumberRef.current.focus();
+            if (mobileNumberVisible)
+                mobileNumberRef.current.focus();
         }
 
     };
@@ -549,6 +698,12 @@ const LeadCreationBasic = (props, { navigation, route }) => {
 
                         <HeadComp textval={language[0][props.language].str_leadcreation} props={props} />
 
+                    </View>
+
+                    <View style={{ width: '100%', justifyContent: 'center', alignItems: 'flex-end' }}>
+                        <Text style={{
+                            fontSize: 14, color: Colors.mediumgrey, marginRight: 23,
+                        }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black }}>{global.leadNumber}</Text></Text>
                     </View>
 
                     <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
@@ -602,6 +757,16 @@ const LeadCreationBasic = (props, { navigation, route }) => {
 
 
                     </View>}
+
+                    {/* <SystemMandatoryField
+                        fielduiid="et_firstname"
+                        type="email-address"
+                        textvalue={firstName}
+                        // Disable={false}
+                        isInput={1}
+                        updateDataInParent={updateDatainParent}
+                    // updateDataErrorinParent={updateDataErrorinParent}
+                    /> */}
 
                     {middleNameVisible && <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
 
@@ -700,13 +865,16 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) => {
     const { language } = state.languageReducer;
+    const { profileDetails } = state.profileReducer;
     return {
-        language: language
+        language: language,
+        profiledetail: profileDetails,
     }
 }
 
 const mapDispatchToProps = (dispatch) => ({
     languageAction: (item) => dispatch(languageAction(item)),
+    profileAction: (item) => dispatch(profileAction(item)),
 });
 
 

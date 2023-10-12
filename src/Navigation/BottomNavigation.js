@@ -11,6 +11,7 @@ import DashboardStack from './DashboardStack';
 import ProfileStack from './ProfileStack';
 import DashboardScreen from '../Screens/DashBoard/DashboardScreen';
 import { NavigationContainer } from '@react-navigation/native';
+import AddressDetails from '../Screens/Application/Address/AddressDetails';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -46,7 +47,7 @@ function BottomNavigation({ }) {
         }}
       />
 
-      <Tab.Screen
+      {/* <Tab.Screen
         name="Dashboard"
         component={DashboardStack}
         options={{
@@ -61,7 +62,7 @@ function BottomNavigation({ }) {
             />
           ),
         }}
-      />
+      /> */}
 
       <Tab.Screen
         name="Profile"

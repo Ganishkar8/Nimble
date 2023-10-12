@@ -29,6 +29,7 @@ import apiInstancelocal from '../../../Utils/apiInstancelocal';
 
 
 
+
 const LeadApproval = (props, { navigation, route }) => {
 
     const [errMsg, setErrMsg] = useState('');
@@ -43,13 +44,34 @@ const LeadApproval = (props, { navigation, route }) => {
     const showBottomSheet = () => setBottomErrorSheetVisible(true);
     const hideBottomSheet = () => setBottomErrorSheetVisible(false);
     const [leadData, setLeadData] = useState(props.route.params.leadData);
-
+    const [statusDisable, setStatusDisable] = useState(false);
+    const [commentDisable, setCommentDisable] = useState(false);
+    const [logData, setLogData] = useState(props.route.params.logDetail);
 
     useEffect(() => {
         //below code is used for hiding  bottom tab
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         //pickerData();
         callPickerApi();
+
+        if (props.route.params.position == 1) {
+            setApproverComment(logData[1].approverComments);
+            setLeadStatusLabel(1667)
+        } else {
+            setLeadStatusLabel(1666)
+        }
+
+        if (global.USERTYPEID == '1164') {
+            setStatusDisable(true);
+            setCommentDisable(true);
+        } else {
+            setStatusDisable(false);
+            setCommentDisable(false);
+            if (props.route.params.position == 1) {
+                setStatusDisable(true);
+                setCommentDisable(true);
+            }
+        }
         return () =>
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
     }, [navigation]);
@@ -124,7 +146,16 @@ const LeadApproval = (props, { navigation, route }) => {
             .then(async (response) => {
 
                 setLoading(false);
-                setLeadStatusData(response.data)
+                var data = [];
+                for (var i = 0; i < response.data.length; i++) {
+                    if (response.data[i].id == 1667) {
+                        data.push(response.data[i])
+                    } else if (response.data[i].id == 1668) {
+                        data.push(response.data[i])
+                    }
+                }
+                setLeadStatusData(data)
+
             })
             .catch((error) => {
                 if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
@@ -136,6 +167,13 @@ const LeadApproval = (props, { navigation, route }) => {
     }
 
     const leadApproval = () => {
+
+        if (global.USERTYPEID == '1164') {
+            return;
+        } else if (statusDisable) {
+            return;
+        }
+
         if (validate()) {
             showBottomSheet();
             return;
@@ -199,7 +237,7 @@ const LeadApproval = (props, { navigation, route }) => {
 
                         </View>
 
-                        <PickerComp textLabel={leadStatusLabel} pickerStyle={Commonstyles.picker} Disable={false} pickerdata={leadStatusData} componentName='leadStatusPicker' handlePickerClick={handlePickerClick} />
+                        <PickerComp textLabel={leadStatusLabel} pickerStyle={Commonstyles.picker} Disable={statusDisable} pickerdata={leadStatusData} componentName='leadStatusPicker' handlePickerClick={handlePickerClick} />
 
 
                     </View>
@@ -210,7 +248,7 @@ const LeadApproval = (props, { navigation, route }) => {
                             <TextComp textVal={language[0][props.language].str_approvercomment} textStyle={Commonstyles.inputtextStyle} Visible={true} />
                         </View>
 
-                        <TextInputComp textValue={approverComment} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={false} ComponentName='approverComment' returnKey="done" handleClick={handleClick} handleReference={handleReference} />
+                        <TextInputComp textValue={approverComment} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={commentDisable} ComponentName='approverComment' returnKey="done" handleClick={handleClick} handleReference={handleReference} />
 
 
 
@@ -218,7 +256,7 @@ const LeadApproval = (props, { navigation, route }) => {
 
                 </View>
 
-                <ButtonViewComp textValue={language[0][props.language].str_submit.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} viewStyle={Commonstyles.buttonView} innerStyle={Commonstyles.buttonViewInnerStyle} handleClick={leadApproval} />
+                <ButtonViewComp textValue={language[0][props.language].str_submit.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} viewStyle={Commonstyles.buttonView} innerStyle={global.USERTYPEID == '1164' ? Commonstyles.disableBg : statusDisable ? Commonstyles.disableBg : Commonstyles.buttonViewInnerStyle} handleClick={leadApproval} />
 
 
             </ScrollView>

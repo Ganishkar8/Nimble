@@ -1,9 +1,11 @@
 global.DEBUG_MODE = true
-global.USERNAME = 'UserName'
+global.USERNAME = ''
 global.USERID = ''
 global.USERTYPEID = ''
 global.RefreshToken = ''
 global.leadID = ''
+global.leadNumber = ''
+global.leadTrackerData = ''
 global.BASEURL = "";
 global.BANKID = "066";
 global.CHANLLENGECODE = "232100";

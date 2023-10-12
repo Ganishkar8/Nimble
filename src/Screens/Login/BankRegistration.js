@@ -38,8 +38,11 @@ import {
     useBlurOnFulfill,
     useClearByFocusCell,
 } from 'react-native-confirmation-code-field';
+import Entypo from 'react-native-vector-icons/Entypo';
 const { Value, Text: AnimatedText } = Animated;
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Button, Menu, Divider } from 'react-native-paper';
+
 const CELL_COUNT = 3;
 const CELL_SIZE = 46;
 const CELL_BORDER_RADIUS = 8;
@@ -86,6 +89,13 @@ const BankRegistration = (props, { navigation }) => {
     const challengeCodeRef = useRef(null);
     let Url = Common.CS_URL; // Initialize with your initial URL
     let goForRetry = true;
+
+    const [menuvisible, setMenuVisible] = React.useState(false);
+    const [instance, setInstance] = React.useState('LIV');
+    const openMenu = () => setMenuVisible(true);
+
+    const closeMenu = () => setMenuVisible(false);
+
 
     const renderCell = ({ index, symbol, isFocused }) => {
         const hasValue = Boolean(symbol);
@@ -236,11 +246,11 @@ const BankRegistration = (props, { navigation }) => {
         formData.append('DeviceModelName', deviceModelName);
         formData.append('PlatFormID', Platform.OS);
         formData.append('ChallengeCode', challengeCode);
-        formData.append('AppInstance', global.INSTANCE);
+        formData.append('AppInstance', instance);
         formData.append('AppID', global.APPID);
         formData.append('AppVersionNo', global.APPVERSIONNO);
         // Add more key-value pairs as needed
-        console.log(global.BANKID + " " + deviceNo + " " + deviceModelName + " " + Platform.OS + " " + global.CHANLLENGECODE + " " + global.INSTANCE + " " + global.APPID + " " + global.APPVERSIONNO)
+        console.log(institutionID + " " + deviceNo + " " + deviceModelName + " " + Platform.OS + " " + challengeCode + " " + instance + " " + global.APPID + " " + global.APPVERSIONNO)
         const headers = {
             'Accept-Encoding': 'identity',
             'Content-Type': 'application/x-www-form-urlencoded', // Mimicking form data
@@ -397,15 +407,34 @@ const BankRegistration = (props, { navigation }) => {
 
                     <View style={{ width: '100%', flexDirection: 'row', }}>
 
-                        <View style={{ width: '100%', }}>
+                        <View style={{ width: '50%', }}>
                             <ImageComp imageSrc={require('../../Images/loginbg.png')} imageStylee={{ width: 160, height: 160, resizeMode: 'contain' }} />
                         </View>
 
-                        <View style={{ width: '55%', }}>
+                        <View style={{ width: '47%', marginTop: 25, alignItems: 'flex-end', justifyContent: 'flex-start' }}>
+
+                            <Menu
+                                visible={menuvisible}
+                                onDismiss={closeMenu}
+                                contentStyle={{ backgroundColor: Colors.white }}
+                                anchor={
+                                    <TouchableOpacity onPress={() => { openMenu() }}>
+                                        <View>
+                                            <Entypo name='dots-three-vertical' color={Colors.black} size={20} />
+                                        </View>
+                                    </TouchableOpacity>
+                                }>
+                                <Menu.Item onPress={() => { setInstance('LIV'); closeMenu() }} style={{ backgroundColor: instance == 'LIV' ? Colors.darkblue : Colors.white }} titleStyle={{ color: instance == 'LIV' ? Colors.white : Colors.black }} title="LIVE" />
+                                <Menu.Item onPress={() => { setInstance('UAT'); closeMenu() }} style={{ backgroundColor: instance == 'UAT' ? Colors.darkblue : Colors.white }} titleStyle={{ color: instance == 'UAT' ? Colors.white : Colors.black }} title="UAT" />
+                                <Menu.Item onPress={() => { setInstance('DEV'); closeMenu() }} style={{ backgroundColor: instance == 'DEV' ? Colors.darkblue : Colors.white }} titleStyle={{ color: instance == 'DEV' ? Colors.white : Colors.black }} title="DEV" />
+                            </Menu>
 
                         </View>
 
                     </View>
+
+
+
 
                     <View style={{ width: '100%', marginTop: 30, paddingHorizontal: 16, alignItems: 'center' }}>
 

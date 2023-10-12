@@ -35,7 +35,7 @@ const apiInstance = (baseURL, authToken) => {
     // Response interceptor
     instance.interceptors.response.use(
         async (response) => {
-            console.log("ResponseData:", response.data);
+            console.log("ResponseData:", response);
 
             return response;
 

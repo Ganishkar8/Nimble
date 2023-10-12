@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     SafeAreaView,
     StyleSheet,
@@ -13,11 +13,17 @@ import {
 import MyStatusBar from '../../Components/ MyStatusBar';
 import Colors from '../../Utils/Colors';
 import Entypo from 'react-native-vector-icons/Entypo';
+import { connect } from 'react-redux';
+import { languageAction } from '../../Utils/redux/actions/languageAction';
+import { profileAction } from '../../Utils/redux/actions/ProfileAction';
 
 
 
 
-const PersonalDetailsScreen = ({ navigation, route }) => {
+
+const PersonalDetailsScreen = (props, { navigation, route }) => {
+
+    const [profileDetail, setProfileDetail] = useState(props.profiledetail.userPersonalDetailsDto);
 
     useEffect(() => {
 
@@ -40,7 +46,7 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
 
                     }}>
                         <View style={{ width: '92%', flexDirection: 'row' }}>
-                            <TouchableOpacity onPress={() => navigation.goBack()} style={{ width: '10%', height: 56, justifyContent: 'center' }}>
+                            <TouchableOpacity onPress={() => props.navigation.goBack()} style={{ width: '10%', height: 56, justifyContent: 'center' }}>
                                 <View >
 
                                     <Entypo name='chevron-left' size={25} color={Colors.darkblack} />
@@ -70,7 +76,7 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
                                     fontSize: 14,
                                     marginTop: 10
                                 }}>
-                                {route.params.Info.userId}
+                                {profileDetail.userId}
                             </Text>
 
                         </View>
@@ -91,7 +97,7 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
                                     fontSize: 14,
                                     marginTop: 10
                                 }}>
-                                {route.params.Info.firstName}
+                                {profileDetail.userName}
                             </Text>
 
                         </View>
@@ -113,7 +119,7 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
                                     fontSize: 14,
                                     marginTop: 10
                                 }}>
-                                {route.params.Info.mobileNumber}
+                                {profileDetail.mobileNumber}
                             </Text>
 
                         </View>
@@ -134,7 +140,7 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
                                     fontSize: 14,
                                     marginTop: 10
                                 }}>
-                                {route.params.Info.emailId}
+                                {profileDetail.emailId}
                             </Text>
 
                         </View>
@@ -155,7 +161,49 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
                                     fontSize: 14,
                                     marginTop: 10
                                 }}>
-                                {route.params.Info.addressDto[0].address}
+                                {profileDetail.address}
+                            </Text>
+
+                        </View>
+                        <View style={styles.line}></View>
+
+                        <View style={{ width: '90%', marginTop: 20, }}>
+                            <Text
+                                style={{
+                                    color: Colors.lightgrey,
+                                    fontSize: 14,
+                                }}>
+                                SUPERVISOR ID
+                            </Text>
+
+                            <Text
+                                style={{
+                                    color: Colors.darkblack,
+                                    fontSize: 14,
+                                    marginTop: 10
+                                }}>
+                                {profileDetail.supervisorName}/{profileDetail.supervisorId}
+                            </Text>
+
+                        </View>
+                        <View style={styles.line}></View>
+
+                        <View style={{ width: '90%', marginTop: 20, }}>
+                            <Text
+                                style={{
+                                    color: Colors.lightgrey,
+                                    fontSize: 14,
+                                }}>
+                                BRANCH ID
+                            </Text>
+
+                            <Text
+                                style={{
+                                    color: Colors.darkblack,
+                                    fontSize: 14,
+                                    marginTop: 10
+                                }}>
+                                {profileDetail.branchName}/{profileDetail.branchId}
                             </Text>
 
                         </View>
@@ -195,4 +243,20 @@ const styles = StyleSheet.create({
 });
 
 
-export default PersonalDetailsScreen;
+const mapStateToProps = (state) => {
+    const { language } = state.languageReducer;
+    const { profileDetails } = state.profileReducer;
+    return {
+        language: language,
+        profiledetail: profileDetails,
+    }
+}
+
+const mapDispatchToProps = (dispatch) => ({
+    languageAction: (item) => dispatch(languageAction(item)),
+    profileAction: (item) => dispatch(profileAction(item)),
+});
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(PersonalDetailsScreen);
+

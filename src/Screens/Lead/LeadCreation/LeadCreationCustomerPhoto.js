@@ -55,6 +55,9 @@ import axios from 'axios';
 import tbl_lead_image from '../../../Database/Table/tbl_lead_image';
 import tbl_lead_creation_dms from '../../../Database/Table/tbl_lead_creation_dms';
 import Common from '../../../Utils/Common';
+import ImageDetailComp from '../../../Components/ImageDetailComp';
+import { profileAction } from '../../../Utils/redux/actions/ProfileAction';
+
 
 const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
@@ -70,6 +73,8 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
         locationStatus,
         setLocationStatus
     ] = useState('');
+    const [profileDetail, setProfileDetail] = useState(props.profiledetail);
+
     const [gpslatlon, setGPSLatLon] = useState('');
     const mapRef = useRef(null);
     const [visible, setVisible] = useState(true);
@@ -83,6 +88,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
     const [docID, setDocID] = useState('');
     const [fileName, setFileName] = useState('');
     const [fileType, setFileType] = useState('');
+    const [time, setTime] = useState('');
     const [leadType, setLeadType] = useState(global.LEADTYPE);
 
     const showBottomSheet = () => setBottomSheetVisible(true);
@@ -91,6 +97,10 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
     const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
     const showBottomErrorSheet = () => setBottomErrorSheetVisible(true);
     const hideBottomErrorSheet = () => setBottomErrorSheetVisible(false);
+
+    const [detailModalVisible, setDetailModalVisible] = useState(false);
+    const showDetailModalSheet = () => setDetailModalVisible(true);
+    const hideDetailModalSheet = () => setDetailModalVisible(false);
 
 
     const showphotoBottomSheet = () => setphotoOptionvisible(true);
@@ -116,7 +126,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                     const [latitude, longitude] = latLng.split(',');
                     setCurrentLongitude(parseFloat(longitude));
                     setCurrentLatitude(parseFloat(latitude));
-
+                    setTime(value[0].created_On)
                     zoomToMarker();
                     setGPSLatLon(latLng);
                     tbl_lead_image.getLeadImageBasedOnLeadID(global.leadID).then(value => {
@@ -136,6 +146,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
             setDocID(data.leadCreationDms.dmsId);
             setFileName(data.leadCreationDms.fileName);
             setFileType(data.leadCreationDms.fileType);
+            setTime(data.leadCreationDms.createdOn)
             const latLng = data.leadCreationDms.geoLocation;
             const [latitude, longitude] = latLng.split(',');
             setCurrentLongitude(parseFloat(longitude));
@@ -269,7 +280,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
     }
 
     const insertLead = async (leadID, nav) => {
-        await tbl_lead_creation_dms.insertLeadCreationDmsDetails(leadID, docID, fileName, '', fileType, gpslatlon, '', global.USERID);
+        await tbl_lead_creation_dms.insertLeadCreationDmsDetails(leadID, docID, fileName, '', fileType, gpslatlon, '', global.USERID, time);
         await tbl_lead_image.insertLeadImage(leadID, docID, imageUri, global.USERID);
 
         tbl_lead_creation_dms.getLeadCreationDmsDetailsBasedOnLeadID(leadID).then(value => {
@@ -321,6 +332,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
             }
 
             // const imageName = image.path.split('/').pop();
+            setTime(Common.getCurrentDateTime());
             setFileType(image.mime)
             setFileName(imageName)
             setImageUri(image.path)
@@ -539,6 +551,8 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                         </View>
                     </Modal>
 
+                    <ImageDetailComp props={props} isVisible={detailModalVisible} onClose={hideDetailModalSheet} fileName={fileName} time={time} geoLocation={gpslatlon} fileType={fileType} />
+
                     <Modal
                         isVisible={bottomSheetVisible}
                         onBackdropPress={hideBottomSheet}
@@ -562,6 +576,19 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                                         </View>
                                         <View style={{ width: '85%', justifyContent: 'center' }}>
                                             <TextComp textVal={language[0][props.language].str_preview} textStyle={{ fontSize: 14, color: Colors.mediumgrey }} Visible={false} />
+                                        </View>
+
+                                    </View>
+
+                                </TouchableOpacity>
+
+                                <TouchableOpacity onPress={() => { showDetailModalSheet(); hideBottomSheet(); }} style={{ width: '100%', flexDirection: 'row', marginTop: 25 }}>
+                                    <View style={{ flexDirection: 'row' }}>
+                                        <View style={{ width: '15%' }}>
+                                            <MaterialIcons name='error' size={20} color={Colors.darkblue} />
+                                        </View>
+                                        <View style={{ width: '85%', justifyContent: 'center' }}>
+                                            <TextComp textVal={language[0][props.language].str_details} textStyle={{ fontSize: 14, color: Colors.mediumgrey }} Visible={false} />
                                         </View>
 
                                     </View>
@@ -700,7 +727,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                                     </TouchableOpacity>
                                     <Text style={{ fontSize: 14, color: Colors.black, marginTop: 7 }}>Camera</Text>
                                 </View>
-                                <View style={{ width: '30%', alignItems: 'center' }}>
+                                {/* <View style={{ width: '30%', alignItems: 'center' }}>
                                     <TouchableOpacity onPress={() => selectImage()} activeOpacity={11}>
                                         <View style={{
                                             width: 53, height: 53, borderRadius: 53, backgroundColor: '#8E44AD',
@@ -710,7 +737,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                                         </View>
                                     </TouchableOpacity>
                                     <Text style={{ fontSize: 14, color: Colors.black, marginTop: 7 }}>Gallery</Text>
-                                </View>
+                                </View> */}
 
                             </View>
                         </View>
@@ -724,6 +751,12 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
                     }}>
                         <HeadComp textval={language[0][props.language].str_leadcreation} props={props} />
+                    </View>
+
+                    <View style={{ width: '100%', justifyContent: 'center', alignItems: 'flex-end' }}>
+                        <Text style={{
+                            fontSize: 14, color: Colors.mediumgrey, marginRight: 23,
+                        }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black }}>{global.leadNumber}</Text></Text>
                     </View>
 
                     <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
@@ -867,7 +900,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                     }}>
                     <TouchableOpacity onPress={() => {
                         if (leadType == 'COMP') {
-                            props.navigation.goBack();
+                            props.navigation.navigate('LeadDetails', { leadData: global.leadTrackerData })
                         } else {
                             uploadImage()
                         }
@@ -878,7 +911,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                     }}>
                         <View >
 
-                            <TextComp textVal={leadType != 'COMP' ? language[0][props.language].str_submit : language[0][props.language].str_previous} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} />
+                            <TextComp textVal={leadType != 'COMP' ? language[0][props.language].str_submit : language[0][props.language].str_close} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} />
 
                         </View>
                     </TouchableOpacity>
@@ -938,13 +971,16 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) => {
     const { language } = state.languageReducer;
+    const { profileDetails } = state.profileReducer;
     return {
-        language: language
+        language: language,
+        profiledetail: profileDetails,
     }
 }
 
 const mapDispatchToProps = (dispatch) => ({
     languageAction: (item) => dispatch(languageAction(item)),
+    profileAction: (item) => dispatch(profileAction(item)),
 });
 
 
