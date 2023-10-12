@@ -47,9 +47,13 @@ import PickerComp from '../../../Components/PickerComp';
 import TextInputComp from '../../../Components/TextInputComp';
 import tbl_lead_creation_loan_details from '../../../Database/Table/tbl_lead_creation_loan_details';
 import Common from '../../../Utils/Common';
+import { profileAction } from '../../../Utils/redux/actions/ProfileAction';
+
 
 
 const LeadCreationLoan = (props, { navigation }) => {
+    const [profileDetail, setProfileDetail] = useState(props.profiledetail);
+
     const [leadType, setLeadType] = useState(global.LEADTYPE);
     const [errMsg, setErrMsg] = useState('');
     const [loading, setLoading] = useState(false);
@@ -76,7 +80,7 @@ const LeadCreationLoan = (props, { navigation }) => {
     const [productIdLabel, setProductIdLabel] = useState('');
     const [productIdIndex, setProductIdIndex] = useState('');
     const [productIdCaption, setProductIdCaption] = useState('PRODUCT ID');
-    const [productIdMan, setProductIdMan] = useState(false);
+    const [productIdMan, setProductIdMan] = useState(true);
     const [productIdVisible, setProductIdVisible] = useState(true);
     const [productIdDisable, setProductIdDisable] = useState(false);
     const [productIdData, setProductIdData] = useState([]);
@@ -375,7 +379,8 @@ const LeadCreationLoan = (props, { navigation }) => {
                 "loanTypeId": loanTypeLabel,
                 "loanPurposeId": loanPurposeLabel,
                 "leadTypeId": leadTypeLabel,
-                "loanAmount": loanAmount
+                "loanAmount": loanAmount,
+                "loanProductId": productIdLabel
             }
         }
         const baseURL = '8901'
@@ -515,11 +520,11 @@ const LeadCreationLoan = (props, { navigation }) => {
             tbl_lead_creation_loan_details.getLeadCreationLoanDetailsBasedOnLeadID(global.leadID).then(value => {
                 if (value !== undefined && value.length > 0) {
                     setLoanTypeLabel(parseInt(value[0].loan_type_id));
-                    setProductIdLabel(988);
+                    setProductIdLabel(parseInt(value[0].loan_product_id));
                     setLoanPurposeLabel(parseInt(value[0].loan_purpose_id));
                     setLoanAmount(value[0].loan_amount);
                     setLeadTypeLabel(parseInt(value[0].lead_type_id));
-                    callLoanAmount(988);
+                    callLoanAmount(parseInt(value[0].loan_product_id));
                     callPickerApi();
                 } else {
                     callPickerApi();
@@ -530,11 +535,11 @@ const LeadCreationLoan = (props, { navigation }) => {
         } else if (leadType == 'COMP') {
             const data = props.route.params.leadData;
             setLoanTypeLabel(parseInt(data.leadCreationLoanDetails.loanTypeId))
-            setProductIdLabel(988);
+            setProductIdLabel(parseInt(data.leadCreationLoanDetails.loanProductId));
             setLoanPurposeLabel(parseInt(data.leadCreationLoanDetails.loanPurposeId));
             setLoanAmount(data.leadCreationLoanDetails.loanAmount.toString());
             setLeadTypeLabel(parseInt(data.leadCreationLoanDetails.leadTypeId));
-            callLoanAmount(988);
+            callLoanAmount(parseInt(data.leadCreationLoanDetails.loanProductId));
             setLoanTypeDisable(true)
             setProductIdDisable(true)
             setLoanPurposeDisable(true)
@@ -783,6 +788,12 @@ const LeadCreationLoan = (props, { navigation }) => {
                         <HeadComp textval={language[0][props.language].str_leadcreation} props={props} />
                     </View>
 
+                    <View style={{ width: '100%', justifyContent: 'center', alignItems: 'flex-end' }}>
+                        <Text style={{
+                            fontSize: 14, color: Colors.mediumgrey, marginRight: 23,
+                        }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black }}>{global.leadNumber}</Text></Text>
+                    </View>
+
                     <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
 
                         <View style={{ width: '90%', marginTop: 3, }}>
@@ -937,13 +948,16 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) => {
     const { language } = state.languageReducer;
+    const { profileDetails } = state.profileReducer;
     return {
-        language: language
+        language: language,
+        profiledetail: profileDetails,
     }
 }
 
 const mapDispatchToProps = (dispatch) => ({
     languageAction: (item) => dispatch(languageAction(item)),
+    profileAction: (item) => dispatch(profileAction(item)),
 });
 
 

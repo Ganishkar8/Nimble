@@ -44,8 +44,11 @@ import PickerComp from '../../../Components/PickerComp';
 import TextInputComp from '../../../Components/TextInputComp';
 import Common from '../../../Utils/Common';
 import tbl_lead_creation_business_details from '../../../Database/Table/tbl_lead_creation_business_details';
+import { profileAction } from '../../../Utils/redux/actions/ProfileAction';
 
 const LeadCreationBusiness = (props, { navigation }) => {
+    const [profileDetail, setProfileDetail] = useState(props.profiledetail);
+
     const [leadType, setLeadType] = useState(global.LEADTYPE);
     const [errMsg, setErrMsg] = useState('');
     const [loading, setLoading] = useState(false);
@@ -72,6 +75,8 @@ const LeadCreationBusiness = (props, { navigation }) => {
     const [yearVisible, setYearVisible] = useState(true);
     const [yearDisable, setYearDisable] = useState(false);
     const [months, setMonths] = useState('');
+    const [monthLabel, setMonthLabel] = useState('');
+    const [monthIndex, setMonthIndex] = useState('');
     const [monthsCaption, setMonthsCaption] = useState('MONTHS');
     const [monthsMan, setMonthsMan] = useState(false);
     const [monthsVisible, setMonthsVisible] = useState(true);
@@ -85,6 +90,23 @@ const LeadCreationBusiness = (props, { navigation }) => {
     const incomeTurnOverRef = useRef(null);
     const yearRef = useRef(null);
     const monthsRef = useRef(null);
+
+    const monthArray = [
+        { id: 0, label: '0' },
+        { id: 1, label: '1' },
+        { id: 2, label: '2' },
+        { id: 3, label: '3' },
+        { id: 4, label: '4' },
+        { id: 5, label: '5' },
+        { id: 6, label: '6' },
+        { id: 7, label: '7' },
+        { id: 8, label: '8' },
+        { id: 9, label: '9' },
+        { id: 10, label: '10' },
+        { id: 11, label: '11' },
+    ]
+
+    const [monthData, setMonthData] = useState(monthArray);
 
     useEffect(() => {
 
@@ -249,10 +271,10 @@ const LeadCreationBusiness = (props, { navigation }) => {
                 "createdBy": global.USERID,
                 "createdOn": '',
                 "businessName": businessName,
-                "industryType": industryTypeLabel,
+                "industryTypeId": industryTypeLabel,
                 "incomeBusinessTurnover": incomeTurnOver,
                 "businessVintageYear": year,
-                "businessVintageMonth": months
+                "businessVintageMonth": monthLabel
             }
         }
         const baseURL = '8901'
@@ -283,7 +305,7 @@ const LeadCreationBusiness = (props, { navigation }) => {
                     setBusinessName(value[0].business_name);
                     setIncomeTurnOver(value[0].income_business_turnover);
                     setYear(value[0].business_vintage_year);
-                    setMonths(value[0].business_vintage_month);
+                    setMonthLabel(parseInt(value[0].business_vintage_month));
                     callPickerApi();
                 } else {
                     callPickerApi();
@@ -297,7 +319,7 @@ const LeadCreationBusiness = (props, { navigation }) => {
             setBusinessName(data.leadCreationBusinessDetails.businessName);
             setIncomeTurnOver(data.leadCreationBusinessDetails.incomeBusinessTurnover.toString());
             setYear(data.leadCreationBusinessDetails.businessVintageYear.toString());
-            setMonths(data.leadCreationBusinessDetails.businessVintageMonth.toString());
+            setMonthLabel(parseInt(data.leadCreationBusinessDetails.businessVintageMonth));
             setIndustryTypeDisable(true)
             setBusinessNameDisable(true)
             setIncomeTurnOverDisable(true);
@@ -309,7 +331,7 @@ const LeadCreationBusiness = (props, { navigation }) => {
     }
 
     const insertLead = async (leadID, nav) => {
-        await tbl_lead_creation_business_details.insertLeadCreationBusinessDetails(leadID, industryTypeLabel, businessName, year, months, incomeTurnOver, global.USERID);
+        await tbl_lead_creation_business_details.insertLeadCreationBusinessDetails(leadID, industryTypeLabel, businessName, year, monthLabel, incomeTurnOver, global.USERID);
 
         tbl_lead_creation_business_details.getLeadCreationBusinessDetailsBasedOnLeadID(leadID).then(value => {
             console.log("LeadBusinessDetails::::" + JSON.stringify(value))
@@ -355,8 +377,8 @@ const LeadCreationBusiness = (props, { navigation }) => {
         }
 
         if (monthsMan && monthsVisible) {
-            if (months.length <= 0) {
-                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + monthsCaption + '\n';
+            if (monthLabel === 'Select') {
+                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + monthsCaption + '\n';
                 i++;
                 flag = true;
             }
@@ -391,6 +413,9 @@ const LeadCreationBusiness = (props, { navigation }) => {
         if (componentName === 'industryPicker') {
             setIndustryTypeLabel(label);
             setIndustryTypeIndex(index);
+        } else if (componentName === 'monthPicker') {
+            setMonthLabel(label);
+            setMonthIndex(index);
         }
 
     }
@@ -398,12 +423,22 @@ const LeadCreationBusiness = (props, { navigation }) => {
     const handleClick = (componentName, textValue) => {
 
         if (componentName === 'businessName') {
-            setBusinessName(textValue)
+            if (textValue.length > 0) {
+                if (Common.isValidText(textValue))
+                    setBusinessName(textValue)
+            } else {
+                setBusinessName(textValue)
+            }
         } else if (componentName === 'incomeTurnOver') {
-            setIncomeTurnOver(textValue)
-        } else if (componentName === 'year') {
             if (textValue.length > 0) {
                 if (Common.numberRegex.test(textValue))
+                    setIncomeTurnOver(textValue)
+            } else {
+                setIncomeTurnOver(textValue)
+            }
+        } else if (componentName === 'year') {
+            if (textValue.length > 0) {
+                if (Common.numberRegex.test(textValue) && textValue <= 99 && textValue > 0)
                     setYear(textValue)
             } else {
                 setYear(textValue)
@@ -422,11 +457,11 @@ const LeadCreationBusiness = (props, { navigation }) => {
     const handleReference = (componentName) => {
 
         if (componentName === 'businessName') {
-            incomeTurnOver.current.focus();
+            incomeTurnOverRef.current.focus();
         } else if (componentName === 'incomeTurnOver') {
             yearRef.current.focus();
         } else if (componentName === 'year') {
-            monthsRef.current.focus();
+            // monthsRef.current.focus();
         }
 
     };
@@ -506,6 +541,12 @@ const LeadCreationBusiness = (props, { navigation }) => {
                         <HeadComp textval={language[0][props.language].str_leadcreation} props={props} />
                     </View>
 
+                    <View style={{ width: '100%', justifyContent: 'center', alignItems: 'flex-end' }}>
+                        <Text style={{
+                            fontSize: 14, color: Colors.mediumgrey, marginRight: 23,
+                        }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black }}>{global.leadNumber}</Text></Text>
+                    </View>
+
                     <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
 
                         <View style={{ width: '90%', marginTop: 3, }}>
@@ -580,7 +621,7 @@ const LeadCreationBusiness = (props, { navigation }) => {
                                         <TextComp textVal={monthsCaption} textStyle={Commonstyles.inputtextStyle} Visible={monthsMan} />
                                     </View>
 
-                                    <TextInputComp textValue={months} textStyle={Commonstyles.textinputtextStyle} type='numeric' Disable={monthsDisable} ComponentName='month' reference={monthsRef} returnKey="done" handleClick={handleClick} handleReference={handleReference} />
+                                    <PickerComp textLabel={monthLabel} pickerStyle={Commonstyles.picker} Disable={monthsDisable} pickerdata={monthData} componentName='monthPicker' handlePickerClick={handlePickerClick} />
 
                                 </View>
                             </View>}
@@ -662,13 +703,16 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) => {
     const { language } = state.languageReducer;
+    const { profileDetails } = state.profileReducer;
     return {
-        language: language
+        language: language,
+        profiledetail: profileDetails,
     }
 }
 
 const mapDispatchToProps = (dispatch) => ({
     languageAction: (item) => dispatch(languageAction(item)),
+    profileAction: (item) => dispatch(profileAction(item)),
 });
 
 

@@ -7,16 +7,16 @@ import { connect } from 'react-redux';
 import { languageAction } from '../../Utils/redux/actions/languageAction';
 import { language } from '../../Utils/LanguageString';
 
-const StatusComp = ({ props, statusData, filterClick, refresh }) => {
+const StatusComp = ({ props, statusData, filterClick, reload }) => {
 
     const [statusFilterData, setStatusFilterData] = React.useState(statusData);
     const [refreshFlatlist, setRefreshFlatList] = React.useState(false);
 
     useEffect(() => {
-
-        setRefreshFlatList(!refreshFlatlist)
-
-    }, []);
+        if (statusData) {
+            setStatusFilterData(statusData)
+        }
+    }, [statusData]);
 
     const updateStatusData = (item) => {
         let fiterStatusPosition = statusFilterData

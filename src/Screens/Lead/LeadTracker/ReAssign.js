@@ -29,6 +29,9 @@ import ImageComp from '../../../Components/ImageComp';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import apiInstancelocal from '../../../Utils/apiInstancelocal';
+import { profileAction } from '../../../Utils/redux/actions/ProfileAction';
+import Common from '../../../Utils/Common';
+
 
 const statusDataArr = [
 
@@ -40,11 +43,12 @@ const statusDataArr = [
 
 const ReAssign = (props, { navigation }) => {
 
+    const [profileDetail, setProfileDetail] = useState(props.profiledetail.userPersonalDetailsDto);
     const [leadData, setLeadData] = useState(props.route.params.leadData);
     const [currentPosition, setCurrentPosition] = useState(0);
     const [loading, setLoading] = useState(false);
     const [visible, setVisible] = useState(false);
-    const [leadOwner, setLeadOwner] = useState('Uday/Ag01');
+    const [leadOwner, setLeadOwner] = useState('');
     const [reasonLabel, setReasonLabel] = useState('');
     const [reasonIndex, setReasonIndex] = useState('');
     const [reasonData, setReasonData] = useState([]);
@@ -108,9 +112,9 @@ const ReAssign = (props, { navigation }) => {
                 alert(error);
             });
 
-        apiInstancelocal('8901').post('/api/v1/lead-Approved/ReAssignedDrowdown/1180')
+        apiInstancelocal('8901').post(`/api/v1/lead-Approved/ReAssignedDrowdown/${profileDetail.branchId}`)
             .then(async (response) => {
-                var userresponse = true;
+                userresponse = true;
                 if (reasonresponse && userresponse) {
                     setLoading(false);
                 }
@@ -231,7 +235,8 @@ const ReAssign = (props, { navigation }) => {
             .catch((error) => {
                 // Handle the error
                 setLoading(false)
-                alert(JSON.stringify(error.response));
+                //alert(JSON.stringify(error.response));
+                props.navigation.goBack();
             });
     }
 
@@ -272,6 +277,7 @@ const ReAssign = (props, { navigation }) => {
                     visible={visible}
                     animationType="slide"
                     transparent={true}
+                    onRequestClose={() => { setVisible(false); }}
                 >
                     <View style={styles.modalContainer}>
                         <View style={styles.modalContent}>
@@ -287,7 +293,15 @@ const ReAssign = (props, { navigation }) => {
 
                                     <TextInput
                                         value={search}
-                                        onChangeText={search => searchFilterFunction(search)}
+                                        onChangeText={search => {
+                                            if (search.length > 0) {
+                                                if (Common.isValidText(search))
+                                                    searchFilterFunction(search)
+                                            } else {
+                                                searchFilterFunction(search)
+                                            }
+
+                                        }}
                                         placeholder={'Search By Name or ID'}
                                         placeholderTextColor={'gray'}
                                         keyboardType='default'
@@ -332,7 +346,7 @@ const ReAssign = (props, { navigation }) => {
                     <View style={{ width: '100%', height: 50, justifyContent: 'center' }}>
                         <Text style={{
                             fontSize: 16, color: Colors.mediumgrey, marginLeft: 23,
-                        }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black }}>{leadData.leadNumber}</Text></Text>
+                        }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black }}>{leadData.leadId}</Text></Text>
                     </View>
 
                     <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
@@ -341,7 +355,7 @@ const ReAssign = (props, { navigation }) => {
                             <TextComp textVal={language[0][props.language].str_leadowner} textStyle={Commonstyles.inputtextStyle} Visible={true} />
                         </View>
 
-                        <TextInputComp textValue={leadOwner} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={true} ComponentName='approverComment' returnKey="done" handleClick={handleClick} handleReference={handleReference} />
+                        <TextInputComp textValue={leadData.agentName} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={true} ComponentName='approverComment' returnKey="done" handleClick={handleClick} handleReference={handleReference} />
 
 
 
@@ -390,13 +404,16 @@ const ReAssign = (props, { navigation }) => {
 
 const mapStateToProps = (state) => {
     const { language } = state.languageReducer;
+    const { profileDetails } = state.profileReducer;
     return {
-        language: language
+        language: language,
+        profiledetail: profileDetails,
     }
 }
 
 const mapDispatchToProps = (dispatch) => ({
     languageAction: (item) => dispatch(languageAction(item)),
+    profileAction: (item) => dispatch(profileAction(item)),
 });
 
 

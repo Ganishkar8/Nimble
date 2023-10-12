@@ -9,7 +9,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Commonstyles from '../../Utils/Commonstyles';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-const DateComp = ({ props, filterClick }) => {
+const DateComp = ({ props, filterClick, reload }) => {
 
     const currentDate = new Date();
 
@@ -31,8 +31,11 @@ const DateComp = ({ props, filterClick }) => {
     const [isDisplayDate, setShow] = React.useState(false);
     const [isDisplayDateTo, setShowTo] = React.useState(false);
     React.useEffect(() => {
-        updateAgeData(formattedServerDatee, formattedServerDatee)
-    }, []);
+        //updateAgeData(formattedServerDatee, formattedServerDatee)
+        if (reload) {
+            updateAgeData('', '')
+        }
+    }, [reload]);
     const displayDatepicker = (type) => {
         if (type == 1) {
             showMode('date');

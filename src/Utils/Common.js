@@ -13,6 +13,13 @@ const isValidPhoneNumber = (phoneNumber) => {
   return phoneRegex.test(phoneNumber);
 };
 
+const isValidText = (text) => {
+  // Regular expression to validate a mobile number with a country code
+  const textRegex = /^[a-zA-Z]+$/;
+
+  return textRegex.test(text);
+};
+
 
 export async function getDeviceName() {
   var manufacturer = await getManufacturer();
@@ -62,6 +69,24 @@ export function formatDate(inputDate) {
   return formattedDate;
 }
 
+function getCurrentDateTime() {
+  const now = new Date();
+
+  // Format the date and time components
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0'); // Month is 0-based
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+  const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
+
+  // Combine the components to create the desired format
+  const formattedDateTime = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}`;
+
+  return formattedDateTime;
+};
+
 function hasOnlyOneKey(obj) {
   // Get the keys of the object
   const keys = Object.keys(obj);
@@ -89,6 +114,6 @@ export function formatTime(inputDate) {
 }
 
 export default {
-  isValidPhoneNumber,
-  numberRegex, CS_URL, CS_URL1, integerPattern, formatDate, getCodeDescription, formatTime, hasOnlyOneKey, getNetworkConnection
+  isValidPhoneNumber, isValidText,
+  numberRegex, CS_URL, CS_URL1, integerPattern, formatDate, getCodeDescription, formatTime, hasOnlyOneKey, getCurrentDateTime, getNetworkConnection
 };

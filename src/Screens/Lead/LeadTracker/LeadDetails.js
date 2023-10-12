@@ -27,6 +27,7 @@ import { FAB } from 'react-native-paper';
 import apiInstance from '../../../Utils/apiInstance';
 import tbl_SystemCodeDetails from '../../../Database/Table/tbl_SystemCodeDetails';
 import Common from '../../../Utils/Common';
+import Commonstyles from '../../../Utils/Commonstyles';
 
 const data = [
 
@@ -71,6 +72,7 @@ const LeadDetails = (props, { navigation, route }) => {
     const [status, setStatus] = useState('COMP');
     const [leadStatusData, setLeadStatusData] = useState([]);
     const [leadStatus, setLeadStatus] = useState(props.route.params.leadData.leadStatus);
+    const [leadTrackerData, setLeadTrackerData] = useState(props.route.params.leadData);
     const [loanTypeData, setLoanTypeData] = useState([]);
 
     useEffect(() => {
@@ -119,9 +121,9 @@ const LeadDetails = (props, { navigation, route }) => {
             });
     }
 
-    const getLogDetails = () => {
+    const getLogDetails = (value) => {
         var logArray = [];
-        var approvalavailable = false; var draftavailable = 0; var insertApprovalIndex = 0; var insertDraftIndex = 0;
+        var approvalavailable = false; var draftavailable = 0; var insertApprovalIndex = 0; var insertDraftIndex = 0; var rejectavailable = false; var insertRejectIndex = 0
         for (var i = 0; i < leadData.leadCreationLeadLogDtoList.length; i++) {
 
             if (leadData.leadCreationLeadLogDtoList[i].leadStatus == '1669') {
@@ -131,7 +133,12 @@ const LeadDetails = (props, { navigation, route }) => {
             } else if (leadData.leadCreationLeadLogDtoList[i].leadStatus == '1667') {
                 approvalavailable = true;
                 insertApprovalIndex = i;
+                break;
 
+            } else if (leadData.leadCreationLeadLogDtoList[i].leadStatus == '1668') {
+                rejectavailable = true;
+                insertRejectIndex = i;
+                break;
             }
 
         }
@@ -143,6 +150,9 @@ const LeadDetails = (props, { navigation, route }) => {
 
         if (approvalavailable) {
             logArray.push(leadData.leadCreationLeadLogDtoList[insertApprovalIndex]);
+            position = 1;
+        } else if (rejectavailable) {
+            logArray.push(leadData.leadCreationLeadLogDtoList[insertRejectIndex]);
             position = 1;
         } else {
             logArray.push({
@@ -156,7 +166,12 @@ const LeadDetails = (props, { navigation, route }) => {
         }
 
         //alert(JSON.stringify(logArray))
-        props.navigation.navigate('LeadLog', { leadData: leadData, logDetail: logArray, position: position })
+        if (value == 'LeadLog') {
+            props.navigation.navigate('LeadLog', { leadData: leadData, logDetail: logArray, position: position })
+        } else {
+            props.navigation.navigate('LeadApproval', { leadData: leadData, logDetail: logArray, position: position })
+        }
+
 
     }
 
@@ -214,83 +229,96 @@ const LeadDetails = (props, { navigation, route }) => {
                             </View>
 
                             <View style={{ width: '100%', flexDirection: 'row', marginTop: 13, }}>
-                                <View style={{ width: '55%' }}>
+                                <View style={styles.leftText}>
                                     <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_customername}</Text>
                                 </View>
-                                <View style={{ width: '45%' }}>
-                                    <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {props.route.params.leadData.customerName}</Text>
+                                <View style={styles.rightText}>
+                                    <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {leadTrackerData.customerName}</Text>
                                 </View>
                             </View>
                             <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                                <View style={{ width: '55%' }}>
+                                <View style={styles.leftText}>
                                     <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_leadid}</Text>
                                 </View>
-                                <View style={{ width: '45%' }}>
-                                    <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {props.route.params.leadData.leadId}</Text>
+                                <View style={styles.rightText}>
+                                    <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {leadTrackerData.leadId}</Text>
                                 </View>
                             </View>
                             <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                                <View style={{ width: '55%' }}>
+                                <View style={styles.leftText}>
                                     <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_leadtype}</Text>
                                 </View>
-                                <View style={{ width: '45%' }}>
-                                    <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {props.route.params.leadData.leadType}</Text>
+                                <View style={styles.rightText}>
+                                    <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {leadTrackerData.leadType}</Text>
                                 </View>
                             </View>
                             {/* hide */}
 
                             {visible && <View>
-                                <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                                    <View style={{ width: '55%' }}>
+
+                                {leadStatus == 'APPROVED' && <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
+                                    <View style={styles.leftText}>
                                         <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_approvername}</Text>
                                     </View>
-                                    <View style={{ width: '45%' }}>
-                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  </Text>
+                                    <View style={styles.rightText}>
+                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>: {leadTrackerData.leadStatus == 'APPROVED' ? leadTrackerData.approverName : ''}  </Text>
+                                    </View>
+                                </View>
+                                }
+
+                                <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
+                                    <View style={styles.leftText}>
+                                        <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_productId}</Text>
+                                    </View>
+                                    <View style={styles.rightText}>
+                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {leadTrackerData.product}</Text>
                                     </View>
                                 </View>
 
                                 <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                                    <View style={{ width: '55%' }}>
+                                    <View style={styles.leftText}>
                                         <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_loanamount}</Text>
                                     </View>
-                                    <View style={{ width: '45%' }}>
-                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {leadData.leadCreationLoanDetails.loanAmount}</Text>
+                                    <View style={styles.rightText}>
+                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {leadTrackerData.loanAmount}</Text>
                                     </View>
                                 </View>
 
                                 <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                                    <View style={{ width: '55%' }}>
+                                    <View style={styles.leftText}>
                                         <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_loantype}</Text>
                                     </View>
-                                    <View style={{ width: '45%' }}>
+                                    <View style={styles.rightText}>
                                         <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {Common.getCodeDescription(loanTypeData, leadData.leadCreationLoanDetails.loanTypeId)}</Text>
                                     </View>
                                 </View>
 
                                 <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                                    <View style={{ width: '55%' }}>
+                                    <View style={styles.leftText}>
                                         <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_creationdate}</Text>
                                     </View>
-                                    <View style={{ width: '45%' }}>
-                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {Common.formatDate(props.route.params.leadData.creationDate)}</Text>
+                                    <View style={styles.rightText}>
+                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {Common.formatDate(leadTrackerData.creationDate)}</Text>
                                     </View>
                                 </View>
 
-                                <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                                    <View style={{ width: '55%' }}>
-                                        <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_completiondate}</Text>
+                                {leadStatus == 'APPROVED' &&
+                                    <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
+                                        <View style={styles.leftText}>
+                                            <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_completiondate}</Text>
+                                        </View>
+                                        <View style={styles.rightText}>
+                                            <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {leadStatus == 'APPROVED' ? Common.formatDate(leadTrackerData.completionDate) : ''}</Text>
+                                        </View>
                                     </View>
-                                    <View style={{ width: '45%' }}>
-                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {leadStatus == 'APPROVED' ? Common.formatDate(props.route.params.leadData.completionDate) : ''}</Text>
-                                    </View>
-                                </View>
+                                }
 
                                 <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                                    <View style={{ width: '55%' }}>
+                                    <View style={styles.leftText}>
                                         <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_ageing}</Text>
                                     </View>
-                                    <View style={{ width: '45%' }}>
-                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {props.route.params.leadData.ageing}</Text>
+                                    <View style={styles.rightText}>
+                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {leadTrackerData.ageing}</Text>
                                     </View>
                                 </View>
                             </View>
@@ -306,7 +334,7 @@ const LeadDetails = (props, { navigation, route }) => {
 
                         </View>
 
-                        <TouchableOpacity onPress={() => { global.LEADTYPE = 'COMP'; props.navigation.navigate('LeadCreationBasic', { leadData: leadData }) }} activeOpacity={0.5} style={{ width: '100%', marginTop: '5%', alignItems: 'center' }}>
+                        <TouchableOpacity onPress={() => { global.LEADTYPE = 'COMP'; global.leadNumber = leadData.leadNumber; props.navigation.navigate('LeadCreationBasic', { leadData: leadData }) }} activeOpacity={0.5} style={{ width: '100%', marginTop: '5%', alignItems: 'center' }}>
                             <View style={{ flexDirection: 'row' }}>
 
                                 <View style={{ width: '70%', justifyContent: 'center' }}>
@@ -319,50 +347,54 @@ const LeadDetails = (props, { navigation, route }) => {
                             </View>
                         </TouchableOpacity>
 
-                        <View style={styles.line}></View>
+                        {global.USERTYPEID == '1163' && <View style={styles.line}></View>}
 
-                        {(leadStatus != 'APPROVED') ? <TouchableOpacity onPress={() => alert('Cant ReAssign')} activeOpacity={0.5} style={{ width: '100%', marginTop: '5%', alignItems: 'center' }}>
+                        {global.USERTYPEID == '1163' && <TouchableOpacity onPress={() => {
+                            if (leadStatus != 'APPROVED') {
+
+                            } else {
+                                props.navigation.navigate('ReAssign', { leadData: leadTrackerData })
+                            }
+
+                        }} activeOpacity={0.5} style={{ width: '100%', marginTop: '5%', alignItems: 'center' }}>
                             <View style={{ flexDirection: 'row' }}>
 
                                 <View style={{ width: '70%', justifyContent: 'center' }}>
-                                    <Text style={{ fontSize: 16, color: Colors.lightgrey, marginTop: 5, }}>{language[0][props.language].str_reassign}</Text>
+                                    <Text style={{ fontSize: 16, color: leadStatus != 'APPROVED' ? Colors.lightgrey : Colors.mediumgrey, marginTop: 5, }}>{language[0][props.language].str_reassign}</Text>
                                 </View>
 
                                 <View style={{ width: '10%' }}></View>
-                                <Entypo name='chevron-right' size={23} color={Colors.lightgrey} style={{ marginLeft: 10 }} />
-
-                            </View>
-                        </TouchableOpacity> : <TouchableOpacity onPress={() => props.navigation.navigate('ReAssign', { leadData: leadData })} activeOpacity={0.5} style={{ width: '100%', marginTop: '5%', alignItems: 'center' }}>
-                            <View style={{ flexDirection: 'row' }}>
-
-                                <View style={{ width: '70%', justifyContent: 'center' }}>
-                                    <Text style={{ fontSize: 16, color: Colors.mediumgrey, marginTop: 5, }}>{language[0][props.language].str_reassign}</Text>
-                                </View>
-
-                                <View style={{ width: '10%' }}></View>
-                                <Entypo name='chevron-right' size={23} color={Colors.darkblack} style={{ marginLeft: 10 }} />
+                                <Entypo name='chevron-right' size={23} color={leadStatus != 'APPROVED' ? Colors.lightgrey : Colors.darkblack} style={{ marginLeft: 10 }} />
 
                             </View>
                         </TouchableOpacity>}
 
+
                         <View style={styles.line}></View>
 
-                        <TouchableOpacity onPress={() => props.navigation.navigate('LeadApproval', { leadData: leadData })} activeOpacity={0.5} style={{ width: '100%', marginTop: '8%', alignItems: 'center' }}>
+                        <TouchableOpacity onPress={() => {
+                            if (global.USERTYPEID == '1163') {
+                                getLogDetails()
+                            } else if (leadStatus != 'PENDING') {
+                                getLogDetails()
+                            }
+
+                        }} activeOpacity={0.5} style={{ width: '100%', marginTop: '8%', alignItems: 'center' }}>
                             <View style={{ flexDirection: 'row' }}>
 
                                 <View style={{ width: '70%', justifyContent: 'center' }}>
-                                    <Text style={{ fontSize: 16, color: Colors.mediumgrey, marginTop: 5, }}>{language[0][props.language].str_leadapprovals}</Text>
+                                    <Text style={{ fontSize: 16, color: global.USERTYPEID == '1163' ? Colors.mediumgrey : leadStatus != 'PENDING' ? Colors.darkblack : Colors.lightgrey, marginTop: 5, }}>{language[0][props.language].str_leadapprovals}</Text>
                                 </View>
 
                                 <View style={{ width: '10%' }}></View>
-                                <Entypo name='chevron-right' size={23} color={Colors.darkblack} style={{ marginLeft: 10 }} />
+                                <Entypo name='chevron-right' size={23} color={global.USERTYPEID == '1163' ? Colors.mediumgrey : leadStatus != 'PENDING' ? Colors.darkblack : Colors.lightgrey} style={{ marginLeft: 10 }} />
 
                             </View>
                         </TouchableOpacity>
 
                         <View style={styles.line}></View>
 
-                        <TouchableOpacity onPress={() => getLogDetails()} activeOpacity={0.5} style={{ width: '100%', marginTop: '8%', alignItems: 'center' }}>
+                        <TouchableOpacity onPress={() => getLogDetails('LeadLog')} activeOpacity={0.5} style={{ width: '100%', marginTop: '8%', alignItems: 'center' }}>
                             <View style={{ flexDirection: 'row' }}>
 
                                 <View style={{ width: '70%', justifyContent: 'center' }}>
@@ -387,7 +419,7 @@ const LeadDetails = (props, { navigation, route }) => {
                         justifyContent: 'flex-end',
                         alignItems: 'center',
                     }}>
-                    <TouchableOpacity activeOpacity={10} style={styles.disableBg}>
+                    <TouchableOpacity activeOpacity={10} style={global.USERTYPEID == '1163' ? Commonstyles.disableBg : leadStatus == 'APPROVED' ? Commonstyles.buttonViewInnerStyle : Commonstyles.disableBg}>
                         <View >
                             <TextComp textVal={language[0][props.language].str_initiateloanapplication.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} />
 
@@ -396,7 +428,7 @@ const LeadDetails = (props, { navigation, route }) => {
                 </View>
 
             </ScrollView>
-        </SafeAreaView>
+        </SafeAreaView >
     );
 };
 
@@ -502,6 +534,13 @@ const styles = StyleSheet.create({
         right: 0,
         bottom: 12,
         width: '100%',
+
+    },
+    leftText: {
+        width: '45%',
+    },
+    rightText: {
+        width: '55%',
 
     },
 

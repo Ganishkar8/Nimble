@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import {
     View,
     StatusBar,
@@ -8,7 +8,8 @@ import {
     StyleSheet,
     TextInput,
     TouchableOpacity,
-    SafeAreaView
+    SafeAreaView,
+    RefreshControl
 } from 'react-native';
 
 import Entypo from 'react-native-vector-icons/Entypo';
@@ -43,6 +44,7 @@ import tbl_lead_creation_basic_details from '../../../Database/Table/tbl_lead_cr
 import tbl_lead_creation_business_details from '../../../Database/Table/tbl_lead_creation_business_details';
 import tbl_lead_creation_loan_details from '../../../Database/Table/tbl_lead_creation_loan_details';
 import PickerComp from '../../../Components/PickerComp';
+import { it } from 'react-native-paper-dates';
 
 
 
@@ -93,16 +95,33 @@ const LeadManagement = (props, { navigation, route }) => {
 
     const [statusRefresh, setStatusRefresh] = useState(false);
     const [typeRefresh, setTypeRefresh] = useState(false);
+    const [refreshing, setRefreshing] = useState(true);
+
+    const sortChildRef = useRef(null);
+    const [reload, setReload] = useState(false);
+
 
 
     useEffect(() => {
         //getPendingData()
         if (props.route.params.fromScreen == "LeadCompletion") {
-            showBottomSheet();
+            // showBottomSheet();
         }
         if (isScreenVisible) {
-            getPendingData(null, null, null, null, null, null, null, null);
+            Common.getNetworkConnection().then(value => {
+                if (value.isConnected == true) {
+                    getPendingData(null, null, null, null, null, null, null, null);
+                    //getDraftData();
+                } else {
+                    getDraftData();
+                }
+
+            })
+
+            setMainFilteredData(mainFilterDataArr)
+
         }
+
 
         tbl_SystemCodeDetails.getSystemCodeDetailsBasedOnID('LeadStatus').then(value => {
             if (value !== undefined && value.length > 0) {
@@ -118,6 +137,44 @@ const LeadManagement = (props, { navigation, route }) => {
         return () =>
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
     }, [navigation, isScreenVisible]);
+
+
+    const getDraftData = async () => {
+        let data = [];
+        const promises = [];
+        await tbl_lead_creation_lead_details.getAllLeadCreationLeadDetails().then(value => {
+            if (value !== undefined && value.length > 0) {
+                for (let i = 0; i < value.length; i++) {
+                    const promise = tbl_lead_creation_lead_details.getLeadDraftDetail(value[i].id).then(value1 => {
+                        if (value1 !== undefined && value1.length > 0) {
+                            data.push({
+                                "id": value[i].id,
+                                "leadStatus": "DRAFT",
+                                "customerName": value1[0].first_name + " " + value1[0].middle_name + " " + value1[0].last_name,
+                                "leadId": value1[0].lead_number,
+                                "leadType": "HOT",
+                                "creationDate": value1[0].created_date,
+                                "completionDate": "",
+                                "ageing": "",
+                                "agentName": "",
+                                "approverName": "",
+                                "loanAmount": "",
+                                "product": ""
+                            })
+                        }
+                    })
+                    promises.push(promise);
+                }
+
+            }
+        })
+        await Promise.all(promises);
+
+        // alert(JSON.stringify(data))
+        setFilteredData(data)
+        setPendingData(data)
+        setRefreshing(false)
+    }
 
     const filterClick = (type, value, from) => {
         console.log('SortedValues::' + JSON.stringify(value))
@@ -172,6 +229,7 @@ const LeadManagement = (props, { navigation, route }) => {
         }
         let age = ageFilterValue.AGE
         let operator = ageFilterValue.Label
+        let agentName = agentLabel;
         if (sort == undefined || sort.length <= 0) {
             sort = null;
         }
@@ -199,15 +257,15 @@ const LeadManagement = (props, { navigation, route }) => {
             operator = null;
         }
 
-        if (agentLabel == undefined || agentLabel.length <= 0) {
-            agentLabel = null;
+        if (agentName == undefined || agentName.length <= 0) {
+            agentName = null;
         }
 
-        getPendingData(status, type, from, to, operator, age, agentLabel, sort);
+        getPendingData(status, type, from, to, operator, age, agentName, sort);
 
         console.log("ApplyFilterData::" + "Sort::" + sort + " Status::" + status
             + " FromDate::" + from + " ToDate::" + to + " Type::" + type
-            + " Age::" + age + " Operator::" + operator + " Agent Name::" + agentLabel)
+            + " Age::" + age + " Operator::" + operator + " Agent Name::" + agentName)
         setVisible(false)
     }
 
@@ -253,6 +311,7 @@ const LeadManagement = (props, { navigation, route }) => {
                 setPendingData(response.data.slice().reverse())
                 setFilteredData(response.data.slice().reverse())
                 setLoading(false)
+                setRefreshing(false)
                 // const decodedToken = jwtDecode(response.data.jwtToken);
                 // console.log("LoginJWTDecode::" + JSON.stringify(decodedToken));
             })
@@ -262,6 +321,15 @@ const LeadManagement = (props, { navigation, route }) => {
                 console.error("ErrorDataApi::" + error);
             });
     }
+
+    const onRefresh = () => {
+        //Clear old data of the list
+        setPendingData([]);
+        setFilteredData([]);
+        //Call the Service to get the latest data
+        setRefreshing(true)
+        getPendingData();
+    };
 
     const getLeadByID = (leadID) => {
 
@@ -284,7 +352,7 @@ const LeadManagement = (props, { navigation, route }) => {
     }
 
     const insertLead = async (leadData) => {
-        await tbl_lead_creation_lead_details.insertLeadCreationLeadDetails(leadData.id, leadData.leadNumber, leadData.branchId, leadData.isActive, leadData.createdBy);
+        await tbl_lead_creation_lead_details.insertLeadCreationLeadDetails(leadData.id, leadData.leadNumber, leadData.branchId, leadData.isActive, leadData.createdBy, leadData.leadCreationBasicDetails.createdOn);
         await tbl_lead_creation_basic_details.insertLeadCreationBasicDetails(leadData.id, leadData.leadCreationBasicDetails.customerCategoryId, leadData.leadCreationBasicDetails.titleId, leadData.leadCreationBasicDetails.firstName, leadData.leadCreationBasicDetails.middleName, leadData.leadCreationBasicDetails.lastName, leadData.leadCreationBasicDetails.genderId, leadData.leadCreationBasicDetails.mobileNumber, global.USERID);
 
         if (!Common.hasOnlyOneKey(leadData.leadCreationBusinessDetails)) {
@@ -419,13 +487,13 @@ const LeadManagement = (props, { navigation, route }) => {
 
     const callAgentNameApi = () => {
         setLoading(true);
-        apiInstancelocal('8901').post('/api/v1/lead-Approved/ReAssignedDrowdown/1180')
+        apiInstancelocal('8901').get(`api/v1/dropdown/{supervisorId}?supervisorId=${global.USERID}`)
             .then(async (response) => {
 
                 setLoading(false);
                 var data = [];
                 for (var i = 0; i < response.data.length; i++) {
-                    data.push({ id: response.data[i].userIdAndUserName, label: response.data[i].userName })
+                    data.push({ id: response.data[i], label: response.data[i] })
                 }
                 setAgentData(data)
 
@@ -447,6 +515,28 @@ const LeadManagement = (props, { navigation, route }) => {
         }
     }
 
+    const clearFilter = (value) => {
+
+        setSortedFilterValue('');
+        var data = statusDataArr;
+        for (var i = 0; i < data.length; i++) {
+            data[i].checked = false
+        }
+        setStatusFilterValue(data);
+        var data1 = typeDataArr;
+        for (let i = 0; i < data1.length; i++) {
+
+            data1[i].checked = false
+        }
+        setTypeDataArr(data1)
+
+        setAgeFilterValue('')
+        setVisible(false)
+        getPendingData(null, null, null, null, null, null, null, null);
+
+
+    }
+
     const listView = ({ item }) => {
 
 
@@ -454,7 +544,10 @@ const LeadManagement = (props, { navigation, route }) => {
             <View>
                 <TouchableOpacity onPress={() => {
                     global.leadID = item.id;
+                    global.leadNumber = item.leadId;
+
                     if (global.USERTYPEID == '1163') {
+                        global.leadTrackerData = item;
                         props.navigation.navigate('LeadDetails', { leadData: item })
                     } else {
                         if (item.leadStatus == 'DRAFT') {
@@ -462,16 +555,34 @@ const LeadManagement = (props, { navigation, route }) => {
                             tbl_lead_creation_lead_details.getLeadCreationLeadDetailsBasedOnLeadID(item.id).then(value => {
                                 if (value !== undefined && value.length > 0) {
                                     global.LEADTYPE = 'DRAFT';
-                                    props.navigation.navigate('LeadCreationBasic', { leadData: [] });
+                                    Common.getNetworkConnection().then(value => {
+                                        if (value.isConnected == true) {
+                                            getLeadByID(item.id);
+                                            //props.navigation.navigate('LeadCreationBasic', { leadData: [] });
+                                        } else {
+                                            props.navigation.navigate('LeadCreationBasic', { leadData: [] });
+                                        }
+
+                                    })
+                                    //props.navigation.navigate('LeadCreationBasic', { leadData: [] });
                                 } else {
-                                    getLeadByID(item.id)
+                                    Common.getNetworkConnection().then(value => {
+                                        if (value.isConnected == true) {
+                                            getLeadByID(item.id);
+                                        } else {
+                                            alert(language[0][props.language].str_errinternet)
+                                        }
+
+                                    })
                                 }
                             })
 
+                        } else {
+                            props.navigation.navigate('LeadDetails', { leadData: item })
                         }
 
                     }
-                }} activeOpacity={global.USERTYPEID == '1164' ? item.leadStatus == 'DRAFT' ? 0.8 : 10 : 0.9}>
+                }} activeOpacity={0.9}>
                     <View style={{
                         width: '92%', margin: 13, backgroundColor: 'white',
                         elevation: 4, borderRadius: 8, paddingHorizontal: 0,
@@ -532,7 +643,7 @@ const LeadManagement = (props, { navigation, route }) => {
                                 <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_completiondate}</Text>
                             </View>
                             <View style={{ width: '55%' }}>
-                                <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>: {item.leadStatus == 'APPROVED' ? Common.formatDate(item.creationDate) : ''} </Text>
+                                <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {item.leadStatus == 'APPROVED' ? Common.formatDate(item.creationDate) : ''} </Text>
                             </View>
                         </View>
                         <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
@@ -543,6 +654,15 @@ const LeadManagement = (props, { navigation, route }) => {
                                 <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {item.ageing}</Text>
                             </View>
                         </View>
+                        {global.USERTYPEID == '1163' && <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
+                            <View style={{ width: '45%' }}>
+                                <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_currentleadownerid}</Text>
+                            </View>
+                            <View style={{ width: '55%' }}>
+                                <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {item.agentName}</Text>
+                            </View>
+                        </View>
+                        }
                         <View style={{ width: '100%', height: 5, backgroundColor: item.leadStatus == 'APPROVED' ? Colors.approvedBorder : item.leadStatus == 'PENDING' ? Colors.pendingBorder : Colors.rejectedBorder, marginTop: 13, borderBottomLeftRadius: 8, borderBottomRightRadius: 8 }} />
 
 
@@ -634,7 +754,7 @@ const LeadManagement = (props, { navigation, route }) => {
                 >
                     <View style={styles.sortmodalContent}>
 
-                        <SortByComp props={props} filterClick={filterClick} selectedValue={sortedFilterValue} from='top' />
+                        <SortByComp props={props} filterClick={filterClick} selectedValue={sortedFilterValue} from='top' reload={reload} />
 
                     </View>
                 </Modal>
@@ -701,7 +821,15 @@ const LeadManagement = (props, { navigation, route }) => {
 
                     <TextInput
                         value={search}
-                        onChangeText={search => searchFilterFunction(search)}
+                        onChangeText={search => {
+                            if (search.length > 0) {
+                                if (Common.isValidText(search))
+                                    searchFilterFunction(search)
+                            } else {
+                                searchFilterFunction(search)
+                            }
+
+                        }}
                         placeholder={'Search By Name or Lead ID'}
                         placeholderTextColor={'gray'}
                         keyboardType='default'
@@ -725,6 +853,15 @@ const LeadManagement = (props, { navigation, route }) => {
                     renderItem={listView}
                     showsVerticalScrollIndicator={false}
                     keyExtractor={(item, index) => index.toString()}
+
+                    refreshControl={
+                        <RefreshControl
+                            //refresh control used for the Pull to Refresh
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                        />
+                    }
+
                 />
             </View>
 
@@ -787,15 +924,15 @@ const LeadManagement = (props, { navigation, route }) => {
                             }
 
                             {filterVisible === 'ST' &&
-                                <StatusComp props={props} statusData={statusDataArr} filterClick={filterClick} refresh={statusRefresh} />
+                                <StatusComp props={props} statusData={statusDataArr} filterClick={filterClick} reload={reload} />
                             }
 
                             {filterVisible === 'DT' &&
-                                <DateComp props={props} filterClick={filterClick} />
+                                <DateComp props={props} filterClick={filterClick} reload={reload} />
                             }
 
                             {filterVisible === 'TP' &&
-                                <TypeComp props={props} typeData={typeDataArr} filterClick={filterClick} />
+                                <TypeComp props={props} typeData={typeDataArr} filterClick={filterClick} reload={reload} />
                             }
 
                             {filterVisible === 'AGN' &&
@@ -823,7 +960,7 @@ const LeadManagement = (props, { navigation, route }) => {
                             }
 
                             {filterVisible === 'AG' &&
-                                <AgeingComp props={props} filterClick={filterClick} />
+                                <AgeingComp props={props} filterClick={filterClick} reload={reload} />
                             }
 
                         </View>
@@ -837,10 +974,13 @@ const LeadManagement = (props, { navigation, route }) => {
                     shadowRadius: 2,
                     elevation: 6, justifyContent: 'space-between', alignItems: 'center', flexDirection: 'row'
                 }}>
-                    <View style={{ padding: 25 }}>
-                        <TextComp textStyle={{ marginTop: 0, fontSize: 18, color: Colors.dimmText, marginLeft: 3 }} textVal={language[0][props.language].str_clearfilters} Visible={false}></TextComp>
-                    </View>
-                    <TouchableOpacity activeOpacity={10} onPress={applyFilter} style={{
+                    <TouchableOpacity activeOpacity={0.9} onPress={() => { clearFilter() }}>
+                        <View style={{ padding: 25 }}>
+                            <TextComp textStyle={{ marginTop: 0, fontSize: 18, color: Colors.dimmText, marginLeft: 3 }} textVal={language[0][props.language].str_clearfilters} Visible={false}></TextComp>
+                        </View>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity activeOpacity={0.9} onPress={applyFilter} style={{
                         width: '40%', height: 45, backgroundColor: Colors.darkblue, alignItems: 'center', justifyContent: 'center', marginRight: 20,
                         borderRadius: 25
                     }}>
@@ -852,17 +992,20 @@ const LeadManagement = (props, { navigation, route }) => {
                 </View>
             </BottomSheet>
 
-            <FAB
-                icon="plus"
-                color={Colors.white}
-                style={styles.fab}
-                label='Create New Lead'
-                onPress={() => {
-                    global.LEADTYPE = 'NEW';
-                    global.leadID = '';
-                    props.navigation.navigate('LeadCreationBasic', { leadData: [] });
-                }}
-            />
+            {global.USERTYPEID == '1164' &&
+                <FAB
+                    icon="plus"
+                    color={Colors.white}
+                    style={styles.fab}
+                    label='Create New Lead'
+                    onPress={() => {
+                        global.LEADTYPE = 'NEW';
+                        global.leadID = '';
+                        global.leadNumber = '';
+                        props.navigation.navigate('LeadCreationBasic', { leadData: [] });
+                    }}
+                />
+            }
 
         </View>
     );

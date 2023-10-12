@@ -7,6 +7,7 @@ import {
     FlatList,
     StyleSheet,
     TextInput,
+    ScrollView,
     TouchableOpacity,
     SafeAreaView,
 } from 'react-native';
@@ -25,6 +26,7 @@ import { language } from '../../../Utils/LanguageString';
 import StepIndicator from 'react-native-step-indicator';
 import Common from '../../../Utils/Common';
 import { getAvailableLocationProviders } from 'react-native-device-info';
+import apiInstance from '../../../Utils/apiInstance';
 
 const data = [
 
@@ -43,12 +45,12 @@ const mainFilterDataArr = [
 ]
 
 const statusDataArr = [
-
-    { name: 'Approve', id: 'APR', checked: true },
-    { name: 'Pending', id: 'PEN', checked: false },
-    { name: 'Rejected', id: 'REJ', checked: false },
-    { name: 'Draft', id: 'DFT', checked: false },
-
+    {
+        "date": "",
+        "time": "",
+        "userId": "",
+        "userName": ""
+    }
 ]
 
 
@@ -60,7 +62,9 @@ const LeadLog = (props, { navigation }) => {
     const [visible, setVisible] = useState(false);
     const [leadData, setLeadData] = useState(props.route.params.leadData);
     //const [labels, setLabels] = useState(typeDataArr);
-    const [logData, setLogData] = useState(props.route.params.logDetail);
+    const [logData, setLogData] = useState();
+    const [logTotalData, setLogTotalData] = useState();
+    const [logDataLength, setLogDataLength] = useState(0);
     //const labels = ["Cart", "Delivery Address"];
     const customStyles = {
         stepIndicatorSize: 15,
@@ -81,6 +85,7 @@ const LeadLog = (props, { navigation }) => {
         stepIndicatorLabelCurrentColor: Colors.green,
         stepIndicatorLabelFinishedColor: Colors.green,
         stepIndicatorLabelUnFinishedColor: Colors.green,
+        marginTop: 20
     };
 
 
@@ -88,6 +93,7 @@ const LeadLog = (props, { navigation }) => {
         //below code is used for hiding  bottom tab
         //alert(JSON.stringify(props.route.params.leadData.leadCreationLeadLogDtoList))
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
+        leadLogApi();
         return () =>
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
     }, [navigation]);
@@ -114,106 +120,283 @@ const LeadLog = (props, { navigation }) => {
         );
     };
 
+    const leadLogApi = () => {
+
+        const baseURL = '8901'
+        setLoading(true)
+        // alert(props.route.params.leadData.id)
+        apiInstance(baseURL).post(`/api/v1/lead-log/foragent/${global.leadNumber}`)
+            .then(async (response) => {
+                // Handle the response data
+                setLoading(false)
+                if (response.data.length > 1) {
+                    var data = [];
+                    for (var i = 0; i < response.data.length; i++) {
+                        data.push({
+                            "id": "1",
+                            "date": response.data[i].date,
+                            "time": response.data[i].time,
+                            "userId": response.data[i].userId,
+                            "userName": response.data[i].userName,
+                            "reassignfrom": "",
+                            "reassignto": "",
+                            "reassignby": ""
+                        })
+                    }
+                    setCurrentPosition(response.data.length - 1)
+                    getReAssignApi(data);
+                } else {
+                    var data = [];
+                    data.push({
+                        "id": "1",
+                        "date": response.data[0].date,
+                        "time": response.data[0].time,
+                        "userId": response.data[0].userId,
+                        "userName": response.data[0].userName,
+                        "reassignfrom": "",
+                        "reassignto": "",
+                        "reassignby": ""
+                    })
+                    data.push({
+                        "id": "1",
+                        "date": "",
+                        "time": "",
+                        "userId": "",
+                        "userName": "",
+                        "reassignfrom": "",
+                        "reassignto": "",
+                        "reassignby": ""
+
+                    })
+                    setLogTotalData(data);
+                    setCurrentPosition(0)
+                }
+
+            })
+            .catch((error) => {
+                // Handle the error
+                setLoading(false)
+                alert(JSON.stringify(error.response));
+            });
+    }
+
+
+    const getReAssignApi = (data) => {
+
+        const baseURL = '8901'
+        setLoading(true)
+        // alert(props.route.params.leadData.id)
+        apiInstance(baseURL).post(`/api/v1/updatedLog/new/${global.leadNumber}`)
+            .then(async (response) => {
+                // Handle the response data
+                setLoading(false)
+                if (response.data.length > 0) {
+                    for (var i = 0; i < response.data.length; i++) {
+                        data.push({
+                            "id": "2",
+                            "date": response.data[i].reAssignedByDate,
+                            "time": response.data[i].reAssignedByTime,
+                            "userId": "",
+                            "userName": "",
+                            "reassignfrom": response.data[i].reAssignFromUsername + "/" + response.data[i].reAssignedFrom,
+                            "reassignto": response.data[i].reAssignedToUsername + "/" + response.data[i].reAssignedTo,
+                            "reassignby": response.data[i].reAssignedByUsername + "/" + response.data[i].reAssignedBy
+                        })
+                    }
+
+                    setCurrentPosition(currentPosition + response.data.length)
+                    setLogTotalData(data);
+                } else {
+
+                    setLogTotalData(data);
+                }
+
+
+
+            })
+            .catch((error) => {
+                // Handle the error
+                setLoading(false)
+                alert(JSON.stringify(error.response));
+            });
+    }
+
 
     return (
 
-        <View style={{ flex: 1, backgroundColor: '#fefefe' }}>
+        <SafeAreaView style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
+
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
+
             {loading ? <Loading /> : null}
-            <View style={styles.headerView}>
-                <View style={{
-                    width: '100%', height: 50, alignItems: 'center', justifyContent: 'center',
-                    flexDirection: 'row'
-                }}>
-                    <TouchableOpacity onPress={() => props.navigation.goBack()} style={{ width: '15%', height: 56, alignItems: 'center', justifyContent: 'center' }}>
-                        <View >
 
-                            <Entypo name='chevron-left' size={25} color='#4e4e4e' />
+            <View style={{ flex: 1 }}>
 
+                <View style={styles.headerView}>
+                    <View style={{
+                        width: '100%', height: 50, alignItems: 'center', justifyContent: 'center',
+                        flexDirection: 'row'
+                    }}>
+                        <TouchableOpacity onPress={() => props.navigation.goBack()} style={{ width: '15%', height: 56, alignItems: 'center', justifyContent: 'center' }}>
+                            <View >
+
+                                <Entypo name='chevron-left' size={25} color='#4e4e4e' />
+
+                            </View>
+                        </TouchableOpacity>
+                        <View style={{ width: '85%', height: 50, justifyContent: 'center' }}>
+                            <Text style={{ fontSize: 18, color: '#000', fontWeight: '400' }}>{language[0][props.language].str_leadlog}</Text>
                         </View>
-                    </TouchableOpacity>
-                    <View style={{ width: '85%', height: 50, justifyContent: 'center' }}>
-                        <Text style={{ fontSize: 18, color: '#000', fontWeight: '400' }}>{language[0][props.language].str_leadlog}</Text>
                     </View>
                 </View>
-            </View>
-            <View style={{ width: '100%', height: 5, backgroundColor: Colors.skyblue }} />
 
 
-            <View style={{ width: '100%', height: 50, justifyContent: 'center' }}>
-                <Text style={{
-                    fontSize: 16, color: Colors.mediumgrey, marginLeft: 23,
-                }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black }}>{leadData.leadNumber}</Text></Text>
-            </View>
+                <View style={{ width: '100%', height: 5, backgroundColor: Colors.skyblue }} />
 
-            <View style={{ width: '100%', height: 5, backgroundColor: Colors.skyblue }} />
 
-            <View style={{ width: '100%', justifyContent: 'center' }}>
-                <Text style={{
-                    fontSize: 16, color: '#000', marginLeft: 23, marginTop: 10
-                }}>{language[0][props.language].str_leadlog}</Text>
+                <View style={{ width: '100%', height: 50, justifyContent: 'center' }}>
+                    <Text style={{
+                        fontSize: 16, color: Colors.mediumgrey, marginLeft: 23,
+                    }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black }}>{leadData.leadNumber}</Text></Text>
+                </View>
 
-            </View>
-            <View style={{ width: '100%', height: '40%', justifyContent: 'center', marginLeft: 20 }}>
+                <View style={{ width: '100%', height: 5, backgroundColor: Colors.skyblue }} />
 
-                <StepIndicator
-                    customStyles={customStyles}
-                    currentPosition={currentPosition}
-                    labels={logData}
-                    direction={'vertical'}
-                    stepCount={logData.length}
-                    renderLabel={({ position, stepStatus, label, currentPosition }) => {
-                        return (
-                            <View style={{ width: '100%', marginTop: 110 }}>
-                                <Text style={{
-                                    fontSize: 16, color: '#000', marginLeft: 10,
-                                }}>{label.leadStatus == '1667' ? language[0][props.language].str_leadapproval : language[0][props.language].str_leadcreation}</Text>
-                                <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                                    <View style={{ width: '50%' }}>
-                                        <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 10 }}>{language[0][props.language].str_completiondate}:</Text>
+                <View style={{ width: '100%', justifyContent: 'center' }}>
+                    <Text style={{
+                        fontSize: 16, color: Colors.mediumgrey, marginLeft: 23, marginTop: 10
+                    }}>{language[0][props.language].str_leadlog}</Text>
+
+                </View>
+                <View style={{ width: '100%', alignItems: 'flex-start', justifyContent: 'flex-start', marginLeft: 20, marginTop: 20, marginBottom: 200 }}>
+
+                    <FlatList
+                        data={logTotalData}
+                        showsHorizontalScrollIndicator={false}
+                        keyExtractor={(item, index) => index.toString()}
+                        renderItem={({ item, index }) => {
+                            return (
+                                <View style={{ width: '100%' }}>
+                                    <View style={{ width: '100%', flexDirection: 'row', marginTop: index == 0 ? 8 : 0 }}>
+                                        <View style={{
+                                            width: '15%', // Adjust as needed
+                                            alignItems: 'center'
+                                        }}>
+                                            <View style={{
+                                                width: 15, // Set the width of your rounded view
+                                                height: 15, // Set the height of your rounded view
+                                                borderRadius: 15,
+                                                // Half of the width or height to create a circle
+                                                backgroundColor: index == 1 ? currentPosition == 0 ? Colors.lightgrey : Colors.green : Colors.green, // Set the background color
+                                                justifyContent: 'center', // Adjust as needed
+                                                alignItems: 'center', // Adjust as needed
+                                            }}>
+                                            </View>
+                                            {logTotalData.length != index + 1 &&
+                                                <View style={{
+                                                    flex: 1, borderColor: currentPosition == 0 ? Colors.lightgrey : Colors.green, borderLeftWidth: 1, justifyContent: 'center', // Adjust as needed
+                                                    alignItems: 'center',
+                                                }}></View>}
+
+                                        </View>
+
+                                        <View style={{ width: '85%' }}>
+                                            <Text style={{
+                                                fontSize: 14, color: '#000', marginLeft: 10,
+                                            }}>{index == 0 ? language[0][props.language].str_leadcreation : index == 1 ? language[0][props.language].str_leadapproval : language[0][props.language].str_reassign}</Text>
+                                            <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
+                                                <View style={{ width: '40%' }}>
+                                                    <Text style={{ color: Colors.dimText, fontSize: 12, fontWeight: '400', marginLeft: 10 }}>{language[0][props.language].str_completiondate} :</Text>
+                                                </View>
+                                                <View style={{ width: '60%' }}>
+                                                    <Text style={{ color: Colors.black, fontSize: 12, fontWeight: '400' }}>{item.date}</Text>
+                                                </View>
+                                            </View>
+                                            <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
+                                                <View style={{ width: '40%' }}>
+                                                    <Text style={{ color: Colors.dimText, fontSize: 12, fontWeight: '400', marginLeft: 10 }}>{language[0][props.language].str_completiontime} :</Text>
+                                                </View>
+                                                <View style={{ width: '60%' }}>
+                                                    <Text style={{ color: Colors.black, fontSize: 12, fontWeight: '400' }}>{item.time}</Text>
+                                                </View>
+                                            </View>
+                                            {item.id == '1' && <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
+                                                <View style={{ width: '40%' }}>
+                                                    <Text style={{ color: Colors.dimText, fontSize: 12, fontWeight: '400', marginLeft: 10 }}>{language[0][props.language].str_userid} :</Text>
+                                                </View>
+                                                <View style={{ width: '60%' }}>
+                                                    <Text style={{ color: Colors.black, fontSize: 12, fontWeight: '400' }}>{item.userId}</Text>
+                                                </View>
+                                            </View>}
+                                            {item.id == '1' &&
+                                                <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
+                                                    <View style={{ width: '40%' }}>
+                                                        <Text style={{ color: Colors.dimText, fontSize: 12, fontWeight: '400', marginLeft: 10 }}>{language[0][props.language].str_username} :</Text>
+                                                    </View>
+                                                    <View style={{ width: '60%' }}>
+                                                        <Text style={{ color: Colors.black, fontSize: 12, fontWeight: '400' }}>{item.userName}</Text>
+                                                    </View>
+                                                </View>
+                                            }
+                                            {item.id == '2' && <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
+                                                <View style={{ width: '40%' }}>
+                                                    <Text style={{ color: Colors.dimText, fontSize: 12, fontWeight: '400', marginLeft: 10 }}>{language[0][props.language].str_reassignfrom} :</Text>
+                                                </View>
+                                                <View style={{ width: '60%' }}>
+                                                    <Text style={{ color: Colors.black, fontSize: 12, fontWeight: '400' }}>{item.reassignfrom}</Text>
+                                                </View>
+                                            </View>}
+
+                                            {item.id == '2' && <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
+                                                <View style={{ width: '40%' }}>
+                                                    <Text style={{ color: Colors.dimText, fontSize: 12, fontWeight: '400', marginLeft: 10 }}>{language[0][props.language].str_reassignto} :</Text>
+                                                </View>
+                                                <View style={{ width: '60%' }}>
+                                                    <Text style={{ color: Colors.black, fontSize: 12, fontWeight: '400' }}>{item.reassignto}</Text>
+                                                </View>
+                                            </View>}
+
+                                            {item.id == '2' && <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
+                                                <View style={{ width: '40%' }}>
+                                                    <Text style={{ color: Colors.dimText, fontSize: 12, fontWeight: '400', marginLeft: 10 }}>{language[0][props.language].str_reassignby} :</Text>
+                                                </View>
+                                                <View style={{ width: '60%' }}>
+                                                    <Text style={{ color: Colors.black, fontSize: 12, fontWeight: '400' }}>{item.reassignby}</Text>
+                                                </View>
+                                            </View>}
+
+                                        </View>
                                     </View>
-                                    <View style={{ width: '40%' }}>
-                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>{label.leadStatus == '1667' ? label.approvedOn != '' ? Common.formatDate(label.approvedOn) : '' : Common.formatDate(label.createdOn)}</Text>
-                                    </View>
+
+                                    {logTotalData.length != index + 1 && <View style={{ height: 20, flexDirection: 'row' }}>
+                                        <View style={{
+                                            width: '15%', // Adjust as needed
+                                            alignItems: 'center', justifyContent: 'center'
+                                        }}>
+
+
+                                            <View style={{
+                                                flex: 1, borderColor: currentPosition == 0 ? Colors.lightgrey : Colors.green, borderLeftWidth: 1, justifyContent: 'center', // Adjust as needed
+                                                alignItems: 'center',
+                                            }}></View>
+
+                                        </View>
+
+                                        <View style={{ width: '85%' }} />
+                                    </View>}
+
                                 </View>
-                                <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                                    <View style={{ width: '50%' }}>
-                                        <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 10 }}>{language[0][props.language].str_completiontime}:</Text>
-                                    </View>
-                                    <View style={{ width: '40%' }}>
-                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>{label.leadStatus == '1667' ? label.approvedOn != '' ? Common.formatTime(label.approvedOn) : '' : Common.formatTime(label.createdOn)}</Text>
-                                    </View>
-                                </View>
-                                <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                                    <View style={{ width: '50%' }}>
-                                        <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 10 }}>{language[0][props.language].str_userid}:</Text>
-                                    </View>
-                                    <View style={{ width: '40%' }}>
-                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>{label.createdBy}</Text>
-                                    </View>
-                                </View>
-                                <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                                    <View style={{ width: '50%' }}>
-                                        <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 10 }}>{language[0][props.language].str_username}:</Text>
-                                    </View>
-                                    <View style={{ width: '40%' }}>
-                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>userName</Text>
-                                    </View>
-                                </View>
-                            </View>
-                        );
-                    }} />
-            </View>
+                            );
+                        }} />
+                </View>
 
-            <View>
+                <View>
 
-            </View>
+                </View>
 
+            </View >
 
-
-
-
-        </View >
+        </SafeAreaView >
     );
 };
 
@@ -238,8 +421,19 @@ const styles = StyleSheet.create({
         backgroundColor: '#f5f8fa',
         alignItems: 'center'
     },
+    parentView: {
+        flex: 1,
+    },
+    scrollView: {
+        flex: 1,
+    },
+    contentContainer: {
+
+        paddingBottom: 50,
+        flexGrow: 1
+    },
     headerView: {
-        width: ('100%'),
+        width: '100%',
         paddingVertical: 15,
         backgroundColor: 'white',
         alignItems: 'center',

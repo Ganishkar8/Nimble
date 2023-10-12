@@ -56,7 +56,8 @@ const createTables = async () => {
         lead_number TEXT,
         branch_id TEXT,
         is_active TEXT,
-        created_by TEXT
+        created_by TEXT,
+        created_date TEXT
       )`,
     //tbl_lead_creation_basic_details
     `CREATE TABLE IF NOT EXISTS tbl_lead_creation_basic_details (
@@ -99,7 +100,8 @@ const createTables = async () => {
         file_type TEXT,
         geo_location TEXT,
         comments TEXT,
-        created_by TEXT
+        created_by TEXT,
+        created_On TEXT
       );`,
     //tbl_lead_image
     `CREATE TABLE IF NOT EXISTS tbl_lead_image (

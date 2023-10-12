@@ -26,6 +26,7 @@ const TextInputComp = ({
         onChangeText={txt => { setValue(txt) }}
         placeholder={''}
         editable={!Disable}
+        contextMenuHidden={true}
         placeholderTextColor={Colors.lightgrey}
         secureTextEntry={false}
         keyboardType={type}

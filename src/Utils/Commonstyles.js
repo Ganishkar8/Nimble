@@ -92,4 +92,8 @@ export default {
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
+  disableBg: {
+    width: '88%', height: 50, backgroundColor: Colors.disableBg,
+    borderRadius: 45, alignItems: 'center', justifyContent: 'center'
+  },
 };

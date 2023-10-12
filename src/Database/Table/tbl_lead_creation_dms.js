@@ -2,15 +2,15 @@ import databaseInstance from "../DatabaseInstance";
 
 const tableName = 'tbl_lead_creation_dms';
 
-const insertLeadCreationDmsDetails = (lead_id, dms_id, file_name, file_info, file_type, geo_location, comments, created_by) => {
+const insertLeadCreationDmsDetails = (lead_id, dms_id, file_name, file_info, file_type, geo_location, comments, created_by, created_On) => {
     const db = databaseInstance.getInstance();
 
     return new Promise((resolve, reject) => {
         db.transaction(tx => {
             comments
             tx.executeSql(
-                `INSERT OR REPLACE INTO ${tableName} (lead_id, dms_id, file_name, file_info, file_type, geo_location,comments, created_by) VALUES (?, ?, ?, ?, ?, ?, ?,?)`,
-                [lead_id, dms_id, file_name, file_info, file_type, geo_location, comments, created_by],
+                `INSERT OR REPLACE INTO ${tableName} (lead_id, dms_id, file_name, file_info, file_type, geo_location,comments, created_by,created_On) VALUES (?, ?, ?, ?, ?, ?, ?,?,?)`,
+                [lead_id, dms_id, file_name, file_info, file_type, geo_location, comments, created_by, created_On],
                 (_, result) => {
                     resolve(result);
                 },

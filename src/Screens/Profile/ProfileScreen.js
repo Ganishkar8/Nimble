@@ -29,7 +29,7 @@ const ProfileScreen = ({ navigation }) => {
     useEffect(() => {
 
         // if (isScreenVisible) {
-        getProfileDetails();
+        //getProfileDetails();
         //  }
 
 
@@ -40,7 +40,7 @@ const ProfileScreen = ({ navigation }) => {
 
         const baseURL = '8908'
         setLoading(true)
-        apiInstancelocal(baseURL).get(`/api/users/1`)
+        apiInstancelocal(baseURL).get(`/api/users/${global.USERID}`)
             .then(async (response) => {
                 // Handle the response data
                 console.log("ProfileApiResponse::" + JSON.stringify(response.data));
@@ -109,9 +109,9 @@ const ProfileScreen = ({ navigation }) => {
                             </View>
                         </TouchableOpacity>
 
-                        <View style={styles.line}></View>
+                        {global.USERTYPEID == '1164' && <View style={styles.line}></View>}
 
-                        <TouchableOpacity onPress={() => navigation.navigate('ProfessionalDetailsScreen')} activeOpacity={0.5} style={{ width: '92%', marginTop: '8%', alignItems: 'center' }}>
+                        {global.USERTYPEID == '1164' && <TouchableOpacity onPress={() => navigation.navigate('ProfessionalDetailsScreen')} activeOpacity={0.5} style={{ width: '92%', marginTop: '8%', alignItems: 'center' }}>
                             <View style={{ flexDirection: 'row' }}>
 
                                 <View style={{ width: '15%' }}>
@@ -127,7 +127,7 @@ const ProfileScreen = ({ navigation }) => {
                                 <Entypo name='chevron-right' size={23} color={Colors.darkblack} />
 
                             </View>
-                        </TouchableOpacity>
+                        </TouchableOpacity>}
 
                         <View style={styles.line}></View>
 
@@ -159,7 +159,7 @@ const ProfileScreen = ({ navigation }) => {
 
                 <View style={{ width: '100%', justifyContent: 'flex-end', alignItems: 'center' }}>
                     <View style={{ width: '92%' }}>
-                        <TouchableOpacity activeOpacity={0.5} onPress={() => { navigation.navigate('LoginScreen'); AsyncStorage.setItem('IsLogin', 'false'); }}>
+                        <TouchableOpacity activeOpacity={0.5} onPress={() => { navigation.replace('LoginScreen'); AsyncStorage.setItem('IsLogin', 'false'); }}>
                             <Text style={{ fontSize: 16, color: Colors.darkblue, marginTop: 5, }}>Logout</Text>
                         </TouchableOpacity>
                         <Text style={{ fontSize: 12, color: Colors.lightgrey, marginTop: 5, }}>Version 1.0.0</Text>
