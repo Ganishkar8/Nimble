@@ -13,6 +13,8 @@ import LeadLog from '../Screens/Lead/LeadTracker/LeadLog';
 import LeadApproval from '../Screens/Lead/LeadTracker/LeadApproval';
 import ReAssign from '../Screens/Lead/LeadTracker/ReAssign';
 import PreviewImage from '../Components/PreviewImage';
+import ProfileShortBasicDetails from '../Screens/Application/ApplicationInitiation/ProfileShortBasicDetails';
+
 import AddressMainList from '../Screens/Application/Address/AddressMainList';
 import AddressDetails from '../Screens/Application/Address/AddressDetails';
 import LoanApplicationMain from '../Screens/LoanApplication/LoanApplicationMain';
@@ -56,6 +58,16 @@ export default HomeStack = () => {
         name="ReAssign"
         component={ReAssign}
         options={{ headerShown: false, tabBarVisible: false }}
+      />
+      <Stack.Screen
+        name="ProfileShortBasicDetails"
+        component={ProfileShortBasicDetails}
+        options={{headerShown: false, tabBarVisible: false}}
+      />
+      <Stack.Screen
+        name="ProfileShortBasicDetails"
+        component={ProfileShortBasicDetails}
+        options={{headerShown: false, tabBarVisible: false}}
       />
 
       <Stack.Screen

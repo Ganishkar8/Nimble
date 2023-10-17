@@ -1,23 +1,23 @@
-import React, { useState, useRef, useEffect, createRef } from 'react';
+import React, {useState, useRef, useEffect, createRef} from 'react';
 import {
-    StyleSheet,
-    View,
-    Text,
-    Image,
-    StatusBar,
-    Keyboard,
-    TouchableOpacity,
-    SafeAreaView,
-    ScrollView,
-    ToastAndroid,
-    KeyboardAvoidingView,
-    Dimensions,
-    ImageBackground,
-    TextInput,
-    Alert,
-    PermissionsAndroid,
-    Platform,
-    Button
+  StyleSheet,
+  View,
+  Text,
+  Image,
+  StatusBar,
+  Keyboard,
+  TouchableOpacity,
+  SafeAreaView,
+  ScrollView,
+  ToastAndroid,
+  KeyboardAvoidingView,
+  Dimensions,
+  ImageBackground,
+  TextInput,
+  Alert,
+  PermissionsAndroid,
+  Platform,
+  Button,
 } from 'react-native';
 
 import Feather from 'react-native-vector-icons/Feather';
@@ -27,27 +27,27 @@ import Colors from '../../../Utils/Colors';
 import MyStatusBar from '../../../Components/ MyStatusBar';
 import Loading from '../../../Components/Loading';
 import TextComp from '../../../Components/TextComp';
-import { connect } from 'react-redux';
-import { languageAction } from '../../../Utils/redux/actions/languageAction';
-import { language } from '../../../Utils/LanguageString';
+import {connect} from 'react-redux';
+import {languageAction} from '../../../Utils/redux/actions/languageAction';
+import {language} from '../../../Utils/LanguageString';
 import Commonstyles from '../../../Utils/Commonstyles';
 import ImageComp from '../../../Components/ImageComp';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import HeadComp from '../../../Components/HeadComp';
-import { ProgressBar, MD3Colors } from 'react-native-paper';
-import { Picker } from '@react-native-picker/picker';
+import {ProgressBar, MD3Colors} from 'react-native-paper';
+import {Picker} from '@react-native-picker/picker';
 import ProgressComp from '../../../Components/ProgressComp';
 import Geolocation from 'react-native-geolocation-service';
 import RNAndroidLocationEnabler from 'react-native-android-location-enabler';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, {Marker} from 'react-native-maps';
 import Entypo from 'react-native-vector-icons/Entypo';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Fontisto from 'react-native-vector-icons/Fontisto';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import ImagePicker, { ImageOrVideo } from 'react-native-image-crop-picker';
-import { tr } from 'react-native-paper-dates';
+import ImagePicker, {ImageOrVideo} from 'react-native-image-crop-picker';
+import {tr} from 'react-native-paper-dates';
 import Modal from 'react-native-modal';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import apiInstancelocal from '../../../Utils/apiInstancelocal';
@@ -91,8 +91,8 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
     const [time, setTime] = useState('');
     const [leadType, setLeadType] = useState(global.LEADTYPE);
 
-    const showBottomSheet = () => setBottomSheetVisible(true);
-    const hideBottomSheet = () => setBottomSheetVisible(false);
+  const showBottomSheet = () => setBottomSheetVisible(true);
+  const hideBottomSheet = () => setBottomSheetVisible(false);
 
     const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
     const showBottomErrorSheet = () => setBottomErrorSheetVisible(true);
@@ -103,9 +103,8 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
     const hideDetailModalSheet = () => setDetailModalVisible(false);
 
 
-    const showphotoBottomSheet = () => setphotoOptionvisible(true);
-    const hidephotoBottomSheet = () => setphotoOptionvisible(false);
-
+  const showphotoBottomSheet = () => setphotoOptionvisible(true);
+  const hidephotoBottomSheet = () => setphotoOptionvisible(false);
 
     useEffect(() => {
 
@@ -295,24 +294,22 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
         }
     }
 
-    const zoomToMarker = () => {
-        if (mapRef.current) {
-            mapRef.current.animateToRegion(
-                {
-                    latitude: currentLatitude,
-                    longitude: currentLongitude,
-                    latitudeDelta: 0.02, // Adjust the zoom level as needed
-                    longitudeDelta: 0.02,
-                },
-                1000 // Duration of the animation in milliseconds
-            );
+  const zoomToMarker = () => {
+    if (mapRef.current) {
+      mapRef.current.animateToRegion(
+        {
+          latitude: currentLatitude,
+          longitude: currentLongitude,
+          latitudeDelta: 0.02, // Adjust the zoom level as needed
+          longitudeDelta: 0.02,
+        },
+        1000, // Duration of the animation in milliseconds
+      );
+    }
+  };
 
-        }
-    };
-
-
-    const pickImage = () => {
-        // setVisible(false)
+  const pickImage = () => {
+    // setVisible(false)
 
         hidephotoBottomSheet();
         ImagePicker.openCamera({
@@ -340,16 +337,16 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
     };
 
-    const selectImage = async () => {
-        // setVisible(false)
+  const selectImage = async () => {
+    // setVisible(false)
 
-        hidephotoBottomSheet();
-        ImagePicker.openPicker({
-            width: 300,
-            height: 400,
-            cropping: true,
-        }).then(image => {
-            setImageFile(image)
+    hidephotoBottomSheet();
+    ImagePicker.openPicker({
+      width: 300,
+      height: 400,
+      cropping: true,
+    }).then(image => {
+      setImageFile(image);
 
             const lastDotIndex = image.path.lastIndexOf('.');
             var imageName = 'Photo' + '_' + global.leadID;
@@ -370,124 +367,121 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
     };
 
 
-    const getOneTimeLocation = () => {
-        setLocationStatus('Getting Location ...');
-        Geolocation.getCurrentPosition(
-            //Will give you the current location
-            (position) => {
-                setLocationStatus('You are Here');
+  const getOneTimeLocation = () => {
+    setLocationStatus('Getting Location ...');
+    Geolocation.getCurrentPosition(
+      //Will give you the current location
+      position => {
+        setLocationStatus('You are Here');
 
-                //getting the Longitude from the location json
-                const currentLongitude =
-                    JSON.stringify(position.coords.longitude);
+        //getting the Longitude from the location json
+        const currentLongitude = JSON.stringify(position.coords.longitude);
 
-                //getting the Latitude from the location json
-                const currentLatitude =
-                    JSON.stringify(position.coords.latitude);
+        //getting the Latitude from the location json
+        const currentLatitude = JSON.stringify(position.coords.latitude);
 
-                //Setting Longitude state
-                setCurrentLongitude(parseFloat(currentLongitude));
+        //Setting Longitude state
+        setCurrentLongitude(parseFloat(currentLongitude));
 
-                //Setting Longitude state
-                setCurrentLatitude(parseFloat(currentLatitude));
+        //Setting Longitude state
+        setCurrentLatitude(parseFloat(currentLatitude));
 
-                // setGPSLatLon(currentLatitude+","+currentLongitude)
-                zoomToMarker();
-                setGPSLatLon((prevCount) => currentLatitude + "," + currentLongitude);
+        // setGPSLatLon(currentLatitude+","+currentLongitude)
+        zoomToMarker();
+        setGPSLatLon(prevCount => currentLatitude + ',' + currentLongitude);
+      },
+      error => {
+        setLocationStatus(error.message);
+        console.log(error);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 30000,
+        maximumAge: 1000,
+      },
+    );
+  };
 
+  const subscribeLocationLocation = () => {
+    watchID = Geolocation.watchPosition(
+      position => {
+        //Will give you the location on location change
 
+        setLocationStatus('You are Here');
+        console.log(position);
 
-            },
-            (error) => {
-                setLocationStatus(error.message);
-                console.log(error)
-            },
-            {
-                enableHighAccuracy: true,
-                timeout: 30000,
-                maximumAge: 1000
-            },
-        );
-    };
+        //getting the Longitude from the location json
+        const currentLongitude = JSON.stringify(position.coords.longitude);
 
-    const subscribeLocationLocation = () => {
-        watchID = Geolocation.watchPosition(
-            (position) => {
-                //Will give you the location on location change
+        //getting the Latitude from the location json
+        const currentLatitude = JSON.stringify(position.coords.latitude);
 
-                setLocationStatus('You are Here');
-                console.log(position);
+        //Setting Longitude state
+        setCurrentLongitude(currentLongitude);
 
-                //getting the Longitude from the location json        
-                const currentLongitude =
-                    JSON.stringify(position.coords.longitude);
+        //Setting Latitude state
+        setCurrentLatitude(currentLatitude);
+      },
+      error => {
+        setLocationStatus(error.message);
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 1000,
+      },
+    );
+  };
 
-                //getting the Latitude from the location json
-                const currentLatitude =
-                    JSON.stringify(position.coords.latitude);
+  const requestCameraPermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        {
+          title: 'Camera Permission',
+          message: 'App needs camera permission',
+        },
+      );
 
-                //Setting Longitude state
-                setCurrentLongitude(currentLongitude);
+      // If CAMERA Permission is granted
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    } catch (err) {
+      console.warn(err);
+      return false;
+    }
+  };
 
-                //Setting Latitude state
-                setCurrentLatitude(currentLatitude);
-            },
-            (error) => {
-                setLocationStatus(error.message);
-            },
-            {
-                enableHighAccuracy: true,
-                maximumAge: 1000
-            },
-        );
-    };
+  const deletePhoto = () => {
+    setImageUri(null);
+    setVisible(true);
+    hideBottomSheet();
+  };
 
-    const requestCameraPermission = async () => {
+  const validate = () => {
+    var flag = false;
+    var i = 1;
+    var errorMessage = '';
 
-        try {
-            const granted = await PermissionsAndroid.request(
-                PermissionsAndroid.PERMISSIONS.CAMERA,
-                {
-                    title: 'Camera Permission',
-                    message: 'App needs camera permission',
-                },
-            );
-
-            // If CAMERA Permission is granted
-            return granted === PermissionsAndroid.RESULTS.GRANTED;
-        } catch (err) {
-            console.warn(err);
-            return false;
-        }
-    };
-
-    const deletePhoto = () => {
-        setImageUri(null);
-        setVisible(true);
-        hideBottomSheet();
-    };
-
-    const validate = () => {
-        var flag = false; var i = 1;
-        var errorMessage = '';
-
-        if (imageUri == null) {
-            errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_errorimage + '\n';
-            i++;
-            flag = true;
-        }
-
-
-        setErrMsg(errorMessage);
-        return flag;
+    if (imageUri == null) {
+      errorMessage =
+        errorMessage +
+        i +
+        ')' +
+        ' ' +
+        language[0][props.language].str_errorimage +
+        '\n';
+      i++;
+      flag = true;
     }
 
+    setErrMsg(errorMessage);
+    return flag;
+  };
 
-    return (
-        // enclose all components in this View tag
-        <SafeAreaView style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
-
-            <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
+  return (
+    // enclose all components in this View tag
+    <SafeAreaView
+      style={[styles.parentView, {backgroundColor: Colors.lightwhite}]}>
+      <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
 
 
 
@@ -524,9 +518,17 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
                                 </View>
 
-                                <View style={{ width: '100%', marginTop: 15 }}>
-                                    <TextComp textVal={errMsg} textStyle={{ fontSize: 14, color: Colors.black, lineHeight: 20 }} Visible={false} />
-                                </View>
+                <View style={{width: '100%', marginTop: 15}}>
+                  <TextComp
+                    textVal={errMsg}
+                    textStyle={{
+                      fontSize: 14,
+                      color: Colors.black,
+                      lineHeight: 20,
+                    }}
+                    Visible={false}
+                  />
+                </View>
 
 
 
@@ -642,59 +644,102 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
                                 <MaterialIcons name='error' size={35} color={Colors.red} />
 
-                                <TextComp textVal={language[0][props.language].str_deletephoto} textStyle={{ fontSize: 14, color: Colors.black, fontWeight: 600, marginTop: 20 }} Visible={false} />
+                  <TextComp
+                    textVal={language[0][props.language].str_deletephoto}
+                    textStyle={{
+                      fontSize: 14,
+                      color: Colors.black,
+                      fontWeight: 600,
+                      marginTop: 20,
+                    }}
+                    Visible={false}
+                  />
 
-                                <TextComp textVal={language[0][props.language].str_deletephotodesc} textStyle={{ fontSize: 14, color: Colors.mediumgrey }} Visible={false} />
+                  <TextComp
+                    textVal={language[0][props.language].str_deletephotodesc}
+                    textStyle={{fontSize: 14, color: Colors.mediumgrey}}
+                    Visible={false}
+                  />
 
+                  <View
+                    style={{
+                      width: '100%',
+                      justifyContent: 'space-between',
+                      flexDirection: 'row',
+                    }}>
+                    <View
+                      style={{
+                        width: '48%',
+                        height: 50,
+                        marginTop: 25,
+                        justifyContent: 'flex-end',
+                        alignItems: 'center',
+                      }}>
+                      <TouchableOpacity
+                        onPress={() => {
+                          hideBottomSheet();
+                        }}
+                        activeOpacity={0.5}
+                        style={{
+                          width: '88%',
+                          height: 50,
+                          borderBottomColor: Colors.mediumgrey,
+                          borderWidth: 1,
+                          borderRadius: 45,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}>
+                        <View>
+                          <TextComp
+                            textVal={language[0][props.language].str_cancel}
+                            textStyle={{
+                              color: Colors.darkblue,
+                              fontSize: 13,
+                              fontWeight: 600,
+                            }}
+                          />
+                        </View>
+                      </TouchableOpacity>
+                    </View>
 
-                                <View style={{ width: '100%', justifyContent: 'space-between', flexDirection: 'row' }}>
+                    <View
+                      style={{
+                        width: '48%',
+                        height: 50,
+                        marginTop: 25,
+                        justifyContent: 'flex-end',
+                        alignItems: 'center',
+                      }}>
+                      <TouchableOpacity
+                        onPress={() => {
+                          deletePhoto();
+                        }}
+                        activeOpacity={10}
+                        style={{
+                          width: '88%',
+                          height: 50,
+                          backgroundColor: '#0294ff',
+                          borderRadius: 45,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}>
+                        <View>
+                          <TextComp
+                            textVal={language[0][props.language].str_yesdelete}
+                            textStyle={{
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: 600,
+                            }}
+                          />
+                        </View>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+              )}
 
-                                    <View
-                                        style={{
-                                            width: '48%',
-                                            height: 50,
-                                            marginTop: 25,
-                                            justifyContent: 'flex-end',
-                                            alignItems: 'center',
-                                        }}>
-                                        <TouchableOpacity onPress={() => { hideBottomSheet() }} activeOpacity={0.5} style={{
-                                            width: '88%', height: 50, borderBottomColor: Colors.mediumgrey, borderWidth: 1,
-                                            borderRadius: 45, alignItems: 'center', justifyContent: 'center'
-                                        }}>
-                                            <View>
-
-                                                <TextComp textVal={language[0][props.language].str_cancel} textStyle={{ color: Colors.darkblue, fontSize: 13, fontWeight: 600 }} />
-
-                                            </View>
-                                        </TouchableOpacity>
-                                    </View>
-
-
-                                    <View
-                                        style={{
-                                            width: '48%',
-                                            height: 50,
-                                            marginTop: 25,
-                                            justifyContent: 'flex-end',
-                                            alignItems: 'center',
-                                        }}>
-                                        <TouchableOpacity onPress={() => { deletePhoto() }} activeOpacity={10} style={{
-                                            width: '88%', height: 50, backgroundColor: '#0294ff',
-                                            borderRadius: 45, alignItems: 'center', justifyContent: 'center'
-                                        }}>
-                                            <View >
-
-                                                <TextComp textVal={language[0][props.language].str_yesdelete} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 600 }} />
-
-                                            </View>
-                                        </TouchableOpacity>
-                                    </View>
-
-                                </View>
-
-                            </View>}
-
-                            {/*                             
+              {/*                             
 
                             <View style={{width:'100%',flexDirection:'row',marginTop:25,marginBottom:20}}>
                             <View style={{ width: '15%' }}>
@@ -707,25 +752,29 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                             </View>
                             
                             </View> */}
+            </View>
+          </Modal>
 
-                        </View>
-                    </Modal>
-
-
-                    <Modal
-                        isVisible={photoOptionvisible}
-                        onBackdropPress={hidephotoBottomSheet}
-                        style={styles.modal}
-                    >
-
-                        <View style={styles.modalContent}>
-                            <TouchableOpacity onPress={() => (hidephotoBottomSheet())} style={{
-                                width: 33, height: 33, position: 'absolute', right: 0,
-                                alignItems: 'center', justifyContent: 'center',
-                                zIndex: 1, backgroundColor: Colors.common, borderBottomStartRadius: 10
-                            }}>
-                                <AntDesign name='close' size={18} color={Colors.black} />
-                            </TouchableOpacity>
+          <Modal
+            isVisible={photoOptionvisible}
+            onBackdropPress={hidephotoBottomSheet}
+            style={styles.modal}>
+            <View style={styles.modalContent}>
+              <TouchableOpacity
+                onPress={() => hidephotoBottomSheet()}
+                style={{
+                  width: 33,
+                  height: 33,
+                  position: 'absolute',
+                  right: 0,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 1,
+                  backgroundColor: Colors.common,
+                  borderBottomStartRadius: 10,
+                }}>
+                <AntDesign name="close" size={18} color={Colors.black} />
+              </TouchableOpacity>
 
                             <View style={{ width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
                                 <View style={{ width: '30%', alignItems: 'center' }}>
@@ -757,136 +806,186 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
 
 
-                    <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
+          <View style={{width: '100%', alignItems: 'center', marginTop: '3%'}}>
+            <View style={{width: '90%', marginTop: 3}}>
+              <TextComp
+                textStyle={{
+                  color: Colors.mediumgrey,
+                  fontSize: 15,
+                  fontWeight: '500',
+                }}
+                textVal={language[0][props.language].str_phtcapture}></TextComp>
 
-                        <View style={{ width: '90%', marginTop: 3, }}>
+              <ProgressComp progressvalue={1} textvalue="4 of 4" />
+            </View>
+          </View>
 
-                            <TextComp textStyle={{ color: Colors.mediumgrey, fontSize: 15, fontWeight: '500' }} textVal={language[0][props.language].str_phtcapture}></TextComp>
+          <View style={{width: '100%', alignItems: 'center', marginTop: '4%'}}>
+            <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+              <TextComp
+                textVal={language[0][props.language].str_capturecustpht}
+                textStyle={Commonstyles.inputtextStyle}
+                Visible={true}
+              />
+            </View>
 
-                            <ProgressComp progressvalue={1} textvalue="4 of 4" />
-
-                        </View>
-
-
-                    </View>
-
-
-
-                    <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
-                        <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
-                            <TextComp textVal={language[0][props.language].str_capturecustpht} textStyle={Commonstyles.inputtextStyle} Visible={true} />
-
-                        </View>
-
-
-                        {visible && <TouchableOpacity onPress={() => { setphotoOptionvisible(true) }} style={{ width: '90%', height: 170, justifyContent: 'center', alignItems: 'center', marginTop: 10, paddingHorizontal: 0, borderRadius: 10, backgroundColor: '#e2e2e2' }}>
-                            <View >
-
-                                <Entypo name='camera' size={25} color={Colors.darkblack} />
-
-
-                            </View>
-                        </TouchableOpacity>}
-
-
-                        {!visible && <View style={{ width: '90%', height: 170, justifyContent: 'center', alignItems: 'center', marginTop: 10, paddingHorizontal: 0, borderRadius: 10, backgroundColor: '#e2e2e2' }}>
-
-
-                            <Image
-                                source={{ uri: imageUri }}
-                                style={{ width: '100%', height: 170, borderRadius: 10 }}
-                            />
-
-                        </View>}
-
-                        {!visible && <View style={{ width: '90%', justifyContent: 'center', marginTop: 15, paddingHorizontal: 0, flexDirection: 'row' }}>
-
-
-                            <TextComp textVal={fileName} textStyle={{ width: '90%', fontSize: 14, color: Colors.mediumgrey }} Visible={false} />
-
-                            <TouchableOpacity onPress={() => { showBottomSheet(); setDeleteVisible(false) }}>
-
-                                <Entypo name='dots-three-vertical' size={25} color={Colors.darkblue} />
-
-                            </TouchableOpacity>
-
-
-                        </View>}
-
-
-
-                    </View>
-
-
-                    <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
-
-                        <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
-                            <TextComp textVal={language[0][props.language].str_gpslocation} textStyle={Commonstyles.inputtextStyle} Visible={true} />
-                        </View>
-
-                        <View style={{ width: '90%', flexDirection: 'row', marginTop: 3, paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: '#e2e2e2' }}>
-
-                            <TextInput
-                                value={gpslatlon}
-                                onChangeText={txt => setGPSLatLon(txt)}
-                                placeholder={''}
-                                editable={false}
-                                placeholderTextColor={Colors.lightgrey}
-                                secureTextEntry={false}
-                                autoCapitalize="none"
-                                style={Commonstyles.textinputtextStyle}
-                            />
-
-                            <TouchableOpacity onPress={() => { getOneTimeLocation() }} activeOpacity={0.5}>
-                                <FontAwesome6 name='location-dot' size={23} color={Colors.darkblue} />
-                            </TouchableOpacity>
-
-
-
-                        </View>
-
-                    </View>
-
-
-                    <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
-
-                        <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: '#e2e2e2' }}>
-
-
-                            <MapView
-                                style={{ width: '100%', height: 200, marginTop: 15 }}
-                                ref={mapRef}
-                                initialRegion={{
-                                    latitude: currentLatitude,
-                                    longitude: currentLongitude,
-                                    latitudeDelta: 0.02,
-                                    longitudeDelta: 0.02,
-                                }}
-                            >
-                                <Marker
-
-                                    coordinate={{
-                                        latitude: parseFloat(currentLatitude),
-                                        longitude: parseFloat(currentLongitude),
-                                    }}
-                                    onDragEnd={
-                                        (e) => alert(JSON.stringify(e.nativeEvent.coordinate))
-                                    }
-                                    title={'Test Marker'}
-                                    description={'This is a description of the marker'}
-                                />
-                            </MapView>
-
-                        </View>
-
-
-
-                    </View>
-
-
-
+            {visible && (
+              <TouchableOpacity
+                onPress={() => {
+                  setphotoOptionvisible(true);
+                }}
+                style={{
+                  width: '90%',
+                  height: 170,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginTop: 10,
+                  paddingHorizontal: 0,
+                  borderRadius: 10,
+                  backgroundColor: '#e2e2e2',
+                }}>
+                <View>
+                  <Entypo name="camera" size={25} color={Colors.darkblack} />
                 </View>
+              </TouchableOpacity>
+            )}
 
+            {!visible && (
+              <View
+                style={{
+                  width: '90%',
+                  height: 170,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginTop: 10,
+                  paddingHorizontal: 0,
+                  borderRadius: 10,
+                  backgroundColor: '#e2e2e2',
+                }}>
+                <Image
+                  source={{uri: imageUri}}
+                  style={{width: '100%', height: 170, borderRadius: 10}}
+                />
+              </View>
+            )}
+
+            {!visible && (
+              <View
+                style={{
+                  width: '90%',
+                  justifyContent: 'center',
+                  marginTop: 15,
+                  paddingHorizontal: 0,
+                  flexDirection: 'row',
+                }}>
+                <TextComp
+                  textVal={fileName}
+                  textStyle={{
+                    width: '90%',
+                    fontSize: 14,
+                    color: Colors.mediumgrey,
+                  }}
+                  Visible={false}
+                />
+
+                <TouchableOpacity
+                  onPress={() => {
+                    showBottomSheet();
+                    setDeleteVisible(false);
+                  }}>
+                  <Entypo
+                    name="dots-three-vertical"
+                    size={25}
+                    color={Colors.darkblue}
+                  />
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+
+          <View
+            style={{
+              width: '100%',
+              marginTop: 19,
+              paddingHorizontal: 0,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+            <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+              <TextComp
+                textVal={language[0][props.language].str_gpslocation}
+                textStyle={Commonstyles.inputtextStyle}
+                Visible={true}
+              />
+            </View>
+
+            <View
+              style={{
+                width: '90%',
+                flexDirection: 'row',
+                marginTop: 3,
+                paddingHorizontal: 0,
+                borderBottomWidth: 1,
+                borderBottomColor: '#e2e2e2',
+              }}>
+              <TextInput
+                value={gpslatlon}
+                onChangeText={txt => setGPSLatLon(txt)}
+                placeholder={''}
+                editable={false}
+                placeholderTextColor={Colors.lightgrey}
+                secureTextEntry={false}
+                autoCapitalize="none"
+                style={Commonstyles.textinputtextStyle}
+              />
+
+              <TouchableOpacity
+                onPress={() => {
+                  getOneTimeLocation();
+                }}
+                activeOpacity={0.5}>
+                <FontAwesome6
+                  name="location-dot"
+                  size={23}
+                  color={Colors.darkblue}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={{width: '100%', alignItems: 'center', marginTop: '4%'}}>
+            <View
+              style={{
+                width: '90%',
+                marginTop: 3,
+                paddingHorizontal: 0,
+                borderBottomWidth: 1,
+                borderBottomColor: '#e2e2e2',
+              }}>
+              <MapView
+                style={{width: '100%', height: 200, marginTop: 15}}
+                ref={mapRef}
+                initialRegion={{
+                  latitude: currentLatitude,
+                  longitude: currentLongitude,
+                  latitudeDelta: 0.02,
+                  longitudeDelta: 0.02,
+                }}>
+                <Marker
+                  coordinate={{
+                    latitude: parseFloat(currentLatitude),
+                    longitude: parseFloat(currentLongitude),
+                  }}
+                  onDragEnd={e =>
+                    alert(JSON.stringify(e.nativeEvent.coordinate))
+                  }
+                  title={'Test Marker'}
+                  description={'This is a description of the marker'}
+                />
+              </MapView>
+            </View>
+          </View>
+        </View>
 
                 <View
                     style={{
@@ -926,44 +1025,41 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
     );
 };
 
-
 const styles = StyleSheet.create({
-    parentView: {
-        flex: 1,
-
-    },
-    scrollView: {
-        flex: 1,
-
-    },
-    contentContainer: {
-
-        paddingBottom: 50,
-        flexGrow: 1
-    }, line: {
-        backgroundColor: '#dbdbdb', // Change the color as needed
-        height: 1,
-        width: '90%',
-        marginTop: '5%'           // Adjust the height as needed
-    },
-    picker: {
-        height: 50,
-        width: '100%',
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        textAlign: 'center'
-    },
-    modal: {
-        justifyContent: 'flex-end',
-        margin: 0,
-    },
-    modalContent: {
-        backgroundColor: 'white',
-        padding: 16,
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-    },
+  parentView: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  contentContainer: {
+    paddingBottom: 50,
+    flexGrow: 1,
+  },
+  line: {
+    backgroundColor: '#dbdbdb', // Change the color as needed
+    height: 1,
+    width: '90%',
+    marginTop: '5%', // Adjust the height as needed
+  },
+  picker: {
+    height: 50,
+    width: '100%',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    textAlign: 'center',
+  },
+  modal: {
+    justifyContent: 'flex-end',
+    margin: 0,
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 16,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
 });
 
 

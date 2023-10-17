@@ -41,34 +41,6 @@ const SplashScreen = ({ navigation }) => {
           );
           tbl_SystemMandatoryFields.insertSystemMandatoryFields(
             '7711',
-            'TITLE',
-            '1',
-            'sp_title',
-            '',
-            '',
-            '0',
-            '0',
-            '',
-            '0',
-            '',
-            '',
-          );
-          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-            '7711',
-            'GENDER',
-            '1',
-            'sp_gender',
-            '',
-            '',
-            '0',
-            '0',
-            '',
-            '0',
-            '',
-            '',
-          );
-          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-            '7711',
             'FIRST NAME',
             '1',
             'et_firstname',
@@ -267,7 +239,7 @@ const SplashScreen = ({ navigation }) => {
             '7711',
             'ADDRESS LINE 1',
             '1',
-            'et_addressline1',
+            'sp_kycsource',
             '',
             '',
             '0',
@@ -789,6 +761,14 @@ const SplashScreen = ({ navigation }) => {
           '441',
           'Secured',
           '2',
+          '0',
+        );
+        tbl_SystemCodeDetails.insertSystemCodeDetails(
+          'LNTP',
+          '3',
+          '',
+          'NONE',
+          '3',
           '0',
         );
         tbl_SystemCodeDetails.insertSystemCodeDetails(

@@ -30,6 +30,12 @@ export default {
     fontSize: 15,
     fontWeight: '400',
     minHeight: 43,
+  },
+  HeaderStyle: {
+    width: '90%',
+    fontSize: 17,
+    fontWeight: '2000',
+    paddingHorizontal: 0,
     color: '#000000',
   },
   picker: {
@@ -39,6 +45,17 @@ export default {
     borderWidth: 1,
     borderColor: '#ccc',
     textAlign: 'center',
+  },
+  item: {
+    backgroundColor: '#EBECEB',
+    padding: 20,
+    marginVertical: 8,
+    marginHorizontal: 16,
+  },
+  title: {
+    fontSize: 32,
+    marginVertical: 8,
+    marginHorizontal: 16,
     color: '#000000',
   },
   buttonView: {

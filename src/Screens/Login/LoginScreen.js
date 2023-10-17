@@ -109,8 +109,8 @@ const LoginScreen = (props, { navigation }) => {
     }
 
     const updateSecureTextEntry = () => {
-        if (!secureTextEntry) {
-            setSecureTextEntry(true);
+        if (!secureTexsetSecureTextEntrytEntry) {
+            (true);
         } else {
             setSecureTextEntry(false);
         }
