@@ -17,8 +17,8 @@ const PickerComp = ({
     };
 
     return (
-        <View style={{ flexDirection: 'row' }}>
-            <View style={{ width: '95%' }}>
+        <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'center' }}>
+            <View style={{ width: '96%' }}>
 
                 <Picker
                     selectedValue={textLabel}

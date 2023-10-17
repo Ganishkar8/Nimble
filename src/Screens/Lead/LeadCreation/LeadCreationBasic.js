@@ -324,7 +324,7 @@ const LeadCreationBasic = (props, { navigation, route }) => {
                 global.leadNumber = response.data.leadNumber;
                 setLoading(false)
                 //alert(JSON.stringify(response.data))
-                insertLead(response.data)
+                insertLead(response.data, true)
 
             })
             .catch((error) => {
@@ -360,7 +360,7 @@ const LeadCreationBasic = (props, { navigation, route }) => {
                 global.leadNumber = response.data.leadNumber;
                 setLoading(false)
                 //alert(JSON.stringify(response.data))
-                insertLead(response.data)
+                insertLead(response.data, false)
 
             })
             .catch((error) => {
@@ -371,7 +371,7 @@ const LeadCreationBasic = (props, { navigation, route }) => {
             });
     }
 
-    const insertLead = async (leadData) => {
+    const insertLead = async (leadData, showToast) => {
         await tbl_lead_creation_lead_details.insertLeadCreationLeadDetails(leadData.id, leadData.leadNumber, leadData.branchId, leadData.isActive, leadData.createdBy, Common.getCurrentDateTime());
         await tbl_lead_creation_basic_details.insertLeadCreationBasicDetails(leadData.id, custCatgLabel, titleLabel, firstName, middleName, lastName, genderLabel, mobileNumber, global.USERID);
 
@@ -382,7 +382,7 @@ const LeadCreationBasic = (props, { navigation, route }) => {
         tbl_lead_creation_basic_details.getLeadCreationBasicDetailsBasedOnLeadID(leadData.id).then(value => {
             console.log("LeadBasicDetails::::" + JSON.stringify(value))
         })
-        props.navigation.navigate('LeadCreationBusiness', { leadData: [] })
+        props.navigation.navigate('LeadCreationBusiness', { leadData: [], showToast: showToast })
 
     }
 
@@ -535,6 +535,23 @@ const LeadCreationBasic = (props, { navigation, route }) => {
                 flag = true;
             }
         }
+
+        if (titleVisible && genderVisible) {
+            if (titleLabel === 236) {
+                if (genderLabel === 519) {
+                    errorMessage = errorMessage + i + ')' + ' ' + titleCaption + ' AND ' + genderCaption + ' Not matching' + '\n';
+                    i++;
+                    flag = true;
+                }
+            } else if (titleLabel === 237 || titleLabel === 238) {
+                if (genderLabel === 518) {
+                    errorMessage = errorMessage + i + ')' + ' ' + titleCaption + ' AND ' + genderCaption + ' Not matching' + '\n';
+                    i++;
+                    flag = true;
+                }
+            }
+        }
+
         setErrMsg(errorMessage);
         return flag;
     }
@@ -685,26 +702,22 @@ const LeadCreationBasic = (props, { navigation, route }) => {
         <SafeAreaView style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
 
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
+            <View style={{ width: '100%', height: 56, alignItems: 'center', justifyContent: 'center', }}>
 
+                <HeadComp textval={language[0][props.language].str_leadcreation} props={props} />
+
+            </View>
+            <View style={{ width: '100%', justifyContent: 'center', alignItems: 'flex-end' }}>
+                <Text style={{
+                    fontSize: 14, color: Colors.mediumgrey, marginRight: 23,
+                }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black }}>{global.leadNumber}</Text></Text>
+            </View>
             <ScrollView style={styles.scrollView}
                 contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                 {loading ? <Loading /> : null}
                 <View style={{ flex: 1 }}>
 
                     <ErrorMessageModal isVisible={bottomErrorSheetVisible} hideBottomSheet={hideBottomSheet} errMsg={errMsg} textError={language[0][props.language].str_error} textClose={language[0][props.language].str_ok} />
-
-
-                    <View style={{ width: '100%', height: 56, alignItems: 'center', justifyContent: 'center', }}>
-
-                        <HeadComp textval={language[0][props.language].str_leadcreation} props={props} />
-
-                    </View>
-
-                    <View style={{ width: '100%', justifyContent: 'center', alignItems: 'flex-end' }}>
-                        <Text style={{
-                            fontSize: 14, color: Colors.mediumgrey, marginRight: 23,
-                        }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black }}>{global.leadNumber}</Text></Text>
-                    </View>
 
                     <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
 
@@ -752,7 +765,7 @@ const LeadCreationBasic = (props, { navigation, route }) => {
                             <TextComp textVal={firstNameCaption} textStyle={Commonstyles.inputtextStyle} Visible={firstNameMan} />
                         </View>
 
-                        <TextInputComp textValue={firstName} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={firstNameDisable} ComponentName='firstName' reference={firstNameRef} returnKey="next" handleClick={handleClick} handleReference={handleReference} />
+                        <TextInputComp textValue={firstName} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={firstNameDisable} ComponentName='firstName' reference={firstNameRef} returnKey="next" handleClick={handleClick} handleReference={handleReference} length={30} />
 
 
 
@@ -775,7 +788,7 @@ const LeadCreationBasic = (props, { navigation, route }) => {
                         </View>
 
 
-                        <TextInputComp textValue={middleName} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={middleNameDisable} ComponentName='middleName' reference={middleNameRef} returnKey="next" handleClick={handleClick} handleReference={handleReference} />
+                        <TextInputComp textValue={middleName} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={middleNameDisable} ComponentName='middleName' reference={middleNameRef} returnKey="next" handleClick={handleClick} handleReference={handleReference} length={30} />
 
                     </View>}
 
@@ -785,7 +798,7 @@ const LeadCreationBasic = (props, { navigation, route }) => {
                             <TextComp textVal={lastNameCaption} textStyle={Commonstyles.inputtextStyle} Visible={lastNameMan} />
                         </View>
 
-                        <TextInputComp textValue={lastName} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={lastNameDisable} ComponentName='lastName' reference={lastNameRef} returnKey="next" handleClick={handleClick} handleReference={handleReference} />
+                        <TextInputComp textValue={lastName} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={lastNameDisable} ComponentName='lastName' reference={lastNameRef} returnKey="next" handleClick={handleClick} handleReference={handleReference} length={30} />
 
 
                     </View>}
@@ -809,7 +822,7 @@ const LeadCreationBasic = (props, { navigation, route }) => {
                         </View>
 
 
-                        <TextInputComp textValue={mobileNumber} textStyle={Commonstyles.textinputtextStyle} type='numeric' Disable={mobileNumberDisable} ComponentName='mobileNumber' reference={mobileNumberRef} returnKey="done" handleClick={handleClick} handleReference={handleReference} />
+                        <TextInputComp textValue={mobileNumber} textStyle={Commonstyles.textinputtextStyle} type='numeric' Disable={mobileNumberDisable} ComponentName='mobileNumber' reference={mobileNumberRef} returnKey="done" handleClick={handleClick} handleReference={handleReference} length={10} />
 
 
                     </View>}

@@ -13,6 +13,7 @@ const TextInputComp = ({
   returnKey,
   handleClick,
   handleReference,
+  length, multilines
 }) => {
   const setValue = txt => {
     handleClick(ComponentName, txt);
@@ -30,8 +31,10 @@ const TextInputComp = ({
         placeholderTextColor={Colors.lightgrey}
         secureTextEntry={false}
         keyboardType={type}
+        multiline={multilines ? true : false}
+        maxLength={length}
         autoCapitalize="characters"
-        style={[textStyle, { color: !Disable ? Colors.black : Colors.lightgrey }]}
+        style={[textStyle, { color: !Disable ? Colors.black : Colors.lightgrey, overflow: 'scroll' }]}
         ref={reference}
         returnKeyType={returnKey}
         onSubmitEditing={() => { handleReference(ComponentName) }}

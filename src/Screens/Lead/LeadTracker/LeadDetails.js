@@ -28,6 +28,7 @@ import apiInstance from '../../../Utils/apiInstance';
 import tbl_SystemCodeDetails from '../../../Database/Table/tbl_SystemCodeDetails';
 import Common from '../../../Utils/Common';
 import Commonstyles from '../../../Utils/Commonstyles';
+import { useIsFocused } from '@react-navigation/native';
 
 const data = [
 
@@ -74,10 +75,13 @@ const LeadDetails = (props, { navigation, route }) => {
     const [leadStatus, setLeadStatus] = useState(props.route.params.leadData.leadStatus);
     const [leadTrackerData, setLeadTrackerData] = useState(props.route.params.leadData);
     const [loanTypeData, setLoanTypeData] = useState([]);
+    const isScreenVisible = useIsFocused();
 
     useEffect(() => {
         //below code is used for hiding  bottom tab
+
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
+
         getLeadData();
 
         tbl_SystemCodeDetails.getSystemCodeDetailsBasedOnID('LeadStatus').then(value => {
@@ -95,7 +99,8 @@ const LeadDetails = (props, { navigation, route }) => {
 
         return () =>
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
-    }, [navigation]);
+
+    }, [navigation, isScreenVisible]);
 
     const hideAndShow = () => {
 
@@ -123,53 +128,53 @@ const LeadDetails = (props, { navigation, route }) => {
 
     const getLogDetails = (value) => {
         var logArray = [];
-        var approvalavailable = false; var draftavailable = 0; var insertApprovalIndex = 0; var insertDraftIndex = 0; var rejectavailable = false; var insertRejectIndex = 0
-        for (var i = 0; i < leadData.leadCreationLeadLogDtoList.length; i++) {
+        // var approvalavailable = false; var draftavailable = 0; var insertApprovalIndex = 0; var insertDraftIndex = 0; var rejectavailable = false; var insertRejectIndex = 0
+        // for (var i = 0; i < leadData.leadCreationLeadLogDtoList.length; i++) {
 
-            if (leadData.leadCreationLeadLogDtoList[i].leadStatus == '1669') {
-                draftavailable = true;
-                insertDraftIndex = i;
-                //logArray.push(leadData.leadCreationLeadLogDtoList[i]);
-            } else if (leadData.leadCreationLeadLogDtoList[i].leadStatus == '1667') {
-                approvalavailable = true;
-                insertApprovalIndex = i;
-                break;
+        //     if (leadData.leadCreationLeadLogDtoList[i].leadStatus == '1669') {
+        //         draftavailable = true;
+        //         insertDraftIndex = i;
+        //         //logArray.push(leadData.leadCreationLeadLogDtoList[i]);
+        //     } else if (leadData.leadCreationLeadLogDtoList[i].leadStatus == '1667') {
+        //         approvalavailable = true;
+        //         insertApprovalIndex = i;
+        //         break;
 
-            } else if (leadData.leadCreationLeadLogDtoList[i].leadStatus == '1668') {
-                rejectavailable = true;
-                insertRejectIndex = i;
-                break;
-            }
+        //     } else if (leadData.leadCreationLeadLogDtoList[i].leadStatus == '1668') {
+        //         rejectavailable = true;
+        //         insertRejectIndex = i;
+        //         break;
+        //     }
 
-        }
+        // }
 
-        var position = 0;
-        if (draftavailable) {
-            logArray.push(leadData.leadCreationLeadLogDtoList[insertDraftIndex]);
-        }
+        // var position = 0;
+        // if (draftavailable) {
+        //     logArray.push(leadData.leadCreationLeadLogDtoList[insertDraftIndex]);
+        // }
 
-        if (approvalavailable) {
-            logArray.push(leadData.leadCreationLeadLogDtoList[insertApprovalIndex]);
-            position = 1;
-        } else if (rejectavailable) {
-            logArray.push(leadData.leadCreationLeadLogDtoList[insertRejectIndex]);
-            position = 1;
-        } else {
-            logArray.push({
-                "createdBy": '',
-                "approvedOn": "",
-                "id": '',
-                "leadStatus": '1667',
-                "leadId": '',
-                "isActive": ''
-            })
-        }
+        // if (approvalavailable) {
+        //     logArray.push(leadData.leadCreationLeadLogDtoList[insertApprovalIndex]);
+        //     position = 1;
+        // } else if (rejectavailable) {
+        //     logArray.push(leadData.leadCreationLeadLogDtoList[insertRejectIndex]);
+        //     position = 1;
+        // } else {
+        //     logArray.push({
+        //         "createdBy": '',
+        //         "approvedOn": "",
+        //         "id": '',
+        //         "leadStatus": '1667',
+        //         "leadId": '',
+        //         "isActive": ''
+        //     })
+        // }
 
         //alert(JSON.stringify(logArray))
         if (value == 'LeadLog') {
-            props.navigation.navigate('LeadLog', { leadData: leadData, logDetail: logArray, position: position })
+            props.navigation.navigate('LeadLog', { leadData: leadData, logDetail: logArray })
         } else {
-            props.navigation.navigate('LeadApproval', { leadData: leadData, logDetail: logArray, position: position })
+            props.navigation.navigate('LeadApproval', { leadData: leadData, logDetail: logArray })
         }
 
 
@@ -318,13 +323,13 @@ const LeadDetails = (props, { navigation, route }) => {
                                         <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_ageing}</Text>
                                     </View>
                                     <View style={styles.rightText}>
-                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {leadTrackerData.ageing}</Text>
+                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {leadTrackerData.ageing} days</Text>
                                     </View>
                                 </View>
                             </View>
                             }
-                            <TouchableOpacity onPress={hideAndShow} activeOpacity={10} style={{ marginTop: 20, marginBottom: 9 }}>
-                                <View style={{ width: '100%' }}>
+                            <TouchableOpacity onPress={hideAndShow} activeOpacity={10} style={{ width: '100%', marginTop: 20, marginBottom: 10 }}>
+                                <View style={{ justifyContent: 'center', alignSelf: 'center' }}>
                                     {visible ? (
                                         <AntDesign name='up' size={12} color={Colors.black} />
                                     ) : <AntDesign name='down' size={12} color={Colors.black} />}

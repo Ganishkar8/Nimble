@@ -17,6 +17,7 @@ export const language = [
       str_errlogin: 'Please Enter Valid Details',
       str_leadcreation: 'Lead Creation',
       str_leadapproval: 'Lead Approval',
+      str_leadrejected: 'Lead Rejected',
       str_basicdetails: 'Basic Details',
       str_customercatg: 'CUSTOMER CATEGORY',
       str_firstname: 'FIRST NAME',

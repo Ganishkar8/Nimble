@@ -57,7 +57,7 @@ const statusDataArr = [
 const LeadLog = (props, { navigation }) => {
 
 
-    const [currentPosition, setCurrentPosition] = useState(props.route.params.position);
+    const [currentPosition, setCurrentPosition] = useState(0);
     const [loading, setLoading] = useState(false);
     const [visible, setVisible] = useState(false);
     const [leadData, setLeadData] = useState(props.route.params.leadData);
@@ -300,10 +300,10 @@ const LeadLog = (props, { navigation }) => {
 
                                         </View>
 
-                                        <View style={{ width: '85%' }}>
+                                        <View style={{ width: '80%' }}>
                                             <Text style={{
                                                 fontSize: 14, color: '#000', marginLeft: 10,
-                                            }}>{index == 0 ? language[0][props.language].str_leadcreation : index == 1 ? language[0][props.language].str_leadapproval : language[0][props.language].str_reassign}</Text>
+                                            }}>{index == 0 ? language[0][props.language].str_leadcreation : index == 1 ? leadData.leadCreationLeadLogDto.leadStatus == '1668' ? language[0][props.language].str_leadrejected : language[0][props.language].str_leadapproval : language[0][props.language].str_reassign}</Text>
                                             <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
                                                 <View style={{ width: '40%' }}>
                                                     <Text style={{ color: Colors.dimText, fontSize: 12, fontWeight: '400', marginLeft: 10 }}>{language[0][props.language].str_completiondate} :</Text>
