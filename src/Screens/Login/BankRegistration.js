@@ -408,7 +408,7 @@ const BankRegistration = (props, { navigation }) => {
                     <View style={{ width: '100%', flexDirection: 'row', }}>
 
                         <View style={{ width: '50%', }}>
-                            <ImageComp imageSrc={require('../../Images/loginbg.png')} imageStylee={{ width: 160, height: 160, resizeMode: 'contain' }} />
+                            <ImageComp imageSrc={require('../../Images/loginbg.png')} imageStylee={{ width: 160, height: 160, }} />
                         </View>
 
                         <View style={{ width: '47%', marginTop: 25, alignItems: 'flex-end', justifyContent: 'flex-start' }}>
@@ -439,7 +439,7 @@ const BankRegistration = (props, { navigation }) => {
                     <View style={{ width: '100%', marginTop: 30, paddingHorizontal: 16, alignItems: 'center' }}>
 
                         <TextComp textVal={language[0][props.language].str_appconfig} textStyle={[Commonstyles.boldtextStyle, { fontSize: 16 }]} />
-                        <TextComp textVal={language[0][props.language].str_enterinstid} textStyle={{ color: Colors.lightgrey, fontSize: 14, marginTop: 25 }} />
+                        <TextComp textVal={language[0][props.language].str_enterinstid} textStyle={{ color: Colors.darkblack, fontSize: 14, marginTop: 25 }} />
                     </View>
 
 
@@ -470,7 +470,7 @@ const BankRegistration = (props, { navigation }) => {
                         renderCell={renderCell}
                     />
 
-                    <TextComp textVal={language[0][props.language].str_enterchallengecode} textStyle={{ color: Colors.lightgrey, fontSize: 14, marginTop: 30 }} />
+                    <TextComp textVal={language[0][props.language].str_enterchallengecode} textStyle={{ color: Colors.darkblack, fontSize: 14, marginTop: 30 }} />
 
 
                     <CodeField

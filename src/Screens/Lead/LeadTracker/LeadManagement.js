@@ -51,10 +51,10 @@ import { it } from 'react-native-paper-dates';
 const LeadManagement = (props, { navigation, route }) => {
     const data = [
 
-        { name: 'Filter' },
-        { name: 'Sort by' },
-        { name: 'Pending' },
-        { name: "Today's Lead" }
+        { name: 'Filter', isSelected: false, id: 1 },
+        { name: 'Sort by', isSelected: false, id: 2 },
+        { name: 'Pending', isSelected: false, id: 3 },
+        { name: "Today's Lead", isSelected: false, id: 4 }
     ]
     const mainFilterDataArr = [
 
@@ -63,6 +63,7 @@ const LeadManagement = (props, { navigation, route }) => {
         { name: 'Date', isSelected: false, id: 'DT' },
         { name: 'Type', isSelected: false, id: 'TP' },
         { name: 'Ageing', isSelected: false, id: 'AG' }
+
     ]
 
     const [typeDataArr, setTypeDataArr] = useState([]);
@@ -71,6 +72,7 @@ const LeadManagement = (props, { navigation, route }) => {
     const [pendingData, setPendingData] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
     const [mainFilterData, setMainFilteredData] = useState(mainFilterDataArr);
+    const [upperData, setUpperData] = useState(data);
     const [loading, setLoading] = useState(false);
     const [visible, setVisible] = useState(false);
     const [filterVisible, setFilterVisible] = useState('');
@@ -108,6 +110,7 @@ const LeadManagement = (props, { navigation, route }) => {
             // showBottomSheet();
         }
         if (isScreenVisible) {
+            setSearch('')
             Common.getNetworkConnection().then(value => {
                 if (value.isConnected == true) {
                     getPendingData(null, null, null, null, null, null, null, null);
@@ -117,9 +120,8 @@ const LeadManagement = (props, { navigation, route }) => {
                 }
 
             })
-
             setMainFilteredData(mainFilterDataArr)
-
+            setUpperData(data)
         }
 
 
@@ -136,6 +138,7 @@ const LeadManagement = (props, { navigation, route }) => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         return () =>
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
+
     }, [navigation, isScreenVisible]);
 
 
@@ -207,6 +210,7 @@ const LeadManagement = (props, { navigation, route }) => {
         if (type == 'AG') {
             setAgeFilterValue(value)
         }
+
     }
 
     const applyFilter = () => {
@@ -267,6 +271,16 @@ const LeadManagement = (props, { navigation, route }) => {
             + " FromDate::" + from + " ToDate::" + to + " Type::" + type
             + " Age::" + age + " Operator::" + operator + " Agent Name::" + agentName)
         setVisible(false)
+        let fiterPosition = data;
+        for (let i = 0; i < fiterPosition.length; i++) {
+            if (i == 0) {
+                fiterPosition[i].isSelected = true
+            } else {
+                fiterPosition[i].isSelected = false
+            }
+        }
+        //alert(JSON.stringify(fiterPosition))
+        setUpperData(fiterPosition)
     }
 
     const toggleBottomNavigationView = () => {
@@ -392,9 +406,15 @@ const LeadManagement = (props, { navigation, route }) => {
         //alert(JSON.stringify(value))
         if (value.name == 'Filter') {
             setVisible(true)
-            callStatusApi();
-            callLeadTypeApi();
-            callAgentNameApi();
+            if (statusDataArr.length <= 0) {
+                callStatusApi();
+            } else if (typeDataArr.length <= 0) {
+                callLeadTypeApi();
+            } else {
+                if (agentData.length <= 0)
+                    callAgentNameApi();
+            }
+
         } else if (value.name == 'Pending') {
             getPendingData('1666', null, null, null, null, null, null, null);
         } else if (index == 3) {
@@ -408,6 +428,19 @@ const LeadManagement = (props, { navigation, route }) => {
         } else if (index == 1) {
             showSortModalSheet();
         }
+
+
+        let fiterPosition = data;
+        for (let i = 0; i < fiterPosition.length; i++) {
+            if (fiterPosition[i].id == value.id) {
+                fiterPosition[i].isSelected = true
+            } else {
+                fiterPosition[i].isSelected = false
+            }
+        }
+        //alert(JSON.stringify(fiterPosition))
+        setUpperData(fiterPosition)
+
     }
 
     const updateMainFilteredData = (item, index) => {
@@ -518,11 +551,11 @@ const LeadManagement = (props, { navigation, route }) => {
     const clearFilter = (value) => {
 
         setSortedFilterValue('');
-        var data = statusDataArr;
-        for (var i = 0; i < data.length; i++) {
-            data[i].checked = false
+        var data2 = statusDataArr;
+        for (var i = 0; i < data2.length; i++) {
+            data2[i].checked = false
         }
-        setStatusFilterValue(data);
+        setStatusFilterValue(data2);
         var data1 = typeDataArr;
         for (let i = 0; i < data1.length; i++) {
 
@@ -533,7 +566,12 @@ const LeadManagement = (props, { navigation, route }) => {
         setAgeFilterValue('')
         setVisible(false)
         getPendingData(null, null, null, null, null, null, null, null);
-
+        let fiterPosition = data;
+        for (let i = 0; i < fiterPosition.length; i++) {
+            fiterPosition[i].isSelected = false
+        }
+        //alert(JSON.stringify(fiterPosition))
+        setUpperData(fiterPosition)
 
     }
 
@@ -651,7 +689,7 @@ const LeadManagement = (props, { navigation, route }) => {
                                 <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_ageing}</Text>
                             </View>
                             <View style={{ width: '55%' }}>
-                                <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {item.ageing}</Text>
+                                <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {item.ageing} days</Text>
                             </View>
                         </View>
                         {global.USERTYPEID == '1163' && <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
@@ -748,43 +786,55 @@ const LeadManagement = (props, { navigation, route }) => {
 
                 <Modal
                     isVisible={sortModalVisible}
-                    onBackdropPress={hideSortModalSheet}
+                    onBackdropPress={() => {
+                        hideSortModalSheet()
+                        if (upperData[1].isSelected == true) {
+                            if (sortedFilterValue == '') {
+                                let fiterPosition = data;
+                                for (let i = 0; i < fiterPosition.length; i++) {
+                                    fiterPosition[i].isSelected = false
+                                }
+                                //alert(JSON.stringify(fiterPosition))
+                                setUpperData(fiterPosition)
+                            }
+                        }
+                    }}
                     style={styles.sortmodal}
                     backdropOpacity={0}
                 >
                     <View style={styles.sortmodalContent}>
 
-                        <SortByComp props={props} filterClick={filterClick} selectedValue={sortedFilterValue} from='top' reload={reload} />
+                        <SortByComp props={props} filterClick={filterClick} selectedValue={sortedFilterValue} from='top' />
 
                     </View>
                 </Modal>
 
                 <View style={{
-                    width: '100%', height: 56, alignItems: 'center', justifyContent: 'center',
+                    width: '100%', height: 56,
                     flexDirection: 'row'
                 }}>
-                    <TouchableOpacity onPress={() => props.navigation.navigate('HomeScreen')} style={{ width: '15%', height: 56, alignItems: 'center', justifyContent: 'center' }}>
+                    <TouchableOpacity onPress={() => props.navigation.navigate('HomeScreen')} style={{ height: 56, justifyContent: 'center', marginLeft: 5 }}>
                         <View >
 
                             <Entypo name='chevron-left' size={25} color='#4e4e4e' />
 
                         </View>
                     </TouchableOpacity>
-                    <View style={{ width: '85%', height: 56, justifyContent: 'center' }}>
+                    <View style={{ width: '90%', height: 56, justifyContent: 'center', marginLeft: 5 }}>
                         <Text style={{ fontSize: 18, color: '#000', fontWeight: '400' }}>{language[0][props.language].str_leadmanagement}</Text>
                     </View>
                 </View>
 
                 <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 7, }}>
                     <FlatList
-                        data={data}
+                        data={upperData}
                         horizontal={true}
                         showsHorizontalScrollIndicator={false}
                         keyExtractor={(item, index) => index.toString()}
                         renderItem={({ item, index }) => {
                             return (
                                 <TouchableOpacity onPress={() => handleclick(item, index)} activeOpacity={11}>
-                                    <View style={[styles.viewStyle, { flexDirection: 'row' }]}>
+                                    <View style={[styles.viewStyle, { flexDirection: 'row', borderColor: item.isSelected ? Colors.darkblue : Colors.line }]}>
                                         <Text style={[styles.textColor, { marginRight: 8, }]}>{item.name}</Text>
                                         {item.name === 'Filter' &&
                                             <Image source={require('../../../Images/filter.png')}
@@ -815,7 +865,7 @@ const LeadManagement = (props, { navigation, route }) => {
                 justifyContent: 'center', marginTop: 10, marginBottom: 8
             }}>
                 <View style={{
-                    width: '90%', backgroundColor: '#f2f2f2',
+                    width: '95%', backgroundColor: '#f2f2f2',
                     borderRadius: 7, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10
                 }}>
 
@@ -823,7 +873,7 @@ const LeadManagement = (props, { navigation, route }) => {
                         value={search}
                         onChangeText={search => {
                             if (search.length > 0) {
-                                if (Common.isValidText(search))
+                                if (Common.isValidAlphaText(search))
                                     searchFilterFunction(search)
                             } else {
                                 searchFilterFunction(search)
@@ -924,15 +974,15 @@ const LeadManagement = (props, { navigation, route }) => {
                             }
 
                             {filterVisible === 'ST' &&
-                                <StatusComp props={props} statusData={statusDataArr} filterClick={filterClick} reload={reload} />
+                                <StatusComp props={props} statusData={statusDataArr} filterClick={filterClick} />
                             }
 
                             {filterVisible === 'DT' &&
-                                <DateComp props={props} filterClick={filterClick} reload={reload} />
+                                <DateComp props={props} filterClick={filterClick} fromCompDate={dateFilterValue.FromDate} toCompDate={dateFilterValue.ToDate} />
                             }
 
                             {filterVisible === 'TP' &&
-                                <TypeComp props={props} typeData={typeDataArr} filterClick={filterClick} reload={reload} />
+                                <TypeComp props={props} typeData={typeDataArr} filterClick={filterClick} />
                             }
 
                             {filterVisible === 'AGN' &&
@@ -960,7 +1010,7 @@ const LeadManagement = (props, { navigation, route }) => {
                             }
 
                             {filterVisible === 'AG' &&
-                                <AgeingComp props={props} filterClick={filterClick} reload={reload} />
+                                <AgeingComp props={props} filterClick={filterClick} operatorid={ageFilterValue.Label} ageValue={ageFilterValue.AGE} />
                             }
 
                         </View>
@@ -1042,7 +1092,6 @@ const styles = StyleSheet.create({
     viewStyle: {
         alignItems: 'center',
         paddingHorizontal: 20, marginLeft: 9, marginRight: 4,
-        borderColor: '#e3e3e3',
         marginBottom: 4,
         marginStart: 12,
         paddingVertical: 7,

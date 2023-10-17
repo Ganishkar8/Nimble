@@ -10,9 +10,9 @@ const PreviewImage = (props, { navigation, route }) => {
 
     useEffect(() => {
 
-        getImageSize(imageUri);
+        getImageSize(props.route.params.imageUri);
 
-    }, [imageUri]);
+    }, []);
 
 
     const getImageSize = (uri) => {

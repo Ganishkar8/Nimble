@@ -316,8 +316,6 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
         hidephotoBottomSheet();
         ImagePicker.openCamera({
-            width: 300,
-            height: 400,
             cropping: true,
         }).then(image => {
             setImageFile(image)
@@ -491,6 +489,20 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
 
+
+
+            <View style={{
+                width: '100%', height: 56, alignItems: 'center', justifyContent: 'center',
+
+            }}>
+                <HeadComp textval={language[0][props.language].str_leadcreation} props={props} />
+            </View>
+
+            <View style={{ width: '100%', justifyContent: 'center', alignItems: 'flex-end' }}>
+                <Text style={{
+                    fontSize: 14, color: Colors.mediumgrey, marginRight: 23,
+                }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black }}>{global.leadNumber}</Text></Text>
+            </View>
             <ScrollView style={styles.scrollView}
                 contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                 {loading ? <Loading /> : null}
@@ -574,7 +586,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                                             <Image source={require('../../../Images/preview.png')}
                                                 style={{ width: 20, height: 20 }} />
                                         </View>
-                                        <View style={{ width: '85%', justifyContent: 'center' }}>
+                                        <View style={{ width: '85%', justifyContent: 'center', marginLeft: 3 }}>
                                             <TextComp textVal={language[0][props.language].str_preview} textStyle={{ fontSize: 14, color: Colors.mediumgrey }} Visible={false} />
                                         </View>
 
@@ -587,7 +599,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                                         <View style={{ width: '15%' }}>
                                             <MaterialIcons name='error' size={20} color={Colors.darkblue} />
                                         </View>
-                                        <View style={{ width: '85%', justifyContent: 'center' }}>
+                                        <View style={{ width: '85%', justifyContent: 'center', marginLeft: 3 }}>
                                             <TextComp textVal={language[0][props.language].str_details} textStyle={{ fontSize: 14, color: Colors.mediumgrey }} Visible={false} />
                                         </View>
 
@@ -597,7 +609,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
                                 {leadType != 'COMP' && <TouchableOpacity onPress={() => { setphotoOptionvisible(true); hideBottomSheet() }} activeOpacity={0.5} style={{ width: '100%', flexDirection: 'row', marginTop: 25 }}>
                                     <View style={{ flexDirection: 'row' }} >
-                                        <View style={{ width: '15%' }}>
+                                        <View style={{ width: '15%', marginLeft: 3 }}>
                                             <Image source={require('../../../Images/fileupload.png')}
                                                 style={{ width: 16, height: 20 }} />
                                         </View>
@@ -616,7 +628,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                                                 <MaterialCommunityIcons name='delete' size={25} color={Colors.darkblue} />
 
                                             </View>
-                                            <View style={{ width: '85%', justifyContent: 'center' }}>
+                                            <View style={{ width: '85%', justifyContent: 'center', marginLeft: 3 }}>
                                                 <TextComp textVal={language[0][props.language].str_delete} textStyle={{ fontSize: 14, color: Colors.mediumgrey }} Visible={false} />
                                             </View>
 
@@ -744,20 +756,6 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                     </Modal>
 
 
-
-
-                    <View style={{
-                        width: '100%', height: 56, alignItems: 'center', justifyContent: 'center',
-
-                    }}>
-                        <HeadComp textval={language[0][props.language].str_leadcreation} props={props} />
-                    </View>
-
-                    <View style={{ width: '100%', justifyContent: 'center', alignItems: 'flex-end' }}>
-                        <Text style={{
-                            fontSize: 14, color: Colors.mediumgrey, marginRight: 23,
-                        }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black }}>{global.leadNumber}</Text></Text>
-                    </View>
 
                     <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
 

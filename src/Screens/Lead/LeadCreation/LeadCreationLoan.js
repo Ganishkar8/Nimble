@@ -651,7 +651,12 @@ const LeadCreationLoan = (props, { navigation }) => {
     const handleClick = (componentName, textValue) => {
 
         if (componentName === 'loanAmount') {
-            setLoanAmount(textValue)
+            if (textValue.length > 0) {
+                if (Common.numberRegex.test(textValue))
+                    setLoanAmount(textValue)
+            } else {
+                setLoanAmount(textValue)
+            }
         }
 
     }
@@ -694,7 +699,18 @@ const LeadCreationLoan = (props, { navigation }) => {
         <SafeAreaView style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
 
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
+            <View style={{
+                width: '100%', height: 56, alignItems: 'center', justifyContent: 'center',
 
+            }}>
+                <HeadComp textval={language[0][props.language].str_leadcreation} props={props} />
+            </View>
+
+            <View style={{ width: '100%', justifyContent: 'center', alignItems: 'flex-end' }}>
+                <Text style={{
+                    fontSize: 14, color: Colors.mediumgrey, marginRight: 23,
+                }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black }}>{global.leadNumber}</Text></Text>
+            </View>
             <ScrollView style={styles.scrollView}
                 contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                 {loading ? <Loading /> : null}
@@ -781,18 +797,7 @@ const LeadCreationLoan = (props, { navigation }) => {
                         </View>
                     </Modal>
 
-                    <View style={{
-                        width: '100%', height: 56, alignItems: 'center', justifyContent: 'center',
 
-                    }}>
-                        <HeadComp textval={language[0][props.language].str_leadcreation} props={props} />
-                    </View>
-
-                    <View style={{ width: '100%', justifyContent: 'center', alignItems: 'flex-end' }}>
-                        <Text style={{
-                            fontSize: 14, color: Colors.mediumgrey, marginRight: 23,
-                        }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black }}>{global.leadNumber}</Text></Text>
-                    </View>
 
                     <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
 
@@ -857,7 +862,7 @@ const LeadCreationLoan = (props, { navigation }) => {
                             <TextComp textVal={loanAmountCaption} textStyle={Commonstyles.inputtextStyle} Visible={loanAmountMan} />
                         </View>
 
-                        <TextInputComp textValue={loanAmount} textStyle={Commonstyles.textinputtextStyle} type='numeric' Disable={loanAmountDisable} ComponentName='loanAmount' reference={loanAmountRef} returnKey="done" handleClick={handleClick} handleReference={handleReference} />
+                        <TextInputComp textValue={loanAmount} textStyle={Commonstyles.textinputtextStyle} type='numeric' Disable={loanAmountDisable} ComponentName='loanAmount' reference={loanAmountRef} returnKey="done" handleClick={handleClick} handleReference={handleReference} length={10} />
 
                     </View>}
 

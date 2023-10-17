@@ -54,12 +54,8 @@ const LeadApproval = (props, { navigation, route }) => {
         //pickerData();
         callPickerApi();
 
-        if (props.route.params.position == 1) {
-            setApproverComment(logData[1].approverComments);
-            setLeadStatusLabel(1667)
-        } else {
-            setLeadStatusLabel(1666)
-        }
+        setApproverComment(leadData.leadCreationLeadLogDto.approverComments);
+        setLeadStatusLabel(leadData.leadCreationLeadLogDto.leadStatus)
 
         if (global.USERTYPEID == '1164') {
             setStatusDisable(true);
@@ -67,7 +63,7 @@ const LeadApproval = (props, { navigation, route }) => {
         } else {
             setStatusDisable(false);
             setCommentDisable(false);
-            if (props.route.params.position == 1) {
+            if (leadData.leadCreationLeadLogDto.leadStatus == '1667' || leadData.leadCreationLeadLogDto.leadStatus == '1668') {
                 setStatusDisable(true);
                 setCommentDisable(true);
             }
@@ -248,7 +244,7 @@ const LeadApproval = (props, { navigation, route }) => {
                             <TextComp textVal={language[0][props.language].str_approvercomment} textStyle={Commonstyles.inputtextStyle} Visible={true} />
                         </View>
 
-                        <TextInputComp textValue={approverComment} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={commentDisable} ComponentName='approverComment' returnKey="done" handleClick={handleClick} handleReference={handleReference} />
+                        <TextInputComp textValue={approverComment} textStyle={[Commonstyles.textinputtextStyle, { maxHeight: 100 }]} type='email-address' Disable={commentDisable} ComponentName='approverComment' returnKey="done" handleClick={handleClick} handleReference={handleReference} length={30} multilines={true} />
 
 
 

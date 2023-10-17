@@ -46,9 +46,15 @@ import Common from '../../../Utils/Common';
 import tbl_lead_creation_business_details from '../../../Database/Table/tbl_lead_creation_business_details';
 import { profileAction } from '../../../Utils/redux/actions/ProfileAction';
 
+
 const LeadCreationBusiness = (props, { navigation }) => {
     const [profileDetail, setProfileDetail] = useState(props.profiledetail);
-
+    const [bottomLeadSheetVisible, setBottomLeadSheetVisible] = useState(false);
+    const showLeadBottomSheet = () => {
+        setBottomLeadSheetVisible(true)
+        setTimeout(() => hideLeadBottomSheet(), 5000);
+    };
+    const hideLeadBottomSheet = () => setBottomLeadSheetVisible(false);
     const [leadType, setLeadType] = useState(global.LEADTYPE);
     const [errMsg, setErrMsg] = useState('');
     const [loading, setLoading] = useState(false);
@@ -113,9 +119,14 @@ const LeadCreationBusiness = (props, { navigation }) => {
         makeSystemMandatoryFields();
         // pickerData();
         //callPickerApi();
+        if (props.route.params.showToast) {
+            showLeadBottomSheet();
+        }
         getData();
 
     }, []);
+
+
 
 
     const pickerData = async () => {
@@ -472,7 +483,18 @@ const LeadCreationBusiness = (props, { navigation }) => {
         <SafeAreaView style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
 
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
+            <View style={{
+                width: '100%', height: 56, alignItems: 'center', justifyContent: 'center',
 
+            }}>
+                <HeadComp textval={language[0][props.language].str_leadcreation} props={props} />
+            </View>
+
+            <View style={{ width: '100%', justifyContent: 'center', alignItems: 'flex-end' }}>
+                <Text style={{
+                    fontSize: 14, color: Colors.mediumgrey, marginRight: 23,
+                }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black }}>{global.leadNumber}</Text></Text>
+            </View>
             <ScrollView style={styles.scrollView}
                 contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                 {loading ? <Loading /> : null}
@@ -533,19 +555,26 @@ const LeadCreationBusiness = (props, { navigation }) => {
                         </View>
                     </Modal>
 
+                    <Modal
+                        isVisible={bottomLeadSheetVisible}
+                        onBackdropPress={hideBottomSheet}
+                        backdropOpacity={0}
+                        style={styles.leadmodal}
+                    >
+                        <View style={styles.leadmodalContent}>
+                            <View style={{ alignItems: 'center' }}>
 
-                    <View style={{
-                        width: '100%', height: 56, alignItems: 'center', justifyContent: 'center',
 
-                    }}>
-                        <HeadComp textval={language[0][props.language].str_leadcreation} props={props} />
-                    </View>
+                                <View style={{ width: '100%', height: 30 }}>
+                                    <TextComp textVal={`Lead ID: ${global.leadNumber} Created`} textStyle={{ fontSize: 14, color: Colors.white, lineHeight: 20 }} Visible={false} />
+                                </View>
 
-                    <View style={{ width: '100%', justifyContent: 'center', alignItems: 'flex-end' }}>
-                        <Text style={{
-                            fontSize: 14, color: Colors.mediumgrey, marginRight: 23,
-                        }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black }}>{global.leadNumber}</Text></Text>
-                    </View>
+
+                            </View>
+
+
+                        </View>
+                    </Modal>
 
                     <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
 
@@ -567,7 +596,7 @@ const LeadCreationBusiness = (props, { navigation }) => {
                             <TextComp textVal={businessNameCaption} textStyle={Commonstyles.inputtextStyle} Visible={businessNameMan} />
                         </View>
 
-                        <TextInputComp textValue={businessName} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={businessNameDisable} ComponentName='businessName' reference={businessNameRef} returnKey="next" handleClick={handleClick} handleReference={handleReference} />
+                        <TextInputComp textValue={businessName} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={businessNameDisable} ComponentName='businessName' reference={businessNameRef} returnKey="next" handleClick={handleClick} handleReference={handleReference} length={30} />
 
                     </View>}
 
@@ -589,14 +618,14 @@ const LeadCreationBusiness = (props, { navigation }) => {
                             <TextComp textVal={incomeTurnOverCaption} textStyle={Commonstyles.inputtextStyle} Visible={incomeTurnOverMan} />
                         </View>
 
-                        <TextInputComp textValue={incomeTurnOver} textStyle={Commonstyles.textinputtextStyle} type='numeric' Disable={incomeTurnOverDisable} ComponentName='incomeTurnOver' reference={incomeTurnOverRef} returnKey="next" handleClick={handleClick} handleReference={handleReference} />
+                        <TextInputComp textValue={incomeTurnOver} textStyle={Commonstyles.textinputtextStyle} type='numeric' Disable={incomeTurnOverDisable} ComponentName='incomeTurnOver' reference={incomeTurnOverRef} returnKey="next" handleClick={handleClick} handleReference={handleReference} length={10} />
 
                     </View>}
 
                     <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
 
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
-                            <TextComp textVal={language[0][props.language].str_businessvintage} textStyle={Commonstyles.inputtextStyle} Visible={true} />
+                            <TextComp textVal={language[0][props.language].str_businessvintage} textStyle={Commonstyles.inputtextStyle} Visible={false} />
                         </View>
 
                         <View style={{ width: '90%', flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -608,7 +637,7 @@ const LeadCreationBusiness = (props, { navigation }) => {
                                         <TextComp textVal={yearCaption} textStyle={Commonstyles.inputtextStyle} Visible={yearMan} />
                                     </View>
 
-                                    <TextInputComp textValue={year} textStyle={Commonstyles.textinputtextStyle} type='numeric' Disable={yearDisable} ComponentName='year' reference={yearRef} returnKey="next" handleClick={handleClick} handleReference={handleReference} />
+                                    <TextInputComp textValue={year} textStyle={Commonstyles.textinputtextStyle} type='numeric' Disable={yearDisable} ComponentName='year' reference={yearRef} returnKey="next" handleClick={handleClick} handleReference={handleReference} length={2} />
 
                                 </View>
                             </View>}
@@ -697,7 +726,15 @@ const styles = StyleSheet.create({
         padding: 16,
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
+    }, leadmodal: {
+        justifyContent: 'flex-end',
+        margin: 10,
     },
+    leadmodalContent: {
+        backgroundColor: '#362F2F',
+        padding: 16,
+        borderRadius: 10,
+    }
 });
 
 

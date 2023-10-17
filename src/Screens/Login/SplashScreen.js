@@ -19,7 +19,7 @@ import tbl_UserCodeDetails from '../../Database/Table/tbl_UserCodeDetails';
 import tbl_SystemCodeDetails from '../../Database/Table/tbl_SystemCodeDetails';
 import Bank_Detail_Table from '../../Database/Table/Bank_Detail_Table';
 
-const SplashScreen = ({navigation}) => {
+const SplashScreen = ({ navigation }) => {
   useEffect(() => {
     Sqlitedatabase.createTables().then(table => {
       tbl_SystemMandatoryFields
@@ -223,7 +223,7 @@ const SplashScreen = ({navigation}) => {
           );
           tbl_SystemMandatoryFields.insertSystemMandatoryFields(
             '7711',
-            'LOAN AMOUNT',
+            "LOAN AMOUNT (MULTIPLE OF 5000's)",
             '1',
             'et_loanamount',
             '',
@@ -487,259 +487,259 @@ const SplashScreen = ({navigation}) => {
             '',
             '',
           );
-            tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-              '7712',
-              'ADDRESS LINE 2',
-              '0',
-              'et_addressline2',
-              '',
-              '',
-              '0',
-              '0',
-              '',
-              '',
-              '',
-              '',
-            );
-            tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-              '7712',
-              'LANDMARK',
-              '0',
-              'et_landmark',
-              '',
-              '',
-              '0',
-              '0',
-              '',
-              '',
-              '',
-              '',
-            );
-            tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-              '7712',
-              'PINCODE',
-              '1',
-              'et_pincode',
-              '',
-              '',
-              '0',
-              '0',
-              '',
-              '',
-              '',
-              '',
-            );
-            tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-              '7712',
-              'CITY/VILLAGE',
-              '1',
-              'et_cityvillage',
-              '',
-              '',
-              '0',
-              '0',
-              '',
-              '',
-              '',
-              '',
-            );
-            tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-              '7712',
-              'DISTRICT',
-              '1',
-              'et_district',
-              '',
-              '',
-              '0',
-              '0',
-              '',
-              '',
-              '',
-              '',
-            );
-            tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-              '7712',
-              'STATE',
-              '1',
-              'et_state',
-              '',
-              '',
-              '0',
-              '0',
-              '',
-              '',
-              '',
-              '',
-            );
-            tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-              '7712',
-              'COUNTY',
-              '1',
-              'et_country',
-              'et_country',
-              '',
-              '',
-              '0',
-              '0',
-              '',
-              '',
-              '',
-              '',
-            );
-            tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-              '7712',
-              'MOBILE/LANDLINE NUMBER',
-              '1',
-              'et_mobilenumber',
-              '',
-              '',
-              '0',
-              '0',
-              '',
-              '',
-              '',
-              '',
-            );
-            tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-              '7712',
-              'EMAIL',
-              '1',
-              'et_email',
-              '',
-              '',
-              '0',
-              '0',
-              '',
-              '',
-              '',
-              '',
-            );
-            tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-              '7712',
-              'ADRESS OWNERSHIP TYPE',
-              '1',
-              'sp_addressownershiptype',
-              '',
-              '',
-              '0',
-              '0',
-              '',
-              '',
-              '',
-              '',
-            );
-            tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-              '7712',
-              'OWNER DETAILS',
-              '1',
-              'sp_ownerdetails',
-              '',
-              '',
-              '0',
-              '0',
-              '',
-              '',
-              '',
-              '',
-            );
-            tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-              '7712',
-              'OWNER NAME',
-              '0',
-              'et_ownername',
-              '',
-              '',
-              '0',
-              '0',
-              '',
-              '',
-              '',
-              '',
-            );
-            tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-              '7712',
-              'ACCOUNT TYPE',
-              '0',
-              'sp_accounttype',
-              '',
-              '',
-              '0',
-              '0',
-              '',
-              '',
-              '',
-              '',
-            );
-            tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-              '7712',
-              'ACCOUNT HOLDER NAME AS PER BANK',
-              '0',
-              'et_accountholdernameasbank',
-              '',
-              '',
-              '0',
-              '0',
-              '',
-              '',
-              '',
-              '',
-            );
-            tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-              '7712',
-              'IFSC CODE',
-              '0',
-              'et_ifsccode',
-              '',
-              '',
-              '0',
-              '0',
-              '',
-              '',
-              '',
-              '',
-            );
-            tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-              '7712',
-              'BANK NAME',
-              '0',
-              'et_bankname',
-              '',
-              '',
-              '0',
-              '0',
-              '',
-              '',
-              '',
-              '',
-            );
-            tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-              '7712',
-              'BRANCH NAME',
-              '0',
-              'st_branchname',
-              '',
-              '',
-              '0',
-              '0',
-              '',
-              '',
-              '',
-              '',
-            );
-            tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-              '7712',
-              'ACCOUNT NUMBER',
-              '0',
-              'et_accountnumber',
-              '',
-              '',
-              '0',
-              '0',
-              '',
-              '',
-              '',
-              '',
-            );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'ADDRESS LINE 2',
+            '0',
+            'et_addressline2',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'LANDMARK',
+            '0',
+            'et_landmark',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'PINCODE',
+            '1',
+            'et_pincode',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'CITY/VILLAGE',
+            '1',
+            'et_cityvillage',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'DISTRICT',
+            '1',
+            'et_district',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'STATE',
+            '1',
+            'et_state',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'COUNTY',
+            '1',
+            'et_country',
+            'et_country',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'MOBILE/LANDLINE NUMBER',
+            '1',
+            'et_mobilenumber',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'EMAIL',
+            '1',
+            'et_email',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'ADRESS OWNERSHIP TYPE',
+            '1',
+            'sp_addressownershiptype',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'OWNER DETAILS',
+            '1',
+            'sp_ownerdetails',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'OWNER NAME',
+            '0',
+            'et_ownername',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'ACCOUNT TYPE',
+            '0',
+            'sp_accounttype',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'ACCOUNT HOLDER NAME AS PER BANK',
+            '0',
+            'et_accountholdernameasbank',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'IFSC CODE',
+            '0',
+            'et_ifsccode',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'BANK NAME',
+            '0',
+            'et_bankname',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'BRANCH NAME',
+            '0',
+            'st_branchname',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'ACCOUNT NUMBER',
+            '0',
+            'et_accountnumber',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
         });
 
       tbl_SystemCodeDetails.deleteAllSystemCodeDetails().then(response => {
@@ -913,7 +913,7 @@ const SplashScreen = ({navigation}) => {
         );
       });
 
-      tbl_UserCodeDetails.deleteAllUserCodeDetails().then(response => {});
+      tbl_UserCodeDetails.deleteAllUserCodeDetails().then(response => { });
       setTimeout(() => {
         AsyncStorage.getItem('IsBankRegistered').then(value => {
           if (value == 'true') {
@@ -928,7 +928,7 @@ const SplashScreen = ({navigation}) => {
               });
             });
           } else {
-            navigation.replace('BankDetails');
+            navigation.replace('BankRegistration');
           }
         });
       }, 2000);
@@ -941,7 +941,7 @@ const SplashScreen = ({navigation}) => {
       <View style={styles.parentView}>
         <Image
           source={require('../../Images/logoanim.gif')}
-          style={{width: 175, height: 175}}
+          style={{ width: 175, height: 175 }}
         />
 
         {/* <Text style={{ color: Colors.darkblack, fontSize: 12, marginLeft: 34 }}>Business Loan</Text> */}

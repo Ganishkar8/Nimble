@@ -14,7 +14,7 @@ export default {
     fontWeight: 'bold',
   },
   inputtextStyle: {
-    color: Colors.mediumgrey,
+    color: Colors.darkblack,
     fontSize: 13,
     paddingHorizontal: 0,
     fontWeight: '400',
@@ -29,7 +29,7 @@ export default {
     width: '90%',
     fontSize: 15,
     fontWeight: '400',
-    height: 43,
+    minHeight: 43,
     color: '#000000',
   },
   picker: {

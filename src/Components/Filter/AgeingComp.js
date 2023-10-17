@@ -11,11 +11,11 @@ import Commonstyles from '../../Utils/Commonstyles';
 
 import { Picker } from '@react-native-picker/picker';
 
-const AgeingComp = ({ props, filterClick }) => {
+const AgeingComp = ({ props, filterClick, operatorid, ageValue }) => {
 
-    const [choosenLabel, setChoosenLabel] = React.useState('Native');
+    const [choosenLabel, setChoosenLabel] = React.useState(operatorid);
     const [choosenIndex, setChoosenIndex] = React.useState('2');
-    const [age, setAge] = React.useState('');
+    const [age, setAge] = React.useState(ageValue);
 
 
     const updateAgeData = (value, ind, val) => {

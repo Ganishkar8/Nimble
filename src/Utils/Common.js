@@ -20,6 +20,13 @@ const isValidText = (text) => {
   return textRegex.test(text);
 };
 
+const isValidAlphaText = (text) => {
+  // Regular expression to validate a mobile number with a country code
+  const textRegex = /^[a-zA-Z0-9]+$/;
+
+  return textRegex.test(text);
+};
+
 
 export async function getDeviceName() {
   var manufacturer = await getManufacturer();
@@ -113,7 +120,35 @@ export function formatTime(inputDate) {
   return `${hour12}:${minute} ${amPm}`;
 }
 
+export function convertDateFormat(inputDate) {
+  // Split the input date into year, month, and day
+  const parts = inputDate.split('-');
+
+  // Create a new date object using the year, month, and day
+  const date = new Date(parts[0], parts[1] - 1, parts[2]); // Month is zero-based
+
+  // Format the date in "dd-mm-yyyy" format
+  const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+
+  return formattedDate;
+}
+
+export function isDateGreaterThan(date1, date2) {
+  // Create Date objects from the date strings
+  const dateObj1 = new Date(date1);
+  const dateObj2 = new Date(date2);
+
+  // Compare the two Date objects
+  if (dateObj1 > dateObj2) {
+    return true; // date1 is greater than date2
+  } else if (dateObj1 < dateObj2) {
+    return false; // date1 is smaller than date2
+  } else {
+    return false; // The dates are equal
+  }
+}
+
 export default {
-  isValidPhoneNumber, isValidText,
+  isValidPhoneNumber, isValidText, convertDateFormat, isDateGreaterThan, isValidAlphaText,
   numberRegex, CS_URL, CS_URL1, integerPattern, formatDate, getCodeDescription, formatTime, hasOnlyOneKey, getCurrentDateTime, getNetworkConnection
 };

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import Colors from '../../Utils/Colors';
-
+import Common from '../../Utils/Common';
 import { connect } from 'react-redux';
 import { languageAction } from '../../Utils/redux/actions/languageAction';
 import { language } from '../../Utils/LanguageString';
@@ -9,7 +9,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Commonstyles from '../../Utils/Commonstyles';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-const DateComp = ({ props, filterClick, reload }) => {
+const DateComp = ({ props, filterClick, fromCompDate, toCompDate }) => {
 
     const currentDate = new Date();
 
@@ -32,10 +32,21 @@ const DateComp = ({ props, filterClick, reload }) => {
     const [isDisplayDateTo, setShowTo] = React.useState(false);
     React.useEffect(() => {
         //updateAgeData(formattedServerDatee, formattedServerDatee)
-        if (reload) {
-            updateAgeData('', '')
+        if (fromCompDate) {
+            setFromDate(Common.convertDateFormat(fromCompDate))
+            setFromServerDate(fromCompDate)
+            const parts = fromCompDate.split('-');
+            const date = new Date(parts[0], parts[1] - 1, parts[2]); // Month is zero-based
+            setDate(date)
         }
-    }, [reload]);
+        if (toCompDate) {
+            setToDate(Common.convertDateFormat(toCompDate))
+            setToServerDate(toCompDate)
+            const parts = toCompDate.split('-');
+            const date = new Date(parts[0], parts[1] - 1, parts[2]); // Month is zero-based
+            setTooDate(date)
+        }
+    }, [fromCompDate, toCompDate]);
     const displayDatepicker = (type) => {
         if (type == 1) {
             showMode('date');
@@ -52,46 +63,56 @@ const DateComp = ({ props, filterClick, reload }) => {
         setMode(currentMode);
     };
     const changeSelectedDate = (event, selectedDate) => {
-        const currentDate = selectedDate || mydate;
-        console.log("SelectedDate::" + currentDate)
-        const date = new Date(currentDate);
-        setDate(date)
-        setShow(false);
+        if (event.type == 'set') {
+            const currentDate = selectedDate;
+            console.log("SelectedDate::" + currentDate)
+            const date = new Date(currentDate);
+            setDate(date)
+            setShow(false);
 
-        // Get day, month, and year components from the Date object
-        const day = date.getDate().toString().padStart(2, '0');
-        const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Note: Months are 0-indexed, so we add 1.
-        const year = date.getFullYear();
+            // Get day, month, and year components from the Date object
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Note: Months are 0-indexed, so we add 1.
+            const year = date.getFullYear();
 
-        // Create the formatted date string
-        const formattedDate = `${day}-${month}-${year}`;
-        const formattedServerDate = `${year}-${month}-${day}`;
-        console.log("FormattedDate::" + formattedServerDate)
-        console.log("Event::" + JSON.stringify(event))
-        updateAgeData(formattedServerDate, toServerDate)
-        setFromDate(formattedDate);
+            // Create the formatted date string
+            const formattedDate = `${day}-${month}-${year}`;
+            const formattedServerDate = `${year}-${month}-${day}`;
+            setFromServerDate(formattedServerDate)
+            console.log("FormattedDate::" + formattedServerDate)
+            console.log("Event::" + JSON.stringify(event))
+            updateAgeData(formattedServerDate, toServerDate)
+            setFromDate(formattedDate);
+        }
 
     };
     const changeSelectedDateTo = (event, selectedDate) => {
-        const currentDate = selectedDate || mydate;
-        console.log("SelectedDate::" + currentDate)
-        const date = new Date(currentDate);
-        setTooDate(date);
-        setShowTo(false);
+        if (event.type == 'set') {
+            const currentDate = selectedDate;
+            console.log("SelectedDate::" + currentDate)
+            const date = new Date(currentDate);
+            setTooDate(date);
+            setShowTo(false);
 
-        // Get day, month, and year components from the Date object
-        const day = date.getDate().toString().padStart(2, '0');
-        const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Note: Months are 0-indexed, so we add 1.
-        const year = date.getFullYear();
+            // Get day, month, and year components from the Date object
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Note: Months are 0-indexed, so we add 1.
+            const year = date.getFullYear();
 
-        // Create the formatted date string
-        const formattedDate = `${day}-${month}-${year}`;
-        const formattedServerDate = `${year}-${month}-${day}`;
-        console.log("FormattedDate::" + formattedServerDate)
-        console.log("Event::" + JSON.stringify(event))
-        updateAgeData(fromServerDate, formattedServerDate)
-        setToDate(formattedDate);
-
+            // Create the formatted date string
+            const formattedDate = `${day}-${month}-${year}`;
+            const formattedServerDate = `${year}-${month}-${day}`;
+            setToServerDate(formattedServerDate)
+            console.log("FormattedDate::" + formattedServerDate)
+            console.log("Event::" + JSON.stringify(event))
+            updateAgeData(fromServerDate, formattedServerDate)
+            setToDate(formattedDate);
+            if (Common.isDateGreaterThan(fromServerDate, formattedServerDate)) {
+                setFromServerDate(formattedServerDate)
+                updateAgeData(formattedServerDate, formattedServerDate)
+                setFromDate(formattedDate);
+            }
+        }
     };
 
 
@@ -175,6 +196,7 @@ const DateComp = ({ props, filterClick, reload }) => {
                     mode={displaymode}
                     is24Hour={true}
                     display="default"
+                    maximumDate={mydateTo}
                     onChange={changeSelectedDate}
                 />
             )}
@@ -183,6 +205,7 @@ const DateComp = ({ props, filterClick, reload }) => {
                     testID="dateTimePicker"
                     value={mydateTo}
                     mode={displaymode}
+                    maximumDate={new Date()}
                     is24Hour={true}
                     display="default"
                     onChange={changeSelectedDateTo}
