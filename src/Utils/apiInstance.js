@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const apiInstance = (baseURL, authToken) => {
 
-    const baseURLFinal = 'http://nimbleservicebeta.brnetsaas.com:' + baseURL
+    const baseURLFinal = global.BASEURL + baseURL
     const instance = axios.create({
         baseURL: baseURLFinal,
         timeout: 500000, // Set your desired timeout
@@ -35,7 +35,7 @@ const apiInstance = (baseURL, authToken) => {
     // Response interceptor
     instance.interceptors.response.use(
         async (response) => {
-            console.log("ResponseData:", response.data);
+            console.log("ResponseData:", response);
 
             return response;
 

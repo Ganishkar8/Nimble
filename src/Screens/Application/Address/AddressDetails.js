@@ -1,10 +1,10 @@
-import {View, Text, ScrollView, SafeAreaView, StyleSheet} from 'react-native';
-import {React, useState, useRef, useEffect} from 'react';
+import { View, Text, ScrollView, SafeAreaView, StyleSheet } from 'react-native';
+import { React, useState, useRef, useEffect } from 'react';
 import MyStatusBar from '../../../Components/ MyStatusBar';
 import HeadComp from '../../../Components/HeadComp';
-import {connect} from 'react-redux';
-import {languageAction} from '../../../Utils/redux/actions/languageAction';
-import {language} from '../../../Utils/LanguageString';
+import { connect } from 'react-redux';
+import { languageAction } from '../../../Utils/redux/actions/languageAction';
+import { language } from '../../../Utils/LanguageString';
 import Commonstyles from '../../../Utils/Commonstyles';
 import Colors from '../../../Utils/Colors';
 import Loading from '../../../Components/Loading';
@@ -12,7 +12,7 @@ import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import SystemMandatoryField from '../../../Components/SystemMandatoryField';
 import ButtonViewComp from '../../../Components/ButtonViewComp';
 
-const AddressDetails = (props, {navigation}) => {
+const AddressDetails = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
   // const [Data, setNewData] = useState();
   const [DataArray, setNewDataArray] = useState([]);
@@ -26,13 +26,13 @@ const AddressDetails = (props, {navigation}) => {
   useEffect(() => {
     props.navigation
       .getParent()
-      ?.setOptions({tabBarStyle: {display: 'none'}, tabBarVisible: false});
+      ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     // pickerData();
 
     return () =>
       props.navigation
         .getParent()
-        ?.setOptions({tabBarStyle: undefined, tabBarVisible: undefined});
+        ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
   }, [navigation]);
 
   const updateDatainParent = (
@@ -156,7 +156,7 @@ const AddressDetails = (props, {navigation}) => {
           // Disable={false}
           isInput={1}
           updateDataInParent={updateDatainParent}
-          // updateDataErrorinParent={updateDataErrorinParent}
+        // updateDataErrorinParent={updateDataErrorinParent}
         />
         <SystemMandatoryField
           fielduiid="et_addressline2"
@@ -216,10 +216,62 @@ const AddressDetails = (props, {navigation}) => {
           isInput={1}
           updateDataInParent={updateDatainParent}
         />
+        <SystemMandatoryField
+          fielduiid="sp_geoclassification"
+          // textvalue="craftsilicon "
+          type="email-address"
+          // Disable={false}
+          isPicker={1}
+          updateDataInParent={updateDatainParent}
+        />
+        <SystemMandatoryField
+          fielduiid="et_yearsatresidence"
+          // textvalue="craftsilicon "
+          type="email-address"
+          // Disable={false}
+          isInput={1}
+          updateDataInParent={updateDatainParent}
+        />
+
+        <SystemMandatoryField
+          fielduiid="et_yearsincurrentcitytown"
+          // textvalue="craftsilicon "
+          type="email-address"
+          // Disable={false}
+          isInput={1}
+          updateDataInParent={updateDatainParent}
+        />
+
+        <SystemMandatoryField
+          fielduiid="sp_addressownershiptype"
+          // textvalue="craftsilicon "
+          type="email-address"
+          // Disable={false}
+          isPicker={1}
+          updateDataInParent={updateDatainParent}
+        />
+
+        <SystemMandatoryField
+          fielduiid="sp_ownerdetails"
+          // textvalue="craftsilicon "
+          type="email-address"
+          // Disable={false}
+          isPicker={1}
+          updateDataInParent={updateDatainParent}
+        />
+
+        <SystemMandatoryField
+          fielduiid="et_ownername"
+          // textvalue="craftsilicon "
+          type="email-address"
+          // Disable={false}
+          isInput={1}
+          updateDataInParent={updateDatainParent}
+        />
 
         <ButtonViewComp
           textValue={language[0][props.language].str_next.toUpperCase()}
-          textStyle={{color: Colors.white, fontSize: 13, fontWeight: 500}}
+          textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
           viewStyle={Commonstyles.buttonView}
           innerStyle={Commonstyles.buttonViewInnerStyle}
           handleClick={addressSubmit}
@@ -230,7 +282,7 @@ const AddressDetails = (props, {navigation}) => {
 };
 
 const mapStateToProps = state => {
-  const {language} = state.languageReducer;
+  const { language } = state.languageReducer;
   return {
     language: language,
   };

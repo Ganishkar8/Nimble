@@ -22,6 +22,7 @@ const SystemMandatoryField = props => {
   const FieldRef = useRef(null);
 
   const isPicker = props.isPicker || false;
+  const moduleID = props.moduleID || 7711;
 
   useEffect(() => {
     makeSystemMandatoryFields();
@@ -29,7 +30,7 @@ const SystemMandatoryField = props => {
   }, []);
 
   const pickerData = async () => {
-    if (isPicker == 1) {
+    if (isPicker) {
       tbl_SystemCodeDetails
         .getSystemCodeDetailsBasedOnID('ADDRESSTYPE')
         .then(value => {
@@ -50,7 +51,10 @@ const SystemMandatoryField = props => {
 
   const makeSystemMandatoryFields = async () => {
     tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID(props.fielduiid)
+      .getSystemMandatoryFieldsBasedOnFieldUIIDModuleID(
+        props.fielduiid,
+        moduleID,
+      )
       .then(value => {
         // console.log(value);
         if (value !== undefined && value.length > 0) {

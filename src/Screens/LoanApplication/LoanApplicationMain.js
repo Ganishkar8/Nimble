@@ -124,8 +124,11 @@ const LoanApplicationMain = (props, { navigation }) => {
     useEffect(() => {
 
         console.log('NesteSubdata::' + JSON.stringify(labels[0].nesteddata[0].nestedSubdata))
+        props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
+        return () =>
+            props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
+    }, [navigation]);
 
-    }, []);
 
     const updateLeadDetails = () => {
     }
@@ -303,7 +306,7 @@ const LoanApplicationMain = (props, { navigation }) => {
                     />
                 </View>
             </ScrollView>
-            <ButtonViewComp textValue={language[0][props.language].str_next.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} viewStyle={[Commonstyles.buttonView,{marginBottom:10}]} innerStyle={Commonstyles.buttonViewInnerStyle} handleClick={updateLeadDetails} />
+            <ButtonViewComp textValue={language[0][props.language].str_next.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} viewStyle={[Commonstyles.buttonView, { marginBottom: 10 }]} innerStyle={Commonstyles.buttonViewInnerStyle} handleClick={updateLeadDetails} />
         </View>
 
     );

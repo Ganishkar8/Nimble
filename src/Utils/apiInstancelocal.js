@@ -29,10 +29,10 @@ const apiInstancelocal = baseURL => {
   );
   // Interceptor for response
 
-  // Response interceptor
-  instance.interceptors.response.use(
-    async response => {
-      console.log('ResponseData:', response.data);
+    // Response interceptor
+    instance.interceptors.response.use(
+        async (response) => {
+            console.log("ResponseData:", response);
 
       return response;
 

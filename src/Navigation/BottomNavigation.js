@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Entypo from 'react-native-vector-icons/Entypo';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Colors from '../Utils/Colors';
 import HomeStack from './HomeStack';
@@ -11,6 +12,7 @@ import DashboardStack from './DashboardStack';
 import ProfileStack from './ProfileStack';
 import DashboardScreen from '../Screens/DashBoard/DashboardScreen';
 import { NavigationContainer } from '@react-navigation/native';
+import AddressDetails from '../Screens/Application/Address/AddressDetails';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -38,7 +40,7 @@ function BottomNavigation({ }) {
           tabBarIcon: ({ color }) => (
             <Entypo
               name={'home'}
-              size={23}
+              size={24}
               color={color}
             //style={[styles.buttonIcon, { color: Colors.textBlue }]}
             />
@@ -55,7 +57,7 @@ function BottomNavigation({ }) {
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons
               name={'view-dashboard'}
-              size={23}
+              size={24}
               color={color}
             // style={[styles.buttonIcon, { color: Colors.textBlue }]}
             />
@@ -70,9 +72,9 @@ function BottomNavigation({ }) {
           headerShown: false,
           tabBarLabel: 'Profile',
           tabBarIcon: ({ color }) => (
-            <FontAwesome5
-              name={'user-circle'}
-              size={23}
+            <FontAwesome
+              name={'user'}
+              size={24}
               color={color}
             // style={[styles.buttonIcon, { color: Colors.textBlue }]}
             />

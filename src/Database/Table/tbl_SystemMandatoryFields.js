@@ -100,6 +100,35 @@ const getSystemMandatoryFieldsBasedOnFieldUIID = fielduiid => {
   });
 };
 
+const getSystemMandatoryFieldsBasedOnFieldUIIDModuleID = (
+  fielduiid,
+  moduleID,
+) => {
+  const db = databaseInstance.getInstance();
+
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        `SELECT * FROM ${tableName} WHERE FieldUIID = ? AND moduleID = ?`,
+        [fielduiid, moduleID],
+        (_, result) => {
+          const rows = result.rows;
+          const systemMandatoryFields = [];
+
+          for (let i = 0; i < rows.length; i++) {
+            systemMandatoryFields.push(rows.item(i));
+          }
+
+          resolve(systemMandatoryFields);
+        },
+        error => {
+          reject(error);
+        },
+      );
+    });
+  });
+};
+
 const deleteAllSystemMandatoryFields = async () => {
   try {
     const db = databaseInstance.getInstance(); // Execute the DELETE query
@@ -119,4 +148,5 @@ export default {
   insertSystemMandatoryFields,
   deleteAllSystemMandatoryFields,
   getSystemMandatoryFieldsBasedOnFieldUIID,
+  getSystemMandatoryFieldsBasedOnFieldUIIDModuleID,
 };

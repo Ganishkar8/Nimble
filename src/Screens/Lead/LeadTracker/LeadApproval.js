@@ -29,7 +29,8 @@ import apiInstancelocal from '../../../Utils/apiInstancelocal';
 
 
 
-const LeadApproval = (props, { navigation }) => {
+
+const LeadApproval = (props, { navigation, route }) => {
 
     const [errMsg, setErrMsg] = useState('');
     const [currentPosition, setCurrentPosition] = useState(0);
@@ -42,14 +43,31 @@ const LeadApproval = (props, { navigation }) => {
     const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
     const showBottomSheet = () => setBottomErrorSheetVisible(true);
     const hideBottomSheet = () => setBottomErrorSheetVisible(false);
-
-
+    const [leadData, setLeadData] = useState(props.route.params.leadData);
+    const [statusDisable, setStatusDisable] = useState(false);
+    const [commentDisable, setCommentDisable] = useState(false);
+    const [logData, setLogData] = useState(props.route.params.logDetail);
 
     useEffect(() => {
         //below code is used for hiding  bottom tab
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         //pickerData();
         callPickerApi();
+
+        setApproverComment(leadData.leadCreationLeadLogDto.approverComments);
+        setLeadStatusLabel(leadData.leadCreationLeadLogDto.leadStatus)
+
+        if (global.USERTYPEID == '1164') {
+            setStatusDisable(true);
+            setCommentDisable(true);
+        } else {
+            setStatusDisable(false);
+            setCommentDisable(false);
+            if (leadData.leadCreationLeadLogDto.leadStatus == '1667' || leadData.leadCreationLeadLogDto.leadStatus == '1668') {
+                setStatusDisable(true);
+                setCommentDisable(true);
+            }
+        }
         return () =>
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
     }, [navigation]);
@@ -124,7 +142,16 @@ const LeadApproval = (props, { navigation }) => {
             .then(async (response) => {
 
                 setLoading(false);
-                setLeadStatusData(response.data)
+                var data = [];
+                for (var i = 0; i < response.data.length; i++) {
+                    if (response.data[i].id == 1667) {
+                        data.push(response.data[i])
+                    } else if (response.data[i].id == 1668) {
+                        data.push(response.data[i])
+                    }
+                }
+                setLeadStatusData(data)
+
             })
             .catch((error) => {
                 if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
@@ -136,6 +163,13 @@ const LeadApproval = (props, { navigation }) => {
     }
 
     const leadApproval = () => {
+
+        if (global.USERTYPEID == '1164') {
+            return;
+        } else if (statusDisable) {
+            return;
+        }
+
         if (validate()) {
             showBottomSheet();
             return;
@@ -144,21 +178,22 @@ const LeadApproval = (props, { navigation }) => {
         const appDetails = {
             "status": leadStatusLabel,
             "comments": approverComment,
-            "userName": global.USERID
+            "userId": global.USERID
         }
         const baseURL = '8901'
         setLoading(true)
-        apiInstancelocal(baseURL).post(`/api/v1/lead-Approved/ByBm/${global.leadID}`, appDetails)
+        // alert(props.route.params.leadData.id)
+        apiInstancelocal(baseURL).post(`/api/v1/lead-Approved/ByBm/${props.route.params.leadData.id}`, appDetails)
             .then(async (response) => {
                 // Handle the response data
                 setLoading(false)
-
+                props.navigation.navigate('LeadManagement', { fromScreen: 'LeadApproval' })
 
             })
             .catch((error) => {
                 // Handle the error
                 setLoading(false)
-                alert(error);
+                alert(JSON.stringify(error.response));
             });
     }
 
@@ -186,8 +221,8 @@ const LeadApproval = (props, { navigation }) => {
 
                     <View style={{ width: '100%', height: 50, justifyContent: 'center' }}>
                         <Text style={{
-                            fontSize: 16, color: Colors.lightgrey, marginLeft: 23,
-                        }}>{language[0][props.language].str_leadid} <Text style={{ color: Colors.black }}>: LX127</Text></Text>
+                            fontSize: 16, color: Colors.mediumgrey, marginLeft: 23,
+                        }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black }}>{leadData.leadNumber}</Text></Text>
                     </View>
 
 
@@ -198,7 +233,7 @@ const LeadApproval = (props, { navigation }) => {
 
                         </View>
 
-                        <PickerComp textLabel={leadStatusLabel} pickerStyle={Commonstyles.picker} Disable={false} pickerdata={leadStatusData} componentName='leadStatusPicker' handlePickerClick={handlePickerClick} />
+                        <PickerComp textLabel={leadStatusLabel} pickerStyle={Commonstyles.picker} Disable={statusDisable} pickerdata={leadStatusData} componentName='leadStatusPicker' handlePickerClick={handlePickerClick} />
 
 
                     </View>
@@ -209,7 +244,7 @@ const LeadApproval = (props, { navigation }) => {
                             <TextComp textVal={language[0][props.language].str_approvercomment} textStyle={Commonstyles.inputtextStyle} Visible={true} />
                         </View>
 
-                        <TextInputComp textValue={approverComment} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={false} ComponentName='approverComment' returnKey="done" handleClick={handleClick} handleReference={handleReference} />
+                        <TextInputComp textValue={approverComment} textStyle={[Commonstyles.textinputtextStyle, { maxHeight: 100 }]} type='email-address' Disable={commentDisable} ComponentName='approverComment' returnKey="done" handleClick={handleClick} handleReference={handleReference} length={30} multilines={true} />
 
 
 
@@ -217,7 +252,7 @@ const LeadApproval = (props, { navigation }) => {
 
                 </View>
 
-                <ButtonViewComp textValue={language[0][props.language].str_submit.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} viewStyle={Commonstyles.buttonView} innerStyle={Commonstyles.buttonViewInnerStyle} handleClick={leadApproval} />
+                <ButtonViewComp textValue={language[0][props.language].str_submit.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} viewStyle={Commonstyles.buttonView} innerStyle={global.USERTYPEID == '1164' ? Commonstyles.disableBg : statusDisable ? Commonstyles.disableBg : Commonstyles.buttonViewInnerStyle} handleClick={leadApproval} />
 
 
             </ScrollView>

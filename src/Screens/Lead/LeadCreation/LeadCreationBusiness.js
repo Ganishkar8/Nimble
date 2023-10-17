@@ -41,8 +41,21 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Modal from 'react-native-modal';
 import apiInstancelocal from '../../../Utils/apiInstancelocal';
 import PickerComp from '../../../Components/PickerComp';
+import TextInputComp from '../../../Components/TextInputComp';
+import Common from '../../../Utils/Common';
+import tbl_lead_creation_business_details from '../../../Database/Table/tbl_lead_creation_business_details';
+import { profileAction } from '../../../Utils/redux/actions/ProfileAction';
+
 
 const LeadCreationBusiness = (props, { navigation }) => {
+    const [profileDetail, setProfileDetail] = useState(props.profiledetail);
+    const [bottomLeadSheetVisible, setBottomLeadSheetVisible] = useState(false);
+    const showLeadBottomSheet = () => {
+        setBottomLeadSheetVisible(true)
+        setTimeout(() => hideLeadBottomSheet(), 5000);
+    };
+    const hideLeadBottomSheet = () => setBottomLeadSheetVisible(false);
+    const [leadType, setLeadType] = useState(global.LEADTYPE);
     const [errMsg, setErrMsg] = useState('');
     const [loading, setLoading] = useState(false);
     const [checked, setChecked] = React.useState('first');
@@ -68,6 +81,8 @@ const LeadCreationBusiness = (props, { navigation }) => {
     const [yearVisible, setYearVisible] = useState(true);
     const [yearDisable, setYearDisable] = useState(false);
     const [months, setMonths] = useState('');
+    const [monthLabel, setMonthLabel] = useState('');
+    const [monthIndex, setMonthIndex] = useState('');
     const [monthsCaption, setMonthsCaption] = useState('MONTHS');
     const [monthsMan, setMonthsMan] = useState(false);
     const [monthsVisible, setMonthsVisible] = useState(true);
@@ -82,13 +97,36 @@ const LeadCreationBusiness = (props, { navigation }) => {
     const yearRef = useRef(null);
     const monthsRef = useRef(null);
 
+    const monthArray = [
+        { id: 0, label: '0' },
+        { id: 1, label: '1' },
+        { id: 2, label: '2' },
+        { id: 3, label: '3' },
+        { id: 4, label: '4' },
+        { id: 5, label: '5' },
+        { id: 6, label: '6' },
+        { id: 7, label: '7' },
+        { id: 8, label: '8' },
+        { id: 9, label: '9' },
+        { id: 10, label: '10' },
+        { id: 11, label: '11' },
+    ]
+
+    const [monthData, setMonthData] = useState(monthArray);
+
     useEffect(() => {
 
         makeSystemMandatoryFields();
         // pickerData();
-        callPickerApi();
+        //callPickerApi();
+        if (props.route.params.showToast) {
+            showLeadBottomSheet();
+        }
+        getData();
 
     }, []);
+
+
 
 
     const pickerData = async () => {
@@ -214,43 +252,104 @@ const LeadCreationBusiness = (props, { navigation }) => {
 
     const updateLeadDetails = () => {
 
-        if (validate()) {
+        if (global.LEADTYPE == 'COMP') {
+            props.navigation.navigate('LeadCreationLoan', { leadData: props.route.params.leadData })
+        } else if (validate()) {
             showBottomSheet();
         }
         else {
 
-            const appDetails = {
-                "leadCreationBusinessDetails": {
-                    "createdBy": global.USERID,
-                    "createdOn": '',
-                    "businessName": businessName,
-                    "industryType": industryTypeLabel,
-                    "incomeBusinessTurnover": 5000,
-                    "businessVintageYear": 2,
-                    "businessVintageMonth": 5
+            Common.getNetworkConnection().then(value => {
+                if (value.isConnected == true) {
+                    callLeadApi();
+                } else {
+                    insertLead(global.leadID, true)
                 }
-            }
-            const baseURL = '8901'
-            setLoading(true)
-            apiInstancelocal(baseURL).put(`/api/v1/lead-creation-initiation/${global.leadID}`, appDetails)
-                .then(async (response) => {
-                    // Handle the response data
-                    console.log("LeadCreationBusinessApiResponse::" + JSON.stringify(response.data));
-                    setLoading(false)
-                    props.navigation.navigate('LeadCreationLoan')
+            })
 
-                })
-                .catch((error) => {
-                    // Handle the error
-                    console.log("Error" + JSON.stringify(error.response))
-                    setLoading(false)
-                    alert(error);
-                    props.navigation.navigate('LeadCreationLoan')
-                });
+
 
 
         }
 
+
+    }
+
+    const callLeadApi = () => {
+        insertLead(global.leadID, false)
+        const appDetails = {
+            "leadCreationBusinessDetails": {
+                "createdBy": global.USERID,
+                "createdOn": '',
+                "businessName": businessName,
+                "industryTypeId": industryTypeLabel,
+                "incomeBusinessTurnover": incomeTurnOver,
+                "businessVintageYear": year,
+                "businessVintageMonth": monthLabel
+            }
+        }
+        const baseURL = '8901'
+        setLoading(true)
+        apiInstancelocal(baseURL).put(`/api/v1/lead-creation-initiation/${global.leadID}`, appDetails)
+            .then(async (response) => {
+                // Handle the response data
+                console.log("LeadCreationBusinessApiResponse::" + JSON.stringify(response.data));
+                setLoading(false)
+                props.navigation.navigate('LeadCreationLoan', { leadData: [] })
+
+            })
+            .catch((error) => {
+                // Handle the error
+                console.log("Error" + JSON.stringify(error.response))
+                setLoading(false)
+                alert(error);
+            });
+    }
+
+    const getData = () => {
+
+        if (leadType == 'DRAFT') {
+            setLoading(true);
+            tbl_lead_creation_business_details.getLeadCreationBusinessDetailsBasedOnLeadID(global.leadID).then(value => {
+                if (value !== undefined && value.length > 0) {
+                    setIndustryTypeLabel(parseInt(value[0].industry_type_id));
+                    setBusinessName(value[0].business_name);
+                    setIncomeTurnOver(value[0].income_business_turnover);
+                    setYear(value[0].business_vintage_year);
+                    setMonthLabel(parseInt(value[0].business_vintage_month));
+                    callPickerApi();
+                } else {
+                    callPickerApi();
+                }
+            })
+        } else if (leadType == 'NEW') {
+            callPickerApi();
+        } else if (leadType == 'COMP') {
+            const data = props.route.params.leadData;
+            setIndustryTypeLabel(parseInt(data.leadCreationBusinessDetails.industryTypeId));
+            setBusinessName(data.leadCreationBusinessDetails.businessName);
+            setIncomeTurnOver(data.leadCreationBusinessDetails.incomeBusinessTurnover.toString());
+            setYear(data.leadCreationBusinessDetails.businessVintageYear.toString());
+            setMonthLabel(parseInt(data.leadCreationBusinessDetails.businessVintageMonth));
+            setIndustryTypeDisable(true)
+            setBusinessNameDisable(true)
+            setIncomeTurnOverDisable(true);
+            setYearDisable(true)
+            setMonthsDisable(true)
+            callPickerApi();
+        }
+
+    }
+
+    const insertLead = async (leadID, nav) => {
+        await tbl_lead_creation_business_details.insertLeadCreationBusinessDetails(leadID, industryTypeLabel, businessName, year, monthLabel, incomeTurnOver, global.USERID);
+
+        tbl_lead_creation_business_details.getLeadCreationBusinessDetailsBasedOnLeadID(leadID).then(value => {
+            console.log("LeadBusinessDetails::::" + JSON.stringify(value))
+        })
+        if (nav == true) {
+            props.navigation.navigate('LeadCreationLoan', { leadData: [] })
+        }
 
     }
 
@@ -289,8 +388,8 @@ const LeadCreationBusiness = (props, { navigation }) => {
         }
 
         if (monthsMan && monthsVisible) {
-            if (months.length <= 0) {
-                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + monthsCaption + '\n';
+            if (monthLabel === 'Select') {
+                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + monthsCaption + '\n';
                 i++;
                 flag = true;
             }
@@ -325,9 +424,58 @@ const LeadCreationBusiness = (props, { navigation }) => {
         if (componentName === 'industryPicker') {
             setIndustryTypeLabel(label);
             setIndustryTypeIndex(index);
+        } else if (componentName === 'monthPicker') {
+            setMonthLabel(label);
+            setMonthIndex(index);
         }
 
     }
+
+    const handleClick = (componentName, textValue) => {
+
+        if (componentName === 'businessName') {
+            if (textValue.length > 0) {
+                if (Common.isValidText(textValue))
+                    setBusinessName(textValue)
+            } else {
+                setBusinessName(textValue)
+            }
+        } else if (componentName === 'incomeTurnOver') {
+            if (textValue.length > 0) {
+                if (Common.numberRegex.test(textValue))
+                    setIncomeTurnOver(textValue)
+            } else {
+                setIncomeTurnOver(textValue)
+            }
+        } else if (componentName === 'year') {
+            if (textValue.length > 0) {
+                if (Common.numberRegex.test(textValue) && textValue <= 99 && textValue > 0)
+                    setYear(textValue)
+            } else {
+                setYear(textValue)
+            }
+        } else if (componentName === 'month') {
+            if (textValue.length > 0) {
+                if (Common.numberRegex.test(textValue))
+                    setMonths(textValue)
+            } else {
+                setMonths(textValue)
+            }
+        }
+
+    }
+
+    const handleReference = (componentName) => {
+
+        if (componentName === 'businessName') {
+            incomeTurnOverRef.current.focus();
+        } else if (componentName === 'incomeTurnOver') {
+            yearRef.current.focus();
+        } else if (componentName === 'year') {
+            // monthsRef.current.focus();
+        }
+
+    };
 
 
     return (
@@ -335,7 +483,18 @@ const LeadCreationBusiness = (props, { navigation }) => {
         <SafeAreaView style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
 
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
+            <View style={{
+                width: '100%', height: 56, alignItems: 'center', justifyContent: 'center',
 
+            }}>
+                <HeadComp textval={language[0][props.language].str_leadcreation} props={props} />
+            </View>
+
+            <View style={{ width: '100%', justifyContent: 'center', alignItems: 'flex-end' }}>
+                <Text style={{
+                    fontSize: 14, color: Colors.mediumgrey, marginRight: 23,
+                }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black }}>{global.leadNumber}</Text></Text>
+            </View>
             <ScrollView style={styles.scrollView}
                 contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                 {loading ? <Loading /> : null}
@@ -396,13 +555,26 @@ const LeadCreationBusiness = (props, { navigation }) => {
                         </View>
                     </Modal>
 
+                    <Modal
+                        isVisible={bottomLeadSheetVisible}
+                        onBackdropPress={hideBottomSheet}
+                        backdropOpacity={0}
+                        style={styles.leadmodal}
+                    >
+                        <View style={styles.leadmodalContent}>
+                            <View style={{ alignItems: 'center' }}>
 
-                    <View style={{
-                        width: '100%', height: 56, alignItems: 'center', justifyContent: 'center',
 
-                    }}>
-                        <HeadComp textval={language[0][props.language].str_leadcreation} props={props} />
-                    </View>
+                                <View style={{ width: '100%', height: 30 }}>
+                                    <TextComp textVal={`Lead ID: ${global.leadNumber} Created`} textStyle={{ fontSize: 14, color: Colors.white, lineHeight: 20 }} Visible={false} />
+                                </View>
+
+
+                            </View>
+
+
+                        </View>
+                    </Modal>
 
                     <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
 
@@ -417,29 +589,14 @@ const LeadCreationBusiness = (props, { navigation }) => {
 
                     </View>
 
+
                     {businessNameVisible && <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
 
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
                             <TextComp textVal={businessNameCaption} textStyle={Commonstyles.inputtextStyle} Visible={businessNameMan} />
                         </View>
 
-                        <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: '#e2e2e2' }}>
-
-                            <TextInput
-                                value={businessName}
-                                onChangeText={txt => setBusinessName(txt)}
-                                placeholder={''}
-                                editable={!businessNameDisable}
-                                placeholderTextColor={Colors.lightgrey}
-                                secureTextEntry={false}
-                                autoCapitalize="characters"
-                                style={Commonstyles.textinputtextStyle}
-                                ref={businessNameRef}
-                                returnKeyType="next"
-                                onSubmitEditing={() => { incomeTurnOverRef.current.focus(); }}
-                            />
-
-                        </View>
+                        <TextInputComp textValue={businessName} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={businessNameDisable} ComponentName='businessName' reference={businessNameRef} returnKey="next" handleClick={handleClick} handleReference={handleReference} length={30} />
 
                     </View>}
 
@@ -455,84 +612,45 @@ const LeadCreationBusiness = (props, { navigation }) => {
 
                     </View>}
 
-
                     {incomeTurnOverVisible && <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
 
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
-                            <TextComp textVal={incomeTurnOverCaption} Visible={incomeTurnOverMan} textStyle={Commonstyles.inputtextStyle} />
+                            <TextComp textVal={incomeTurnOverCaption} textStyle={Commonstyles.inputtextStyle} Visible={incomeTurnOverMan} />
                         </View>
 
-                        <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: '#e2e2e2' }}>
-
-                            <TextInput
-                                value={incomeTurnOver}
-                                onChangeText={txt => setIncomeTurnOver(txt)}
-                                placeholder={''}
-                                placeholderTextColor={Colors.lightgrey}
-                                secureTextEntry={false}
-                                editable={!incomeTurnOverDisable}
-                                autoCapitalize="characters"
-                                keyboardType="numeric"
-                                style={Commonstyles.textinputtextStyle}
-                                ref={incomeTurnOverRef}
-                                returnKeyType="next"
-                                onSubmitEditing={() => { yearRef.current.focus(); }}
-                            />
-
-                        </View>
+                        <TextInputComp textValue={incomeTurnOver} textStyle={Commonstyles.textinputtextStyle} type='numeric' Disable={incomeTurnOverDisable} ComponentName='incomeTurnOver' reference={incomeTurnOverRef} returnKey="next" handleClick={handleClick} handleReference={handleReference} length={10} />
 
                     </View>}
 
                     <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
 
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
-                            <TextComp textVal={language[0][props.language].str_businessvintage} textStyle={Commonstyles.inputtextStyle} Visible={true} />
+                            <TextComp textVal={language[0][props.language].str_businessvintage} textStyle={Commonstyles.inputtextStyle} Visible={false} />
                         </View>
 
                         <View style={{ width: '90%', flexDirection: 'row', justifyContent: 'space-between' }}>
 
-                            {yearVisible && <View style={{ width: '48%', marginTop: 20 }}>
+                            {yearVisible && <View style={{ width: '48%' }}>
+                                <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
 
-                                <TextComp textVal={yearCaption} textStyle={Commonstyles.inputtextStyle} Visible={yearMan} />
-                                <View style={{ width: '100%', marginTop: 3, paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: '#e2e2e2' }}>
+                                    <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
+                                        <TextComp textVal={yearCaption} textStyle={Commonstyles.inputtextStyle} Visible={yearMan} />
+                                    </View>
 
-                                    <TextInput
-                                        value={year}
-                                        onChangeText={txt => setYear(txt)}
-                                        placeholder={''}
-                                        placeholderTextColor={Colors.lightgrey}
-                                        secureTextEntry={false}
-                                        editable={!yearDisable}
-                                        keyboardType="numeric"
-                                        autoCapitalize="characters"
-                                        style={Commonstyles.textinputtextStyle}
-                                        ref={yearRef}
-                                        returnKeyType="next"
-                                        onSubmitEditing={() => { monthsRef.current.focus(); }}
-                                    />
+                                    <TextInputComp textValue={year} textStyle={Commonstyles.textinputtextStyle} type='numeric' Disable={yearDisable} ComponentName='year' reference={yearRef} returnKey="next" handleClick={handleClick} handleReference={handleReference} length={2} />
 
                                 </View>
                             </View>}
 
 
-                            {monthsVisible && <View style={{ width: '48%', marginTop: 20 }}>
+                            {monthsVisible && <View style={{ width: '48%' }}>
+                                <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
 
-                                <TextComp textVal={monthsCaption} textStyle={Commonstyles.inputtextStyle} Visible={monthsMan} />
-                                <View style={{ width: '100%', marginTop: 3, paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: '#e2e2e2' }}>
+                                    <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
+                                        <TextComp textVal={monthsCaption} textStyle={Commonstyles.inputtextStyle} Visible={monthsMan} />
+                                    </View>
 
-                                    <TextInput
-                                        value={months}
-                                        onChangeText={txt => setMonths(txt)}
-                                        placeholder={''}
-                                        keyboardType="numeric"
-                                        placeholderTextColor={Colors.lightgrey}
-                                        secureTextEntry={false}
-                                        editable={!monthsDisable}
-                                        autoCapitalize="characters"
-                                        style={Commonstyles.textinputtextStyle}
-                                        ref={monthsRef}
-                                        returnKeyType="done"
-                                    />
+                                    <PickerComp textLabel={monthLabel} pickerStyle={Commonstyles.picker} Disable={monthsDisable} pickerdata={monthData} componentName='monthPicker' handlePickerClick={handlePickerClick} />
 
                                 </View>
                             </View>}
@@ -608,19 +726,30 @@ const styles = StyleSheet.create({
         padding: 16,
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
+    }, leadmodal: {
+        justifyContent: 'flex-end',
+        margin: 10,
     },
+    leadmodalContent: {
+        backgroundColor: '#362F2F',
+        padding: 16,
+        borderRadius: 10,
+    }
 });
 
 
 const mapStateToProps = (state) => {
     const { language } = state.languageReducer;
+    const { profileDetails } = state.profileReducer;
     return {
-        language: language
+        language: language,
+        profiledetail: profileDetails,
     }
 }
 
 const mapDispatchToProps = (dispatch) => ({
     languageAction: (item) => dispatch(languageAction(item)),
+    profileAction: (item) => dispatch(profileAction(item)),
 });
 
 

@@ -1,4 +1,6 @@
-import React, {useEffect} from 'react';
+/* eslint-disable prettier/prettier */
+/* prettier-ignore */
+import React, { useEffect } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -17,7 +19,7 @@ import tbl_UserCodeDetails from '../../Database/Table/tbl_UserCodeDetails';
 import tbl_SystemCodeDetails from '../../Database/Table/tbl_SystemCodeDetails';
 import Bank_Detail_Table from '../../Database/Table/Bank_Detail_Table';
 
-const SplashScreen = ({navigation}) => {
+const SplashScreen = ({ navigation }) => {
   useEffect(() => {
     Sqlitedatabase.createTables().then(table => {
       tbl_SystemMandatoryFields
@@ -193,7 +195,7 @@ const SplashScreen = ({navigation}) => {
           );
           tbl_SystemMandatoryFields.insertSystemMandatoryFields(
             '7711',
-            'LOAN AMOUNT',
+            "LOAN AMOUNT (MULTIPLE OF 5000's)",
             '1',
             'et_loanamount',
             '',
@@ -221,9 +223,9 @@ const SplashScreen = ({navigation}) => {
           );
           tbl_SystemMandatoryFields.insertSystemMandatoryFields(
             '7711',
-            'PRODUCT TYPE',
+            'ADDRESSTYPE',
             '1',
-            'sp_producttype',
+            'sp_addresstype',
             '',
             '',
             '0',
@@ -235,245 +237,7 @@ const SplashScreen = ({navigation}) => {
           );
           tbl_SystemMandatoryFields.insertSystemMandatoryFields(
             '7711',
-            'CUSTOMER SUBCATEGORY',
-            '1',
-            'sp_customersubcategory',
-            '',
-            '',
-            '0',
-            '0',
-            '',
-            '',
-            '',
-            '',
-          );
-          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-            '7711',
-            'CUSTOMER SUBCATEGORY',
-            '1',
-            'sp_customersubcategory',
-            '',
-            '',
-            '0',
-            '0',
-            '',
-            '',
-            '',
-            '',
-          );
-          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-            '7711',
-            'MARITAL STATUS',
-            '1',
-            'sp_maritalstatus',
-            '',
-            '',
-            '0',
-            '0',
-            '',
-            '',
-            '',
-            '',
-          );
-          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-            '7711',
-            'KYC TYPE1',
-            '1',
-            'sp_kyctype1',
-            '',
-            '',
-            '0',
-            '0',
-            '',
-            '',
-            '',
-            '',
-          );
-          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-            '7711',
-            'KYC TYPE2',
-            '1',
-            'sp_kyctype2',
-            '',
-            '',
-            '0',
-            '0',
-            '',
-            '',
-            '',
-            '',
-          );
-          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-            '7711',
-            'KYC ID1',
-            '1',
-            'et_kycID1',
-            '',
-            '',
-            '0',
-            '0',
-            '',
-            '',
-            '',
-            '',
-          );
-          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-            '7711',
-            'KYC ID2',
-            '1',
-            'et_kycID2',
-            '',
-            '',
-            '0',
-            '0',
-            '',
-            '',
-            '',
-            '',
-          );
-          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-            '7711',
-            'NAME',
-            '1',
-            'sp_name',
-            '',
-            '',
-            '0',
-            '0',
-            '',
-            '',
-            '',
-            '',
-          );
-          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-            '7711',
-            'EMAIL',
-            '0',
-            'sp_email',
-            '',
-            '',
-            '0',
-            '0',
-            '',
-            '',
-            '',
-            '',
-          );
-          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-            '7711',
-            'UDYAM REGISTRATION NUMBER',
-            '1',
-            'sp_urnumber',
-            '',
-            '',
-            '0',
-            '0',
-            '',
-            '',
-            '',
-            '',
-          );
-          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-            '7711',
-            'Is MSME?',
-            '1',
-            'sp_ismsme',
-            '',
-            '',
-            '0',
-            '0',
-            '',
-            '',
-            '',
-            '',
-          );
-          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-            '7711',
-            'CLIENT ID',
-            '1',
-            'sp_clientid',
-            '',
-            '',
-            '0',
-            '0',
-            '',
-            '',
-            '',
-            '',
-          );
-          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-            '7711',
-            'BRANCH ID',
-            '1',
-            'sp_branchid',
-            '',
-            '',
-            '0',
-            '0',
-            '',
-            '',
-            '',
-            '',
-          );
-          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-            '7711',
-            'KYC TYPE',
-            '1',
-            'sp_kyctype',
-            '',
-            '',
-            '0',
-            '0',
-            '',
-            '',
-            '',
-            '',
-          );
-          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-            '7711',
-            'KYC ID',
-            '1',
-            'sp_kycid',
-            '',
-            '',
-            '0',
-            '0',
-            '',
-            '',
-            '',
-            '',
-          );
-          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-            '7711',
-            'CUSTOMER NAME',
-            '1',
-            'sp_customername',
-            '',
-            '',
-            '0',
-            '0',
-            '',
-            '',
-            '',
-            '',
-          );
-          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-            '7711',
-            'LOAN APPLICATION ID',
-            '1',
-            'sp_loanapplicationid',
-            '',
-            '',
-            '0',
-            '0',
-            '',
-            '',
-            '',
-            '',
-          );
-          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
-            '7711',
-            'KYC SOURCE',
+            'ADDRESS LINE 1',
             '1',
             'sp_kycsource',
             '',
@@ -487,9 +251,23 @@ const SplashScreen = ({navigation}) => {
           );
           tbl_SystemMandatoryFields.insertSystemMandatoryFields(
             '7711',
-            'TITLE',
+            'ADDRESS LINE 2',
+            '0',
+            'et_addressline2',
+            '',
+            '',
+            '0',
+            '0',
+            '',
             '1',
-            'sp_title',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7711',
+            'LANDMARK',
+            '0',
+            'et_landmark',
             '',
             '',
             '0',
@@ -501,9 +279,9 @@ const SplashScreen = ({navigation}) => {
           );
           tbl_SystemMandatoryFields.insertSystemMandatoryFields(
             '7711',
-            'GENDER',
+            'PINCODE',
             '1',
-            'sp_gender',
+            'et_pincode',
             '',
             '',
             '0',
@@ -515,9 +293,9 @@ const SplashScreen = ({navigation}) => {
           );
           tbl_SystemMandatoryFields.insertSystemMandatoryFields(
             '7711',
-            'DATE OF BIRTH',
+            'CITY/VILLAGE',
             '1',
-            'sp_dob',
+            'et_cityvillage',
             '',
             '',
             '0',
@@ -529,9 +307,9 @@ const SplashScreen = ({navigation}) => {
           );
           tbl_SystemMandatoryFields.insertSystemMandatoryFields(
             '7711',
-            'AGE',
+            'DISTRICT',
             '1',
-            'sp_age',
+            'et_district',
             '',
             '',
             '0',
@@ -543,9 +321,9 @@ const SplashScreen = ({navigation}) => {
           );
           tbl_SystemMandatoryFields.insertSystemMandatoryFields(
             '7711',
-            'FATHER NAME',
+            'STATE',
             '1',
-            'sp_fathername',
+            'et_state',
             '',
             '',
             '0',
@@ -557,9 +335,9 @@ const SplashScreen = ({navigation}) => {
           );
           tbl_SystemMandatoryFields.insertSystemMandatoryFields(
             '7711',
-            'HUSBAND NAME',
+            'COUNTRY',
             '1',
-            'sp_husbandname',
+            'et_country',
             '',
             '',
             '0',
@@ -571,9 +349,9 @@ const SplashScreen = ({navigation}) => {
           );
           tbl_SystemMandatoryFields.insertSystemMandatoryFields(
             '7711',
-            'CASTE',
+            'GEO CLASSIFICATION',
             '1',
-            'sp_caste',
+            'sp_geoclassification',
             '',
             '',
             '0',
@@ -585,9 +363,9 @@ const SplashScreen = ({navigation}) => {
           );
           tbl_SystemMandatoryFields.insertSystemMandatoryFields(
             '7711',
-            'RELIGION',
+            'YEARS AT RESIDENCE',
             '1',
-            'sp_reilgion',
+            'et_yearsatresidence',
             '',
             '',
             '0',
@@ -599,9 +377,9 @@ const SplashScreen = ({navigation}) => {
           );
           tbl_SystemMandatoryFields.insertSystemMandatoryFields(
             '7711',
-            'MOTHER TONGUE',
+            'YEARS IN CURRENT CITY/TOWN',
             '1',
-            'sp_mothertongue',
+            'et_yearsincurrentcitytown',
             '',
             '',
             '0',
@@ -613,9 +391,318 @@ const SplashScreen = ({navigation}) => {
           );
           tbl_SystemMandatoryFields.insertSystemMandatoryFields(
             '7711',
-            'EDUCATION QUALIFICATION',
+            'ADDRESS OWNERSHIP TYPE',
             '1',
-            'sp_educationqualification',
+            'sp_addressownershiptype',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7711',
+            'OWNER DETAILS',
+            '1',
+            'sp_ownerdetails',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7711',
+            'OWNER NAME',
+            '0',
+            'et_ownername',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'ADDRESS TYPE',
+            '1',
+            'sp_addresstype',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'ADDRESS LINE 1',
+            '1',
+            'et_addressline1',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'ADDRESS LINE 2',
+            '0',
+            'et_addressline2',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'LANDMARK',
+            '0',
+            'et_landmark',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'PINCODE',
+            '1',
+            'et_pincode',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'CITY/VILLAGE',
+            '1',
+            'et_cityvillage',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'DISTRICT',
+            '1',
+            'et_district',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'STATE',
+            '1',
+            'et_state',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'COUNTY',
+            '1',
+            'et_country',
+            'et_country',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'MOBILE/LANDLINE NUMBER',
+            '1',
+            'et_mobilenumber',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'EMAIL',
+            '1',
+            'et_email',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'ADRESS OWNERSHIP TYPE',
+            '1',
+            'sp_addressownershiptype',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'OWNER DETAILS',
+            '1',
+            'sp_ownerdetails',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'OWNER NAME',
+            '0',
+            'et_ownername',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'ACCOUNT TYPE',
+            '0',
+            'sp_accounttype',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'ACCOUNT HOLDER NAME AS PER BANK',
+            '0',
+            'et_accountholdernameasbank',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'IFSC CODE',
+            '0',
+            'et_ifsccode',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'BANK NAME',
+            '0',
+            'et_bankname',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'BRANCH NAME',
+            '0',
+            'st_branchname',
+            '',
+            '',
+            '0',
+            '0',
+            '',
+            '',
+            '',
+            '',
+          );
+          tbl_SystemMandatoryFields.insertSystemMandatoryFields(
+            '7712',
+            'ACCOUNT NUMBER',
+            '0',
+            'et_accountnumber',
             '',
             '',
             '0',
@@ -663,7 +750,7 @@ const SplashScreen = ({navigation}) => {
         tbl_SystemCodeDetails.insertSystemCodeDetails(
           'LNTP',
           '1',
-          'UNSEC',
+          '440',
           'UnSecured',
           '1',
           '0',
@@ -671,7 +758,7 @@ const SplashScreen = ({navigation}) => {
         tbl_SystemCodeDetails.insertSystemCodeDetails(
           'LNTP',
           '2',
-          'SEC',
+          '441',
           'Secured',
           '2',
           '0',
@@ -727,17 +814,33 @@ const SplashScreen = ({navigation}) => {
         tbl_SystemCodeDetails.insertSystemCodeDetails(
           'LeadStatus',
           '1',
-          'APPROVE',
-          'Approve',
+          '1666',
+          'Pending',
           '1',
           '0',
         );
         tbl_SystemCodeDetails.insertSystemCodeDetails(
           'LeadStatus',
           '2',
-          'REJECT',
-          'Reject',
+          '1667',
+          'Approved',
           '2',
+          '0',
+        );
+        tbl_SystemCodeDetails.insertSystemCodeDetails(
+          'LeadStatus',
+          '3',
+          '1668',
+          'Rejected',
+          '3',
+          '0',
+        );
+        tbl_SystemCodeDetails.insertSystemCodeDetails(
+          'LeadStatus',
+          '4',
+          '1669',
+          'Draft',
+          '4',
           '0',
         );
         tbl_SystemCodeDetails.insertSystemCodeDetails(
@@ -757,162 +860,57 @@ const SplashScreen = ({navigation}) => {
           '0',
         );
         tbl_SystemCodeDetails.insertSystemCodeDetails(
-          'ProductType',
+          'UserType',
           '1',
-          'BR',
-          'BRNET',
+          '1164',
+          'BM',
           '1',
           '0',
         );
         tbl_SystemCodeDetails.insertSystemCodeDetails(
-          'ProductType',
+          'UserType',
           '2',
-          'GL',
-          'GLOW',
-          '2',
-          '0',
-        );
-        tbl_SystemCodeDetails.insertSystemCodeDetails(
-          'ProductType',
-          '3',
-          '',
-          'NONE',
-          '3',
-          '0',
-        );
-        tbl_SystemCodeDetails.insertSystemCodeDetails(
-          'CustomerSubCategory',
-          '1',
-          'PPS',
-          'Proprietorship',
-          '1',
-          '0',
-        );
-        tbl_SystemCodeDetails.insertSystemCodeDetails(
-          'MaritalStatus',
-          '1',
-          'M',
-          'Married',
-          '1',
-          '0',
-        );
-        tbl_SystemCodeDetails.insertSystemCodeDetails(
-          'MaritalStatus',
-          '2',
-          'S',
-          'Single',
+          '1163',
+          'FA',
           '2',
           '0',
         );
         tbl_SystemCodeDetails.insertSystemCodeDetails(
-          'KycType1',
+          'ADDRESSTYPE',
           '1',
-          'A',
-          'Aadhar',
-          '1',
-          '0',
-        );
-        tbl_SystemCodeDetails.insertSystemCodeDetails(
-          'KycType1',
-          '2',
           'P',
-          'Pan',
-          '2',
-          '0',
-        );
-        tbl_SystemCodeDetails.insertSystemCodeDetails(
-          'KycType2',
-          '1',
-          'A',
-          'Aadhar',
+          'Permanent Address',
           '1',
           '0',
         );
         tbl_SystemCodeDetails.insertSystemCodeDetails(
-          'KycType2',
+          'ADDRESSTYPE',
           '2',
-          'P',
-          'Pan',
+          'C',
+          'Communication Address',
           '2',
-          '0',
-        );
-        tbl_SystemCodeDetails.insertSystemCodeDetails(
-          'KycType',
-          '1',
-          'A',
-          'Aadhar',
-          '1',
-          '0',
-        );
-        tbl_SystemCodeDetails.insertSystemCodeDetails(
-          'KycType',
-          '2',
-          'P',
-          'Pan',
-          '2',
-          '0',
-        );
-        tbl_SystemCodeDetails.insertSystemCodeDetails(
-          'KycSource',
-          '1',
-          'A',
-          'Aadhar',
-          '1',
-          '0',
-        );
-        tbl_SystemCodeDetails.insertSystemCodeDetails(
-          'KycSource',
-          '2',
-          'P',
-          'Pan',
-          '2',
-          '0',
-        );
-        tbl_SystemCodeDetails.insertSystemCodeDetails(
-          'Title',
-          '1',
-          'Mr',
-          'MR',
-          '1',
-          '0',
-        );
-        tbl_SystemCodeDetails.insertSystemCodeDetails(
-          'Title',
-          '2',
-          'Ms',
-          'MS',
-          '2',
-          '0',
-        );
-        tbl_SystemCodeDetails.insertSystemCodeDetails(
-          'Gender',
-          '1',
-          'M',
-          'Male',
-          '1',
-          '0',
-        );
-        tbl_SystemCodeDetails.insertSystemCodeDetails(
-          'Gender',
-          '2',
-          'F',
-          'Female',
-          '2',
-          '0',
-        );
-        tbl_SystemCodeDetails.insertSystemCodeDetails(
-          'Gender',
-          '3',
-          'TG',
-          'TransGender',
-          '3',
           '0',
         );
       });
 
-      tbl_UserCodeDetails.deleteAllUserCodeDetails().then(response => {});
+      tbl_UserCodeDetails.deleteAllUserCodeDetails().then(response => { });
       setTimeout(() => {
-        navigation.replace('LoanDemographicsFinancialDetails');
+        AsyncStorage.getItem('IsBankRegistered').then(value => {
+          if (value == 'true') {
+            Bank_Detail_Table.getAllBankDetails().then(value => {
+              global.BASEURL = value[0].BankURL;
+              AsyncStorage.getItem('IsLogin').then(value => {
+                if (value == 'true') {
+                  navigation.replace('BottomNavigation');
+                } else {
+                  navigation.replace('LoginScreen');
+                }
+              });
+            });
+          } else {
+            navigation.replace('BankRegistration');
+          }
+        });
       }, 2000);
     });
   }, []);
@@ -923,7 +921,7 @@ const SplashScreen = ({navigation}) => {
       <View style={styles.parentView}>
         <Image
           source={require('../../Images/logoanim.gif')}
-          style={{width: 175, height: 175}}
+          style={{ width: 175, height: 175 }}
         />
 
         {/* <Text style={{ color: Colors.darkblack, fontSize: 12, marginLeft: 34 }}>Business Loan</Text> */}

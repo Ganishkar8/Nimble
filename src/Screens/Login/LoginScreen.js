@@ -33,6 +33,8 @@ import ImageComp from '../../Components/ImageComp';
 import ActivationCodeModal from '../../Components/ActivationCodeModal';
 import CenteredModal from '../../Components/CenteredModal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Common from '../../Utils/Common';
+
 
 const LoginScreen = (props, { navigation }) => {
 
@@ -53,36 +55,58 @@ const LoginScreen = (props, { navigation }) => {
             alert(language[0][props.language].str_errlogin)
             return;
         }
+
+
+        Common.getNetworkConnection().then(value => {
+            if (value.isConnected == true) {
+                callLogin();
+            } else {
+                alert(language[0][props.language].str_errinternet)
+            }
+
+        })
+
+
+    }
+
+    const callLogin = () => {
         const appDetails = {
             "username": userID,
-            "password": password
+            "password": password,
         }
-        const baseURL = '8081'
+        const baseURL = '8908'
         setLoading(true)
         apiInstance(baseURL).post('/api/auth/login', appDetails)
             .then(async (response) => {
                 // Handle the response data
-                console.log("ResponseLoginApi::" + JSON.stringify(response.data));
-                const decodedToken = await jwtDecode(response.data.jwtToken);
-                console.log("LoginJWTDecode::" + JSON.stringify(decodedToken));
-                setLoading(false)
-                setUserID('')
-                setPassword('')
-                global.USERNAME = decodedToken.userName;
-                global.USERID = decodedToken.userId;
-                global.RefreshToken = response.data.jwtRefreshToken;
-                //setVisible(true);
-                AsyncStorage.setItem('IsLogin', 'true');
-                loginHandle();
+                if (response.status == 200) {
+                    console.log("ResponseLoginApi::" + JSON.stringify(response.data));
+                    const decodedToken = await jwtDecode(response.data.jwtToken);
+                    console.log("LoginJWTDecode::" + JSON.stringify(decodedToken));
+                    setLoading(false)
+                    setUserID('')
+                    setPassword('')
+                    global.USERNAME = decodedToken.userName;
+                    global.USERID = decodedToken.userId;
+                    global.USERTYPEID = decodedToken.userTypeId;
+                    global.RefreshToken = response.data.jwtRefreshToken;
+                    //setVisible(true);
+                    //AsyncStorage.setItem('IsLogin', 'true');
+
+                    loginHandle();
+                } else if (response.status == 500) {
+                    alert('Login Failed');
+                } else {
+                    alert('Login Failed');
+                }
 
             })
             .catch((error) => {
                 // Handle the error
                 setLoading(false)
-                alert(error);
+                alert('Login Failed');
             });
     }
-
 
     const updateSecureTextEntry = () => {
         if (!secureTexsetSecureTextEntrytEntry) {
@@ -124,7 +148,7 @@ const LoginScreen = (props, { navigation }) => {
                     <View style={{ width: '100%', flexDirection: 'row', }}>
 
                         <View style={{ width: '100%', }}>
-                            <ImageComp imageSrc={require('../../Images/loginbg.png')} imageStylee={{ width: 140, height: 140, resizeMode: 'contain' }} />
+                            <ImageComp imageSrc={require('../../Images/loginbg.png')} imageStylee={{ width: 160, height: 160 }} />
                         </View>
 
                         <View style={{ width: '55%', }}>
@@ -133,21 +157,21 @@ const LoginScreen = (props, { navigation }) => {
 
                     </View>
 
-                    <View style={{ width: '100%', marginTop: 30, paddingHorizontal: 16, }}>
+                    <View style={{ width: '100%', marginTop: 30, alignItems: 'center' }}>
 
-                        <TextComp textVal={language[0][props.language].str_login} textStyle={[Commonstyles.boldtextStyle, { fontSize: 22 }]} />
-                        <TextComp textVal={language[0][props.language].str_logindesc} textStyle={{ color: Colors.lightgrey, fontSize: 14, marginTop: 7 }} />
+                        <TextComp textVal={language[0][props.language].str_login} textStyle={[Commonstyles.boldtextStyle, { fontSize: 22, width: '90%' }]} />
+                        {/* <TextComp textVal={language[0][props.language].str_logindesc} textStyle={{ color: Colors.lightgrey, fontSize: 14, marginTop: 7 }} /> */}
 
                     </View>
 
 
-                    <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
+                    <View style={{ width: '100%', marginTop: 24, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
 
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
-                            <TextComp textVal={language[0][props.language].str_userid} textStyle={Commonstyles.inputtextStyle} />
+                            <TextComp textVal={language[0][props.language].str_userid.toUpperCase()} textStyle={Commonstyles.inputtextStyle} />
                         </View>
 
-                        <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: '#e2e2e2' }}>
+                        <View style={{ width: '92%', marginTop: 3, }}>
 
                             <TextInput
                                 value={userID}
@@ -156,16 +180,20 @@ const LoginScreen = (props, { navigation }) => {
                                 placeholderTextColor={Colors.lightgrey}
                                 secureTextEntry={false}
                                 autoCapitalize="none"
+                                contextMenuHidden={true}
                                 style={Commonstyles.textinputtextStyle}
                             />
 
                         </View>
 
+                        <View style={{ width: '90%', paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: '#e2e2e2' }} />
+
+
                     </View>
 
 
                     <View style={{
-                        width: '100%', marginTop: 15, paddingHorizontal: 0,
+                        width: '100%', marginTop: 16, paddingHorizontal: 0,
                         alignItems: 'center', justifyContent: 'center',
                     }}>
 
@@ -174,8 +202,7 @@ const LoginScreen = (props, { navigation }) => {
                         </View>
 
                         <View style={{
-                            width: '90%', marginTop: 6, flexDirection: 'row',
-                            borderBottomWidth: 1, borderBottomColor: '#e2e2e2'
+                            width: '92%', marginTop: 6, flexDirection: 'row',
                         }}>
 
                             <TextInput
@@ -185,6 +212,7 @@ const LoginScreen = (props, { navigation }) => {
                                 placeholderTextColor={Colors.lightgrey}
                                 secureTextEntry={secureTextEntry ? true : false}
                                 style={Commonstyles.textinputtextStyle}
+                                contextMenuHidden={true}
                             />
 
 
@@ -212,6 +240,9 @@ const LoginScreen = (props, { navigation }) => {
 
                         </View>
 
+                        <View style={{ width: '90%', paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: '#e2e2e2' }} />
+
+
                     </View>
 
                     <View
@@ -220,7 +251,7 @@ const LoginScreen = (props, { navigation }) => {
                             flexDirection: 'row',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            marginTop: 20,
+                            marginTop: 16
                         }}>
 
                         <View
@@ -232,7 +263,7 @@ const LoginScreen = (props, { navigation }) => {
                                 justifyContent: 'flex-end',
                             }}>
 
-                            <TextComp textVal={language[0][props.language].str_forgotpassword} textStyle={{ color: Colors.darkblue, fontSize: 14 }} />
+                            <TextComp textVal={language[0][props.language].str_forgotpassword} textStyle={{ color: Colors.darkblue, fontSize: 14, fontWeight: 500 }} />
 
 
                         </View>
@@ -242,7 +273,7 @@ const LoginScreen = (props, { navigation }) => {
                         style={{
                             width: '100%',
                             height: 50,
-                            marginTop: 10,
+                            marginTop: 24,
                             justifyContent: 'center',
                             alignItems: 'center',
                         }}>
@@ -267,18 +298,18 @@ const LoginScreen = (props, { navigation }) => {
                         justifyContent: 'space-between', paddingVertical: 20
                     }}>
                         <View style={{ alignItems: 'flex-start', flex: 0.5 }}>
-                            <Image style={{ width: 60, height: 26, resizeMode: 'contain' }}
+                            <Image style={{ width: 70, height: 28, resizeMode: 'contain' }}
                                 source={require('../../Images/nimble.png')} />
                             <View style={{ alignItems: 'center' }}>
                                 <Text style={{
-                                    marginLeft: 14, color: '#4e4e4e',
+                                    marginLeft: 20, color: '#4e4e4e',
                                     textAlign: 'center', fontSize: 7, fontWeight: '500'
                                 }}>Business Loan</Text>
                             </View>
                         </View>
 
                         <View style={{ flex: 0.5, alignItems: 'flex-end' }}>
-                            <Image style={{ width: 60, height: 40, resizeMode: 'contain', marginTop: 9 }}
+                            <Image style={{ width: 70, height: 50, resizeMode: 'contain', marginTop: 9 }}
                                 source={require('../../Images/cslogo.png')} />
                         </View>
 

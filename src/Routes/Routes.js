@@ -8,6 +8,7 @@ import SetUpMPIN from '../Screens/Login/SetUpMPIN';
 import MPINLogin from '../Screens/Login/MPINLogin';
 import AddressMainList from '../Screens/Application/Address/AddressMainList';
 import AddressDetails from '../Screens/Application/Address/AddressDetails';
+import DemographicsAddressDetails from '../Screens/LoanDemographics/DemoGraphicAddress/DemographicsAddressDetails';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {NavigationContainer} from '@react-navigation/native';
 import ProfileShortBasicDetails from '../Screens/Application/ApplicationInitiation/ProfileShortBasicDetails';
@@ -28,6 +29,7 @@ import LeadManagement from '../Screens/Lead/LeadTracker/LeadManagement';
 import LoanApplicationMain from '../Screens/LoanApplication/LoanApplicationMain';
 import CBResponseScreen from '../Screens/CreditBureau/CBResponseScreen';
 import CBStatus from '../Screens/CreditBureau/CBStatus';
+import BankDetails from '../Screens/LoanDemographics/bankDetails/BankDetails';
 
 const Route = () => {
   return (
@@ -107,6 +109,19 @@ const Route = () => {
           component={AddressDetails}
           options={{headerShown: false}}
         />
+
+        <Stack.Screen
+          name="DemographicsAddressDetails"
+          component={DemographicsAddressDetails}
+          options={{headerShown: false}}
+        />
+
+        <Stack.Screen
+          name="BankDetails"
+          component={BankDetails}
+          options={{headerShown: false}}
+        />
+
         <Stack.Screen
           name="LoanDemographicsGSTDetails"
           component={LoanDemographicsGSTDetails}
