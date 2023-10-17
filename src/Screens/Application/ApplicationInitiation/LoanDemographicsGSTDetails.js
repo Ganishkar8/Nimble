@@ -35,40 +35,19 @@ import ChildHeadComp from '../../../Components/ChildHeadComp';
 import CheckBoxComp from '../../../Components/CheckBoxComp';
 import {RadioButton} from 'react-native-paper';
 
-const DemographicsGSTDetails = (props, {navigation}) => {
+const LoanDemographicsGSTDetails = (props, {navigation}) => {
   const [loading, setLoading] = useState(false);
   const [errMsg, setErrMsg] = useState('');
   const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
   const showBottomSheet = () => setBottomErrorSheetVisible(true);
   const hideBottomSheet = () => setBottomErrorSheetVisible(false);
 
-  //loanType - dropdown
-  const [loanTypeMan, setLoanTypeMan] = useState(false); //Manditory or not
-  const [loanTypeVisible, setLoanTypeVisible] = useState(true); //Hide or not
-  const [loanTypeDisable, setLoanTypeDisable] = useState(false); //Enable or Disable
-  const [loanTypeData, setLoanTypeData] = useState([]); //DataPicking
-  const [loanTypeCaption, setLoanTypeCaption] = useState('LOAN TYPE'); //FieldCaption
-  const [loanTypeLabel, setLoanTypeLabel] = useState('');
-  const [loanTypeIndex, setLoanTypeIndex] = useState('');
-
   const [text, setText] = useState('');
   const [textInputValue, setTextInputValue] = useState('');
   const [isSelected, setisSelected] = useState(false);
   const [value, setvalue] = useState(1);
-  const [data, setdata] = useState([
-    {id: 0, isSelect: false, tname: ''},
-    {id: 1, isSelect: false, tname: ''},
-    {id: 2, isSelect: false, tname: ''},
-  ]);
+  const [data, setdata] = useState([{id: 0, isSelect: false, tname: ''}]);
 
-  const [LoanAmount, setLoanAmount] = useState('');
-  const [LoanAmountCaption, setLoanAmountCaption] = useState(
-    "Loan Amount(IN MULTIPLE OF 5000's)",
-  );
-  const [LoanAmountMan, setLoanAmountMan] = useState(false);
-  const [LoanAmountVisible, setLoanAmountVisible] = useState(true);
-  const [LoanAmountDisable, setLoanAmountDisable] = useState(false);
-  const LoanAmountRef = useRef(null);
   const [selectedValue, setSelectedValue] = useState(false);
   const [selectedValue1, setSelectedValue1] = useState(false);
   const [AvailableCaption, setAvailableCaption] = useState('Available');
@@ -263,6 +242,48 @@ const DemographicsGSTDetails = (props, {navigation}) => {
                 }></TextComp>
             </View>
           </View>
+          <View
+            style={{
+              width: '100%',
+              alignItems: 'center',
+              flexDirection: 'row',
+              marginTop: 15,
+            }}>
+            <View
+              style={{
+                width: '50%',
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginLeft: 10,
+              }}>
+              <RadioButton.Android
+                value="option1"
+                status={selectedValue === 'option1' ? 'checked' : 'unchecked'}
+                onPress={() => setSelectedValue('option1')}
+                color="#007BFF"
+              />
+              <Text viewStyle={Commonstyles.inputtextStyle}>
+                {AvailableCaption}
+              </Text>
+            </View>
+
+            <View
+              style={{
+                width: '50%',
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}>
+              <RadioButton.Android
+                value="option2"
+                status={selectedValue1 === 'option2' ? 'checked' : 'unchecked'}
+                onPress={() => setSelectedValue1('option2')}
+                color="#007BFF"
+              />
+              <Text viewStyle={Commonstyles.inputtextStyle}>
+                {NotAvailableCaption}
+              </Text>
+            </View>
+          </View>
           {data.map((each, index) => (
             <View
               style={{
@@ -391,4 +412,4 @@ const mapDispatchToProps = dispatch => ({
 export default connect(
   mapStateToProps,
   mapDispatchToProps,
-)(DemographicsGSTDetails);
+)(LoanDemographicsGSTDetails);

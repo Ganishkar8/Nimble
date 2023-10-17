@@ -34,41 +34,30 @@ import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import ChildHeadComp from '../../../Components/ChildHeadComp';
 import CheckBoxComp from '../../../Components/CheckBoxComp';
 import {RadioButton} from 'react-native-paper';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 
-const DemographicsGSTDetails = (props, {navigation}) => {
+const LoanDemographicsFinancialDetails = (props, {navigation}) => {
   const [loading, setLoading] = useState(false);
   const [errMsg, setErrMsg] = useState('');
   const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
   const showBottomSheet = () => setBottomErrorSheetVisible(true);
   const hideBottomSheet = () => setBottomErrorSheetVisible(false);
 
-  //loanType - dropdown
-  const [loanTypeMan, setLoanTypeMan] = useState(false); //Manditory or not
-  const [loanTypeVisible, setLoanTypeVisible] = useState(true); //Hide or not
-  const [loanTypeDisable, setLoanTypeDisable] = useState(false); //Enable or Disable
-  const [loanTypeData, setLoanTypeData] = useState([]); //DataPicking
-  const [loanTypeCaption, setLoanTypeCaption] = useState('LOAN TYPE'); //FieldCaption
-  const [loanTypeLabel, setLoanTypeLabel] = useState('');
-  const [loanTypeIndex, setLoanTypeIndex] = useState('');
+  const [ProductTypeMan, setProductTypeMan] = useState(false);
+  const [ProductTypeVisible, setProductTypeVisible] = useState(true);
+  const [ProductTypeDisable, setProductTypeDisable] = useState(false);
+  const [ProductTypeData, setProductTypeData] = useState([]);
+  const [ProductTypeCaption, setProductTypeCaption] = useState('PRODUCT TYPE');
+  const [ProductTypeLabel, setProductTypeLabel] = useState('');
+  const [ProductTypeIndex, setProductTypeIndex] = useState('');
 
   const [text, setText] = useState('');
   const [textInputValue, setTextInputValue] = useState('');
   const [isSelected, setisSelected] = useState(false);
   const [value, setvalue] = useState(1);
-  const [data, setdata] = useState([
-    {id: 0, isSelect: false, tname: ''},
-    {id: 1, isSelect: false, tname: ''},
-    {id: 2, isSelect: false, tname: ''},
-  ]);
+  const [data, setdata] = useState([{id: 0, Amount: 0, tname: ''}]);
 
-  const [LoanAmount, setLoanAmount] = useState('');
-  const [LoanAmountCaption, setLoanAmountCaption] = useState(
-    "Loan Amount(IN MULTIPLE OF 5000's)",
-  );
-  const [LoanAmountMan, setLoanAmountMan] = useState(false);
-  const [LoanAmountVisible, setLoanAmountVisible] = useState(true);
-  const [LoanAmountDisable, setLoanAmountDisable] = useState(false);
-  const LoanAmountRef = useRef(null);
   const [selectedValue, setSelectedValue] = useState(false);
   const [selectedValue1, setSelectedValue1] = useState(false);
   const [AvailableCaption, setAvailableCaption] = useState('Available');
@@ -103,7 +92,24 @@ const DemographicsGSTDetails = (props, {navigation}) => {
     console.log('data:', updatedData);
   };
 
-  const pickerData = async () => {};
+  const pickerData = async () => {
+    tbl_SystemCodeDetails
+      .getSystemCodeDetailsBasedOnID('ProductType')
+      .then(value => {
+        if (value !== undefined && value.length > 0) {
+          console.log(value);
+
+          for (var i = 0; i < value.length; i++) {
+            if (value[i].IsDefault === '1') {
+              setProductTypeLabel(value[i].SubCodeID);
+              setProductTypeIndex(i + 1);
+            }
+          }
+
+          setProductTypeData(value);
+        }
+      });
+  };
 
   const makeSystemMandatoryFields = () => {};
 
@@ -166,19 +172,24 @@ const DemographicsGSTDetails = (props, {navigation}) => {
 
   const handleClick = (index, textValue) => {
     //alert(index);
-    //setdata([...data, {id: 0, isSelect: false, tname: textValue}]);
+    //setdata([...data, {id: 0, Amount: 0, tname: textValue}]);
   };
 
   const handleReference = componentName => {};
 
-  const handlePickerClick = (componentName, label, index) => {};
+  const handlePickerClick = (componentName, label, index) => {
+    if (componentName == 'ProductTypePicker') {
+      setProductTypeLabel(label);
+      setProductTypeIndex(index);
+    }
+  };
   function isMultipleOf5000(number) {
     return number % 5000 === 0;
   }
 
   // const AddGST = () => {
   //   console.log(data);
-  //   setdata([...data, {id: data.length, isSelect: false, tname: ''}]);
+  //   setdata([...data, {id: data.length, Amount: 0, tname: ''}]);
   //   console.log(data);
   // };
 
@@ -186,7 +197,7 @@ const DemographicsGSTDetails = (props, {navigation}) => {
     const newDataArray = [...data];
     const newObject = {
       id: newDataArray.length,
-      isSelect: false,
+      Amount: 0,
       tname: '',
     };
     newDataArray.push(newObject);
@@ -250,19 +261,6 @@ const DemographicsGSTDetails = (props, {navigation}) => {
             </View>
           </View>
 
-          <View style={{width: '100%', alignItems: 'center', marginTop: '5%'}}>
-            <View style={{width: '90%', marginTop: 3}}>
-              <TextComp
-                textStyle={{
-                  color: Colors.mediumgrey,
-                  fontSize: 15,
-                  fontWeight: '500',
-                }}
-                textVal={
-                  language[0][props.language].str_gstregistration
-                }></TextComp>
-            </View>
-          </View>
           {data.map((each, index) => (
             <View
               style={{
@@ -271,38 +269,80 @@ const DemographicsGSTDetails = (props, {navigation}) => {
                 marginTop: 15,
               }}>
               <View
+                style={{width: '100%', alignItems: 'center', marginTop: '4%'}}>
+                <View
+                  style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+                  <TextComp
+                    textVal="ITEM 1"
+                    textStyle={Commonstyles.inputtextStyle}
+                    Visible={ProductTypeMan}
+                  />
+                </View>
+
+                <PickerComp
+                  textLabel={ProductTypeLabel}
+                  pickerStyle={Commonstyles.picker}
+                  Disable={ProductTypeDisable}
+                  pickerdata={ProductTypeData}
+                  componentName="ProductTypePicker"
+                  handlePickerClick={handlePickerClick}
+                  onValueChange={label =>
+                    updateDataInArray(each.id, {tname: label})
+                  }
+                />
+              </View>
+              <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+                <TextComp
+                  textVal="AMOUNT"
+                  textStyle={Commonstyles.inputtextStyle}
+                  Visible={false}
+                />
+              </View>
+              <View
                 style={{
-                  width: '93%',
+                  width: '90%',
+                  flexDirection: 'row',
+                  marginTop: 3,
+                  paddingHorizontal: 0,
+                  borderBottomColor: 'grey',
+                  borderBottomWidth: 0.5,
+                }}>
+                <FontAwesome
+                  name="rupee"
+                  size={20}
+                  color="#343434"></FontAwesome>
+                <TextInput
+                  style={styles.textinputtextStyle}
+                  keyboardType="numeric"
+                  //value={()=> (each.id)}
+                  onChangeText={e => {
+                    const numericValue = e.replace(/[^0-9]/g, '');
+                    updateDataInArray(each.id, {Amount: numericValue});
+                  }}
+                />
+              </View>
+              <View
+                style={{
+                  marginLeft: 220,
+                  marginTop: 15,
                   flexDirection: 'row',
                   alignItems: 'center',
                 }}>
-                <CheckBox
-                  value={each.isSelect}
-                  onValueChange={() =>
-                    updateDataInArray(each.id, {
-                      isSelect: !each.isSelect,
-                    })
-                  }
-                  style={styles.checkbox}
-                />
-                <Text
-                  style={{
-                    color: Colors.darkblue,
-                  }}>
-                  GST IN {index + 1}
-                </Text>
-                <TextInput
-                  style={Commonstyles.textinputtextStyle}
-                  //value={()=> (each.id)}
-                  onChangeText={e => updateDataInArray(each.id, {tname: e})}
-                />
-                {/* <TextInputComp
-                  textValue={each.tname}
-                  textStyle={Commonstyles.textinputtextStyle}
-                  type="email-address"
-                  handleClick={() =>
-                    updateDataInArray(each.id, {tname: each.tname})
-                  }></TextInputComp> */}
+                <TouchableOpacity onPress={() => deleteItemFromArray(each.id)}>
+                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <AntDesign
+                      name="delete"
+                      size={20}
+                      color="#343434"></AntDesign>
+                    <Text
+                      style={{
+                        color: Colors.black,
+                        marginLeft: 5,
+                      }}>
+                      Delete
+                    </Text>
+                  </View>
+                </TouchableOpacity>
               </View>
             </View>
           ))}
@@ -362,6 +402,19 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     textAlign: 'center',
   },
+  textinputtextStyle: {
+    width: '90%',
+    fontSize: 15,
+    fontWeight: '350',
+    height: 37,
+  },
+
+  inputtextStyle: {
+    color: Colors.darkblack,
+    fontSize: 13,
+    paddingHorizontal: 0,
+    fontWeight: '400',
+  },
   modal: {
     justifyContent: 'flex-end',
     margin: 0,
@@ -391,4 +444,4 @@ const mapDispatchToProps = dispatch => ({
 export default connect(
   mapStateToProps,
   mapDispatchToProps,
-)(DemographicsGSTDetails);
+)(LoanDemographicsFinancialDetails);
