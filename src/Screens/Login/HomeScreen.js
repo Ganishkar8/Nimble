@@ -1,16 +1,16 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  SafeAreaView,
-  StyleSheet,
-  ImageBackground,
-  View,
-  Platform,
-  TouchableOpacity,
-  Alert,
-  Image,
-  StatusBar,
-  Text,
-  ScrollView,
+    SafeAreaView,
+    StyleSheet,
+    ImageBackground,
+    View,
+    Platform,
+    TouchableOpacity,
+    Alert,
+    Image,
+    StatusBar,
+    Text,
+    ScrollView,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Colors from '../../Utils/Colors';
@@ -87,31 +87,31 @@ const HomeScreen = (props, { navigation }) => {
 
                             </View>
 
-              <Text
-                style={{
-                  width: '100%',
-                  marginLeft: '3.4%',
-                  fontSize: 12,
-                  color: '#4e4e4e',
-                  marginTop: 5,
-                  paddingHorizontal: 5,
-                }}>
-                User ID :{global.USERID}
-              </Text>
-              <View
-                style={{
-                  width: '100%',
-                  marginTop: '4%',
-                  flexDirection: 'column',
-                  marginLeft: '3.4%',
-                }}>
-                <View style={{flexDirection: 'row'}}>
-                  <Text
-                    style={{fontSize: 16, color: '#4e4e4e', marginTop: '5%'}}>
-                    Quick Items
-                  </Text>
+                            <Text
+                                style={{
+                                    width: '100%',
+                                    marginLeft: '3.4%',
+                                    fontSize: 12,
+                                    color: '#4e4e4e',
+                                    marginTop: 5,
+                                    paddingHorizontal: 5,
+                                }}>
+                                User ID :{global.USERID}
+                            </Text>
+                            <View
+                                style={{
+                                    width: '100%',
+                                    marginTop: '4%',
+                                    flexDirection: 'column',
+                                    marginLeft: '3.4%',
+                                }}>
+                                <View style={{ flexDirection: 'row' }}>
+                                    <Text
+                                        style={{ fontSize: 16, color: '#4e4e4e', marginTop: '5%' }}>
+                                        Quick Items
+                                    </Text>
 
-                  {/* <View style={{ height: '75%', alignItems: 'center', justifyContent: 'space-between', flexDirection: 'row' }}>
+                                    {/* <View style={{ height: '75%', alignItems: 'center', justifyContent: 'space-between', flexDirection: 'row' }}>
 
         <View style={{ flexDirection: 'column' }}>
             <View style={styles.circularView}>
@@ -148,7 +148,7 @@ const HomeScreen = (props, { navigation }) => {
         </View>
 
     </View> */}
-                </View>
+                                </View>
 
                                 <View style={{ width: '93%', height: 170, justifyContent: 'space-between', flexDirection: 'row', marginTop: '4%' }}>
 
@@ -230,7 +230,7 @@ const HomeScreen = (props, { navigation }) => {
 
                                 {global.USERTYPEID == '1164' &&
                                     <TouchableOpacity onPress={() => {
-                                        props.navigation.navigate('LoanApplicationMain')
+                                        props.navigation.navigate('ConsentScreen')
                                     }} activeOpacity={0.5} style={{ width: '93%', height: 150, backgroundColor: '#ffffff99', marginTop: '3.5%', borderRadius: 10 }}>
                                         <View >
 
@@ -249,7 +249,7 @@ const HomeScreen = (props, { navigation }) => {
 
                                                     <View style={{ width: '25%' }}>
                                                         <TouchableOpacity onPress={() => {
-                                                            props.navigation.navigate('LoanApplicationMain')
+                                                            props.navigation.navigate('ConsentScreen')
                                                         }} activeOpacity={0.5} style={{ width: '70%', height: '100%', backgroundColor: '#0294ff', borderRadius: 25, alignItems: 'center', justifyContent: 'center' }}>
                                                             <View >
                                                                 <Image source={require('../../Images/forward_icon.png')}
@@ -270,7 +270,7 @@ const HomeScreen = (props, { navigation }) => {
 
                             </View>
 
-              {/* <View style={{ width: '95%', height: '28%', borderRadius: 10, marginTop: '6%', backgroundColor: '#ffffff', flexDirection: 'column' }}>
+                            {/* <View style={{ width: '95%', height: '28%', borderRadius: 10, marginTop: '6%', backgroundColor: '#ffffff', flexDirection: 'column' }}>
 
 <LinearGradient
     colors={['#d1ecff', '#ffffff']}
@@ -308,84 +308,84 @@ const HomeScreen = (props, { navigation }) => {
 
 
 </View> */}
-            </View>
-          </ScrollView>
+                        </View>
+                    </ScrollView>
+                </View>
+            </ImageBackground>
         </View>
-      </ImageBackground>
-    </View>
-  );
+    );
 };
 
 const styles = StyleSheet.create({
-  parentView: {
-    width: '100%',
-    height: '100%',
-    alignItems: 'center',
-    flexDirection: 'column',
-  },
-  imageStyle: {
-    width: '100%',
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  imageStyle1: {
-    width: 230,
-    height: 100,
-    resizeMode: 'contain',
-  },
-  imageStyleLogo: {
-    width: 100,
-    height: 100,
-    resizeMode: 'contain',
-  },
-  tinyLogo: {
-    width: 17,
-    height: 21,
-    justifyContent: 'center',
-  },
-  circularView: {
-    width: 60,
-    height: 60,
-    borderRadius: 50,
-    backgroundColor: '#e3dbd4',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  circularView1: {
-    width: 60,
-    height: 60,
-    borderRadius: 50,
-    backgroundColor: '#AAF2D4',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  circularView2: {
-    width: 60,
-    height: 60,
-    borderRadius: 50,
-    backgroundColor: '#d7f0db',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  circularView3: {
-    width: 60,
-    height: 60,
-    borderRadius: 50,
-    backgroundColor: '#cceaff',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  scrollView: {
-    flex: 1,
-    alignSelf: 'center',
-  },
-  contentContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingBottom: 50,
-    flexGrow: 1,
-  },
+    parentView: {
+        width: '100%',
+        height: '100%',
+        alignItems: 'center',
+        flexDirection: 'column',
+    },
+    imageStyle: {
+        width: '100%',
+        height: '100%',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    imageStyle1: {
+        width: 230,
+        height: 100,
+        resizeMode: 'contain',
+    },
+    imageStyleLogo: {
+        width: 100,
+        height: 100,
+        resizeMode: 'contain',
+    },
+    tinyLogo: {
+        width: 17,
+        height: 21,
+        justifyContent: 'center',
+    },
+    circularView: {
+        width: 60,
+        height: 60,
+        borderRadius: 50,
+        backgroundColor: '#e3dbd4',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    circularView1: {
+        width: 60,
+        height: 60,
+        borderRadius: 50,
+        backgroundColor: '#AAF2D4',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    circularView2: {
+        width: 60,
+        height: 60,
+        borderRadius: 50,
+        backgroundColor: '#d7f0db',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    circularView3: {
+        width: 60,
+        height: 60,
+        borderRadius: 50,
+        backgroundColor: '#cceaff',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    scrollView: {
+        flex: 1,
+        alignSelf: 'center',
+    },
+    contentContainer: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingBottom: 50,
+        flexGrow: 1,
+    },
 });
 
 const mapStateToProps = (state) => {

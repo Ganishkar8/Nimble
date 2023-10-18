@@ -1,4 +1,4 @@
-import React, {useState, useRef, useEffect} from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -15,9 +15,9 @@ import Colors from '../../../Utils/Colors';
 import MyStatusBar from '../../../Components/ MyStatusBar';
 import Loading from '../../../Components/Loading';
 import TextComp from '../../../Components/TextComp';
-import {connect} from 'react-redux';
-import {languageAction} from '../../../Utils/redux/actions/languageAction';
-import {language} from '../../../Utils/LanguageString';
+import { connect } from 'react-redux';
+import { languageAction } from '../../../Utils/redux/actions/languageAction';
+import { language } from '../../../Utils/LanguageString';
 import Commonstyles from '../../../Utils/Commonstyles';
 import HeadComp from '../../../Components/HeadComp';
 import ProgressComp from '../../../Components/ProgressComp';
@@ -30,11 +30,11 @@ import TextInputComp from '../../../Components/TextInputComp';
 import PickerComp from '../../../Components/PickerComp';
 import ButtonViewComp from '../../../Components/ButtonViewComp';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
-import {Directions} from 'react-native-gesture-handler';
+import { Directions } from 'react-native-gesture-handler';
 import ChildHeadComp from '../../../Components/ChildHeadComp';
 import CheckBoxComp from '../../../Components/CheckBoxComp';
 
-const ProfileShortBasicDetails = (props, {navigation}) => {
+const ProfileShortBasicDetails = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
   const [custCatgLabel, setCustCatgLabel] = useState('');
   const [custCatgIndex, setCustCatgIndex] = useState('');
@@ -114,7 +114,7 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
   const [KycType1Visible, setKycType1Visible] = useState(true);
   const [KycType1Disable, setKycType1Disable] = useState(false);
   const [KycType1Data, setKycType1Data] = useState([]);
-  const [KycType1Caption, setKycType1Caption] = useState('KYC TYPE1');
+  const [KycType1Caption, setKycType1Caption] = useState('KYC TYPE 1');
   const [KycType1Label, setKycType1Label] = useState('');
   const [KycType1Index, setKycType1Index] = useState('');
 
@@ -122,20 +122,20 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
   const [KycType2Visible, setKycType2Visible] = useState(true);
   const [KycType2Disable, setKycType2Disable] = useState(false);
   const [KycType2Data, setKycType2Data] = useState([]);
-  const [KycType2Caption, setKycType2Caption] = useState('KYC TYPE2');
+  const [KycType2Caption, setKycType2Caption] = useState('KYC TYPE 2');
   const [KycType2Label, setKycType2Label] = useState('');
   const [KycType2Index, setKycType2Index] = useState('');
 
   //kycid1 -- TextInput
   const [kycID1, setkycID1] = useState('');
-  const [kycID1Caption, setkycID1Caption] = useState('KYC ID1');
+  const [kycID1Caption, setkycID1Caption] = useState('KYC ID 1');
   const [kycID1Man, setkycID1Man] = useState(false);
   const [kycID1Visible, setkycID1Visible] = useState(true);
   const [kycID1Disable, setkycID1Disable] = useState(false);
   const KycID1Ref = useRef(null);
 
   const [kycID2, setkycID2] = useState('');
-  const [kycID2Caption, setkycID2Caption] = useState('KYC ID1');
+  const [kycID2Caption, setkycID2Caption] = useState('KYC ID 2');
   const [kycID2Man, setkycID2Man] = useState(false);
   const [kycID2Visible, setkycID2Visible] = useState(true);
   const [kycID2Disable, setkycID2Disable] = useState(false);
@@ -174,14 +174,14 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
   useEffect(() => {
     props.navigation
       .getParent()
-      ?.setOptions({tabBarStyle: {display: 'none'}, tabBarVisible: false});
+      ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     makeSystemMandatoryFields();
-    pickerData();
+    // pickerData();
 
     return () =>
       props.navigation
         .getParent()
-        ?.setOptions({tabBarStyle: undefined, tabBarVisible: undefined});
+        ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
   }, [navigation]);
 
   const pickerData = async () => {
@@ -1020,8 +1020,24 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
   return (
     // enclose all components in this View tag
     <SafeAreaView
-      style={[styles.parentView, {backgroundColor: Colors.lightwhite}]}>
+      style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
       <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
+
+      <View
+        style={{
+          width: '100%',
+          height: 56,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+        <HeadComp
+          textval={language[0][props.language].str_profileshort}
+          props={props}
+        />
+      </View>
+      <ChildHeadComp
+        textval={language[0][props.language].str_applicantdetails}
+      />
 
       <ScrollView
         style={styles.scrollView}
@@ -1029,7 +1045,7 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled">
         {loading ? <Loading /> : null}
-        <View style={{flex: 1}}>
+        <View style={{ flex: 1 }}>
           <ErrorMessageModal
             isVisible={bottomErrorSheetVisible}
             hideBottomSheet={hideBottomSheet}
@@ -1038,24 +1054,9 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
             textClose={language[0][props.language].str_ok}
           />
 
-          <View
-            style={{
-              width: '100%',
-              height: 56,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-            <HeadComp
-              textval={language[0][props.language].str_profileshort}
-              props={props}
-            />
-          </View>
-          <ChildHeadComp
-            textval={language[0][props.language].str_applicantdetails}
-          />
 
-          <View style={{width: '100%', alignItems: 'center', marginTop: '3%'}}>
-            <View style={{width: '90%', marginTop: 3}}>
+          <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
+            <View style={{ width: '90%', marginTop: 3 }}>
               <TextComp
                 textStyle={{
                   color: Colors.mediumgrey,
@@ -1072,8 +1073,8 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
 
           {loanTypeVisible && (
             <View
-              style={{width: '100%', alignItems: 'center', marginTop: '4%'}}>
-              <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+              style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                 <TextComp
                   textVal={loanTypeCaption}
                   textStyle={Commonstyles.inputtextStyle}
@@ -1094,8 +1095,8 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
 
           {ProductTypeVisible && (
             <View
-              style={{width: '100%', alignItems: 'center', marginTop: '4%'}}>
-              <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+              style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                 <TextComp
                   textVal={ProductTypeCaption}
                   textStyle={Commonstyles.inputtextStyle}
@@ -1123,7 +1124,7 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
                 alignItems: 'center',
                 justifyContent: 'center',
               }}>
-              <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                 <TextComp
                   textVal={LoanAmountCaption}
                   textStyle={Commonstyles.inputtextStyle}
@@ -1147,8 +1148,8 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
 
           {LoanPurposeVisible && (
             <View
-              style={{width: '100%', alignItems: 'center', marginTop: '4%'}}>
-              <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+              style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                 <TextComp
                   textVal={LoanPurposeCaption}
                   textStyle={Commonstyles.inputtextStyle}
@@ -1169,8 +1170,8 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
 
           {custCatgVisible && (
             <View
-              style={{width: '100%', alignItems: 'center', marginTop: '4%'}}>
-              <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+              style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                 <TextComp
                   textVal={custCatgCaption}
                   textStyle={Commonstyles.inputtextStyle}
@@ -1191,8 +1192,8 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
 
           {CustomerSubCategoryVisible && (
             <View
-              style={{width: '100%', alignItems: 'center', marginTop: '4%'}}>
-              <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+              style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                 <TextComp
                   textVal={CustomerSubCategoryCaption}
                   textStyle={Commonstyles.inputtextStyle}
@@ -1220,7 +1221,7 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
                 alignItems: 'center',
                 justifyContent: 'center',
               }}>
-              <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                 <TextComp
                   textVal={NameCaption}
                   textStyle={Commonstyles.inputtextStyle}
@@ -1244,8 +1245,8 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
 
           {MaritalStatusVisible && (
             <View
-              style={{width: '100%', alignItems: 'center', marginTop: '4%'}}>
-              <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+              style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                 <TextComp
                   textVal={MaritalStatusCaption}
                   textStyle={Commonstyles.inputtextStyle}
@@ -1264,19 +1265,19 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
             </View>
           )}
 
-          <View style={{width: '100%', alignItems: 'center', marginTop: '4%'}}>
-            <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+          <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
               <TextComp
                 textVal={KYCDetalsCaption}
-                textStyle={Commonstyles.textinputtextStyle}
+                textStyle={[Commonstyles.textinputtextStyle, { color: Colors.mediumgrey }]}
               />
             </View>
           </View>
 
           {KycType1Visible && (
             <View
-              style={{width: '100%', alignItems: 'center', marginTop: '4%'}}>
-              <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+              style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                 <TextComp
                   textVal={KycType1Caption}
                   textStyle={Commonstyles.inputtextStyle}
@@ -1304,7 +1305,7 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
                 alignItems: 'center',
                 justifyContent: 'center',
               }}>
-              <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                 <TextComp
                   textVal={kycID1Caption}
                   textStyle={Commonstyles.inputtextStyle}
@@ -1328,8 +1329,8 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
 
           {KycType2Visible && (
             <View
-              style={{width: '100%', alignItems: 'center', marginTop: '4%'}}>
-              <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+              style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                 <TextComp
                   textVal={KycType2Caption}
                   textStyle={Commonstyles.inputtextStyle}
@@ -1357,7 +1358,7 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
                 alignItems: 'center',
                 justifyContent: 'center',
               }}>
-              <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                 <TextComp
                   textVal={kycID2Caption}
                   textStyle={Commonstyles.inputtextStyle}
@@ -1388,17 +1389,18 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
                 alignItems: 'center',
                 justifyContent: 'center',
               }}>
-              <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                 <TextComp
                   textVal={mobileNumberCaption}
                   textStyle={Commonstyles.inputtextStyle}
                   Visible={mobileNumberMan}
                 />
               </View>
-              <View style={{flexDirection: 'row'}}>
+              <View style={{ flexDirection: 'row', width: '90%' }}>
+
                 <TextInputComp
                   textValue={mobileNumber}
-                  textStyle={[Commonstyles.textinputtextStyle, {width: '70%'}]}
+                  textStyle={Commonstyles.textinputtextStyle}
                   type="numeric"
                   Disable={mobileNumberDisable}
                   ComponentName="mobileNumber"
@@ -1407,19 +1409,23 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
                   handleClick={handleClick}
                   handleReference={handleReference}
                 />
+
                 <View
                   style={{
-                    width: '20%',
+                    width: '11%',
                     marginTop: 3,
                     paddingHorizontal: 0,
                     borderBottomWidth: 1,
                     borderBottomColor: '#e2e2e2',
                     color: 'darkblue',
+                    alignItems: 'flex-end',
+                    justifyContent: 'center'
                   }}>
                   <TouchableOpacity onPress={onClick}>
                     <Text
                       style={{
                         color: Colors.darkblue,
+                        fontWeight: 500,
                       }}>
                       Verify
                     </Text>
@@ -1438,14 +1444,14 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
                 alignItems: 'center',
                 justifyContent: 'center',
               }}>
-              <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                 <TextComp
                   textVal={EmailCaption}
                   textStyle={Commonstyles.inputtextStyle}
                   Visible={EmailMan}
                 />
               </View>
-              <View style={{flexDirection: 'row'}}>
+              <View style={{ flexDirection: 'row', width: '90%' }}>
                 <TextInputComp
                   textValue={Email}
                   textStyle={Commonstyles.textinputtextStyle}
@@ -1459,7 +1465,7 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
                 />
                 <View
                   style={{
-                    width: '20%',
+                    width: '11%',
                     marginTop: 3,
                     paddingHorizontal: 0,
                     borderBottomWidth: 1,
@@ -1469,6 +1475,7 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
                     <Text
                       style={{
                         color: Colors.darkblue,
+                        fontWeight: 500,
                       }}>
                       Verify
                     </Text>
@@ -1478,7 +1485,7 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
             </View>
           )}
 
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 19, }}>
             <CheckBoxComp
               textValue={chkMsme}
               Disable={chkMsmeDisable}
@@ -1499,7 +1506,7 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
                 alignItems: 'center',
                 justifyContent: 'center',
               }}>
-              <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                 <TextComp
                   textVal={URNumberCaption}
                   textStyle={Commonstyles.inputtextStyle}
@@ -1524,7 +1531,7 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
 
         <ButtonViewComp
           textValue={language[0][props.language].str_dedupecheck.toUpperCase()}
-          textStyle={{color: Colors.white, fontSize: 13, fontWeight: 500}}
+          textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
           viewStyle={Commonstyles.buttonView}
           innerStyle={Commonstyles.buttonViewInnerStyle}
           handleClick={updateBasicDetails}
@@ -1572,7 +1579,7 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = state => {
-  const {language} = state.languageReducer;
+  const { language } = state.languageReducer;
   return {
     language: language,
   };

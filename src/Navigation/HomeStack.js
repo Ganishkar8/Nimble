@@ -18,6 +18,7 @@ import ProfileShortBasicDetails from '../Screens/Application/ApplicationInitiati
 import AddressMainList from '../Screens/Application/Address/AddressMainList';
 import AddressDetails from '../Screens/Application/Address/AddressDetails';
 import LoanApplicationMain from '../Screens/LoanApplication/LoanApplicationMain';
+import ConsentScreen from '../Screens/LoanApplication/ConsentScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -117,6 +118,12 @@ export default HomeStack = () => {
       <Stack.Screen
         name="LoanApplicationMain"
         component={LoanApplicationMain}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="ConsentScreen"
+        component={ConsentScreen}
         options={{ headerShown: false, tabBarVisible: false }}
       />
 

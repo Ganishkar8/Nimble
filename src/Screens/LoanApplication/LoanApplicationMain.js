@@ -22,6 +22,7 @@ import TextComp from '../../Components/TextComp';
 import LinearGradient from 'react-native-linear-gradient';
 import ButtonViewComp from '../../Components/ButtonViewComp';
 import Commonstyles from '../../Utils/Commonstyles';
+import { useIsFocused } from '@react-navigation/native';
 
 
 const data = [
@@ -32,12 +33,13 @@ const data = [
                 nestedName: 'Applicant',
                 id: 'AA',
                 nestedIsSelected: true,
+                subDataIsCompleted: false,
                 nestedSubdata: [
                     {
                         name: 'Basic Details',
                         id: 'BD',
-                        nestedSubDataIsCompleted: true,
-                        parent: 'Applicant'
+                        nestedSubDataIsCompleted: false,
+                        parent: 'Applicant',
                     },
                     {
                         name: 'KYC Verification Status',
@@ -64,11 +66,12 @@ const data = [
                 nestedName: 'Co Applicant',
                 id: 'CA',
                 nestedIsSelected: false,
+                subDataIsCompleted: false,
                 nestedSubdata: [
                     {
                         name: 'Basic Details',
                         id: 'BD',
-                        nestedSubDataIsCompleted: true,
+                        nestedSubDataIsCompleted: false,
                         parent: 'CApplicant'
                     },
                     {
@@ -119,7 +122,7 @@ const LoanApplicationMain = (props, { navigation }) => {
     const [nestedSubData, setNestedSubData] = useState(labels[0].nesteddata);
     const [refreshFlatlist, setRefreshFlatList] = useState(false);
     const [selectedData, setSelectedData] = useState(labels[0].name);
-
+    const isScreenVisible = useIsFocused();
 
     useEffect(() => {
 
@@ -127,10 +130,11 @@ const LoanApplicationMain = (props, { navigation }) => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         return () =>
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
-    }, [navigation]);
+    }, [navigation, isScreenVisible]);
 
 
-    const updateLeadDetails = () => {
+    const nextScreen = () => {
+        props.navigation.navigate('ProfileShortBasicDetails')
     }
 
     const onClickMainList = (item) => {
@@ -252,17 +256,17 @@ const LoanApplicationMain = (props, { navigation }) => {
                                     <View>
                                         <View style={{ flexDirection: 'row' }}>
                                             <View style={{
-                                                width: 25, height: 25, backgroundColor: Colors.green, borderRadius: 15, margin: 10,
+                                                width: 25, height: 25, backgroundColor: item.subDataIsCompleted ? Colors.green : Colors.dimText, borderRadius: 15, margin: 10,
                                                 alignItems: 'center', justifyContent: 'center'
                                             }}>
                                                 <TextComp textVal={index + 1} textStyle={{ color: Colors.white, fontWeight: 500, marginLeft: 2 }} />
                                             </View>
                                             <View style={{ width: '60%', borderWidth: 0.5, borderColor: Colors.dimText, margin: 5, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}>
-                                                <TextComp textVal={item.nestedName} textStyle={{ color: Colors.skyBlue, fontWeight: 500, marginLeft: 2 }} />
+                                                <TextComp textVal={item.nestedName} textStyle={{ color: item.subDataIsCompleted ? Colors.skyBlue : Colors.dimText, fontWeight: 500, marginLeft: 2 }} />
                                             </View>
                                         </View>
                                         {item.nestedSubdata ? (
-                                            <View style={{ width: 1, height: 30, backgroundColor: Colors.green, marginLeft: 23 }} />
+                                            <View style={{ width: 1, height: 30, backgroundColor: item.subDataIsCompleted ? Colors.green : Colors.dimText, marginLeft: 23 }} />
                                         ) : null
                                         }
                                         {/* <View style={{ width: 1, height: 30, backgroundColor: Colors.green, marginLeft: 23 }} /> */}
@@ -276,20 +280,20 @@ const LoanApplicationMain = (props, { navigation }) => {
                                                         <View>
                                                             <View style={{ flexDirection: 'row' }}>
                                                                 <View style={{
-                                                                    width: 10, height: 10, backgroundColor: Colors.green, borderRadius: 15, margin: 10,
+                                                                    width: 10, height: 10, backgroundColor: item.nestedSubDataIsCompleted ? Colors.green : Colors.dimText, borderRadius: 15, margin: 10,
                                                                     alignItems: 'center', justifyContent: 'center', marginLeft: 18
                                                                 }}>
 
                                                                 </View>
                                                                 <View style={{ width: '60%', margin: 5, borderRadius: 20, justifyContent: 'center' }}>
-                                                                    <TextComp textVal={item.name} textStyle={{ color: Colors.skyBlue, fontWeight: 500, marginLeft: 2 }} />
+                                                                    <TextComp textVal={item.name} textStyle={{ color: item.subDataIsCompleted ? Colors.skyBlue : Colors.dimText, fontWeight: 500, marginLeft: 2 }} />
                                                                 </View>
                                                             </View>
                                                             {/* {index != subData.length - 1 ? (
                                                             <View style={{ width: 1, height: 30, backgroundColor: Colors.green, marginLeft: 23 }} />
                                                         ) : null
                                                         } */}
-                                                            <View style={{ width: 1, height: 30, backgroundColor: Colors.green, marginLeft: 23 }} />
+                                                            <View style={{ width: 1, height: 30, backgroundColor: item.nestedSubDataIsCompleted ? Colors.green : Colors.dimText, marginLeft: 23 }} />
 
                                                         </View>
                                                     </TouchableOpacity>
@@ -306,7 +310,7 @@ const LoanApplicationMain = (props, { navigation }) => {
                     />
                 </View>
             </ScrollView>
-            <ButtonViewComp textValue={language[0][props.language].str_next.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} viewStyle={[Commonstyles.buttonView, { marginBottom: 10 }]} innerStyle={Commonstyles.buttonViewInnerStyle} handleClick={updateLeadDetails} />
+            <ButtonViewComp textValue={language[0][props.language].str_editprofileshort.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} viewStyle={[Commonstyles.buttonView, { marginBottom: 10 }]} innerStyle={Commonstyles.buttonViewInnerStyle} handleClick={nextScreen} />
         </View>
 
     );

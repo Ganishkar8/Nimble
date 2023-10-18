@@ -1,9 +1,9 @@
 import React from 'react';
-import {Text, TouchableOpacity, Image, View} from 'react-native';
+import { Text, TouchableOpacity, Image, View } from 'react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Colors from '../Utils/Colors';
 
-const ChildHeadComp = ({textval}) => {
+const ChildHeadComp = ({ textval }) => {
   return (
     <View
       style={{
@@ -18,7 +18,7 @@ const ChildHeadComp = ({textval}) => {
         }}>
         <Image
           source={require('../Images/applicantimage.png')}
-          style={{width: 20, height: 42}}
+          style={{ width: 14, height: 32 }}
         />
         <Text
           style={{
