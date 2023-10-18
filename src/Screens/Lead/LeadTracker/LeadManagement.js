@@ -479,7 +479,7 @@ const LeadManagement = (props, { navigation, route }) => {
                 setLeadStatusData(response.data)
                 var data = [];
                 for (var i = 0; i < response.data.length; i++) {
-                    data.push({ name: response.data[i].label, id: response.data[i].id, checked: false })
+                    data.push({ name: response.data[i].label.charAt(0).toUpperCase() + response.data[i].label.slice(1).toLowerCase(), id: response.data[i].id, checked: false })
                 }
                 setStatusDataArr(data)
                 setStatusRefresh(!statusRefresh)
@@ -505,7 +505,7 @@ const LeadManagement = (props, { navigation, route }) => {
                 var data = [];
                 setLeadStatusData(response.data)
                 for (var i = 0; i < response.data.length; i++) {
-                    data.push({ name: response.data[i].label, id: response.data[i].id, checked: false })
+                    data.push({ name: response.data[i].label.charAt(0).toUpperCase() + response.data[i].label.slice(1).toLowerCase(), id: response.data[i].id, checked: false })
                 }
                 setTypeDataArr(data)
             })
@@ -633,12 +633,12 @@ const LeadManagement = (props, { navigation, route }) => {
                     }}>
 
                         <View style={{ width: '100%', flexDirection: 'row', marginTop: 13 }}>
-                            <View style={{ width: '60%', flexDirection: 'row', alignItems: 'center' }}>
-                                <Text style={{ color: Colors.black, fontSize: 14, fontWeight: '100', marginLeft: 20 }}>{language[0][props.language].str_leadapprovalstatus}</Text>
+                            <View style={{ width: '45%', flexDirection: 'row', alignItems: 'center' }}>
+                                <Text style={{ color: Colors.mediumgrey, fontSize: 14, marginLeft: 26 }}>{language[0][props.language].str_leadapprovalstatus}</Text>
                             </View>
-                            <View style={{ width: '40%', flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'flex-start' }}>
-                                <View style={item.leadStatus == 'APPROVED' ? styles.approvedbackground : item.leadStatus == 'PENDING' ? styles.pendingbackground : styles.rejectedbackground}>
-                                    <Text style={{ color: Colors.black, fontSize: 14, fontWeight: '100' }}>{item.leadStatus}</Text>
+                            <View style={{ width: '55%', flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'flex-start' }}>
+                                <View style={item.leadStatus == 'APPROVED' ? styles.approvedbackground : item.leadStatus == 'PENDING' ? styles.pendingbackground : item.leadStatus == 'DRAFT' ? styles.draftbackground : styles.rejectedbackground}>
+                                    <Text style={{ color: Colors.mediumgrey, fontSize: 12, }}>{item.leadStatus}</Text>
                                 </View>
                             </View>
                         </View>
@@ -646,7 +646,7 @@ const LeadManagement = (props, { navigation, route }) => {
 
                         <View style={{ width: '100%', flexDirection: 'row', marginTop: 13, }}>
                             <View style={{ width: '45%' }}>
-                                <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_customername}</Text>
+                                <Text style={{ color: Colors.mediumgrey, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_customername}</Text>
                             </View>
                             <View style={{ width: '55%' }}>
                                 <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {item.customerName}</Text>
@@ -654,7 +654,7 @@ const LeadManagement = (props, { navigation, route }) => {
                         </View>
                         <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
                             <View style={{ width: '45%' }}>
-                                <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_leadid}</Text>
+                                <Text style={{ color: Colors.mediumgrey, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_leadid}</Text>
                             </View>
                             <View style={{ width: '55%' }}>
                                 <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {item.leadId}</Text>
@@ -662,7 +662,7 @@ const LeadManagement = (props, { navigation, route }) => {
                         </View>
                         <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
                             <View style={{ width: '45%' }}>
-                                <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_leadtype}</Text>
+                                <Text style={{ color: Colors.mediumgrey, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_leadtype}</Text>
                             </View>
                             <View style={{ width: '55%' }}>
                                 <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {item.leadType}</Text>
@@ -670,7 +670,7 @@ const LeadManagement = (props, { navigation, route }) => {
                         </View>
                         <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
                             <View style={{ width: '45%' }}>
-                                <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_creationdate}</Text>
+                                <Text style={{ color: Colors.mediumgrey, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_creationdate}</Text>
                             </View>
                             <View style={{ width: '55%' }}>
                                 <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {Common.formatDate(item.creationDate)}</Text>
@@ -678,7 +678,7 @@ const LeadManagement = (props, { navigation, route }) => {
                         </View>
                         <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
                             <View style={{ width: '45%' }}>
-                                <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_completiondate}</Text>
+                                <Text style={{ color: Colors.mediumgrey, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_completiondate}</Text>
                             </View>
                             <View style={{ width: '55%' }}>
                                 <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {item.leadStatus == 'APPROVED' ? Common.formatDate(item.creationDate) : ''} </Text>
@@ -686,7 +686,7 @@ const LeadManagement = (props, { navigation, route }) => {
                         </View>
                         <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
                             <View style={{ width: '45%' }}>
-                                <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_ageing}</Text>
+                                <Text style={{ color: Colors.mediumgrey, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_ageing}</Text>
                             </View>
                             <View style={{ width: '55%' }}>
                                 <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {item.ageing} days</Text>
@@ -694,14 +694,14 @@ const LeadManagement = (props, { navigation, route }) => {
                         </View>
                         {global.USERTYPEID == '1163' && <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
                             <View style={{ width: '45%' }}>
-                                <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_currentleadownerid}</Text>
+                                <Text style={{ color: Colors.mediumgrey, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_currentleadownerid}</Text>
                             </View>
                             <View style={{ width: '55%' }}>
                                 <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {item.agentName}</Text>
                             </View>
                         </View>
                         }
-                        <View style={{ width: '100%', height: 5, backgroundColor: item.leadStatus == 'APPROVED' ? Colors.approvedBorder : item.leadStatus == 'PENDING' ? Colors.pendingBorder : Colors.rejectedBorder, marginTop: 13, borderBottomLeftRadius: 8, borderBottomRightRadius: 8 }} />
+                        <View style={{ width: '100%', height: 5, backgroundColor: item.leadStatus == 'APPROVED' ? Colors.approvedBorder : item.leadStatus == 'PENDING' ? Colors.pendingBorder : item.leadStatus == 'DRAFT' ? Colors.lightgrey : Colors.rejectedBorder, marginTop: 13, borderBottomLeftRadius: 8, borderBottomRightRadius: 8 }} />
 
 
                     </View>
@@ -834,7 +834,7 @@ const LeadManagement = (props, { navigation, route }) => {
                         renderItem={({ item, index }) => {
                             return (
                                 <TouchableOpacity onPress={() => handleclick(item, index)} activeOpacity={11}>
-                                    <View style={[styles.viewStyle, { flexDirection: 'row', borderColor: item.isSelected ? Colors.darkblue : Colors.line }]}>
+                                    <View style={[styles.viewStyle, { flexDirection: 'row', borderColor: item.isSelected ? Colors.darkblue : Colors.lightgrey, backgroundColor: item.isSelected ? '#EFF8FF' : Colors.white }]}>
                                         <Text style={[styles.textColor, { marginRight: 8, }]}>{item.name}</Text>
                                         {item.name === 'Filter' &&
                                             <Image source={require('../../../Images/filter.png')}
@@ -1132,7 +1132,10 @@ const styles = StyleSheet.create({
         width: 90, borderColor: Colors.approvedBorder, backgroundColor: Colors.approvedBg, alignItems: 'center', padding: 3, borderRadius: 15, borderWidth: 1
     },
     rejectedbackground: {
-        width: 90, borderColor: Colors.rejectedBorder, rejectedbackground: Colors.approvedBg, alignItems: 'center', padding: 3, borderRadius: 15, borderWidth: 1
+        width: 90, borderColor: Colors.rejectedBorder, backgroundColor: Colors.rejectedBg, alignItems: 'center', padding: 3, borderRadius: 15, borderWidth: 1
+    },
+    draftbackground: {
+        width: 90, borderColor: Colors.lightgrey, backgroundColor: '#f2f2f2', alignItems: 'center', padding: 3, borderRadius: 15, borderWidth: 1
     },
     fab: {
         position: 'absolute',

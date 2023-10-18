@@ -35,7 +35,7 @@ const TypeComp = ({ props, typeData, filterClick }) => {
         <View>
             <View style={{ marginLeft: 15 }}>
                 <Text
-                    style={{ marginTop: 15, fontSize: 14, color: Colors.dimText }}>
+                    style={{ marginTop: 15, fontSize: 14, color: Colors.mediumgrey }}>
                     {language[0][props.language].str_leadtype}
                 </Text>
             </View>

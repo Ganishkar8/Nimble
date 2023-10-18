@@ -23,6 +23,7 @@ export default {
     approvedBg: '#f5f8fa',
     rejectedBorder: '#E90000',
     rejectedBg: '#FFCFCF',
+    draftBg: '#9f9f9f',
     skyblue: '#f5f8fa',
     disableBg: '#dfe6ea',
     maroon: '#FFF2C5'

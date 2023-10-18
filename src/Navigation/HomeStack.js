@@ -62,12 +62,7 @@ export default HomeStack = () => {
       <Stack.Screen
         name="ProfileShortBasicDetails"
         component={ProfileShortBasicDetails}
-        options={{headerShown: false, tabBarVisible: false}}
-      />
-      <Stack.Screen
-        name="ProfileShortBasicDetails"
-        component={ProfileShortBasicDetails}
-        options={{headerShown: false, tabBarVisible: false}}
+        options={{ headerShown: false, tabBarVisible: false }}
       />
 
       <Stack.Screen
