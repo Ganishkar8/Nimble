@@ -32,7 +32,7 @@ const SortByComp = ({ props, filterClick, selectedValue, from }) => {
         <View>
             <View style={{ marginLeft: 15 }}>
                 <Text
-                    style={{ marginTop: 15, fontSize: 14, color: Colors.dimText }}>
+                    style={{ marginTop: 15, fontSize: 14, color: Colors.mediumgrey }}>
                     {language[0][props.language].str_sortby}
                 </Text>
                 <Text

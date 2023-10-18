@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, TextInput, TouchableOpacity} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import Colors from '../../Utils/Colors';
 import Common from '../../Utils/Common';
 import { connect } from 'react-redux';
@@ -13,10 +13,10 @@ const DateComp = ({ props, filterClick, fromCompDate, toCompDate }) => {
 
     const currentDate = new Date();
 
-  // Extract the components of the current date
-  const day = currentDate.getDate().toString().padStart(2, '0');
-  const month = (currentDate.getMonth() + 1).toString().padStart(2, '0'); // Note: Months are 0-indexed, so we add 1.
-  const year = currentDate.getFullYear();
+    // Extract the components of the current date
+    const day = currentDate.getDate().toString().padStart(2, '0');
+    const month = (currentDate.getMonth() + 1).toString().padStart(2, '0'); // Note: Months are 0-indexed, so we add 1.
+    const year = currentDate.getFullYear();
 
     // Create the formatted date string
     const formattedDatee = `${day}-${month}-${year}`;
@@ -127,7 +127,7 @@ const DateComp = ({ props, filterClick, fromCompDate, toCompDate }) => {
         <View>
             <View style={{ marginLeft: 15 }}>
                 <Text
-                    style={{ marginTop: 15, fontSize: 14, color: Colors.dimText }}>
+                    style={{ marginTop: 15, fontSize: 14, color: Colors.mediumgrey }}>
                     {language[0][props.language].str_cdcaps}
                 </Text>
             </View>
@@ -215,14 +215,14 @@ const DateComp = ({ props, filterClick, fromCompDate, toCompDate }) => {
     );
 };
 const mapStateToProps = state => {
-  const {language} = state.languageReducer;
-  return {
-    language: language,
-  };
+    const { language } = state.languageReducer;
+    return {
+        language: language,
+    };
 };
 
 const mapDispatchToProps = dispatch => ({
-  languageAction: item => dispatch(languageAction(item)),
+    languageAction: item => dispatch(languageAction(item)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(DateComp);

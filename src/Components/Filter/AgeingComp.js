@@ -31,7 +31,7 @@ const AgeingComp = ({ props, filterClick, operatorid, ageValue }) => {
         <View>
             <View style={{ marginLeft: 15 }}>
                 <Text
-                    style={{ marginTop: 15, fontSize: 14, color: Colors.dimText }}>
+                    style={{ marginTop: 15, fontSize: 14, color: Colors.mediumgrey }}>
                     {language[0][props.language].str_ageingcap}
                 </Text>
             </View>
