@@ -85,6 +85,10 @@ const LeadManagement = (props, { navigation, route }) => {
     const isScreenVisible = useIsFocused();
     const [leadStatusData, setLeadStatusData] = useState([]);
 
+    const [noRecord, setNoRecord] = useState(false);
+    const showNoRecord = () => setNoRecord(true);
+    const hideNoRecord = () => setNoRecord(false);
+
     const [sortedFilterValue, setSortedFilterValue] = useState('');
     const [statusFilterValue, setStatusFilterValue] = useState('');
     const [typeFilterValue, setTypeFilterValue] = useState('');
@@ -326,6 +330,11 @@ const LeadManagement = (props, { navigation, route }) => {
                 setFilteredData(response.data.slice().reverse())
                 setLoading(false)
                 setRefreshing(false)
+                if (response.data.length > 0) {
+                    setNoRecord(false)
+                } else {
+                    setNoRecord(true)
+                }
                 // const decodedToken = jwtDecode(response.data.jwtToken);
                 // console.log("LoginJWTDecode::" + JSON.stringify(decodedToken));
             })
@@ -860,59 +869,70 @@ const LeadManagement = (props, { navigation, route }) => {
                 </View>
             </View>
 
-            <View style={{
-                width: '100%', alignItems: 'center',
-                justifyContent: 'center', marginTop: 10, marginBottom: 8
-            }}>
+            {!noRecord &&
                 <View style={{
-                    width: '95%', backgroundColor: '#f2f2f2',
-                    borderRadius: 7, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10
+                    width: '100%', alignItems: 'center',
+                    justifyContent: 'center', marginTop: 10, marginBottom: 8
                 }}>
+                    <View style={{
+                        width: '95%', backgroundColor: '#f2f2f2',
+                        borderRadius: 7, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10
+                    }}>
 
-                    <TextInput
-                        value={search}
-                        onChangeText={search => {
-                            if (search.length > 0) {
-                                if (Common.isValidAlphaText(search))
+                        <TextInput
+                            value={search}
+                            onChangeText={search => {
+                                if (search.length > 0) {
+                                    if (Common.isValidAlphaText(search))
+                                        searchFilterFunction(search)
+                                } else {
                                     searchFilterFunction(search)
-                            } else {
-                                searchFilterFunction(search)
-                            }
+                                }
 
-                        }}
-                        placeholder={'Search By Name or Lead ID'}
-                        placeholderTextColor={'gray'}
-                        keyboardType='default'
-                        secureTextEntry={false}
-                        autoCapitalize="none"
-                        style={{
-                            width: '80%',
-                            height: 44,
-                            fontSize: 14.4,
-                            fontWeight: '400',
-                            color: Colors.black
-                        }}
-                    />
-                    <Ionicons name="search" style={{ marginStart: 32 }} size={20} color={'#aaaaaa'} />
-                </View>
-            </View>
-
-            <View style={{ width: '100%', justifyContent: 'center', marginBottom: 200 }}>
-                <FlatList
-                    data={filteredData}
-                    renderItem={listView}
-                    showsVerticalScrollIndicator={false}
-                    keyExtractor={(item, index) => index.toString()}
-
-                    refreshControl={
-                        <RefreshControl
-                            //refresh control used for the Pull to Refresh
-                            refreshing={refreshing}
-                            onRefresh={onRefresh}
+                            }}
+                            placeholder={'Search By Name or Lead ID'}
+                            placeholderTextColor={'gray'}
+                            keyboardType='default'
+                            secureTextEntry={false}
+                            autoCapitalize="none"
+                            style={{
+                                width: '80%',
+                                height: 44,
+                                fontSize: 14.4,
+                                fontWeight: '400',
+                                color: Colors.black
+                            }}
                         />
-                    }
+                        <Ionicons name="search" style={{ marginStart: 32 }} size={20} color={'#aaaaaa'} />
+                    </View>
+                </View>
+            }
 
-                />
+            <View style={{ flex: 1, }}>
+                {!noRecord &&
+                    <FlatList
+                        data={filteredData}
+                        renderItem={listView}
+                        showsVerticalScrollIndicator={false}
+                        keyExtractor={(item, index) => index.toString()}
+
+                        refreshControl={
+                            <RefreshControl
+                                //refresh control used for the Pull to Refresh
+                                refreshing={refreshing}
+                                onRefresh={onRefresh}
+                            />
+                        }
+                    />}
+                {noRecord &&
+                    <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: 100 }}>
+                        <Image source={require('../../../Images/norecord.png')}
+                            style={{ width: 200, height: 200 }} />
+
+                        <Text style={{ color: Colors.black, marginTop: 20 }}>No Record Found!</Text>
+                    </View>
+                }
+
             </View>
 
             <BottomSheet

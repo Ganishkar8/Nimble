@@ -1,9 +1,9 @@
-import React, {useState} from 'react';
-import {Text, Image, View, StyleSheet} from 'react-native';
+import React, { useState } from 'react';
+import { Text, Image, View, StyleSheet } from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
 import Colors from '../Utils/Colors';
 
-const CheckBoxComp = ({textCaption, textStyle, Visible, Disable}) => {
+const CheckBoxComp = ({ textCaption, textStyle, Visible, Disable }) => {
   const [isSelected, setSelection] = useState(false);
 
   return (
@@ -14,7 +14,7 @@ const CheckBoxComp = ({textCaption, textStyle, Visible, Disable}) => {
       }}>
       <View
         style={{
-          width: '90%',
+          width: '93%',
           flexDirection: 'row',
           alignItems: 'center',
         }}>
@@ -26,7 +26,7 @@ const CheckBoxComp = ({textCaption, textStyle, Visible, Disable}) => {
         />
         <Text style={textStyle}>
           {textCaption}
-          {Visible && <Text style={{color: 'red'}}>*</Text>}
+          {Visible && <Text style={{ color: 'red' }}>*</Text>}
         </Text>
       </View>
     </View>
