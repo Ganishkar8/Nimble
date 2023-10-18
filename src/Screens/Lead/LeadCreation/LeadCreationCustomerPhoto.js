@@ -1,4 +1,4 @@
-import React, {useState, useRef, useEffect, createRef} from 'react';
+import React, { useState, useRef, useEffect, createRef } from 'react';
 import {
   StyleSheet,
   View,
@@ -27,27 +27,27 @@ import Colors from '../../../Utils/Colors';
 import MyStatusBar from '../../../Components/ MyStatusBar';
 import Loading from '../../../Components/Loading';
 import TextComp from '../../../Components/TextComp';
-import {connect} from 'react-redux';
-import {languageAction} from '../../../Utils/redux/actions/languageAction';
-import {language} from '../../../Utils/LanguageString';
+import { connect } from 'react-redux';
+import { languageAction } from '../../../Utils/redux/actions/languageAction';
+import { language } from '../../../Utils/LanguageString';
 import Commonstyles from '../../../Utils/Commonstyles';
 import ImageComp from '../../../Components/ImageComp';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import HeadComp from '../../../Components/HeadComp';
-import {ProgressBar, MD3Colors} from 'react-native-paper';
-import {Picker} from '@react-native-picker/picker';
+import { ProgressBar, MD3Colors } from 'react-native-paper';
+import { Picker } from '@react-native-picker/picker';
 import ProgressComp from '../../../Components/ProgressComp';
 import Geolocation from 'react-native-geolocation-service';
 import RNAndroidLocationEnabler from 'react-native-android-location-enabler';
-import MapView, {Marker} from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 import Entypo from 'react-native-vector-icons/Entypo';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Fontisto from 'react-native-vector-icons/Fontisto';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import ImagePicker, {ImageOrVideo} from 'react-native-image-crop-picker';
-import {tr} from 'react-native-paper-dates';
+import ImagePicker, { ImageOrVideo } from 'react-native-image-crop-picker';
+import { tr } from 'react-native-paper-dates';
 import Modal from 'react-native-modal';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import apiInstancelocal from '../../../Utils/apiInstancelocal';
@@ -61,238 +61,238 @@ import { profileAction } from '../../../Utils/redux/actions/ProfileAction';
 
 const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
-    const [
-        currentLongitude,
-        setCurrentLongitude
-    ] = useState(0.0);
-    const [
-        currentLatitude,
-        setCurrentLatitude
-    ] = useState(0.0);
-    const [
-        locationStatus,
-        setLocationStatus
-    ] = useState('');
-    const [profileDetail, setProfileDetail] = useState(props.profiledetail);
+  const [
+    currentLongitude,
+    setCurrentLongitude
+  ] = useState(0.0);
+  const [
+    currentLatitude,
+    setCurrentLatitude
+  ] = useState(0.0);
+  const [
+    locationStatus,
+    setLocationStatus
+  ] = useState('');
+  const [profileDetail, setProfileDetail] = useState(props.profiledetail);
 
-    const [gpslatlon, setGPSLatLon] = useState('');
-    const mapRef = useRef(null);
-    const [visible, setVisible] = useState(true);
-    const [photoOptionvisible, setphotoOptionvisible] = useState(false);
-    const [imageUri, setImageUri] = useState(null);
-    const [imageFile, setImageFile] = useState([]);
-    const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
-    const [deleteVisible, setDeleteVisible] = useState(false);
-    const [errMsg, setErrMsg] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [docID, setDocID] = useState('');
-    const [fileName, setFileName] = useState('');
-    const [fileType, setFileType] = useState('');
-    const [time, setTime] = useState('');
-    const [leadType, setLeadType] = useState(global.LEADTYPE);
+  const [gpslatlon, setGPSLatLon] = useState('');
+  const mapRef = useRef(null);
+  const [visible, setVisible] = useState(true);
+  const [photoOptionvisible, setphotoOptionvisible] = useState(false);
+  const [imageUri, setImageUri] = useState(null);
+  const [imageFile, setImageFile] = useState([]);
+  const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
+  const [deleteVisible, setDeleteVisible] = useState(false);
+  const [errMsg, setErrMsg] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [docID, setDocID] = useState('');
+  const [fileName, setFileName] = useState('');
+  const [fileType, setFileType] = useState('');
+  const [time, setTime] = useState('');
+  const [leadType, setLeadType] = useState(global.LEADTYPE);
 
   const showBottomSheet = () => setBottomSheetVisible(true);
   const hideBottomSheet = () => setBottomSheetVisible(false);
 
-    const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
-    const showBottomErrorSheet = () => setBottomErrorSheetVisible(true);
-    const hideBottomErrorSheet = () => setBottomErrorSheetVisible(false);
+  const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
+  const showBottomErrorSheet = () => setBottomErrorSheetVisible(true);
+  const hideBottomErrorSheet = () => setBottomErrorSheetVisible(false);
 
-    const [detailModalVisible, setDetailModalVisible] = useState(false);
-    const showDetailModalSheet = () => setDetailModalVisible(true);
-    const hideDetailModalSheet = () => setDetailModalVisible(false);
+  const [detailModalVisible, setDetailModalVisible] = useState(false);
+  const showDetailModalSheet = () => setDetailModalVisible(true);
+  const hideDetailModalSheet = () => setDetailModalVisible(false);
 
 
   const showphotoBottomSheet = () => setphotoOptionvisible(true);
   const hidephotoBottomSheet = () => setphotoOptionvisible(false);
 
-    useEffect(() => {
+  useEffect(() => {
 
-        getData();
+    getData();
 
-    }, [gpslatlon]);
+  }, [gpslatlon]);
 
 
-    const getData = () => {
+  const getData = () => {
 
-        if (leadType == 'DRAFT') {
-            tbl_lead_creation_dms.getLeadCreationDmsDetailsBasedOnLeadID(global.leadID).then(value => {
-                if (value !== undefined && value.length > 0) {
-                    setDocID(value[0].dms_id);
-                    setFileName(value[0].file_name);
-                    setFileType(value[0].file_type);
-                    const latLng = value[0].geo_location;
-                    const [latitude, longitude] = latLng.split(',');
-                    setCurrentLongitude(parseFloat(longitude));
-                    setCurrentLatitude(parseFloat(latitude));
-                    setTime(value[0].created_On)
-                    zoomToMarker();
-                    setGPSLatLon(latLng);
-                    tbl_lead_image.getLeadImageBasedOnLeadID(global.leadID).then(value => {
-                        if (value !== undefined && value.length > 0) {
-                            setVisible(false)
-                            setImageUri(value[0].image);
-                        }
-                    })
-                } else {
-                    getOneTimeLocation();
-                }
-            })
-        } else if (leadType == 'NEW') {
-            getOneTimeLocation();
-        } else if (leadType == 'COMP') {
-            const data = props.route.params.leadData;
-            setDocID(data.leadCreationDms.dmsId);
-            setFileName(data.leadCreationDms.fileName);
-            setFileType(data.leadCreationDms.fileType);
-            setTime(data.leadCreationDms.createdOn)
-            const latLng = data.leadCreationDms.geoLocation;
-            const [latitude, longitude] = latLng.split(',');
-            setCurrentLongitude(parseFloat(longitude));
-            setCurrentLatitude(parseFloat(latitude));
-            getImage(data.leadCreationDms.dmsId);
-            zoomToMarker();
-            setGPSLatLon(latLng);
-        }
-
-    }
-
-    const getImage = (dmsID) => {
-        Common.getNetworkConnection().then(value => {
-            if (value.isConnected == true) {
-                setLoading(true)
-                const baseURL = '8094'
-                apiInstance(baseURL).get(`/api/documents/document/${dmsID}`)
-                    .then(async (response) => {
-                        // Handle the response data
-                        console.log("FinalLeadCreationApiResponse::" + JSON.stringify(response.data));
-                        setFileName(response.data.fileName)
-                        setVisible(false)
-                        setImageUri('data:image/png;base64,' + response.data.base64Content)
-                        // props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
-                        setLoading(false)
-
-                    })
-                    .catch((error) => {
-                        // Handle the error
-                        console.log("Error" + JSON.stringify(error.response))
-                        setLoading(false)
-                        alert(error);
-                    });
-            } else {
-                alert(language[0][props.language].str_errinternetimage)
+    if (leadType == 'DRAFT') {
+      tbl_lead_creation_dms.getLeadCreationDmsDetailsBasedOnLeadID(global.leadID).then(value => {
+        if (value !== undefined && value.length > 0) {
+          setDocID(value[0].dms_id);
+          setFileName(value[0].file_name);
+          setFileType(value[0].file_type);
+          const latLng = value[0].geo_location;
+          const [latitude, longitude] = latLng.split(',');
+          setCurrentLongitude(parseFloat(longitude));
+          setCurrentLatitude(parseFloat(latitude));
+          setTime(value[0].created_On)
+          zoomToMarker();
+          setGPSLatLon(latLng);
+          tbl_lead_image.getLeadImageBasedOnLeadID(global.leadID).then(value => {
+            if (value !== undefined && value.length > 0) {
+              setVisible(false)
+              setImageUri(value[0].image);
             }
-
-        })
+          })
+        } else {
+          getOneTimeLocation();
+        }
+      })
+    } else if (leadType == 'NEW') {
+      getOneTimeLocation();
+    } else if (leadType == 'COMP') {
+      const data = props.route.params.leadData;
+      setDocID(data.leadCreationDms.dmsId);
+      setFileName(data.leadCreationDms.fileName);
+      setFileType(data.leadCreationDms.fileType);
+      setTime(data.leadCreationDms.createdOn)
+      const latLng = data.leadCreationDms.geoLocation;
+      const [latitude, longitude] = latLng.split(',');
+      setCurrentLongitude(parseFloat(longitude));
+      setCurrentLatitude(parseFloat(latitude));
+      getImage(data.leadCreationDms.dmsId);
+      zoomToMarker();
+      setGPSLatLon(latLng);
     }
 
+  }
 
-    const uploadImage = async () => {
+  const getImage = (dmsID) => {
+    Common.getNetworkConnection().then(value => {
+      if (value.isConnected == true) {
+        setLoading(true)
+        const baseURL = '8094'
+        apiInstance(baseURL).get(`/api/documents/document/${dmsID}`)
+          .then(async (response) => {
+            // Handle the response data
+            console.log("FinalLeadCreationApiResponse::" + JSON.stringify(response.data));
+            setFileName(response.data.fileName)
+            setVisible(false)
+            setImageUri('data:image/png;base64,' + response.data.base64Content)
+            // props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
+            setLoading(false)
+
+          })
+          .catch((error) => {
+            // Handle the error
+            console.log("Error" + JSON.stringify(error.response))
+            setLoading(false)
+            alert(error);
+          });
+      } else {
+        alert(language[0][props.language].str_errinternetimage)
+      }
+
+    })
+  }
 
 
-        if (validate()) {
-            showBottomErrorSheet();
-            return;
+  const uploadImage = async () => {
+
+
+    if (validate()) {
+      showBottomErrorSheet();
+      return;
+    }
+    Common.getNetworkConnection().then(value => {
+      if (value.isConnected == true) {
+        updateImage();
+      } else {
+        insertLead(global.leadID, true);
+      }
+
+    })
+
+
+  };
+
+  const updateImage = async () => {
+    if (imageUri) {
+
+      setLoading(true);
+      insertLead(global.leadID, false)
+      const formData = new FormData();
+      formData.append('file', {
+        uri: imageUri,
+        type: fileType,
+        name: fileName,
+      });
+
+      try {
+        const response = await fetch(global.BASEURL + '8094/api/documents', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          // Handle the response from Cloudinary
+
+          console.log('Upload success:', data);
+          setDocID(data.docId);
+          updateLeadDetails(data.docId);
+        } else {
+          console.log('Upload failed:', response.status);
         }
-        Common.getNetworkConnection().then(value => {
-            if (value.isConnected == true) {
-                updateImage();
-            } else {
-                insertLead(global.leadID, true);
-            }
+      } catch (error) {
+        console.log('Upload error:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+  }
 
-        })
+  const updateLeadDetails = (id) => {
 
-
-    };
-
-    const updateImage = async () => {
-        if (imageUri) {
-
-            setLoading(true);
-            insertLead(global.leadID, false)
-            const formData = new FormData();
-            formData.append('file', {
-                uri: imageUri,
-                type: fileType,
-                name: fileName,
-            });
-
-            try {
-                const response = await fetch(global.BASEURL + '8094/api/documents', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    // Handle the response from Cloudinary
-
-                    console.log('Upload success:', data);
-                    setDocID(data.docId);
-                    updateLeadDetails(data.docId);
-                } else {
-                    console.log('Upload failed:', response.status);
-                }
-            } catch (error) {
-                console.log('Upload error:', error);
-            } finally {
-                setLoading(false);
-            }
-        }
+    const appDetails = {
+      "leadCreationDms": {
+        "createdBy": global.USERID,
+        "createdOn": '',
+        "dmsId": id,
+        "fileName": fileName,
+        "fileType": fileType,
+        "fileInfo": "",
+        "comments": "",
+        "geoLocation": currentLatitude + "," + currentLongitude
+      }
     }
 
-    const updateLeadDetails = (id) => {
+    const baseURL = '8901'
+    apiInstancelocal(baseURL).put(`/api/v1/lead-creation-initiation/${global.leadID}`, appDetails)
+      .then(async (response) => {
+        // Handle the response data
 
-        const appDetails = {
-            "leadCreationDms": {
-                "createdBy": global.USERID,
-                "createdOn": '',
-                "dmsId": id,
-                "fileName": fileName,
-                "fileType": fileType,
-                "fileInfo": "",
-                "comments": "",
-                "geoLocation": currentLatitude + "," + currentLongitude
-            }
-        }
+        console.log("FinalLeadCreationApiResponse::" + JSON.stringify(response.data));
+        props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
+        setLoading(false)
 
-        const baseURL = '8901'
-        apiInstancelocal(baseURL).put(`/api/v1/lead-creation-initiation/${global.leadID}`, appDetails)
-            .then(async (response) => {
-                // Handle the response data
+      })
+      .catch((error) => {
+        // Handle the error
+        console.log("Error" + JSON.stringify(error.response))
+        setLoading(false)
+        alert(error);
+      });
 
-                console.log("FinalLeadCreationApiResponse::" + JSON.stringify(response.data));
-                props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
-                setLoading(false)
+  }
 
-            })
-            .catch((error) => {
-                // Handle the error
-                console.log("Error" + JSON.stringify(error.response))
-                setLoading(false)
-                alert(error);
-            });
+  const insertLead = async (leadID, nav) => {
+    await tbl_lead_creation_dms.insertLeadCreationDmsDetails(leadID, docID, fileName, '', fileType, gpslatlon, '', global.USERID, time);
+    await tbl_lead_image.insertLeadImage(leadID, docID, imageUri, global.USERID);
 
+    tbl_lead_creation_dms.getLeadCreationDmsDetailsBasedOnLeadID(leadID).then(value => {
+      console.log("LeadImageDetails::::" + JSON.stringify(value))
+    })
+
+    tbl_lead_image.getLeadImageBasedOnLeadID(leadID).then(value => {
+      console.log("LeadImage::::" + JSON.stringify(value))
+    })
+    if (nav == true) {
+      props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
     }
-
-    const insertLead = async (leadID, nav) => {
-        await tbl_lead_creation_dms.insertLeadCreationDmsDetails(leadID, docID, fileName, '', fileType, gpslatlon, '', global.USERID, time);
-        await tbl_lead_image.insertLeadImage(leadID, docID, imageUri, global.USERID);
-
-        tbl_lead_creation_dms.getLeadCreationDmsDetailsBasedOnLeadID(leadID).then(value => {
-            console.log("LeadImageDetails::::" + JSON.stringify(value))
-        })
-
-        tbl_lead_image.getLeadImageBasedOnLeadID(leadID).then(value => {
-            console.log("LeadImage::::" + JSON.stringify(value))
-        })
-        if (nav == true) {
-            props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
-        }
-    }
+  }
 
   const zoomToMarker = () => {
     if (mapRef.current) {
@@ -311,31 +311,31 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
   const pickImage = () => {
     // setVisible(false)
 
-        hidephotoBottomSheet();
-        ImagePicker.openCamera({
-            cropping: true,
-        }).then(image => {
-            setImageFile(image)
+    hidephotoBottomSheet();
+    ImagePicker.openCamera({
+      cropping: true,
+    }).then(image => {
+      setImageFile(image)
 
-            const lastDotIndex = image.path.lastIndexOf('.');
-            var imageName = 'Photo' + '_' + global.leadID;
-            if (lastDotIndex !== -1) {
-                // Get the substring from the last dot to the end of the string
-                const fileExtension = image.path.substring(lastDotIndex);
-                imageName = imageName + fileExtension;
-                console.log('File extension:', fileExtension);
-            }
+      const lastDotIndex = image.path.lastIndexOf('.');
+      var imageName = 'Photo' + '_' + global.leadID;
+      if (lastDotIndex !== -1) {
+        // Get the substring from the last dot to the end of the string
+        const fileExtension = image.path.substring(lastDotIndex);
+        imageName = imageName + fileExtension;
+        console.log('File extension:', fileExtension);
+      }
 
-            // const imageName = image.path.split('/').pop();
-            setTime(Common.getCurrentDateTime());
-            setFileType(image.mime)
-            setFileName(imageName)
-            setImageUri(image.path)
-            setVisible(false)
-            props.onChange?.(image);
-        })
+      // const imageName = image.path.split('/').pop();
+      setTime(Common.getCurrentDateTime());
+      setFileType(image.mime)
+      setFileName(imageName)
+      setImageUri(image.path)
+      setVisible(false)
+      props.onChange?.(image);
+    })
 
-    };
+  };
 
   const selectImage = async () => {
     // setVisible(false)
@@ -348,23 +348,23 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
     }).then(image => {
       setImageFile(image);
 
-            const lastDotIndex = image.path.lastIndexOf('.');
-            var imageName = 'Photo' + '_' + global.leadID;
-            if (lastDotIndex !== -1) {
-                // Get the substring from the last dot to the end of the string
-                const fileExtension = image.path.substring(lastDotIndex);
-                imageName = imageName + fileExtension;
-                console.log('File extension:', fileExtension);
-            }
-            setFileType(image.mime)
-            setFileName(imageName)
-            setImageUri(image.path)
-            setVisible(false)
-            setDeleteVisible(false)
-            props.onChange?.(image);
-        })
+      const lastDotIndex = image.path.lastIndexOf('.');
+      var imageName = 'Photo' + '_' + global.leadID;
+      if (lastDotIndex !== -1) {
+        // Get the substring from the last dot to the end of the string
+        const fileExtension = image.path.substring(lastDotIndex);
+        imageName = imageName + fileExtension;
+        console.log('File extension:', fileExtension);
+      }
+      setFileType(image.mime)
+      setFileName(imageName)
+      setImageUri(image.path)
+      setVisible(false)
+      setDeleteVisible(false)
+      props.onChange?.(image);
+    })
 
-    };
+  };
 
 
   const getOneTimeLocation = () => {
@@ -480,45 +480,45 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
   return (
     // enclose all components in this View tag
     <SafeAreaView
-      style={[styles.parentView, {backgroundColor: Colors.lightwhite}]}>
+      style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
       <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
 
 
 
-            <View style={{
-                width: '100%', height: 56, alignItems: 'center', justifyContent: 'center',
+      <View style={{
+        width: '100%', height: 56, alignItems: 'center', justifyContent: 'center',
 
-            }}>
-                <HeadComp textval={language[0][props.language].str_leadcreation} props={props} />
-            </View>
+      }}>
+        <HeadComp textval={language[0][props.language].str_leadcreation} props={props} />
+      </View>
 
-            <View style={{ width: '100%', justifyContent: 'center', alignItems: 'flex-end' }}>
-                <Text style={{
-                    fontSize: 14, color: Colors.mediumgrey, marginRight: 23,
-                }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black }}>{global.leadNumber}</Text></Text>
-            </View>
-            <ScrollView style={styles.scrollView}
-                contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-                {loading ? <Loading /> : null}
-                <View style={{ flex: 1 }}>
+      <View style={{ width: '100%', justifyContent: 'center', alignItems: 'flex-end' }}>
+        <Text style={{
+          fontSize: 14, color: Colors.mediumgrey, marginRight: 23,
+        }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black }}>{global.leadNumber}</Text></Text>
+      </View>
+      <ScrollView style={styles.scrollView}
+        contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+        {loading ? <Loading /> : null}
+        <View style={{ flex: 1 }}>
 
-                    <Modal
-                        isVisible={bottomErrorSheetVisible}
-                        onBackdropPress={hideBottomSheet}
-                        style={styles.modal}
-                    >
-                        <View style={styles.modalContent}>
-                            <View style={{ alignItems: 'center' }}>
+          <Modal
+            isVisible={bottomErrorSheetVisible}
+            onBackdropPress={hideBottomSheet}
+            style={styles.modal}
+          >
+            <View style={styles.modalContent}>
+              <View style={{ alignItems: 'center' }}>
 
-                                <View style={{ width: '100%', flexDirection: 'row', }}>
+                <View style={{ width: '100%', flexDirection: 'row', }}>
 
-                                    <TextComp textVal={language[0][props.language].str_error} textStyle={{ fontSize: 14, color: Colors.black, fontWeight: 600 }} Visible={false} />
+                  <TextComp textVal={language[0][props.language].str_error} textStyle={{ fontSize: 14, color: Colors.black, fontWeight: 600 }} Visible={false} />
 
-                                    <MaterialIcons name='error' size={20} color={Colors.red} />
+                  <MaterialIcons name='error' size={20} color={Colors.red} />
 
-                                </View>
+                </View>
 
-                <View style={{width: '100%', marginTop: 15}}>
+                <View style={{ width: '100%', marginTop: 15 }}>
                   <TextComp
                     textVal={errMsg}
                     textStyle={{
@@ -533,211 +533,211 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
 
 
-                                <View style={{ width: '100%', justifyContent: 'flex-end', alignItems: 'flex-end', flexDirection: 'row' }}>
+                <View style={{ width: '100%', justifyContent: 'flex-end', alignItems: 'flex-end', flexDirection: 'row' }}>
 
 
 
-
-                                    <View
-                                        style={{
-                                            width: '25%',
-                                            height: 40,
-                                            justifyContent: 'flex-end',
-                                            alignItems: 'center',
-                                        }}>
-                                        <TouchableOpacity onPress={() => { hideBottomErrorSheet() }} activeOpacity={0.5} style={{
-                                            width: '88%', height: 40, backgroundColor: '#0294ff',
-                                            borderRadius: 35, alignItems: 'center', justifyContent: 'center'
-                                        }}>
-                                            <View >
-
-                                                <TextComp textVal={language[0][props.language].str_ok} textStyle={{ color: Colors.white, fontSize: 15, fontWeight: 600 }} />
-
-                                            </View>
-                                        </TouchableOpacity>
-                                    </View>
-
-                                </View>
-
-                            </View>
-
-
-                        </View>
-                    </Modal>
-
-                    <ImageDetailComp props={props} isVisible={detailModalVisible} onClose={hideDetailModalSheet} fileName={fileName} time={time} geoLocation={gpslatlon} fileType={fileType} />
-
-                    <Modal
-                        isVisible={bottomSheetVisible}
-                        onBackdropPress={hideBottomSheet}
-                        style={styles.modal}
-                    >
-                        <View style={styles.modalContent}>
-
-                            {(!deleteVisible) && <View style={{ marginBottom: 20 }}>
-
-                                <TextComp textVal={fileName} textStyle={{ width: '90%', fontSize: 14, color: Colors.mediumgrey, marginTop: 15 }} Visible={false} />
-
-
-                                <View style={{ width: '100%', flexDirection: 'row', marginTop: 15, paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: '#e2e2e2' }} />
-
-
-                                <TouchableOpacity onPress={() => { hideBottomSheet(); props.navigation.navigate('PreviewImage', { imageName: fileName, imageUri: imageUri }) }} style={{ width: '100%', flexDirection: 'row', marginTop: 25 }}>
-                                    <View style={{ flexDirection: 'row' }}>
-                                        <View style={{ width: '15%' }}>
-                                            <Image source={require('../../../Images/preview.png')}
-                                                style={{ width: 20, height: 20 }} />
-                                        </View>
-                                        <View style={{ width: '85%', justifyContent: 'center', marginLeft: 3 }}>
-                                            <TextComp textVal={language[0][props.language].str_preview} textStyle={{ fontSize: 14, color: Colors.mediumgrey }} Visible={false} />
-                                        </View>
-
-                                    </View>
-
-                                </TouchableOpacity>
-
-                                <TouchableOpacity onPress={() => { showDetailModalSheet(); hideBottomSheet(); }} style={{ width: '100%', flexDirection: 'row', marginTop: 25 }}>
-                                    <View style={{ flexDirection: 'row' }}>
-                                        <View style={{ width: '15%' }}>
-                                            <MaterialIcons name='error' size={20} color={Colors.darkblue} />
-                                        </View>
-                                        <View style={{ width: '85%', justifyContent: 'center', marginLeft: 3 }}>
-                                            <TextComp textVal={language[0][props.language].str_details} textStyle={{ fontSize: 14, color: Colors.mediumgrey }} Visible={false} />
-                                        </View>
-
-                                    </View>
-
-                                </TouchableOpacity>
-
-                                {leadType != 'COMP' && <TouchableOpacity onPress={() => { setphotoOptionvisible(true); hideBottomSheet() }} activeOpacity={0.5} style={{ width: '100%', flexDirection: 'row', marginTop: 25 }}>
-                                    <View style={{ flexDirection: 'row' }} >
-                                        <View style={{ width: '15%', marginLeft: 3 }}>
-                                            <Image source={require('../../../Images/fileupload.png')}
-                                                style={{ width: 16, height: 20 }} />
-                                        </View>
-                                        <View style={{ width: '85%', justifyContent: 'center' }}>
-                                            <TextComp textVal={language[0][props.language].str_retake} textStyle={{ fontSize: 14, color: Colors.mediumgrey }} Visible={false} />
-                                        </View>
-
-                                    </View>
-                                </TouchableOpacity>}
-
-                                {leadType != 'COMP' &&
-                                    <TouchableOpacity onPress={() => { setDeleteVisible(true) }} activeOpacity={0.5} style={{ width: '100%', flexDirection: 'row', marginTop: 25, marginBottom: 20 }}>
-                                        <View style={{ flexDirection: 'row' }}>
-                                            <View style={{ width: '15%' }}>
-
-                                                <MaterialCommunityIcons name='delete' size={25} color={Colors.darkblue} />
-
-                                            </View>
-                                            <View style={{ width: '85%', justifyContent: 'center', marginLeft: 3 }}>
-                                                <TextComp textVal={language[0][props.language].str_delete} textStyle={{ fontSize: 14, color: Colors.mediumgrey }} Visible={false} />
-                                            </View>
-
-                                        </View>
-                                    </TouchableOpacity>}
-
-                            </View>}
-
-
-                            {deleteVisible && <View style={{ alignItems: 'center' }}>
-
-                                <MaterialIcons name='error' size={35} color={Colors.red} />
-
-                  <TextComp
-                    textVal={language[0][props.language].str_deletephoto}
-                    textStyle={{
-                      fontSize: 14,
-                      color: Colors.black,
-                      fontWeight: 600,
-                      marginTop: 20,
-                    }}
-                    Visible={false}
-                  />
-
-                  <TextComp
-                    textVal={language[0][props.language].str_deletephotodesc}
-                    textStyle={{fontSize: 14, color: Colors.mediumgrey}}
-                    Visible={false}
-                  />
 
                   <View
                     style={{
-                      width: '100%',
-                      justifyContent: 'space-between',
-                      flexDirection: 'row',
+                      width: '25%',
+                      height: 40,
+                      justifyContent: 'flex-end',
+                      alignItems: 'center',
                     }}>
-                    <View
-                      style={{
-                        width: '48%',
-                        height: 50,
-                        marginTop: 25,
-                        justifyContent: 'flex-end',
-                        alignItems: 'center',
-                      }}>
-                      <TouchableOpacity
-                        onPress={() => {
-                          hideBottomSheet();
-                        }}
-                        activeOpacity={0.5}
-                        style={{
-                          width: '88%',
-                          height: 50,
-                          borderBottomColor: Colors.mediumgrey,
-                          borderWidth: 1,
-                          borderRadius: 45,
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}>
-                        <View>
-                          <TextComp
-                            textVal={language[0][props.language].str_cancel}
-                            textStyle={{
-                              color: Colors.darkblue,
-                              fontSize: 13,
-                              fontWeight: 600,
-                            }}
-                          />
-                        </View>
-                      </TouchableOpacity>
+                    <TouchableOpacity onPress={() => { hideBottomErrorSheet() }} activeOpacity={0.5} style={{
+                      width: '88%', height: 40, backgroundColor: '#0294ff',
+                      borderRadius: 35, alignItems: 'center', justifyContent: 'center'
+                    }}>
+                      <View >
+
+                        <TextComp textVal={language[0][props.language].str_ok} textStyle={{ color: Colors.white, fontSize: 15, fontWeight: 600 }} />
+
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+
+                </View>
+
+              </View>
+
+
+            </View>
+          </Modal>
+
+          <ImageDetailComp props={props} isVisible={detailModalVisible} onClose={hideDetailModalSheet} fileName={fileName} time={time} geoLocation={gpslatlon} fileType={fileType} />
+
+          <Modal
+            isVisible={bottomSheetVisible}
+            onBackdropPress={hideBottomSheet}
+            style={styles.modal}
+          >
+            <View style={styles.modalContent}>
+
+              {(!deleteVisible) && <View style={{ marginBottom: 20 }}>
+
+                <TextComp textVal={fileName} textStyle={{ width: '90%', fontSize: 14, color: Colors.mediumgrey, marginTop: 15 }} Visible={false} />
+
+
+                <View style={{ width: '100%', flexDirection: 'row', marginTop: 15, paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: '#e2e2e2' }} />
+
+
+                <TouchableOpacity onPress={() => { hideBottomSheet(); props.navigation.navigate('PreviewImage', { imageName: fileName, imageUri: imageUri }) }} style={{ width: '100%', flexDirection: 'row', marginTop: 25 }}>
+                  <View style={{ flexDirection: 'row' }}>
+                    <View style={{ width: '15%' }}>
+                      <Image source={require('../../../Images/preview.png')}
+                        style={{ width: 20, height: 20 }} />
+                    </View>
+                    <View style={{ width: '85%', justifyContent: 'center', marginLeft: 3 }}>
+                      <TextComp textVal={language[0][props.language].str_preview} textStyle={{ fontSize: 14, color: Colors.mediumgrey }} Visible={false} />
                     </View>
 
-                    <View
-                      style={{
-                        width: '48%',
-                        height: 50,
-                        marginTop: 25,
-                        justifyContent: 'flex-end',
-                        alignItems: 'center',
-                      }}>
-                      <TouchableOpacity
-                        onPress={() => {
-                          deletePhoto();
-                        }}
-                        activeOpacity={10}
-                        style={{
-                          width: '88%',
-                          height: 50,
-                          backgroundColor: '#0294ff',
-                          borderRadius: 45,
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}>
-                        <View>
-                          <TextComp
-                            textVal={language[0][props.language].str_yesdelete}
-                            textStyle={{
-                              color: Colors.white,
-                              fontSize: 13,
-                              fontWeight: 600,
-                            }}
-                          />
-                        </View>
-                      </TouchableOpacity>
+                  </View>
+
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => { showDetailModalSheet(); hideBottomSheet(); }} style={{ width: '100%', flexDirection: 'row', marginTop: 25 }}>
+                  <View style={{ flexDirection: 'row' }}>
+                    <View style={{ width: '15%' }}>
+                      <MaterialIcons name='error' size={20} color={Colors.darkblue} />
                     </View>
+                    <View style={{ width: '85%', justifyContent: 'center', marginLeft: 3 }}>
+                      <TextComp textVal={language[0][props.language].str_details} textStyle={{ fontSize: 14, color: Colors.mediumgrey }} Visible={false} />
+                    </View>
+
+                  </View>
+
+                </TouchableOpacity>
+
+                {leadType != 'COMP' && <TouchableOpacity onPress={() => { setphotoOptionvisible(true); hideBottomSheet() }} activeOpacity={0.5} style={{ width: '100%', flexDirection: 'row', marginTop: 25 }}>
+                  <View style={{ flexDirection: 'row' }} >
+                    <View style={{ width: '15%', marginLeft: 3 }}>
+                      <Image source={require('../../../Images/fileupload.png')}
+                        style={{ width: 16, height: 20 }} />
+                    </View>
+                    <View style={{ width: '85%', justifyContent: 'center' }}>
+                      <TextComp textVal={language[0][props.language].str_retake} textStyle={{ fontSize: 14, color: Colors.mediumgrey }} Visible={false} />
+                    </View>
+
+                  </View>
+                </TouchableOpacity>}
+
+                {leadType != 'COMP' &&
+                  <TouchableOpacity onPress={() => { setDeleteVisible(true) }} activeOpacity={0.5} style={{ width: '100%', flexDirection: 'row', marginTop: 25, marginBottom: 20 }}>
+                    <View style={{ flexDirection: 'row' }}>
+                      <View style={{ width: '15%' }}>
+
+                        <MaterialCommunityIcons name='delete' size={25} color={Colors.darkblue} />
+
+                      </View>
+                      <View style={{ width: '85%', justifyContent: 'center', marginLeft: 3 }}>
+                        <TextComp textVal={language[0][props.language].str_delete} textStyle={{ fontSize: 14, color: Colors.mediumgrey }} Visible={false} />
+                      </View>
+
+                    </View>
+                  </TouchableOpacity>}
+
+              </View>}
+
+
+              {deleteVisible && <View style={{ alignItems: 'center' }}>
+
+                <MaterialIcons name='error' size={35} color={Colors.red} />
+
+                <TextComp
+                  textVal={language[0][props.language].str_deletephoto}
+                  textStyle={{
+                    fontSize: 14,
+                    color: Colors.black,
+                    fontWeight: 600,
+                    marginTop: 20,
+                  }}
+                  Visible={false}
+                />
+
+                <TextComp
+                  textVal={language[0][props.language].str_deletephotodesc}
+                  textStyle={{ fontSize: 14, color: Colors.mediumgrey }}
+                  Visible={false}
+                />
+
+                <View
+                  style={{
+                    width: '100%',
+                    justifyContent: 'space-between',
+                    flexDirection: 'row',
+                  }}>
+                  <View
+                    style={{
+                      width: '48%',
+                      height: 50,
+                      marginTop: 25,
+                      justifyContent: 'flex-end',
+                      alignItems: 'center',
+                    }}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        hideBottomSheet();
+                      }}
+                      activeOpacity={0.5}
+                      style={{
+                        width: '88%',
+                        height: 50,
+                        borderBottomColor: Colors.mediumgrey,
+                        borderWidth: 1,
+                        borderRadius: 45,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                      <View>
+                        <TextComp
+                          textVal={language[0][props.language].str_cancel}
+                          textStyle={{
+                            color: Colors.darkblue,
+                            fontSize: 13,
+                            fontWeight: 600,
+                          }}
+                        />
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+
+                  <View
+                    style={{
+                      width: '48%',
+                      height: 50,
+                      marginTop: 25,
+                      justifyContent: 'flex-end',
+                      alignItems: 'center',
+                    }}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        deletePhoto();
+                      }}
+                      activeOpacity={10}
+                      style={{
+                        width: '88%',
+                        height: 50,
+                        backgroundColor: '#0294ff',
+                        borderRadius: 45,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                      <View>
+                        <TextComp
+                          textVal={language[0][props.language].str_yesdelete}
+                          textStyle={{
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: 600,
+                          }}
+                        />
+                      </View>
+                    </TouchableOpacity>
                   </View>
                 </View>
-              )}
+              </View>
+              }
 
               {/*                             
 
@@ -776,19 +776,19 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                 <AntDesign name="close" size={18} color={Colors.black} />
               </TouchableOpacity>
 
-                            <View style={{ width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                                <View style={{ width: '30%', alignItems: 'center' }}>
-                                    <TouchableOpacity onPress={() => pickImage()} activeOpacity={11}>
-                                        <View style={{
-                                            width: 53, height: 53, borderRadius: 53, backgroundColor: '#E74C3C',
-                                            alignItems: 'center', justifyContent: 'center'
-                                        }}>
-                                            <Ionicons name='camera-outline' size={31} color={Colors.white} />
-                                        </View>
-                                    </TouchableOpacity>
-                                    <Text style={{ fontSize: 14, color: Colors.black, marginTop: 7 }}>Camera</Text>
-                                </View>
-                                {/* <View style={{ width: '30%', alignItems: 'center' }}>
+              <View style={{ width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                <View style={{ width: '30%', alignItems: 'center' }}>
+                  <TouchableOpacity onPress={() => pickImage()} activeOpacity={11}>
+                    <View style={{
+                      width: 53, height: 53, borderRadius: 53, backgroundColor: '#E74C3C',
+                      alignItems: 'center', justifyContent: 'center'
+                    }}>
+                      <Ionicons name='camera-outline' size={31} color={Colors.white} />
+                    </View>
+                  </TouchableOpacity>
+                  <Text style={{ fontSize: 14, color: Colors.black, marginTop: 7 }}>Camera</Text>
+                </View>
+                {/* <View style={{ width: '30%', alignItems: 'center' }}>
                                     <TouchableOpacity onPress={() => selectImage()} activeOpacity={11}>
                                         <View style={{
                                             width: 53, height: 53, borderRadius: 53, backgroundColor: '#8E44AD',
@@ -800,14 +800,14 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                                     <Text style={{ fontSize: 14, color: Colors.black, marginTop: 7 }}>Gallery</Text>
                                 </View> */}
 
-                            </View>
-                        </View>
-                    </Modal>
+              </View>
+            </View>
+          </Modal>
 
 
 
-          <View style={{width: '100%', alignItems: 'center', marginTop: '3%'}}>
-            <View style={{width: '90%', marginTop: 3}}>
+          <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
+            <View style={{ width: '90%', marginTop: 3 }}>
               <TextComp
                 textStyle={{
                   color: Colors.mediumgrey,
@@ -820,8 +820,8 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
             </View>
           </View>
 
-          <View style={{width: '100%', alignItems: 'center', marginTop: '4%'}}>
-            <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+          <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
               <TextComp
                 textVal={language[0][props.language].str_capturecustpht}
                 textStyle={Commonstyles.inputtextStyle}
@@ -863,8 +863,8 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                   backgroundColor: '#e2e2e2',
                 }}>
                 <Image
-                  source={{uri: imageUri}}
-                  style={{width: '100%', height: 170, borderRadius: 10}}
+                  source={{ uri: imageUri }}
+                  style={{ width: '100%', height: 170, borderRadius: 10 }}
                 />
               </View>
             )}
@@ -911,7 +911,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
               <TextComp
                 textVal={language[0][props.language].str_gpslocation}
                 textStyle={Commonstyles.inputtextStyle}
@@ -953,7 +953,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
             </View>
           </View>
 
-          <View style={{width: '100%', alignItems: 'center', marginTop: '4%'}}>
+          <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
             <View
               style={{
                 width: '90%',
@@ -963,7 +963,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                 borderBottomColor: '#e2e2e2',
               }}>
               <MapView
-                style={{width: '100%', height: 200, marginTop: 15}}
+                style={{ width: '100%', height: 200, marginTop: 15 }}
                 ref={mapRef}
                 initialRegion={{
                   latitude: currentLatitude,
@@ -987,42 +987,42 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
           </View>
         </View>
 
-                <View
-                    style={{
-                        width: '100%',
-                        height: 50,
-                        marginTop: 25,
-                        justifyContent: 'flex-end',
-                        alignItems: 'center',
-                    }}>
-                    <TouchableOpacity onPress={() => {
-                        if (leadType == 'COMP') {
-                            props.navigation.navigate('LeadDetails', { leadData: global.leadTrackerData })
-                        } else {
-                            uploadImage()
-                        }
+        <View
+          style={{
+            width: '100%',
+            height: 50,
+            marginTop: 25,
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+          }}>
+          <TouchableOpacity onPress={() => {
+            if (leadType == 'COMP') {
+              props.navigation.navigate('LeadDetails', { leadData: global.leadTrackerData })
+            } else {
+              uploadImage()
+            }
 
-                    }} activeOpacity={10} style={{
-                        width: '88%', height: 50, backgroundColor: '#0294ff',
-                        borderRadius: 45, alignItems: 'center', justifyContent: 'center'
-                    }}>
-                        <View >
+          }} activeOpacity={10} style={{
+            width: '88%', height: 50, backgroundColor: '#0294ff',
+            borderRadius: 45, alignItems: 'center', justifyContent: 'center'
+          }}>
+            <View >
 
-                            <TextComp textVal={leadType != 'COMP' ? language[0][props.language].str_submit : language[0][props.language].str_close} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} />
+              <TextComp textVal={leadType != 'COMP' ? language[0][props.language].str_submit : language[0][props.language].str_close} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} />
 
-                        </View>
-                    </TouchableOpacity>
-                </View>
-
-
+            </View>
+          </TouchableOpacity>
+        </View>
 
 
 
 
 
-            </ScrollView>
-        </SafeAreaView>
-    );
+
+
+      </ScrollView>
+    </SafeAreaView>
+  );
 };
 
 const styles = StyleSheet.create({
@@ -1064,17 +1064,17 @@ const styles = StyleSheet.create({
 
 
 const mapStateToProps = (state) => {
-    const { language } = state.languageReducer;
-    const { profileDetails } = state.profileReducer;
-    return {
-        language: language,
-        profiledetail: profileDetails,
-    }
+  const { language } = state.languageReducer;
+  const { profileDetails } = state.profileReducer;
+  return {
+    language: language,
+    profiledetail: profileDetails,
+  }
 }
 
 const mapDispatchToProps = (dispatch) => ({
-    languageAction: (item) => dispatch(languageAction(item)),
-    profileAction: (item) => dispatch(profileAction(item)),
+  languageAction: (item) => dispatch(languageAction(item)),
+  profileAction: (item) => dispatch(profileAction(item)),
 });
 
 
