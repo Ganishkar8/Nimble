@@ -9,6 +9,7 @@ import {
     TouchableOpacity,
     SafeAreaView,
     ScrollView,
+    BackHandler,
     ToastAndroid,
     KeyboardAvoidingView,
     Dimensions,
@@ -34,6 +35,7 @@ import ActivationCodeModal from '../../Components/ActivationCodeModal';
 import CenteredModal from '../../Components/CenteredModal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Common from '../../Utils/Common';
+import { useIsFocused } from '@react-navigation/native';
 
 
 const LoginScreen = (props, { navigation }) => {
@@ -45,10 +47,22 @@ const LoginScreen = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
     const [Visible, setVisible] = useState(false);
     const [activationSuccess, setActivationSuccess] = useState(false);
+    const isFocused = useIsFocused();
 
     useEffect(() => {
+        if (isFocused) {
+            BackHandler.addEventListener('hardwareBackPress', handleBackButton);
+        }
+        return () => {
+            BackHandler.removeEventListener('hardwareBackPress', handleBackButton);
+        };
+    }, [isFocused]);
 
-    }, []);
+    const handleBackButton = () => {
+        // Close the app
+        BackHandler.exitApp();
+        return true;
+    };
 
     const nav = () => {
         if (userID.length < 3 || password.length < 3) {
@@ -109,8 +123,8 @@ const LoginScreen = (props, { navigation }) => {
     }
 
     const updateSecureTextEntry = () => {
-        if (!secureTexsetSecureTextEntrytEntry) {
-            (true);
+        if (!secureTextEntry) {
+            setSecureTextEntry(true);
         } else {
             setSecureTextEntry(false);
         }
@@ -263,7 +277,7 @@ const LoginScreen = (props, { navigation }) => {
                                 justifyContent: 'flex-end',
                             }}>
 
-                            <TextComp textVal={language[0][props.language].str_forgotpassword} textStyle={{ color: Colors.darkblue, fontSize: 14, fontWeight: 500 }} />
+                            <TextComp textVal={language[0][props.language].str_forgotpassword} textStyle={{ color: Colors.darkblue, fontSize: 14, fontFamily: 'Poppins-Medium', }} />
 
 
                         </View>
@@ -282,7 +296,7 @@ const LoginScreen = (props, { navigation }) => {
                             borderRadius: 45, alignItems: 'center', justifyContent: 'center'
                         }}>
                             <View >
-                                <TextComp textVal={language[0][props.language].str_login.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} />
+                                <TextComp textVal={language[0][props.language].str_login.toUpperCase()} textStyle={Commonstyles.buttonTextStyle} />
 
                             </View>
                         </TouchableOpacity>
@@ -303,7 +317,7 @@ const LoginScreen = (props, { navigation }) => {
                             <View style={{ alignItems: 'center' }}>
                                 <Text style={{
                                     marginLeft: 20, color: '#4e4e4e',
-                                    textAlign: 'center', fontSize: 7, fontWeight: '500'
+                                    textAlign: 'center', fontSize: 7, fontFamily: 'PoppinsRegular',
                                 }}>Business Loan</Text>
                             </View>
                         </View>
@@ -316,10 +330,10 @@ const LoginScreen = (props, { navigation }) => {
                     </View>
 
                     <View style={{ marginLeft: 18, marginRight: 18, marginBottom: 9 }}>
-                        <Text style={{ color: '#8a8f9d', fontSize: 12 }}>{language[0][props.language].str_termsdesc}<Text style={{ color: '#0294ff' }}>{language[0][props.language].str_terms}</Text> {language[0][props.language].str_and} <Text style={{ color: '#0294ff' }}>{language[0][props.language].str_privacypolicy}</Text></Text>
+                        <Text style={{ color: '#8a8f9d', fontSize: 12, fontFamily: 'PoppinsRegular', }}>{language[0][props.language].str_termsdesc}<Text style={{ color: '#0294ff' }}>{language[0][props.language].str_terms}</Text> {language[0][props.language].str_and} <Text style={{ color: '#0294ff' }}>{language[0][props.language].str_privacypolicy}</Text></Text>
                     </View>
                     <View>
-                        <Text style={{ color: '#8a8f9d', fontSize: 13, }}>{language[0][props.language].str_version}:{global.APPVERSIONNO}</Text>
+                        <Text style={{ color: '#8a8f9d', fontSize: 13, fontFamily: 'PoppinsRegular', }}>{language[0][props.language].str_version}:{global.APPVERSIONNO}</Text>
                     </View>
                 </View>
 

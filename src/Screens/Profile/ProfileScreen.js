@@ -9,7 +9,8 @@ import {
     Text,
     Image,
     ScrollView,
-    TouchableOpacity
+    TouchableOpacity,
+    BackHandler
 } from 'react-native';
 import Colors from '../../Utils/Colors';
 import Commonstyles from '../../Utils/Commonstyles';
@@ -31,10 +32,19 @@ const ProfileScreen = ({ navigation }) => {
         // if (isScreenVisible) {
         //getProfileDetails();
         //  }
+        BackHandler.addEventListener('hardwareBackPress', handleBackButton);
 
+        // Remove the event listener when the component unmounts
+        return () => {
+            BackHandler.removeEventListener('hardwareBackPress', handleBackButton);
+        };
 
     }, []);
 
+    const handleBackButton = () => {
+        BackHandler.exitApp()
+        return true; // Prevent default back button behavior
+    };
 
     const getProfileDetails = () => {
 
@@ -84,8 +94,8 @@ const ProfileScreen = ({ navigation }) => {
 
 
                             <View style={{ width: '75%', justifyContent: 'center', alignSelf: 'center' }}>
-                                <Text style={{ textAlign: 'left', fontSize: 20, color: Colors.darkblack }}>{global.USERNAME}</Text>
-                                <Text style={{ fontSize: 12, color: Colors.lightgrey, marginTop: 5, }}>User ID :{global.USERID}</Text>
+                                <Text style={{ textAlign: 'left', fontSize: 20, color: Colors.darkblack, fontFamily: 'PoppinsRegular' }}>{global.USERNAME}</Text>
+                                <Text style={{ fontSize: 14, color: Colors.lightgrey, marginTop: 5, fontFamily: 'PoppinsRegular' }}>User ID :{global.USERID}</Text>
                             </View>
 
                         </View>
@@ -100,7 +110,7 @@ const ProfileScreen = ({ navigation }) => {
                                 </View>
 
                                 <View style={{ width: '67%', justifyContent: 'center' }}>
-                                    <Text style={{ fontSize: 16, color: Colors.mediumgrey, marginTop: 5, }}>Personal Details</Text>
+                                    <Text style={styles.textStyle}>Personal Details</Text>
                                 </View>
 
                                 <View style={{ width: '10%' }}></View>
@@ -120,7 +130,7 @@ const ProfileScreen = ({ navigation }) => {
                                 </View>
 
                                 <View style={{ width: '67%', justifyContent: 'center' }}>
-                                    <Text style={{ fontSize: 16, color: Colors.mediumgrey, marginTop: 5, }}>Professional Details</Text>
+                                    <Text style={styles.textStyle}>Professional Details</Text>
                                 </View>
 
                                 <View style={{ width: '10%' }}></View>
@@ -140,7 +150,7 @@ const ProfileScreen = ({ navigation }) => {
                                 </View>
 
                                 <View style={{ width: '67%', justifyContent: 'center' }}>
-                                    <Text style={{ fontSize: 16, color: Colors.mediumgrey, marginTop: 5, }}>Language Settings</Text>
+                                    <Text style={styles.textStyle}>Language Settings</Text>
                                 </View>
 
                                 <View style={{ width: '10%' }}></View>
@@ -160,9 +170,9 @@ const ProfileScreen = ({ navigation }) => {
                 <View style={{ width: '100%', justifyContent: 'flex-end', alignItems: 'center' }}>
                     <View style={{ width: '92%' }}>
                         <TouchableOpacity activeOpacity={0.5} onPress={() => { navigation.replace('LoginScreen'); AsyncStorage.setItem('IsLogin', 'false'); }}>
-                            <Text style={{ fontSize: 16, color: Colors.darkblue, marginTop: 5, }}>Logout</Text>
+                            <Text style={{ fontSize: 16, color: Colors.darkblue, marginTop: 5, fontFamily: 'PoppinsRegular' }}>Logout</Text>
                         </TouchableOpacity>
-                        <Text style={{ fontSize: 12, color: Colors.lightgrey, marginTop: 5, }}>Version 1.0.0</Text>
+                        <Text style={{ fontSize: 12, color: Colors.lightgrey, marginTop: 5, fontFamily: 'Poppins-Medium' }}>Version {global.APPVERSIONNO}</Text>
                     </View>
                 </View>
 
@@ -192,6 +202,9 @@ const styles = StyleSheet.create({
         width: '93%',
         marginTop: '5%'           // Adjust the height as needed
     },
+    textStyle: {
+        fontSize: 16, color: Colors.mediumgrey, marginTop: 5, fontFamily: 'PoppinsRegular'
+    }
 
 });
 

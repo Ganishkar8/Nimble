@@ -11,13 +11,13 @@ export default {
   boldtextStyle: {
     color: Colors.darkblack,
     fontSize: 18,
-    fontWeight: 'bold',
+    fontFamily: 'Poppins-SemiBold'
   },
   inputtextStyle: {
     color: Colors.darkblack,
     fontSize: 13,
     paddingHorizontal: 0,
-    fontWeight: '400',
+    fontFamily: 'PoppinsRegular'
   },
   inputtextStyle2: {
     color: Colors.darkblack,
@@ -28,8 +28,9 @@ export default {
   textinputtextStyle: {
     width: '90%',
     fontSize: 15,
-    fontWeight: '400',
+    fontFamily: 'PoppinsRegular',
     minHeight: 43,
+    color: Colors.black
   },
   HeaderStyle: {
     width: '90%',
@@ -45,6 +46,7 @@ export default {
     borderWidth: 1,
     borderColor: '#ccc',
     textAlign: 'center',
+    fontFamily: 'PoppinsRegular'
   },
   item: {
     backgroundColor: '#EBECEB',
@@ -64,6 +66,9 @@ export default {
     marginTop: 10,
     justifyContent: 'flex-end',
     alignItems: 'center',
+  },
+  buttonTextStyle: {
+    color: Colors.white, fontSize: 14, fontFamily: 'Poppins-SemiBold', letterSpacing: 0.5
   },
   buttonViewInnerStyle: {
     width: '88%',

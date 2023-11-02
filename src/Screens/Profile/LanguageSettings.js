@@ -8,22 +8,37 @@ import {
     Alert,
     Text,
     TouchableOpacity,
-    ScrollView
+    ScrollView,
+    BackHandler
 } from 'react-native';
 import MyStatusBar from '../../Components/ MyStatusBar';
 import Colors from '../../Utils/Colors';
 import Entypo from 'react-native-vector-icons/Entypo';
 import { RadioButton } from 'react-native-paper';
+import HeadComp from '../../Components/HeadComp';
+import { useIsFocused } from '@react-navigation/native';
 
-
-const LanguageSettingsScreen = ({ navigation }) => {
+const LanguageSettingsScreen = (props, { navigation }) => {
 
     const [checked, setChecked] = React.useState('first');
+    const isScreenVisible = useIsFocused();
 
     useEffect(() => {
 
-    }, []);
+        props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
+        return () => {
+            props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
+            backHandler.remove();
+        }
 
+    }, [navigation, isScreenVisible]);
+
+
+    const handleBackButton = () => {
+        props.navigation.goBack();
+        return true; // Prevent default back button behavior
+    };
 
     return (
         // enclose all components in this View tag
@@ -40,18 +55,9 @@ const LanguageSettingsScreen = ({ navigation }) => {
                         width: '100%', height: 56, alignItems: 'center', justifyContent: 'center',
 
                     }}>
-                        <View style={{ width: '92%', flexDirection: 'row' }}>
-                            <TouchableOpacity onPress={() => navigation.goBack()} style={{ width: '10%', height: 56, justifyContent: 'center' }}>
-                                <View >
 
-                                    <Entypo name='chevron-left' size={25} color={Colors.darkblack} />
+                        <HeadComp textval={'Language Settings'} props={props} />
 
-                                </View>
-                            </TouchableOpacity>
-                            <View style={{ width: '80%', height: 56, justifyContent: 'center' }}>
-                                <Text style={{ fontSize: 18, color: Colors.darkblack }}>Language Settings</Text>
-                            </View>
-                        </View>
                     </View>
 
                     <View style={{ width: '100%', alignItems: 'center', marginTop: '6%' }}>
@@ -61,7 +67,7 @@ const LanguageSettingsScreen = ({ navigation }) => {
                                 style={{
                                     color: Colors.mediumgrey,
                                     fontSize: 15,
-                                    fontWeight: '500'
+                                    fontFamily: 'Poppins-Medium'
                                 }}>
                                 Please select your language
                             </Text>
@@ -72,6 +78,7 @@ const LanguageSettingsScreen = ({ navigation }) => {
                                         style={{
                                             color: Colors.lightgrey,
                                             fontSize: 15,
+                                            fontFamily: 'PoppinsRegular'
                                         }}>
                                         English
                                     </Text>

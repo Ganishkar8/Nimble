@@ -31,14 +31,14 @@ const AgeingComp = ({ props, filterClick, operatorid, ageValue }) => {
         <View>
             <View style={{ marginLeft: 15 }}>
                 <Text
-                    style={{ marginTop: 15, fontSize: 14, color: Colors.mediumgrey }}>
+                    style={{ marginTop: 15, fontSize: 14, color: Colors.mediumgrey, fontFamily: 'Poppins-Medium' }}>
                     {language[0][props.language].str_ageingcap}
                 </Text>
             </View>
             <View style={{ width: '100%', alignItems: 'center', marginLeft: 15 }}>
 
                 <View style={{ width: '100%', marginTop: 3 }}>
-                    <TextComp textStyle={{ marginTop: 15, fontSize: 14, color: Colors.dimmText, marginLeft: 3 }} textVal={language[0][props.language].str_operator} Visible={true}></TextComp>
+                    <TextComp textStyle={{ marginTop: 15, fontSize: 14, color: Colors.dimmText, marginLeft: 3, fontFamily: 'PoppinsRegular' }} textVal={language[0][props.language].str_operator} Visible={true}></TextComp>
 
                     <View style={{ width: '100%', flexDirection: 'row' }}>
 
@@ -81,7 +81,7 @@ const AgeingComp = ({ props, filterClick, operatorid, ageValue }) => {
 
                 <View style={{ width: '100%', marginTop: 3 }}>
 
-                    <TextComp textStyle={{ marginTop: 15, fontSize: 14, color: Colors.dimmText, marginLeft: 3 }} textVal={language[0][props.language].str_age} Visible={true}></TextComp>
+                    <TextComp textStyle={{ marginTop: 15, fontSize: 14, color: Colors.dimmText, marginLeft: 3, fontFamily: 'PoppinsRegular' }} textVal={language[0][props.language].str_age} Visible={true}></TextComp>
                     <View style={{ width: '100%', flexDirection: 'row' }}>
                         <View style={{ width: '70%' }}>
                             <TextInput

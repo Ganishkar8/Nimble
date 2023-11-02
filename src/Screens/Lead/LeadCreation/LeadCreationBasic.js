@@ -93,6 +93,7 @@ const LeadCreationBasic = (props, { navigation, route }) => {
     const lastNameRef = useRef(null);
     const mobileNumberRef = useRef(null);
 
+
     const [DataArray, setNewDataArray] = useState([]);
     let errorCounter = 1;
 
@@ -536,15 +537,16 @@ const LeadCreationBasic = (props, { navigation, route }) => {
             }
         }
 
+
         if (titleVisible && genderVisible) {
-            if (titleLabel === 236) {
-                if (genderLabel === 519) {
+            if (titleLabel === 225) {
+                if (genderLabel == 519) {
                     errorMessage = errorMessage + i + ')' + ' ' + titleCaption + ' AND ' + genderCaption + ' Not matching' + '\n';
                     i++;
                     flag = true;
                 }
-            } else if (titleLabel === 237 || titleLabel === 238) {
-                if (genderLabel === 518) {
+            } else if (titleLabel === 226 || titleLabel === 227) {
+                if (genderLabel == 518) {
                     errorMessage = errorMessage + i + ')' + ' ' + titleCaption + ' AND ' + genderCaption + ' Not matching' + '\n';
                     i++;
                     flag = true;
@@ -704,13 +706,13 @@ const LeadCreationBasic = (props, { navigation, route }) => {
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
             <View style={{ width: '100%', height: 56, alignItems: 'center', justifyContent: 'center', }}>
 
-                <HeadComp textval={language[0][props.language].str_leadcreation} props={props} />
+                <HeadComp textval={leadType != 'COMP' ? language[0][props.language].str_leadcreation : language[0][props.language].str_captureddetails} props={props} />
 
             </View>
             <View style={{ width: '100%', justifyContent: 'center', alignItems: 'flex-end' }}>
                 <Text style={{
-                    fontSize: 14, color: Colors.mediumgrey, marginRight: 23,
-                }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black }}>{global.leadNumber}</Text></Text>
+                    fontSize: 14, color: Colors.mediumgrey, marginRight: 23, fontFamily: 'PoppinsRegular'
+                }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black, fontFamily: 'PoppinsRegular' }}>{global.leadNumber}</Text></Text>
             </View>
             <ScrollView style={styles.scrollView}
                 contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
@@ -723,7 +725,7 @@ const LeadCreationBasic = (props, { navigation, route }) => {
 
                         <View style={{ width: '90%', marginTop: 3, }}>
 
-                            <TextComp textStyle={{ color: Colors.mediumgrey, fontSize: 15, fontWeight: '500' }} textVal={language[0][props.language].str_basicdetails}></TextComp>
+                            <TextComp textStyle={{ color: Colors.mediumgrey, fontSize: 15, fontFamily: 'Poppins-Medium' }} textVal={language[0][props.language].str_basicdetails}></TextComp>
 
                             <ProgressComp progressvalue={0.25} textvalue="1 of 4" />
 
@@ -830,7 +832,7 @@ const LeadCreationBasic = (props, { navigation, route }) => {
                 </View>
 
 
-                <ButtonViewComp textValue={language[0][props.language].str_next.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} viewStyle={Commonstyles.buttonView} innerStyle={Commonstyles.buttonViewInnerStyle} handleClick={updateLeadDetails} />
+                <ButtonViewComp textValue={language[0][props.language].str_next.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 14, fontWeight: 800, letterSpacing: 1, }} viewStyle={Commonstyles.buttonView} innerStyle={Commonstyles.buttonViewInnerStyle} handleClick={updateLeadDetails} />
 
 
             </ScrollView>

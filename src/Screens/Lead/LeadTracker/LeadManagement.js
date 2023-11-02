@@ -9,7 +9,8 @@ import {
     TextInput,
     TouchableOpacity,
     SafeAreaView,
-    RefreshControl
+    RefreshControl,
+    BackHandler
 } from 'react-native';
 
 import Entypo from 'react-native-vector-icons/Entypo';
@@ -45,6 +46,7 @@ import tbl_lead_creation_business_details from '../../../Database/Table/tbl_lead
 import tbl_lead_creation_loan_details from '../../../Database/Table/tbl_lead_creation_loan_details';
 import PickerComp from '../../../Components/PickerComp';
 import { it } from 'react-native-paper-dates';
+import { isParameter } from 'typescript';
 
 
 
@@ -115,6 +117,18 @@ const LeadManagement = (props, { navigation, route }) => {
         }
         if (isScreenVisible) {
             setSearch('')
+            setTypeDataArr([]);
+            setStatusDataArr([])
+            setDateFilterValue({
+                FromDate: '',
+                ToDate: ''
+            })
+            setStatusFilterValue('')
+            setSortedFilterValue('')
+            setTypeFilterValue('')
+            setAgeFilterValue('')
+            setAgentLabel('')
+            setAgentIndex('')
             Common.getNetworkConnection().then(value => {
                 if (value.isConnected == true) {
                     getPendingData(null, null, null, null, null, null, null, null);
@@ -140,11 +154,17 @@ const LeadManagement = (props, { navigation, route }) => {
         setFilterVisible(mainFilterData[0].id)
         //below code is used for hiding  bottom tab
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
-        return () =>
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
+        return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
-
+            backHandler.remove();
+        }
     }, [navigation, isScreenVisible]);
 
+    const handleBackButton = () => {
+        props.navigation.goBack();
+        return true; // Prevent default back button behavior
+    };
 
     const getDraftData = async () => {
         let data = [];
@@ -186,11 +206,11 @@ const LeadManagement = (props, { navigation, route }) => {
     const filterClick = (type, value, from) => {
         console.log('SortedValues::' + JSON.stringify(value))
         if (type == 'SO') {
+            setSortedFilterValue(value)
             if (from == 'top') {
                 hideSortModalSheet();
-                getPendingData(null, null, null, null, null, null, null, value);
+                applyFilter('top');
             }
-            setSortedFilterValue(value)
         }
         if (type == 'ST') {
             setStatusFilterValue(value)
@@ -217,7 +237,7 @@ const LeadManagement = (props, { navigation, route }) => {
 
     }
 
-    const applyFilter = () => {
+    const applyFilter = (value) => {
         let sort = sortedFilterValue;
         let status = '';
         for (let i = 0; i < statusFilterValue.length; i++) {
@@ -275,16 +295,19 @@ const LeadManagement = (props, { navigation, route }) => {
             + " FromDate::" + from + " ToDate::" + to + " Type::" + type
             + " Age::" + age + " Operator::" + operator + " Agent Name::" + agentName)
         setVisible(false)
-        let fiterPosition = data;
-        for (let i = 0; i < fiterPosition.length; i++) {
-            if (i == 0) {
-                fiterPosition[i].isSelected = true
-            } else {
-                fiterPosition[i].isSelected = false
+
+        if (value != 'top') {
+            let fiterPosition = upperData;
+            for (let i = 0; i < fiterPosition.length; i++) {
+                if (i == 0) {
+                    fiterPosition[i].isSelected = true
+                } else {
+                    fiterPosition[i].isSelected = false
+                }
             }
+            //alert(JSON.stringify(fiterPosition))
+            setUpperData(fiterPosition)
         }
-        //alert(JSON.stringify(fiterPosition))
-        setUpperData(fiterPosition)
     }
 
     const toggleBottomNavigationView = () => {
@@ -352,6 +375,8 @@ const LeadManagement = (props, { navigation, route }) => {
         //Call the Service to get the latest data
         setRefreshing(true)
         getPendingData();
+        setSearch('')
+        clearFilter("1");
     };
 
     const getLeadByID = (leadID) => {
@@ -383,7 +408,7 @@ const LeadManagement = (props, { navigation, route }) => {
         }
 
         if (!Common.hasOnlyOneKey(leadData.leadCreationLoanDetails)) {
-            await tbl_lead_creation_loan_details.insertLeadCreationLoanDetails(leadData.id, leadData.leadCreationLoanDetails.loanTypeId, "988", leadData.leadCreationLoanDetails.loanPurposeId, leadData.leadCreationLoanDetails.loanAmount, leadData.leadCreationLoanDetails.leadTypeId, global.USERID);
+            await tbl_lead_creation_loan_details.insertLeadCreationLoanDetails(leadData.id, leadData.leadCreationLoanDetails.loanTypeId, leadData.leadCreationLoanDetails.loanProductId, leadData.leadCreationLoanDetails.loanPurposeId, leadData.leadCreationLoanDetails.loanAmount, leadData.leadCreationLoanDetails.leadTypeId, global.USERID);
         }
 
         // if (!Common.hasOnlyOneKey(leadData.leadCreationDms)) {
@@ -413,6 +438,9 @@ const LeadManagement = (props, { navigation, route }) => {
 
     const handleclick = (value, index) => {
         //alert(JSON.stringify(value))
+
+
+
         if (value.name == 'Filter') {
             setVisible(true)
             if (statusDataArr.length <= 0) {
@@ -425,29 +453,44 @@ const LeadManagement = (props, { navigation, route }) => {
             }
 
         } else if (value.name == 'Pending') {
-            getPendingData('1666', null, null, null, null, null, null, null);
+            // alert(upperData[index].isSelected)
+            if (!upperData[index].isSelected) {
+                getPendingData('1666', null, null, null, null, null, null, null);
+            } else {
+                getPendingData(null, null, null, null, null, null, null, null);
+            }
+
+            clearFilter("0");
         } else if (index == 3) {
             const currentDate = new Date();
             const day = currentDate.getDate().toString().padStart(2, '0');
             const month = (currentDate.getMonth() + 1).toString().padStart(2, '0'); // Note: Months are 0-indexed, so we add 1.
             const year = currentDate.getFullYear();
             const formattedServerDatee = `${year}-${month}-${day}`;
-            getPendingData(null, null, formattedServerDatee, formattedServerDatee, null, null, null, null);
+            clearFilter("0");
+            if (!upperData[index].isSelected) {
+                getPendingData(null, null, formattedServerDatee, formattedServerDatee, null, null, null, null);
+            } else {
+                getPendingData(null, null, null, null, null, null, null, null);
+            }
 
         } else if (index == 1) {
             showSortModalSheet();
         }
+        let fiterPosition = upperData;
 
-
-        let fiterPosition = data;
         for (let i = 0; i < fiterPosition.length; i++) {
             if (fiterPosition[i].id == value.id) {
-                fiterPosition[i].isSelected = true
+                if (fiterPosition[i].isSelected) {
+                    fiterPosition[i].isSelected = false;
+                } else {
+                    fiterPosition[i].isSelected = true;
+                }
             } else {
                 fiterPosition[i].isSelected = false
             }
         }
-        //alert(JSON.stringify(fiterPosition))
+
         setUpperData(fiterPosition)
 
     }
@@ -574,13 +617,19 @@ const LeadManagement = (props, { navigation, route }) => {
 
         setAgeFilterValue('')
         setVisible(false)
-        getPendingData(null, null, null, null, null, null, null, null);
-        let fiterPosition = data;
-        for (let i = 0; i < fiterPosition.length; i++) {
-            fiterPosition[i].isSelected = false
+        if (value == "1") {
+            getPendingData(null, null, null, null, null, null, null, null);
+            let fiterPosition = upperData;
+            for (let i = 0; i < fiterPosition.length; i++) {
+                fiterPosition[i].isSelected = false
+            }
+            setUpperData(fiterPosition)
         }
         //alert(JSON.stringify(fiterPosition))
-        setUpperData(fiterPosition)
+        setDateFilterValue({
+            FromDate: '',
+            ToDate: ''
+        })
 
     }
 
@@ -592,9 +641,8 @@ const LeadManagement = (props, { navigation, route }) => {
                 <TouchableOpacity onPress={() => {
                     global.leadID = item.id;
                     global.leadNumber = item.leadId;
-
+                    global.leadTrackerData = item;
                     if (global.USERTYPEID == '1163') {
-                        global.leadTrackerData = item;
                         props.navigation.navigate('LeadDetails', { leadData: item })
                     } else {
                         if (item.leadStatus == 'DRAFT') {
@@ -643,11 +691,11 @@ const LeadManagement = (props, { navigation, route }) => {
 
                         <View style={{ width: '100%', flexDirection: 'row', marginTop: 13 }}>
                             <View style={{ width: '45%', flexDirection: 'row', alignItems: 'center' }}>
-                                <Text style={{ color: Colors.mediumgrey, fontSize: 14, marginLeft: 26 }}>{language[0][props.language].str_leadapprovalstatus}</Text>
+                                <Text style={{ color: Colors.black, fontSize: 14, marginLeft: 26, fontFamily: 'Poppins-Medium' }}>{language[0][props.language].str_leadapprovalstatus}</Text>
                             </View>
                             <View style={{ width: '55%', flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'flex-start' }}>
                                 <View style={item.leadStatus == 'APPROVED' ? styles.approvedbackground : item.leadStatus == 'PENDING' ? styles.pendingbackground : item.leadStatus == 'DRAFT' ? styles.draftbackground : styles.rejectedbackground}>
-                                    <Text style={{ color: Colors.mediumgrey, fontSize: 12, }}>{item.leadStatus}</Text>
+                                    <Text style={{ color: Colors.black, fontSize: 12, fontFamily: 'Poppins-Medium' }}>{item.leadStatus}</Text>
                                 </View>
                             </View>
                         </View>
@@ -655,58 +703,58 @@ const LeadManagement = (props, { navigation, route }) => {
 
                         <View style={{ width: '100%', flexDirection: 'row', marginTop: 13, }}>
                             <View style={{ width: '45%' }}>
-                                <Text style={{ color: Colors.mediumgrey, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_customername}</Text>
+                                <Text style={styles.headText}>{language[0][props.language].str_customername}</Text>
                             </View>
                             <View style={{ width: '55%' }}>
-                                <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {item.customerName}</Text>
+                                <Text style={styles.childText}>:  {item.customerName}</Text>
                             </View>
                         </View>
                         <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
                             <View style={{ width: '45%' }}>
-                                <Text style={{ color: Colors.mediumgrey, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_leadid}</Text>
+                                <Text style={styles.headText}>{language[0][props.language].str_leadid}</Text>
                             </View>
                             <View style={{ width: '55%' }}>
-                                <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {item.leadId}</Text>
+                                <Text style={styles.childText}>:  {item.leadId}</Text>
                             </View>
                         </View>
                         <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
                             <View style={{ width: '45%' }}>
-                                <Text style={{ color: Colors.mediumgrey, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_leadtype}</Text>
+                                <Text style={styles.headText}>{language[0][props.language].str_leadtype}</Text>
                             </View>
                             <View style={{ width: '55%' }}>
-                                <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {item.leadType}</Text>
+                                <Text style={styles.childText}>:  {item.leadType}</Text>
                             </View>
                         </View>
                         <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
                             <View style={{ width: '45%' }}>
-                                <Text style={{ color: Colors.mediumgrey, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_creationdate}</Text>
+                                <Text style={styles.headText}>{language[0][props.language].str_creationdate}</Text>
                             </View>
                             <View style={{ width: '55%' }}>
-                                <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {Common.formatDate(item.creationDate)}</Text>
+                                <Text style={styles.childText}>:  {Common.formatDate(item.creationDate)}</Text>
                             </View>
                         </View>
                         <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
                             <View style={{ width: '45%' }}>
-                                <Text style={{ color: Colors.mediumgrey, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_completiondate}</Text>
+                                <Text style={styles.headText}>{language[0][props.language].str_completiondate}</Text>
                             </View>
                             <View style={{ width: '55%' }}>
-                                <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {item.leadStatus == 'APPROVED' ? Common.formatDate(item.creationDate) : ''} </Text>
+                                <Text style={styles.childText}>:  {item.leadStatus == 'APPROVED' ? Common.formatDate(item.creationDate) : ''} </Text>
                             </View>
                         </View>
                         <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
                             <View style={{ width: '45%' }}>
-                                <Text style={{ color: Colors.mediumgrey, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_ageing}</Text>
+                                <Text style={styles.headText}>{language[0][props.language].str_ageing}</Text>
                             </View>
                             <View style={{ width: '55%' }}>
-                                <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {item.ageing} days</Text>
+                                <Text style={styles.childText}>:  {item.ageing} days</Text>
                             </View>
                         </View>
                         {global.USERTYPEID == '1163' && <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
                             <View style={{ width: '45%' }}>
-                                <Text style={{ color: Colors.mediumgrey, fontSize: 13, fontWeight: '400', marginLeft: 26 }}>{language[0][props.language].str_currentleadownerid}</Text>
+                                <Text style={styles.headText}>{language[0][props.language].str_currentleadownerid}</Text>
                             </View>
                             <View style={{ width: '55%' }}>
-                                <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {item.agentName}</Text>
+                                <Text style={styles.childText}>:  {item.agentName}</Text>
                             </View>
                         </View>
                         }
@@ -783,7 +831,7 @@ const LeadManagement = (props, { navigation, route }) => {
 
 
                             <View style={{ width: '100%', height: 30 }}>
-                                <TextComp textVal={"Lead ID Created"} textStyle={{ fontSize: 14, color: Colors.white, lineHeight: 20 }} Visible={false} />
+                                <TextComp textVal={"Lead ID Created"} textStyle={{ fontSize: 14, color: Colors.white, lineHeight: 20, fontFamily: 'PoppinsRegular' }} Visible={false} />
                             </View>
 
 
@@ -799,7 +847,7 @@ const LeadManagement = (props, { navigation, route }) => {
                         hideSortModalSheet()
                         if (upperData[1].isSelected == true) {
                             if (sortedFilterValue == '') {
-                                let fiterPosition = data;
+                                let fiterPosition = upperData;
                                 for (let i = 0; i < fiterPosition.length; i++) {
                                     fiterPosition[i].isSelected = false
                                 }
@@ -830,11 +878,11 @@ const LeadManagement = (props, { navigation, route }) => {
                         </View>
                     </TouchableOpacity>
                     <View style={{ width: '90%', height: 56, justifyContent: 'center', marginLeft: 5 }}>
-                        <Text style={{ fontSize: 18, color: '#000', fontWeight: '400' }}>{language[0][props.language].str_leadmanagement}</Text>
+                        <Text style={{ fontSize: 18, color: '#000', fontFamily: 'Poppins-Medium', marginTop: 3 }}>{language[0][props.language].str_leadmanagement}</Text>
                     </View>
                 </View>
 
-                <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 7, }}>
+                <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 7 }}>
                     <FlatList
                         data={upperData}
                         horizontal={true}
@@ -843,8 +891,8 @@ const LeadManagement = (props, { navigation, route }) => {
                         renderItem={({ item, index }) => {
                             return (
                                 <TouchableOpacity onPress={() => handleclick(item, index)} activeOpacity={11}>
-                                    <View style={[styles.viewStyle, { flexDirection: 'row', borderColor: item.isSelected ? Colors.darkblue : Colors.lightgrey, backgroundColor: item.isSelected ? '#EFF8FF' : Colors.white }]}>
-                                        <Text style={[styles.textColor, { marginRight: 8, }]}>{item.name}</Text>
+                                    <View style={[styles.viewStyle, { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', borderColor: item.isSelected ? Colors.darkblue : Colors.lightgrey, backgroundColor: item.isSelected ? '#EFF8FF' : Colors.white }]}>
+                                        <Text style={[styles.textColor, { marginRight: 8, fontFamily: 'PoppinsRegular' }]}>{item.name}</Text>
                                         {item.name === 'Filter' &&
                                             <Image source={require('../../../Images/filter.png')}
                                                 style={{ width: 15, height: 15, resizeMode: 'contain', marginStart: 8 }} />
@@ -871,7 +919,7 @@ const LeadManagement = (props, { navigation, route }) => {
 
             {!noRecord &&
                 <View style={{
-                    width: '100%', alignItems: 'center',
+                    width: '98%', alignItems: 'center',
                     justifyContent: 'center', marginTop: 10, marginBottom: 8
                 }}>
                     <View style={{
@@ -900,7 +948,8 @@ const LeadManagement = (props, { navigation, route }) => {
                                 height: 44,
                                 fontSize: 14.4,
                                 fontWeight: '400',
-                                color: Colors.black
+                                color: Colors.black,
+                                fontFamily: 'PoppinsRegular'
                             }}
                         />
                         <Ionicons name="search" style={{ marginStart: 32 }} size={20} color={'#aaaaaa'} />
@@ -929,7 +978,7 @@ const LeadManagement = (props, { navigation, route }) => {
                         <Image source={require('../../../Images/norecord.png')}
                             style={{ width: 200, height: 200 }} />
 
-                        <Text style={{ color: Colors.black, marginTop: 20 }}>No Record Found!</Text>
+                        <Text style={{ color: Colors.black, marginTop: 20, fontFamily: 'PoppinsRegular' }}>No Record Found!</Text>
                     </View>
                 }
 
@@ -951,7 +1000,8 @@ const LeadManagement = (props, { navigation, route }) => {
                             style={{
                                 padding: 15,
                                 fontSize: 16,
-                                color: Colors.black
+                                color: Colors.black,
+                                fontFamily: 'Poppins-Medium'
                             }}>
                             {language[0][props.language].str_filter}
                         </Text>
@@ -965,7 +1015,7 @@ const LeadManagement = (props, { navigation, route }) => {
                     </View>
                     <View style={{ height: 1, width: '100%', backgroundColor: Colors.line }} />
                     <View style={{ width: '100%', flexDirection: 'row' }}>
-                        <View style={{ width: '35%' }}>
+                        <View style={{ width: '35%', }}>
                             <FlatList
                                 data={mainFilterData}
                                 horizontal={false}
@@ -974,12 +1024,12 @@ const LeadManagement = (props, { navigation, route }) => {
                                 renderItem={({ item, index }) => {
                                     return (
                                         <TouchableOpacity onPress={() => updateMainFilteredData(item, index)} activeOpacity={0.5}>
-                                            <View style={[styles.viewStyleFilter, { flexDirection: 'row', marginTop: 5 }]}>
+                                            <View style={[styles.viewStyleFilter, { flexDirection: 'row' }]}>
 
                                                 {item.isSelected ?
                                                     (<View style={{ width: 7, height: 35, backgroundColor: Colors.skyBlue }} />) : null}
                                                 <View style={{ width: '95%', padding: 17 }}>
-                                                    <Text style={[styles.textColor, { marginRight: 8, textAlign: 'left' }]}>{item.name}</Text>
+                                                    <Text style={[styles.textColor, { marginRight: 8, textAlign: 'left', fontFamily: 'Poppins-Medium' }]}>{item.name}</Text>
                                                 </View>
                                             </View>
                                         </TouchableOpacity>
@@ -987,7 +1037,7 @@ const LeadManagement = (props, { navigation, route }) => {
                                 }}
                             />
                         </View>
-                        <View style={{ width: 1, height: 400, backgroundColor: Colors.line }} />
+                        <View style={{ width: 1, backgroundColor: Colors.line }} />
                         <View style={{ width: '65%' }}>
                             {filterVisible === 'SO' &&
                                 <SortByComp props={props} filterClick={filterClick} selectedValue={sortedFilterValue} from='bottom' />
@@ -1007,9 +1057,9 @@ const LeadManagement = (props, { navigation, route }) => {
 
                             {filterVisible === 'AGN' &&
                                 <View>
-                                    <View style={{ marginLeft: 15 }}>
+                                    <View style={{ marginLeft: 14 }}>
                                         <Text
-                                            style={{ marginTop: 15, fontSize: 14, color: Colors.dimText }}>
+                                            style={{ marginTop: 15, fontSize: 14, color: Colors.dimText, fontFamily: 'Poppins-Medium' }}>
                                             {language[0][props.language].str_agentname}
                                         </Text>
                                     </View>
@@ -1044,9 +1094,9 @@ const LeadManagement = (props, { navigation, route }) => {
                     shadowRadius: 2,
                     elevation: 6, justifyContent: 'space-between', alignItems: 'center', flexDirection: 'row'
                 }}>
-                    <TouchableOpacity activeOpacity={0.9} onPress={() => { clearFilter() }}>
+                    <TouchableOpacity activeOpacity={0.9} onPress={() => { clearFilter("1") }}>
                         <View style={{ padding: 25 }}>
-                            <TextComp textStyle={{ marginTop: 0, fontSize: 18, color: Colors.dimmText, marginLeft: 3 }} textVal={language[0][props.language].str_clearfilters} Visible={false}></TextComp>
+                            <TextComp textStyle={{ marginTop: 0, fontSize: 18, color: Colors.dimmText, marginLeft: 3, fontFamily: 'Poppins-Medium' }} textVal={language[0][props.language].str_clearfilters} Visible={false}></TextComp>
                         </View>
                     </TouchableOpacity>
 
@@ -1055,7 +1105,7 @@ const LeadManagement = (props, { navigation, route }) => {
                         borderRadius: 25
                     }}>
                         <View>
-                            <TextComp textStyle={{ marginTop: 0, fontSize: 14, color: Colors.white, marginLeft: 3 }} textVal={language[0][props.language].str_apply} Visible={false}></TextComp>
+                            <TextComp textStyle={{ marginTop: 0, fontSize: 14, color: Colors.white, marginLeft: 3, fontFamily: 'Poppins-SemiBold', letterSpacing: 0.5 }} textVal={language[0][props.language].str_apply} Visible={false}></TextComp>
                         </View>
                     </TouchableOpacity>
 
@@ -1114,14 +1164,14 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20, marginLeft: 9, marginRight: 4,
         marginBottom: 4,
         marginStart: 12,
-        paddingVertical: 7,
+        paddingVertical: 5,
         borderWidth: 1,
         borderRadius: 8,
     },
     bottomNavigationView: {
         backgroundColor: '#fff',
         width: '100%',
-        height: 400,
+
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
     },
@@ -1129,7 +1179,6 @@ const styles = StyleSheet.create({
     textColor: {
         color: '#000',
         fontSize: 14,
-        fontWeight: '400'
     },
     viewStyleFilter: {
         alignItems: 'center', justifyContent: 'center',
@@ -1180,7 +1229,7 @@ const styles = StyleSheet.create({
     },
     sortmodalContent: {
         position: 'absolute',
-        top: 110,
+        top: 90,
         left: 50,
         right: 50,
         backgroundColor: '#f7f7f7',
@@ -1194,5 +1243,12 @@ const styles = StyleSheet.create({
             height: 2,
         }
     },
+    headText: {
+        color: Colors.mediumgrey, fontSize: 13, marginLeft: 26, fontFamily: 'PoppinsRegular'
+    },
+    childText: {
+        color: Colors.black, fontSize: 13, fontFamily: 'Poppins-Medium'
+    }
+
 
 });

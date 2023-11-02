@@ -127,7 +127,7 @@ const DateComp = ({ props, filterClick, fromCompDate, toCompDate }) => {
         <View>
             <View style={{ marginLeft: 15 }}>
                 <Text
-                    style={{ marginTop: 15, fontSize: 14, color: Colors.mediumgrey }}>
+                    style={{ marginTop: 15, fontSize: 13, color: Colors.mediumgrey, fontFamily: 'Poppins-Medium' }}>
                     {language[0][props.language].str_cdcaps}
                 </Text>
             </View>
@@ -135,7 +135,7 @@ const DateComp = ({ props, filterClick, fromCompDate, toCompDate }) => {
 
                 <View style={{ width: '100%', marginTop: 3 }}>
                     <Text
-                        style={{ marginTop: 15, fontSize: 14, color: Colors.dimmText, marginLeft: 3 }}>
+                        style={{ marginTop: 15, fontSize: 13, color: Colors.dimmText, marginLeft: 3, fontFamily: 'Poppins-Medium' }}>
                         {language[0][props.language].str_from}
                     </Text>
                     <View style={{ width: '100%', flexDirection: 'row' }}>
@@ -164,7 +164,7 @@ const DateComp = ({ props, filterClick, fromCompDate, toCompDate }) => {
 
                 <View style={{ width: '100%', marginTop: 3 }}>
                     <Text
-                        style={{ marginTop: 15, fontSize: 14, color: Colors.dimmText, marginLeft: 3 }}>
+                        style={{ marginTop: 15, fontSize: 14, color: Colors.dimmText, marginLeft: 3, fontFamily: 'Poppins-Medium' }}>
                         {language[0][props.language].str_to}
                     </Text>
                     <View style={{ width: '100%', flexDirection: 'row' }}>
@@ -177,7 +177,7 @@ const DateComp = ({ props, filterClick, fromCompDate, toCompDate }) => {
                                 placeholderTextColor={Colors.lightgrey}
                                 secureTextEntry={false}
                                 autoCapitalize="none"
-                                style={[Commonstyles.textinputtextStyle, { color: Colors.dimmText }]}
+                                style={[Commonstyles.textinputtextStyle, { color: Colors.dimmText, fontFamily: 'PoppinsRegular' }]}
                             />
                         </View>
                         <TouchableOpacity onPress={() => displayDatepicker(2)} activeOpacity={10} style={{ width: '10%', marginTop: 8 }}>

@@ -221,8 +221,8 @@ const LeadApproval = (props, { navigation, route }) => {
 
                     <View style={{ width: '100%', height: 50, justifyContent: 'center' }}>
                         <Text style={{
-                            fontSize: 16, color: Colors.mediumgrey, marginLeft: 23,
-                        }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black }}>{leadData.leadNumber}</Text></Text>
+                            fontSize: 16, color: Colors.mediumgrey, marginLeft: 23, fontFamily: 'PoppinsRegular'
+                        }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black, fontFamily: 'PoppinsRegular' }}>{leadData.leadNumber}</Text></Text>
                     </View>
 
 
@@ -244,7 +244,7 @@ const LeadApproval = (props, { navigation, route }) => {
                             <TextComp textVal={language[0][props.language].str_approvercomment} textStyle={Commonstyles.inputtextStyle} Visible={true} />
                         </View>
 
-                        <TextInputComp textValue={approverComment} textStyle={[Commonstyles.textinputtextStyle, { maxHeight: 100 }]} type='email-address' Disable={commentDisable} ComponentName='approverComment' returnKey="done" handleClick={handleClick} handleReference={handleReference} length={30} multilines={true} />
+                        <TextInputComp textValue={approverComment} textStyle={[Commonstyles.textinputtextStyle, { maxHeight: 100 }]} type='email-address' Disable={commentDisable} ComponentName='approverComment' returnKey="done" handleClick={handleClick} handleReference={handleReference} length={300} multilines={true} />
 
 
 
