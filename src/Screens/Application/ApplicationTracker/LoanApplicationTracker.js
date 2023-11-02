@@ -34,8 +34,8 @@ const data = [
 
     { name: 'Filter' },
     { name: 'Sort by' },
-    { name: 'Draft' },
-    { name: 'Rejected' }
+    { name: 'Pending' },
+    { name: "Today's Lead" }
 ]
 const mainFilterDataArr = [
 

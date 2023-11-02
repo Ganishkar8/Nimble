@@ -48,7 +48,7 @@ function BottomNavigation({ }) {
         }}
       />
 
-      <Tab.Screen
+      {/* <Tab.Screen
         name="Dashboard"
         component={DashboardStack}
         options={{
@@ -63,7 +63,7 @@ function BottomNavigation({ }) {
             />
           ),
         }}
-      />
+      /> */}
 
       <Tab.Screen
         name="Profile"

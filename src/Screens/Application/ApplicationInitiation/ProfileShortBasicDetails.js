@@ -1015,7 +1015,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   }
 
   const onClick = () => {
-    alert('Hii');
+    props.navigation.navigate('OTPVerification')
   };
   return (
     // enclose all components in this View tag

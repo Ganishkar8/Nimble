@@ -57,7 +57,7 @@ import tbl_lead_creation_dms from '../../../Database/Table/tbl_lead_creation_dms
 import Common from '../../../Utils/Common';
 import ImageDetailComp from '../../../Components/ImageDetailComp';
 import { profileAction } from '../../../Utils/redux/actions/ProfileAction';
-
+import ButtonViewComp from '../../../Components/ButtonViewComp';
 
 const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
@@ -477,6 +477,14 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
     return flag;
   };
 
+  const updateLead = () => {
+    if (leadType == 'COMP') {
+      props.navigation.navigate('LeadDetails', { leadData: global.leadTrackerData })
+    } else {
+      uploadImage()
+    }
+  }
+
   return (
     // enclose all components in this View tag
     <SafeAreaView
@@ -489,13 +497,13 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
         width: '100%', height: 56, alignItems: 'center', justifyContent: 'center',
 
       }}>
-        <HeadComp textval={language[0][props.language].str_leadcreation} props={props} />
+        <HeadComp textval={leadType != 'COMP' ? language[0][props.language].str_leadcreation : language[0][props.language].str_captureddetails} props={props} />
       </View>
 
       <View style={{ width: '100%', justifyContent: 'center', alignItems: 'flex-end' }}>
         <Text style={{
-          fontSize: 14, color: Colors.mediumgrey, marginRight: 23,
-        }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black }}>{global.leadNumber}</Text></Text>
+          fontSize: 14, color: Colors.mediumgrey, marginRight: 23, fontFamily: 'PoppinsRegular'
+        }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black, fontFamily: 'PoppinsRegular' }}>{global.leadNumber}</Text></Text>
       </View>
       <ScrollView style={styles.scrollView}
         contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
@@ -576,54 +584,54 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
               {(!deleteVisible) && <View style={{ marginBottom: 20 }}>
 
-                <TextComp textVal={fileName} textStyle={{ width: '90%', fontSize: 14, color: Colors.mediumgrey, marginTop: 15 }} Visible={false} />
+                <TextComp textVal={fileName} textStyle={{ width: '90%', fontSize: 14, color: Colors.mediumgrey, marginTop: 15, fontFamily: 'PoppinsRegular' }} Visible={false} />
 
 
                 <View style={{ width: '100%', flexDirection: 'row', marginTop: 15, paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: '#e2e2e2' }} />
 
 
-                <TouchableOpacity onPress={() => { hideBottomSheet(); props.navigation.navigate('PreviewImage', { imageName: fileName, imageUri: imageUri }) }} style={{ width: '100%', flexDirection: 'row', marginTop: 25 }}>
+                <TouchableOpacity onPress={() => { hideBottomSheet(); props.navigation.navigate('PreviewImage', { imageName: fileName, imageUri: imageUri }) }} style={{ width: '100%', flexDirection: 'row', marginTop: 18 }}>
                   <View style={{ flexDirection: 'row' }}>
                     <View style={{ width: '15%' }}>
                       <Image source={require('../../../Images/preview.png')}
                         style={{ width: 20, height: 20 }} />
                     </View>
                     <View style={{ width: '85%', justifyContent: 'center', marginLeft: 3 }}>
-                      <TextComp textVal={language[0][props.language].str_preview} textStyle={{ fontSize: 14, color: Colors.mediumgrey }} Visible={false} />
+                      <TextComp textVal={language[0][props.language].str_preview} textStyle={{ fontSize: 14, color: Colors.mediumgrey, fontFamily: 'PoppinsRegular' }} Visible={false} />
                     </View>
 
                   </View>
 
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => { showDetailModalSheet(); hideBottomSheet(); }} style={{ width: '100%', flexDirection: 'row', marginTop: 25 }}>
+                <TouchableOpacity onPress={() => { showDetailModalSheet(); hideBottomSheet(); }} style={{ width: '100%', flexDirection: 'row', marginTop: 18, }}>
                   <View style={{ flexDirection: 'row' }}>
                     <View style={{ width: '15%' }}>
                       <MaterialIcons name='error' size={20} color={Colors.darkblue} />
                     </View>
                     <View style={{ width: '85%', justifyContent: 'center', marginLeft: 3 }}>
-                      <TextComp textVal={language[0][props.language].str_details} textStyle={{ fontSize: 14, color: Colors.mediumgrey }} Visible={false} />
+                      <TextComp textVal={language[0][props.language].str_details} textStyle={{ fontSize: 14, color: Colors.mediumgrey, fontFamily: 'PoppinsRegular' }} Visible={false} />
                     </View>
 
                   </View>
 
                 </TouchableOpacity>
 
-                {leadType != 'COMP' && <TouchableOpacity onPress={() => { setphotoOptionvisible(true); hideBottomSheet() }} activeOpacity={0.5} style={{ width: '100%', flexDirection: 'row', marginTop: 25 }}>
+                {leadType != 'COMP' && <TouchableOpacity onPress={() => { setphotoOptionvisible(true); hideBottomSheet() }} activeOpacity={0.5} style={{ width: '100%', flexDirection: 'row', marginTop: 18 }}>
                   <View style={{ flexDirection: 'row' }} >
                     <View style={{ width: '15%', marginLeft: 3 }}>
                       <Image source={require('../../../Images/fileupload.png')}
                         style={{ width: 16, height: 20 }} />
                     </View>
                     <View style={{ width: '85%', justifyContent: 'center' }}>
-                      <TextComp textVal={language[0][props.language].str_retake} textStyle={{ fontSize: 14, color: Colors.mediumgrey }} Visible={false} />
+                      <TextComp textVal={language[0][props.language].str_retake} textStyle={{ fontSize: 14, color: Colors.mediumgrey, fontFamily: 'PoppinsRegular' }} Visible={false} />
                     </View>
 
                   </View>
                 </TouchableOpacity>}
 
                 {leadType != 'COMP' &&
-                  <TouchableOpacity onPress={() => { setDeleteVisible(true) }} activeOpacity={0.5} style={{ width: '100%', flexDirection: 'row', marginTop: 25, marginBottom: 20 }}>
+                  <TouchableOpacity onPress={() => { setDeleteVisible(true) }} activeOpacity={0.5} style={{ width: '100%', flexDirection: 'row', marginTop: 20, marginBottom: 20 }}>
                     <View style={{ flexDirection: 'row' }}>
                       <View style={{ width: '15%' }}>
 
@@ -631,7 +639,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
                       </View>
                       <View style={{ width: '85%', justifyContent: 'center', marginLeft: 3 }}>
-                        <TextComp textVal={language[0][props.language].str_delete} textStyle={{ fontSize: 14, color: Colors.mediumgrey }} Visible={false} />
+                        <TextComp textVal={language[0][props.language].str_delete} textStyle={{ fontSize: 14, color: Colors.mediumgrey, fontFamily: 'PoppinsRegular' }} Visible={false} />
                       </View>
 
                     </View>
@@ -786,7 +794,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                       <Ionicons name='camera-outline' size={31} color={Colors.white} />
                     </View>
                   </TouchableOpacity>
-                  <Text style={{ fontSize: 14, color: Colors.black, marginTop: 7 }}>Camera</Text>
+                  <Text style={{ fontSize: 14, color: Colors.black, marginTop: 7, fontFamily: 'PoppinsRegular' }}>Camera</Text>
                 </View>
                 {/* <View style={{ width: '30%', alignItems: 'center' }}>
                                     <TouchableOpacity onPress={() => selectImage()} activeOpacity={11}>
@@ -812,7 +820,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                 textStyle={{
                   color: Colors.mediumgrey,
                   fontSize: 15,
-                  fontWeight: '500',
+                  fontFamily: 'Poppins-Medium'
                 }}
                 textVal={language[0][props.language].str_phtcapture}></TextComp>
 
@@ -884,6 +892,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                     width: '90%',
                     fontSize: 14,
                     color: Colors.mediumgrey,
+                    fontFamily: 'PoppinsRegular'
                   }}
                   Visible={false}
                 />
@@ -987,7 +996,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
           </View>
         </View>
 
-        <View
+        {/* <View
           style={{
             width: '100%',
             height: 50,
@@ -1008,13 +1017,15 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
           }}>
             <View >
 
-              <TextComp textVal={leadType != 'COMP' ? language[0][props.language].str_submit : language[0][props.language].str_close} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} />
+              <TextComp textVal={leadType != 'COMP' ? language[0][props.language].str_submit : language[0][props.language].str_backtollead} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} />
 
             </View>
           </TouchableOpacity>
-        </View>
+        </View> */}
 
 
+
+        <ButtonViewComp textValue={leadType != 'COMP' ? language[0][props.language].str_submit : language[0][props.language].str_backtollead} textStyle={{ color: Colors.white, fontSize: 14, fontWeight: 800, letterSpacing: 1, }} viewStyle={Commonstyles.buttonView} innerStyle={Commonstyles.buttonViewInnerStyle} handleClick={updateLead} />
 
 
 

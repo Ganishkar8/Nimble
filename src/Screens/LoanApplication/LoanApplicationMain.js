@@ -217,7 +217,7 @@ const LoanApplicationMain = (props, { navigation }) => {
                                         </LinearGradient>
                                         {index != labels.length - 1 ? (
                                             <View style={{ marginTop: 23 }}>
-                                                <Text style={{ fontWeight: 700 }}>- - -</Text>
+                                                <Text style={{ fontWeight: 700, color: Colors.black }}>- - -</Text>
                                             </View>
                                         ) : null
                                         }

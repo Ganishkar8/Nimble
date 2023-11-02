@@ -35,7 +35,7 @@ const TypeComp = ({ props, typeData, filterClick }) => {
         <View>
             <View style={{ marginLeft: 15 }}>
                 <Text
-                    style={{ marginTop: 15, fontSize: 14, color: Colors.mediumgrey }}>
+                    style={{ marginTop: 15, fontSize: 14, color: Colors.mediumgrey, fontFamily: 'Poppins-Medium' }}>
                     {language[0][props.language].str_leadtype}
                 </Text>
             </View>
@@ -68,6 +68,7 @@ const TypeComp = ({ props, typeData, filterClick }) => {
                                                 style={{
                                                     color: Colors.black,
                                                     fontSize: 15,
+                                                    fontFamily: 'Poppins-Medium'
                                                 }}>
                                                 {item.name}
                                             </Text>

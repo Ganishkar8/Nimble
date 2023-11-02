@@ -15,7 +15,7 @@ const isValidPhoneNumber = (phoneNumber) => {
 
 const isValidText = (text) => {
   // Regular expression to validate a mobile number with a country code
-  const textRegex = /^[a-zA-Z]+$/;
+  const textRegex = /^[a-zA-Z\s]+$/;
 
   return textRegex.test(text);
 };

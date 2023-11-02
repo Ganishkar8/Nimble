@@ -32,11 +32,11 @@ const SortByComp = ({ props, filterClick, selectedValue, from }) => {
         <View>
             <View style={{ marginLeft: 15 }}>
                 <Text
-                    style={{ marginTop: 15, fontSize: 14, color: Colors.mediumgrey }}>
+                    style={{ marginTop: 15, fontSize: 14, color: Colors.mediumgrey, fontFamily: 'Poppins-Medium' }}>
                     {language[0][props.language].str_sortby}
                 </Text>
                 <Text
-                    style={{ marginTop: 8, fontSize: 14, color: Colors.black }}>
+                    style={{ marginTop: 8, fontSize: 14, color: Colors.black, fontFamily: 'Poppins-Medium' }}>
                     {language[0][props.language].str_creationdate}
                 </Text>
             </View>
@@ -59,6 +59,8 @@ const SortByComp = ({ props, filterClick, selectedValue, from }) => {
                                 style={{
                                     color: Colors.black,
                                     fontSize: 15,
+                                    fontFamily: 'Poppins-Medium',
+                                    marginTop: 4
                                 }}>
                                 {language[0][props.language].str_lto}
                             </Text>
@@ -81,6 +83,8 @@ const SortByComp = ({ props, filterClick, selectedValue, from }) => {
                                 style={{
                                     color: Colors.black,
                                     fontSize: 15,
+                                    fontFamily: 'Poppins-Medium',
+                                    marginTop: 4
                                 }}>
                                 {language[0][props.language].str_otl}
                             </Text>

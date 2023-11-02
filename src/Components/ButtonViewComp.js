@@ -15,7 +15,7 @@ const ButtonViewComp = ({ textValue, textStyle, viewStyle, innerStyle, handleCli
             style={viewStyle}>
             <TouchableOpacity onPress={onClick} activeOpacity={0.8} style={innerStyle}>
                 <View >
-                    <TextComp textVal={textValue} textStyle={textStyle} />
+                    <TextComp textVal={textValue} textStyle={Commonstyles.buttonTextStyle} />
 
                 </View>
             </TouchableOpacity>

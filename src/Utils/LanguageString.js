@@ -96,7 +96,7 @@ export const language = [
       str_leadapprovalstatuss: 'Lead Approval Status',
       str_approvername: 'Approver Name',
       str_loanamount: 'Loan Amount',
-      str_captureddetails: 'Capture Details',
+      str_captureddetails: 'Captured Details',
       str_leadapprovals: 'Lead Approval',
       str_leadlog: 'Lead Log',
       str_initiateloanapplication: 'Initiate Loan Application',
@@ -188,6 +188,9 @@ export const language = [
       str_disclaimers: 'Disclaimers',
       str_agree: 'Agree',
       str_cancel: 'Cancel',
+      str_backtollead: 'BACK TO LEAD DETAILS',
+      str_mobileotpverification: 'Mobile OTP Verification',
+      str_mobileverifydesc: 'An authentication code has been send to '
     },
 
     ta: {

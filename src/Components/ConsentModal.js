@@ -58,6 +58,7 @@ const ConsentModal = props => {
                                 <Text style={{ color: isSelected ? Colors.darkblue : Colors.dimText, fontWeight: 500 }}>{language[0][props.language].str_agree}</Text>
                             </TouchableOpacity>
 
+
                             <TouchableOpacity onPress={() => { props.nextScreen('Cancel') }} >
                                 <Text style={{ color: Colors.darkblue, marginLeft: 20, fontWeight: 500 }}>{language[0][props.language].str_cancel}</Text>
                             </TouchableOpacity>

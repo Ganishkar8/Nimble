@@ -18,11 +18,11 @@ const PickerComp = ({
 
     return (
         <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'center' }}>
-            <View style={{ width: '96%' }}>
+            <View style={{ width: '96%', marginTop: 4 }}>
 
                 <Picker
                     selectedValue={textLabel}
-                    style={[pickerStyle, { color: !Disable ? Colors.black : Colors.lightgrey }]}
+                    style={[pickerStyle, { color: !Disable ? Colors.black : Colors.lightgrey, }]}
                     enabled={!Disable}
                     mode='dropdown'
                     dropdownIconColor={!Disable ? Colors.black : Colors.lightgrey}
@@ -31,7 +31,7 @@ const PickerComp = ({
                         setPicker(itemValue, itemIndex)
                     }}>
                     {componentName == 'productIdPicker' &&
-                        <Picker.Item value='' label='Select' style={{ backgroundColor: '#fff', color: '#000' }} />
+                        <Picker.Item value='' label='Select' style={{ backgroundColor: '#fff', color: '#000', fontFamily: 'PoppinsRegular' }} />
                     }
 
                     {
@@ -49,7 +49,7 @@ const PickerComp = ({
                                     labelValue = item.label;
                             }
 
-                            return <Picker.Item value={item.id} label={labelValue} style={{ backgroundColor: '#fff', color: '#000' }} />
+                            return <Picker.Item value={item.id} label={labelValue} style={{ backgroundColor: '#fff', color: '#000', fontFamily: 'PoppinsRegular' }} />
                         })
                     }
                 </Picker>

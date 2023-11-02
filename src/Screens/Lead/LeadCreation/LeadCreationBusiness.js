@@ -45,9 +45,11 @@ import TextInputComp from '../../../Components/TextInputComp';
 import Common from '../../../Utils/Common';
 import tbl_lead_creation_business_details from '../../../Database/Table/tbl_lead_creation_business_details';
 import { profileAction } from '../../../Utils/redux/actions/ProfileAction';
+import ButtonViewComp from '../../../Components/ButtonViewComp';
 
 
 const LeadCreationBusiness = (props, { navigation }) => {
+
     const [profileDetail, setProfileDetail] = useState(props.profiledetail);
     const [bottomLeadSheetVisible, setBottomLeadSheetVisible] = useState(false);
     const showLeadBottomSheet = () => {
@@ -487,13 +489,13 @@ const LeadCreationBusiness = (props, { navigation }) => {
                 width: '100%', height: 56, alignItems: 'center', justifyContent: 'center',
 
             }}>
-                <HeadComp textval={language[0][props.language].str_leadcreation} props={props} />
+                <HeadComp textval={leadType != 'COMP' ? language[0][props.language].str_leadcreation : language[0][props.language].str_captureddetails} props={props} />
             </View>
 
             <View style={{ width: '100%', justifyContent: 'center', alignItems: 'flex-end' }}>
                 <Text style={{
-                    fontSize: 14, color: Colors.mediumgrey, marginRight: 23,
-                }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black }}>{global.leadNumber}</Text></Text>
+                    fontSize: 14, color: Colors.mediumgrey, marginRight: 23, fontFamily: 'PoppinsRegular'
+                }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black, fontFamily: 'PoppinsRegular' }}>{global.leadNumber}</Text></Text>
             </View>
             <ScrollView style={styles.scrollView}
                 contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
@@ -566,7 +568,7 @@ const LeadCreationBusiness = (props, { navigation }) => {
 
 
                                 <View style={{ width: '100%', height: 30 }}>
-                                    <TextComp textVal={`Lead ID: ${global.leadNumber} Created`} textStyle={{ fontSize: 14, color: Colors.white, lineHeight: 20 }} Visible={false} />
+                                    <TextComp textVal={`Lead ID: ${global.leadNumber} Created`} textStyle={{ fontSize: 14, color: Colors.white, lineHeight: 20, fontFamily: 'PoppinsRegular' }} Visible={false} />
                                 </View>
 
 
@@ -580,7 +582,7 @@ const LeadCreationBusiness = (props, { navigation }) => {
 
                         <View style={{ width: '90%', marginTop: 3, }}>
 
-                            <TextComp textStyle={{ color: Colors.mediumgrey, fontSize: 15, fontWeight: '500' }} textVal={language[0][props.language].str_businessdetails}></TextComp>
+                            <TextComp textStyle={{ color: Colors.mediumgrey, fontSize: 15, fontFamily: 'Poppins-Medium' }} textVal={language[0][props.language].str_businessdetails}></TextComp>
 
                             <ProgressComp progressvalue={0.5} textvalue="2 of 4" />
 
@@ -618,7 +620,7 @@ const LeadCreationBusiness = (props, { navigation }) => {
                             <TextComp textVal={incomeTurnOverCaption} textStyle={Commonstyles.inputtextStyle} Visible={incomeTurnOverMan} />
                         </View>
 
-                        <TextInputComp textValue={incomeTurnOver} textStyle={Commonstyles.textinputtextStyle} type='numeric' Disable={incomeTurnOverDisable} ComponentName='incomeTurnOver' reference={incomeTurnOverRef} returnKey="next" handleClick={handleClick} handleReference={handleReference} length={10} />
+                        <TextInputComp textValue={incomeTurnOver} textStyle={Commonstyles.textinputtextStyle} type='numeric' Disable={incomeTurnOverDisable} ComponentName='incomeTurnOver' reference={incomeTurnOverRef} returnKey="next" handleClick={handleClick} handleReference={handleReference} length={9} />
 
                     </View>}
 
@@ -664,25 +666,8 @@ const LeadCreationBusiness = (props, { navigation }) => {
                 </View>
 
 
-                <View
-                    style={{
-                        width: '100%',
-                        height: 50,
-                        marginTop: 25,
-                        justifyContent: 'flex-end',
-                        alignItems: 'center',
-                    }}>
-                    <TouchableOpacity onPress={() => { updateLeadDetails() }} activeOpacity={10} style={{
-                        width: '88%', height: 50, backgroundColor: '#0294ff',
-                        borderRadius: 45, alignItems: 'center', justifyContent: 'center'
-                    }}>
-                        <View >
+                <ButtonViewComp textValue={language[0][props.language].str_next.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 14, fontWeight: 700, letterSpacing: 1, }} viewStyle={Commonstyles.buttonView} innerStyle={Commonstyles.buttonViewInnerStyle} handleClick={updateLeadDetails} />
 
-                            <TextComp textVal={language[0][props.language].str_next} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} />
-
-                        </View>
-                    </TouchableOpacity>
-                </View>
 
             </ScrollView>
         </SafeAreaView>

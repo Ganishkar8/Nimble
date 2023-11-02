@@ -200,7 +200,7 @@ const ReAssign = (props, { navigation }) => {
 
                         <View style={{ width: '100%', flexDirection: 'row', }}>
 
-                            <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>{item.userName}</Text>
+                            <Text style={{ color: Colors.black, fontSize: 13, fontFamily: 'Poppins-Medium' }}>{item.userName}</Text>
 
                         </View>
 
@@ -294,12 +294,12 @@ const ReAssign = (props, { navigation }) => {
                                     <TextInput
                                         value={search}
                                         onChangeText={search => {
-                                            if (search.length > 0) {
-                                                if (Common.isValidText(search))
-                                                    searchFilterFunction(search)
-                                            } else {
-                                                searchFilterFunction(search)
-                                            }
+                                            // if (search.length > 0) {
+                                            //     if (Common.isValidText(search))
+                                            //         searchFilterFunction(search)
+                                            // } else {
+                                            searchFilterFunction(search)
+                                            // }
 
                                         }}
                                         placeholder={'Search By Name or ID'}
@@ -311,8 +311,8 @@ const ReAssign = (props, { navigation }) => {
                                             width: '80%',
                                             height: 44,
                                             fontSize: 14.4,
-                                            fontWeight: '400',
-                                            color: Colors.black
+                                            color: Colors.black,
+                                            fontFamily: 'PoppinsRegular'
                                         }}
                                     />
                                     <Ionicons name="search" style={{ marginStart: 32 }} size={20} color={'#aaaaaa'} />
@@ -345,8 +345,8 @@ const ReAssign = (props, { navigation }) => {
 
                     <View style={{ width: '100%', height: 50, justifyContent: 'center' }}>
                         <Text style={{
-                            fontSize: 16, color: Colors.mediumgrey, marginLeft: 23,
-                        }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black }}>{leadData.leadId}</Text></Text>
+                            fontSize: 16, color: Colors.mediumgrey, marginLeft: 23, fontFamily: 'PoppinsRegular'
+                        }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black, fontFamily: 'PoppinsRegular' }}>{leadData.leadId}</Text></Text>
                     </View>
 
                     <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>

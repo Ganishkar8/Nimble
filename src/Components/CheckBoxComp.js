@@ -22,9 +22,11 @@ const CheckBoxComp = ({ textCaption, textStyle, Visible, Disable }) => {
           value={isSelected}
           enabled={!Disable}
           onValueChange={setSelection}
+          color="#000000"
           style={styles.checkbox}
+          tintColors={{ true: Colors.darkblue }}
         />
-        <Text style={textStyle}>
+        <Text style={{ color: Colors.black }}>
           {textCaption}
           {Visible && <Text style={{ color: 'red' }}>*</Text>}
         </Text>
@@ -36,6 +38,7 @@ const CheckBoxComp = ({ textCaption, textStyle, Visible, Disable }) => {
 const styles = StyleSheet.create({
   checkbox: {
     alignSelf: 'center',
+    borderColor: Colors.black
   },
 });
 

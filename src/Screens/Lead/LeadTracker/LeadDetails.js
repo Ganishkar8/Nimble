@@ -82,7 +82,16 @@ const LeadDetails = (props, { navigation, route }) => {
 
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
 
-        getLeadData();
+        if (isScreenVisible) {
+            Common.getNetworkConnection().then(value => {
+                if (value.isConnected == true) {
+                    getLeadData();
+                } else {
+                    alert('Internet is not connected')
+                }
+
+            })
+        }
 
         tbl_SystemCodeDetails.getSystemCodeDetailsBasedOnID('LeadStatus').then(value => {
             if (value !== undefined && value.length > 0) {
@@ -113,8 +122,12 @@ const LeadDetails = (props, { navigation, route }) => {
         apiInstance(baseURL).get(`api/v1/lead-creation-initiation/getByLeadId/${props.route.params.leadData.id}`)
             .then((response) => {
                 // Handle the response data
-                console.log("ResponseDataApi::" + JSON.stringify(response.data));
-                setLeadData(response.data)
+                if (response.status == 200) {
+                    console.log("ResponseDataApi::" + JSON.stringify(response.data));
+                    setLeadData(response.data)
+                } else {
+                    alert('Server Error!!')
+                }
                 setLoading(false)
                 // const decodedToken = jwtDecode(response.data.jwtToken);
                 // console.log("LoginJWTDecode::" + JSON.stringify(decodedToken));
@@ -223,38 +236,38 @@ const LeadDetails = (props, { navigation, route }) => {
                         }}>
 
                             <View style={{ width: '100%', flexDirection: 'row', marginTop: 13 }}>
-                                <View style={{ width: '55%', flexDirection: 'row', alignItems: 'center' }}>
-                                    <Text style={{ color: Colors.black, fontSize: 14, fontWeight: '100', marginLeft: 20 }}>{language[0][props.language].str_leadapprovalstatuss}</Text>
+                                <View style={{ width: '45%', flexDirection: 'row', alignItems: 'center' }}>
+                                    <Text style={{ color: Colors.black, fontSize: 14, marginLeft: 20, fontFamily: 'Poppins-Medium' }}>{language[0][props.language].str_leadapprovalstatus}</Text>
                                 </View>
-                                <View style={{ width: '45%', flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'flex-start' }}>
+                                <View style={{ width: '55%', flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'flex-start' }}>
                                     <View style={leadStatus == 'APPROVED' ? styles.approvedbackground : leadStatus == 'REJECTED' ? styles.rejectedbackground : styles.pendingbackground}>
-                                        <Text style={{ color: Colors.black, fontSize: 14, fontWeight: '100' }}>{leadStatus}</Text>
+                                        <Text style={{ color: Colors.black, fontSize: 12, fontFamily: 'Poppins-Medium' }}>{leadStatus}</Text>
                                     </View>
                                 </View>
                             </View>
 
                             <View style={{ width: '100%', flexDirection: 'row', marginTop: 13, }}>
                                 <View style={styles.leftText}>
-                                    <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_customername}</Text>
+                                    <Text style={styles.headText}>{language[0][props.language].str_customername}</Text>
                                 </View>
                                 <View style={styles.rightText}>
-                                    <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {leadTrackerData.customerName}</Text>
+                                    <Text style={styles.childText}>:  {leadTrackerData.customerName}</Text>
                                 </View>
                             </View>
                             <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
                                 <View style={styles.leftText}>
-                                    <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_leadid}</Text>
+                                    <Text style={styles.headText}>{language[0][props.language].str_leadid}</Text>
                                 </View>
                                 <View style={styles.rightText}>
-                                    <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {leadTrackerData.leadId}</Text>
+                                    <Text style={styles.childText}>:  {leadTrackerData.leadId}</Text>
                                 </View>
                             </View>
                             <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
                                 <View style={styles.leftText}>
-                                    <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_leadtype}</Text>
+                                    <Text style={styles.headText}>{language[0][props.language].str_leadtype}</Text>
                                 </View>
                                 <View style={styles.rightText}>
-                                    <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {leadTrackerData.leadType}</Text>
+                                    <Text style={styles.childText}>:  {leadTrackerData.leadType}</Text>
                                 </View>
                             </View>
                             {/* hide */}
@@ -263,67 +276,67 @@ const LeadDetails = (props, { navigation, route }) => {
 
                                 {leadStatus == 'APPROVED' && <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
                                     <View style={styles.leftText}>
-                                        <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_approvername}</Text>
+                                        <Text style={styles.headText}>{language[0][props.language].str_approvername}</Text>
                                     </View>
                                     <View style={styles.rightText}>
-                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>: {leadTrackerData.leadStatus == 'APPROVED' ? leadTrackerData.approverName : ''}  </Text>
+                                        <Text style={styles.childText}>: {leadTrackerData.leadStatus == 'APPROVED' ? leadTrackerData.approverName : ''}  </Text>
                                     </View>
                                 </View>
                                 }
 
                                 <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
                                     <View style={styles.leftText}>
-                                        <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_productId}</Text>
+                                        <Text style={styles.headText}>{language[0][props.language].str_productId}</Text>
                                     </View>
                                     <View style={styles.rightText}>
-                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {leadTrackerData.product}</Text>
+                                        <Text style={styles.childText}>:  {leadTrackerData.product}</Text>
                                     </View>
                                 </View>
 
                                 <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
                                     <View style={styles.leftText}>
-                                        <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_loanamount}</Text>
+                                        <Text style={styles.headText}>{language[0][props.language].str_loanamount}</Text>
                                     </View>
                                     <View style={styles.rightText}>
-                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {leadTrackerData.loanAmount}</Text>
+                                        <Text style={styles.childText}>:  ₹{leadTrackerData.loanAmount}</Text>
                                     </View>
                                 </View>
 
                                 <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
                                     <View style={styles.leftText}>
-                                        <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_loantype}</Text>
+                                        <Text style={styles.headText}>{language[0][props.language].str_loantype}</Text>
                                     </View>
                                     <View style={styles.rightText}>
-                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {Common.getCodeDescription(loanTypeData, leadData.leadCreationLoanDetails.loanTypeId)}</Text>
+                                        <Text style={styles.childText}>:  {Common.getCodeDescription(loanTypeData, leadData.leadCreationLoanDetails.loanTypeId)}</Text>
                                     </View>
                                 </View>
 
                                 <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
                                     <View style={styles.leftText}>
-                                        <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_creationdate}</Text>
+                                        <Text style={styles.headText}>{language[0][props.language].str_creationdate}</Text>
                                     </View>
                                     <View style={styles.rightText}>
-                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {Common.formatDate(leadTrackerData.creationDate)}</Text>
+                                        <Text style={styles.childText}>:  {Common.formatDate(leadTrackerData.creationDate)}</Text>
                                     </View>
                                 </View>
 
                                 {leadStatus == 'APPROVED' &&
                                     <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
                                         <View style={styles.leftText}>
-                                            <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_completiondate}</Text>
+                                            <Text style={styles.headText}>{language[0][props.language].str_completiondate}</Text>
                                         </View>
                                         <View style={styles.rightText}>
-                                            <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {leadStatus == 'APPROVED' ? Common.formatDate(leadTrackerData.completionDate) : ''}</Text>
+                                            <Text style={styles.childText}>:  {leadStatus == 'APPROVED' ? Common.formatDate(leadTrackerData.completionDate) : ''}</Text>
                                         </View>
                                     </View>
                                 }
 
                                 <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
                                     <View style={styles.leftText}>
-                                        <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_ageing}</Text>
+                                        <Text style={styles.headText}>{language[0][props.language].str_ageing}</Text>
                                     </View>
                                     <View style={styles.rightText}>
-                                        <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {leadTrackerData.ageing} days</Text>
+                                        <Text style={styles.childText}>:  {leadTrackerData.ageing} days</Text>
                                     </View>
                                 </View>
                             </View>
@@ -343,7 +356,7 @@ const LeadDetails = (props, { navigation, route }) => {
                             <View style={{ flexDirection: 'row' }}>
 
                                 <View style={{ width: '70%', justifyContent: 'center' }}>
-                                    <Text style={{ fontSize: 16, color: Colors.mediumgrey, marginTop: 5, }}>{language[0][props.language].str_captureddetails}</Text>
+                                    <Text style={{ fontSize: 16, color: Colors.mediumgrey, marginTop: 5, fontFamily: 'PoppinsRegular' }}>{language[0][props.language].str_captureddetails}</Text>
                                 </View>
 
                                 <View style={{ width: '10%' }}></View>
@@ -365,7 +378,7 @@ const LeadDetails = (props, { navigation, route }) => {
                             <View style={{ flexDirection: 'row' }}>
 
                                 <View style={{ width: '70%', justifyContent: 'center' }}>
-                                    <Text style={{ fontSize: 16, color: leadStatus != 'APPROVED' ? Colors.lightgrey : Colors.mediumgrey, marginTop: 5, }}>{language[0][props.language].str_reassign}</Text>
+                                    <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 16, color: leadStatus != 'APPROVED' ? Colors.lightgrey : Colors.mediumgrey, marginTop: 5, }}>{language[0][props.language].str_reassign}</Text>
                                 </View>
 
                                 <View style={{ width: '10%' }}></View>
@@ -388,7 +401,7 @@ const LeadDetails = (props, { navigation, route }) => {
                             <View style={{ flexDirection: 'row' }}>
 
                                 <View style={{ width: '70%', justifyContent: 'center' }}>
-                                    <Text style={{ fontSize: 16, color: global.USERTYPEID == '1163' ? Colors.mediumgrey : leadStatus != 'PENDING' ? Colors.darkblack : Colors.lightgrey, marginTop: 5, }}>{language[0][props.language].str_leadapprovals}</Text>
+                                    <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 16, color: global.USERTYPEID == '1163' ? Colors.mediumgrey : leadStatus != 'PENDING' ? Colors.darkblack : Colors.lightgrey, marginTop: 5, }}>{language[0][props.language].str_leadapprovals}</Text>
                                 </View>
 
                                 <View style={{ width: '10%' }}></View>
@@ -403,7 +416,7 @@ const LeadDetails = (props, { navigation, route }) => {
                             <View style={{ flexDirection: 'row' }}>
 
                                 <View style={{ width: '70%', justifyContent: 'center' }}>
-                                    <Text style={{ fontSize: 16, color: Colors.mediumgrey, marginTop: 5, }}>{language[0][props.language].str_leadlog}</Text>
+                                    <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 16, color: Colors.mediumgrey, marginTop: 5, }}>{language[0][props.language].str_leadlog}</Text>
                                 </View>
 
                                 <View style={{ width: '10%' }}></View>
@@ -426,7 +439,7 @@ const LeadDetails = (props, { navigation, route }) => {
                     }}>
                     <TouchableOpacity activeOpacity={10} style={global.USERTYPEID == '1163' ? Commonstyles.disableBg : leadStatus == 'APPROVED' ? Commonstyles.buttonViewInnerStyle : Commonstyles.disableBg}>
                         <View >
-                            <TextComp textVal={language[0][props.language].str_initiateloanapplication.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} />
+                            <TextComp textVal={language[0][props.language].str_initiateloanapplication.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13, fontFamily: 'Poppins-SemiBold', letterSpacing: 0.5 }} />
 
                         </View>
                     </TouchableOpacity>
@@ -517,8 +530,9 @@ const styles = StyleSheet.create({
     },
     approvedbackground: {
         width: 90, borderColor: Colors.approvedBorder, backgroundColor: Colors.approvedBg, alignItems: 'center', padding: 3, borderRadius: 15, borderWidth: 1
-    }, rejectedbackground: {
-        width: 90, borderColor: Colors.rejectedBorder, rejectedbackground: Colors.approvedBg, alignItems: 'center', padding: 3, borderRadius: 15, borderWidth: 1
+    },
+    rejectedbackground: {
+        width: 90, borderColor: Colors.rejectedBorder, backgroundColor: Colors.rejectedBg, alignItems: 'center', padding: 3, borderRadius: 15, borderWidth: 1
     },
     line: {
         backgroundColor: '#f1f1f1', // Change the color as needed
@@ -548,5 +562,11 @@ const styles = StyleSheet.create({
         width: '55%',
 
     },
+    headText: {
+        color: Colors.mediumgrey, fontSize: 13, marginLeft: 20, fontFamily: 'PoppinsRegular'
+    },
+    childText: {
+        color: Colors.black, fontSize: 13, fontFamily: 'Poppins-Medium'
+    }
 
 });

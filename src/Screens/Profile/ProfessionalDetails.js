@@ -8,7 +8,8 @@ import {
     Alert,
     Text,
     TouchableOpacity,
-    ScrollView
+    ScrollView,
+    BackHandler
 } from 'react-native';
 import MyStatusBar from '../../Components/ MyStatusBar';
 import Colors from '../../Utils/Colors';
@@ -18,8 +19,8 @@ import apiInstance from '../../Utils/apiInstance';
 import { connect } from 'react-redux';
 import { languageAction } from '../../Utils/redux/actions/languageAction';
 import { profileAction } from '../../Utils/redux/actions/ProfileAction';
-
-
+import HeadComp from '../../Components/HeadComp';
+import { useIsFocused } from '@react-navigation/native';
 
 const ProfessionalDetailsScreen = (props, { navigation }) => {
 
@@ -28,11 +29,24 @@ const ProfessionalDetailsScreen = (props, { navigation }) => {
     const [agencyName, setagencyName] = useState(false);
     const [supervisorID, setSupervisorID] = useState(false);
     const [professionalDetail, setProfessionalDetail] = useState(props.profiledetail.userAgencyDetailsDto);
+    const isScreenVisible = useIsFocused();
 
 
     useEffect(() => {
         //getProfessionalDetails();
-    }, []);
+        props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
+        return () => {
+            props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
+            backHandler.remove();
+        }
+
+    }, [navigation, isScreenVisible]);
+
+    const handleBackButton = () => {
+        props.navigation.goBack();
+        return true; // Prevent default back button behavior
+    };
 
     const getProfessionalDetails = () => {
 
@@ -76,37 +90,20 @@ const ProfessionalDetailsScreen = (props, { navigation }) => {
                         width: '100%', height: 56, alignItems: 'center', justifyContent: 'center',
 
                     }}>
-                        <View style={{ width: '92%', flexDirection: 'row' }}>
-                            <TouchableOpacity onPress={() => props.navigation.goBack()} style={{ width: '10%', height: 56, justifyContent: 'center' }}>
-                                <View >
+                        <HeadComp textval={'Professional Details'} props={props} />
 
-                                    <Entypo name='chevron-left' size={25} color={Colors.darkblack} />
-
-                                </View>
-                            </TouchableOpacity>
-                            <View style={{ width: '80%', height: 56, justifyContent: 'center' }}>
-                                <Text style={{ fontSize: 18, color: Colors.darkblack }}>Professional Details</Text>
-                            </View>
-                        </View>
                     </View>
 
                     <View style={{ width: '100%', alignItems: 'center', marginTop: '6%' }}>
 
                         <View style={{ width: '90%', marginTop: 3, }}>
                             <Text
-                                style={{
-                                    color: Colors.lightgrey,
-                                    fontSize: 14,
-                                }}>
+                                style={styles.headText}>
                                 AGENT TYPE
                             </Text>
 
                             <Text
-                                style={{
-                                    color: Colors.darkblack,
-                                    fontSize: 14,
-                                    marginTop: 10
-                                }}>
+                                style={styles.childText}>
                                 {professionalDetail.agentType}
                             </Text>
 
@@ -115,19 +112,12 @@ const ProfessionalDetailsScreen = (props, { navigation }) => {
 
                         <View style={{ width: '90%', marginTop: 20, }}>
                             <Text
-                                style={{
-                                    color: Colors.lightgrey,
-                                    fontSize: 14,
-                                }}>
+                                style={styles.headText}>
                                 AGENCY NAME
                             </Text>
 
                             <Text
-                                style={{
-                                    color: Colors.darkblack,
-                                    fontSize: 14,
-                                    marginTop: 10
-                                }}>
+                                style={styles.childText}>
                                 {professionalDetail.agencyName}
                             </Text>
 
@@ -166,7 +156,17 @@ const styles = StyleSheet.create({
         height: 1,
         width: '90%',
         marginTop: '3%'           // Adjust the height as needed
+    }, headText: {
+        color: Colors.lightgrey,
+        fontSize: 14,
+        fontFamily: 'PoppinsRegular'
     },
+    childText: {
+        color: Colors.darkblack,
+        fontSize: 14,
+        marginTop: 10,
+        fontFamily: 'PoppinsRegular'
+    }
 });
 
 

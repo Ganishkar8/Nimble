@@ -27,6 +27,7 @@ import StepIndicator from 'react-native-step-indicator';
 import Common from '../../../Utils/Common';
 import { getAvailableLocationProviders } from 'react-native-device-info';
 import apiInstance from '../../../Utils/apiInstance';
+import HeadComp from '../../../Components/HeadComp';
 
 const data = [
 
@@ -232,22 +233,10 @@ const LeadLog = (props, { navigation }) => {
 
             <View style={{ flex: 1 }}>
 
-                <View style={styles.headerView}>
-                    <View style={{
-                        width: '100%', height: 50, alignItems: 'center', justifyContent: 'center',
-                        flexDirection: 'row'
-                    }}>
-                        <TouchableOpacity onPress={() => props.navigation.goBack()} style={{ width: '15%', height: 56, alignItems: 'center', justifyContent: 'center' }}>
-                            <View >
+                <View style={{ width: '100%', height: 56, alignItems: 'center', justifyContent: 'center', }}>
 
-                                <Entypo name='chevron-left' size={25} color='#4e4e4e' />
+                    <HeadComp textval={language[0][props.language].str_leadlog} props={props} />
 
-                            </View>
-                        </TouchableOpacity>
-                        <View style={{ width: '85%', height: 50, justifyContent: 'center' }}>
-                            <Text style={{ fontSize: 18, color: '#000', fontWeight: '400' }}>{language[0][props.language].str_leadlog}</Text>
-                        </View>
-                    </View>
                 </View>
 
 
@@ -256,19 +245,19 @@ const LeadLog = (props, { navigation }) => {
 
                 <View style={{ width: '100%', height: 50, justifyContent: 'center' }}>
                     <Text style={{
-                        fontSize: 16, color: Colors.mediumgrey, marginLeft: 23,
-                    }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black }}>{leadData.leadNumber}</Text></Text>
+                        fontSize: 16, color: Colors.mediumgrey, marginLeft: 23, fontFamily: 'PoppinsRegular'
+                    }}>{language[0][props.language].str_leadid} :  <Text style={{ color: Colors.black, fontFamily: 'PoppinsRegular' }}>{leadData.leadNumber}</Text></Text>
                 </View>
 
                 <View style={{ width: '100%', height: 5, backgroundColor: Colors.skyblue }} />
 
-                <View style={{ width: '100%', justifyContent: 'center' }}>
+                {/* <View style={{ width: '100%', justifyContent: 'center' }}>
                     <Text style={{
-                        fontSize: 16, color: Colors.mediumgrey, marginLeft: 23, marginTop: 10
+                        fontSize: 16, color: Colors.mediumgrey, marginLeft: 23, marginTop: 10, fontFamily: 'PoppinsRegular'
                     }}>{language[0][props.language].str_leadlog}</Text>
 
-                </View>
-                <View style={{ width: '100%', alignItems: 'flex-start', justifyContent: 'flex-start', marginLeft: 20, marginTop: 20, marginBottom: 200 }}>
+                </View> */}
+                <View style={{ width: '100%', alignItems: 'flex-start', justifyContent: 'flex-start', marginLeft: 20, marginTop: 20, marginBottom: 190 }}>
 
                     <FlatList
                         data={logTotalData}
@@ -280,12 +269,13 @@ const LeadLog = (props, { navigation }) => {
                                     <View style={{ width: '100%', flexDirection: 'row', marginTop: index == 0 ? 8 : 0 }}>
                                         <View style={{
                                             width: '15%', // Adjust as needed
-                                            alignItems: 'center'
+                                            alignItems: 'center',
                                         }}>
                                             <View style={{
                                                 width: 15, // Set the width of your rounded view
                                                 height: 15, // Set the height of your rounded view
                                                 borderRadius: 15,
+
                                                 // Half of the width or height to create a circle
                                                 backgroundColor: index == 1 ? currentPosition == 0 ? Colors.lightgrey : Colors.green : Colors.green, // Set the background color
                                                 justifyContent: 'center', // Adjust as needed
@@ -302,66 +292,66 @@ const LeadLog = (props, { navigation }) => {
 
                                         <View style={{ width: '80%' }}>
                                             <Text style={{
-                                                fontSize: 14, color: '#000', marginLeft: 10,
+                                                fontSize: 14, color: '#000', marginLeft: 10, fontFamily: 'Poppins-Medium'
                                             }}>{index == 0 ? language[0][props.language].str_leadcreation : index == 1 ? leadData.leadCreationLeadLogDto.leadStatus == '1668' ? language[0][props.language].str_leadrejected : language[0][props.language].str_leadapproval : language[0][props.language].str_reassign}</Text>
-                                            <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                                                <View style={{ width: '40%' }}>
-                                                    <Text style={{ color: Colors.dimText, fontSize: 12, fontWeight: '400', marginLeft: 10 }}>{language[0][props.language].str_completiondate} :</Text>
+                                            <View style={{ width: '100%', marginTop: 11, }}>
+                                                <View style={{ width: '100%' }}>
+                                                    <Text style={styles.headText}>{language[0][props.language].str_completiondate.toUpperCase()} </Text>
                                                 </View>
-                                                <View style={{ width: '60%' }}>
-                                                    <Text style={{ color: Colors.black, fontSize: 12, fontWeight: '400' }}>{item.date}</Text>
-                                                </View>
-                                            </View>
-                                            <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                                                <View style={{ width: '40%' }}>
-                                                    <Text style={{ color: Colors.dimText, fontSize: 12, fontWeight: '400', marginLeft: 10 }}>{language[0][props.language].str_completiontime} :</Text>
-                                                </View>
-                                                <View style={{ width: '60%' }}>
-                                                    <Text style={{ color: Colors.black, fontSize: 12, fontWeight: '400' }}>{item.time}</Text>
+                                                <View style={{ width: '100%' }}>
+                                                    <Text style={styles.childText}>{item.date}</Text>
                                                 </View>
                                             </View>
-                                            {item.id == '1' && <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                                                <View style={{ width: '40%' }}>
-                                                    <Text style={{ color: Colors.dimText, fontSize: 12, fontWeight: '400', marginLeft: 10 }}>{language[0][props.language].str_userid} :</Text>
+                                            <View style={{ width: '100%', marginTop: 11, }}>
+                                                <View style={{ width: '100%' }}>
+                                                    <Text style={styles.headText}>{language[0][props.language].str_completiontime.toUpperCase()} </Text>
                                                 </View>
-                                                <View style={{ width: '60%' }}>
-                                                    <Text style={{ color: Colors.black, fontSize: 12, fontWeight: '400' }}>{item.userId}</Text>
+                                                <View style={{ width: '100%' }}>
+                                                    <Text style={styles.childText}>{item.time}</Text>
+                                                </View>
+                                            </View>
+                                            {item.id == '1' && <View style={{ width: '100%', marginTop: 11, }}>
+                                                <View style={{ width: '100%' }}>
+                                                    <Text style={styles.headText}>{language[0][props.language].str_userid.toUpperCase()} </Text>
+                                                </View>
+                                                <View style={{ width: '100%' }}>
+                                                    <Text style={styles.childText}>{item.userId}</Text>
                                                 </View>
                                             </View>}
                                             {item.id == '1' &&
-                                                <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                                                    <View style={{ width: '40%' }}>
-                                                        <Text style={{ color: Colors.dimText, fontSize: 12, fontWeight: '400', marginLeft: 10 }}>{language[0][props.language].str_username} :</Text>
+                                                <View style={{ width: '100%', marginTop: 11, }}>
+                                                    <View style={{ width: '100%' }}>
+                                                        <Text style={styles.headText}>{language[0][props.language].str_username.toUpperCase()} </Text>
                                                     </View>
-                                                    <View style={{ width: '60%' }}>
-                                                        <Text style={{ color: Colors.black, fontSize: 12, fontWeight: '400' }}>{item.userName}</Text>
+                                                    <View style={{ width: '100%' }}>
+                                                        <Text style={styles.childText}>{item.userName}</Text>
                                                     </View>
                                                 </View>
                                             }
-                                            {item.id == '2' && <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                                                <View style={{ width: '40%' }}>
-                                                    <Text style={{ color: Colors.dimText, fontSize: 12, fontWeight: '400', marginLeft: 10 }}>{language[0][props.language].str_reassignfrom} :</Text>
+                                            {item.id == '2' && <View style={{ width: '100%', marginTop: 11, }}>
+                                                <View style={{ width: '100%' }}>
+                                                    <Text style={styles.headText}>{language[0][props.language].str_reassignfrom.toUpperCase()} </Text>
                                                 </View>
-                                                <View style={{ width: '60%' }}>
-                                                    <Text style={{ color: Colors.black, fontSize: 12, fontWeight: '400' }}>{item.reassignfrom}</Text>
-                                                </View>
-                                            </View>}
-
-                                            {item.id == '2' && <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                                                <View style={{ width: '40%' }}>
-                                                    <Text style={{ color: Colors.dimText, fontSize: 12, fontWeight: '400', marginLeft: 10 }}>{language[0][props.language].str_reassignto} :</Text>
-                                                </View>
-                                                <View style={{ width: '60%' }}>
-                                                    <Text style={{ color: Colors.black, fontSize: 12, fontWeight: '400' }}>{item.reassignto}</Text>
+                                                <View style={{ width: '100%' }}>
+                                                    <Text style={styles.childText}>{item.reassignfrom}</Text>
                                                 </View>
                                             </View>}
 
-                                            {item.id == '2' && <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                                                <View style={{ width: '40%' }}>
-                                                    <Text style={{ color: Colors.dimText, fontSize: 12, fontWeight: '400', marginLeft: 10 }}>{language[0][props.language].str_reassignby} :</Text>
+                                            {item.id == '2' && <View style={{ width: '100%', marginTop: 11, }}>
+                                                <View style={{ width: '100%' }}>
+                                                    <Text style={styles.headText}>{language[0][props.language].str_reassignto.toUpperCase()} </Text>
                                                 </View>
-                                                <View style={{ width: '60%' }}>
-                                                    <Text style={{ color: Colors.black, fontSize: 12, fontWeight: '400' }}>{item.reassignby}</Text>
+                                                <View style={{ width: '100%' }}>
+                                                    <Text style={styles.childText}>{item.reassignto}</Text>
+                                                </View>
+                                            </View>}
+
+                                            {item.id == '2' && <View style={{ width: '100%', marginTop: 11, }}>
+                                                <View style={{ width: '100%' }}>
+                                                    <Text style={styles.headText}>{language[0][props.language].str_reassignby.toUpperCase()} </Text>
+                                                </View>
+                                                <View style={{ width: '100%' }}>
+                                                    <Text style={styles.childText}>{item.reassignby}</Text>
                                                 </View>
                                             </View>}
 
@@ -503,5 +493,11 @@ const styles = StyleSheet.create({
         width: '100%',
 
     },
+    headText: {
+        color: Colors.dimText, fontSize: 12, marginLeft: 10, fontFamily: 'PoppinsRegular'
+    },
+    childText: {
+        color: Colors.black, fontSize: 12, marginLeft: 10, fontFamily: 'Poppins-Medium'
+    }
 
 });

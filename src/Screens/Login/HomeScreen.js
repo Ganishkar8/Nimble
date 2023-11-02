@@ -11,6 +11,7 @@ import {
     StatusBar,
     Text,
     ScrollView,
+    BackHandler,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Colors from '../../Utils/Colors';
@@ -22,7 +23,7 @@ import apiInstance from '../../Utils/apiInstance';
 import { connect } from 'react-redux';
 import { languageAction } from '../../Utils/redux/actions/languageAction';
 import { profileAction } from '../../Utils/redux/actions/ProfileAction';
-
+import { useIsFocused } from '@react-navigation/native';
 
 const HomeScreen = (props, { navigation }) => {
 
@@ -30,11 +31,22 @@ const HomeScreen = (props, { navigation }) => {
     const screenWidth = Dimensions.get('window').width;
     const screenHeight = Dimensions.get('window').height;
     const [userName, setUserName] = useState('');
+    const isScreenVisible = useIsFocused();
 
     useEffect(() => {
         getProfileDetails();
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
+
+        // Remove the event listener when the component unmounts
+        return () => {
+            backHandler.remove();
+        };
     }, []);
 
+    const handleBackButton = () => {
+        BackHandler.exitApp()
+        return true; // Prevent default back button behavior
+    };
 
     const getProfileDetails = () => {
 
@@ -80,7 +92,7 @@ const HomeScreen = (props, { navigation }) => {
                                 flexDirection: 'row', alignItems: 'center', paddingHorizontal: 5
                             }}>
 
-                                <Text style={{ textAlign: 'left', flex: 0.9, fontSize: 20, color: '#4e4e4e' }}>Hi! {userName}</Text>
+                                <Text style={{ textAlign: 'left', flex: 0.9, fontSize: 20, color: '#4e4e4e', fontFamily: 'PoppinsRegular' }}>Hi! {userName}</Text>
 
                                 {/* <Image source={require('../../Images/notification_bellicon.png')}
                                     style={styles.tinyLogo} /> */}
@@ -91,10 +103,11 @@ const HomeScreen = (props, { navigation }) => {
                                 style={{
                                     width: '100%',
                                     marginLeft: '3.4%',
-                                    fontSize: 12,
+                                    fontSize: 14,
                                     color: '#4e4e4e',
                                     marginTop: 5,
                                     paddingHorizontal: 5,
+                                    fontFamily: 'PoppinsRegular'
                                 }}>
                                 User ID :{global.USERID}
                             </Text>
@@ -107,7 +120,7 @@ const HomeScreen = (props, { navigation }) => {
                                 }}>
                                 <View style={{ flexDirection: 'row' }}>
                                     <Text
-                                        style={{ fontSize: 16, color: '#4e4e4e', marginTop: '5%' }}>
+                                        style={{ fontSize: 16, color: '#4e4e4e', marginTop: '5%', fontFamily: 'Poppins-Medium' }}>
                                         Quick Items
                                     </Text>
 
@@ -161,7 +174,7 @@ const HomeScreen = (props, { navigation }) => {
                                                     <Image source={require('../../Images/profile.png')}
                                                         style={{ width: 20, height: 25 }} />
                                                 </View>
-                                                <Text style={{ fontSize: 12, color: '#707070', marginTop: 8, textAlign: 'center' }}>Lead{'\n'}Tracker</Text>
+                                                <Text style={styles.textstyle1}>Lead{'\n'}Tracker</Text>
                                             </View>
 
                                         </View>
@@ -174,7 +187,7 @@ const HomeScreen = (props, { navigation }) => {
                                                     <Image source={require('../../Images/lead_list.png')}
                                                         style={{ width: 22.5, height: 25 }} />
                                                 </View>
-                                                <Text style={{ fontSize: 12, color: '#707070', marginTop: 8, textAlign: 'center' }}>Application{'\n'}Tracker</Text>
+                                                <Text style={styles.textstyle1}>Application{'\n'}Tracker</Text>
                                             </View>
                                         </View>
                                     </TouchableOpacity>
@@ -199,7 +212,7 @@ const HomeScreen = (props, { navigation }) => {
                                                 <View style={{ width: '100%', height: '23%', flexDirection: 'row', marginTop: 23 }}>
 
                                                     <View style={{ width: '75%', justifyContent: 'flex-end' }}>
-                                                        <Text style={{ fontSize: 15, color: '#707070', marginLeft: '4%', }}>New Lead Initiation</Text>
+                                                        <Text style={styles.textstyle}>New Lead Initiation</Text>
 
                                                     </View>
 
@@ -243,7 +256,7 @@ const HomeScreen = (props, { navigation }) => {
                                                 <View style={{ width: '100%', height: '23%', flexDirection: 'row', marginTop: 23 }}>
 
                                                     <View style={{ width: '75%', justifyContent: 'flex-end' }}>
-                                                        <Text style={{ fontSize: 15, color: '#707070', marginLeft: '4%', }}>New Application Initiation</Text>
+                                                        <Text style={styles.textstyle}>New Application Initiation</Text>
 
                                                     </View>
 
@@ -386,6 +399,12 @@ const styles = StyleSheet.create({
         paddingBottom: 50,
         flexGrow: 1,
     },
+    textstyle: {
+        fontSize: 14, color: '#707070', marginLeft: '4%', fontFamily: 'PoppinsRegular',
+    },
+    textstyle1: {
+        fontSize: 11, color: '#707070', marginTop: 8, textAlign: 'center', fontFamily: 'PoppinsRegular',
+    }
 });
 
 const mapStateToProps = (state) => {

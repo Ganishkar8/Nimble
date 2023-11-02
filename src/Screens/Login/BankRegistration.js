@@ -42,7 +42,7 @@ import Entypo from 'react-native-vector-icons/Entypo';
 const { Value, Text: AnimatedText } = Animated;
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Button, Menu, Divider } from 'react-native-paper';
-
+import { generateRequest, validateOTP } from '../../Utils/EKYC';
 const CELL_COUNT = 3;
 const CELL_SIZE = 46;
 const CELL_BORDER_RADIUS = 8;
@@ -165,7 +165,7 @@ const BankRegistration = (props, { navigation }) => {
     useEffect(() => {
         let isMounted = true;
 
-
+        //myDisplayy();
         if (isFocused) {
             BackHandler.addEventListener('hardwareBackPress', handleBackButton);
         }
@@ -187,6 +187,17 @@ const BankRegistration = (props, { navigation }) => {
             BackHandler.removeEventListener('hardwareBackPress', handleBackButton);
         };
     }, [isFocused]);
+
+
+    async function myDisplayy() {
+        var encryptVal = await generateRequest('717485993554', '6012', '11205764', 'EQT000000001641', 'Equitas Bank           Chennai      TNIN').then(value => { return value })
+
+        var ValidateOTP = await validateOTP('717485993554', '117770', '041154', '1025104154', '041154', '1025', '6012', '11205764', 'EQT000000001641', 'Equitas Bank           Chennai      TNIN').then(value => { return value })
+
+        if (global.DEBUG_MODE) console.log("EncryptedVal::" + encryptVal)
+        if (global.DEBUG_MODE) console.log("ValidateOTP::" + ValidateOTP)
+
+    }
 
     const handleBackButton = () => {
         // Close the app
@@ -424,9 +435,9 @@ const BankRegistration = (props, { navigation }) => {
                                         </View>
                                     </TouchableOpacity>
                                 }>
-                                <Menu.Item onPress={() => { setInstance('LIV'); closeMenu() }} style={{ backgroundColor: instance == 'LIV' ? Colors.darkblue : Colors.white }} titleStyle={{ color: instance == 'LIV' ? Colors.white : Colors.black }} title="LIVE" />
-                                <Menu.Item onPress={() => { setInstance('UAT'); closeMenu() }} style={{ backgroundColor: instance == 'UAT' ? Colors.darkblue : Colors.white }} titleStyle={{ color: instance == 'UAT' ? Colors.white : Colors.black }} title="UAT" />
-                                <Menu.Item onPress={() => { setInstance('DEV'); closeMenu() }} style={{ backgroundColor: instance == 'DEV' ? Colors.darkblue : Colors.white }} titleStyle={{ color: instance == 'DEV' ? Colors.white : Colors.black }} title="DEV" />
+                                <Menu.Item onPress={() => { setInstance('LIV'); closeMenu() }} style={{ backgroundColor: instance == 'LIV' ? Colors.darkblue : Colors.white, }} titleStyle={{ color: instance == 'LIV' ? Colors.white : Colors.black, fontFamily: 'PoppinsRegular' }} title="LIVE" />
+                                <Menu.Item onPress={() => { setInstance('UAT'); closeMenu() }} style={{ backgroundColor: instance == 'UAT' ? Colors.darkblue : Colors.white }} titleStyle={{ color: instance == 'UAT' ? Colors.white : Colors.black, fontFamily: 'PoppinsRegular' }} title="UAT" />
+                                <Menu.Item onPress={() => { setInstance('DEV'); closeMenu() }} style={{ backgroundColor: instance == 'DEV' ? Colors.darkblue : Colors.white }} titleStyle={{ color: instance == 'DEV' ? Colors.white : Colors.black, fontFamily: 'PoppinsRegular' }} title="DEV" />
                             </Menu>
 
                         </View>
@@ -439,7 +450,7 @@ const BankRegistration = (props, { navigation }) => {
                     <View style={{ width: '100%', marginTop: 30, paddingHorizontal: 16, alignItems: 'center' }}>
 
                         <TextComp textVal={language[0][props.language].str_appconfig} textStyle={[Commonstyles.boldtextStyle, { fontSize: 16 }]} />
-                        <TextComp textVal={language[0][props.language].str_enterinstid} textStyle={{ color: Colors.darkblack, fontSize: 14, marginTop: 25 }} />
+                        <TextComp textVal={language[0][props.language].str_enterinstid} textStyle={{ color: Colors.darkblack, fontSize: 14, marginTop: 32, fontFamily: 'PoppinsRegular' }} />
                     </View>
 
 
@@ -470,7 +481,7 @@ const BankRegistration = (props, { navigation }) => {
                         renderCell={renderCell}
                     />
 
-                    <TextComp textVal={language[0][props.language].str_enterchallengecode} textStyle={{ color: Colors.darkblack, fontSize: 14, marginTop: 30 }} />
+                    <TextComp textVal={language[0][props.language].str_enterchallengecode} textStyle={{ color: Colors.darkblack, fontSize: 14, marginTop: 34, fontFamily: 'PoppinsRegular' }} />
 
 
                     <CodeField
@@ -555,7 +566,7 @@ const styles = StyleSheet.create({
         marginTop: 5, position: 'absolute', bottom: 0, marginBottom: 25
     }, codeFieldRoot: {
         height: CELL_SIZE,
-        marginTop: 30,
+        marginTop: 24,
         paddingHorizontal: 10,
         justifyContent: 'center',
     },

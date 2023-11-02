@@ -14,7 +14,7 @@ import LeadApproval from '../Screens/Lead/LeadTracker/LeadApproval';
 import ReAssign from '../Screens/Lead/LeadTracker/ReAssign';
 import PreviewImage from '../Components/PreviewImage';
 import ProfileShortBasicDetails from '../Screens/Application/ApplicationInitiation/ProfileShortBasicDetails';
-
+import OTPVerification from '../Screens/Application/ApplicationInitiation/OTPVerification';
 import AddressMainList from '../Screens/Application/Address/AddressMainList';
 import AddressDetails from '../Screens/Application/Address/AddressDetails';
 import LoanApplicationMain from '../Screens/LoanApplication/LoanApplicationMain';
@@ -124,6 +124,12 @@ export default HomeStack = () => {
       <Stack.Screen
         name="ConsentScreen"
         component={ConsentScreen}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="OTPVerification"
+        component={OTPVerification}
         options={{ headerShown: false, tabBarVisible: false }}
       />
 
