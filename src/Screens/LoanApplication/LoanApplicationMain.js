@@ -16,13 +16,14 @@ import { languageAction } from '../../Utils/redux/actions/languageAction';
 import { language } from '../../Utils/LanguageString';
 //
 import HeadComp from '../../Components/HeadComp';
-import MyStatusBar from '../../Components/ MyStatusBar';
+import MyStatusBar from '../../Components/MyStatusBar';
 import Colors from '../../Utils/Colors';
 import TextComp from '../../Components/TextComp';
 import LinearGradient from 'react-native-linear-gradient';
 import ButtonViewComp from '../../Components/ButtonViewComp';
 import Commonstyles from '../../Utils/Commonstyles';
 import { useIsFocused } from '@react-navigation/native';
+import BottomToastModal from '../../Components/BottomToastModal';
 
 
 const data = [
@@ -33,12 +34,12 @@ const data = [
                 nestedName: 'Applicant',
                 id: 'AA',
                 nestedIsSelected: true,
-                subDataIsCompleted: false,
+                subDataIsCompleted: true,
                 nestedSubdata: [
                     {
                         name: 'Basic Details',
                         id: 'BD',
-                        nestedSubDataIsCompleted: false,
+                        nestedSubDataIsCompleted: true,
                         parent: 'Applicant',
                     },
                     {
@@ -123,11 +124,27 @@ const LoanApplicationMain = (props, { navigation }) => {
     const [refreshFlatlist, setRefreshFlatList] = useState(false);
     const [selectedData, setSelectedData] = useState(labels[0].name);
     const isScreenVisible = useIsFocused();
+    const [bottomLeadSheetVisible, setBottomLeadSheetVisible] = useState(false);
+    const showLeadBottomSheet = () => {
+        setBottomLeadSheetVisible(true)
+        setTimeout(() => { setBottomLeadSheetVisible(false) }, 2000);
+    };
+    const hideLeadBottomSheet = () => setBottomLeadSheetVisible(false);
+
+    const [processSubStageData, setProcessSubStageData] = useState();
+    const [processSubStage, setProcessSubStage] = useState(props.mobilecodedetail.processSubStage);
+
+    const [processModuleData, setProcessModuleData] = useState();
+    const [processModule, setProcessModule] = useState(props.mobilecodedetail.processModule);
+
+    const [processPageData, setprocessPageData] = useState();
+    const [processPage, setprocessPage] = useState(props.mobilecodedetail.processPage);
+
 
     useEffect(() => {
-
-        console.log('NesteSubdata::' + JSON.stringify(labels[0].nesteddata[0].nestedSubdata))
+        showLeadBottomSheet();
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
+        getProcessSubStage();
         return () =>
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
     }, [navigation, isScreenVisible]);
@@ -137,23 +154,90 @@ const LoanApplicationMain = (props, { navigation }) => {
         props.navigation.navigate('ProfileShortBasicDetails')
     }
 
-    const onClickMainList = (item) => {
-        let fiterStatusPosition = labels
+    const onClickMainList = (item, substageId) => {
+        let fiterStatusPosition = processSubStageData
         for (let i = 0; i < fiterStatusPosition.length; i++) {
-            if (fiterStatusPosition[i].id == item.id) {
+            if (fiterStatusPosition[i].stageId == item.stageId) {
                 fiterStatusPosition[i].isSelected = true
-                setSelectedData(fiterStatusPosition[i].name)
-                setSubData(fiterStatusPosition[i].nesteddata)
+                setSelectedData(fiterStatusPosition[i].subStageName)
             } else {
                 fiterStatusPosition[i].isSelected = false
             }
         }
-        setLabels(fiterStatusPosition)
+
+        //alert(JSON.stringify(item))
+
+        setProcessSubStageData(fiterStatusPosition)
+
+        const filteredProcessModuleStage = processModule.filter((data) => {
+            return data.wfId === 79 && data.subStageId === item.stageId;
+        }).map((data) => {
+            const extraJSON = { subDataIsCompleted: false, nestedSubData: [] };
+            return { ...data, ...extraJSON };
+        });
+        //alert(JSON.stringify(filteredProcessSubStage))
+        setProcessModuleData(filteredProcessModuleStage);
+
+        filteredProcessModuleStage.forEach((data) => {
+            if (data.wfId === 79) {
+
+                processPage.forEach((data1) => {
+                    if (data1.moduleId === data.id) {
+                        data.nestedSubData.push(data1);
+                    }
+                });
+
+            }
+        });
+
+
+        setProcessModuleData(filteredProcessModuleStage);
+
         setRefreshFlatList(!refreshFlatlist)
     }
 
     const nestedDataClick = (item) => {
         alert(JSON.stringify(item))
+    }
+
+
+    const getProcessSubStage = async () => {
+
+        const filteredProcessSubStage = processSubStage.filter((data) => {
+            return data.wfId === 79 && (data.stageId === 1 || data.stageId === 2 || data.stageId === 3 || data.stageId === 4);
+        }).map((data) => {
+            const extraJSON = { isSelected: data.stageId === 1 };
+            return { ...data, ...extraJSON };
+        });
+        //alert(JSON.stringify(filteredProcessSubStage))
+        setProcessSubStageData(filteredProcessSubStage.reverse());
+
+        const filteredProcessModuleStage = processModule.filter((data) => {
+            return data.wfId === 79 && data.subStageId === 1;
+        }).map((data) => {
+            const extraJSON = { subDataIsCompleted: false, nestedSubData: [] };
+            return { ...data, ...extraJSON };
+        });
+
+        filteredProcessModuleStage.forEach((data) => {
+            if (data.wfId === 79) {
+
+                processPage.forEach((data1) => {
+                    if (data1.moduleId === data.id) {
+                        data.nestedSubData.push(data1);
+                    }
+                });
+
+            }
+        });
+
+
+        setProcessModuleData(filteredProcessModuleStage);
+
+        // alert(JSON.stringify(filteredProcessModuleStage))
+
+
+
     }
 
 
@@ -167,10 +251,10 @@ const LoanApplicationMain = (props, { navigation }) => {
 
             <View style={{ width: '100%', height: 80, backgroundColor: Colors.maroon, marginTop: 10, flexDirection: 'row' }}>
                 <View style={{ width: '70%', justifyContent: 'center', marginLeft: 14 }}>
-                    <TextComp textVal={language[0][props.language].str_applicationNumber + ': 11079862356'}
-                        textStyle={{ color: Colors.black, fontWeight: 500 }} />
+                    <TextComp textVal={language[0][props.language].str_applicationNumber + ': ' + global.TEMPAPPID}
+                        textStyle={{ color: Colors.black, fontFamily: 'PoppinsRegular', }} />
                     <TextComp textVal={language[0][props.language].str_applicationStatus + ': 98%'}
-                        textStyle={{ color: Colors.dimText, fontWeight: 500 }} />
+                        textStyle={{ color: Colors.dimText, fontFamily: 'PoppinsRegular' }} />
                 </View>
                 <View style={{ width: '30%', justifyContent: 'center' }}>
                     <Image source={require('../../Images/loanappimage.png')}
@@ -179,15 +263,17 @@ const LoanApplicationMain = (props, { navigation }) => {
 
             </View>
 
-            <View style={{ width: '100%', marginTop: 30, alignItems: 'center' }}>
+            <BottomToastModal IsVisible={bottomLeadSheetVisible} onClose={hideLeadBottomSheet} textContent={`Temp Loan Application ID: ${global.TEMPAPPID} created successfully`} />
+
+            <View style={{ width: '85%', marginTop: 30, alignSelf: 'center' }}>
                 <FlatList
                     extraData={refreshFlatlist}
-                    data={labels}
+                    data={processSubStageData}
                     horizontal={true}
                     keyExtractor={(item, index) => index.toString()}
                     renderItem={({ item, index }) => {
                         return (
-                            <TouchableOpacity activeOpacity={1} onPress={() => onClickMainList(item)}>
+                            <TouchableOpacity activeOpacity={1} onPress={() => onClickMainList(item, item.id)}>
                                 <View>
                                     <View style={{ flexDirection: 'row' }}>
                                         <LinearGradient colors={item.isSelected ? (['#D2FF21', '#FAD420', '#FFCE20']) : (['#ECECEC', '#DBDBDB', '#ECECEC'])} style={{
@@ -215,7 +301,7 @@ const LoanApplicationMain = (props, { navigation }) => {
                                                 </View>
                                             </View>
                                         </LinearGradient>
-                                        {index != labels.length - 1 ? (
+                                        {index != processSubStageData.length - 1 ? (
                                             <View style={{ marginTop: 23 }}>
                                                 <Text style={{ fontWeight: 700, color: Colors.black }}>- - -</Text>
                                             </View>
@@ -223,8 +309,8 @@ const LoanApplicationMain = (props, { navigation }) => {
                                         }
                                     </View>
                                     <View style={{ alignItems: 'center', marginRight: 5 }}>
-                                        <TextComp textVal={item.name}
-                                            textStyle={{ color: Colors.black, fontWeight: 200 }} />
+                                        <TextComp textVal={item.subStageName}
+                                            textStyle={{ color: Colors.black, fontFamily: 'PoppinsRegular' }} />
                                     </View>
                                     <View style={{ marginLeft: 5 }}>
 
@@ -241,13 +327,13 @@ const LoanApplicationMain = (props, { navigation }) => {
             </View>
 
             <View style={{ width: '100%', marginLeft: 20, marginTop: 15 }}>
-                <TextComp textVal={selectedData} textStyle={{ color: Colors.black, fontWeight: 500 }} />
+                <TextComp textVal={selectedData} textStyle={{ color: Colors.black, fontFamily: 'Poppins-Medium' }} />
             </View>
             <ScrollView showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ width: '100%', marginTop: 20, marginLeft: 10, marginBottom: 40 }}>
                 <View>
                     <FlatList
-                        data={subData}
+                        data={processModuleData}
                         horizontal={false}
                         keyExtractor={(item, index) => index.toString()}
                         renderItem={({ item, index }) => {
@@ -262,17 +348,17 @@ const LoanApplicationMain = (props, { navigation }) => {
                                                 <TextComp textVal={index + 1} textStyle={{ color: Colors.white, fontWeight: 500, marginLeft: 2 }} />
                                             </View>
                                             <View style={{ width: '60%', borderWidth: 0.5, borderColor: Colors.dimText, margin: 5, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}>
-                                                <TextComp textVal={item.nestedName} textStyle={{ color: item.subDataIsCompleted ? Colors.skyBlue : Colors.dimText, fontWeight: 500, marginLeft: 2 }} />
+                                                <TextComp textVal={item.moduleName} textStyle={{ color: item.subDataIsCompleted ? Colors.skyBlue : Colors.dimText, fontFamily: 'Poppins-Medium', marginLeft: 2 }} />
                                             </View>
                                         </View>
-                                        {item.nestedSubdata ? (
+                                        {item.nestedSubData ? (
                                             <View style={{ width: 1, height: 30, backgroundColor: item.subDataIsCompleted ? Colors.green : Colors.dimText, marginLeft: 23 }} />
                                         ) : null
                                         }
                                         {/* <View style={{ width: 1, height: 30, backgroundColor: Colors.green, marginLeft: 23 }} /> */}
 
                                         <FlatList
-                                            data={item.nestedSubdata}
+                                            data={item.nestedSubData}
                                             keyExtractor={(item, index) => index.toString()}
                                             renderItem={({ item, index }) => {
                                                 return (
@@ -286,7 +372,7 @@ const LoanApplicationMain = (props, { navigation }) => {
 
                                                                 </View>
                                                                 <View style={{ width: '60%', margin: 5, borderRadius: 20, justifyContent: 'center' }}>
-                                                                    <TextComp textVal={item.name} textStyle={{ color: item.subDataIsCompleted ? Colors.skyBlue : Colors.dimText, fontWeight: 500, marginLeft: 2 }} />
+                                                                    <TextComp textVal={item.pageName} textStyle={{ color: item.subDataIsCompleted ? Colors.skyBlue : Colors.dimText, fontFamily: 'Poppins-Medium', marginLeft: 2 }} />
                                                                 </View>
                                                             </View>
                                                             {/* {index != subData.length - 1 ? (
@@ -319,8 +405,12 @@ const LoanApplicationMain = (props, { navigation }) => {
 
 const mapStateToProps = (state) => {
     const { language } = state.languageReducer;
+    const { profileDetails } = state.profileReducer;
+    const { mobileCodeDetails } = state.mobilecodeReducer;
     return {
-        language: language
+        language: language,
+        profiledetail: profileDetails,
+        mobilecodedetail: mobileCodeDetails
     }
 }
 

@@ -1,1 +1,2 @@
 export const PROFILEDETAIL = 'PROFILEDETAIL';
+export const DEDUPEDETAIL = 'DEDUPEDETAIL';

@@ -10,7 +10,7 @@ import {
     TouchableOpacity,
     ScrollView
 } from 'react-native';
-import MyStatusBar from '../../Components/ MyStatusBar';
+import MyStatusBar from '../../Components/MyStatusBar';
 import Colors from '../../Utils/Colors';
 import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesign from 'react-native-vector-icons/AntDesign';

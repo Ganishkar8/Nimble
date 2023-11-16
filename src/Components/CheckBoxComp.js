@@ -3,8 +3,13 @@ import { Text, Image, View, StyleSheet } from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
 import Colors from '../Utils/Colors';
 
-const CheckBoxComp = ({ textCaption, textStyle, Visible, Disable }) => {
+const CheckBoxComp = ({ textCaption, textStyle, Visible, Disable, onClick }) => {
   const [isSelected, setSelection] = useState(false);
+
+  const valueChange = () => {
+    setSelection(!isSelected);
+    onClick(!isSelected)
+  }
 
   return (
     <View
@@ -21,7 +26,7 @@ const CheckBoxComp = ({ textCaption, textStyle, Visible, Disable }) => {
         <CheckBox
           value={isSelected}
           enabled={!Disable}
-          onValueChange={setSelection}
+          onValueChange={valueChange}
           color="#000000"
           style={styles.checkbox}
           tintColors={{ true: Colors.darkblue }}
@@ -38,7 +43,8 @@ const CheckBoxComp = ({ textCaption, textStyle, Visible, Disable }) => {
 const styles = StyleSheet.create({
   checkbox: {
     alignSelf: 'center',
-    borderColor: Colors.black
+    borderColor: Colors.black,
+    fontFamily: 'PoppinsRegular'
   },
 });
 

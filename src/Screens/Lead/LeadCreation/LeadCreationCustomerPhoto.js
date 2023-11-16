@@ -24,7 +24,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import apiInstance from '../../../Utils/apiInstance';
 import jwtDecode from 'jwt-decode';
 import Colors from '../../../Utils/Colors';
-import MyStatusBar from '../../../Components/ MyStatusBar';
+import MyStatusBar from '../../../Components/MyStatusBar';
 import Loading from '../../../Components/Loading';
 import TextComp from '../../../Components/TextComp';
 import { connect } from 'react-redux';
@@ -54,10 +54,15 @@ import apiInstancelocal from '../../../Utils/apiInstancelocal';
 import axios from 'axios';
 import tbl_lead_image from '../../../Database/Table/tbl_lead_image';
 import tbl_lead_creation_dms from '../../../Database/Table/tbl_lead_creation_dms';
+import tbl_lead_creation_lead_details from '../../../Database/Table/tbl_lead_creation_lead_details';
+import tbl_lead_creation_basic_details from '../../../Database/Table/tbl_lead_creation_basic_details';
+import tbl_lead_creation_business_details from '../../../Database/Table/tbl_lead_creation_business_details';
+import tbl_lead_creation_loan_details from '../../../Database/Table/tbl_lead_creation_loan_details';
 import Common from '../../../Utils/Common';
 import ImageDetailComp from '../../../Components/ImageDetailComp';
 import { profileAction } from '../../../Utils/redux/actions/ProfileAction';
 import ButtonViewComp from '../../../Components/ButtonViewComp';
+import ErrorModal from '../../../Components/ErrorModal';
 
 const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
@@ -106,6 +111,9 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
   const showphotoBottomSheet = () => setphotoOptionvisible(true);
   const hidephotoBottomSheet = () => setphotoOptionvisible(false);
 
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [apiError, setApiError] = useState('');
+
   useEffect(() => {
 
     getData();
@@ -150,7 +158,9 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
       const [latitude, longitude] = latLng.split(',');
       setCurrentLongitude(parseFloat(longitude));
       setCurrentLatitude(parseFloat(latitude));
-      getImage(data.leadCreationDms.dmsId);
+      if (imageUri == null) {
+        getImage(data.leadCreationDms.dmsId);
+      }
       zoomToMarker();
       setGPSLatLon(latLng);
     }
@@ -175,17 +185,28 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
           })
           .catch((error) => {
             // Handle the error
-            console.log("Error" + JSON.stringify(error.response))
+            if (global.DEBUG_MODE) console.log("FinalLeadCreationApiResponse::" + JSON.stringify(error.response.data));
             setLoading(false)
-            alert(error);
+            if (error.response.data != null) {
+              setApiError(error.response.data.message);
+              setErrorModalVisible(true)
+            } else if (error.response.httpStatusCode == 500) {
+              setApiError(error.response.message);
+              setErrorModalVisible(true)
+            }
           });
       } else {
-        alert(language[0][props.language].str_errinternetimage)
+        setApiError(language[0][props.language].str_errinternetimage);
+        setErrorModalVisible(true)
+
       }
 
     })
   }
 
+  const deleteDraftData = async () => {
+
+  }
 
   const uploadImage = async () => {
 
@@ -230,14 +251,17 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
           const data = await response.json();
           // Handle the response from Cloudinary
 
-          console.log('Upload success:', data);
           setDocID(data.docId);
           updateLeadDetails(data.docId);
         } else {
-          console.log('Upload failed:', response.status);
+          if (global.DEBUG_MODE) console.log('Upload failed:', response.status);
+          setApiError(response.status);
+          setErrorModalVisible(true)
         }
       } catch (error) {
-        console.log('Upload error:', error);
+        if (global.DEBUG_MODE) console.log('Upload error:', error);
+        setApiError(error.response.data.message);
+        setErrorModalVisible(true)
       } finally {
         setLoading(false);
       }
@@ -245,7 +269,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
   }
 
   const updateLeadDetails = (id) => {
-
+    setLoading(true)
     const appDetails = {
       "leadCreationDms": {
         "createdBy": global.USERID,
@@ -264,16 +288,30 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
       .then(async (response) => {
         // Handle the response data
 
-        console.log("FinalLeadCreationApiResponse::" + JSON.stringify(response.data));
+        if (global.DEBUG_MODE) console.log("FinalLeadCreationApiResponse::" + JSON.stringify(response.data));
+
+        const deletePromises = [
+          tbl_lead_creation_lead_details.deleteLeadCreationLeadDetailsBasedOnID(global.leadID),
+          tbl_lead_creation_basic_details.deleteLeadCreationBasicDetailsBasedOnID(global.leadID),
+          tbl_lead_creation_business_details.deleteLeadCreationBusinessDetailsBasedOnID(global.leadID),
+          tbl_lead_creation_loan_details.deleteLeadCreationLoanDetailsBasedOnID(global.leadID),
+          tbl_lead_creation_dms.deleteLeadCreationDmsDetailsBasedOnID(global.leadID),
+          tbl_lead_image.deleteLeadImageDetailsBasedOnID(global.leadID),
+        ];
         props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
+
+        await Promise.all(deletePromises);
         setLoading(false)
 
       })
       .catch((error) => {
         // Handle the error
-        console.log("Error" + JSON.stringify(error.response))
+        if (global.DEBUG_MODE) console.log("FinalLeadCreationApiResponse:::" + JSON.stringify(error.response))
         setLoading(false)
-        alert(error);
+        if (error.response.data != null) {
+          setApiError(error.response.data.message);
+          setErrorModalVisible(true)
+        }
       });
 
   }
@@ -485,13 +523,17 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
     }
   }
 
+  const closeErrorModal = () => {
+    setErrorModalVisible(false);
+  };
+
   return (
     // enclose all components in this View tag
     <SafeAreaView
       style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
       <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
 
-
+      <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
 
       <View style={{
         width: '100%', height: 56, alignItems: 'center', justifyContent: 'center',
@@ -520,7 +562,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
                 <View style={{ width: '100%', flexDirection: 'row', }}>
 
-                  <TextComp textVal={language[0][props.language].str_error} textStyle={{ fontSize: 14, color: Colors.black, fontWeight: 600 }} Visible={false} />
+                  <TextComp textVal={language[0][props.language].str_error} textStyle={{ fontSize: 14, color: Colors.black, fontFamily: 'Poppins-Medium' }} Visible={false} />
 
                   <MaterialIcons name='error' size={20} color={Colors.red} />
 
@@ -533,6 +575,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                       fontSize: 14,
                       color: Colors.black,
                       lineHeight: 20,
+                      fontFamily: 'PoppinsRegular'
                     }}
                     Visible={false}
                   />
@@ -859,23 +902,28 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
             )}
 
             {!visible && (
-              <View
-                style={{
-                  width: '90%',
-                  height: 170,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  marginTop: 10,
-                  paddingHorizontal: 0,
-                  borderRadius: 10,
-                  backgroundColor: '#e2e2e2',
-                }}>
-                <Image
-                  source={{ uri: imageUri }}
-                  style={{ width: '100%', height: 170, borderRadius: 10 }}
-                />
-              </View>
+              <TouchableOpacity style={{
+                width: '90%',
+                height: 170,
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginTop: 10,
+                paddingHorizontal: 0,
+                borderRadius: 10,
+                backgroundColor: '#e2e2e2',
+              }} onPress={() => { props.navigation.navigate('PreviewImage', { imageName: fileName, imageUri: imageUri }) }}>
+
+
+                <View style={{ width: '100%', height: 170 }}>
+                  <Image
+                    source={{ uri: imageUri }}
+                    style={{ width: '100%', height: 170, borderRadius: 10 }}
+                  />
+                </View>
+              </TouchableOpacity>
             )}
+
+
 
             {!visible && (
               <View
@@ -952,6 +1000,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                 onPress={() => {
                   getOneTimeLocation();
                 }}
+                style={{ marginLeft: 8, marginTop: 5 }}
                 activeOpacity={0.5}>
                 <FontAwesome6
                   name="location-dot"
@@ -988,8 +1037,8 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
                   onDragEnd={e =>
                     alert(JSON.stringify(e.nativeEvent.coordinate))
                   }
-                  title={'Test Marker'}
-                  description={'This is a description of the marker'}
+                //title={'Test Marker'}
+                //description={'This is a description of the marker'}
                 />
               </MapView>
             </View>

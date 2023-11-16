@@ -1,4 +1,4 @@
-import React, {useState, useRef, useEffect, userId} from 'react';
+import React, { useState, useRef, useEffect, userId } from 'react';
 import {
   StyleSheet,
   View,
@@ -13,12 +13,12 @@ import CheckBox from '@react-native-community/checkbox';
 import apiInstance from '../../../Utils/apiInstance';
 import apiInstancelocal from '../../../Utils/apiInstancelocal';
 import Colors from '../../../Utils/Colors';
-import MyStatusBar from '../../../Components/ MyStatusBar';
+import MyStatusBar from '../../../Components/MyStatusBar';
 import Loading from '../../../Components/Loading';
 import TextComp from '../../../Components/TextComp';
-import {connect} from 'react-redux';
-import {languageAction} from '../../../Utils/redux/actions/languageAction';
-import {language} from '../../../Utils/LanguageString';
+import { connect } from 'react-redux';
+import { languageAction } from '../../../Utils/redux/actions/languageAction';
+import { language } from '../../../Utils/LanguageString';
 import Commonstyles from '../../../Utils/Commonstyles';
 import HeadComp from '../../../Components/HeadComp';
 import ProgressComp from '../../../Components/ProgressComp';
@@ -33,9 +33,9 @@ import ButtonViewComp from '../../../Components/ButtonViewComp';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import ChildHeadComp from '../../../Components/ChildHeadComp';
 import CheckBoxComp from '../../../Components/CheckBoxComp';
-import {RadioButton} from 'react-native-paper';
+import { RadioButton } from 'react-native-paper';
 
-const LoanDemographicsGSTDetails = (props, {navigation}) => {
+const LoanDemographicsGSTDetails = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
   const [errMsg, setErrMsg] = useState('');
   const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
@@ -46,7 +46,7 @@ const LoanDemographicsGSTDetails = (props, {navigation}) => {
   const [textInputValue, setTextInputValue] = useState('');
   const [isSelected, setisSelected] = useState(false);
   const [value, setvalue] = useState(1);
-  const [data, setdata] = useState([{id: 0, isSelect: false, tname: ''}]);
+  const [data, setdata] = useState([{ id: 0, isSelect: false, tname: '' }]);
 
   const [selectedValue, setSelectedValue] = useState(false);
   const [selectedValue1, setSelectedValue1] = useState(false);
@@ -57,14 +57,14 @@ const LoanDemographicsGSTDetails = (props, {navigation}) => {
   useEffect(() => {
     props.navigation
       .getParent()
-      ?.setOptions({tabBarStyle: {display: 'none'}, tabBarVisible: false});
+      ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     makeSystemMandatoryFields();
     pickerData();
 
     return () =>
       props.navigation
         .getParent()
-        ?.setOptions({tabBarStyle: undefined, tabBarVisible: undefined});
+        ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
   }, [navigation]);
 
   const updateDataInArray = (idToUpdate, updatedProperties) => {
@@ -82,9 +82,9 @@ const LoanDemographicsGSTDetails = (props, {navigation}) => {
     console.log('data:', updatedData);
   };
 
-  const pickerData = async () => {};
+  const pickerData = async () => { };
 
-  const makeSystemMandatoryFields = () => {};
+  const makeSystemMandatoryFields = () => { };
 
   const updateBasicDetails = () => {
     if (validate()) {
@@ -148,9 +148,9 @@ const LoanDemographicsGSTDetails = (props, {navigation}) => {
     //setdata([...data, {id: 0, isSelect: false, tname: textValue}]);
   };
 
-  const handleReference = componentName => {};
+  const handleReference = componentName => { };
 
-  const handlePickerClick = (componentName, label, index) => {};
+  const handlePickerClick = (componentName, label, index) => { };
   function isMultipleOf5000(number) {
     return number % 5000 === 0;
   }
@@ -176,12 +176,12 @@ const LoanDemographicsGSTDetails = (props, {navigation}) => {
     //alert(count);
   };
 
-  const OncustomeText = (value, index) => {};
+  const OncustomeText = (value, index) => { };
 
   return (
     // enclose all components in this View tag
     <SafeAreaView
-      style={[styles.parentView, {backgroundColor: Colors.lightwhite}]}>
+      style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
       <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
 
       <ScrollView
@@ -190,7 +190,7 @@ const LoanDemographicsGSTDetails = (props, {navigation}) => {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled">
         {loading ? <Loading /> : null}
-        <View style={{flex: 1}}>
+        <View style={{ flex: 1 }}>
           <ErrorMessageModal
             isVisible={bottomErrorSheetVisible}
             hideBottomSheet={hideBottomSheet}
@@ -215,8 +215,8 @@ const LoanDemographicsGSTDetails = (props, {navigation}) => {
             textval={language[0][props.language].str_applicantdetails}
           />
 
-          <View style={{width: '100%', alignItems: 'center', marginTop: '3%'}}>
-            <View style={{width: '90%', marginTop: 3}}>
+          <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
+            <View style={{ width: '90%', marginTop: 3 }}>
               <TextComp
                 textStyle={{
                   color: Colors.mediumgrey,
@@ -229,8 +229,8 @@ const LoanDemographicsGSTDetails = (props, {navigation}) => {
             </View>
           </View>
 
-          <View style={{width: '100%', alignItems: 'center', marginTop: '5%'}}>
-            <View style={{width: '90%', marginTop: 3}}>
+          <View style={{ width: '100%', alignItems: 'center', marginTop: '5%' }}>
+            <View style={{ width: '90%', marginTop: 3 }}>
               <TextComp
                 textStyle={{
                   color: Colors.mediumgrey,
@@ -315,7 +315,7 @@ const LoanDemographicsGSTDetails = (props, {navigation}) => {
                 <TextInput
                   style={Commonstyles.textinputtextStyle}
                   //value={()=> (each.id)}
-                  onChangeText={e => updateDataInArray(each.id, {tname: e})}
+                  onChangeText={e => updateDataInArray(each.id, { tname: e })}
                 />
                 {/* <TextInputComp
                   textValue={each.tname}
@@ -399,7 +399,7 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = state => {
-  const {language} = state.languageReducer;
+  const { language } = state.languageReducer;
   return {
     language: language,
   };

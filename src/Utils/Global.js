@@ -21,4 +21,5 @@ global.DEVICEMODELNAME = '';
 global.AUTHTOKEN = '230UAT';
 global.BRCONNECTAPIKEY = "";
 global.BRCONNECTAPPID = "";
-global.LEADTYPE = ''
+global.LEADTYPE = '';
+global.TEMPAPPID = '';

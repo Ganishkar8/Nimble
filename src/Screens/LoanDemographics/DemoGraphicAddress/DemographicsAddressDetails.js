@@ -1,19 +1,19 @@
-import {View, ScrollView, SafeAreaView} from 'react-native';
-import {React, useState} from 'react';
-import MyStatusBar from '../../../Components/ MyStatusBar';
+import { View, ScrollView, SafeAreaView } from 'react-native';
+import { React, useState } from 'react';
+import MyStatusBar from '../../../Components/MyStatusBar';
 import HeadComp from '../../../Components/HeadComp';
-import {connect} from 'react-redux';
-import {languageAction} from '../../../Utils/redux/actions/languageAction';
-import {language} from '../../../Utils/LanguageString';
+import { connect } from 'react-redux';
+import { languageAction } from '../../../Utils/redux/actions/languageAction';
+import { language } from '../../../Utils/LanguageString';
 import Commonstyles from '../../../Utils/Commonstyles';
 import Colors from '../../../Utils/Colors';
 import Loading from '../../../Components/Loading';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import SystemMandatoryField from '../../../Components/SystemMandatoryField';
 import ButtonViewComp from '../../../Components/ButtonViewComp';
-import {validateData} from '../../../Components/helpers/validateData';
+import { validateData } from '../../../Components/helpers/validateData';
 
-const DemographicsAddressDetails = (props, {navigation}) => {
+const DemographicsAddressDetails = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
   const [DataArray, setNewDataArray] = useState([]);
   const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
@@ -68,7 +68,7 @@ const DemographicsAddressDetails = (props, {navigation}) => {
 
   const validateDataWrapper = () => {
     // eslint-disable-next-line no-shadow
-    const {flag, errMsg} = validateData(DataArray);
+    const { flag, errMsg } = validateData(DataArray);
     setErrMsg(errMsg);
     return flag;
   };
@@ -81,23 +81,23 @@ const DemographicsAddressDetails = (props, {navigation}) => {
 
   const renderMandatoryFields = () => {
     const fieldUIIDs = [
-      {fielduiid: 'sp_addresstype', isPicker: true},
-      {fielduiid: 'et_addressline1', isInput: true},
-      {fielduiid: 'et_addressline2', isInput: true},
-      {fielduiid: 'et_landmark', isInput: true},
-      {fielduiid: 'et_pincode', isInput: true},
-      {fielduiid: 'et_cityvillage', isInput: true},
-      {fielduiid: 'et_district', isInput: true},
-      {fielduiid: 'et_state', isInput: true},
-      {fielduiid: 'et_country', isInput: true},
-      {fielduiid: 'et_mobilenumber', isInput: true},
-      {fielduiid: 'et_email', isInput: true},
-      {fielduiid: 'sp_addressownershiptype', isPicker: true},
-      {fielduiid: 'sp_ownerdetails', isInput: true},
-      {fielduiid: 'et_ownername', isInput: true},
+      { fielduiid: 'sp_addresstype', isPicker: true },
+      { fielduiid: 'et_addressline1', isInput: true },
+      { fielduiid: 'et_addressline2', isInput: true },
+      { fielduiid: 'et_landmark', isInput: true },
+      { fielduiid: 'et_pincode', isInput: true },
+      { fielduiid: 'et_cityvillage', isInput: true },
+      { fielduiid: 'et_district', isInput: true },
+      { fielduiid: 'et_state', isInput: true },
+      { fielduiid: 'et_country', isInput: true },
+      { fielduiid: 'et_mobilenumber', isInput: true },
+      { fielduiid: 'et_email', isInput: true },
+      { fielduiid: 'sp_addressownershiptype', isPicker: true },
+      { fielduiid: 'sp_ownerdetails', isInput: true },
+      { fielduiid: 'et_ownername', isInput: true },
     ];
 
-    return fieldUIIDs.map(({fielduiid, isPicker, isInput}) => (
+    return fieldUIIDs.map(({ fielduiid, isPicker, isInput }) => (
       <SystemMandatoryField
         key={fielduiid}
         fielduiid={fielduiid}
@@ -145,7 +145,7 @@ const DemographicsAddressDetails = (props, {navigation}) => {
 
         <ButtonViewComp
           textValue={language[0][props.language].str_next.toUpperCase()}
-          textStyle={{color: Colors.white, fontSize: 13, fontWeight: 500}}
+          textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
           viewStyle={Commonstyles.buttonView}
           innerStyle={Commonstyles.buttonViewInnerStyle}
           handleClick={demographicAddressSubmit}
@@ -157,7 +157,7 @@ const DemographicsAddressDetails = (props, {navigation}) => {
 
 const mapStateToProps = state => {
   // eslint-disable-next-line no-shadow
-  const {language} = state.languageReducer;
+  const { language } = state.languageReducer;
   return {
     language: language,
   };

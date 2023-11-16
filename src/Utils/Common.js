@@ -1,7 +1,7 @@
 import DeviceInfo from 'react-native-device-info';
 import { getManufacturer } from 'react-native-device-info';
 import NetInfo from '@react-native-community/netinfo';
-
+import { Alert } from 'react-native';
 const numberRegex = /^(\d+)?$/;
 const integerPattern = /^[0-9]+$/;
 const CS_URL = "https://mbsreg.brnetsaas.com/MBSConnectREG/frmmbs.aspx";
@@ -148,7 +148,40 @@ export function isDateGreaterThan(date1, date2) {
   }
 }
 
+export function getSystemCodeDescription(systemCodeDetail, type, subCodeId) {
+
+  const matchingItem = systemCodeDetail.find((data) => data.masterId === type && data.subCodeId === subCodeId);
+
+  if (matchingItem) {
+    return matchingItem.label;
+  } else {
+    return ''; // Or any other appropriate value for no match
+  }
+
+  // systemCodeDetail.filter((data) => data.masterId === type).map((value, index) => {
+
+  //   if (value.subCodeId === subCodeId) {
+  //     console.log('subCodeId::::' + value.subCodeId + ' ' + subCodeId + ' ' + value.label)
+  //     return value.label;
+  //   }
+
+  // });
+}
+
+export function showErrorAlert(title, message, buttontext) {
+  Alert.alert(
+    title,
+    message,
+    [
+      {
+        text: buttontext,
+        onPress: () => console.log(`'OK' Pressed`),
+      },
+    ],
+  );
+}
+
 export default {
-  isValidPhoneNumber, isValidText, convertDateFormat, isDateGreaterThan, isValidAlphaText,
+  isValidPhoneNumber, isValidText, convertDateFormat, isDateGreaterThan, isValidAlphaText, showErrorAlert, getSystemCodeDescription,
   numberRegex, CS_URL, CS_URL1, integerPattern, formatDate, getCodeDescription, formatTime, hasOnlyOneKey, getCurrentDateTime, getNetworkConnection
 };

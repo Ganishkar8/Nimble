@@ -20,7 +20,7 @@ export default {
     pendingBorder: '#ffce20',
     pendingBg: '#fff9e3',
     approvedBorder: '#178e39',
-    approvedBg: '#f5f8fa',
+    approvedBg: '#178e3950',
     rejectedBorder: '#E90000',
     rejectedBg: '#FFCFCF',
     draftBg: '#9f9f9f',

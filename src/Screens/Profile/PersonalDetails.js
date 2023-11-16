@@ -11,7 +11,7 @@ import {
     ScrollView,
     BackHandler
 } from 'react-native';
-import MyStatusBar from '../../Components/ MyStatusBar';
+import MyStatusBar from '../../Components/MyStatusBar';
 import Colors from '../../Utils/Colors';
 import Entypo from 'react-native-vector-icons/Entypo';
 import { connect } from 'react-redux';
@@ -28,7 +28,6 @@ const PersonalDetailsScreen = (props, { navigation, route }) => {
     const isScreenVisible = useIsFocused();
 
     useEffect(() => {
-
 
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);

@@ -34,8 +34,8 @@ export default {
   },
   HeaderStyle: {
     width: '90%',
-    fontSize: 17,
-    fontWeight: '2000',
+    fontSize: 15,
+    fontFamily: 'Poppins-Medium',
     paddingHorizontal: 0,
     color: '#000000',
   },

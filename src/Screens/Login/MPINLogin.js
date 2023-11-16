@@ -15,7 +15,7 @@ import {
 import apiInstance from '../../Utils/apiInstance';
 import jwtDecode from 'jwt-decode';
 import Colors from '../../Utils/Colors';
-import MyStatusBar from '../../Components/ MyStatusBar';
+import MyStatusBar from '../../Components/MyStatusBar';
 import Loading from '../../Components/Loading';
 import TextComp from '../../Components/TextComp';
 import { connect } from 'react-redux';

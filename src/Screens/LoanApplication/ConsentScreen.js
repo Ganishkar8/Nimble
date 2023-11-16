@@ -10,12 +10,13 @@ import {
     Image,
     StatusBar,
     Text,
+    BackHandler,
     ScrollView,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Colors from '../../Utils/Colors';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import MyStatusBar from '../../Components/ MyStatusBar';
+import MyStatusBar from '../../Components/MyStatusBar';
 import Loading from '../../Components/Loading';
 import { Dimensions } from 'react-native';
 import apiInstance from '../../Utils/apiInstance';
@@ -24,6 +25,9 @@ import { languageAction } from '../../Utils/redux/actions/languageAction';
 import { profileAction } from '../../Utils/redux/actions/ProfileAction';
 import { useIsFocused } from '@react-navigation/native';
 import ConsentModal from '../../Components/ConsentModal';
+import ErrorModal from '../../Components/ErrorModal';
+import { language } from '../../Utils/LanguageString';
+import Common from '../../Utils/Common';
 
 
 const ConsentScreen = (props, { navigation }) => {
@@ -34,34 +38,72 @@ const ConsentScreen = (props, { navigation }) => {
     const [userName, setUserName] = useState('');
     const isScreenVisible = useIsFocused();
 
+    const [errorModalVisible, setErrorModalVisible] = useState(false);
+    const [apiError, setApiError] = useState('');
 
     useEffect(() => {
 
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
-        return () =>
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
+        return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
+            backHandler.remove();
+        }
     }, [navigation, isScreenVisible]);
 
+    const handleBackButton = () => {
+        props.navigation.goBack();
+        return true; // Prevent default back button behavior
+    };
 
-    const getProfileDetails = () => {
+    const callTempID = () => {
+        Common.getNetworkConnection().then(value => {
+            if (value.isConnected == true) {
+                createTempID();
+            } else {
+                setApiError(language[0][props.language].str_errinternet);
+                setErrorModalVisible(true)
+                //alert(language[0][props.language].str_errinternet)
+            }
+
+        })
+    }
+
+    const createTempID = () => {
+
+        const appDetails = {
+            "createdBy": global.USERID,
+            "consent": true,
+        }
 
         const baseURL = '8901'
         setLoading(true)
-        apiInstance(baseURL).post(`api/v1/user-personal-details/userID/${global.USERID}`)
+        apiInstance(baseURL).post(`api/v2/profile-short/loan-creation`, appDetails)
             .then(async (response) => {
                 // Handle the response data
-                console.log("ProfileApiResponse::" + JSON.stringify(response.data));
+                if (global.DEBUG_MODE) console.log("TempIDCreationApiResponse::" + JSON.stringify(response));
+                if (response.status == 200) {
+                    if (response.data != null) {
+                        if (global.DEBUG_MODE) console.log("TempIDCreationApiResponse::" + JSON.stringify(response.data));
+                        global.TEMPAPPID = response.data.tempNumber;
+                        props.navigation.replace('LoanApplicationMain')
+                    } else {
+                        setApiError('Not a Valid Response from Api');
+                        setErrorModalVisible(true)
+                    }
+                }
                 setLoading(false)
-                global.USERNAME = response.data.userPersonalDetailsDto.userName;
-                setUserName(response.data.userPersonalDetailsDto.userName);
-                props.profileAction(response.data)
+
 
             })
             .catch((error) => {
-                // Handle the error
-                console.log("Error" + JSON.stringify(error.response))
                 setLoading(false)
-                alert(error);
+                if (global.DEBUG_MODE) console.log("TempIDCreationApiResponse::" + JSON.stringify(error.response));
+                props.navigation.replace('LoanApplicationMain')
+                // if (error.response.data != null) {
+                //     setApiError(error.response.data.message);
+                //     setErrorModalVisible(true)
+                // }
             });
 
 
@@ -70,12 +112,16 @@ const ConsentScreen = (props, { navigation }) => {
 
     const nextScreen = (value) => {
         if (value == 'Agree') {
-            props.navigation.replace('LoanApplicationMain')
+            createTempID();
         } else {
             props.navigation.goBack()
         }
 
     }
+
+    const closeErrorModal = () => {
+        setErrorModalVisible(false);
+    };
 
 
     return (
@@ -84,6 +130,7 @@ const ConsentScreen = (props, { navigation }) => {
 
         <View style={{ flex: 1 }}>
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
+            <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
             {loading ? <Loading /> : null}
 
             <View style={{ flex: 1 }}>

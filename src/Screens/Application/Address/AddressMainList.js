@@ -9,30 +9,30 @@ import {
   SafeAreaView,
   FlatList,
 } from 'react-native';
-import {React, useState} from 'react';
-import MyStatusBar from '../../../Components/ MyStatusBar';
+import { React, useState } from 'react';
+import MyStatusBar from '../../../Components/MyStatusBar';
 import HeadComp from '../../../Components/HeadComp';
-import {connect} from 'react-redux';
-import {languageAction} from '../../../Utils/redux/actions/languageAction';
-import {language} from '../../../Utils/LanguageString';
+import { connect } from 'react-redux';
+import { languageAction } from '../../../Utils/redux/actions/languageAction';
+import { language } from '../../../Utils/LanguageString';
 import Loading from '../../../Components/Loading';
 import ChildHeadComp from '../../../Components/ChildHeadComp';
 import ProgressComp from '../../../Components/ProgressComp';
 import Colors from '../../../Utils/Colors';
 import Commonstyles from '../../../Utils/Commonstyles';
 import IconButtonViewComp from '../../../Components/IconButtonViewComp';
-import {TouchableOpacity} from 'react-native-gesture-handler';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
-const FlatView = ({item}) => (
-  <View style={{marginLeft: 10, marginRight: 10}}>
+const FlatView = ({ item }) => (
+  <View style={{ marginLeft: 10, marginRight: 10 }}>
     <View>
-      <Text style={{fontSize: 14, fontWeight: 'bold', marginTop: 5}}>
+      <Text style={{ fontSize: 14, fontWeight: 'bold', marginTop: 5 }}>
         {item.AddressType}
       </Text>
       <Text>{item.Addressline}</Text>
     </View>
 
-    <View style={{flexDirection: 'row', alignItems: 'flex-start'}}>
+    <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
       <View>
         <IconButtonViewComp
           textValue={'Edit'.toUpperCase()}
@@ -57,7 +57,7 @@ const FlatView = ({item}) => (
           }}
         />
       </View>
-      <View style={{width: '20%'}}>
+      <View style={{ width: '20%' }}>
         <IconButtonViewComp
           textValue={'Delete'.toUpperCase()}
           textStyle={{
@@ -100,7 +100,7 @@ const FlatView = ({item}) => (
   </View>
 );
 
-const AddressMainList = (props, {navigation}) => {
+const AddressMainList = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
 
   const Data = [
@@ -118,7 +118,7 @@ const AddressMainList = (props, {navigation}) => {
   ];
 
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: 'white'}}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
       {loading ? <Loading /> : null}
       <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
 
@@ -138,20 +138,20 @@ const AddressMainList = (props, {navigation}) => {
         <ChildHeadComp textval={language[0][props.language].str_profileshort} />
       </View>
       <View>
-        <Text style={{margin: 10}}>
+        <Text style={{ margin: 10 }}>
           {language[0][props.language].str_addressdetail}
         </Text>
       </View>
 
       <ProgressComp progressvalue={1} textvalue="4 of 4" />
 
-      <View style={{marginBottom: 10}}>
+      <View style={{ marginBottom: 10 }}>
         <IconButtonViewComp
           icon={'+'}
           textValue={language[0][
             props.language
           ].str_addressdetail.toUpperCase()}
-          textStyle={{color: Colors.skyBlue, fontSize: 13, fontWeight: 500}}
+          textStyle={{ color: Colors.skyBlue, fontSize: 13, fontWeight: 500 }}
           viewStyle={Commonstyles.buttonView}
           innerStyle={Commonstyles.buttonViewBorderStyle}
         />
@@ -167,7 +167,7 @@ const AddressMainList = (props, {navigation}) => {
 };
 
 const mapStateToProps = state => {
-  const {language} = state.languageReducer;
+  const { language } = state.languageReducer;
   return {
     language: language,
   };

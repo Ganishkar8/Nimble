@@ -24,7 +24,7 @@ const ChildHeadComp = ({ textval }) => {
           style={{
             marginLeft: 10,
             fontSize: 14,
-            fontWeight: 500,
+            fontFamily: 'Poppins-Medium',
             color: Colors.mediumgrey,
           }}>
           {textval}

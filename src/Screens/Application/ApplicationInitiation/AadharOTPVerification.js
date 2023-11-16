@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
     Animated,
     StyleSheet,
@@ -9,38 +9,37 @@ import {
     Keyboard,
     Alert,
     BackHandler,
-    Modal,
     TouchableOpacity
 } from 'react-native';
-import apiInstance from '../../Utils/apiInstance';
-import jwtDecode from 'jwt-decode';
-import Colors from '../../Utils/Colors';
-import MyStatusBar from '../../Components/MyStatusBar';
-import Loading from '../../Components/Loading';
-import TextComp from '../../Components/TextComp';
+import apiInstance from '../../../Utils/apiInstance';
+import apiInstancelocal from '../../../Utils/apiInstancelocal';
+import Colors from '../../../Utils/Colors';
+import MyStatusBar from '../../../Components/MyStatusBar';
+import Loading from '../../../Components/Loading';
+import TextComp from '../../../Components/TextComp';
 import { connect } from 'react-redux';
-import { languageAction } from '../../Utils/redux/actions/languageAction';
-import { language } from '../../Utils/LanguageString';
-import Commonstyles from '../../Utils/Commonstyles';
-import ImageComp from '../../Components/ImageComp';
-import ButtonViewComp from '../../Components/ButtonViewComp';
-import { getDeviceID, getDeviceName, } from '../../Utils/Common';
-import Common from '../../Utils/Common';
-import Bank_Detail_Table from '../../Database/Table/Bank_Detail_Table';
-import axios from 'axios';
-import parser from 'react-native-xml2js';
-import { useIsFocused } from '@react-navigation/native';
-import CenteredModal from '../../Components/CenteredModal';
-import HeadComp from '../../Components/HeadComp';
+import { languageAction } from '../../../Utils/redux/actions/languageAction';
+import { language } from '../../../Utils/LanguageString';
+import Commonstyles from '../../../Utils/Commonstyles';
+import HeadComp from '../../../Components/HeadComp';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Common from '../../../Utils/Common';
+import ButtonViewComp from '../../../Components/ButtonViewComp';
+import ErrorMessageModal from '../../../Components/ErrorMessageModal';
+import DedupeModal from '../../../Components/DedupeModal';
 import {
     CodeField,
     Cursor,
     useBlurOnFulfill,
     useClearByFocusCell,
 } from 'react-native-confirmation-code-field';
+import CheckBoxComp from '../../../Components/CheckBoxComp';
+import Entypo from 'react-native-vector-icons/Entypo';
 const { Value, Text: AnimatedText } = Animated;
-
-const CELL_COUNT = 4;
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Button, Menu, Divider } from 'react-native-paper';
+import { useIsFocused } from '@react-navigation/native';
+const CELL_COUNT = 3;
 const CELL_SIZE = 46;
 const CELL_BORDER_RADIUS = 8;
 const DEFAULT_CELL_BG_COLOR = '#F4F5F7';
@@ -63,22 +62,30 @@ const animateCell = ({ hasValue, index, isFocused }) => {
     ]).start();
 };
 
-const SetUpMPIN = (props, { navigation }) => {
-
-    const [mpin, setMPIN] = useState('');
-    const [confirmMPIN, setConfirmMPIN] = useState('');
+const AadharOTPVerification = (props, { navigation }) => {
+    const [mobileOTP, setMobileOTP] = useState('');
+    const [aadharNumber, setaadharNumber] = useState(props.route.params.aadharNumber);
     const [loading, setLoading] = useState(false);
-    const { confirmCode, timer } = props;
+    const [isManualKYC, setIsManualKYC] = useState(false);
+    const [Visible, setVisible] = useState(false);
+    const [errMsg, setErrMsg] = useState('');
     const [value, setValue] = useState('');
+    const [timeLeft, setTimeLeft] = useState(60);
     const ref = useBlurOnFulfill({ value, cellCount: CELL_COUNT });
     const [, getCellOnLayoutHandler] = useClearByFocusCell({
         value,
         setValue,
     });
-    const mpinRef = useRef(null);
-    const confirmMPINRef = useRef(null);
+    const institutionIDRef = useRef(null);
+    const challengeCodeRef = useRef(null);
     let Url = Common.CS_URL; // Initialize with your initial URL
     let goForRetry = true;
+
+    const [menuvisible, setMenuVisible] = React.useState(false);
+    const [instance, setInstance] = React.useState('LIV');
+    const openMenu = () => setMenuVisible(true);
+
+    const closeMenu = () => setMenuVisible(false);
 
     const renderCell = ({ index, symbol, isFocused }) => {
         const hasValue = Boolean(symbol);
@@ -141,32 +148,72 @@ const SetUpMPIN = (props, { navigation }) => {
         );
     };
 
-
-
-    const isFocused = useIsFocused();
-
     useEffect(() => {
-
-        if (isFocused) {
-            //BackHandler.addEventListener('hardwareBackPress', handleBackButton);
-        }
-
+        const timer = setInterval(() => {
+            if (timeLeft > 0) {
+                setTimeLeft(timeLeft - 1);
+            } else {
+                clearInterval(timer);
+                // Timer has ended; you can add code for what happens when the timer finishes here
+            }
+        }, 1000); // Update every second (1000 milliseconds)
 
         return () => {
-            //BackHandler.removeEventListener('hardwareBackPress', handleBackButton);
+            clearInterval(timer); // Clean up the timer when the component unmounts
         };
-    }, [isFocused]);
+    }, [timeLeft]);
 
-    const handleBackButton = () => {
-        // Close the app
-        BackHandler.exitApp();
-        return true;
+
+
+    const validateOTP = () => {
+
+        const appDetails = {
+            "generatedFor": ``,
+            "process": "Profile Short motp",
+            "otp": global.USERTYPEID,
+        }
+        const baseURL = '8908';
+        setLoading(true);
+        apiInstancelocal(baseURL)
+            .post('/api/v1/otp/verify-otp', appDetails)
+            .then(async response => {
+                // Handle the response data
+                if (global.DEBUG_MODE) console.log('AadharOTPVerifyApiResponse::' + JSON.stringify(response.data),);
+
+                props.navigation.navigate('ProfileShortKYCVerificationStatus', { 'isAadharVerified': '0' });
+
+                setLoading(false);
+
+
+
+            })
+            .catch(error => {
+                // Handle the error
+                if (global.DEBUG_MODE) console.log('AadharOTPVerifyApiResponse::::' + JSON.stringify(error.response));
+                setLoading(false);
+                if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
+
     };
 
+    const manualKYC = () => {
+        if (isManualKYC) {
+            props.navigation.navigate('ProfileShortKYCVerificationStatus', { 'isAadharVerified': '0' });
+        } else {
+            validateOTP();
+        }
+    }
 
+    const sendDataBack = () => {
+        props.navigation.goBack();
+        props.navigation.emit('isAadharVerified', '1');
+    };
 
-    const handleClick = () => {
-        props.navigation.navigate('MPINLogin');
+    const getCheckbox = (value) => {
+        setIsManualKYC(value)
     };
 
     return (
@@ -174,78 +221,67 @@ const SetUpMPIN = (props, { navigation }) => {
         <View style={{ flex: 1, backgroundColor: Colors.lightwhite }}>
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
 
+            <View style={{ width: '100%', height: 56, alignItems: 'center', justifyContent: 'center', }}>
+
+                <HeadComp textval={language[0][props.language].str_aadharotpverification} props={props} />
+
+            </View>
+
             <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" >
                 {loading ? <Loading /> : null}
                 <View style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-start' }}>
 
-                    <View style={{ width: '100%', height: 56, alignItems: 'center', justifyContent: 'center', }}>
 
-                        <HeadComp textval={language[0][props.language].str_setmpin} props={props} />
+                    <TextComp textVal={language[0][props.language].str_aadharverifynewcust} textStyle={{ width: '70%', color: Colors.lightgrey, fontSize: 14, marginTop: 34 }} />
 
-                    </View>
-
-                    <View style={{ width: '97%', marginTop: 30, paddingHorizontal: 16 }}>
-
-                        <TextComp textVal={language[0][props.language].str_setupmpin} textStyle={{ color: Colors.black, fontSize: 16 }} />
-                        <TextComp textVal={language[0][props.language].str_entermpin} textStyle={{ color: Colors.lightgrey, fontSize: 12, marginTop: 30, textAlign: 'center' }} />
-                    </View>
+                    <TextComp textVal={language[0][props.language].str_aadharverifydesc} textStyle={{ width: '70%', color: Colors.lightgrey, fontSize: 14, marginTop: 14 }} />
 
 
                     <CodeField
-                        ref={mpinRef}
+                        ref={challengeCodeRef}
                         {...props}
-                        value={mpin}
-                        autoFocus={true}
-                        onChangeText={(txt) => {
-                            if (txt.length > 0) {
-                                if (Common.integerPattern.test(txt))
-                                    setMPIN(txt)
-                            } else {
-                                setMPIN(txt)
-                            }
-                        }}
-                        cellCount={4}
-                        rootStyle={styles.codeFieldRoot}
-                        keyboardType="number-pad"
-                        textContentType="oneTimeCode"
-                        onSubmitEditing={() => {
-                            if (confirmMPIN.length >= 4) {
-                                Keyboard.dismiss()
-                            } else {
-                                confirmMPINRef.current.focus()
-                            }
-                        }}
-                        renderCell={renderCellCode}
-                    />
-
-                    <TextComp textVal={language[0][props.language].str_confirmmpin} textStyle={{ color: Colors.lightgrey, fontSize: 12, marginTop: 30 }} />
-
-
-                    <CodeField
-                        ref={confirmMPINRef}
-                        {...props}
-                        value={confirmMPIN}
+                        value={mobileOTP}
                         autoFocus={false}
                         onChangeText={(txt) => {
                             if (txt.length > 0) {
                                 if (Common.integerPattern.test(txt))
-                                    setConfirmMPIN(txt)
+                                    setMobileOTP(txt)
                             } else {
-                                setConfirmMPIN(txt)
+                                setMobileOTP(txt)
                             }
+
                         }}
-                        cellCount={4}
+                        cellCount={6}
                         rootStyle={styles.codeFieldRoot}
                         keyboardType="number-pad"
                         textContentType="oneTimeCode"
                         onSubmitEditing={Keyboard.dismiss}
                         renderCell={renderCellCode}
                     />
+                    {timeLeft != 0 &&
+                        <Text style={{ color: Colors.darkblue, marginTop: 20, fontFamily: 'Poppins-Medium', }}>{`${Math.floor(timeLeft / 60)}:${timeLeft % 60 < 10 ? '0' : ''}${timeLeft % 60}`}</Text>
+                    }
+                    {timeLeft == 0 &&
+                        <TouchableOpacity onPress={() => { setTimeLeft(60) }} style={{ width: '70%' }}>
+                            <Text style={{ color: Colors.darkblue, marginTop: 20, alignSelf: 'flex-end', fontFamily: 'Poppins-Medium', }}>Resend?</Text>
+                        </TouchableOpacity>
+                    }
+
+
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 19, }}>
+                        <CheckBoxComp
+                            Disable={false}
+                            Visible={false}
+                            textCaption={'Select Manual KYC'}
+                            onClick={getCheckbox}
+                        />
+                    </View>
 
 
                 </View>
 
-                <ButtonViewComp textValue={language[0][props.language].str_next.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} viewStyle={[Commonstyles.buttonView, { marginTop: 60, marginBottom: 20 }]} innerStyle={Commonstyles.buttonViewInnerStyle} handleClick={handleClick} />
+                <ButtonViewComp textValue={language[0][props.language].str_submit.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} viewStyle={[Commonstyles.buttonView, { marginTop: 60, marginBottom: 20 }]} innerStyle={Commonstyles.buttonViewInnerStyle} handleClick={manualKYC} />
+
 
             </ScrollView>
 
@@ -269,7 +305,7 @@ const mapDispatchToProps = (dispatch) => ({
 });
 
 
-export default connect(mapStateToProps, mapDispatchToProps)(SetUpMPIN);
+export default connect(mapStateToProps, mapDispatchToProps)(AadharOTPVerification);
 
 const { width, height } = Dimensions.get('window');
 
@@ -299,7 +335,7 @@ const styles = StyleSheet.create({
         marginTop: 5, position: 'absolute', bottom: 0, marginBottom: 25
     }, codeFieldRoot: {
         height: CELL_SIZE,
-        marginTop: 30,
+        marginTop: 24,
         paddingHorizontal: 10,
         justifyContent: 'center',
     },
@@ -376,5 +412,21 @@ const styles = StyleSheet.create({
         fontSize: 18,
         color: '#fff',
         fontWeight: '700',
+    }, modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', // semi-transparent background
+    },
+    modalContent: {
+        width: '80%',
+        backgroundColor: 'white',
+        padding: 20,
+        borderRadius: 10,
+        alignItems: 'center',
+    },
+    closeButton: {
+        marginTop: 10,
+        padding: 10,
     },
 });
