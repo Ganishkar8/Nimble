@@ -113,6 +113,24 @@ const deleteAllLeadCreationLeadDetails = async () => {
     }
 };
 
+const deleteLeadCreationLeadDetailsBasedOnID = async () => {
+    try {
+
+        const db = databaseInstance.getInstance();  // Execute the DELETE query
+
+        const query = `DELETE FROM ${tableName} WHERE id = ?`;
+
+        const [rowsAffected] = await db.executeSql(query);
+
+        console.log(`${rowsAffected} records deleted`);
+
+
+
+    } catch (error) {
+        console.error('Error deleting records:', error);
+    }
+};
+
 
 const getLeadDraftDetail = (leadid) => {
     const db = databaseInstance.getInstance();
@@ -162,5 +180,6 @@ export default {
     updateLeadCreationLeadDetails,
     deleteAllLeadCreationLeadDetails,
     getLeadCreationLeadDetailsBasedOnLeadID,
-    getLeadDraftDetail
+    getLeadDraftDetail,
+    deleteLeadCreationLeadDetailsBasedOnID
 };

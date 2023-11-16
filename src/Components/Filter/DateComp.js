@@ -148,12 +148,12 @@ const DateComp = ({ props, filterClick, fromCompDate, toCompDate }) => {
                                 placeholderTextColor={Colors.lightgrey}
                                 secureTextEntry={false}
                                 autoCapitalize="none"
-                                style={[Commonstyles.textinputtextStyle, { color: Colors.dimmText }]}
+                                style={[Commonstyles.textinputtextStyle, { color: Colors.black }]}
                             />
                         </View>
                         <TouchableOpacity onPress={() => displayDatepicker(1)} activeOpacity={10} style={{ width: '10%', marginTop: 8 }}>
                             <View>
-                                <Ionicons name='calendar-clear-outline' size={22} color={Colors.dimText} />
+                                <Ionicons name='calendar-clear-outline' size={22} color={Colors.skyBlue} />
                             </View>
                         </TouchableOpacity>
                     </View>
@@ -177,12 +177,12 @@ const DateComp = ({ props, filterClick, fromCompDate, toCompDate }) => {
                                 placeholderTextColor={Colors.lightgrey}
                                 secureTextEntry={false}
                                 autoCapitalize="none"
-                                style={[Commonstyles.textinputtextStyle, { color: Colors.dimmText, fontFamily: 'PoppinsRegular' }]}
+                                style={[Commonstyles.textinputtextStyle, { color: Colors.black, fontFamily: 'PoppinsRegular' }]}
                             />
                         </View>
                         <TouchableOpacity onPress={() => displayDatepicker(2)} activeOpacity={10} style={{ width: '10%', marginTop: 8 }}>
                             <View>
-                                <Ionicons name='calendar-clear-outline' size={22} color={Colors.dimText} />
+                                <Ionicons name='calendar-clear-outline' size={22} color={Colors.skyBlue} />
                             </View>
                         </TouchableOpacity>
                     </View>

@@ -14,7 +14,7 @@ import {
 import apiInstance from '../../../Utils/apiInstance';
 import apiInstancelocal from '../../../Utils/apiInstancelocal';
 import Colors from '../../../Utils/Colors';
-import MyStatusBar from '../../../Components/ MyStatusBar';
+import MyStatusBar from '../../../Components/MyStatusBar';
 import Loading from '../../../Components/Loading';
 import TextComp from '../../../Components/TextComp';
 import { connect } from 'react-redux';
@@ -26,8 +26,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Common from '../../../Utils/Common';
 import ButtonViewComp from '../../../Components/ButtonViewComp';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
-
-
+import DedupeModal from '../../../Components/DedupeModal';
 import {
     CodeField,
     Cursor,
@@ -63,7 +62,8 @@ const animateCell = ({ hasValue, index, isFocused }) => {
 };
 
 const OTPVerification = (props, { navigation }) => {
-    const [challengeCode, setChallengeCode] = useState('');
+    const [mobileOTP, setMobileOTP] = useState('');
+    const [mobileNumber, setMobileNumber] = useState(props.route.params.mobileNumber);
     const [loading, setLoading] = useState(false);
     const [Visible, setVisible] = useState(false);
     const [errMsg, setErrMsg] = useState('');
@@ -84,7 +84,6 @@ const OTPVerification = (props, { navigation }) => {
     const openMenu = () => setMenuVisible(true);
 
     const closeMenu = () => setMenuVisible(false);
-
 
     const renderCell = ({ index, symbol, isFocused }) => {
         const hasValue = Boolean(symbol);
@@ -162,6 +161,48 @@ const OTPVerification = (props, { navigation }) => {
         };
     }, [timeLeft]);
 
+
+
+    const validateOTP = () => {
+
+        const appDetails = {
+            "generatedFor": `91${mobileNumber}`,
+            "process": "Profile Short motp",
+            "otp": global.USERTYPEID,
+        }
+        const baseURL = '8908';
+        setLoading(true);
+        apiInstancelocal(baseURL)
+            .post('/api/v1/otp/verify-otp', appDetails)
+            .then(async response => {
+                // Handle the response data
+                if (global.DEBUG_MODE) console.log('MobileOTPVerifyApiResponse::' + JSON.stringify(response.data),);
+
+                sendDataBack();
+
+
+                setLoading(false);
+
+
+
+            })
+            .catch(error => {
+                // Handle the error
+                if (global.DEBUG_MODE) console.log('MobileOTPVerifyApiResponse::::' + JSON.stringify(error.response));
+                setLoading(false);
+                if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
+
+    };
+
+    const sendDataBack = () => {
+        props.navigation.goBack();
+        props.navigation.emit('isMobileVerified', '1');
+    };
+
     return (
 
         <View style={{ flex: 1, backgroundColor: Colors.lightwhite }}>
@@ -178,24 +219,24 @@ const OTPVerification = (props, { navigation }) => {
                 <View style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-start' }}>
 
 
-                    <TextComp textVal={`${language[0][props.language].str_mobileverifydesc}+917578976546`} textStyle={{ width: '70%', color: Colors.lightgrey, fontSize: 14, marginTop: 34 }} />
+                    <TextComp textVal={`${language[0][props.language].str_mobileverifydesc}91${mobileNumber}`} textStyle={{ width: '70%', color: Colors.lightgrey, fontSize: 14, marginTop: 34 }} />
 
 
                     <CodeField
                         ref={challengeCodeRef}
                         {...props}
-                        value={challengeCode}
+                        value={mobileOTP}
                         autoFocus={false}
                         onChangeText={(txt) => {
                             if (txt.length > 0) {
                                 if (Common.integerPattern.test(txt))
-                                    setChallengeCode(txt)
+                                    setMobileOTP(txt)
                             } else {
-                                setChallengeCode(txt)
+                                setMobileOTP(txt)
                             }
 
                         }}
-                        cellCount={5}
+                        cellCount={6}
                         rootStyle={styles.codeFieldRoot}
                         keyboardType="number-pad"
                         textContentType="oneTimeCode"
@@ -215,7 +256,7 @@ const OTPVerification = (props, { navigation }) => {
 
                 </View>
 
-                <ButtonViewComp textValue={language[0][props.language].str_submit.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} viewStyle={[Commonstyles.buttonView, { marginTop: 60, marginBottom: 20 }]} innerStyle={Commonstyles.buttonViewInnerStyle} />
+                <ButtonViewComp textValue={language[0][props.language].str_submit.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} viewStyle={[Commonstyles.buttonView, { marginTop: 60, marginBottom: 20 }]} innerStyle={Commonstyles.buttonViewInnerStyle} handleClick={validateOTP} />
 
 
             </ScrollView>

@@ -18,7 +18,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import apiInstance from '../../../Utils/apiInstance';
 import Colors from '../../../Utils/Colors';
-import MyStatusBar from '../../../Components/ MyStatusBar';
+import MyStatusBar from '../../../Components/MyStatusBar';
 import Loading from '../../../Components/Loading';
 import { BottomSheet } from 'react-native-btr';
 import { connect } from 'react-redux';
@@ -47,6 +47,7 @@ import tbl_lead_creation_loan_details from '../../../Database/Table/tbl_lead_cre
 import PickerComp from '../../../Components/PickerComp';
 import { it } from 'react-native-paper-dates';
 import { isParameter } from 'typescript';
+import ErrorModal from '../../../Components/ErrorModal';
 
 
 
@@ -108,7 +109,11 @@ const LeadManagement = (props, { navigation, route }) => {
     const sortChildRef = useRef(null);
     const [reload, setReload] = useState(false);
 
-
+    const [systemCodeDetail, setSystemCodeDetail] = useState(props.mobilecodedetail.leadSystemCodeDto);
+    const [userCodeDetail, setUserCodeDetail] = useState(props.mobilecodedetail.leadUserCodeDto);
+    const [systemMandatoryField, setSystemMandatoryField] = useState(props.mobilecodedetail.leadSystemMandatoryFieldDto);
+    const [errorModalVisible, setErrorModalVisible] = useState(false);
+    const [apiError, setApiError] = useState('');
 
     useEffect(() => {
         //getPendingData()
@@ -143,11 +148,11 @@ const LeadManagement = (props, { navigation, route }) => {
         }
 
 
-        tbl_SystemCodeDetails.getSystemCodeDetailsBasedOnID('LeadStatus').then(value => {
-            if (value !== undefined && value.length > 0) {
-                setLeadStatusData(value)
-            }
-        })
+        // tbl_SystemCodeDetails.getSystemCodeDetailsBasedOnID('LeadStatus').then(value => {
+        //     if (value !== undefined && value.length > 0) {
+        //         setLeadStatusData(value)
+        //     }
+        // })
         if (global.USERTYPEID == '1163') {
             mainFilterDataArr.splice(4, 0, { name: 'Agent Name', isSelected: false, id: 'AGN' });
         }
@@ -179,7 +184,7 @@ const LeadManagement = (props, { navigation, route }) => {
                                 "leadStatus": "DRAFT",
                                 "customerName": value1[0].first_name + " " + value1[0].middle_name + " " + value1[0].last_name,
                                 "leadId": value1[0].lead_number,
-                                "leadType": "HOT",
+                                "leadType": value1[0].lead_type,
                                 "creationDate": value1[0].created_date,
                                 "completionDate": "",
                                 "ageing": "",
@@ -198,8 +203,8 @@ const LeadManagement = (props, { navigation, route }) => {
         await Promise.all(promises);
 
         // alert(JSON.stringify(data))
-        setFilteredData(data)
-        setPendingData(data)
+        setFilteredData(data.slice().reverse())
+        setPendingData(data.slice().reverse())
         setRefreshing(false)
     }
 
@@ -209,7 +214,7 @@ const LeadManagement = (props, { navigation, route }) => {
             setSortedFilterValue(value)
             if (from == 'top') {
                 hideSortModalSheet();
-                applyFilter('top');
+                applyFilter('top', value);
             }
         }
         if (type == 'ST') {
@@ -237,8 +242,13 @@ const LeadManagement = (props, { navigation, route }) => {
 
     }
 
-    const applyFilter = (value) => {
-        let sort = sortedFilterValue;
+    const applyFilter = (value, sortValue) => {
+
+        if (value == 'top') {
+            var sort = sortValue;
+        } else {
+            var sort = sortedFilterValue;
+        }
         let status = '';
         for (let i = 0; i < statusFilterValue.length; i++) {
             if (statusFilterValue[i].checked == true) {
@@ -291,7 +301,7 @@ const LeadManagement = (props, { navigation, route }) => {
 
         getPendingData(status, type, from, to, operator, age, agentName, sort);
 
-        console.log("ApplyFilterData::" + "Sort::" + sort + " Status::" + status
+        if (global.DEBUG_MODE) console.log("ApplyFilterData::" + "Sort::" + sort + " Status::" + status
             + " FromDate::" + from + " ToDate::" + to + " Type::" + type
             + " Age::" + age + " Operator::" + operator + " Agent Name::" + agentName)
         setVisible(false)
@@ -348,7 +358,7 @@ const LeadManagement = (props, { navigation, route }) => {
         apiInstance(baseURL).post(`api/v1/${url}/${global.USERID}`, appDetails)
             .then((response) => {
                 // Handle the response data
-                console.log("ResponseDataApi::" + JSON.stringify(response.data));
+                if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(response.data));
                 setPendingData(response.data.slice().reverse())
                 setFilteredData(response.data.slice().reverse())
                 setLoading(false)
@@ -364,7 +374,11 @@ const LeadManagement = (props, { navigation, route }) => {
             .catch((error) => {
                 // Handle the error
                 setLoading(false)
-                console.error("ErrorDataApi::" + error);
+                if (global.DEBUG_MODE) console.log("TrackerApiResponse::" + JSON.stringify(error.response.data));
+                if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
             });
     }
 
@@ -374,7 +388,6 @@ const LeadManagement = (props, { navigation, route }) => {
         setFilteredData([]);
         //Call the Service to get the latest data
         setRefreshing(true)
-        getPendingData();
         setSearch('')
         clearFilter("1");
     };
@@ -387,7 +400,7 @@ const LeadManagement = (props, { navigation, route }) => {
         apiInstance(baseURL).get(`api/v1/lead-creation-initiation/getByLeadId/${leadID}`)
             .then((response) => {
                 // Handle the response data
-                console.log("ResponseDataApi::" + JSON.stringify(response.data));
+                if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(response.data));
                 setLoading(false)
                 insertLead(response.data)
 
@@ -395,7 +408,11 @@ const LeadManagement = (props, { navigation, route }) => {
             .catch((error) => {
                 // Handle the error
                 setLoading(false)
-                console.error("ErrorDataApi::" + error);
+                if (global.DEBUG_MODE) console.log("getByLead::" + JSON.stringify(error.response.data));
+                if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
             });
     }
 
@@ -417,19 +434,19 @@ const LeadManagement = (props, { navigation, route }) => {
         // }
 
         tbl_lead_creation_lead_details.getLeadCreationLeadDetailsBasedOnLeadID(leadData.id).then(value => {
-            console.log("LeadDetails::::" + JSON.stringify(value))
+            if (global.DEBUG_MODE) console.log("LeadDetails::::" + JSON.stringify(value))
         })
 
         tbl_lead_creation_basic_details.getLeadCreationBasicDetailsBasedOnLeadID(leadData.id).then(value => {
-            console.log("LeadBasicDetails::::" + JSON.stringify(value))
+            if (global.DEBUG_MODE) console.log("LeadBasicDetails::::" + JSON.stringify(value))
         })
 
         tbl_lead_creation_business_details.getLeadCreationBusinessDetailsBasedOnLeadID(leadData.id).then(value => {
-            console.log("LeadBusinessDetails::::" + JSON.stringify(value))
+            if (global.DEBUG_MODE) console.log("LeadBusinessDetails::::" + JSON.stringify(value))
         })
 
         tbl_lead_creation_loan_details.getLeadCreationLoanDetailsBasedOnLeadID(leadData.id).then(value => {
-            console.log("LeadLoanDetails::::" + JSON.stringify(value))
+            if (global.DEBUG_MODE) console.log("LeadLoanDetails::::" + JSON.stringify(value))
         })
 
         props.navigation.navigate('LeadCreationBasic', { leadData: [] });
@@ -438,9 +455,6 @@ const LeadManagement = (props, { navigation, route }) => {
 
     const handleclick = (value, index) => {
         //alert(JSON.stringify(value))
-
-
-
         if (value.name == 'Filter') {
             setVisible(true)
             if (statusDataArr.length <= 0) {
@@ -448,14 +462,16 @@ const LeadManagement = (props, { navigation, route }) => {
             } else if (typeDataArr.length <= 0) {
                 callLeadTypeApi();
             } else {
-                if (agentData.length <= 0)
-                    callAgentNameApi();
+                if (global.USERTYPEID == '1163') {
+                    if (agentData.length <= 0)
+                        callAgentNameApi();
+                }
             }
 
         } else if (value.name == 'Pending') {
             // alert(upperData[index].isSelected)
             if (!upperData[index].isSelected) {
-                getPendingData('1666', null, null, null, null, null, null, null);
+                getPendingData('PENDING', null, null, null, null, null, null, null);
             } else {
                 getPendingData(null, null, null, null, null, null, null, null);
             }
@@ -507,8 +523,10 @@ const LeadManagement = (props, { navigation, route }) => {
                     if (typeDataArr.length <= 0)
                         callLeadTypeApi();
                 } else if (fiterPosition[i].id == 'AGN') {
-                    if (agentData.length <= 0)
-                        callAgentNameApi();
+                    if (global.USERTYPEID == '1163') {
+                        if (agentData.length <= 0)
+                            callAgentNameApi();
+                    }
                 }
                 setFilterVisible(fiterPosition[i].id)
             } else {
@@ -521,51 +539,64 @@ const LeadManagement = (props, { navigation, route }) => {
 
     const callStatusApi = () => {
 
-        const baseURL = '8082'
-        setLoading(true)
+        const data = [];
+        systemCodeDetail.filter((data) => data.masterId === 'LEAD_STATUS').map((value, index) => {
+            data.push({ name: value.label, id: value.subCodeId, checked: false })
+        });
+        setStatusDataArr(data);
 
-        apiInstance(baseURL).get('/api/v1/system-code/master/LEAD_STATUS')
-            .then(async (response) => {
+        // const baseURL = '8082'
+        // setLoading(true)
 
-                setLoading(false);
-                setLeadStatusData(response.data)
-                var data = [];
-                for (var i = 0; i < response.data.length; i++) {
-                    data.push({ name: response.data[i].label.charAt(0).toUpperCase() + response.data[i].label.slice(1).toLowerCase(), id: response.data[i].id, checked: false })
-                }
-                setStatusDataArr(data)
-                setStatusRefresh(!statusRefresh)
-            })
-            .catch((error) => {
-                if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
-                setLoading(false)
-                alert(error);
-            });
+        // apiInstance(baseURL).get('/api/v1/system-code/master/LEAD_STATUS')
+        //     .then(async (response) => {
+
+        //         setLoading(false);
+        //         setLeadStatusData(response.data)
+        //         var data = [];
+        //         for (var i = 0; i < response.data.length; i++) {
+        //             data.push({ name: response.data[i].label.charAt(0).toUpperCase() + response.data[i].label.slice(1).toLowerCase(), id: response.data[i].id, checked: false })
+        //         }
+        //         setStatusDataArr(data)
+        //         setStatusRefresh(!statusRefresh)
+        //     })
+        //     .catch((error) => {
+        //         if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
+        //         setLoading(false)
+        //         alert(error);
+        //     });
 
 
     }
 
     const callLeadTypeApi = () => {
 
-        const baseURL = '8082'
-        setLoading(true)
+        const data = [];
+        systemCodeDetail.filter((data) => data.masterId === 'LEAD_TYPE').map((value, index) => {
+            data.push({ name: value.label, id: value.subCodeId, checked: false })
+        });
+        setTypeDataArr(data);
 
-        apiInstance(baseURL).get('/api/v1/system-code/master/LEAD_TYPE')
-            .then(async (response) => {
 
-                setLoading(false);
-                var data = [];
-                setLeadStatusData(response.data)
-                for (var i = 0; i < response.data.length; i++) {
-                    data.push({ name: response.data[i].label.charAt(0).toUpperCase() + response.data[i].label.slice(1).toLowerCase(), id: response.data[i].id, checked: false })
-                }
-                setTypeDataArr(data)
-            })
-            .catch((error) => {
-                if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
-                setLoading(false)
-                alert(error);
-            });
+        // const baseURL = '8082'
+        // setLoading(true)
+
+        // apiInstance(baseURL).get('/api/v1/system-code/master/LEAD_TYPE')
+        //     .then(async (response) => {
+
+        //         setLoading(false);
+        //         var data = [];
+        //         setLeadStatusData(response.data)
+        //         for (var i = 0; i < response.data.length; i++) {
+        //             data.push({ name: response.data[i].label.charAt(0).toUpperCase() + response.data[i].label.slice(1).toLowerCase(), id: response.data[i].id, checked: false })
+        //         }
+        //         setTypeDataArr(data)
+        //     })
+        //     .catch((error) => {
+        //         if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
+        //         setLoading(false)
+        //         alert(error);
+        //     });
 
 
     }
@@ -584,9 +615,12 @@ const LeadManagement = (props, { navigation, route }) => {
 
             })
             .catch((error) => {
-                if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
                 setLoading(false)
-                alert(error);
+                if (global.DEBUG_MODE) console.log("AgentNameApi::" + JSON.stringify(error.response.data));
+                if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
             });
 
 
@@ -617,14 +651,25 @@ const LeadManagement = (props, { navigation, route }) => {
 
         setAgeFilterValue('')
         setVisible(false)
+
         if (value == "1") {
-            getPendingData(null, null, null, null, null, null, null, null);
+            Common.getNetworkConnection().then(value => {
+                if (value.isConnected) {
+                    getPendingData(null, null, null, null, null, null, null, null);
+                    //getDraftData();
+                } else {
+                    getDraftData();
+                }
+
+            })
+            //getPendingData(null, null, null, null, null, null, null, null);
             let fiterPosition = upperData;
             for (let i = 0; i < fiterPosition.length; i++) {
                 fiterPosition[i].isSelected = false
             }
             setUpperData(fiterPosition)
         }
+        setMainFilteredData(mainFilterDataArr)
         //alert(JSON.stringify(fiterPosition))
         setDateFilterValue({
             FromDate: '',
@@ -635,7 +680,6 @@ const LeadManagement = (props, { navigation, route }) => {
 
     const listView = ({ item }) => {
 
-
         return (
             <View>
                 <TouchableOpacity onPress={() => {
@@ -645,7 +689,7 @@ const LeadManagement = (props, { navigation, route }) => {
                     if (global.USERTYPEID == '1163') {
                         props.navigation.navigate('LeadDetails', { leadData: item })
                     } else {
-                        if (item.leadStatus == 'DRAFT') {
+                        if (item.leadStatus.toUpperCase() == 'DRAFT') {
                             global.LEADTYPE = 'DRAFT';
                             tbl_lead_creation_lead_details.getLeadCreationLeadDetailsBasedOnLeadID(item.id).then(value => {
                                 if (value !== undefined && value.length > 0) {
@@ -665,7 +709,11 @@ const LeadManagement = (props, { navigation, route }) => {
                                         if (value.isConnected == true) {
                                             getLeadByID(item.id);
                                         } else {
-                                            alert(language[0][props.language].str_errinternet)
+
+                                            setApiError(language[0][props.language].str_errinternet);
+                                            setErrorModalVisible(true)
+
+                                            // alert(language[0][props.language].str_errinternet)
                                         }
 
                                     })
@@ -694,7 +742,7 @@ const LeadManagement = (props, { navigation, route }) => {
                                 <Text style={{ color: Colors.black, fontSize: 14, marginLeft: 26, fontFamily: 'Poppins-Medium' }}>{language[0][props.language].str_leadapprovalstatus}</Text>
                             </View>
                             <View style={{ width: '55%', flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'flex-start' }}>
-                                <View style={item.leadStatus == 'APPROVED' ? styles.approvedbackground : item.leadStatus == 'PENDING' ? styles.pendingbackground : item.leadStatus == 'DRAFT' ? styles.draftbackground : styles.rejectedbackground}>
+                                <View style={item.leadStatus.toUpperCase() == 'APPROVED' ? styles.approvedbackground : item.leadStatus.toUpperCase() == 'PENDING' ? styles.pendingbackground : item.leadStatus.toUpperCase() == 'DRAFT' ? styles.draftbackground : styles.rejectedbackground}>
                                     <Text style={{ color: Colors.black, fontSize: 12, fontFamily: 'Poppins-Medium' }}>{item.leadStatus}</Text>
                                 </View>
                             </View>
@@ -722,7 +770,7 @@ const LeadManagement = (props, { navigation, route }) => {
                                 <Text style={styles.headText}>{language[0][props.language].str_leadtype}</Text>
                             </View>
                             <View style={{ width: '55%' }}>
-                                <Text style={styles.childText}>:  {item.leadType}</Text>
+                                <Text style={styles.childText}>:   {item.leadType}</Text>
                             </View>
                         </View>
                         <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
@@ -738,7 +786,7 @@ const LeadManagement = (props, { navigation, route }) => {
                                 <Text style={styles.headText}>{language[0][props.language].str_completiondate}</Text>
                             </View>
                             <View style={{ width: '55%' }}>
-                                <Text style={styles.childText}>:  {item.leadStatus == 'APPROVED' ? Common.formatDate(item.creationDate) : ''} </Text>
+                                <Text style={styles.childText}>:  {item.leadStatus.toUpperCase() == 'APPROVED' ? Common.formatDate(item.completionDate) : item.leadStatus == 'REJECTED' ? Common.formatDate(item.completionDate) : ''} </Text>
                             </View>
                         </View>
                         <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
@@ -758,7 +806,7 @@ const LeadManagement = (props, { navigation, route }) => {
                             </View>
                         </View>
                         }
-                        <View style={{ width: '100%', height: 5, backgroundColor: item.leadStatus == 'APPROVED' ? Colors.approvedBorder : item.leadStatus == 'PENDING' ? Colors.pendingBorder : item.leadStatus == 'DRAFT' ? Colors.lightgrey : Colors.rejectedBorder, marginTop: 13, borderBottomLeftRadius: 8, borderBottomRightRadius: 8 }} />
+                        <View style={{ width: '100%', height: 5, backgroundColor: item.leadStatus.toUpperCase() == 'APPROVED' ? Colors.approvedBorder : item.leadStatus.toUpperCase() == 'PENDING' ? Colors.pendingBorder : item.leadStatus.toUpperCase() == 'DRAFT' ? Colors.lightgrey : Colors.rejectedBorder, marginTop: 13, borderBottomLeftRadius: 8, borderBottomRightRadius: 8 }} />
 
 
                     </View>
@@ -813,9 +861,14 @@ const LeadManagement = (props, { navigation, route }) => {
         }
     }
 
+    const closeErrorModal = () => {
+        setErrorModalVisible(false);
+    };
+
     return (
 
         <View style={{ flex: 1, backgroundColor: '#fefefe' }}>
+            <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
             {loading ? <Loading /> : null}
             <View style={styles.headerView}>
@@ -1133,8 +1186,12 @@ const LeadManagement = (props, { navigation, route }) => {
 
 const mapStateToProps = (state) => {
     const { language } = state.languageReducer;
+    const { profileDetails } = state.profileReducer;
+    const { mobileCodeDetails } = state.mobilecodeReducer;
     return {
-        language: language
+        language: language,
+        profiledetail: profileDetails,
+        mobilecodedetail: mobileCodeDetails
     }
 }
 

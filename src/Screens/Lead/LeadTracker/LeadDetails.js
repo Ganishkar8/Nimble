@@ -17,7 +17,7 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import TextComp from '../../../Components/TextComp';
 import Colors from '../../../Utils/Colors';
-import MyStatusBar from '../../../Components/ MyStatusBar';
+import MyStatusBar from '../../../Components/MyStatusBar';
 import Loading from '../../../Components/Loading';
 import { BottomSheet } from 'react-native-btr';
 import { connect } from 'react-redux';
@@ -72,10 +72,17 @@ const LeadDetails = (props, { navigation, route }) => {
     const [visible, setVisible] = useState(false);
     const [status, setStatus] = useState('COMP');
     const [leadStatusData, setLeadStatusData] = useState([]);
-    const [leadStatus, setLeadStatus] = useState(props.route.params.leadData.leadStatus);
+    const [leadStatus, setLeadStatus] = useState(props.route.params.leadData.leadStatus.toUpperCase());
     const [leadTrackerData, setLeadTrackerData] = useState(props.route.params.leadData);
     const [loanTypeData, setLoanTypeData] = useState([]);
     const isScreenVisible = useIsFocused();
+
+    const [systemCodeDetail, setSystemCodeDetail] = useState(props.mobilecodedetail.leadSystemCodeDto);
+    const [userCodeDetail, setUserCodeDetail] = useState(props.mobilecodedetail.leadUserCodeDto);
+    const [systemMandatoryField, setSystemMandatoryField] = useState(props.mobilecodedetail.leadSystemMandatoryFieldDto);
+    const [errorModalVisible, setErrorModalVisible] = useState(false);
+    const [apiError, setApiError] = useState('');
+
 
     useEffect(() => {
         //below code is used for hiding  bottom tab
@@ -241,7 +248,7 @@ const LeadDetails = (props, { navigation, route }) => {
                                 </View>
                                 <View style={{ width: '55%', flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'flex-start' }}>
                                     <View style={leadStatus == 'APPROVED' ? styles.approvedbackground : leadStatus == 'REJECTED' ? styles.rejectedbackground : styles.pendingbackground}>
-                                        <Text style={{ color: Colors.black, fontSize: 12, fontFamily: 'Poppins-Medium' }}>{leadStatus}</Text>
+                                        <Text style={{ color: Colors.black, fontSize: 12, fontFamily: 'Poppins-Medium' }}>{Common.getSystemCodeDescription(systemCodeDetail, 'LEAD_STATUS', leadStatus)}</Text>
                                     </View>
                                 </View>
                             </View>
@@ -251,7 +258,8 @@ const LeadDetails = (props, { navigation, route }) => {
                                     <Text style={styles.headText}>{language[0][props.language].str_customername}</Text>
                                 </View>
                                 <View style={styles.rightText}>
-                                    <Text style={styles.childText}>:  {leadTrackerData.customerName}</Text>
+                                    <Text style={[styles.childText, { width: '7%' }]}>:</Text>
+                                    <Text style={[styles.childText, { width: '93%' }]}>{leadTrackerData.customerName}</Text>
                                 </View>
                             </View>
                             <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
@@ -259,7 +267,8 @@ const LeadDetails = (props, { navigation, route }) => {
                                     <Text style={styles.headText}>{language[0][props.language].str_leadid}</Text>
                                 </View>
                                 <View style={styles.rightText}>
-                                    <Text style={styles.childText}>:  {leadTrackerData.leadId}</Text>
+                                    <Text style={[styles.childText, { width: '7%' }]}>:</Text>
+                                    <Text style={[styles.childText, { width: '93%' }]}>{leadTrackerData.leadId}</Text>
                                 </View>
                             </View>
                             <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
@@ -267,7 +276,8 @@ const LeadDetails = (props, { navigation, route }) => {
                                     <Text style={styles.headText}>{language[0][props.language].str_leadtype}</Text>
                                 </View>
                                 <View style={styles.rightText}>
-                                    <Text style={styles.childText}>:  {leadTrackerData.leadType}</Text>
+                                    <Text style={[styles.childText, { width: '7%' }]}>:</Text>
+                                    <Text style={[styles.childText, { width: '93%' }]}>{leadTrackerData.leadType}</Text>
                                 </View>
                             </View>
                             {/* hide */}
@@ -279,7 +289,8 @@ const LeadDetails = (props, { navigation, route }) => {
                                         <Text style={styles.headText}>{language[0][props.language].str_approvername}</Text>
                                     </View>
                                     <View style={styles.rightText}>
-                                        <Text style={styles.childText}>: {leadTrackerData.leadStatus == 'APPROVED' ? leadTrackerData.approverName : ''}  </Text>
+                                        <Text style={[styles.childText, { width: '7%' }]}>:</Text>
+                                        <Text style={[styles.childText, { width: '93%' }]}>{leadTrackerData.leadStatus.toUpperCase() == 'APPROVED' ? leadTrackerData.approverName : ''}  </Text>
                                     </View>
                                 </View>
                                 }
@@ -289,7 +300,8 @@ const LeadDetails = (props, { navigation, route }) => {
                                         <Text style={styles.headText}>{language[0][props.language].str_productId}</Text>
                                     </View>
                                     <View style={styles.rightText}>
-                                        <Text style={styles.childText}>:  {leadTrackerData.product}</Text>
+                                        <Text style={[styles.childText, { width: '7%' }]}>:</Text>
+                                        <Text style={[styles.childText, { width: '93%' }]}>{leadTrackerData.product}</Text>
                                     </View>
                                 </View>
 
@@ -298,7 +310,8 @@ const LeadDetails = (props, { navigation, route }) => {
                                         <Text style={styles.headText}>{language[0][props.language].str_loanamount}</Text>
                                     </View>
                                     <View style={styles.rightText}>
-                                        <Text style={styles.childText}>:  ₹{leadTrackerData.loanAmount}</Text>
+                                        <Text style={[styles.childText, { width: '7%' }]}>:</Text>
+                                        <Text style={[styles.childText, { width: '93%' }]}><Text style={{ fontFamily: 'AntDesign' }}>₹ </Text>{leadTrackerData.loanAmount}</Text>
                                     </View>
                                 </View>
 
@@ -307,16 +320,28 @@ const LeadDetails = (props, { navigation, route }) => {
                                         <Text style={styles.headText}>{language[0][props.language].str_loantype}</Text>
                                     </View>
                                     <View style={styles.rightText}>
-                                        <Text style={styles.childText}>:  {Common.getCodeDescription(loanTypeData, leadData.leadCreationLoanDetails.loanTypeId)}</Text>
+                                        <Text style={[styles.childText, { width: '7%' }]}>:</Text>
+                                        <Text style={[styles.childText, { width: '93%' }]}>{Common.getSystemCodeDescription(systemCodeDetail, 'LNTP', leadData.leadCreationLoanDetails.loanType)}</Text>
                                     </View>
                                 </View>
+
+                                {global.USERTYPEID == '1163' && <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
+                                    <View style={styles.leftText}>
+                                        <Text style={styles.headText}>{language[0][props.language].str_currentleadownerid}</Text>
+                                    </View>
+                                    <View style={styles.rightText}>
+                                        <Text style={[styles.childText, { width: '7%' }]}>:</Text>
+                                        <Text style={[styles.childText, { width: '93%' }]}>{leadTrackerData.agentName}</Text>
+                                    </View>
+                                </View>}
 
                                 <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
                                     <View style={styles.leftText}>
                                         <Text style={styles.headText}>{language[0][props.language].str_creationdate}</Text>
                                     </View>
                                     <View style={styles.rightText}>
-                                        <Text style={styles.childText}>:  {Common.formatDate(leadTrackerData.creationDate)}</Text>
+                                        <Text style={[styles.childText, { width: '7%' }]}>:</Text>
+                                        <Text style={[styles.childText, { width: '93%' }]}>{Common.formatDate(leadTrackerData.creationDate)}</Text>
                                     </View>
                                 </View>
 
@@ -326,7 +351,8 @@ const LeadDetails = (props, { navigation, route }) => {
                                             <Text style={styles.headText}>{language[0][props.language].str_completiondate}</Text>
                                         </View>
                                         <View style={styles.rightText}>
-                                            <Text style={styles.childText}>:  {leadStatus == 'APPROVED' ? Common.formatDate(leadTrackerData.completionDate) : ''}</Text>
+                                            <Text style={[styles.childText, { width: '7%' }]}>:</Text>
+                                            <Text style={[styles.childText, { width: '93%' }]}>{leadStatus == 'APPROVED' ? Common.formatDate(leadTrackerData.completionDate) : ''}</Text>
                                         </View>
                                     </View>
                                 }
@@ -336,7 +362,8 @@ const LeadDetails = (props, { navigation, route }) => {
                                         <Text style={styles.headText}>{language[0][props.language].str_ageing}</Text>
                                     </View>
                                     <View style={styles.rightText}>
-                                        <Text style={styles.childText}>:  {leadTrackerData.ageing} days</Text>
+                                        <Text style={[styles.childText, { width: '7%' }]}>:</Text>
+                                        <Text style={[styles.childText, { width: '93%' }]}>{leadTrackerData.ageing} days</Text>
                                     </View>
                                 </View>
                             </View>
@@ -452,8 +479,12 @@ const LeadDetails = (props, { navigation, route }) => {
 
 const mapStateToProps = (state) => {
     const { language } = state.languageReducer;
+    const { profileDetails } = state.profileReducer;
+    const { mobileCodeDetails } = state.mobilecodeReducer;
     return {
-        language: language
+        language: language,
+        profiledetail: profileDetails,
+        mobilecodedetail: mobileCodeDetails
     }
 }
 
@@ -560,6 +591,7 @@ const styles = StyleSheet.create({
     },
     rightText: {
         width: '55%',
+        flexDirection: 'row'
 
     },
     headText: {

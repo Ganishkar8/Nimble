@@ -17,7 +17,7 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import TextComp from '../../../Components/TextComp';
 import Colors from '../../../Utils/Colors';
-import MyStatusBar from '../../../Components/ MyStatusBar';
+import MyStatusBar from '../../../Components/MyStatusBar';
 import Loading from '../../../Components/Loading';
 import { BottomSheet } from 'react-native-btr';
 import { connect } from 'react-redux';
@@ -28,6 +28,7 @@ import Common from '../../../Utils/Common';
 import { getAvailableLocationProviders } from 'react-native-device-info';
 import apiInstance from '../../../Utils/apiInstance';
 import HeadComp from '../../../Components/HeadComp';
+import ErrorModal from '../../../Components/ErrorModal';
 
 const data = [
 
@@ -66,6 +67,8 @@ const LeadLog = (props, { navigation }) => {
     const [logData, setLogData] = useState();
     const [logTotalData, setLogTotalData] = useState();
     const [logDataLength, setLogDataLength] = useState(0);
+    const [errorModalVisible, setErrorModalVisible] = useState(false);
+    const [apiError, setApiError] = useState('');
     //const labels = ["Cart", "Delivery Address"];
     const customStyles = {
         stepIndicatorSize: 15,
@@ -94,7 +97,15 @@ const LeadLog = (props, { navigation }) => {
         //below code is used for hiding  bottom tab
         //alert(JSON.stringify(props.route.params.leadData.leadCreationLeadLogDtoList))
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
-        leadLogApi();
+        Common.getNetworkConnection().then(async (value) => {
+            if (value.isConnected == true) {
+                leadLogApi();
+            } else {
+                setApiError(language[0][props.language].str_errinternet);
+                setErrorModalVisible(true)
+            }
+        })
+
         return () =>
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
     }, [navigation]);
@@ -126,7 +137,7 @@ const LeadLog = (props, { navigation }) => {
         const baseURL = '8901'
         setLoading(true)
         // alert(props.route.params.leadData.id)
-        apiInstance(baseURL).post(`/api/v1/lead-log/foragent/${global.leadNumber}`)
+        apiInstance(baseURL).post(`/api/v1/lead-log/${global.leadNumber}`)
             .then(async (response) => {
                 // Handle the response data
                 setLoading(false)
@@ -177,7 +188,11 @@ const LeadLog = (props, { navigation }) => {
             .catch((error) => {
                 // Handle the error
                 setLoading(false)
-                alert(JSON.stringify(error.response));
+                if (global.DEBUG_MODE) console.log("LeadLog::" + JSON.stringify(error.response.data));
+                if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
             });
     }
 
@@ -218,15 +233,22 @@ const LeadLog = (props, { navigation }) => {
             .catch((error) => {
                 // Handle the error
                 setLoading(false)
-                alert(JSON.stringify(error.response));
+                if (global.DEBUG_MODE) console.log("ReAssignApiResponse::" + JSON.stringify(error.response.data));
+                if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
             });
     }
 
+    const closeErrorModal = () => {
+        setErrorModalVisible(false);
+    };
 
     return (
 
         <SafeAreaView style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
-
+            <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
 
             {loading ? <Loading /> : null}

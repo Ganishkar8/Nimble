@@ -22,7 +22,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import apiInstance from '../../../Utils/apiInstance';
 import jwtDecode from 'jwt-decode';
 import Colors from '../../../Utils/Colors';
-import MyStatusBar from '../../../Components/ MyStatusBar';
+import MyStatusBar from '../../../Components/MyStatusBar';
 import Loading from '../../../Components/Loading';
 import TextComp from '../../../Components/TextComp';
 import { connect } from 'react-redux';
@@ -46,6 +46,7 @@ import Common from '../../../Utils/Common';
 import tbl_lead_creation_business_details from '../../../Database/Table/tbl_lead_creation_business_details';
 import { profileAction } from '../../../Utils/redux/actions/ProfileAction';
 import ButtonViewComp from '../../../Components/ButtonViewComp';
+import ErrorModal from '../../../Components/ErrorModal';
 
 
 const LeadCreationBusiness = (props, { navigation }) => {
@@ -54,7 +55,7 @@ const LeadCreationBusiness = (props, { navigation }) => {
     const [bottomLeadSheetVisible, setBottomLeadSheetVisible] = useState(false);
     const showLeadBottomSheet = () => {
         setBottomLeadSheetVisible(true)
-        setTimeout(() => hideLeadBottomSheet(), 5000);
+        setTimeout(() => hideLeadBottomSheet(), 2000);
     };
     const hideLeadBottomSheet = () => setBottomLeadSheetVisible(false);
     const [leadType, setLeadType] = useState(global.LEADTYPE);
@@ -100,21 +101,28 @@ const LeadCreationBusiness = (props, { navigation }) => {
     const monthsRef = useRef(null);
 
     const monthArray = [
-        { id: 0, label: '0' },
-        { id: 1, label: '1' },
-        { id: 2, label: '2' },
-        { id: 3, label: '3' },
-        { id: 4, label: '4' },
-        { id: 5, label: '5' },
-        { id: 6, label: '6' },
-        { id: 7, label: '7' },
-        { id: 8, label: '8' },
-        { id: 9, label: '9' },
-        { id: 10, label: '10' },
-        { id: 11, label: '11' },
+        { subCodeId: 0, label: '0' },
+        { subCodeId: 1, label: '1' },
+        { subCodeId: 2, label: '2' },
+        { subCodeId: 3, label: '3' },
+        { subCodeId: 4, label: '4' },
+        { subCodeId: 5, label: '5' },
+        { subCodeId: 6, label: '6' },
+        { subCodeId: 7, label: '7' },
+        { subCodeId: 8, label: '8' },
+        { subCodeId: 9, label: '9' },
+        { subCodeId: 10, label: '10' },
+        { subCodeId: 11, label: '11' },
     ]
 
     const [monthData, setMonthData] = useState(monthArray);
+
+
+    const [systemCodeDetail, setSystemCodeDetail] = useState(props.mobilecodedetail.leadSystemCodeDto);
+    const [userCodeDetail, setUserCodeDetail] = useState(props.mobilecodedetail.leadUserCodeDto);
+    const [systemMandatoryField, setSystemMandatoryField] = useState(props.mobilecodedetail.leadSystemMandatoryFieldDto);
+    const [errorModalVisible, setErrorModalVisible] = useState(false);
+    const [apiError, setApiError] = useState('');
 
     useEffect(() => {
 
@@ -130,124 +138,95 @@ const LeadCreationBusiness = (props, { navigation }) => {
 
 
 
+    const getSystemCodeDetail = () => {
 
-    const pickerData = async () => {
-        tbl_SystemCodeDetails.getSystemCodeDetailsBasedOnID('IndustryType').then(value => {
-            if (value !== undefined && value.length > 0) {
-                console.log(value)
+        const filteredIndustryTypeData = systemCodeDetail.filter((data) => data.masterId === 'CREDIT_SCORE_INDUSTRY_TYPE_SUB_CATEGORY');
+        setIndustryTypeData(filteredIndustryTypeData);
 
-                for (var i = 0; i < value.length; i++) {
-                    if (value[i].IsDefault === '1') {
-                        setIndustryTypeLabel(value[i].SubCodeID);
-                        setIndustryTypeIndex(i + 1);
-                    }
-                }
-
-                setIndustryTypeData(value)
-
-            }
-        })
     }
 
     const makeSystemMandatoryFields = () => {
 
-        tbl_SystemMandatoryFields.getSystemMandatoryFieldsBasedOnFieldUIID('sp_industrytype').then(value => {
-            if (value !== undefined && value.length > 0) {
-                console.log(value[0])
-                setIndustryTypeCaption(value[0].FieldName)
-                if (value[0].IsMandatory == "1") {
-                    setIndustryTypeMan(true);
-                }
-                if (value[0].IsHide == "1") {
-                    setIndustryTypeVisible(false);
-                }
-                if (value[0].IsDisable == "1") {
-                    setIndustryTypeDisable(true);
-                }
-                if (value[0].IsCaptionChange == "1") {
-                    setIndustryTypeCaption(value[0].FieldCaptionChange)
-                }
+
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_industrytype').map((value, index) => {
+            setIndustryTypeCaption(value.fieldName)
+            if (value.mandatory) {
+                setIndustryTypeMan(true);
             }
-        })
-
-        //firstName
-        tbl_SystemMandatoryFields.getSystemMandatoryFieldsBasedOnFieldUIID('et_businessname').then(value => {
-            if (value !== undefined && value.length > 0) {
-                console.log(value[0])
-                setBusinessNameCaption(value[0].FieldName)
-                if (value[0].IsMandatory == "1") {
-                    setBusinessNameMan(true);
-                }
-                if (value[0].IsHide == "1") {
-                    setBusinessNameVisible(false);
-                }
-                if (value[0].IsDisable == "1") {
-                    setBusinessNameDisable(true);
-                }
-                if (value[0].IsCaptionChange == "1") {
-                    setBusinessNameCaption(value[0].FieldCaptionChange)
-                }
+            if (value.hide) {
+                setIndustryTypeVisible(false);
             }
-        })
-
-        tbl_SystemMandatoryFields.getSystemMandatoryFieldsBasedOnFieldUIID('et_incometurnover').then(value => {
-
-
-            if (value !== undefined && value.length > 0) {
-                console.log(value)
-                setIncomeTurnOverCaption(value[0].FieldName)
-                if (value[0].IsMandatory == "1") {
-                    setIncomeTurnOverMan(true);
-                }
-                if (value[0].IsHide == "1") {
-                    setIncomeTurnOverVisible(false);
-                }
-                if (value[0].IsDisable == "1") {
-                    setIncomeTurnOverDisable(true);
-                }
-                if (value[0].IsCaptionChange == "1") {
-                    setIncomeTurnOverCaption(value[0].FieldCaptionChange)
-                }
+            if (value.disable) {
+                setIndustryTypeDisable(true);
             }
-        })
-
-        tbl_SystemMandatoryFields.getSystemMandatoryFieldsBasedOnFieldUIID('et_year').then(value => {
-            if (value !== undefined && value.length > 0) {
-                console.log(value)
-                setYearCaption(value[0].FieldName)
-                if (value[0].IsMandatory == "1") {
-                    setYearMan(true);
-                }
-                if (value[0].IsHide == "1") {
-                    setYearVisible(false);
-                }
-                if (value[0].IsDisable == "1") {
-                    setYearDisable(true);
-                }
-                if (value[0].IsCaptionChange == "1") {
-                    setYearCaption(value[0].FieldCaptionChange)
-                }
+            if (value.captionChange) {
+                setIndustryTypeCaption(value[0].fieldCaptionChange)
             }
-        })
+        });
 
-        tbl_SystemMandatoryFields.getSystemMandatoryFieldsBasedOnFieldUIID('et_months').then(value => {
-            if (value !== undefined && value.length > 0) {
-                console.log(value)
-                setMonthsCaption(value[0].FieldName)
-                if (value[0].IsMandatory == "1") {
-                    setMonthsMan(true);
-                }
-                if (value[0].IsHide == "1") {
-                    setMonthsVisible(false);
-                }
-                if (value[0].IsDisable == "1") {
-                    setMonthsDisable(true);
-                }
-                if (value[0].IsCaptionChange == "1") {
-                    setMonthsCaption(value[0].FieldCaptionChange)
-                }
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_businessname').map((value, index) => {
+            setBusinessNameCaption(value.fieldName)
+            if (value.mandatory) {
+                setBusinessNameMan(true);
             }
-        })
+            if (value.hide) {
+                setBusinessNameVisible(false);
+            }
+            if (value.disable) {
+                setBusinessNameDisable(true);
+            }
+            if (value.captionChange) {
+                setBusinessNameCaption(value[0].fieldCaptionChange)
+            }
+        });
+
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_incometurnover').map((value, index) => {
+            setIncomeTurnOverCaption(value.fieldName)
+            if (value.mandatory) {
+                setIncomeTurnOverMan(true);
+            }
+            if (value.hide) {
+                setIncomeTurnOverVisible(false);
+            }
+            if (value.disable) {
+                setIncomeTurnOverDisable(true);
+            }
+            if (value.captionChange) {
+                setIncomeTurnOverCaption(value[0].fieldCaptionChange)
+            }
+        });
+
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_year').map((value, index) => {
+            setYearCaption(value.fieldName)
+            if (value.mandatory) {
+                setYearMan(true);
+            }
+            if (value.hide) {
+                setYearVisible(false);
+            }
+            if (value.disable) {
+                setYearDisable(true);
+            }
+            if (value.captionChange) {
+                setYearCaption(value[0].fieldCaptionChange)
+            }
+        });
+
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_months').map((value, index) => {
+            setMonthsCaption(value.fieldName)
+            if (value.mandatory) {
+                setMonthsMan(true);
+            }
+            if (value.hide) {
+                setMonthsVisible(false);
+            }
+            if (value.disable) {
+                setMonthsDisable(true);
+            }
+            if (value.captionChange) {
+                setMonthsCaption(value[0].fieldCaptionChange)
+            }
+        });
 
     }
 
@@ -284,7 +263,7 @@ const LeadCreationBusiness = (props, { navigation }) => {
                 "createdBy": global.USERID,
                 "createdOn": '',
                 "businessName": businessName,
-                "industryTypeId": industryTypeLabel,
+                "industryType": industryTypeLabel,
                 "incomeBusinessTurnover": incomeTurnOver,
                 "businessVintageYear": year,
                 "businessVintageMonth": monthLabel
@@ -294,41 +273,44 @@ const LeadCreationBusiness = (props, { navigation }) => {
         setLoading(true)
         apiInstancelocal(baseURL).put(`/api/v1/lead-creation-initiation/${global.leadID}`, appDetails)
             .then(async (response) => {
-                // Handle the response data
-                console.log("LeadCreationBusinessApiResponse::" + JSON.stringify(response.data));
+                if (global.DEBUG_MODE) console.log("LeadCreationBusinessApiResponse::" + JSON.stringify(response.data));
                 setLoading(false)
                 props.navigation.navigate('LeadCreationLoan', { leadData: [] })
-
             })
             .catch((error) => {
-                // Handle the error
-                console.log("Error" + JSON.stringify(error.response))
                 setLoading(false)
-                alert(error);
+                if (global.DEBUG_MODE) console.log("LeadCreationBusinessApiResponse::" + JSON.stringify(error.response.data));
+                if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
             });
     }
 
     const getData = () => {
 
         if (leadType == 'DRAFT') {
-            setLoading(true);
+            //setLoading(true);
             tbl_lead_creation_business_details.getLeadCreationBusinessDetailsBasedOnLeadID(global.leadID).then(value => {
                 if (value !== undefined && value.length > 0) {
-                    setIndustryTypeLabel(parseInt(value[0].industry_type_id));
+                    setIndustryTypeLabel(value[0].industry_type_id);
                     setBusinessName(value[0].business_name);
                     setIncomeTurnOver(value[0].income_business_turnover);
                     setYear(value[0].business_vintage_year);
                     setMonthLabel(parseInt(value[0].business_vintage_month));
-                    callPickerApi();
+                    //callPickerApi();
+                    getSystemCodeDetail();
                 } else {
-                    callPickerApi();
+                    //callPickerApi();
+                    getSystemCodeDetail();
                 }
             })
         } else if (leadType == 'NEW') {
-            callPickerApi();
+            // callPickerApi();
+            getSystemCodeDetail();
         } else if (leadType == 'COMP') {
             const data = props.route.params.leadData;
-            setIndustryTypeLabel(parseInt(data.leadCreationBusinessDetails.industryTypeId));
+            setIndustryTypeLabel(data.leadCreationBusinessDetails.industryType);
             setBusinessName(data.leadCreationBusinessDetails.businessName);
             setIncomeTurnOver(data.leadCreationBusinessDetails.incomeBusinessTurnover.toString());
             setYear(data.leadCreationBusinessDetails.businessVintageYear.toString());
@@ -338,7 +320,8 @@ const LeadCreationBusiness = (props, { navigation }) => {
             setIncomeTurnOverDisable(true);
             setYearDisable(true)
             setMonthsDisable(true)
-            callPickerApi();
+            //callPickerApi();
+            getSystemCodeDetail();
         }
 
     }
@@ -400,26 +383,6 @@ const LeadCreationBusiness = (props, { navigation }) => {
         return flag;
     }
 
-    const callPickerApi = () => {
-
-        const baseURL = '8082'
-        setLoading(true)
-
-        apiInstancelocal(baseURL).get('/api/v1/generic-master/type?size=100&type=CREDIT_SCORE_INDUSTRY_TYPE_SUB_CATEGORY')
-            .then(async (response) => {
-
-                setLoading(false);
-                //alert(JSON.stringify(response.data.content))
-                setIndustryTypeData(response.data.content)
-            })
-            .catch((error) => {
-                if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
-                setLoading(false)
-                alert(error);
-            });
-
-
-    }
 
     const handlePickerClick = (componentName, label, index) => {
 
@@ -479,11 +442,15 @@ const LeadCreationBusiness = (props, { navigation }) => {
 
     };
 
+    const closeErrorModal = () => {
+        setErrorModalVisible(false);
+    };
+
 
     return (
         // enclose all components in this View tag
         <SafeAreaView style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
-
+            <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
             <View style={{
                 width: '100%', height: 56, alignItems: 'center', justifyContent: 'center',
@@ -726,9 +693,11 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state) => {
     const { language } = state.languageReducer;
     const { profileDetails } = state.profileReducer;
+    const { mobileCodeDetails } = state.mobilecodeReducer;
     return {
         language: language,
         profiledetail: profileDetails,
+        mobilecodedetail: mobileCodeDetails
     }
 }
 

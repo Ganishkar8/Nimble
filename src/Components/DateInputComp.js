@@ -7,7 +7,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 const DateInputComp = ({ textValue, textStyle, Disable, type, ComponentName, reference, returnKey, handleClick, handleReference }) => {
 
     const [mydate, setDate] = React.useState(new Date());
-    const [date, setDatee] = React.useState();
+    const [date, setDatee] = React.useState(textValue);
     const [displaymode, setMode] = React.useState('date');
     const [isDisplayDate, setShow] = React.useState(false);
     React.useEffect(() => {
@@ -18,7 +18,7 @@ const DateInputComp = ({ textValue, textStyle, Disable, type, ComponentName, ref
         const month = (currentDate.getMonth() + 1).toString().padStart(2, '0'); // Note: Months are 0-indexed, so we add 1.
         const year = currentDate.getFullYear();
         const formattedDatee = `${day}/${month}/${year}`;
-        setDatee(formattedDatee)
+        // setDatee(formattedDatee)
         //alert(textValue)
     }, []);
 
@@ -50,29 +50,43 @@ const DateInputComp = ({ textValue, textStyle, Disable, type, ComponentName, ref
 
     };
     const setValue = txt => {
-        handleClick(ComponentName, txt);
+        handleTextChange(txt)
+    };
+
+    const handleTextChange = (input) => {
+        const numericInput = input.replace(/\D/g, '');
+
+        // Insert slashes while typing
+        let formattedDate = '';
+        for (let i = 0; i < numericInput.length; i++) {
+            if (i === 2 || i === 4) {
+                formattedDate += '/';
+            }
+            formattedDate += numericInput[i];
+        }
+        handleClick(ComponentName, formattedDate);
+        setDatee(formattedDate)
     };
 
     return (
-        <View style={{ width: '90%' }}>
+        <View style={{ width: '90%', }}>
 
             <View style={{ flexDirection: 'row' }}>
                 <TextInput
                     value={date}
                     onChangeText={txt => { setValue(txt) }}
                     placeholder={''}
-                    editable={!Disable}
+                    editable={false}
                     placeholderTextColor={Colors.lightgrey}
                     secureTextEntry={false}
                     keyboardType={type}
-                    autoCapitalize="characters"
                     style={textStyle}
                     ref={reference}
                     returnKeyType={returnKey}
                     onSubmitEditing={() => { handleReference(ComponentName) }}
                 />
-                <TouchableOpacity activeOpacity={2} onPress={displayDatepicker}>
-                    <Ionicons name='calendar-clear-outline' size={22} color={Colors.dimText} style={{ marginTop: 12 }} />
+                <TouchableOpacity style={{ alignItems: 'flex-end' }} activeOpacity={2} onPress={displayDatepicker}>
+                    <Ionicons name='calendar-clear-outline' size={22} color={Colors.darkblue} style={{ marginTop: 12 }} />
                 </TouchableOpacity>
             </View>
             <View style={{ width: '98%', height: 0.9, backgroundColor: Colors.line }} />
@@ -84,6 +98,7 @@ const DateInputComp = ({ textValue, textStyle, Disable, type, ComponentName, ref
                     is24Hour={true}
                     display="default"
                     onChange={changeSelectedDate}
+                    maximumDate={new Date()}
                 />
             )}
         </View>

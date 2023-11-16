@@ -1,22 +1,22 @@
-import {View, ScrollView, SafeAreaView, Text} from 'react-native';
-import {React, useState} from 'react';
-import MyStatusBar from '../../../Components/ MyStatusBar';
+import { View, ScrollView, SafeAreaView, Text } from 'react-native';
+import { React, useState } from 'react';
+import MyStatusBar from '../../../Components/MyStatusBar';
 import HeadComp from '../../../Components/HeadComp';
-import {connect} from 'react-redux';
-import {languageAction} from '../../../Utils/redux/actions/languageAction';
-import {language} from '../../../Utils/LanguageString';
+import { connect } from 'react-redux';
+import { languageAction } from '../../../Utils/redux/actions/languageAction';
+import { language } from '../../../Utils/LanguageString';
 import Commonstyles from '../../../Utils/Commonstyles';
 import Colors from '../../../Utils/Colors';
 import Loading from '../../../Components/Loading';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import SystemMandatoryField from '../../../Components/SystemMandatoryField';
 import ButtonViewComp from '../../../Components/ButtonViewComp';
-import {validateData} from '../../../Components/helpers/validateData';
+import { validateData } from '../../../Components/helpers/validateData';
 import ProgressComp from '../../../Components/ProgressComp';
 import ChildHeadComp from '../../../Components/ChildHeadComp';
 import commonstyles from '../../../Utils/Commonstyles';
 
-const BankDetails = (props, {navigation}) => {
+const BankDetails = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
   const [DataArray, setNewDataArray] = useState([]);
   const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
@@ -71,7 +71,7 @@ const BankDetails = (props, {navigation}) => {
 
   const validateDataWrapper = () => {
     // eslint-disable-next-line no-shadow
-    const {flag, errMsg} = validateData(DataArray);
+    const { flag, errMsg } = validateData(DataArray);
     setErrMsg(errMsg);
     return flag;
   };
@@ -84,15 +84,15 @@ const BankDetails = (props, {navigation}) => {
 
   const renderMandatoryFields = () => {
     const fieldUIIDs = [
-      {fielduiid: 'sp_accounttype', isPicker: true},
-      {fielduiid: 'et_accountholdernameasbank', isInput: true},
-      {fielduiid: 'et_ifsccode', isInput: true},
-      {fielduiid: 'et_bankname', isInput: true},
-      {fielduiid: 'st_branchname', isInput: true},
-      {fielduiid: 'et_accountnumber', isInput: true},
+      { fielduiid: 'sp_accounttype', isPicker: true },
+      { fielduiid: 'et_accountholdernameasbank', isInput: true },
+      { fielduiid: 'et_ifsccode', isInput: true },
+      { fielduiid: 'et_bankname', isInput: true },
+      { fielduiid: 'st_branchname', isInput: true },
+      { fielduiid: 'et_accountnumber', isInput: true },
     ];
 
-    return fieldUIIDs.map(({fielduiid, isPicker, isInput}) => (
+    return fieldUIIDs.map(({ fielduiid, isPicker, isInput }) => (
       <SystemMandatoryField
         key={fielduiid}
         fielduiid={fielduiid}
@@ -132,7 +132,7 @@ const BankDetails = (props, {navigation}) => {
         </View>
 
         <View
-          style={{width: '90%', flexDirection: 'row', alignItems: 'center',marginTop:15}}>
+          style={{ width: '90%', flexDirection: 'row', alignItems: 'center', marginTop: 15 }}>
           <Text
             style={{
               marginLeft: 10,
@@ -158,7 +158,7 @@ const BankDetails = (props, {navigation}) => {
 
         <ButtonViewComp
           textValue={language[0][props.language].str_next.toUpperCase()}
-          textStyle={{color: Colors.white, fontSize: 13, fontWeight: 500}}
+          textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
           viewStyle={Commonstyles.buttonView}
           innerStyle={Commonstyles.buttonViewInnerStyle}
           handleClick={demographicAddressSubmit}
@@ -170,7 +170,7 @@ const BankDetails = (props, {navigation}) => {
 
 const mapStateToProps = state => {
   // eslint-disable-next-line no-shadow
-  const {language} = state.languageReducer;
+  const { language } = state.languageReducer;
   return {
     language: language,
   };

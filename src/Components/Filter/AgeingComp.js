@@ -96,7 +96,7 @@ const AgeingComp = ({ props, filterClick, operatorid, ageValue }) => {
                                 autoCapitalize="none"
                                 inputMode='numeric'
                                 maxLength={2}
-                                style={[Commonstyles.textinputtextStyle, { color: Colors.dimmText }]}
+                                style={[Commonstyles.textinputtextStyle, { color: Colors.black }]}
                             />
                         </View>
 

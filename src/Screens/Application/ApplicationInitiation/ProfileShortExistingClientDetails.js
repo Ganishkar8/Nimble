@@ -1,4 +1,4 @@
-import React, {useState, useRef, useEffect} from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -12,12 +12,12 @@ import {
 import apiInstance from '../../../Utils/apiInstance';
 import apiInstancelocal from '../../../Utils/apiInstancelocal';
 import Colors from '../../../Utils/Colors';
-import MyStatusBar from '../../../Components/ MyStatusBar';
+import MyStatusBar from '../../../Components/MyStatusBar';
 import Loading from '../../../Components/Loading';
 import TextComp from '../../../Components/TextComp';
-import {connect} from 'react-redux';
-import {languageAction} from '../../../Utils/redux/actions/languageAction';
-import {language} from '../../../Utils/LanguageString';
+import { connect } from 'react-redux';
+import { languageAction } from '../../../Utils/redux/actions/languageAction';
+import { language } from '../../../Utils/LanguageString';
 import Commonstyles from '../../../Utils/Commonstyles';
 import HeadComp from '../../../Components/HeadComp';
 import ProgressComp from '../../../Components/ProgressComp';
@@ -30,11 +30,11 @@ import TextInputComp from '../../../Components/TextInputComp';
 import PickerComp from '../../../Components/PickerComp';
 import ButtonViewComp from '../../../Components/ButtonViewComp';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
-import {Directions} from 'react-native-gesture-handler';
+import { Directions } from 'react-native-gesture-handler';
 import ChildHeadComp from '../../../Components/ChildHeadComp';
 import CheckBoxComp from '../../../Components/CheckBoxComp';
 
-const ProfileShortExistingClientDetails = (props, {navigation}) => {
+const ProfileShortExistingClientDetails = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
   const [mobileNumber, setMobileNumber] = useState('');
   const [mobileNumberCaption, setMobileNumberCaption] =
@@ -49,7 +49,7 @@ const ProfileShortExistingClientDetails = (props, {navigation}) => {
   const mobileNumberRef = useRef(null);
 
   const [ClientID, setClientID] = useState('');
-  const [ClientIDCaption, setClientIDCaption] = useState('Client ID)');
+  const [ClientIDCaption, setClientIDCaption] = useState('Client ID');
   const [ClientIDMan, setClientIDMan] = useState(false);
   const [ClientIDVisible, setClientIDVisible] = useState(true);
   const [ClientIDDisable, setClientIDDisable] = useState(false);
@@ -113,17 +113,19 @@ const ProfileShortExistingClientDetails = (props, {navigation}) => {
     'Existing Loan Details',
   );
 
+  const [existingClientDetail, setExistingClientDetail] = useState(props.dedupeDetail.clientExistingDetails);
+  const [existingClientLoanDetail, setExistingClientLoanDetail] = useState(props.dedupeDetail.clientExistingLoanDetails);
+
   useEffect(() => {
     props.navigation
       .getParent()
-      ?.setOptions({tabBarStyle: {display: 'none'}, tabBarVisible: false});
-    makeSystemMandatoryFields();
-    pickerData();
+      ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
 
+    pickerData();
     return () =>
       props.navigation
         .getParent()
-        ?.setOptions({tabBarStyle: undefined, tabBarVisible: undefined});
+        ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
   }, [navigation]);
 
   const pickerData = async () => {
@@ -162,217 +164,10 @@ const ProfileShortExistingClientDetails = (props, {navigation}) => {
       });
   };
 
-  const makeSystemMandatoryFields = () => {
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_clientid')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setClientIDCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setClientIDMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setClientIDVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setClientIDDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setClientIDCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_customersubcategory')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setCustomerSubCategoryCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setCustomerSubCategoryMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setCustomerSubCategoryVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setCustomerSubCategoryDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setCustomerSubCategoryCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
-
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_kyctype')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setKycType1Caption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setKycType1Man(true);
-          }
-          if (value[0].IsHide == '1') {
-            setKycType1Visible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setKycType1Disable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setKycType1Caption(value[0].FieldCaptionChange);
-          }
-        }
-      });
-
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_kycid')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setkycID1Caption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setkycID1Man(true);
-          }
-          if (value[0].IsHide == '1') {
-            setkycID1Visible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setkycID1Disable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setkycID1Caption(value[0].FieldCaptionChange);
-          }
-        }
-      });
-
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_email')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setEmailCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setEmailMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setEmailVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setEmailDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setEmailCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
-
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_customername')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setCustomerNameCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setCustomerNameMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setCustomerNameVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setCustomerNameDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setCustomerNameCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
-
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_branchid')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setBranchIDCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setBranchIDMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setBranchIDVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setBranchIDDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setBranchIDCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
-
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('et_mobilenumber')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setMobileNumberCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setMobileNumberMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setMobileNumberVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setMobileNumberDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setMobileNumberCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
-  };
-
   const updateLeadDetails = () => {
-    if (validate()) {
-      showBottomSheet();
-    } else {
-      const appDetails = {
-        createdBy: global.USERID,
-        createdOn: '',
-        isActive: true,
-        branchId: 1180,
-        leadCreationBasicDetails: {
-          createdBy: global.USERID,
-          createdOn: '',
-          customerCategoryId: 5,
-          firstName: firstName,
-          middleName: middleName,
-          lastName: lastName,
-          mobileNumber: 7647865789,
-        },
-        leadCreationBusinessDetails: {},
-        leadCreationLoanDetails: {},
-        leadCreationDms: {},
-      };
-      const baseURL = '8901';
-      setLoading(true);
-      apiInstancelocal(baseURL)
-        .post('/api/v1/lead-creation-initiation', appDetails)
-        .then(async response => {
-          // Handle the response data
-          console.log(
-            'LeadCreationBasicApiResponse::' + JSON.stringify(response.data),
-          );
-          global.leadID = response.data.id;
-          setLoading(false);
-          props.navigation.navigate('LeadCreationBusiness');
-        })
-        .catch(error => {
-          // Handle the error
-          console.log('Error' + JSON.stringify(error.response));
-          setLoading(false);
-          alert(error);
-        });
-    }
+
+    props.navigation.navigate('AadharOTPVerification', { aadharNumber: "717485993554" });
+
   };
 
   const validate = () => {
@@ -580,7 +375,7 @@ const ProfileShortExistingClientDetails = (props, {navigation}) => {
     },
   ];
 
-  const Item = ({title}) => (
+  const Item = ({ title }) => (
     <View style={Commonstyles.item}>
       <Text style={Commonstyles.HeaderStyle}>{title}</Text>
       <View
@@ -594,11 +389,11 @@ const ProfileShortExistingClientDetails = (props, {navigation}) => {
             flexDirection: 'row',
             alignItems: 'center',
           }}>
-          <View style={{width: '50%', alignItems: 'left'}}>
+          <View style={{ width: '50%', alignItems: 'left' }}>
             <Text style={Commonstyles.inputtextStyle}>{title}</Text>
           </View>
 
-          <View style={{width: '50%', alignItems: 'left'}}>
+          <View style={{ width: '50%', alignItems: 'left' }}>
             <Text style={Commonstyles.inputtextStyle}>{title}</Text>
           </View>
         </View>
@@ -608,7 +403,7 @@ const ProfileShortExistingClientDetails = (props, {navigation}) => {
   return (
     // enclose all components in this View tag
     <SafeAreaView
-      style={[styles.parentView, {backgroundColor: Colors.lightwhite}]}>
+      style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
       <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
 
       <ScrollView
@@ -617,7 +412,7 @@ const ProfileShortExistingClientDetails = (props, {navigation}) => {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled">
         {loading ? <Loading /> : null}
-        <View style={{flex: 1}}>
+        <View style={{ flex: 1 }}>
           <ErrorMessageModal
             isVisible={bottomErrorSheetVisible}
             hideBottomSheet={hideBottomSheet}
@@ -642,13 +437,13 @@ const ProfileShortExistingClientDetails = (props, {navigation}) => {
             textval={language[0][props.language].str_applicantdetails}
           />
 
-          <View style={{width: '100%', alignItems: 'center', marginTop: '3%'}}>
-            <View style={{width: '90%', marginTop: 3}}>
+          <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
+            <View style={{ width: '90%', marginTop: 3 }}>
               <TextComp
                 textStyle={{
                   color: Colors.mediumgrey,
                   fontSize: 15,
-                  fontWeight: '500',
+                  fontFamily: 'Poppins-Medium'
                 }}
                 textVal={
                   language[0][props.language].str_existingclientdetails
@@ -665,25 +460,19 @@ const ProfileShortExistingClientDetails = (props, {navigation}) => {
                 alignItems: 'center',
                 justifyContent: 'center',
               }}>
-              <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                 <TextComp
                   textVal={ClientIDCaption}
-                  textStyle={Commonstyles.inputtextStyle}
+                  textStyle={[Commonstyles.inputtextStyle, { color: Colors.lightgrey }]}
+                  Visible={ClientIDMan}
+                />
+                <TextComp
+                  textVal={existingClientDetail.lmsClientId}
+                  textStyle={[Commonstyles.inputtextStyle, { color: Colors.black, fontSize: 14, marginTop: 3 }]}
                   Visible={ClientIDMan}
                 />
               </View>
 
-              <TextInputComp
-                textValue={ClientID}
-                textStyle={Commonstyles.textinputtextStyle}
-                type="email-address"
-                Disable={ClientIDDisable}
-                ComponentName="ClientID"
-                reference={ClientIDRef}
-                returnKey="next"
-                handleClick={handleClick}
-                handleReference={handleReference}
-              />
             </View>
           )}
 
@@ -695,7 +484,7 @@ const ProfileShortExistingClientDetails = (props, {navigation}) => {
             <TouchableOpacity onPress={onClick} activeOpacity={1}>
               <View
                 style={{
-                  width: '90%',
+                  width: '93%',
                   flexDirection: 'row',
                   alignItems: 'center',
                   marginTop: 20,
@@ -732,25 +521,21 @@ const ProfileShortExistingClientDetails = (props, {navigation}) => {
                     justifyContent: 'center',
                   }}>
                   <View
-                    style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+                    style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                     <TextComp
                       textVal={BranchIDCaption}
-                      textStyle={Commonstyles.inputtextStyle}
+                      textStyle={[Commonstyles.inputtextStyle, { color: Colors.lightgrey }]}
                       Visible={BranchIDMan}
                     />
+
+                    <TextComp
+                      textVal={existingClientDetail.branchId}
+                      textStyle={[Commonstyles.inputtextStyle, { color: Colors.black, fontSize: 14, marginTop: 3 }]}
+                      Visible={ClientIDMan}
+                    />
+
                   </View>
 
-                  <TextInputComp
-                    textValue={BranchID}
-                    textStyle={Commonstyles.textinputtextStyle}
-                    type="email-address"
-                    Disable={BranchIDDisable}
-                    ComponentName="BranchID"
-                    reference={BranchIDRef}
-                    returnKey="next"
-                    handleClick={handleClick}
-                    handleReference={handleReference}
-                  />
                 </View>
               )}
 
@@ -764,25 +549,21 @@ const ProfileShortExistingClientDetails = (props, {navigation}) => {
                     justifyContent: 'center',
                   }}>
                   <View
-                    style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+                    style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                     <TextComp
                       textVal={CustomerNameCaption}
-                      textStyle={Commonstyles.inputtextStyle}
+                      textStyle={[Commonstyles.inputtextStyle, { color: Colors.lightgrey }]}
                       Visible={CustomerNameMan}
                     />
+
+                    <TextComp
+                      textVal={existingClientDetail.lmsCustomerName}
+                      textStyle={[Commonstyles.inputtextStyle, { color: Colors.black, fontSize: 14, marginTop: 3 }]}
+                      Visible={ClientIDMan}
+                    />
+
                   </View>
 
-                  <TextInputComp
-                    textValue={CustomerName}
-                    textStyle={Commonstyles.textinputtextStyle}
-                    type="email-address"
-                    Disable={CustomerNameDisable}
-                    ComponentName="CustomerName"
-                    reference={CustomerNameRef}
-                    returnKey="next"
-                    handleClick={handleClick}
-                    handleReference={handleReference}
-                  />
                 </View>
               )}
 
@@ -794,10 +575,10 @@ const ProfileShortExistingClientDetails = (props, {navigation}) => {
                     marginTop: '4%',
                   }}>
                   <View
-                    style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+                    style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                     <TextComp
                       textVal={CustomerSubCategoryCaption}
-                      textStyle={Commonstyles.inputtextStyle}
+                      textStyle={[Commonstyles.inputtextStyle, { color: Colors.lightgrey }]}
                       Visible={CustomerSubCategoryMan}
                     />
                   </View>
@@ -821,10 +602,10 @@ const ProfileShortExistingClientDetails = (props, {navigation}) => {
                     marginTop: '4%',
                   }}>
                   <View
-                    style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+                    style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                     <TextComp
                       textVal={KycType1Caption}
-                      textStyle={Commonstyles.inputtextStyle}
+                      textStyle={[Commonstyles.inputtextStyle, { color: Colors.lightgrey }]}
                       Visible={KycType1Man}
                     />
                   </View>
@@ -850,25 +631,21 @@ const ProfileShortExistingClientDetails = (props, {navigation}) => {
                     justifyContent: 'center',
                   }}>
                   <View
-                    style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+                    style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                     <TextComp
                       textVal={kycID1Caption}
-                      textStyle={Commonstyles.inputtextStyle}
+                      textStyle={[Commonstyles.inputtextStyle, { color: Colors.lightgrey }]}
                       Visible={kycID1Man}
                     />
+
+                    <TextComp
+                      textVal={existingClientDetail.kycTypeId1}
+                      textStyle={[Commonstyles.inputtextStyle, { color: Colors.black, fontSize: 14, marginTop: 3 }]}
+                      Visible={ClientIDMan}
+                    />
+
                   </View>
 
-                  <TextInputComp
-                    textValue={kycID1}
-                    textStyle={Commonstyles.textinputtextStyle}
-                    type="email-address"
-                    Disable={kycID1Disable}
-                    ComponentName="kycID1"
-                    reference={KycID1Ref}
-                    returnKey="next"
-                    handleClick={handleClick}
-                    handleReference={handleReference}
-                  />
                 </View>
               )}
 
@@ -882,38 +659,21 @@ const ProfileShortExistingClientDetails = (props, {navigation}) => {
                     justifyContent: 'center',
                   }}>
                   <View
-                    style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+                    style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                     <TextComp
                       textVal={mobileNumberCaption}
-                      textStyle={Commonstyles.inputtextStyle}
+                      textStyle={[Commonstyles.inputtextStyle, { color: Colors.lightgrey }]}
                       Visible={mobileNumberMan}
                     />
-                  </View>
-                  <View style={{flexDirection: 'row'}}>
-                    <TextInputComp
-                      textValue={mobileNumber}
-                      textStyle={[
-                        Commonstyles.textinputtextStyle,
-                        {width: '70%'},
-                      ]}
-                      type="numeric"
-                      Disable={mobileNumberDisable}
-                      ComponentName="mobileNumber"
-                      reference={mobileNumberRef}
-                      returnKey="next"
-                      handleClick={handleClick}
-                      handleReference={handleReference}
+
+                    <TextComp
+                      textVal={existingClientDetail.mobileNumber}
+                      textStyle={[Commonstyles.inputtextStyle, { color: Colors.black, fontSize: 14, marginTop: 3 }]}
+                      Visible={ClientIDMan}
                     />
-                    <View
-                      style={{
-                        width: '20%',
-                        marginTop: 3,
-                        paddingHorizontal: 0,
-                        borderBottomWidth: 1,
-                        borderBottomColor: '#e2e2e2',
-                        color: 'darkblue',
-                      }}></View>
+
                   </View>
+
                 </View>
               )}
 
@@ -927,34 +687,21 @@ const ProfileShortExistingClientDetails = (props, {navigation}) => {
                     justifyContent: 'center',
                   }}>
                   <View
-                    style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+                    style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                     <TextComp
                       textVal={EmailCaption}
-                      textStyle={Commonstyles.inputtextStyle}
+                      textStyle={[Commonstyles.inputtextStyle, { color: Colors.lightgrey }]}
                       Visible={EmailMan}
                     />
-                  </View>
-                  <View style={{flexDirection: 'row'}}>
-                    <TextInputComp
-                      textValue={Email}
-                      textStyle={Commonstyles.textinputtextStyle}
-                      type="email-address"
-                      Disable={EmailDisable}
-                      ComponentName="Email"
-                      reference={EmailRef}
-                      returnKey="done"
-                      handleClick={handleClick}
-                      handleReference={handleReference}
+
+                    <TextComp
+                      textVal={existingClientDetail.emailId}
+                      textStyle={[Commonstyles.inputtextStyle, { color: Colors.black, fontSize: 14, marginTop: 3 }]}
+                      Visible={ClientIDMan}
                     />
-                    <View
-                      style={{
-                        width: '20%',
-                        marginTop: 3,
-                        paddingHorizontal: 0,
-                        borderBottomWidth: 1,
-                        borderBottomColor: '#e2e2e2',
-                      }}></View>
+
                   </View>
+
                 </View>
               )}
             </View>
@@ -972,7 +719,7 @@ const ProfileShortExistingClientDetails = (props, {navigation}) => {
               activeOpacity={1}>
               <View
                 style={{
-                  width: '90%',
+                  width: '93%',
                   flexDirection: 'row',
                   alignItems: 'center',
                   marginTop: 20,
@@ -998,10 +745,86 @@ const ProfileShortExistingClientDetails = (props, {navigation}) => {
             </TouchableOpacity>
           </View>
           {ExistingLoanDetails ? (
-            <View>
+            <View style={{ width: '100%' }}>
               <FlatList
-                data={DATA}
-                renderItem={({item}) => <Item title={item.title} />}
+                data={existingClientLoanDetail}
+                renderItem={({ item, index }) => {
+                  return (
+
+                    <View style={{ width: '90%', alignSelf: 'center' }}>
+
+                      <Text style={{ color: Colors.black, fontSize: 16, fontFamily: 'Poppins-Medium', marginTop: 14 }}>{`Loan ${index + 1}`}</Text>
+
+                      <View style={{ flexDirection: 'row', width: '100%', marginTop: 10 }}>
+
+                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.mediumgrey, width: '50%', fontFamily: 'Poppins-Medium' }]}>{language[0][props.language].str_accopendate}</Text>
+                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.black, width: '50%', marginTop: 0.2 }]}>{item.accountOpenedDate}</Text>
+
+                      </View>
+
+                      <View style={{ flexDirection: 'row', width: '100%', marginTop: 10 }}>
+
+                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.mediumgrey, width: '50%', fontFamily: 'Poppins-Medium' }]}>{language[0][props.language].str_loantype.toUpperCase()}</Text>
+                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.black, width: '50%', marginTop: 0.2 }]}>{item.loanTypeId}</Text>
+
+                      </View>
+
+                      <View style={{ flexDirection: 'row', width: '100%', marginTop: 10 }}>
+
+                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.mediumgrey, width: '50%', fontFamily: 'Poppins-Medium' }]}>{language[0][props.language].str_productId.toUpperCase()}</Text>
+                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.black, width: '50%', marginTop: 0.2 }]}>{item.productId}</Text>
+
+                      </View>
+
+                      <View style={{ flexDirection: 'row', width: '100%', marginTop: 10 }}>
+
+                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.mediumgrey, width: '50%', fontFamily: 'Poppins-Medium' }]}>{language[0][props.language].str_loansacamount.toUpperCase()}</Text>
+                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.black, width: '50%', marginTop: 0.2 }]}>₹ {item.loanSanctionedAmount}</Text>
+
+                      </View>
+
+                      <View style={{ flexDirection: 'row', width: '100%', marginTop: 10 }}>
+
+                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.mediumgrey, width: '50%', fontFamily: 'Poppins-Medium' }]}>{language[0][props.language].str_loannum.toUpperCase()}</Text>
+                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.black, width: '50%', marginTop: 0.2 }]}>{item.lmsLoanAccountNumber}</Text>
+
+                      </View>
+
+                      <View style={{ flexDirection: 'row', width: '100%', marginTop: 10 }}>
+
+                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.mediumgrey, width: '50%', fontFamily: 'Poppins-Medium' }]}>{language[0][props.language].str_loanassclass.toUpperCase()}</Text>
+                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.black, width: '50%', marginTop: 0.2 }]}>{item.loanAssetClassification}</Text>
+
+                      </View>
+
+                      <View style={{ flexDirection: 'row', width: '100%', marginTop: 10 }}>
+
+                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.mediumgrey, width: '50%', fontFamily: 'Poppins-Medium' }]}>{language[0][props.language].str_dpddays.toUpperCase()}</Text>
+                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.black, width: '50%', marginTop: 0.2 }]}>{item.dpdDays}</Text>
+
+                      </View>
+
+                      <View style={{ flexDirection: 'row', width: '100%', marginTop: 10 }}>
+
+                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.mediumgrey, width: '50%', fontFamily: 'Poppins-Medium' }]}>{language[0][props.language].str_outstandingamt.toUpperCase()}</Text>
+                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.black, width: '50%', marginTop: 0.2 }]}>₹ {item.outstandingAmount}</Text>
+
+                      </View>
+
+                      <View style={{ flexDirection: 'row', width: '100%', marginTop: 10 }}>
+
+                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.mediumgrey, width: '50%', fontFamily: 'Poppins-Medium' }]}>{language[0][props.language].str_overdueamt.toUpperCase()}</Text>
+                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.black, width: '50%', marginTop: 0.2 }]}>₹ {item.overdueAmount}</Text>
+
+                      </View>
+
+
+                    </View>
+
+                  )
+                }
+
+                }
                 keyExtractor={item => item.id}
               />
             </View>
@@ -1012,7 +835,7 @@ const ProfileShortExistingClientDetails = (props, {navigation}) => {
 
         <ButtonViewComp
           textValue={language[0][props.language].str_next.toUpperCase()}
-          textStyle={{color: Colors.white, fontSize: 13, fontWeight: 500}}
+          textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
           viewStyle={Commonstyles.buttonView}
           innerStyle={Commonstyles.buttonViewInnerStyle}
           handleClick={updateLeadDetails}
@@ -1059,12 +882,18 @@ const styles = StyleSheet.create({
   },
 });
 
-const mapStateToProps = state => {
-  const {language} = state.languageReducer;
+const mapStateToProps = (state) => {
+  const { language } = state.languageReducer;
+  const { profileDetails } = state.profileReducer;
+  const { mobileCodeDetails } = state.mobilecodeReducer;
+  const { dedupeDetails } = state.profileReducer;
   return {
     language: language,
-  };
-};
+    profiledetail: profileDetails,
+    mobilecodedetail: mobileCodeDetails,
+    dedupeDetail: dedupeDetails
+  }
+}
 
 const mapDispatchToProps = dispatch => ({
   languageAction: item => dispatch(languageAction(item)),

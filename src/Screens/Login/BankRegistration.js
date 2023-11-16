@@ -15,7 +15,7 @@ import {
 import apiInstance from '../../Utils/apiInstance';
 import jwtDecode from 'jwt-decode';
 import Colors from '../../Utils/Colors';
-import MyStatusBar from '../../Components/ MyStatusBar';
+import MyStatusBar from '../../Components/MyStatusBar';
 import Loading from '../../Components/Loading';
 import TextComp from '../../Components/TextComp';
 import { connect } from 'react-redux';
@@ -38,6 +38,7 @@ import {
     useBlurOnFulfill,
     useClearByFocusCell,
 } from 'react-native-confirmation-code-field';
+import ErrorModal from '../../Components/ErrorModal';
 import Entypo from 'react-native-vector-icons/Entypo';
 const { Value, Text: AnimatedText } = Animated;
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -93,6 +94,8 @@ const BankRegistration = (props, { navigation }) => {
     const [menuvisible, setMenuVisible] = React.useState(false);
     const [instance, setInstance] = React.useState('LIV');
     const openMenu = () => setMenuVisible(true);
+    const [errorModalVisible, setErrorModalVisible] = useState(false);
+    const [apiError, setApiError] = useState('');
 
     const closeMenu = () => setMenuVisible(false);
 
@@ -261,7 +264,7 @@ const BankRegistration = (props, { navigation }) => {
         formData.append('AppID', global.APPID);
         formData.append('AppVersionNo', global.APPVERSIONNO);
         // Add more key-value pairs as needed
-        console.log(institutionID + " " + deviceNo + " " + deviceModelName + " " + Platform.OS + " " + challengeCode + " " + instance + " " + global.APPID + " " + global.APPVERSIONNO)
+        if (global.DEBUG_MODE) console.log(institutionID + " " + deviceNo + " " + deviceModelName + " " + Platform.OS + " " + challengeCode + " " + instance + " " + global.APPID + " " + global.APPVERSIONNO)
         const headers = {
             'Accept-Encoding': 'identity',
             'Content-Type': 'application/x-www-form-urlencoded', // Mimicking form data
@@ -296,7 +299,9 @@ const BankRegistration = (props, { navigation }) => {
                                     performCallWithRetry();
                                 } else {
                                     setLoading(false)
-                                    Alert.alert(language[0][`${props.language}`].eng_unableToConnectToServer);
+                                    setApiError(language[0][`${props.language}`].eng_unableToConnectToServer);
+                                    setErrorModalVisible(true)
+                                    //Alert.alert(language[0][`${props.language}`].eng_unableToConnectToServer);
                                 }
                             }
                         }); // Implement getServerData function
@@ -308,7 +313,9 @@ const BankRegistration = (props, { navigation }) => {
                             retryCount++;
                             performCallWithRetry();
                         } else {
-                            Alert.alert(language[0][`${props.language}`].eng_unableToConnectToServer);
+                            //Alert.alert(language[0][`${props.language}`].eng_unableToConnectToServer);
+                            setApiError(language[0][`${props.language}`].eng_unableToConnectToServer);
+                            setErrorModalVisible(true)
                         }
                     }
                 })
@@ -318,7 +325,9 @@ const BankRegistration = (props, { navigation }) => {
                         performCallWithRetry();
                     } else {
                         setLoading(false);
-                        Alert.alert(language[0][`${props.language}`].eng_unableToConnectToServer);
+                        //Alert.alert(language[0][`${props.language}`].eng_unableToConnectToServer);
+                        setApiError(language[0][`${props.language}`].eng_unableToConnectToServer);
+                        setErrorModalVisible(true)
                     }
                 });
         };
@@ -358,7 +367,9 @@ const BankRegistration = (props, { navigation }) => {
                     setLoading(false);
                     setVisible(true);
                 } else {
-                    alert(result.Main.Response[0].ErrMsg)
+                    setApiError(result.Main.Response[0].ErrMsg);
+                    setErrorModalVisible(true)
+                    //alert(result.Main.Response[0].ErrMsg)
                     setLoading(false);
                     //setResponseErrMsg(result.Main.Response[0].ErrMsg)
                 }
@@ -404,10 +415,16 @@ const BankRegistration = (props, { navigation }) => {
         props.navigation.navigate('LoginScreen');
     };
 
+    const closeErrorModal = () => {
+        setErrorModalVisible(false);
+    };
+
     return (
 
         <View style={{ flex: 1, backgroundColor: Colors.lightwhite }}>
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
+
+            <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
 
             <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" >
                 {loading ? <Loading /> : null}

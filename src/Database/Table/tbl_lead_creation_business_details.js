@@ -91,9 +91,28 @@ const deleteAllLeadCreationBusinessDetails = async () => {
     }
 };
 
+const deleteLeadCreationBusinessDetailsBasedOnID = async () => {
+    try {
+
+        const db = databaseInstance.getInstance();  // Execute the DELETE query
+
+        const query = `DELETE FROM ${tableName} WHERE lead_id = ?`;
+
+        const [rowsAffected] = await db.executeSql(query);
+
+        console.log(`${rowsAffected} records deleted`);
+
+
+
+    } catch (error) {
+        console.error('Error deleting records:', error);
+    }
+};
+
 export default {
     getAllLeadCreationBusinessDetails,
     insertLeadCreationBusinessDetails,
     deleteAllLeadCreationBusinessDetails,
-    getLeadCreationBusinessDetailsBasedOnLeadID
+    getLeadCreationBusinessDetailsBasedOnLeadID,
+    deleteLeadCreationBusinessDetailsBasedOnID
 };

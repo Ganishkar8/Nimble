@@ -11,7 +11,7 @@ import {
     ScrollView,
     BackHandler
 } from 'react-native';
-import MyStatusBar from '../../Components/ MyStatusBar';
+import MyStatusBar from '../../Components/MyStatusBar';
 import Colors from '../../Utils/Colors';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Loading from '../../Components/Loading';

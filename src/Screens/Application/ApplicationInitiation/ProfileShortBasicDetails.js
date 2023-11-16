@@ -12,11 +12,12 @@ import {
 import apiInstance from '../../../Utils/apiInstance';
 import apiInstancelocal from '../../../Utils/apiInstancelocal';
 import Colors from '../../../Utils/Colors';
-import MyStatusBar from '../../../Components/ MyStatusBar';
+import MyStatusBar from '../../../Components/MyStatusBar';
 import Loading from '../../../Components/Loading';
 import TextComp from '../../../Components/TextComp';
 import { connect } from 'react-redux';
 import { languageAction } from '../../../Utils/redux/actions/languageAction';
+import { dedupeAction } from '../../../Utils/redux/actions/ProfileAction';
 import { language } from '../../../Utils/LanguageString';
 import Commonstyles from '../../../Utils/Commonstyles';
 import HeadComp from '../../../Components/HeadComp';
@@ -33,13 +34,21 @@ import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import { Directions } from 'react-native-gesture-handler';
 import ChildHeadComp from '../../../Components/ChildHeadComp';
 import CheckBoxComp from '../../../Components/CheckBoxComp';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import DateComp from '../../../Components/Filter/DateComp';
+import DateInputComp from '../../../Components/DateInputComp';
+import ErrorModal from '../../../Components/ErrorModal';
+import DedupeModal from '../../../Components/DedupeModal';
 
 const ProfileShortBasicDetails = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
+
   const [custCatgLabel, setCustCatgLabel] = useState('');
   const [custCatgIndex, setCustCatgIndex] = useState('');
   const [custCatgCaption, setCustCatgCaption] = useState('CUSTOMER CATEGORY');
+
   const [mobileNumber, setMobileNumber] = useState('');
+  const [isMobileVerified, setIsMobileVerified] = useState('');
   const [mobileNumberCaption, setMobileNumberCaption] =
     useState('MOBILE NUMBER');
   const [mobileNumberMan, setMobileNumberMan] = useState(false);
@@ -55,6 +64,18 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   const hideBottomSheet = () => setBottomErrorSheetVisible(false);
   const mobileNumberRef = useRef(null);
 
+  const data = [{ name: 'Ajith', id: '590', branch: '1180' }]
+
+
+  const [leadID, setLeadID] = useState('');
+  const [leadIDCaption, setLeadIDCaption] = useState(
+    "LEAD ID",
+  );
+  const [leadIDMan, setLeadIDMan] = useState(false);
+  const [leadIDVisible, setLeadIDVisible] = useState(true);
+  const [leadIDDisable, setLeadIDDisable] = useState(true);
+  const leadIDRef = useRef(null);
+
   //loanType - dropdown
   const [loanTypeMan, setLoanTypeMan] = useState(false); //Manditory or not
   const [loanTypeVisible, setLoanTypeVisible] = useState(true); //Hide or not
@@ -68,13 +89,21 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   const [ProductTypeVisible, setProductTypeVisible] = useState(true);
   const [ProductTypeDisable, setProductTypeDisable] = useState(false);
   const [ProductTypeData, setProductTypeData] = useState([]);
-  const [ProductTypeCaption, setProductTypeCaption] = useState('PRODUCT TYPE');
+  const [ProductTypeCaption, setProductTypeCaption] = useState('PRODUCT ID');
   const [ProductTypeLabel, setProductTypeLabel] = useState('');
   const [ProductTypeIndex, setProductTypeIndex] = useState('');
 
+  const [workflowIDMan, setWorkflowIDMan] = useState(false);
+  const [workflowIDVisible, setWorkflowIDVisible] = useState(true);
+  const [workflowIDDisable, setWorkflowIDDisable] = useState(false);
+  const [workflowIDData, setWorkflowIDData] = useState([]);
+  const [workflowIDCaption, setWorkflowIDCaption] = useState('WORKFLOW ID');
+  const [workflowIDLabel, setWorkflowIDLabel] = useState('');
+  const [workflowIDIndex, setWorkflowIDIndex] = useState('');
+
   const [LoanAmount, setLoanAmount] = useState('');
   const [LoanAmountCaption, setLoanAmountCaption] = useState(
-    "Loan Amount(IN MULTIPLE OF 5000's)",
+    "LOAN AMOUNT(IN MULTIPLE OF 5000's)",
   );
   const [LoanAmountMan, setLoanAmountMan] = useState(false);
   const [LoanAmountVisible, setLoanAmountVisible] = useState(true);
@@ -118,6 +147,29 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   const [KycType1Label, setKycType1Label] = useState('');
   const [KycType1Index, setKycType1Index] = useState('');
 
+
+  const [expiryDate1, setExpiry1Date] = useState('');
+  const [expiryDate2, setExpiry2Date] = useState('');
+  const [expiryDate3, setExpiry3Date] = useState('');
+  const [expiryDate4, setExpiry4Date] = useState('');
+  const [expiryDateCaption, setExpiryDateCaption] = useState("EXPIRY DATE",);
+  const [expiryDate1Man, setExpiry1DateMan] = useState(false);
+  const [expiryDate2Man, setExpiry2DateMan] = useState(false);
+  const [expiryDate3Man, setExpiry3DateMan] = useState(false);
+  const [expiryDate4Man, setExpiry4DateMan] = useState(false);
+  const [expiryDate1Visible, setExpiry1DateVisible] = useState(false);
+  const [expiryDate2Visible, setExpiry2DateVisible] = useState(false);
+  const [expiryDate3Visible, setExpiry3DateVisible] = useState(false);
+  const [expiryDate4Visible, setExpiry4DateVisible] = useState(false);
+  const [expiryDate1Disable, setExpiry1DateDisable] = useState(false);
+  const [expiryDate2Disable, setExpiry2DateDisable] = useState(false);
+  const [expiryDate3Disable, setExpiry3DateDisable] = useState(false);
+  const [expiryDate4Disable, setExpiry4DateDisable] = useState(false);
+  const expityDate1Ref = useRef(null);
+  const expityDate2Ref = useRef(null);
+  const expityDate3Ref = useRef(null);
+  const expityDate4Ref = useRef(null);
+
   const [KycType2Man, setKycType2Man] = useState(false);
   const [KycType2Visible, setKycType2Visible] = useState(true);
   const [KycType2Disable, setKycType2Disable] = useState(false);
@@ -126,22 +178,41 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   const [KycType2Label, setKycType2Label] = useState('');
   const [KycType2Index, setKycType2Index] = useState('');
 
+  const [KycType3Man, setKycType3Man] = useState(false);
+  const [KycType3Visible, setKycType3Visible] = useState(true);
+  const [KycType3Disable, setKycType3Disable] = useState(false);
+  const [KycType3Data, setKycType3Data] = useState([]);
+  const [KycType3Caption, setKycType3Caption] = useState('KYC TYPE 3');
+  const [KycType3Label, setKycType3Label] = useState('');
+  const [KycType3Index, setKycType3Index] = useState('');
+
+  const [KycType4Man, setKycType4Man] = useState(false);
+  const [KycType4Visible, setKycType4Visible] = useState(true);
+  const [KycType4Disable, setKycType4Disable] = useState(false);
+  const [KycType4Data, setKycType4Data] = useState([]);
+  const [KycType4Caption, setKycType4Caption] = useState('KYC TYPE 4');
+  const [KycType4Label, setKycType4Label] = useState('');
+  const [KycType4Index, setKycType4Index] = useState('');
+
   //kycid1 -- TextInput
   const [kycID1, setkycID1] = useState('');
   const [kycID1Caption, setkycID1Caption] = useState('KYC ID 1');
-  const [kycID1Man, setkycID1Man] = useState(false);
-  const [kycID1Visible, setkycID1Visible] = useState(true);
-  const [kycID1Disable, setkycID1Disable] = useState(false);
   const KycID1Ref = useRef(null);
 
   const [kycID2, setkycID2] = useState('');
   const [kycID2Caption, setkycID2Caption] = useState('KYC ID 2');
-  const [kycID2Man, setkycID2Man] = useState(false);
-  const [kycID2Visible, setkycID2Visible] = useState(true);
-  const [kycID2Disable, setkycID2Disable] = useState(false);
   const KycID2Ref = useRef(null);
 
+  const [kycID3, setkycID3] = useState('');
+  const [kycID3Caption, setkycID3Caption] = useState('KYC ID 3');
+  const KycID3Ref = useRef(null);
+
+  const [kycID4, setkycID4] = useState('');
+  const [kycID4Caption, setkycID4Caption] = useState('KYC ID 2');
+  const KycID4Ref = useRef(null);
+
   const [Email, setEmail] = useState('');
+  const [isEmailVerified, setIsEmailVerified] = useState('');
   const [EmailCaption, setEmailCaption] = useState('EMAIL');
   const [EmailMan, setEmailMan] = useState(false);
   const [EmailVisible, setEmailVisible] = useState(true);
@@ -171,526 +242,291 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   const [chkMsmeVisible, setchkMsmeVisible] = useState(true);
   const [chkMsmeDisable, setchkMsmeDisable] = useState(false);
 
+  const [systemCodeDetail, setSystemCodeDetail] = useState(props.mobilecodedetail.leadSystemCodeDto);
+  const [userCodeDetail, setUserCodeDetail] = useState(props.mobilecodedetail.leadUserCodeDto);
+  const [bankUserCodeDetail, setBankUserCodeDetail] = useState(props.mobilecodedetail.t_BankUserCode);
+  const [systemMandatoryField, setSystemMandatoryField] = useState(props.mobilecodedetail.leadSystemMandatoryFieldDto);
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [apiError, setApiError] = useState('');
+
+  const [dedupeModalVisible, setDedupeModalVisible] = useState(false);
+
   useEffect(() => {
     props.navigation
       .getParent()
       ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     makeSystemMandatoryFields();
-    // pickerData();
+    getSystemCodeDetail();
+
+    if (KycType1Label !== null || KycType2Label !== null || KycType3Label !== null || KycType4Label !== null) {
+      getID1data();
+      getID2data();
+    }
 
     return () =>
       props.navigation
         .getParent()
         ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
-  }, [navigation]);
+  }, [navigation, KycType1Label, KycType2Label, KycType3Label, KycType4Label]);
 
-  const pickerData = async () => {
-    tbl_SystemCodeDetails
-      .getSystemCodeDetailsBasedOnID('CustomerCategory')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
+  const getSystemCodeDetail = async () => {
 
-          for (var i = 0; i < value.length; i++) {
-            if (value[i].IsDefault === '1') {
-              setCustCatgLabel(value[i].SubCodeID);
-              setCustCatgIndex(i + 1);
-            }
-          }
+    const filteredLoanTypeData = systemCodeDetail.filter((data) => data.masterId === 'LNTP');
+    setLoanTypeData(filteredLoanTypeData);
 
-          setCustCatData(value);
-        }
-      });
-    tbl_SystemCodeDetails.getSystemCodeDetailsBasedOnID('LNTP').then(value => {
-      if (value !== undefined && value.length > 0) {
-        console.log(value);
+    const filteredLoanPurposeData = systemCodeDetail.filter((data) => data.masterId === 'LNPC');
+    setLoanPurposeData(filteredLoanPurposeData);
 
-        for (var i = 0; i < value.length; i++) {
-          if (value[i].IsDefault === '1') {
-            setLoanTypeLabel(value[i].SubCodeID);
-            setLoanTypeIndex(i + 1);
-          }
-        }
+    const filteredMaritalStatusData = userCodeDetail.filter((data) => data.ID === 'MaritalStatusID');
+    setMaritalStatusData(filteredMaritalStatusData);
 
-        setLoanTypeData(value);
-      }
-    });
-    tbl_SystemCodeDetails
-      .getSystemCodeDetailsBasedOnID('ProductType')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
+    getID1data();
+    getID2data();
+    getID3data();
+    getID4data();
 
-          for (var i = 0; i < value.length; i++) {
-            if (value[i].IsDefault === '1') {
-              setProductTypeLabel(value[i].SubCodeID);
-              setProductTypeIndex(i + 1);
-            }
-          }
-
-          setProductTypeData(value);
-        }
-      });
-    tbl_SystemCodeDetails.getSystemCodeDetailsBasedOnID('LNPUR').then(value => {
-      if (value !== undefined && value.length > 0) {
-        console.log(value);
-
-        for (var i = 0; i < value.length; i++) {
-          if (value[i].IsDefault === '1') {
-            setLoanPurposeLabel(value[i].SubCodeID);
-            setLoanPurposeIndex(i + 1);
-          }
-        }
-
-        setLoanPurposeData(value);
-      }
-    });
-    tbl_SystemCodeDetails
-      .getSystemCodeDetailsBasedOnID('CustomerSubCategory')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-
-          for (var i = 0; i < value.length; i++) {
-            if (value[i].IsDefault === '1') {
-              setCustomerSubCategoryLabel(value[i].SubCodeID);
-              setCustomerSubCategoryIndex(i + 1);
-            }
-          }
-
-          setCustomerSubCategoryData(value);
-        }
-      });
-    tbl_SystemCodeDetails
-      .getSystemCodeDetailsBasedOnID('MaritalStatus')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-
-          for (var i = 0; i < value.length; i++) {
-            if (value[i].IsDefault === '1') {
-              setMaritalStatusLabel(value[i].SubCodeID);
-              setMaritalStatusIndex(i + 1);
-            }
-          }
-
-          setMaritalStatusData(value);
-        }
-      });
-
-    tbl_SystemCodeDetails
-      .getSystemCodeDetailsBasedOnID('KycType1')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-
-          for (var i = 0; i < value.length; i++) {
-            if (value[i].IsDefault === '1') {
-              setKycType1Label(value[i].SubCodeID);
-              setKycType1Index(i + 1);
-            }
-          }
-
-          setKycType1Data(value);
-        }
-      });
-
-    tbl_SystemCodeDetails
-      .getSystemCodeDetailsBasedOnID('KycType2')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-
-          for (var i = 0; i < value.length; i++) {
-            if (value[i].IsDefault === '1') {
-              setKycType2Label(value[i].SubCodeID);
-              setKycType2Index(i + 1);
-            }
-          }
-
-          setKycType2Data(value);
-        }
-      });
   };
+
+  const getID1data = () => {
+    let dataArray = [];
+    if (bankUserCodeDetail) {
+      bankUserCodeDetail.forEach((data) => {
+        if (data.ID === 'IndIdentitySettingID') {
+          if (data.SubCodeID != KycType2Label && data.SubCodeID != KycType3Label && data.SubCodeID != KycType4Label)
+            dataArray.push({ 'subCodeId': data.SubCodeID, label: data.Description });
+        }
+      });
+    }
+    setKycType1Data(dataArray);
+  }
+
+  const getID2data = () => {
+    let dataArray = [];
+    if (bankUserCodeDetail) {
+      bankUserCodeDetail.forEach((data) => {
+        if (data.ID === 'IndIdentitySettingID') {
+          if (data.SubCodeID != KycType1Label && data.SubCodeID != KycType3Label && data.SubCodeID != KycType4Label)
+            dataArray.push({ 'subCodeId': data.SubCodeID, label: data.Description });
+        }
+      });
+    }
+    setKycType2Data(dataArray);
+  }
+  const getID3data = () => {
+    let dataArray = [];
+    if (bankUserCodeDetail) {
+      bankUserCodeDetail.forEach((data) => {
+        if (data.ID === 'IndIdentitySettingID') {
+          if (data.SubCodeID != KycType1Label && data.SubCodeID != KycType2Label && data.SubCodeID != KycType4Label)
+            dataArray.push({ 'subCodeId': data.SubCodeID, label: data.Description });
+        }
+      });
+    }
+    setKycType3Data(dataArray);
+  }
+
+  const getID4data = () => {
+    let dataArray = [];
+    if (bankUserCodeDetail) {
+      bankUserCodeDetail.forEach((data) => {
+        if (data.ID === 'IndIdentitySettingID') {
+          if (data.SubCodeID != KycType1Label && data.SubCodeID != KycType2Label && data.SubCodeID != KycType3Label)
+            dataArray.push({ 'subCodeId': data.SubCodeID, label: data.Description });
+        }
+      });
+    }
+    setKycType4Data(dataArray);
+  }
+
+  const getProductID = (loanType) => {
+    let dataArray = [];
+    if (props.mobilecodedetail && props.mobilecodedetail.t_ProductLoan) {
+      props.mobilecodedetail.t_ProductLoan.forEach((data) => {
+        if (data.NatureOfProductId === loanType) {
+          if (props.mobilecodedetail.t_product) {
+            props.mobilecodedetail.t_product.forEach((data1) => {
+              if (data1.ProductID === data.ProductID) {
+                dataArray.push({ 'subCodeId': data.ProductID, Description: data1.Description });
+              }
+            });
+          }
+        }
+      });
+    }
+    setProductTypeData(dataArray)
+  }
 
   const makeSystemMandatoryFields = () => {
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_custcatg')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value[0]);
-          setCustCatgCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setCustCatgMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setCustCatgVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setCustCatgDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setCustCatgCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
 
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_loantype')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value[0]);
-          setLoanTypeCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setLoanTypeMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setLoanTypeVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setLoanTypeDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setLoanTypeCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
-
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_producttype')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value[0]);
-          setProductTypeCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setProductTypeMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setProductTypeVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setProductTypeDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setProductTypeCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_loanpurpose')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value[0]);
-          setLoanPurposeCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setLoanPurposeMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setLoanPurposeVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setLoanPurposeDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setLoanPurposeCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
-
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('et_loanamount')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setLoanAmountCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setLoanAmountMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setLoanAmountVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setLoanAmountDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setLoanAmountCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_customersubcategory')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setCustomerSubCategoryCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setCustomerSubCategoryMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setCustomerSubCategoryVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setCustomerSubCategoryDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setCustomerSubCategoryCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
-
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_maritalstatus')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setMaritalStatusCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setMaritalStatusMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setMaritalStatusVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setMaritalStatusDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setMaritalStatusCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
-
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_kyctype1')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setKycType1Caption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setKycType1Man(true);
-          }
-          if (value[0].IsHide == '1') {
-            setKycType1Visible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setKycType1Disable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setKycType1Caption(value[0].FieldCaptionChange);
-          }
-        }
-      });
-
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_kyctype2')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setKycType2Caption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setKycType2Man(true);
-          }
-          if (value[0].IsHide == '1') {
-            setKycType2Visible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setKycType2Disable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setKycType2Caption(value[0].FieldCaptionChange);
-          }
-        }
-      });
-
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('et_kycID1')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setkycID1Caption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setkycID1Man(true);
-          }
-          if (value[0].IsHide == '1') {
-            setkycID1Visible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setkycID1Disable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setkycID1Caption(value[0].FieldCaptionChange);
-          }
-        }
-      });
-
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('et_kycID2')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setkycID2Caption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setkycID2Man(true);
-          }
-          if (value[0].IsHide == '1') {
-            setkycID2Visible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setkycID2Disable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setkycID2Caption(value[0].FieldCaptionChange);
-          }
-        }
-      });
-
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_email')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setEmailCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setEmailMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setEmailVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setEmailDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setEmailCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
-
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_name')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setNameCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setNameMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setNameVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setNameDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setNameCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
-
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_urnumber')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setURNumberCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setURNumberMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setURNumberVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setURNumberDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setURNumberCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
-
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_ismsme')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setchkMsmeCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setchkMsmeMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setchkMsmeVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setchkMsmeDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setchkMsmeCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
-
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('et_mobilenumber')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setMobileNumberCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setMobileNumberMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setMobileNumberVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setMobileNumberDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setMobileNumberCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
   };
+
+  const checkdetail = () => {
+    props.navigation.navigate('OTPVerification', { mobileNumber: mobileNumber });
+  }
 
   const updateBasicDetails = () => {
     if (validate()) {
       showBottomSheet();
     } else {
       const appDetails = {
-        createdBy: global.USERID,
-        createdOn: '',
-        isActive: true,
-        branchId: 1180,
-        leadCreationBasicDetails: {
-          createdBy: global.USERID,
-          createdOn: '',
-          customerCategoryId: 5,
-          firstName: firstName,
-          middleName: middleName,
-          lastName: lastName,
-          mobileNumber: 7647865789,
-        },
-        leadCreationBusinessDetails: {},
-        leadCreationLoanDetails: {},
-        leadCreationDms: {},
-      };
+        "customerCategoryId": 1234,
+        "leadId": 0,
+        "customerSubcategoryId": 0,
+        "customerTypeId": 521,
+        "loanTypeId": 440,
+        "loanPurposeId": 0,
+        "productId": 0,
+        "workflowId": 1,
+        "consent": true,
+        "applicationAppliedBy": 0,
+        "clientDetail": [
+          {
+            "clientTypeId": 1672,
+            "titleId": 0,
+            "firstName": "aaaaaa",
+            "middleName": "s",
+            "maritalStatusId": 0,
+            "kycTypeId1": 0,
+            "kycIdValue1": "string",
+            "kycTypeId2": 0,
+            "kycIdValue2": "string",
+            "kycTypeId3": 0,
+            "kycIdValue3": "string",
+            "kycTypeId4": 0,
+            "kycIdValue4": "string",
+            "udyamRegistrationNumber": "string",
+            "lastName": "Anure",
+            "mobileNumber": 8884821182,
+            "email": "string",
+            "active": true,
+            "aadharNumberVerified": true,
+            "udyamRegistrationNumberVerified": true,
+            "mobileNumberVerified": true,
+            "msme": false,
+            "emailVerified": true,
+            "panVerified": true
+          }
+        ],
+        "active": true,
+        "createdBy": 1
+      }
       const baseURL = '8901';
       setLoading(true);
       apiInstancelocal(baseURL)
-        .post('/api/v1/lead-creation-initiation', appDetails)
+        .post('api/v2/profile-short/basic-details/{loanApplicationId}', appDetails)
         .then(async response => {
           // Handle the response data
-          console.log(
-            'LeadCreationBasicApiResponse::' + JSON.stringify(response.data),
-          );
+          if (global.DEBUG_MODE) console.log('LeadCreationBasicApiResponse::' + JSON.stringify(response.data),);
           global.leadID = response.data.id;
           setLoading(false);
-          props.navigation.navigate('LeadCreationBusiness');
+          props.navigation.navigate('OTPVerification', { mobileNumber: mobileNumber });
         })
         .catch(error => {
           // Handle the error
           console.log('Error' + JSON.stringify(error.response));
           setLoading(false);
-          alert(error);
+          if (error.response.data != null) {
+            setApiError(error.response.data.message);
+            setErrorModalVisible(true)
+          }
         });
     }
+  };
+
+  const internalDedupeCheck = () => {
+
+
+    if (validate()) {
+      showBottomSheet();
+    } else {
+      // const appDetails = {
+      //   "Method": "InternalDedupRequest",
+      //   "ID1": kycID1,
+      //   "ID1CaptionID": KycType1Label,
+      //   "ID2": kycID2,
+      //   "ID2CaptionID": KycType2Label,
+      //   "ID3": kycID3,
+      //   "ID3CaptionID": KycType3Label,
+      //   "ID4": kycID4,
+      //   "ID4CaptionID": KycType4Label,
+      //   "MobileNo": mobileNumber,
+      // }
+      const appDetails = {
+        "Method": "InternalDedupRequest",
+        "ID1": "NIW0355107",
+        "ID1CaptionID": "012",
+        "ID2": "",
+        "ID2CaptionID": "",
+        "ID3": "",
+        "ID3CaptionID": "",
+        "ID4": "",
+        "ID4CaptionID": "",
+        "MobileNo": "",
+        "UniqueRefNo": "18112311"
+      }
+      const baseURL = '8901';
+      setLoading(true);
+      apiInstancelocal(baseURL)
+        .post(`/api/v2/profile-short/internal-dedupe-check/${global.USERID}`, appDetails)
+        .then(async response => {
+          // Handle the response data
+          if (global.DEBUG_MODE) console.log('DedupeApiResponse::' + JSON.stringify(response.data),);
+
+          props.dedupeAction(response.data)
+          setLoading(false);
+          setDedupeModalVisible(true);
+
+        })
+        .catch(error => {
+          // Handle the error
+          if (global.DEBUG_MODE) console.log('DedupeApiResponse' + JSON.stringify(error));
+          setLoading(false);
+          if (error.response.data != null) {
+            setApiError(error.response.data.message);
+            setErrorModalVisible(true)
+          }
+        });
+    }
+  };
+
+  const generateOTP = () => {
+
+    const appDetails = {
+      "loanApplicationId": 0,
+      "clientId": 0,
+      "generatedFor": `91${mobileNumber}`,
+      "userId": global.USERID,
+      "process": "Profile Short motp",
+      "userType": global.USERTYPEID,
+      "otpType": "23"
+    }
+    const baseURL = '8908';
+    setLoading(true);
+    apiInstancelocal(baseURL)
+      .post('/api/v1/otp/send-otp', appDetails)
+      .then(async response => {
+        // Handle the response data
+        if (global.DEBUG_MODE) console.log('MobileOTPApiResponse::' + JSON.stringify(response.data),);
+
+        if (response.status == 200) {
+          props.navigation.navigate('OTPVerification', { mobileNumber: mobileNumber, fromSCreen: 'ApplicantProfileShort' })
+        }
+
+        setLoading(false);
+
+
+
+      })
+      .catch(error => {
+        // Handle the error
+        if (global.DEBUG_MODE) console.log('MobileOTPApiResponse::::' + JSON.stringify(error.response));
+        setLoading(false);
+        if (error.response.data != null) {
+          setApiError(error.response.data.message);
+          setErrorModalVisible(true)
+        }
+      });
+
   };
 
   const validate = () => {
@@ -828,7 +664,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
     }
 
-    if (kycID1Man && kycID1Visible) {
+    if (KycType1Man && kycID1Visible) {
       if (kycID1.length <= 0) {
         errorMessage =
           errorMessage +
@@ -843,7 +679,22 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
     }
 
-    if (kycID2Man && kycID2Visible) {
+    if (KycType2Man && KycType2Visible) {
+      if (KycType2Label.length <= 0) {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          language[0][props.language].str_plsselect +
+          KycType2Caption +
+          '\n';
+        i++;
+        flag = true;
+      }
+    }
+
+    if (KycType2Man && kycID2Visible) {
       if (kycID2.length <= 0) {
         errorMessage =
           errorMessage +
@@ -910,7 +761,19 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
         i++;
         flag = true;
       }
-    }
+    }// else if (isMobileVerified != '1') {
+    //   errorMessage =
+    //     errorMessage +
+    //     i +
+    //     ')' +
+    //     ' ' +
+    //     language[0][props.language].str_plsverify +
+    //     mobileNumberCaption +
+    //     '\n';
+    //   i++;
+    //   flag = true;
+    // }
+
     if (URNumberMan && URNumberVisible) {
       if (URNumber.length <= 0) {
         errorMessage =
@@ -955,9 +818,22 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     } else if (componentName === 'Name') {
       setName(textValue);
     } else if (componentName === 'URNumber') {
-      setURNumber(textValue);
+      const alphanumericInput = textValue.replace(/\W/g, '');
+
+      let formattedText = '';
+      for (let i = 0; i < alphanumericInput.length; i++) {
+        if (i === 5 || i === 7 || i === 9) {
+          formattedText += '-';
+        }
+        formattedText += alphanumericInput[i];
+      }
+      setURNumber(formattedText);
     } else if (componentName === 'chkMsme') {
       setchkMsme(textValue);
+    } else if (componentName === 'expiryDate1') {
+      handleTextChange(componentName, textValue);
+    } else if (componentName === 'expiryDate2') {
+      handleTextChange(componentName, textValue);
     } else if (componentName === 'mobileNumber') {
       if (textValue.length > 0) {
         if (Common.numberRegex.test(textValue)) setMobileNumber(textValue);
@@ -965,6 +841,29 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
         setMobileNumber(textValue);
       }
     }
+  };
+
+  const handleTextChange = (componentName, input) => {
+    const numericInput = input.replace(/\D/g, '');
+
+    // Insert slashes while typing
+    let formattedDate = '';
+    for (let i = 0; i < numericInput.length; i++) {
+      if (i === 2 || i === 4) {
+        formattedDate += '-';
+      }
+      formattedDate += numericInput[i];
+    }
+    if (componentName === 'expiryDate1') {
+      setExpiry1Date(formattedDate);
+    } else if (componentName === 'expiryDate2') {
+      setExpiry2Date(formattedDate);
+    } else if (componentName === 'expiryDate3') {
+      setExpiry3Date(formattedDate);
+    } else if (componentName === 'expiryDate4') {
+      setExpiry4Date(formattedDate);
+    }
+
   };
 
   const handleReference = componentName => {
@@ -990,6 +889,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     } else if (componentName == 'LoanTypePicker') {
       setLoanTypeLabel(label);
       setLoanTypeIndex(index);
+      getProductID(label);
     } else if (componentName == 'ProductTypePicker') {
       setProductTypeLabel(label);
       setProductTypeIndex(index);
@@ -1008,21 +908,81 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     } else if (componentName == 'KycType2Picker') {
       setKycType2Label(label);
       setKycType2Index(index);
+    } else if (componentName == 'KycType3Picker') {
+      setKycType3Label(label);
+      setKycType3Index(index);
+    } else if (componentName == 'KycType4Picker') {
+      setKycType4Label(label);
+      setKycType4Index(index);
+    } else if (componentName == 'workFlowIDPicker') {
+      setWorkflowIDLabel(label);
+      setWorkflowIDIndex(index);
     }
+
+
   };
   function isMultipleOf5000(number) {
     return number % 5000 === 0;
   }
 
-  const onClick = () => {
-    props.navigation.navigate('OTPVerification')
+  const changeSelectedDate = (event, selectedDate) => {
+    if (event.type == 'set') {
+      const currentDate = selectedDate;
+      console.log("SelectedDate::" + currentDate)
+      const date = new Date(currentDate);
+      //setExpiry1Date(date)
+      //setShow(false);
+
+      // Get day, month, and year components from the Date object
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Note: Months are 0-indexed, so we add 1.
+      const year = date.getFullYear();
+
+      // Create the formatted date string
+      const formattedDate = `${day}-${month}-${year}`;
+      const formattedServerDate = `${year}-${month}-${day}`;
+      //setFromServerDate(formattedServerDate)
+      setExpiry1Date(formattedDate);
+    }
+
   };
+
+  const onClick = () => {
+    if (isMobileVerified == '1') {
+
+    } else if (mobileNumber.length <= 0) {
+      setApiError(language[0][props.language].str_plsenter + mobileNumberCaption);
+      setErrorModalVisible(true);
+    } else if (!Common.isValidPhoneNumber(mobileNumber)) {
+      setApiError(language[0][props.language].str_plsentervalid + mobileNumberCaption);
+      setErrorModalVisible(true);
+    } else {
+      generateOTP();
+    }
+
+  };
+
+  const dedupeAcceptance = (value) => {
+
+    if (value == 'Proceed') {
+      props.navigation.navigate('ProfileShortExistingClientDetails');
+      setDedupeModalVisible(false);
+    } else {
+      setDedupeModalVisible(false);
+    }
+  }
+
+  const closeErrorModal = () => {
+    setErrorModalVisible(false);
+  };
+
   return (
     // enclose all components in this View tag
     <SafeAreaView
       style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
       <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
-
+      <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
+      <DedupeModal isVisible={dedupeModalVisible} dedupeDta={data} onClose={dedupeAcceptance} />
       <View
         style={{
           width: '100%',
@@ -1061,7 +1021,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
                 textStyle={{
                   color: Colors.mediumgrey,
                   fontSize: 15,
-                  fontWeight: '500',
+                  fontFamily: 'Poppins-Medium'
                 }}
                 textVal={
                   language[0][props.language].str_basicdetails
@@ -1070,6 +1030,37 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
               <ProgressComp progressvalue={0.25} textvalue="1 of 4" />
             </View>
           </View>
+
+
+          {leadIDVisible && (
+            <View
+              style={{
+                width: '100%',
+                marginTop: 19,
+                paddingHorizontal: 0,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                <TextComp
+                  textVal={leadIDCaption}
+                  textStyle={Commonstyles.inputtextStyle}
+                  Visible={leadIDMan}
+                />
+              </View>
+
+              <TextInputComp
+                textValue={leadID}
+                textStyle={Commonstyles.textinputtextStyle}
+                Disable={leadIDDisable}
+                ComponentName="LeadID"
+                reference={leadIDRef}
+                returnKey="next"
+                handleClick={handleClick}
+                handleReference={handleReference}
+              />
+            </View>
+          )}
 
           {loanTypeVisible && (
             <View
@@ -1111,37 +1102,6 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
                 pickerdata={ProductTypeData}
                 componentName="ProductTypePicker"
                 handlePickerClick={handlePickerClick}
-              />
-            </View>
-          )}
-
-          {LoanAmountVisible && (
-            <View
-              style={{
-                width: '100%',
-                marginTop: 19,
-                paddingHorizontal: 0,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
-                <TextComp
-                  textVal={LoanAmountCaption}
-                  textStyle={Commonstyles.inputtextStyle}
-                  Visible={LoanAmountMan}
-                />
-              </View>
-
-              <TextInputComp
-                textValue={LoanAmount}
-                textStyle={Commonstyles.textinputtextStyle}
-                type="numeric"
-                Disable={LoanAmountDisable}
-                ComponentName="LoanAmount"
-                reference={LoanAmountRef}
-                returnKey="next"
-                handleClick={handleClick}
-                handleReference={handleReference}
               />
             </View>
           )}
@@ -1208,6 +1168,60 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
                 pickerdata={CustomerSubCategoryData}
                 componentName="CustomerSubCategoryPicker"
                 handlePickerClick={handlePickerClick}
+              />
+            </View>
+          )}
+
+
+          {workflowIDVisible && (
+            <View
+              style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                <TextComp
+                  textVal={workflowIDCaption}
+                  textStyle={Commonstyles.inputtextStyle}
+                  Visible={workflowIDMan}
+                />
+              </View>
+
+              <PickerComp
+                textLabel={CustomerSubCategoryLabel}
+                pickerStyle={Commonstyles.picker}
+                Disable={workflowIDDisable}
+                pickerdata={workflowIDData}
+                componentName="workFlowIDPicker"
+                handlePickerClick={handlePickerClick}
+              />
+            </View>
+          )}
+
+          {LoanAmountVisible && (
+            <View
+              style={{
+                width: '100%',
+                marginTop: 19,
+                paddingHorizontal: 0,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                <TextComp
+                  textVal={LoanAmountCaption}
+                  textStyle={Commonstyles.inputtextStyle}
+                  Visible={LoanAmountMan}
+                />
+              </View>
+
+              <TextInputComp
+                textValue={LoanAmount}
+                textStyle={Commonstyles.textinputtextStyle}
+                type="numeric"
+                Disable={LoanAmountDisable}
+                ComponentName="LoanAmount"
+                reference={LoanAmountRef}
+                returnKey="next"
+                handleClick={handleClick}
+                handleReference={handleReference}
               />
             </View>
           )}
@@ -1296,7 +1310,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
             </View>
           )}
 
-          {kycID1Visible && (
+          {KycType1Visible && (
             <View
               style={{
                 width: '100%',
@@ -1309,7 +1323,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
                 <TextComp
                   textVal={kycID1Caption}
                   textStyle={Commonstyles.inputtextStyle}
-                  Visible={kycID1Man}
+                  Visible={KycType1Man}
                 />
               </View>
 
@@ -1317,13 +1331,51 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
                 textValue={kycID1}
                 textStyle={Commonstyles.textinputtextStyle}
                 type="email-address"
-                Disable={kycID1Disable}
+                Disable={KycType1Disable}
                 ComponentName="kycID1"
                 reference={KycID1Ref}
                 returnKey="next"
                 handleClick={handleClick}
                 handleReference={handleReference}
               />
+            </View>
+          )}
+
+          {expiryDate1Visible && (
+            <View
+              style={{
+                width: '100%',
+                marginTop: 19,
+                paddingHorizontal: 0,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                <TextComp
+                  textVal={expiryDateCaption}
+                  textStyle={Commonstyles.inputtextStyle}
+                  Visible={expiryDate1Man}
+                />
+              </View>
+
+              <View style={{ width: '100%', alignItems: 'center' }}>
+                <DateInputComp textStyle={[Commonstyles.inputtextStyle, { width: '90%' }]} ComponentName="expiryDate1"
+                  textValue={expiryDate1}
+                  type="numeric"
+                  handleClick={handleClick}
+                  handleReference={handleReference} />
+              </View>
+              {/* <TextInputComp
+                textValue={expiryDate1}
+                textStyle={Commonstyles.textinputtextStyle}
+                type="numeric"
+                Disable={expiryDate1Disable}
+                ComponentName="expiryDate1"
+                reference={expityDate1Ref}
+                returnKey="next"
+                handleClick={handleClick}
+                handleReference={handleReference}
+              /> */}
             </View>
           )}
 
@@ -1349,7 +1401,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
             </View>
           )}
 
-          {kycID2Visible && (
+          {KycType2Visible && (
             <View
               style={{
                 width: '100%',
@@ -1362,7 +1414,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
                 <TextComp
                   textVal={kycID2Caption}
                   textStyle={Commonstyles.inputtextStyle}
-                  Visible={kycID2Man}
+                  Visible={KycType2Man}
                 />
               </View>
 
@@ -1370,13 +1422,234 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
                 textValue={kycID2}
                 textStyle={Commonstyles.textinputtextStyle}
                 type="email-address"
-                Disable={kycID2Disable}
+                Disable={KycType2Disable}
                 ComponentName="kycID2"
                 reference={KycID2Ref}
                 returnKey="next"
                 handleClick={handleClick}
                 handleReference={handleReference}
               />
+            </View>
+          )}
+
+          {expiryDate2Visible && (
+            <View
+              style={{
+                width: '100%',
+                marginTop: 19,
+                paddingHorizontal: 0,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                <TextComp
+                  textVal={expiryDateCaption}
+                  textStyle={Commonstyles.inputtextStyle}
+                  Visible={expiryDate2Man}
+                />
+              </View>
+
+              <View style={{ width: '100%', alignItems: 'center' }}>
+                <DateInputComp textStyle={[Commonstyles.inputtextStyle, { width: '90%' }]} ComponentName="expiryDate2"
+                  textValue={expiryDate2}
+                  type="numeric"
+                  handleClick={handleClick}
+                  handleReference={handleReference} />
+              </View>
+              {/* <TextInputComp
+                textValue={expiryDate1}
+                textStyle={Commonstyles.textinputtextStyle}
+                type="numeric"
+                Disable={expiryDate1Disable}
+                ComponentName="expiryDate1"
+                reference={expityDate1Ref}
+                returnKey="next"
+                handleClick={handleClick}
+                handleReference={handleReference}
+              /> */}
+            </View>
+          )}
+
+
+          {KycType3Visible && (
+            <View
+              style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                <TextComp
+                  textVal={KycType3Caption}
+                  textStyle={Commonstyles.inputtextStyle}
+                  Visible={KycType3Man}
+                />
+              </View>
+
+              <PickerComp
+                textLabel={KycType3Label}
+                pickerStyle={Commonstyles.picker}
+                Disable={KycType3Disable}
+                pickerdata={KycType3Data}
+                componentName="KycType3Picker"
+                handlePickerClick={handlePickerClick}
+              />
+            </View>
+          )}
+
+          {KycType3Visible && (
+            <View
+              style={{
+                width: '100%',
+                marginTop: 19,
+                paddingHorizontal: 0,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                <TextComp
+                  textVal={kycID3Caption}
+                  textStyle={Commonstyles.inputtextStyle}
+                  Visible={KycType3Man}
+                />
+              </View>
+
+              <TextInputComp
+                textValue={kycID3}
+                textStyle={Commonstyles.textinputtextStyle}
+                type="email-address"
+                Disable={KycType3Disable}
+                ComponentName="kycID3"
+                reference={KycID3Ref}
+                returnKey="next"
+                handleClick={handleClick}
+                handleReference={handleReference}
+              />
+            </View>
+          )}
+
+          {expiryDate3Visible && (
+            <View
+              style={{
+                width: '100%',
+                marginTop: 19,
+                paddingHorizontal: 0,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                <TextComp
+                  textVal={expiryDateCaption}
+                  textStyle={Commonstyles.inputtextStyle}
+                  Visible={expiryDate3Man}
+                />
+              </View>
+
+              <View style={{ width: '100%', alignItems: 'center' }}>
+                <DateInputComp textStyle={[Commonstyles.inputtextStyle, { width: '90%' }]} ComponentName="expiryDate3"
+                  textValue={expiryDate3}
+                  type="numeric"
+                  handleClick={handleClick}
+                  handleReference={handleReference} />
+              </View>
+              {/* <TextInputComp
+                textValue={expiryDate1}
+                textStyle={Commonstyles.textinputtextStyle}
+                type="numeric"
+                Disable={expiryDate1Disable}
+                ComponentName="expiryDate1"
+                reference={expityDate1Ref}
+                returnKey="next"
+                handleClick={handleClick}
+                handleReference={handleReference}
+              /> */}
+            </View>
+          )}
+
+          {KycType4Visible && (
+            <View
+              style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                <TextComp
+                  textVal={KycType4Caption}
+                  textStyle={Commonstyles.inputtextStyle}
+                  Visible={KycType4Man}
+                />
+              </View>
+
+              <PickerComp
+                textLabel={KycType4Label}
+                pickerStyle={Commonstyles.picker}
+                Disable={KycType4Disable}
+                pickerdata={KycType4Data}
+                componentName="KycType4Picker"
+                handlePickerClick={handlePickerClick}
+              />
+            </View>
+          )}
+
+          {KycType4Visible && (
+            <View
+              style={{
+                width: '100%',
+                marginTop: 19,
+                paddingHorizontal: 0,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                <TextComp
+                  textVal={kycID4Caption}
+                  textStyle={Commonstyles.inputtextStyle}
+                  Visible={KycType4Man}
+                />
+              </View>
+
+              <TextInputComp
+                textValue={kycID4}
+                textStyle={Commonstyles.textinputtextStyle}
+                type="email-address"
+                Disable={KycType4Disable}
+                ComponentName="kycID4"
+                reference={KycID4Ref}
+                returnKey="next"
+                handleClick={handleClick}
+                handleReference={handleReference}
+              />
+            </View>
+          )}
+
+          {expiryDate4Visible && (
+            <View
+              style={{
+                width: '100%',
+                marginTop: 19,
+                paddingHorizontal: 0,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                <TextComp
+                  textVal={expiryDateCaption}
+                  textStyle={Commonstyles.inputtextStyle}
+                  Visible={expiryDate4Man}
+                />
+              </View>
+
+              <View style={{ width: '100%', alignItems: 'center' }}>
+                <DateInputComp textStyle={[Commonstyles.inputtextStyle, { width: '90%' }]} ComponentName="expiryDate4"
+                  textValue={expiryDate4}
+                  type="numeric"
+                  handleClick={handleClick}
+                  handleReference={handleReference} />
+              </View>
+              {/* <TextInputComp
+                textValue={expiryDate1}
+                textStyle={Commonstyles.textinputtextStyle}
+                type="numeric"
+                Disable={expiryDate1Disable}
+                ComponentName="expiryDate1"
+                reference={expityDate1Ref}
+                returnKey="next"
+                handleClick={handleClick}
+                handleReference={handleReference}
+              /> */}
             </View>
           )}
 
@@ -1534,7 +1807,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
           viewStyle={Commonstyles.buttonView}
           innerStyle={Commonstyles.buttonViewInnerStyle}
-          handleClick={updateBasicDetails}
+          handleClick={internalDedupeCheck}
         />
       </ScrollView>
     </SafeAreaView>
@@ -1578,15 +1851,20 @@ const styles = StyleSheet.create({
   },
 });
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   const { language } = state.languageReducer;
+  const { profileDetails } = state.profileReducer;
+  const { mobileCodeDetails } = state.mobilecodeReducer;
   return {
     language: language,
-  };
-};
+    profiledetail: profileDetails,
+    mobilecodedetail: mobileCodeDetails
+  }
+}
 
 const mapDispatchToProps = dispatch => ({
   languageAction: item => dispatch(languageAction(item)),
+  dedupeAction: item => dispatch(dedupeAction(item)),
 });
 
 export default connect(

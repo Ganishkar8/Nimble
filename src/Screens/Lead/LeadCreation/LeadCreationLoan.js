@@ -23,7 +23,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import apiInstance from '../../../Utils/apiInstance';
 import jwtDecode from 'jwt-decode';
 import Colors from '../../../Utils/Colors';
-import MyStatusBar from '../../../Components/ MyStatusBar';
+import MyStatusBar from '../../../Components/MyStatusBar';
 import Loading from '../../../Components/Loading';
 import TextComp from '../../../Components/TextComp';
 import { connect } from 'react-redux';
@@ -49,6 +49,7 @@ import tbl_lead_creation_loan_details from '../../../Database/Table/tbl_lead_cre
 import Common from '../../../Utils/Common';
 import { profileAction } from '../../../Utils/redux/actions/ProfileAction';
 import ButtonViewComp from '../../../Components/ButtonViewComp';
+import ErrorModal from '../../../Components/ErrorModal';
 
 
 const LeadCreationLoan = (props, { navigation }) => {
@@ -109,6 +110,13 @@ const LeadCreationLoan = (props, { navigation }) => {
     const [maxLoanAmount, setMaxLoanAmount] = useState(0);
 
 
+    const [systemCodeDetail, setSystemCodeDetail] = useState(props.mobilecodedetail.leadSystemCodeDto);
+    const [userCodeDetail, setUserCodeDetail] = useState(props.mobilecodedetail.leadUserCodeDto);
+    const [systemMandatoryField, setSystemMandatoryField] = useState(props.mobilecodedetail.leadSystemMandatoryFieldDto);
+    const [errorModalVisible, setErrorModalVisible] = useState(false);
+    const [apiError, setApiError] = useState('');
+
+
     useEffect(() => {
         //  pickerData();
         // callPickerApi();
@@ -118,6 +126,18 @@ const LeadCreationLoan = (props, { navigation }) => {
     }, []);
 
 
+    const getSystemCodeDetail = () => {
+
+        const filteredLoanTypeData = systemCodeDetail.filter((data) => data.masterId === 'LNTP');
+        setLoanTypeData(filteredLoanTypeData);
+
+        const filteredLoanPurposeData = systemCodeDetail.filter((data) => data.masterId === 'LNPC');
+        setLoanPurposeData(filteredLoanPurposeData);
+
+        const filteredLeadTypeData = systemCodeDetail.filter((data) => data.masterId === 'LEAD_TYPE');
+        setLeadTypeData(filteredLeadTypeData);
+
+    }
 
 
     const checkPermissions = async () => {
@@ -194,159 +214,88 @@ const LeadCreationLoan = (props, { navigation }) => {
     };
 
 
-    const pickerData = async () => {
-
-        tbl_SystemCodeDetails.getSystemCodeDetailsBasedOnID('LNTP').then(value => {
-            if (value !== undefined && value.length > 0) {
-                console.log(value)
-
-                for (var i = 0; i < value.length; i++) {
-                    if (value[i].IsDefault === '1') {
-                        setLoanTypeLabel(value[i].SubCodeID);
-                        setLoanTypeIndex(i + 1);
-                    }
-                }
-
-                setLoanTypeData(value)
-
-            }
-        })
-
-        tbl_SystemCodeDetails.getSystemCodeDetailsBasedOnID('LNPUR').then(value => {
-            if (value !== undefined && value.length > 0) {
-                console.log(value)
-
-                for (var i = 0; i < value.length; i++) {
-                    if (value[i].IsDefault === '1') {
-                        setLoanPurposeLabel(value[i].SubCodeID);
-                        setLoanPurposeIndex(i + 1);
-                    }
-                }
-
-                setLoanPurposeData(value)
-
-            }
-        })
-
-        tbl_SystemCodeDetails.getSystemCodeDetailsBasedOnID('LeadType').then(value => {
-            if (value !== undefined && value.length > 0) {
-                console.log(value)
-
-                for (var i = 0; i < value.length; i++) {
-                    if (value[i].IsDefault === '1') {
-                        setLeadTypeLabel(value[i].SubCodeID);
-                        setLeadTypeIndex(i + 1);
-                    }
-                }
-
-                setLeadTypeData(value)
-
-            }
-        })
-
-    }
-
     const makeSystemMandatoryFields = () => {
 
-        tbl_SystemMandatoryFields.getSystemMandatoryFieldsBasedOnFieldUIID('sp_loantype').then(value => {
-            if (value !== undefined && value.length > 0) {
-                console.log(value[0])
-                setLoanTypeCaption(value[0].FieldName)
-                if (value[0].IsMandatory == "1") {
-                    setLoanTypeMan(true);
-                }
-                if (value[0].IsHide == "1") {
-                    setLoanTypeVisible(false);
-                }
-                if (value[0].IsDisable == "1") {
-                    setLoanTypeDisable(true);
-                }
-                if (value[0].IsCaptionChange == "1") {
-                    setLoanTypeCaption(value[0].FieldCaptionChange)
-                }
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_loantype').map((value, index) => {
+            setLoanTypeCaption(value.fieldName)
+            if (value.mandatory) {
+                setLoanTypeMan(true);
             }
-        })
-
-        tbl_SystemMandatoryFields.getSystemMandatoryFieldsBasedOnFieldUIID('sp_productid').then(value => {
-            if (value !== undefined && value.length > 0) {
-                console.log(value[0])
-                setProductIdCaption(value[0].FieldName)
-                if (value[0].IsMandatory == "1") {
-                    setProductIdMan(true);
-                }
-                if (value[0].IsHide == "1") {
-                    setProductIdVisible(false);
-                }
-                if (value[0].IsDisable == "1") {
-                    setProductIdDisable(true);
-                }
-                if (value[0].IsCaptionChange == "1") {
-                    setProductIdCaption(value[0].FieldCaptionChange)
-                }
+            if (value.hide) {
+                setLoanTypeVisible(false);
             }
-        })
-
-        //firstName
-        tbl_SystemMandatoryFields.getSystemMandatoryFieldsBasedOnFieldUIID('sp_loanpurpose').then(value => {
-            if (value !== undefined && value.length > 0) {
-                console.log(value[0])
-                setLoanPurposeCaption(value[0].FieldName)
-                if (value[0].IsMandatory == "1") {
-                    setLoanPurposeMan(true);
-                }
-                if (value[0].IsHide == "1") {
-                    setLoanPurposeVisible(false);
-                }
-                if (value[0].IsDisable == "1") {
-                    setLoanPurposeDisable(true);
-                }
-                if (value[0].IsCaptionChange == "1") {
-                    setLoanPurposeCaption(value[0].FieldCaptionChange)
-                }
+            if (value.disable) {
+                setLoanTypeDisable(true);
             }
-        })
-
-        tbl_SystemMandatoryFields.getSystemMandatoryFieldsBasedOnFieldUIID('et_loanamount').then(value => {
-
-
-            if (value !== undefined && value.length > 0) {
-                console.log(value)
-                setLoanAmountCaption(value[0].FieldName)
-                if (value[0].IsMandatory == "1") {
-                    setLoanAmountMan(true);
-                }
-                if (value[0].IsHide == "1") {
-                    setLoanAmountVisible(false);
-                }
-                if (value[0].IsDisable == "1") {
-                    setLoanAmountDisable(true);
-                }
-                if (value[0].IsCaptionChange == "1") {
-                    setLoanAmountCaption(value[0].FieldCaptionChange)
-                }
+            if (value.captionChange) {
+                setLoanTypeCaption(value[0].fieldCaptionChange)
             }
-        })
+        });
 
-        tbl_SystemMandatoryFields.getSystemMandatoryFieldsBasedOnFieldUIID('sp_leadtype').then(value => {
-            if (value !== undefined && value.length > 0) {
-                console.log(value)
-                setLeadTypeCaption(value[0].FieldName)
-                if (value[0].IsMandatory == "1") {
-                    setLeadTypeMan(true);
-                }
-                if (value[0].IsHide == "1") {
-                    setLeadTypeVisible(false);
-                }
-                if (value[0].IsDisable == "1") {
-                    setLeadTypeDisable(true);
-                }
-                if (value[0].IsCaptionChange == "1") {
-                    setLeadTypeCaption(value[0].FieldCaptionChange)
-                }
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_productid').map((value, index) => {
+            setProductIdCaption(value.fieldName)
+            if (value.mandatory) {
+                setProductIdMan(true);
             }
-        })
+            if (value.hide) {
+                setProductIdVisible(false);
+            }
+            if (value.disable) {
+                setProductIdDisable(true);
+            }
+            if (value.captionChange) {
+                setProductIdCaption(value[0].fieldCaptionChange)
+            }
+        });
 
 
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_loanpurpose').map((value, index) => {
+            setLoanPurposeCaption(value.fieldName)
+            if (value.mandatory) {
+                setLoanPurposeMan(true);
+            }
+            if (value.hide) {
+                setLoanPurposeVisible(false);
+            }
+            if (value.disable) {
+                setLoanPurposeDisable(true);
+            }
+            if (value.captionChange) {
+                setLoanPurposeCaption(value[0].fieldCaptionChange)
+            }
+        });
+
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_loanamount').map((value, index) => {
+            setLoanAmountCaption(value.fieldName)
+            if (value.mandatory) {
+                setLoanAmountMan(true);
+            }
+            if (value.hide) {
+                setLoanAmountVisible(false);
+            }
+            if (value.disable) {
+                setLoanAmountDisable(true);
+            }
+            if (value.captionChange) {
+                setLoanAmountCaption(value[0].fieldCaptionChange)
+            }
+        });
+
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_leadtype').map((value, index) => {
+            setLeadTypeCaption(value.fieldName)
+            if (value.mandatory) {
+                setLeadTypeMan(true);
+            }
+            if (value.hide) {
+                setLeadTypeVisible(false);
+            }
+            if (value.disable) {
+                setLeadTypeDisable(true);
+            }
+            if (value.captionChange) {
+                setLeadTypeCaption(value[0].fieldCaptionChange)
+            }
+        });
 
     }
 
@@ -377,34 +326,36 @@ const LeadCreationLoan = (props, { navigation }) => {
             "leadCreationLoanDetails": {
                 "createdBy": global.USERID,
                 "createdOn": '',
-                "loanTypeId": loanTypeLabel,
-                "loanPurposeId": loanPurposeLabel,
-                "leadTypeId": leadTypeLabel,
+                "loanType": loanTypeLabel,
+                "loanPurpose": loanPurposeLabel,
+                "leadType": leadTypeLabel,
                 "loanAmount": loanAmount,
-                "loanProductId": productIdLabel
+                "loanProduct": productIdLabel
             }
         }
         const baseURL = '8901'
         setLoading(true)
         apiInstancelocal(baseURL).put(`/api/v1/lead-creation-initiation/${global.leadID}`, appDetails)
             .then(async (response) => {
-                // Handle the response data
-                console.log("LeadCreationLoanApiResponse::" + JSON.stringify(response.data));
+                if (global.DEBUG_MODE) console.log("LeadCreationLoanApiResponse::" + JSON.stringify(response.data));
                 checkPermissions().then(res => {
                     if (res == true) {
                         getOneTimeLocation();
                         setLoading(false)
                     } else {
                         setLoading(false)
-                        alert('Permission Not Granted')
+                        setApiError('Permission Not Granted');
+                        setErrorModalVisible(true)
                     }
                 });
             })
             .catch((error) => {
-                // Handle the error
-                console.log("Error" + JSON.stringify(error.response))
                 setLoading(false)
-                alert(error);
+                if (global.DEBUG_MODE) console.log("LeadCreationLoanApiResponse::" + JSON.stringify(error.response.data));
+                if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
             });
 
     }
@@ -424,35 +375,59 @@ const LeadCreationLoan = (props, { navigation }) => {
                     setLoading(false)
                 } else {
                     setLoading(false)
-                    alert('Permission Not Granted')
+                    setApiError('Permission Not Granted');
+                    setErrorModalVisible(true)
                 }
             });
         }
     }
 
-    const callLoanAmount = (productID) => {
-        const baseURL = '8083'
-        setLoading(true)
-        apiInstancelocal(baseURL).get(`/api/v1/Product-Loan/productId=${productID}`)
-            .then(async (response) => {
-                setLoading(false);
-                if (response.data.minLoanAmount.length > 0) {
-                    const minAmount = parseInt(response.data.minLoanAmount, 10);
-                    setMinLoanAmount(minAmount)
+    const getProductID = (loanType) => {
+        let dataArray = [];
+        if (props.mobilecodedetail && props.mobilecodedetail.t_ProductLoan) {
+            props.mobilecodedetail.t_ProductLoan.forEach((data) => {
+                if (data.NatureOfProductId === loanType) {
+                    if (props.mobilecodedetail.t_product) {
+                        props.mobilecodedetail.t_product.forEach((data1) => {
+                            if (data1.ProductID === data.ProductID) {
+                                dataArray.push({ 'subCodeId': data.ProductID, Description: data1.Description });
+                            }
+                        });
+                    }
                 }
-
-                if (response.data.maxLoanAmount.length > 0) {
-                    const maxAmount = parseInt(response.data.maxLoanAmount, 10);
-                    setMaxLoanAmount(maxAmount)
-                }
-
-
-            })
-            .catch((error) => {
-                if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
-                setLoading(false)
-                alert(error);
             });
+        }
+        setProductIdData(dataArray)
+    }
+
+    const callLoanAmount = (productID) => {
+
+        const filteredProductIDData = props.mobilecodedetail.t_ProductLoan.filter((data) => data.ProductID === productID);
+        setMinLoanAmount(filteredProductIDData[0].MinLoanAmount);
+        setMaxLoanAmount(filteredProductIDData[0].MaxLoanAmount);
+
+        // const baseURL = '8083'
+        // setLoading(true)
+        // apiInstancelocal(baseURL).get(`/api/v1/Product-Loan/productId=${productID}`)
+        //     .then(async (response) => {
+        //         setLoading(false);
+        //         if (response.data.minLoanAmount.length > 0) {
+        //             const minAmount = parseInt(response.data.minLoanAmount, 10);
+        //             setMinLoanAmount(minAmount)
+        //         }
+
+        //         if (response.data.maxLoanAmount.length > 0) {
+        //             const maxAmount = parseInt(response.data.maxLoanAmount, 10);
+        //             setMaxLoanAmount(maxAmount)
+        //         }
+
+
+        //     })
+        //     .catch((error) => {
+        //         if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
+        //         setLoading(false)
+        //         alert(error);
+        //     });
     }
 
     const callPickerApi = () => {
@@ -517,36 +492,42 @@ const LeadCreationLoan = (props, { navigation }) => {
     const getData = () => {
 
         if (leadType == 'DRAFT') {
-            setLoading(true);
+            //setLoading(true);
             tbl_lead_creation_loan_details.getLeadCreationLoanDetailsBasedOnLeadID(global.leadID).then(value => {
                 if (value !== undefined && value.length > 0) {
-                    setLoanTypeLabel(parseInt(value[0].loan_type_id));
-                    setProductIdLabel(parseInt(value[0].loan_product_id));
-                    setLoanPurposeLabel(parseInt(value[0].loan_purpose_id));
+                    setLoanTypeLabel(value[0].loan_type_id);
+                    setProductIdLabel(value[0].loan_product_id);
+                    setLoanPurposeLabel(value[0].loan_purpose_id);
                     setLoanAmount(value[0].loan_amount);
-                    setLeadTypeLabel(parseInt(value[0].lead_type_id));
-                    callLoanAmount(parseInt(value[0].loan_product_id));
-                    callPickerApi();
+                    setLeadTypeLabel(value[0].lead_type_id);
+                    callLoanAmount(value[0].loan_product_id);
+                    //callPickerApi();
+                    getSystemCodeDetail();
+                    getProductID(value[0].loan_type_id);
                 } else {
-                    callPickerApi();
+                    //callPickerApi();
+                    getSystemCodeDetail();
                 }
             })
         } else if (leadType == 'NEW') {
-            callPickerApi();
+            // callPickerApi();
+            getSystemCodeDetail();
         } else if (leadType == 'COMP') {
             const data = props.route.params.leadData;
-            setLoanTypeLabel(parseInt(data.leadCreationLoanDetails.loanTypeId))
-            setProductIdLabel(parseInt(data.leadCreationLoanDetails.loanProductId));
-            setLoanPurposeLabel(parseInt(data.leadCreationLoanDetails.loanPurposeId));
-            setLoanAmount(data.leadCreationLoanDetails.loanAmount.toString());
-            setLeadTypeLabel(parseInt(data.leadCreationLoanDetails.leadTypeId));
-            callLoanAmount(parseInt(data.leadCreationLoanDetails.loanProductId));
+            setLoanTypeLabel(data.leadCreationLoanDetails.loanType)
+            setProductIdLabel(data.leadCreationLoanDetails.loanProduct);
+            setLoanPurposeLabel(data.leadCreationLoanDetails.loanPurpose);
+            setLoanAmount(data.leadCreationLoanDetails.loanAmount);
+            setLeadTypeLabel(data.leadCreationLoanDetails.leadType);
+            callLoanAmount(data.leadCreationLoanDetails.loanProduct);
             setLoanTypeDisable(true)
             setProductIdDisable(true)
             setLoanPurposeDisable(true)
             setLoanAmountDisable(true)
             setLeadTypeDisable(true)
-            callPickerApi();
+            getProductID(data.leadCreationLoanDetails.loanType)
+            //callPickerApi();
+            getSystemCodeDetail();
         }
 
     }
@@ -675,6 +656,7 @@ const LeadCreationLoan = (props, { navigation }) => {
         if (componentName === 'loanTypePicker') {
             setLoanTypeLabel(label);
             setLoanTypeIndex(index);
+            getProductID(label)
         } else if (componentName === 'productIdPicker') {
             setProductIdLabel(label);
             setProductIdIndex(index);
@@ -694,11 +676,14 @@ const LeadCreationLoan = (props, { navigation }) => {
 
     }
 
+    const closeErrorModal = () => {
+        setErrorModalVisible(false);
+    };
 
     return (
         // enclose all components in this View tag
         <SafeAreaView style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
-
+            <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
             <View style={{
                 width: '100%', height: 56, alignItems: 'center', justifyContent: 'center',
@@ -937,9 +922,11 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state) => {
     const { language } = state.languageReducer;
     const { profileDetails } = state.profileReducer;
+    const { mobileCodeDetails } = state.mobilecodeReducer;
     return {
         language: language,
         profiledetail: profileDetails,
+        mobilecodedetail: mobileCodeDetails
     }
 }
 

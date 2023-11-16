@@ -1,6 +1,6 @@
 import { View, Text, ScrollView, SafeAreaView, StyleSheet } from 'react-native';
 import { React, useState, useRef, useEffect } from 'react';
-import MyStatusBar from '../../../Components/ MyStatusBar';
+import MyStatusBar from '../../../Components/MyStatusBar';
 import HeadComp from '../../../Components/HeadComp';
 import { connect } from 'react-redux';
 import { languageAction } from '../../../Utils/redux/actions/languageAction';

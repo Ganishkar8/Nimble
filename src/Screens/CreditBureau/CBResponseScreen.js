@@ -15,7 +15,7 @@ import { connect } from 'react-redux';
 import { languageAction } from '../../Utils/redux/actions/languageAction';
 import { language } from '../../Utils/LanguageString';
 //
-import MyStatusBar from '../../Components/ MyStatusBar';
+import MyStatusBar from '../../Components/MyStatusBar';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';

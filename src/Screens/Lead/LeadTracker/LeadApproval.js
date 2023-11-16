@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import TextComp from '../../../Components/TextComp';
 import Colors from '../../../Utils/Colors';
-import MyStatusBar from '../../../Components/ MyStatusBar';
+import MyStatusBar from '../../../Components/MyStatusBar';
 import Loading from '../../../Components/Loading';
 import { connect } from 'react-redux';
 import { languageAction } from '../../../Utils/redux/actions/languageAction';
@@ -26,7 +26,7 @@ import PickerComp from '../../../Components/PickerComp';
 import TextInputComp from '../../../Components/TextInputComp';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import apiInstancelocal from '../../../Utils/apiInstancelocal';
-
+import ErrorModal from '../../../Components/ErrorModal';
 
 
 
@@ -47,6 +47,7 @@ const LeadApproval = (props, { navigation, route }) => {
     const [statusDisable, setStatusDisable] = useState(false);
     const [commentDisable, setCommentDisable] = useState(false);
     const [logData, setLogData] = useState(props.route.params.logDetail);
+    const [systemCodeDetail, setSystemCodeDetail] = useState(props.mobilecodedetail.leadSystemCodeDto);
 
     useEffect(() => {
         //below code is used for hiding  bottom tab
@@ -63,7 +64,7 @@ const LeadApproval = (props, { navigation, route }) => {
         } else {
             setStatusDisable(false);
             setCommentDisable(false);
-            if (leadData.leadCreationLeadLogDto.leadStatus == '1667' || leadData.leadCreationLeadLogDto.leadStatus == '1668') {
+            if (leadData.leadCreationLeadLogDto.leadStatus.toUpperCase() == 'APPROVED' || leadData.leadCreationLeadLogDto.leadStatus.toUpperCase() == 'REJECTED') {
                 setStatusDisable(true);
                 setCommentDisable(true);
             }
@@ -135,29 +136,40 @@ const LeadApproval = (props, { navigation, route }) => {
 
     const callPickerApi = () => {
 
-        const baseURL = '8082'
-        setLoading(true)
+        const dataArray = [];
+        systemCodeDetail.filter((data) => data.masterId === 'LEAD_STATUS').map((value, index) => {
+            if (value.subCodeId.toUpperCase() == 'APPROVED') {
+                dataArray.push({ label: value.label, subCodeId: value.subCodeId, checked: false })
+            } else if (value.subCodeId.toUpperCase() == 'REJECTED') {
+                dataArray.push({ label: value.label, subCodeId: value.subCodeId, checked: false })
+            }
 
-        apiInstancelocal(baseURL).get('/api/v1/system-code/master/LEAD_STATUS')
-            .then(async (response) => {
+        });
+        setLeadStatusData(dataArray);
 
-                setLoading(false);
-                var data = [];
-                for (var i = 0; i < response.data.length; i++) {
-                    if (response.data[i].id == 1667) {
-                        data.push(response.data[i])
-                    } else if (response.data[i].id == 1668) {
-                        data.push(response.data[i])
-                    }
-                }
-                setLeadStatusData(data)
+        // const baseURL = '8082'
+        // setLoading(true)
 
-            })
-            .catch((error) => {
-                if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
-                setLoading(false)
-                alert(error);
-            });
+        // apiInstancelocal(baseURL).get('/api/v1/system-code/master/LEAD_STATUS')
+        //     .then(async (response) => {
+
+        //         setLoading(false);
+        //         var data = [];
+        //         for (var i = 0; i < response.data.length; i++) {
+        //             if (response.data[i].id == 1667) {
+        //                 data.push(response.data[i])
+        //             } else if (response.data[i].id == 1668) {
+        //                 data.push(response.data[i])
+        //             }
+        //         }
+        //         setLeadStatusData(data)
+
+        //     })
+        //     .catch((error) => {
+        //         if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
+        //         setLoading(false)
+        //         alert(error);
+        //     });
 
 
     }
@@ -197,10 +209,14 @@ const LeadApproval = (props, { navigation, route }) => {
             });
     }
 
+    const closeErrorModal = () => {
+        setErrorModalVisible(false);
+    };
+
     return (
 
         <SafeAreaView style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
-
+            <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
 
             <ScrollView style={styles.scrollView}
@@ -262,8 +278,12 @@ const LeadApproval = (props, { navigation, route }) => {
 
 const mapStateToProps = (state) => {
     const { language } = state.languageReducer;
+    const { profileDetails } = state.profileReducer;
+    const { mobileCodeDetails } = state.mobilecodeReducer;
     return {
-        language: language
+        language: language,
+        profiledetail: profileDetails,
+        mobilecodedetail: mobileCodeDetails
     }
 }
 

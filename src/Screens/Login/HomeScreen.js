@@ -16,7 +16,7 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import Colors from '../../Utils/Colors';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import MyStatusBar from '../../Components/ MyStatusBar';
+import MyStatusBar from '../../Components/MyStatusBar';
 import Loading from '../../Components/Loading';
 import { Dimensions } from 'react-native';
 import apiInstance from '../../Utils/apiInstance';
@@ -24,6 +24,9 @@ import { connect } from 'react-redux';
 import { languageAction } from '../../Utils/redux/actions/languageAction';
 import { profileAction } from '../../Utils/redux/actions/ProfileAction';
 import { useIsFocused } from '@react-navigation/native';
+import ErrorModal from '../../Components/ErrorModal';
+import Common from '../../Utils/Common';
+import { language } from '../../Utils/LanguageString';
 
 const HomeScreen = (props, { navigation }) => {
 
@@ -32,9 +35,21 @@ const HomeScreen = (props, { navigation }) => {
     const screenHeight = Dimensions.get('window').height;
     const [userName, setUserName] = useState('');
     const isScreenVisible = useIsFocused();
+    const [errorModalVisible, setErrorModalVisible] = useState(false);
+    const [apiError, setApiError] = useState('');
 
     useEffect(() => {
-        getProfileDetails();
+
+        Common.getNetworkConnection().then(value => {
+            if (value.isConnected == true) {
+                getProfileDetails();
+            } else {
+                setApiError(language[0][props.language].str_errinternet);
+                setErrorModalVisible(true)
+                //alert(language[0][props.language].str_errinternet)
+            }
+
+        })
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
 
         // Remove the event listener when the component unmounts
@@ -48,6 +63,10 @@ const HomeScreen = (props, { navigation }) => {
         return true; // Prevent default back button behavior
     };
 
+    const closeErrorModal = () => {
+        setErrorModalVisible(false);
+    };
+
     const getProfileDetails = () => {
 
         const baseURL = '8901'
@@ -55,7 +74,7 @@ const HomeScreen = (props, { navigation }) => {
         apiInstance(baseURL).post(`api/v1/user-personal-details/userID/${global.USERID}`)
             .then(async (response) => {
                 // Handle the response data
-                console.log("ProfileApiResponse::" + JSON.stringify(response.data));
+                if (global.DEBUG_MODE) console.log("ResponseHomeScreenApi::" + JSON.stringify(response.data));
                 setLoading(false)
                 global.USERNAME = response.data.userPersonalDetailsDto.userName;
                 setUserName(response.data.userPersonalDetailsDto.userName);
@@ -64,21 +83,23 @@ const HomeScreen = (props, { navigation }) => {
             })
             .catch((error) => {
                 // Handle the error
-                console.log("Error" + JSON.stringify(error.response))
+                if (global.DEBUG_MODE) console.log("ResponseHomeScreenApi::" + JSON.stringify(error.response))
                 setLoading(false)
-                alert(error);
+                if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
             });
-
-
 
     }
 
     return (
 
-
-
         <View style={{ flex: 1 }}>
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
+
+            <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
+
             {loading ? <Loading /> : null}
             <ImageBackground style={{ flex: 1 }} source={require('../../Images/home_bg.png')}>
 
@@ -212,7 +233,7 @@ const HomeScreen = (props, { navigation }) => {
                                                 <View style={{ width: '100%', height: '23%', flexDirection: 'row', marginTop: 23 }}>
 
                                                     <View style={{ width: '75%', justifyContent: 'flex-end' }}>
-                                                        <Text style={styles.textstyle}>New Lead Initiation</Text>
+                                                        <Text style={[styles.textstyle, { marginLeft: '8%' }]}>New Lead Initiation</Text>
 
                                                     </View>
 
@@ -256,7 +277,7 @@ const HomeScreen = (props, { navigation }) => {
                                                 <View style={{ width: '100%', height: '23%', flexDirection: 'row', marginTop: 23 }}>
 
                                                     <View style={{ width: '75%', justifyContent: 'flex-end' }}>
-                                                        <Text style={styles.textstyle}>New Application Initiation</Text>
+                                                        <Text style={[styles.textstyle, { marginLeft: '8%' }]}>New Application Initiation</Text>
 
                                                     </View>
 
@@ -400,19 +421,21 @@ const styles = StyleSheet.create({
         flexGrow: 1,
     },
     textstyle: {
-        fontSize: 14, color: '#707070', marginLeft: '4%', fontFamily: 'PoppinsRegular',
+        fontSize: 12, color: '#707070', marginLeft: '4%', fontFamily: 'PoppinsRegular',
     },
     textstyle1: {
-        fontSize: 11, color: '#707070', marginTop: 8, textAlign: 'center', fontFamily: 'PoppinsRegular',
+        fontSize: 12, color: '#707070', marginTop: 8, textAlign: 'center', fontFamily: 'PoppinsRegular',
     }
 });
 
 const mapStateToProps = (state) => {
     const { language } = state.languageReducer;
     const { profiledetail } = state.profileReducer;
+    const { mobilecodedetail } = state.mobilecodeReducer;
     return {
         language: language,
         profiledetail: profiledetail,
+        mobilecodedetail: mobilecodedetail
     }
 }
 

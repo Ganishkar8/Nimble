@@ -1,8 +1,9 @@
-import { PROFILEDETAIL } from "../actions/ProfileActionType"
+import { PROFILEDETAIL, DEDUPEDETAIL } from "../actions/ProfileActionType"
 
 
 const initialState = {
     profileDetails: [],
+    dedupeDetails: [],
 }
 
 const profileReducer = (state = initialState, action) => {
@@ -10,6 +11,11 @@ const profileReducer = (state = initialState, action) => {
         case PROFILEDETAIL: return {
             ...state,
             profileDetails: action.payload,
+        };
+
+        case DEDUPEDETAIL: return {
+            ...state,
+            dedupeDetails: action.payload,
         };
 
         default: return state

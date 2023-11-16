@@ -6,11 +6,12 @@ import {
     Text,
     SafeAreaView,
     ScrollView,
+    BackHandler
 } from 'react-native';
 import apiInstance from '../../../Utils/apiInstance';
 import apiInstancelocal from '../../../Utils/apiInstancelocal';
 import Colors from '../../../Utils/Colors';
-import MyStatusBar from '../../../Components/ MyStatusBar';
+import MyStatusBar from '../../../Components/MyStatusBar';
 import Loading from '../../../Components/Loading';
 import TextComp from '../../../Components/TextComp';
 import { connect } from 'react-redux';
@@ -33,6 +34,8 @@ import tbl_lead_creation_loan_details from '../../../Database/Table/tbl_lead_cre
 import tbl_lead_creation_basic_details from '../../../Database/Table/tbl_lead_creation_basic_details';
 import SystemMandatoryField from '../../../Components/SystemMandatoryField';
 import { profileAction } from '../../../Utils/redux/actions/ProfileAction';
+import ErrorModal from '../../../Components/ErrorModal';
+import { useIsFocused } from '@react-navigation/native';
 
 const LeadCreationBasic = (props, { navigation, route }) => {
     const [profileDetail, setProfileDetail] = useState(props.profiledetail.userPersonalDetailsDto);
@@ -92,179 +95,166 @@ const LeadCreationBasic = (props, { navigation, route }) => {
     const middleNameRef = useRef(null);
     const lastNameRef = useRef(null);
     const mobileNumberRef = useRef(null);
+    const isScreenVisible = useIsFocused();
 
+    const [systemCodeDetail, setSystemCodeDetail] = useState(props.mobilecodedetail.leadSystemCodeDto);
+    const [userCodeDetail, setUserCodeDetail] = useState(props.mobilecodedetail.leadUserCodeDto);
+    const [systemMandatoryField, setSystemMandatoryField] = useState(props.mobilecodedetail.leadSystemMandatoryFieldDto);
+    const [errorModalVisible, setErrorModalVisible] = useState(false);
+    const [apiError, setApiError] = useState('');
 
-    const [DataArray, setNewDataArray] = useState([]);
-    let errorCounter = 1;
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
-
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
         makeSystemMandatoryFields();
         //pickerData();
         getData();
 
+        //alert(JSON.stringify(props.mobilecodedetail))
+
         //callPickerApi();
-        return () =>
+        return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
-    }, [navigation]);
+            backHandler.remove();
+        }
+    }, [navigation, isScreenVisible]);
 
 
-    const pickerData = async () => {
-        tbl_SystemCodeDetails.getSystemCodeDetailsBasedOnID('CustomerCategory').then(value => {
-            if (value !== undefined && value.length > 0) {
-                console.log(value)
+    const handleBackButton = () => {
+        props.navigation.goBack();
+        return true; // Prevent default back button behavior
+    };
 
-                for (var i = 0; i < value.length; i++) {
-                    if (value[i].IsDefault === '1') {
-                        setCustCatgLabel(value[i].SubCodeID);
-                        setCustCatgIndex(i + 1);
-                    }
-                }
+    const getSystemCodeDetail = () => {
 
-                setCustCatData(value)
+        const filteredCustomerCategoryData = systemCodeDetail.filter((data) => data.masterId === 'CUSTOMER_CATEGORY');
+        setCustCatData(filteredCustomerCategoryData);
 
-            }
-        })
+        const filteredGenderData = systemCodeDetail.filter((data) => data.masterId === 'GENDER');
+        setGenderData(filteredGenderData);
+
+        const filteredTitleData = userCodeDetail.filter((data) => data.masterId === 'TITLE');
+        setTitleData(filteredTitleData);
+
     }
 
     const makeSystemMandatoryFields = () => {
 
-        tbl_SystemMandatoryFields.getSystemMandatoryFieldsBasedOnFieldUIID('sp_custcatg').then(value => {
-            if (value !== undefined && value.length > 0) {
-                console.log(value[0])
-                setCustCatgCaption(value[0].FieldName)
-                if (value[0].IsMandatory == "1") {
-                    setCustCatgMan(true);
-                }
-                if (value[0].IsHide == "1") {
-                    setCustCatgVisible(false);
-                }
-                if (value[0].IsDisable == "1") {
-                    setCustCatgDisable(true);
-                }
-                if (value[0].IsCaptionChange == "1") {
-                    setCustCatgCaption(value[0].FieldCaptionChange)
-                }
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_custcategory').map((value, index) => {
+            setCustCatgCaption(value.fieldName)
+            if (value.mandatory) {
+                setCustCatgMan(true);
             }
-        })
+            if (value.hide) {
+                setCustCatgVisible(false);
+            }
+            if (value.disable) {
+                setCustCatgDisable(true);
+            }
+            if (value.captionChange) {
+                setCustCatgCaption(value[0].fieldCaptionChange)
+            }
+        });
 
-        tbl_SystemMandatoryFields.getSystemMandatoryFieldsBasedOnFieldUIID('sp_title').then(value => {
-            if (value !== undefined && value.length > 0) {
-                console.log(value[0])
-                setTitleCaption(value[0].FieldName)
-                if (value[0].IsMandatory == "1") {
-                    setTitleMan(true);
-                }
-                if (value[0].IsHide == "1") {
-                    setTitleVisible(false);
-                }
-                if (value[0].IsDisable == "1") {
-                    setTitleDisable(true);
-                }
-                if (value[0].IsCaptionChange == "1") {
-                    setTitleCaption(value[0].FieldCaptionChange)
-                }
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_title').map((value, index) => {
+            setTitleCaption(value.fieldName)
+            if (value.mandatory) {
+                setTitleMan(true);
             }
-        })
+            if (value.hide) {
+                setTitleVisible(false);
+            }
+            if (value.disable) {
+                setTitleDisable(true);
+            }
+            if (value.captionChange) {
+                setTitleCaption(value[0].fieldCaptionChange)
+            }
+        });
 
-        tbl_SystemMandatoryFields.getSystemMandatoryFieldsBasedOnFieldUIID('sp_gender').then(value => {
-            if (value !== undefined && value.length > 0) {
-                console.log(value[0])
-                setGenderCaption(value[0].FieldName)
-                if (value[0].IsMandatory == "1") {
-                    setGenderMan(true);
-                }
-                if (value[0].IsHide == "1") {
-                    setGenderVisible(false);
-                }
-                if (value[0].IsDisable == "1") {
-                    setGenderDisable(true);
-                }
-                if (value[0].IsCaptionChange == "1") {
-                    setGenderCaption(value[0].FieldCaptionChange)
-                }
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_gender').map((value, index) => {
+            setGenderCaption(value.fieldName)
+            if (value.mandatory) {
+                setGenderMan(true);
             }
-        })
+            if (value.hide) {
+                setGenderVisible(false);
+            }
+            if (value.disable) {
+                setGenderDisable(true);
+            }
+            if (value.captionChange) {
+                setGenderCaption(value[0].fieldCaptionChange)
+            }
+        });
 
         //firstName
-        tbl_SystemMandatoryFields.getSystemMandatoryFieldsBasedOnFieldUIID('et_firstname').then(value => {
-            if (value !== undefined && value.length > 0) {
-                console.log(value[0])
-                setFirstNameCaption(value[0].FieldName)
-                if (value[0].IsMandatory == "1") {
-                    setFirstNameMan(true);
-                }
-                if (value[0].IsHide == "1") {
-                    setFirstNameVisible(false);
-                }
-                if (value[0].IsDisable == "1") {
-                    setFirstNameDisable(true);
-                }
-                if (value[0].IsCaptionChange == "1") {
-                    setFirstNameCaption(value[0].FieldCaptionChange)
-                }
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_firstname').map((value, index) => {
+            setFirstNameCaption(value.fieldName)
+            if (value.mandatory) {
+                setFirstNameMan(true);
             }
-        })
-
-        tbl_SystemMandatoryFields.getSystemMandatoryFieldsBasedOnFieldUIID('et_lastname').then(value => {
-
-
-            if (value !== undefined && value.length > 0) {
-                console.log(value)
-                setLastNameCaption(value[0].FieldName)
-                if (value[0].IsMandatory == "1") {
-                    setLastNameMan(true);
-                }
-                if (value[0].IsHide == "1") {
-                    setLastNameVisible(false);
-                }
-                if (value[0].IsDisable == "1") {
-                    setLastNameDisable(true);
-                }
-                if (value[0].IsCaptionChange == "1") {
-                    setLastNameCaption(value[0].FieldCaptionChange)
-                }
+            if (value.hide) {
+                setFirstNameVisible(false);
             }
-        })
-
-        tbl_SystemMandatoryFields.getSystemMandatoryFieldsBasedOnFieldUIID('et_middlename').then(value => {
-            if (value !== undefined && value.length > 0) {
-                console.log(value)
-                setMiddleNameCaption(value[0].FieldName)
-                if (value[0].IsMandatory == "1") {
-                    setMiddleNameMan(true);
-                }
-                if (value[0].IsHide == "1") {
-                    setMiddleNameVisible(false);
-                }
-                if (value[0].IsDisable == "1") {
-                    setMiddleNameDisable(true);
-                }
-                if (value[0].IsCaptionChange == "1") {
-                    setMiddleNameCaption(value[0].FieldCaptionChange)
-                }
+            if (value.disable) {
+                setFirstNameDisable(true);
             }
-        })
-
-        tbl_SystemMandatoryFields.getSystemMandatoryFieldsBasedOnFieldUIID('et_mobilenumber').then(value => {
-            if (value !== undefined && value.length > 0) {
-                console.log(value)
-                setMobileNumberCaption(value[0].FieldName)
-                if (value[0].IsMandatory == "1") {
-                    setMobileNumberMan(true);
-                }
-                if (value[0].IsHide == "1") {
-                    setMobileNumberVisible(false);
-                }
-                if (value[0].IsDisable == "1") {
-                    setMobileNumberDisable(true);
-                }
-                if (value[0].IsCaptionChange == "1") {
-                    setMobileNumberCaption(value[0].FieldCaptionChange)
-                }
+            if (value.captionChange) {
+                setFirstNameCaption(value[0].fieldCaptionChange)
             }
-        })
+        });
+
+
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_lastname').map((value, index) => {
+            setLastNameCaption(value.fieldName)
+            if (value.mandatory) {
+                setLastNameMan(true);
+            }
+            if (value.hide) {
+                setLastNameVisible(false);
+            }
+            if (value.disable) {
+                setLastNameDisable(true);
+            }
+            if (value.captionChange) {
+                setLastNameCaption(value[0].fieldCaptionChange)
+            }
+        });
+
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_middlename').map((value, index) => {
+            setMiddleNameCaption(value.fieldName)
+            if (value.mandatory) {
+                setMiddleNameMan(true);
+            }
+            if (value.hide) {
+                setMiddleNameVisible(false);
+            }
+            if (value.disable) {
+                setMiddleNameDisable(true);
+            }
+            if (value.captionChange) {
+                setMiddleNameCaption(value[0].fieldCaptionChange)
+            }
+        });
+
+
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_mobilenumber').map((value, index) => {
+            setMobileNumberCaption(value.fieldName)
+            if (value.mandatory) {
+                setMobileNumberMan(true);
+            }
+            if (value.hide) {
+                setMobileNumberVisible(false);
+            }
+            if (value.disable) {
+                setMobileNumberDisable(true);
+            }
+            if (value.captionChange) {
+                setMobileNumberCaption(value[0].fieldCaptionChange)
+            }
+        });
 
     }
 
@@ -286,7 +276,15 @@ const LeadCreationBasic = (props, { navigation, route }) => {
             })
         }
         else {
-            leadPostApi();
+            Common.getNetworkConnection().then(async (value) => {
+                if (value.isConnected == true) {
+                    leadPostApi();
+                } else {
+                    setApiError(language[0][props.language].str_errinternet);
+                    setErrorModalVisible(true)
+                }
+            })
+
         }
 
 
@@ -301,13 +299,13 @@ const LeadCreationBasic = (props, { navigation, route }) => {
             "leadCreationBasicDetails": {
                 "createdBy": global.USERID,
                 "createdOn": '',
-                "customerCategoryId": custCatgLabel,
-                "titleId": titleLabel,
+                "customerCategory": custCatgLabel,
+                "title": titleLabel,
                 "firstName": firstName,
                 "middleName": middleName,
                 "lastName": lastName,
                 "mobileNumber": mobileNumber,
-                "genderId": genderLabel
+                "gender": genderLabel
             },
             "leadCreationBusinessDetails": {},
 
@@ -319,20 +317,19 @@ const LeadCreationBasic = (props, { navigation, route }) => {
         setLoading(true)
         apiInstancelocal(baseURL).post('/api/v1/lead-creation-initiation', appDetails)
             .then(async (response) => {
-                // Handle the response data
-                console.log("LeadCreationBasicApiResponse::" + JSON.stringify(response.data));
+                if (global.DEBUG_MODE) console.log("LeadCreationBasicApiResponse::" + JSON.stringify(response.data));
                 global.leadID = response.data.id;
                 global.leadNumber = response.data.leadNumber;
-                setLoading(false)
-                //alert(JSON.stringify(response.data))
                 insertLead(response.data, true)
-
+                setLoading(false)
             })
             .catch((error) => {
-                // Handle the error
-                console.log("Error" + JSON.stringify(error.response))
                 setLoading(false)
-                alert(error);
+                if (global.DEBUG_MODE) console.log("LeadCreationBasicApiResponse::" + JSON.stringify(error.response.data));
+                if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
             });
     }
 
@@ -342,13 +339,13 @@ const LeadCreationBasic = (props, { navigation, route }) => {
             "leadCreationBasicDetails": {
                 "createdBy": global.USERID,
                 "createdOn": '',
-                "customerCategoryId": custCatgLabel,
-                "titleId": titleLabel,
+                "customerCategory": custCatgLabel,
+                "title": titleLabel,
                 "firstName": firstName,
                 "middleName": middleName,
                 "lastName": lastName,
                 "mobileNumber": mobileNumber,
-                "genderId": genderLabel
+                "gender": genderLabel
             }
         }
         const baseURL = '8901'
@@ -359,16 +356,16 @@ const LeadCreationBasic = (props, { navigation, route }) => {
                 console.log("LeadCreationBasicApiResponse::" + JSON.stringify(response.data));
                 global.leadID = response.data.id;
                 global.leadNumber = response.data.leadNumber;
-                setLoading(false)
-                //alert(JSON.stringify(response.data))
                 insertLead(response.data, false)
-
+                setLoading(false)
             })
             .catch((error) => {
-                // Handle the error
-                console.log("Error" + JSON.stringify(error.response))
-                setLoading(false)
-                alert(error);
+                setLoading(false);
+                if (global.DEBUG_MODE) console.log("LeadCreationBasicApiResponse::" + JSON.stringify(error.response.data));
+                if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
             });
     }
 
@@ -390,32 +387,34 @@ const LeadCreationBasic = (props, { navigation, route }) => {
     const getData = () => {
 
         if (leadType == 'DRAFT') {
-            setLoading(true);
+            //setLoading(true);
             tbl_lead_creation_basic_details.getLeadCreationBasicDetailsBasedOnLeadID(global.leadID).then(value => {
                 if (value !== undefined && value.length > 0) {
-                    setCustCatgLabel(parseInt(value[0].customer_category_id.toString()));
+                    setCustCatgLabel(value[0].customer_category_id);
                     setFirstName(value[0].first_name);
                     setMiddleName(value[0].middle_name);
                     setLastName(value[0].last_name);
-                    setGenderLabel(parseInt(value[0].gender_id));
-                    setTitleLabel(parseInt(value[0].title_id));
+                    setGenderLabel(value[0].gender_id);
+                    setTitleLabel(value[0].title_id);
                     setMobileNumber(value[0].mobile_number);
-                    callPickerApi();
+                    //callPickerApi();
+                    getSystemCodeDetail();
 
                 }
             })
         } else if (leadType == 'NEW') {
-            callPickerApi();
+            getSystemCodeDetail();
         } else if (leadType == 'COMP') {
             const data = props.route.params.leadData;
-            setCustCatgLabel(parseInt(data.leadCreationBasicDetails.customerCategoryId));
+            setCustCatgLabel(data.leadCreationBasicDetails.customerCategory);
             setFirstName(data.leadCreationBasicDetails.firstName);
             setMiddleName(data.leadCreationBasicDetails.middleName);
             setLastName(data.leadCreationBasicDetails.lastName);
-            setGenderLabel(parseInt(data.leadCreationBasicDetails.genderId));
-            setTitleLabel(parseInt(data.leadCreationBasicDetails.titleId));
+            setGenderLabel(data.leadCreationBasicDetails.gender);
+            setTitleLabel(data.leadCreationBasicDetails.title);
             setMobileNumber(data.leadCreationBasicDetails.mobileNumber.toString());
-            callPickerApi();
+            // callPickerApi();
+            getSystemCodeDetail();
             setCustCatgDisable(true)
             setTitleDisable(true)
             setFirstNameDisable(true)
@@ -424,54 +423,6 @@ const LeadCreationBasic = (props, { navigation, route }) => {
             setGenderDisable(true)
             setMobileNumberDisable(true)
         }
-
-    }
-
-    const callPickerApi = () => {
-
-        const baseURL = '8082'
-        setLoading(true)
-        var customerresponse = false; var genderresponse = false; var titleresponse = false;
-        apiInstancelocal(baseURL).get('/api/v1/system-code/master/CUSTOMER_CATEGORY')
-            .then(async (response) => {
-                customerresponse = true;
-                if (customerresponse && genderresponse && titleresponse) {
-                    setLoading(false);
-                }
-                setCustCatData(response.data)
-            })
-            .catch((error) => {
-                if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
-                setLoading(false)
-                alert(error);
-            });
-        apiInstancelocal(baseURL).get('/api/v1/user-code/master/TITLE')
-            .then(async (response) => {
-                titleresponse = true;
-                if (customerresponse && genderresponse && titleresponse) {
-                    setLoading(false);
-                }
-                setTitleData(response.data)
-            })
-            .catch((error) => {
-                if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
-                setLoading(false)
-                alert(error);
-            });
-        apiInstancelocal(baseURL).get('/api/v1/system-code/master/GENDER')
-            .then(async (response) => {
-                genderresponse = true;
-                if (customerresponse && genderresponse && titleresponse) {
-                    setLoading(false);
-                }
-                setGenderData(response.data)
-            })
-            .catch((error) => {
-                if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
-                setLoading(false)
-                alert(error);
-            });
-
 
     }
 
@@ -539,14 +490,14 @@ const LeadCreationBasic = (props, { navigation, route }) => {
 
 
         if (titleVisible && genderVisible) {
-            if (titleLabel === 225) {
-                if (genderLabel == 519) {
+            if (titleLabel === 'MR') {
+                if (genderLabel == 'FEMALE') {
                     errorMessage = errorMessage + i + ')' + ' ' + titleCaption + ' AND ' + genderCaption + ' Not matching' + '\n';
                     i++;
                     flag = true;
                 }
-            } else if (titleLabel === 226 || titleLabel === 227) {
-                if (genderLabel == 518) {
+            } else if (titleLabel === 'MRS' || titleLabel === 'MISS') {
+                if (genderLabel == 'MALE') {
                     errorMessage = errorMessage + i + ')' + ' ' + titleCaption + ' AND ' + genderCaption + ' Not matching' + '\n';
                     i++;
                     flag = true;
@@ -557,75 +508,6 @@ const LeadCreationBasic = (props, { navigation, route }) => {
         setErrMsg(errorMessage);
         return flag;
     }
-
-    const updateDatainParent = (
-        fieldName,
-        newValue,
-        isMandatory,
-        IsHide,
-        IsDisable,
-        isPicker,
-    ) => {
-        // Find the index of the object in DataArray with the matching fieldName
-        const dataIndex = DataArray.findIndex(item => item.fieldName === fieldName);
-
-        if (dataIndex !== -1) {
-            // If the object with the same fieldName exists, get the existing object
-            const existingData = DataArray[dataIndex];
-
-            // Create a new object by merging the existingData with the new data
-            const newDataObject = {
-                fieldName: fieldName,
-                fieldValue: newValue,
-                isMandatory:
-                    isMandatory !== undefined ? isMandatory : existingData.isMandatory,
-                isDisable: IsDisable !== undefined ? IsDisable : existingData.isDisable,
-                IsHide: IsHide !== undefined ? IsHide : existingData.IsHide,
-                isPicker: existingData.isPicker || false,
-            };
-
-            // Update the object in DataArray with the merged data
-            DataArray[dataIndex] = newDataObject;
-        } else {
-            // If not, add the new object to the array with the provided data
-            const newDataObject = {
-                fieldName: fieldName,
-                fieldValue: newValue,
-                isMandatory: isMandatory,
-                isDisable: IsDisable,
-                IsHide: IsHide,
-                isPicker: isPicker || false,
-            };
-
-            setNewDataArray(prevDataArray => [...prevDataArray, newDataObject]);
-        }
-
-        console.log('DataArray:', DataArray);
-    };
-
-    const validateData = () => {
-        let flag = false;
-        let errMsg = '';
-
-        DataArray.forEach(item => {
-            if (
-                (item.IsHide === '' || item.IsHide === '0') &&
-                item.isMandatory === '1' &&
-                (item.fieldValue === '' || item.fieldValue === undefined)
-            ) {
-                errMsg += `${errorCounter}) Please Select ${item.fieldName}\n`;
-                errorCounter++;
-                // console.log('errMsg:', errMsg);
-            }
-        });
-
-        if (errMsg !== '') {
-            setErrMsg(errMsg);
-            flag = true;
-        }
-
-        return flag;
-    };
 
     const handleClick = (componentName, textValue) => {
 
@@ -699,10 +581,14 @@ const LeadCreationBasic = (props, { navigation, route }) => {
 
     }
 
+    const closeErrorModal = () => {
+        setErrorModalVisible(false);
+    };
+
     return (
         // enclose all components in this View tag
         <SafeAreaView style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
-
+            <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
             <View style={{ width: '100%', height: 56, alignItems: 'center', justifyContent: 'center', }}>
 
@@ -881,9 +767,11 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state) => {
     const { language } = state.languageReducer;
     const { profileDetails } = state.profileReducer;
+    const { mobileCodeDetails } = state.mobilecodeReducer;
     return {
         language: language,
         profiledetail: profileDetails,
+        mobilecodedetail: mobileCodeDetails
     }
 }
 

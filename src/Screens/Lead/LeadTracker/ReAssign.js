@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import TextComp from '../../../Components/TextComp';
 import Colors from '../../../Utils/Colors';
-import MyStatusBar from '../../../Components/ MyStatusBar';
+import MyStatusBar from '../../../Components/MyStatusBar';
 import Loading from '../../../Components/Loading';
 import { connect } from 'react-redux';
 import { languageAction } from '../../../Utils/redux/actions/languageAction';
@@ -61,7 +61,9 @@ const ReAssign = (props, { navigation }) => {
     const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
     const showBottomSheet = () => setBottomErrorSheetVisible(true);
     const hideBottomSheet = () => setBottomErrorSheetVisible(false);
-
+    const [systemCodeDetail, setSystemCodeDetail] = useState(props.mobilecodedetail.leadSystemCodeDto);
+    const [errorModalVisible, setErrorModalVisible] = useState(false);
+    const [apiError, setApiError] = useState('');
 
     useEffect(() => {
         //below code is used for hiding  bottom tab
@@ -96,28 +98,35 @@ const ReAssign = (props, { navigation }) => {
         const baseURL = '8082'
         setLoading(true)
 
-        var reasonresponse = false; var userresponse = false;
 
-        apiInstancelocal(baseURL).get('/api/v1/system-code/master/RE_ASSIGN_REASON')
-            .then(async (response) => {
-                reasonresponse = true;
-                if (reasonresponse && userresponse) {
-                    setLoading(false);
-                }
-                setReasonData(response.data)
-            })
-            .catch((error) => {
-                if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
-                setLoading(false)
-                alert(error);
-            });
+        const dataArray = [];
+        systemCodeDetail.filter((data) => data.masterId === 'RE_ASSIGN_REASON').map((value, index) => {
+            dataArray.push({ label: value.label, subCodeId: value.subCodeId })
+        });
+        setReasonData(dataArray)
+
+        // var reasonresponse = false; var userresponse = false;
+
+        // apiInstancelocal(baseURL).get('/api/v1/system-code/master/RE_ASSIGN_REASON')
+        //     .then(async (response) => {
+        //         reasonresponse = true;
+        //         if (reasonresponse && userresponse) {
+        //             setLoading(false);
+        //         }
+        //         setReasonData(response.data)
+        //     })
+        //     .catch((error) => {
+        //         if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
+        //         setLoading(false)
+        //         alert(error);
+        //     });
 
         apiInstancelocal('8901').post(`/api/v1/lead-Approved/ReAssignedDrowdown/${profileDetail.branchId}`)
             .then(async (response) => {
-                userresponse = true;
-                if (reasonresponse && userresponse) {
-                    setLoading(false);
-                }
+                //userresponse = true;
+                //if (reasonresponse && userresponse) {
+                setLoading(false);
+                //}
                 setFilteredData(response.data)
                 setNonFilteredData(response.data)
             })
@@ -229,14 +238,18 @@ const ReAssign = (props, { navigation }) => {
             .then(async (response) => {
                 // Handle the response data
                 setLoading(false)
-                props.navigation.goBack();
+                props.navigation.navigate('LeadManagement', { fromScreen: 'ReAssign' })
 
             })
             .catch((error) => {
                 // Handle the error
                 setLoading(false)
                 //alert(JSON.stringify(error.response));
-                props.navigation.goBack();
+                if (global.DEBUG_MODE) console.log("ReAssignApiResponse::" + JSON.stringify(error.response.data));
+                if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
             });
     }
 
@@ -405,9 +418,11 @@ const ReAssign = (props, { navigation }) => {
 const mapStateToProps = (state) => {
     const { language } = state.languageReducer;
     const { profileDetails } = state.profileReducer;
+    const { mobileCodeDetails } = state.mobilecodeReducer;
     return {
         language: language,
         profiledetail: profileDetails,
+        mobilecodedetail: mobileCodeDetails
     }
 }
 

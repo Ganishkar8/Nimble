@@ -1,4 +1,4 @@
-import React, {useState, useRef, useEffect} from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -12,12 +12,12 @@ import {
 import apiInstance from '../../../Utils/apiInstance';
 import apiInstancelocal from '../../../Utils/apiInstancelocal';
 import Colors from '../../../Utils/Colors';
-import MyStatusBar from '../../../Components/ MyStatusBar';
+import MyStatusBar from '../../../Components/MyStatusBar';
 import Loading from '../../../Components/Loading';
 import TextComp from '../../../Components/TextComp';
-import {connect} from 'react-redux';
-import {languageAction} from '../../../Utils/redux/actions/languageAction';
-import {language} from '../../../Utils/LanguageString';
+import { connect } from 'react-redux';
+import { languageAction } from '../../../Utils/redux/actions/languageAction';
+import { language } from '../../../Utils/LanguageString';
 import Commonstyles from '../../../Utils/Commonstyles';
 import HeadComp from '../../../Components/HeadComp';
 import ProgressComp from '../../../Components/ProgressComp';
@@ -31,12 +31,12 @@ import TextInputComp from '../../../Components/TextInputComp';
 import PickerComp from '../../../Components/PickerComp';
 import ButtonViewComp from '../../../Components/ButtonViewComp';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
-import {Directions} from 'react-native-gesture-handler';
+import { Directions } from 'react-native-gesture-handler';
 import ChildHeadComp from '../../../Components/ChildHeadComp';
 import CheckBoxComp from '../../../Components/CheckBoxComp';
 import DocumentPicker from 'react-native-document-picker';
 
-const ProfileShortBasicDetails = (props, {navigation}) => {
+const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
   const [errMsg, setErrMsg] = useState('');
   const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
@@ -116,14 +116,14 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
   useEffect(() => {
     props.navigation
       .getParent()
-      ?.setOptions({tabBarStyle: {display: 'none'}, tabBarVisible: false});
+      ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     makeSystemMandatoryFields();
     pickerData();
 
     return () =>
       props.navigation
         .getParent()
-        ?.setOptions({tabBarStyle: undefined, tabBarVisible: undefined});
+        ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
   }, [navigation]);
 
   const pickerData = async () => {
@@ -590,7 +590,7 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
   return (
     // enclose all components in this View tag
     <SafeAreaView
-      style={[styles.parentView, {backgroundColor: Colors.lightwhite}]}>
+      style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
       <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
 
       <ScrollView
@@ -599,7 +599,7 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled">
         {loading ? <Loading /> : null}
-        <View style={{flex: 1}}>
+        <View style={{ flex: 1 }}>
           <ErrorMessageModal
             isVisible={bottomErrorSheetVisible}
             hideBottomSheet={hideBottomSheet}
@@ -624,8 +624,8 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
             textval={language[0][props.language].str_applicantdetails}
           />
 
-          <View style={{width: '100%', alignItems: 'center', marginTop: '3%'}}>
-            <View style={{width: '90%', marginTop: 3}}>
+          <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
+            <View style={{ width: '90%', marginTop: 3 }}>
               <TextComp
                 textStyle={{
                   color: Colors.mediumgrey,
@@ -649,7 +649,7 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
                 alignItems: 'center',
                 justifyContent: 'center',
               }}>
-              <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                 <TextComp
                   textVal={LoanApplicationIDCaption}
                   textStyle={Commonstyles.inputtextStyle}
@@ -678,7 +678,7 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
                 alignItems: 'center',
                 marginTop: '4%',
               }}>
-              <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                 <TextComp
                   textVal={KycSourceCaption}
                   textStyle={Commonstyles.inputtextStyle}
@@ -704,7 +704,7 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
                 alignItems: 'center',
                 marginTop: '4%',
               }}>
-              <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                 <TextComp
                   textVal={KycTypeCaption}
                   textStyle={Commonstyles.inputtextStyle}
@@ -732,7 +732,7 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
                 alignItems: 'center',
                 justifyContent: 'center',
               }}>
-              <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                 <TextComp
                   textVal={kycIDCaption}
                   textStyle={Commonstyles.inputtextStyle}
@@ -777,7 +777,7 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
               <TouchableOpacity onPress={pickDocument} activeOpacity={0}>
                 <FontAwesome6 name="cloud-arrow-up" size={35} color="#b5b6b6" />
               </TouchableOpacity>
-              <Text style={{marginLeft: 70}}>
+              <Text style={{ marginLeft: 70 }}>
                 {selectedDocument?.name || 'None'}
               </Text>
             </View>
@@ -826,7 +826,7 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
                     marginTop: '4%',
                   }}>
                   <View
-                    style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+                    style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                     <TextComp
                       textVal={KycType1Caption}
                       textStyle={Commonstyles.inputtextStyle}
@@ -855,7 +855,7 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
                     justifyContent: 'center',
                   }}>
                   <View
-                    style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+                    style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                     <TextComp
                       textVal={kycID1Caption}
                       textStyle={Commonstyles.inputtextStyle}
@@ -882,7 +882,7 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
                       alignItems: 'right',
                       justifyContent: 'right',
                     }}>
-                    <View style={{flexDirection: 'row'}}>
+                    <View style={{ flexDirection: 'row' }}>
                       <View
                         style={{
                           width: '80%',
@@ -957,7 +957,7 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
                     marginTop: '4%',
                   }}>
                   <View
-                    style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+                    style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                     <TextComp
                       textVal={KycType2Caption}
                       textStyle={Commonstyles.inputtextStyle}
@@ -985,7 +985,7 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
                     justifyContent: 'center',
                   }}>
                   <View
-                    style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+                    style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                     <TextComp
                       textVal={kycID2Caption}
                       textStyle={Commonstyles.inputtextStyle}
@@ -1012,7 +1012,7 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
                       alignItems: 'right',
                       justifyContent: 'right',
                     }}>
-                    <View style={{flexDirection: 'row'}}>
+                    <View style={{ flexDirection: 'row' }}>
                       <View
                         style={{
                           width: '80%',
@@ -1047,7 +1047,7 @@ const ProfileShortBasicDetails = (props, {navigation}) => {
 
         <ButtonViewComp
           textValue={language[0][props.language].str_next.toUpperCase()}
-          textStyle={{color: Colors.white, fontSize: 13, fontWeight: 500}}
+          textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
           viewStyle={Commonstyles.buttonView}
           innerStyle={Commonstyles.buttonViewInnerStyle}
           handleClick={buttonNext}
@@ -1095,7 +1095,7 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = state => {
-  const {language} = state.languageReducer;
+  const { language } = state.languageReducer;
   return {
     language: language,
   };
@@ -1108,4 +1108,4 @@ const mapDispatchToProps = dispatch => ({
 export default connect(
   mapStateToProps,
   mapDispatchToProps,
-)(ProfileShortBasicDetails);
+)(ProfileShortKYCVerificationStatus);

@@ -19,6 +19,7 @@ import AddressMainList from '../Screens/Application/Address/AddressMainList';
 import AddressDetails from '../Screens/Application/Address/AddressDetails';
 import LoanApplicationMain from '../Screens/LoanApplication/LoanApplicationMain';
 import ConsentScreen from '../Screens/LoanApplication/ConsentScreen';
+import AadharOTPVerification from '../Screens/Application/ApplicationInitiation/AadharOTPVerification';
 
 const Stack = createNativeStackNavigator();
 
@@ -130,6 +131,12 @@ export default HomeStack = () => {
       <Stack.Screen
         name="OTPVerification"
         component={OTPVerification}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="AadharOTPVerification"
+        component={AadharOTPVerification}
         options={{ headerShown: false, tabBarVisible: false }}
       />
 
