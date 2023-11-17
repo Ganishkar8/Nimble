@@ -117,6 +117,10 @@ const AddressMainList = (props, { navigation }) => {
     },
   ];
 
+  const handleClick = () =>{
+    props.navigation.navigate('AddressDetails')
+   }
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
       {loading ? <Loading /> : null}
@@ -142,8 +146,11 @@ const AddressMainList = (props, { navigation }) => {
           {language[0][props.language].str_addressdetail}
         </Text>
       </View>
-
-      <ProgressComp progressvalue={1} textvalue="4 of 4" />
+      <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center' }}>
+        <View style={{ width: '97%'}}>
+          <ProgressComp progressvalue={0.5} textvalue="1 of 4" />
+        </View>
+      </View>
 
       <View style={{ marginBottom: 10 }}>
         <IconButtonViewComp
@@ -154,6 +161,7 @@ const AddressMainList = (props, { navigation }) => {
           textStyle={{ color: Colors.skyBlue, fontSize: 13, fontWeight: 500 }}
           viewStyle={Commonstyles.buttonView}
           innerStyle={Commonstyles.buttonViewBorderStyle}
+          handleClick = {handleClick}
         />
       </View>
 
