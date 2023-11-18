@@ -205,7 +205,7 @@ export const language = [
       str_dpddays: 'DPD DAYS',
       str_outstandingamt: 'OUTSTANDING AMOUNT',
       str_overdueamt: 'OVERDUE AMOUNT',
-      str_plsverify: 'Please Verify',
+      str_plsverify: 'Please Verify ',
     },
 
     ta: {

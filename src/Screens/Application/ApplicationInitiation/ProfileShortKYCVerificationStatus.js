@@ -43,17 +43,15 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const showBottomSheet = () => setBottomErrorSheetVisible(true);
   const hideBottomSheet = () => setBottomErrorSheetVisible(false);
   const [KYC1Caption, setKYC1Caption] = useState('KYC 1');
-  const [KYC1, setKYC1] = useState(false);
+  const [KYC1, setKYC1] = useState(true);
   const [KYC2Caption, setKYC2Caption] = useState('KYC 2');
-  const [KYC2, setKYC2] = useState(false);
+  const [KYC2, setKYC2] = useState(true);
 
   const [LoanApplicationID, setLoanApplicationID] = useState('');
-  const [LoanApplicationIDCaption, setLoanApplicationIDCaption] = useState(
-    'Loan APPLICATION ID',
-  );
+  const [LoanApplicationIDCaption, setLoanApplicationIDCaption] = useState('Loan APPLICATION ID');
   const [LoanApplicationIDMan, setLoanApplicationIDMan] = useState(false);
   const [LoanApplicationIDVisible, setLoanApplicationIDVisible] =
-    useState(true);
+    useState(false);
   const [LoanApplicationIDDisable, setLoanApplicationIDDisable] =
     useState(false);
   const LoanApplicationIDRef = useRef(null);

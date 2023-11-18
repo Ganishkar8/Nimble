@@ -23,3 +23,5 @@ global.BRCONNECTAPIKEY = "";
 global.BRCONNECTAPPID = "";
 global.LEADTYPE = '';
 global.TEMPAPPID = '';
+global.isMobileVerified = '0';
+global.isDedupeDone = '0';
