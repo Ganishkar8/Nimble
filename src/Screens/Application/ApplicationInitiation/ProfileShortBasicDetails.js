@@ -40,6 +40,8 @@ import DateInputComp from '../../../Components/DateInputComp';
 import ErrorModal from '../../../Components/ErrorModal';
 import DedupeModal from '../../../Components/DedupeModal';
 import { useIsFocused } from '@react-navigation/native';
+import tbl_client from '../../../Database/Table/tbl_client';
+
 
 const ProfileShortBasicDetails = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -102,6 +104,22 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   const [workflowIDCaption, setWorkflowIDCaption] = useState('WORKFLOW ID');
   const [workflowIDLabel, setWorkflowIDLabel] = useState('');
   const [workflowIDIndex, setWorkflowIDIndex] = useState('');
+
+  const [titleCaption, setTitleCaption] = useState('TITLE');
+  const [titleMan, setTitleMan] = useState(false);
+  const [titleVisible, setTitleVisible] = useState(true);
+  const [titleDisable, setTitleDisable] = useState(false);
+  const [titleLabel, setTitleLabel] = useState('');
+  const [titleIndex, setTitleIndex] = useState('');
+  const [titleData, setTitleData] = useState([]);
+
+  const [genderCaption, setGenderCaption] = useState('GENDER');
+  const [genderMan, setGenderMan] = useState(false);
+  const [genderVisible, setGenderVisible] = useState(true);
+  const [genderDisable, setGenderDisable] = useState(false);
+  const [genderLabel, setGenderLabel] = useState('');
+  const [genderIndex, setGenderIndex] = useState('');
+  const [genderData, setGenderData] = useState([]);
 
   const [LoanAmount, setLoanAmount] = useState('');
   const [LoanAmountCaption, setLoanAmountCaption] = useState(
@@ -258,6 +276,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   const [leaduserCodeDetail, setLeadUserCodeDetail] = useState(props.mobilecodedetail.leadUserCodeDto);
   const [userCodeDetail, setUserCodeDetail] = useState(props.mobilecodedetail.t_UserCodeDetail);
   const [bankUserCodeDetail, setBankUserCodeDetail] = useState(props.mobilecodedetail.t_BankUserCode);
+
   const [systemMandatoryField, setSystemMandatoryField] = useState(props.mobilecodedetail.processSystemMandatoryFields);
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [apiError, setApiError] = useState('');
@@ -304,6 +323,12 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
 
     const filteredCustomerSubCategoryData = userCodeDetail.filter((data) => data.ID === 'BusinessLineID');
     setCustomerSubCategoryData(filteredCustomerSubCategoryData);
+
+    const filteredTitleData = leaduserCodeDetail.filter((data) => data.masterId === 'TITLE');
+    setTitleData(filteredTitleData);
+
+    const filteredGenderData = leadsystemCodeDetail.filter((data) => data.masterId === 'GENDER');
+    setGenderData(filteredGenderData);
 
     //alert(JSON.stringify(filteredCustomerSubCategoryData))
 
@@ -501,6 +526,22 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
       if (value.isCaptionChange) {
         setWorkflowIDCaption(value[0].fieldCaptionChange)
+      }
+    });
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_title' && data.pageId === 1).map((value, index) => {
+      setTitleCaption(value.fieldName)
+      if (value.mandatory) {
+        setTitleMan(true);
+      }
+      if (value.hide) {
+        setTitleVisible(false);
+      }
+      if (value.disable) {
+        setTitleDisable(true);
+      }
+      if (value.captionChange) {
+        setTitleCaption(value[0].fieldCaptionChange)
       }
     });
 
@@ -769,7 +810,8 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
 
   const internalDedupeCheck = () => {
 
-
+    props.navigation.navigate('AadharOTPVerification', { aadharNumber: 'mobileNumber' });
+    return;
     if (validate()) {
       showBottomSheet();
     } else {
@@ -804,7 +846,8 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
         .then(async response => {
           // Handle the response data
           if (global.DEBUG_MODE) console.log('DedupeApiResponse::' + JSON.stringify(response.data),);
-
+          //await tbl_client.deleteAllClient();
+          await insertData();
           if (response.data.clientExistingDetails == null) {
             setClientTypeLabel('NEW');
             props.navigation.navigate('AadharOTPVerification', { aadharNumber: 'mobileNumber' });
@@ -831,6 +874,13 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
         });
     }
   };
+
+  const insertData = async () => {
+
+    await tbl_client.insertClient(global.TEMPAPPID, clientTypeLabel, "", titleLabel, Name, "", "", "", "", "", "", "", "", "", "", genderLabel, MaritalStatusLabel, mobileNumber, Email, "",
+      KycType1Label, kycID1, expiryDate1, KycType2Label, kycID2, expiryDate2, KycType3Label, kycID3, expiryDate3, KycType4Label, kycID4, expiryDate4, chkMsme, "", "", URNumber, "", isMobileVerified, isEmailVerified, "dedupeCheck", "isDedupePassed", "dmsId", "image", "geoCode", "1", "", "", "", "", "", "", "", "lmsClientId", "lmsCustomerTypeId");
+
+  }
 
   const generateOTP = () => {
 
@@ -880,6 +930,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     var flag = false;
     var i = 1;
     var errorMessage = '';
+    return flag;
 
     if (custCatgMan && custCatgVisible) {
       if (custCatgLabel === 'Select') {
@@ -1163,7 +1214,12 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       setkycID1(textValue);
     } else if (componentName === 'kycID2') {
       setkycID2(textValue);
-    } else if (componentName === 'Email') {
+    } else if (componentName === 'kycID3') {
+      setkycID3(textValue);
+    } else if (componentName === 'kycID4') {
+      setkycID4(textValue);
+    }
+    else if (componentName === 'Email') {
       setEmail(textValue);
     } else if (componentName === 'Name') {
       setName(textValue);
@@ -1267,6 +1323,12 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     } else if (componentName == 'workFlowIDPicker') {
       setWorkflowIDLabel(label);
       setWorkflowIDIndex(index);
+    } else if (componentName === 'titlePicker') {
+      setTitleLabel(label);
+      setTitleIndex(index);
+    } else if (componentName === 'genderPicker') {
+      setGenderLabel(label);
+      setGenderIndex(index);
     }
 
 
@@ -1599,6 +1661,19 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
             </View>
           )}
 
+          {titleVisible && <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
+
+              <TextComp textVal={titleCaption} textStyle={Commonstyles.inputtextStyle} Visible={titleMan} />
+
+            </View>
+
+            <PickerComp textLabel={titleLabel} pickerStyle={Commonstyles.picker} Disable={titleDisable} pickerdata={titleData} componentName='titlePicker' handlePickerClick={handlePickerClick} />
+
+
+          </View>}
+
+
           {NameVisible && (
             <View
               style={{
@@ -1629,6 +1704,18 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
               />
             </View>
           )}
+
+          {genderVisible && <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
+
+              <TextComp textVal={genderCaption} textStyle={Commonstyles.inputtextStyle} Visible={genderMan} />
+
+            </View>
+
+            <PickerComp textLabel={genderLabel} pickerStyle={Commonstyles.picker} Disable={genderDisable} pickerdata={genderData} componentName='genderPicker' handlePickerClick={handlePickerClick} />
+
+
+          </View>}
 
           {MaritalStatusVisible && (
             <View

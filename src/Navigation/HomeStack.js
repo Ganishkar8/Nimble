@@ -20,6 +20,8 @@ import AddressDetails from '../Screens/Application/Address/AddressDetails';
 import LoanApplicationMain from '../Screens/LoanApplication/LoanApplicationMain';
 import ConsentScreen from '../Screens/LoanApplication/ConsentScreen';
 import AadharOTPVerification from '../Screens/Application/ApplicationInitiation/AadharOTPVerification';
+import ProfileShortKYCVerificationStatus from '../Screens/Application/ApplicationInitiation/ProfileShortKYCVerificationStatus';
+import ProfileShortApplicantDetails from '../Screens/Application/ApplicationInitiation/ProfileShortApplicantDetails';
 
 const Stack = createNativeStackNavigator();
 
@@ -138,6 +140,18 @@ export default HomeStack = () => {
         name="AadharOTPVerification"
         component={AadharOTPVerification}
         options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="ProfileShortKYCVerificationStatus"
+        component={ProfileShortKYCVerificationStatus}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="ProfileShortApplicantDetails"
+        component={ProfileShortApplicantDetails}
+        options={{ headerShown: false }}
       />
 
     </Stack.Navigator>

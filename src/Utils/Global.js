@@ -24,4 +24,5 @@ global.BRCONNECTAPPID = "";
 global.LEADTYPE = '';
 global.TEMPAPPID = '';
 global.isMobileVerified = '0';
+global.isAadharVerified = '0';
 global.isDedupeDone = '0';

@@ -9,7 +9,9 @@ import {
     Keyboard,
     Alert,
     BackHandler,
-    TouchableOpacity
+    TouchableOpacity,
+    PermissionsAndroid,
+    Platform
 } from 'react-native';
 import apiInstance from '../../../Utils/apiInstance';
 import apiInstancelocal from '../../../Utils/apiInstancelocal';
@@ -76,6 +78,7 @@ const AadharOTPVerification = (props, { navigation }) => {
         value,
         setValue,
     });
+
     const institutionIDRef = useRef(null);
     const challengeCodeRef = useRef(null);
     let Url = Common.CS_URL; // Initialize with your initial URL
@@ -201,11 +204,87 @@ const AadharOTPVerification = (props, { navigation }) => {
 
     const manualKYC = () => {
         if (isManualKYC) {
+            global.isAadharVerified = "0";
             props.navigation.navigate('ProfileShortKYCVerificationStatus', { 'isAadharVerified': '0' });
         } else {
-            validateOTP();
+            global.isAadharVerified = "1";
+            props.navigation.navigate('ProfileShortKYCVerificationStatus', { 'isAadharVerified': '0' });
+            //validateOTP();
         }
     }
+
+    const checkPermissions = async () => {
+        const permissionsToRequest = [];
+
+        if (Platform.OS === 'android') {
+            // Camera permission
+            const cameraPermission = await PermissionsAndroid.check(
+                PermissionsAndroid.PERMISSIONS.CAMERA
+            );
+            if (cameraPermission !== PermissionsAndroid.RESULTS.GRANTED) {
+                permissionsToRequest.push(PermissionsAndroid.PERMISSIONS.CAMERA);
+            }
+
+            // Location permission
+            const locationPermission = await PermissionsAndroid.check(
+                PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+            );
+            if (locationPermission !== PermissionsAndroid.RESULTS.GRANTED) {
+                permissionsToRequest.push(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+            }
+
+            // Request all pending permissions
+            return requestPermissions(permissionsToRequest);
+        } else {
+            // For iOS and other platforms, use react-native-permissions
+            const cameraResult = await check(PERMISSIONS.IOS.CAMERA);
+            const locationResult = await check(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
+
+            const permissionsToRequest = [];
+
+            if (cameraResult !== RESULTS.GRANTED) {
+                permissionsToRequest.push(PERMISSIONS.IOS.CAMERA);
+            }
+
+            if (locationResult !== RESULTS.GRANTED) {
+                permissionsToRequest.push(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
+            }
+
+            // Request all pending permissions
+            request(permissionsToRequest);
+        }
+    };
+
+    const requestPermissions = async (permissions) => {
+        if (Platform.OS === 'android') {
+            try {
+                const grantedPermissions = await PermissionsAndroid.requestMultiple(permissions);
+                const allPermissionsGranted = Object.values(grantedPermissions).every(
+                    status => status === PermissionsAndroid.RESULTS.GRANTED
+                );
+
+                if (allPermissionsGranted) {
+                    // All permissions granted
+                    manualKYC();
+                } else {
+
+                    // Handle denied permissions
+                }
+                return allPermissionsGranted
+            } catch (error) {
+                console.error(error);
+            }
+        } else {
+            // For iOS and other platforms, use react-native-permissions
+            const results = await request(permissions);
+
+            if (results.every(result => result === RESULTS.GRANTED)) {
+                // All permissions granted
+            } else {
+                // Handle denied permissions
+            }
+        }
+    };
 
     const sendDataBack = () => {
         props.navigation.goBack();
@@ -280,7 +359,7 @@ const AadharOTPVerification = (props, { navigation }) => {
 
                 </View>
 
-                <ButtonViewComp textValue={language[0][props.language].str_submit.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} viewStyle={[Commonstyles.buttonView, { marginTop: 60, marginBottom: 20 }]} innerStyle={Commonstyles.buttonViewInnerStyle} handleClick={manualKYC} />
+                <ButtonViewComp textValue={language[0][props.language].str_submit.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} viewStyle={[Commonstyles.buttonView, { marginTop: 60, marginBottom: 20 }]} innerStyle={Commonstyles.buttonViewInnerStyle} handleClick={checkPermissions} />
 
 
             </ScrollView>

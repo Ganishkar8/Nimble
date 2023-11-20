@@ -172,6 +172,7 @@ const LoanApplicationMain = (props, { navigation }) => {
 
         const filteredProcessModuleStage = processModule.filter((data) => {
             return data.wfId === 85 && data.subStageId === item.stageId;
+            return data.wfId === 85 && data.subStageId === item.stageId;
         }).map((data) => {
             const extraJSON = { subDataIsCompleted: false, nestedSubData: [] };
             return { ...data, ...extraJSON };
@@ -181,13 +182,15 @@ const LoanApplicationMain = (props, { navigation }) => {
 
         filteredProcessModuleStage.forEach((data) => {
             if (data.wfId === 85) {
+                if (data.wfId === 85) {
 
-                processPage.forEach((data1) => {
-                    if (data1.moduleId === data.id) {
-                        data.nestedSubData.push(data1);
-                    }
-                });
+                    processPage.forEach((data1) => {
+                        if (data1.moduleId === data.id) {
+                            data.nestedSubData.push(data1);
+                        }
+                    });
 
+                }
             }
         });
 
@@ -198,13 +201,17 @@ const LoanApplicationMain = (props, { navigation }) => {
     }
 
     const nestedDataClick = (item) => {
-        alert(JSON.stringify(item))
+        //alert("Ganishkar "+JSON.stringify(item))
+        if (item.id == 5) {
+            props.navigation.navigate('AddressMainList')
+        }
     }
 
 
     const getProcessSubStage = async () => {
 
         const filteredProcessSubStage = processSubStage.filter((data) => {
+            return data.wfId === 85 && (data.stageId === 1 || data.stageId === 2 || data.stageId === 3 || data.stageId === 4);
             return data.wfId === 85 && (data.stageId === 1 || data.stageId === 2 || data.stageId === 3 || data.stageId === 4);
         }).map((data) => {
             const extraJSON = { isSelected: data.stageId === 1 };
@@ -215,6 +222,7 @@ const LoanApplicationMain = (props, { navigation }) => {
 
         const filteredProcessModuleStage = processModule.filter((data) => {
             return data.wfId === 85 && data.subStageId === 1;
+            return data.wfId === 85 && data.subStageId === 1;
         }).map((data) => {
             const extraJSON = { subDataIsCompleted: false, nestedSubData: [] };
             return { ...data, ...extraJSON };
@@ -222,15 +230,17 @@ const LoanApplicationMain = (props, { navigation }) => {
 
         filteredProcessModuleStage.forEach((data) => {
             if (data.wfId === 85) {
+                if (data.wfId === 85) {
 
-                processPage.forEach((data1) => {
-                    if (data1.moduleId === data.id) {
-                        data.nestedSubData.push(data1);
-                    }
-                });
+                    processPage.forEach((data1) => {
+                        if (data1.moduleId === data.id) {
+                            data.nestedSubData.push(data1);
+                        }
+                    });
 
-                data.nestedSubData.sort((a, b) => a.id - b.id);
+                    data.nestedSubData.sort((a, b) => a.id - b.id);
 
+                }
             }
         });
 

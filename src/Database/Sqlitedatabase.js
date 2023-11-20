@@ -200,8 +200,7 @@ const createTables = async () => {
       captionChange TEXT
     )`,
     `CREATE TABLE IF NOT EXISTS tbl_client (
-      id TEXT,
-      loanApplicationId TEXT,
+      loanApplicationId TEXT PRIMARY KEY NOT NULL,
       clientTypeId TEXT,
       relationTypeId TEXT,
       titleId TEXT,
