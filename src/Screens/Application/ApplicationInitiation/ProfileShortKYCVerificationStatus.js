@@ -24,6 +24,7 @@ import ProgressComp from '../../../Components/ProgressComp';
 import tbl_SystemMandatoryFields from '../../../Database/Table/tbl_SystemMandatoryFields';
 import Modal from 'react-native-modal';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Entypo from 'react-native-vector-icons/Entypo';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Common from '../../../Utils/Common';
 import tbl_SystemCodeDetails from '../../../Database/Table/tbl_SystemCodeDetails';
@@ -35,6 +36,13 @@ import { Directions } from 'react-native-gesture-handler';
 import ChildHeadComp from '../../../Components/ChildHeadComp';
 import CheckBoxComp from '../../../Components/CheckBoxComp';
 import DocumentPicker from 'react-native-document-picker';
+import tbl_client from '../../../Database/Table/tbl_client';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import ImagePicker, { ImageOrVideo } from 'react-native-image-crop-picker';
+import ImageBottomPreview from '../../../Components/ImageBottomPreview';
+import ImageDetailComp from '../../../Components/ImageDetailComp';
 
 const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -43,17 +51,19 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const showBottomSheet = () => setBottomErrorSheetVisible(true);
   const hideBottomSheet = () => setBottomErrorSheetVisible(false);
   const [KYC1Caption, setKYC1Caption] = useState('KYC 1');
-  const [KYC1, setKYC1] = useState(false);
+  const [KYC1, setKYC1] = useState(true);
   const [KYC2Caption, setKYC2Caption] = useState('KYC 2');
-  const [KYC2, setKYC2] = useState(false);
+  const [KYC2, setKYC2] = useState(true);
+  const [KYC3Caption, setKYC3Caption] = useState('KYC 3');
+  const [KYC3, setKYC3] = useState(true);
+  const [KYC4Caption, setKYC4Caption] = useState('KYC 4');
+  const [KYC4, setKYC4] = useState(true);
 
   const [LoanApplicationID, setLoanApplicationID] = useState('');
-  const [LoanApplicationIDCaption, setLoanApplicationIDCaption] = useState(
-    'Loan APPLICATION ID',
-  );
+  const [LoanApplicationIDCaption, setLoanApplicationIDCaption] = useState('Loan APPLICATION ID');
   const [LoanApplicationIDMan, setLoanApplicationIDMan] = useState(false);
   const [LoanApplicationIDVisible, setLoanApplicationIDVisible] =
-    useState(true);
+    useState(false);
   const [LoanApplicationIDDisable, setLoanApplicationIDDisable] =
     useState(false);
   const LoanApplicationIDRef = useRef(null);
@@ -62,25 +72,41 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const [KycTypeVisible, setKycTypeVisible] = useState(true);
   const [KycTypeDisable, setKycTypeDisable] = useState(false);
   const [KycTypeData, setKycTypeData] = useState([]);
-  const [KycTypeCaption, setKycTypeCaption] = useState('KYC TYPE1');
+  const [KycTypeCaption, setKycTypeCaption] = useState('KYC TYPE');
   const [KycTypeLabel, setKycTypeLabel] = useState('');
   const [KycTypeIndex, setKycTypeIndex] = useState('');
 
   const [KycType1Man, setKycType1Man] = useState(false);
   const [KycType1Visible, setKycType1Visible] = useState(true);
-  const [KycType1Disable, setKycType1Disable] = useState(false);
+  const [KycType1Disable, setKycType1Disable] = useState(true);
   const [KycType1Data, setKycType1Data] = useState([]);
-  const [KycType1Caption, setKycType1Caption] = useState('KYC TYPE1');
+  const [KycType1Caption, setKycType1Caption] = useState('KYC TYPE 1');
   const [KycType1Label, setKycType1Label] = useState('');
   const [KycType1Index, setKycType1Index] = useState('');
 
   const [KycType2Man, setKycType2Man] = useState(false);
   const [KycType2Visible, setKycType2Visible] = useState(true);
-  const [KycType2Disable, setKycType2Disable] = useState(false);
+  const [KycType2Disable, setKycType2Disable] = useState(true);
   const [KycType2Data, setKycType2Data] = useState([]);
-  const [KycType2Caption, setKycType2Caption] = useState('KYC TYPE2');
+  const [KycType2Caption, setKycType2Caption] = useState('KYC TYPE 2');
   const [KycType2Label, setKycType2Label] = useState('');
   const [KycType2Index, setKycType2Index] = useState('');
+
+  const [KycType3Man, setKycType3Man] = useState(false);
+  const [KycType3Visible, setKycType3Visible] = useState(true);
+  const [KycType3Disable, setKycType3Disable] = useState(true);
+  const [KycType3Data, setKycType3Data] = useState([]);
+  const [KycType3Caption, setKycType3Caption] = useState('KYC TYPE 3');
+  const [KycType3Label, setKycType3Label] = useState('');
+  const [KycType3Index, setKycType3Index] = useState('');
+
+  const [KycType4Man, setKycType4Man] = useState(false);
+  const [KycType4Visible, setKycType4Visible] = useState(true);
+  const [KycType4Disable, setKycType4Disable] = useState(true);
+  const [KycType4Data, setKycType4Data] = useState([]);
+  const [KycType4Caption, setKycType4Caption] = useState('KYC TYPE 4');
+  const [KycType4Label, setKycType4Label] = useState('');
+  const [KycType4Index, setKycType4Index] = useState('');
 
   const [kycID, setkycID] = useState('');
   const [kycIDCaption, setkycIDCaption] = useState('KYC ID');
@@ -90,22 +116,36 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const KycIDRef = useRef(null);
 
   const [kycID1, setkycID1] = useState('');
-  const [kycID1Caption, setkycID1Caption] = useState('KYC ID1');
+  const [kycID1Caption, setkycID1Caption] = useState('KYC ID 1');
   const [kycID1Man, setkycID1Man] = useState(false);
   const [kycID1Visible, setkycID1Visible] = useState(true);
-  const [kycID1Disable, setkycID1Disable] = useState(false);
+  const [kycID1Disable, setkycID1Disable] = useState(true);
   const KycID1Ref = useRef(null);
 
   const [kycID2, setkycID2] = useState('');
-  const [kycID2Caption, setkycID2Caption] = useState('KYC ID1');
+  const [kycID2Caption, setkycID2Caption] = useState('KYC ID 2');
   const [kycID2Man, setkycID2Man] = useState(false);
   const [kycID2Visible, setkycID2Visible] = useState(true);
-  const [kycID2Disable, setkycID2Disable] = useState(false);
+  const [kycID2Disable, setkycID2Disable] = useState(true);
   const KycID2Ref = useRef(null);
+
+  const [kycID3, setkycID3] = useState('');
+  const [kycID3Caption, setkycID3Caption] = useState('KYC ID 3');
+  const [kycID3Man, setkycID3Man] = useState(false);
+  const [kycID3Visible, setkycID3Visible] = useState(true);
+  const [kycID3Disable, setkycID3Disable] = useState(true);
+  const KycID3Ref = useRef(null);
+
+  const [kycID4, setkycID4] = useState('');
+  const [kycID4Caption, setkycID4Caption] = useState('KYC ID 4');
+  const [kycID4Man, setkycID4Man] = useState(false);
+  const [kycID4Visible, setkycID4Visible] = useState(true);
+  const [kycID4Disable, setkycID4Disable] = useState(true);
+  const KycID4Ref = useRef(null);
 
   const [KycSourceMan, setKycSourceMan] = useState(false);
   const [KycSourceVisible, setKycSourceVisible] = useState(true);
-  const [KycSourceDisable, setKycSourceDisable] = useState(false);
+  const [KycSourceDisable, setKycSourceDisable] = useState(true);
   const [KycSourceData, setKycSourceData] = useState([]);
   const [KycSourceCaption, setKycSourceCaption] = useState('KYC SOURCE');
   const [KycSourceLabel, setKycSourceLabel] = useState('');
@@ -113,12 +153,33 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
   const [selectedDocument, setSelectedDocument] = useState(null);
 
+  const [leadsystemCodeDetail, setLeadSystemCodeDetail] = useState(props.mobilecodedetail.leadSystemCodeDto);
+  const [systemCodeDetail, setSystemCodeDetail] = useState(props.mobilecodedetail.t_SystemCodeDetail);
+  const [leaduserCodeDetail, setLeadUserCodeDetail] = useState(props.mobilecodedetail.leadUserCodeDto);
+  const [userCodeDetail, setUserCodeDetail] = useState(props.mobilecodedetail.t_UserCodeDetail);
+  const [bankUserCodeDetail, setBankUserCodeDetail] = useState(props.mobilecodedetail.t_BankUserCode);
+
+  const [photoOptionvisible, setphotoOptionvisible] = useState(false);
+  const showphotoBottomSheet = () => setphotoOptionvisible(true);
+  const hidephotoBottomSheet = () => setphotoOptionvisible(false);
+  const [deleteVisible, setDeleteVisible] = useState(false);
+  const [imageFile, setImageFile] = useState([]);
+  const [imageUri, setImageUri] = useState(null);
+  const [docID, setDocID] = useState('');
+  const [fileName, setFileName] = useState('');
+  const [fileType, setFileType] = useState('');
+  const [time, setTime] = useState('');
+  const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
+  const showImageBottomSheet = () => { setBottomSheetVisible(true) };
+  const hideImageBottomSheet = () => setBottomSheetVisible(false);
+
   useEffect(() => {
     props.navigation
       .getParent()
       ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
-    makeSystemMandatoryFields();
-    pickerData();
+
+    getClientData();
+    getSystemCodeDetail();
 
     return () =>
       props.navigation
@@ -126,289 +187,134 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
         ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
   }, [navigation]);
 
-  const pickerData = async () => {
-    tbl_SystemCodeDetails
-      .getSystemCodeDetailsBasedOnID('KycSource')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
+  const getSystemCodeDetail = async () => {
 
-          for (var i = 0; i < value.length; i++) {
-            if (value[i].IsDefault === '1') {
-              setKycSourceLabel(value[i].SubCodeID);
-              setKycSourceIndex(i + 1);
+
+    if (global.isAadharVerified == '1') {
+      setKycSourceVisible(false);
+      setKycTypeDisable(true);
+      setkycIDDisable(true);
+    } else {
+      const dataArray = [];
+      dataArray.push({ 'subCodeId': 'MAN', Description: 'Manual' });
+      setKycSourceLabel('MAN');
+      setKycSourceData(dataArray);
+      setKycSourceVisible(true);
+      setKycTypeDisable(false);
+      setkycIDDisable(false);
+    }
+
+    getID1data();
+    getID2data();
+    getID3data();
+    getID4data();
+  }
+
+  const getKYCType = (id1, id2, id3, id4) => {
+    let dataArray = [];
+    if (bankUserCodeDetail) {
+      bankUserCodeDetail.forEach((data) => {
+        if (data.ID === 'IndIdentitySettingID') {
+          if (id1.length > 0 && id2.length > 0 && id3.length > 0 && id4.length > 0) {
+            if (id1 == data.SubCodeID || id2 == data.SubCodeID || id3 == data.SubCodeID || id4 == data.SubCodeID) {
+              dataArray.push({ 'subCodeId': data.SubCodeID, Description: data.Description });
             }
+          } else {
+            dataArray.push({ 'subCodeId': data.SubCodeID, Description: data.Description });
           }
 
-          setKycSourceData(value);
         }
       });
+    }
+    setKycTypeData(dataArray);
+  }
 
-    tbl_SystemCodeDetails
-      .getSystemCodeDetailsBasedOnID('KycType')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-
-          for (var i = 0; i < value.length; i++) {
-            if (value[i].IsDefault === '1') {
-              setKycTypeLabel(value[i].SubCodeID);
-              setKycTypeIndex(i + 1);
-            }
-          }
-
-          setKycTypeData(value);
+  const getID1data = () => {
+    let dataArray = [];
+    if (bankUserCodeDetail) {
+      bankUserCodeDetail.forEach((data) => {
+        if (data.ID === 'IndIdentitySettingID') {
+          if (data.SubCodeID != KycType2Label && data.SubCodeID != KycType3Label && data.SubCodeID != KycType4Label)
+            dataArray.push({ 'subCodeId': data.SubCodeID, Description: data.Description });
         }
       });
+    }
+    setKycType1Data(dataArray);
+  }
 
-    tbl_SystemCodeDetails
-      .getSystemCodeDetailsBasedOnID('KycType1')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-
-          for (var i = 0; i < value.length; i++) {
-            if (value[i].IsDefault === '1') {
-              setKycType1Label(value[i].SubCodeID);
-              setKycType1Index(i + 1);
-            }
-          }
-
-          setKycType1Data(value);
+  const getID2data = () => {
+    let dataArray = [];
+    if (bankUserCodeDetail) {
+      bankUserCodeDetail.forEach((data) => {
+        if (data.ID === 'IndIdentitySettingID') {
+          if (data.SubCodeID != KycType1Label && data.SubCodeID != KycType3Label && data.SubCodeID != KycType4Label)
+            dataArray.push({ 'subCodeId': data.SubCodeID, Description: data.Description });
         }
       });
-
-    tbl_SystemCodeDetails
-      .getSystemCodeDetailsBasedOnID('KycType2')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-
-          for (var i = 0; i < value.length; i++) {
-            if (value[i].IsDefault === '1') {
-              setKycType2Label(value[i].SubCodeID);
-              setKycType2Index(i + 1);
-            }
-          }
-
-          setKycType2Data(value);
+    }
+    setKycType2Data(dataArray);
+  }
+  const getID3data = () => {
+    let dataArray = [];
+    if (bankUserCodeDetail) {
+      bankUserCodeDetail.forEach((data) => {
+        if (data.ID === 'IndIdentitySettingID') {
+          if (data.SubCodeID != KycType1Label && data.SubCodeID != KycType2Label && data.SubCodeID != KycType4Label)
+            dataArray.push({ 'subCodeId': data.SubCodeID, Description: data.Description });
         }
       });
-  };
+    }
+    setKycType3Data(dataArray);
+  }
 
-  const makeSystemMandatoryFields = () => {
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_loanapplicationid')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setLoanApplicationIDCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setLoanApplicationIDMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setLoanApplicationIDVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setLoanApplicationIDDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setLoanApplicationIDCaption(value[0].FieldCaptionChange);
-          }
+  const getID4data = () => {
+    let dataArray = [];
+    if (bankUserCodeDetail) {
+      bankUserCodeDetail.forEach((data) => {
+        if (data.ID === 'IndIdentitySettingID') {
+          if (data.SubCodeID != KycType1Label && data.SubCodeID != KycType2Label && data.SubCodeID != KycType3Label)
+            dataArray.push({ 'subCodeId': data.SubCodeID, Description: data.Description });
         }
       });
+    }
+    setKycType4Data(dataArray);
+  }
 
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_kycsource')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setKycSourceCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setKycSourceMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setKycSourceVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setKycSourceDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setKycSourceCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
+  const getClientData = () => {
 
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_kyctype')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setKycTypeCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setKycTypeMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setKycTypeVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setKycTypeDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setKycTypeCaption(value[0].FieldCaptionChange);
-          }
+    tbl_client.getClientBasedOnID(global.TEMPAPPID).then(value => {
+      if (value !== undefined && value.length > 0) {
+        setKycType1Label(value[0].kycTypeId1);
+        setkycID1(value[0].kycIdValue1);
+        setKycType2Label(value[0].kycTypeId2);
+        setkycID2(value[0].kycIdValue2);
+        setKycType3Label(value[0].kycTypeId3);
+        setkycID3(value[0].kycIdValue3);
+        setKycType4Label(value[0].kycTypeId4);
+        setkycID4(value[0].kycIdValue4);
+        if (value[0].kycTypeId1 == '001') {
+          setKycTypeLabel(value[0].kycTypeId1);
+          setkycID(value[0].kycIdValue1);
+        } else if (value[0].kycTypeId2 == '001') {
+          setKycTypeLabel(value[0].kycTypeId2);
+          setkycID(value[0].kycIdValue2);
+        } else if (value[0].kycTypeId3 == '001') {
+          setKycTypeLabel(value[0].kycTypeId3);
+          setkycID(value[0].kycIdValue3);
+        } else if (value[0].kycTypeId4 == '001') {
+          setKycTypeLabel(value[0].kycTypeId4);
+          setkycID(value[0].kycIdValue4);
         }
-      });
+        getKYCType(value[0].kycTypeId1, value[0].kycTypeId2, value[0].kycTypeId3, value[0].kycTypeId4);
+      }
 
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_kyctype1')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setKycType1Caption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setKycType1Man(true);
-          }
-          if (value[0].IsHide == '1') {
-            setKycType1Visible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setKycType1Disable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setKycType1Caption(value[0].FieldCaptionChange);
-          }
-        }
-      });
+    })
+  }
 
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_kyctype2')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setKycType2Caption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setKycType2Man(true);
-          }
-          if (value[0].IsHide == '1') {
-            setKycType2Visible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setKycType2Disable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setKycType2Caption(value[0].FieldCaptionChange);
-          }
-        }
-      });
-
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_kycid')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setkycIDCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setkycIDMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setkycIDVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setkycIDDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setkycIDCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
-
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('et_kycID1')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setkycID1Caption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setkycID1Man(true);
-          }
-          if (value[0].IsHide == '1') {
-            setkycID1Visible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setkycID1Disable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setkycID1Caption(value[0].FieldCaptionChange);
-          }
-        }
-      });
-
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('et_kycID2')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setkycID2Caption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setkycID2Man(true);
-          }
-          if (value[0].IsHide == '1') {
-            setkycID2Visible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setkycID2Disable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setkycID2Caption(value[0].FieldCaptionChange);
-          }
-        }
-      });
-  };
 
   const buttonNext = () => {
-    if (validate()) {
-      showBottomSheet();
-    } else {
-      const appDetails = {
-        createdBy: global.USERID,
-        createdOn: '',
-        isActive: true,
-        branchId: 1180,
-        leadCreationBasicDetails: {
-          createdBy: global.USERID,
-          createdOn: '',
-          customerCategoryId: 5,
-          firstName: firstName,
-          middleName: middleName,
-          lastName: lastName,
-          mobileNumber: 7647865789,
-        },
-        leadCreationBusinessDetails: {},
-        leadCreationLoanDetails: {},
-        leadCreationDms: {},
-      };
-      const baseURL = '8901';
-      setLoading(true);
-      apiInstancelocal(baseURL)
-        .post('/api/v1/lead-creation-initiation', appDetails)
-        .then(async response => {
-          // Handle the response data
-          console.log(
-            'LeadCreationBasicApiResponse::' + JSON.stringify(response.data),
-          );
-          global.leadID = response.data.id;
-          setLoading(false);
-          props.navigation.navigate('LeadCreationBusiness');
-        })
-        .catch(error => {
-          // Handle the error
-          console.log('Error' + JSON.stringify(error.response));
-          setLoading(false);
-          alert(error);
-        });
-    }
-  };
+    props.navigation.navigate('ProfileShortApplicantDetails')
+  }
 
   const validate = () => {
     var flag = false;
@@ -569,29 +475,183 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const onClickKYC2 = () => {
     setKYC2(!KYC2);
   };
+  const onClickKYC3 = () => {
+    setKYC2(!KYC3);
+  };
+  const onClickKYC4 = () => {
+    setKYC2(!KYC4);
+  };
   const onClickVerify = () => {
     alert('Hii');
   };
 
   const pickDocument = async () => {
-    try {
-      const result = await DocumentPicker.pick({
-        type: [DocumentPicker.types.allFiles],
-      });
+    // try {
+    //   const result = await DocumentPicker.pick({
+    //     type: [DocumentPicker.types.images],
+    //   });
 
-      setSelectedDocument(result);
-    } catch (err) {
-      if (DocumentPicker.isCancel(err)) {
-      } else {
-        throw err;
-      }
-    }
+    //   setSelectedDocument(result);
+    // } catch (err) {
+    //   if (DocumentPicker.isCancel(err)) {
+    //   } else {
+    //     throw err;
+    //   }
+    // }
+    showphotoBottomSheet();
   };
+
+  const pickImage = () => {
+    // setVisible(false)
+
+    hidephotoBottomSheet();
+    ImagePicker.openCamera({
+      cropping: true,
+    }).then(image => {
+      setImageFile(image)
+
+      const lastDotIndex = image.path.lastIndexOf('.');
+      var imageName = 'Photo' + '_' + global.leadID;
+      if (lastDotIndex !== -1) {
+        // Get the substring from the last dot to the end of the string
+        const fileExtension = image.path.substring(lastDotIndex);
+        imageName = imageName + fileExtension;
+        console.log('File extension:', fileExtension);
+      }
+
+      // const imageName = image.path.split('/').pop();
+      setTime(Common.getCurrentDateTime());
+      setFileType(image.mime)
+      setFileName(imageName)
+      setImageUri(image.path)
+      //setVisible(false)
+      props.onChange?.(image);
+    })
+
+  };
+
+  const selectImage = async () => {
+    // setVisible(false)
+
+    hidephotoBottomSheet();
+    ImagePicker.openPicker({
+      width: 300,
+      height: 400,
+      cropping: true,
+    }).then(image => {
+      setImageFile(image);
+
+      const lastDotIndex = image.path.lastIndexOf('.');
+      var imageName = 'Photo' + '_' + global.TEMPAPPID;
+      if (lastDotIndex !== -1) {
+        // Get the substring from the last dot to the end of the string
+        const fileExtension = image.path.substring(lastDotIndex);
+        imageName = imageName + fileExtension;
+        console.log('File extension:', fileExtension);
+      }
+      setFileType(image.mime)
+      setFileName(imageName)
+      setImageUri(image.path)
+      //setVisible(false)
+      //setDeleteVisible(false)
+      props.onChange?.(image);
+    })
+
+  };
+
+
+  const previewImage = () => {
+    hideImageBottomSheet();
+    props.navigation.navigate('PreviewImage', { imageName: fileName, imageUri: imageUri })
+  }
+
+  const imageDetail = () => {
+
+  }
+
+  const reTakePhoto = () => {
+    pickDocument();
+    hideImageBottomSheet();
+  }
+
+  const deletePhoto = () => {
+    setDeleteVisible(true);
+  }
+
+  const onDeleteorCancel = (value) => {
+    if (value == 'Cancel') {
+      setDeleteVisible(false);
+      hideImageBottomSheet();
+    } else {
+      setImageUri(null);
+      setFileName('');
+      setFileType('');
+      setImageFile('');
+      setDeleteVisible(false);
+      hideImageBottomSheet();
+    }
+  }
+
+
+
   return (
     // enclose all components in this View tag
     <SafeAreaView
       style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
       <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
+
+      <ImageBottomPreview bottomSheetVisible={bottomSheetVisible} previewImage={previewImage} hideBottomSheet={hideImageBottomSheet} reTakePhoto={reTakePhoto} fileName={fileName} detailHide={true} deleteVisible={deleteVisible} deletePhoto={deletePhoto} onDeleteorCancel={onDeleteorCancel} />
+
+      <Modal
+        isVisible={photoOptionvisible}
+        onBackdropPress={hidephotoBottomSheet}
+        style={styles.modal}>
+        <View style={styles.modalContent}>
+          <TouchableOpacity
+            onPress={() => hidephotoBottomSheet()}
+            style={{
+              width: 33,
+              height: 33,
+              position: 'absolute',
+              right: 0,
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1,
+              backgroundColor: Colors.common,
+              borderBottomStartRadius: 10,
+            }}>
+            <AntDesign name="close" size={18} color={Colors.black} />
+          </TouchableOpacity>
+
+          <View style={{ width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+            <View style={{ width: '30%', alignItems: 'center' }}>
+              <TouchableOpacity onPress={() => pickImage()} activeOpacity={11}>
+                <View style={{
+                  width: 53, height: 53, borderRadius: 53, backgroundColor: '#E74C3C',
+                  alignItems: 'center', justifyContent: 'center'
+                }}>
+                  <Ionicons name='camera-outline' size={31} color={Colors.white} />
+                </View>
+              </TouchableOpacity>
+              <Text style={{ fontSize: 14, color: Colors.black, marginTop: 7, fontFamily: 'PoppinsRegular' }}>Camera</Text>
+            </View>
+            <View style={{ width: '30%', alignItems: 'center' }}>
+              <TouchableOpacity onPress={() => selectImage()} activeOpacity={11}>
+                <View style={{
+                  width: 53, height: 53, borderRadius: 53, backgroundColor: '#8E44AD',
+                  alignItems: 'center', justifyContent: 'center'
+                }}>
+                  <Ionicons name='image-outline' size={27} color={Colors.white} />
+                </View>
+              </TouchableOpacity>
+              <Text style={{ fontSize: 14, color: Colors.black, marginTop: 7 }}>Gallery</Text>
+            </View>
+
+          </View>
+        </View>
+      </Modal>
+
+
 
       <ScrollView
         style={styles.scrollView}
@@ -774,12 +834,33 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                 alignItems: 'center',
                 marginTop: 20,
               }}>
-              <TouchableOpacity onPress={pickDocument} activeOpacity={0}>
-                <FontAwesome6 name="cloud-arrow-up" size={35} color="#b5b6b6" />
+              <TouchableOpacity style={{ width: '30%' }} onPress={pickDocument} activeOpacity={0}>
+                <View style={{ width: 40, height: 40, backgroundColor: '#DBDBDB', borderRadius: 10, justifyContent: 'center', alignItems: 'center' }}>
+                  <Image
+                    source={require('../../../Images/cloudcomputing.png')}
+                    style={{ width: 28, height: 22 }}
+                  />
+                  {/* <FontAwesome6 name="cloud-arrow-up" size={25} color="#b5b6b6" /> */}
+                </View>
               </TouchableOpacity>
-              <Text style={{ marginLeft: 70 }}>
-                {selectedDocument?.name || 'None'}
+
+              <Text style={{ width: '50%', color: Colors.dimmText, textAlign: 'left', fontFamily: 'PoppinsRegular' }}>
+                {fileName}
               </Text>
+
+              {imageUri &&
+                <TouchableOpacity style={{ width: '20%', alignItems: 'flex-end' }}
+                  onPress={() => {
+                    showImageBottomSheet();
+                  }}>
+                  <Entypo
+                    name="dots-three-vertical"
+                    size={25}
+                    color={Colors.darkblue}
+                  />
+                </TouchableOpacity>
+              }
+
             </View>
           </View>
 
@@ -874,7 +955,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                     handleClick={handleClick}
                     handleReference={handleReference}
                   />
-                  <View
+                  {/* <View
                     style={{
                       width: '100%',
                       marginTop: 19,
@@ -906,7 +987,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                         </TouchableOpacity>
                       </View>
                     </View>
-                  </View>
+                  </View> */}
                 </View>
               )}
             </View>
@@ -1004,7 +1085,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                     handleClick={handleClick}
                     handleReference={handleReference}
                   />
-                  <View
+                  {/* <View
                     style={{
                       width: '100%',
                       marginTop: 19,
@@ -1036,13 +1117,275 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                         </TouchableOpacity>
                       </View>
                     </View>
-                  </View>
+                  </View> */}
                 </View>
               )}
             </View>
           ) : (
             <View></View>
           )}
+
+          <View
+            style={{
+              width: '100%',
+              alignItems: 'center',
+            }}>
+            <TouchableOpacity onPress={onClickKYC3} activeOpacity={1}>
+              <View
+                style={{
+                  width: '90%',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginTop: 20,
+                }}>
+                <TextComp
+                  textVal={KYC3Caption}
+                  textStyle={Commonstyles.HeaderStyle}
+                />
+                {KYC3 ? (
+                  <MaterialIcons
+                    name="keyboard-arrow-up"
+                    size={20}
+                    color="#343434"
+                  />
+                ) : (
+                  <MaterialIcons
+                    name="keyboard-arrow-down"
+                    size={20}
+                    color="#343434"
+                  />
+                )}
+              </View>
+            </TouchableOpacity>
+          </View>
+          {KYC3 ? (
+            <View>
+              {KycType3Visible && (
+                <View
+                  style={{
+                    width: '100%',
+                    alignItems: 'center',
+                    marginTop: '4%',
+                  }}>
+                  <View
+                    style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                    <TextComp
+                      textVal={KycType3Caption}
+                      textStyle={Commonstyles.inputtextStyle}
+                      Visible={KycType3Man}
+                    />
+                  </View>
+
+                  <PickerComp
+                    textLabel={KycType3Label}
+                    pickerStyle={Commonstyles.picker}
+                    Disable={KycType3Disable}
+                    pickerdata={KycType3Data}
+                    componentName="KycType3Picker"
+                    handlePickerClick={handlePickerClick}
+                  />
+                </View>
+              )}
+              {kycID3Visible && (
+                <View
+                  style={{
+                    width: '100%',
+                    marginTop: 19,
+                    paddingHorizontal: 0,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                  <View
+                    style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                    <TextComp
+                      textVal={kycID3Caption}
+                      textStyle={Commonstyles.inputtextStyle}
+                      Visible={kycID3Man}
+                    />
+                  </View>
+
+                  <TextInputComp
+                    textValue={kycID3}
+                    textStyle={Commonstyles.textinputtextStyle}
+                    type="email-address"
+                    Disable={kycID3Disable}
+                    ComponentName="kycID3"
+                    reference={KycID3Ref}
+                    returnKey="next"
+                    handleClick={handleClick}
+                    handleReference={handleReference}
+                  />
+                  {/* <View
+                    style={{
+                      width: '100%',
+                      marginTop: 19,
+                      paddingHorizontal: 0,
+                      alignItems: 'right',
+                      justifyContent: 'right',
+                    }}>
+                    <View style={{ flexDirection: 'row' }}>
+                      <View
+                        style={{
+                          width: '80%',
+                          color: 'green',
+                        }}></View>
+                      <View
+                        style={{
+                          width: '20%',
+                          marginTop: 3,
+                          color: 'green',
+                        }}>
+                        <TouchableOpacity
+                          onPress={onClickVerify}
+                          activeOpacity={0}>
+                          <Text
+                            style={{
+                              color: Colors.green,
+                            }}>
+                            Verified
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </View> */}
+                </View>
+              )}
+            </View>
+          ) : (
+            <View></View>
+          )}
+
+
+          <View
+            style={{
+              width: '100%',
+              alignItems: 'center',
+            }}>
+            <TouchableOpacity onPress={onClickKYC4} activeOpacity={1}>
+              <View
+                style={{
+                  width: '90%',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginTop: 20,
+                }}>
+                <TextComp
+                  textVal={KYC4Caption}
+                  textStyle={Commonstyles.HeaderStyle}
+                />
+                {KYC4 ? (
+                  <MaterialIcons
+                    name="keyboard-arrow-up"
+                    size={20}
+                    color="#343434"
+                  />
+                ) : (
+                  <MaterialIcons
+                    name="keyboard-arrow-down"
+                    size={20}
+                    color="#343434"
+                  />
+                )}
+              </View>
+            </TouchableOpacity>
+          </View>
+          {KYC4 ? (
+            <View>
+              {KycType4Visible && (
+                <View
+                  style={{
+                    width: '100%',
+                    alignItems: 'center',
+                    marginTop: '4%',
+                  }}>
+                  <View
+                    style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                    <TextComp
+                      textVal={KycType4Caption}
+                      textStyle={Commonstyles.inputtextStyle}
+                      Visible={KycType4Man}
+                    />
+                  </View>
+
+                  <PickerComp
+                    textLabel={KycType4Label}
+                    pickerStyle={Commonstyles.picker}
+                    Disable={KycType4Disable}
+                    pickerdata={KycType4Data}
+                    componentName="KycType4Picker"
+                    handlePickerClick={handlePickerClick}
+                  />
+                </View>
+              )}
+              {kycID4Visible && (
+                <View
+                  style={{
+                    width: '100%',
+                    marginTop: 19,
+                    paddingHorizontal: 0,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                  <View
+                    style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                    <TextComp
+                      textVal={kycID4Caption}
+                      textStyle={Commonstyles.inputtextStyle}
+                      Visible={kycID4Man}
+                    />
+                  </View>
+
+                  <TextInputComp
+                    textValue={kycID4}
+                    textStyle={Commonstyles.textinputtextStyle}
+                    type="email-address"
+                    Disable={kycID4Disable}
+                    ComponentName="kycID4"
+                    reference={KycID4Ref}
+                    returnKey="next"
+                    handleClick={handleClick}
+                    handleReference={handleReference}
+                  />
+                  {/* <View
+                    style={{
+                      width: '100%',
+                      marginTop: 19,
+                      paddingHorizontal: 0,
+                      alignItems: 'right',
+                      justifyContent: 'right',
+                    }}>
+                    <View style={{ flexDirection: 'row' }}>
+                      <View
+                        style={{
+                          width: '80%',
+                          color: 'green',
+                        }}></View>
+                      <View
+                        style={{
+                          width: '20%',
+                          marginTop: 3,
+                          color: 'green',
+                        }}>
+                        <TouchableOpacity
+                          onPress={onClickVerify}
+                          activeOpacity={0}>
+                          <Text
+                            style={{
+                              color: Colors.green,
+                            }}>
+                            Verified
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </View> */}
+                </View>
+              )}
+            </View>
+          ) : (
+            <View></View>
+          )}
+
         </View>
 
         <ButtonViewComp
@@ -1094,12 +1437,16 @@ const styles = StyleSheet.create({
   },
 });
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   const { language } = state.languageReducer;
+  const { profileDetails } = state.profileReducer;
+  const { mobileCodeDetails } = state.mobilecodeReducer;
   return {
     language: language,
-  };
-};
+    profiledetail: profileDetails,
+    mobilecodedetail: mobileCodeDetails
+  }
+}
 
 const mapDispatchToProps = dispatch => ({
   languageAction: item => dispatch(languageAction(item)),

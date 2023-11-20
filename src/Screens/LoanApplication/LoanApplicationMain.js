@@ -145,6 +145,7 @@ const LoanApplicationMain = (props, { navigation }) => {
         showLeadBottomSheet();
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         getProcessSubStage();
+
         return () =>
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
     }, [navigation, isScreenVisible]);
@@ -171,6 +172,7 @@ const LoanApplicationMain = (props, { navigation }) => {
 
         const filteredProcessModuleStage = processModule.filter((data) => {
             return data.wfId === 85 && data.subStageId === item.stageId;
+            return data.wfId === 85 && data.subStageId === item.stageId;
         }).map((data) => {
             const extraJSON = { subDataIsCompleted: false, nestedSubData: [] };
             return { ...data, ...extraJSON };
@@ -180,13 +182,15 @@ const LoanApplicationMain = (props, { navigation }) => {
 
         filteredProcessModuleStage.forEach((data) => {
             if (data.wfId === 85) {
+                if (data.wfId === 85) {
 
-                processPage.forEach((data1) => {
-                    if (data1.moduleId === data.id) {
-                        data.nestedSubData.push(data1);
-                    }
-                });
+                    processPage.forEach((data1) => {
+                        if (data1.moduleId === data.id) {
+                            data.nestedSubData.push(data1);
+                        }
+                    });
 
+                }
             }
         });
 
@@ -198,7 +202,7 @@ const LoanApplicationMain = (props, { navigation }) => {
 
     const nestedDataClick = (item) => {
         //alert("Ganishkar "+JSON.stringify(item))
-        if(item.id == 5){
+        if (item.id == 5) {
             props.navigation.navigate('AddressMainList')
         }
     }
@@ -208,14 +212,16 @@ const LoanApplicationMain = (props, { navigation }) => {
 
         const filteredProcessSubStage = processSubStage.filter((data) => {
             return data.wfId === 85 && (data.stageId === 1 || data.stageId === 2 || data.stageId === 3 || data.stageId === 4);
+            return data.wfId === 85 && (data.stageId === 1 || data.stageId === 2 || data.stageId === 3 || data.stageId === 4);
         }).map((data) => {
             const extraJSON = { isSelected: data.stageId === 1 };
             return { ...data, ...extraJSON };
-        });
-        //alert(JSON.stringify(filteredProcessSubStage))
+        }).sort((a, b) => a.stageId - b.stageId);
+        //alert(JSON.stringify(processSubStage))
         setProcessSubStageData(filteredProcessSubStage);
 
         const filteredProcessModuleStage = processModule.filter((data) => {
+            return data.wfId === 85 && data.subStageId === 1;
             return data.wfId === 85 && data.subStageId === 1;
         }).map((data) => {
             const extraJSON = { subDataIsCompleted: false, nestedSubData: [] };
@@ -224,13 +230,17 @@ const LoanApplicationMain = (props, { navigation }) => {
 
         filteredProcessModuleStage.forEach((data) => {
             if (data.wfId === 85) {
+                if (data.wfId === 85) {
 
-                processPage.forEach((data1) => {
-                    if (data1.moduleId === data.id) {
-                        data.nestedSubData.push(data1);
-                    }
-                });
+                    processPage.forEach((data1) => {
+                        if (data1.moduleId === data.id) {
+                            data.nestedSubData.push(data1);
+                        }
+                    });
 
+                    data.nestedSubData.sort((a, b) => a.id - b.id);
+
+                }
             }
         });
 
@@ -351,7 +361,7 @@ const LoanApplicationMain = (props, { navigation }) => {
                                                 <TextComp textVal={index + 1} textStyle={{ color: Colors.white, fontWeight: 500, marginLeft: 2 }} />
                                             </View>
                                             <View style={{ width: '60%', borderWidth: 0.5, borderColor: Colors.dimText, margin: 5, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}>
-                                                <TextComp textVal={item.moduleName} textStyle={{ color: item.subDataIsCompleted ? Colors.skyBlue : Colors.dimText, fontFamily: 'Poppins-Medium', marginLeft: 2 }} />
+                                                <TextComp textVal={item.moduleDescription} textStyle={{ color: item.subDataIsCompleted ? Colors.skyBlue : Colors.dimText, fontFamily: 'Poppins-Medium', marginLeft: 2 }} />
                                             </View>
                                         </View>
                                         {item.nestedSubData ? (
@@ -375,7 +385,7 @@ const LoanApplicationMain = (props, { navigation }) => {
 
                                                                 </View>
                                                                 <View style={{ width: '60%', margin: 5, borderRadius: 20, justifyContent: 'center' }}>
-                                                                    <TextComp textVal={item.pageName} textStyle={{ color: item.subDataIsCompleted ? Colors.skyBlue : Colors.dimText, fontFamily: 'Poppins-Medium', marginLeft: 2 }} />
+                                                                    <TextComp textVal={item.pageDescription} textStyle={{ color: item.subDataIsCompleted ? Colors.skyBlue : Colors.dimText, fontFamily: 'Poppins-Medium', marginLeft: 2 }} />
                                                                 </View>
                                                             </View>
                                                             {/* {index != subData.length - 1 ? (

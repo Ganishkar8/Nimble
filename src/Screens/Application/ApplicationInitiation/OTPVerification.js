@@ -38,6 +38,7 @@ const { Value, Text: AnimatedText } = Animated;
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Button, Menu, Divider } from 'react-native-paper';
 import { useIsFocused } from '@react-navigation/native';
+import ErrorModal from '../../../Components/ErrorModal';
 const CELL_COUNT = 3;
 const CELL_SIZE = 46;
 const CELL_BORDER_RADIUS = 8;
@@ -82,6 +83,9 @@ const OTPVerification = (props, { navigation }) => {
     const [menuvisible, setMenuVisible] = React.useState(false);
     const [instance, setInstance] = React.useState('LIV');
     const openMenu = () => setMenuVisible(true);
+    const [errorModalVisible, setErrorModalVisible] = useState(false);
+    const [apiError, setApiError] = useState('');
+
 
     const closeMenu = () => setMenuVisible(false);
 
@@ -165,10 +169,17 @@ const OTPVerification = (props, { navigation }) => {
 
     const validateOTP = () => {
 
+        if (mobileOTP.length < 6) {
+            setApiError('Please Enter OTP');
+            setErrorModalVisible(true)
+
+            return;
+        }
+
         const appDetails = {
             "generatedFor": `91${mobileNumber}`,
             "process": "Profile Short motp",
-            "otp": global.USERTYPEID,
+            "otp": mobileOTP,
         }
         const baseURL = '8908';
         setLoading(true);
@@ -177,6 +188,9 @@ const OTPVerification = (props, { navigation }) => {
             .then(async response => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log('MobileOTPVerifyApiResponse::' + JSON.stringify(response.data),);
+
+                //sendDataBack();
+                // alert(JSON.stringify(response.data))
 
                 sendDataBack();
 
@@ -188,7 +202,7 @@ const OTPVerification = (props, { navigation }) => {
             })
             .catch(error => {
                 // Handle the error
-                if (global.DEBUG_MODE) console.log('MobileOTPVerifyApiResponse::::' + JSON.stringify(error.response));
+                if (global.DEBUG_MODE) console.log('MobileOTPVerifyApiResponseError::::' + JSON.stringify(error.response));
                 setLoading(false);
                 if (error.response.data != null) {
                     setApiError(error.response.data.message);
@@ -199,15 +213,19 @@ const OTPVerification = (props, { navigation }) => {
     };
 
     const sendDataBack = () => {
+        global.isMobileVerified = '1';
         props.navigation.goBack();
-        props.navigation.emit('isMobileVerified', '1');
+    };
+
+    const closeErrorModal = () => {
+        setErrorModalVisible(false);
     };
 
     return (
 
         <View style={{ flex: 1, backgroundColor: Colors.lightwhite }}>
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
-
+            <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
             <View style={{ width: '100%', height: 56, alignItems: 'center', justifyContent: 'center', }}>
 
                 <HeadComp textval={language[0][props.language].str_mobileotpverification} props={props} />
