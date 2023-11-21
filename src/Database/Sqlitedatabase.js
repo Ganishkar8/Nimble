@@ -283,6 +283,36 @@ const createTables = async () => {
       supervisedBy INTEGER,
       supervisedDate TEXT
     )`,
+    `CREATE TABLE IF NOT EXISTS tbl_clientaddressinfo (
+      loanApplicationId TEXT,
+      client_id TEXT,
+      client_type TEXT,
+      address_type TEXT,
+      address_line_1 TEXT,
+      address_line_2 TEXT,
+      landmark TEXT,
+      pincode TEXT,
+      city TEXT,
+      district TEXT,
+      state TEXT,
+      country TEXT,
+      mobile_or_land_line_number TEXT,
+      email_id TEXT,
+      address_ownership TEXT,
+      owner_details TEXT,
+      owner_name TEXT,
+      geo_classification TEXT,
+      years_at_residence TEXT,
+      years_in_current_city_or_town TEXT,
+      is_active TEXT,
+      created_by TEXT,
+      created_date TEXT,
+      modified_by TEXT,
+      modified_date TEXT,
+      supervised_by TEXT,
+      supervised_date TEXT,
+      PRIMARY KEY (loanApplicationId, address_type)
+    )`,
     // Add more CREATE TABLE queries for other tables...
   ];
 

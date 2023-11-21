@@ -15,6 +15,7 @@ import TextComp from '../../../Components/TextComp';
 import PickerComp from '../../../Components/PickerComp';
 import TextInputComp from '../../../Components/TextInputComp';
 import Common from '../../../Utils/Common';
+import tbl_clientaddressinfo from '../../../Database/Table/tbl_clientaddressinfo';
 
 const AddressDetails = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -38,6 +39,8 @@ const AddressDetails = (props, { navigation }) => {
   const yearAtResidenceRef = useRef(null);
   const yearInCurrentCityRef = useRef(null);
   const ownerNameRef = useRef(null);
+
+  const [isNew, setIsNew] = useState(props.route.params.addressType);
 
   const [addressTypeLabel, setAddressTypeLabel] = useState('');
   const [addressTypeIndex, setAddressTypeIndex] = useState('');
@@ -117,7 +120,6 @@ const AddressDetails = (props, { navigation }) => {
 
   const [addressOwnerTypeLabel, setAddressOwnerTypeLabel] = useState('');
   const [addressOwnerTypeIndex, setAddressOwnerTypeIndex] = useState('');
-  const [addressOwnerType, setAddressOwnerType] = useState('');
   const [addressOwnerTypeCaption, setAddressOwnerTypeCaption] = useState('ADDRESS OWNERSHIP TYPE');
   const [addressOwnerTypeMan, setAddressOwnerTypeMan] = useState(true);
   const [addressOwnerTypeVisible, setAddressOwnerTypeVisible] = useState(true);
@@ -126,7 +128,6 @@ const AddressDetails = (props, { navigation }) => {
 
   const [ownerDetailsLabel, setOwnerDetailsLabel] = useState('');
   const [ownerDetailsIndex, setOwnerDetailsIndex] = useState('');
-  const [ownerDetails, setOwnerDetails] = useState('');
   const [ownerDetailsCaption, setOwnerDetailsCaption] = useState('OWNER DETAILS');
   const [ownerDetailsMan, setOwnerDetailsMan] = useState(true);
   const [ownerDetailsVisible, setOwnerDetailsVisible] = useState(true);
@@ -139,15 +140,224 @@ const AddressDetails = (props, { navigation }) => {
   const [ownerNameVisible, setOwnerNameVisible] = useState(true);
   const [ownerNameDisable, setOwnerNameDisable] = useState(false);
 
+  const [systemCodeDetail, setSystemCodeDetail] = useState(props.mobilecodedetail.leadSystemCodeDto);
+  const [userCodeDetail, setUserCodeDetail] = useState(props.mobilecodedetail.leadUserCodeDto);
+  const [systemMandatoryField, setSystemMandatoryField] = useState(props.mobilecodedetail.leadSystemMandatoryFieldDto);
+
+
   useEffect(() => {
     props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     // pickerData();
+    getSystemCodeDetail()
+    getExistingData()
+
 
     return () =>
       props.navigation
         .getParent()
         ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
   }, [navigation]);
+
+  const getExistingData = () => {
+    if (isNew != 'new') {
+      //getExistingAddressData(isNew)
+      //alert(JSON.stringify(isNew))
+      getExistingAddressData(isNew.loanApplicationId,isNew.address_type)
+      //setAddressLine1(isNew)
+    }
+  }
+
+  const getExistingAddressData = (loanAppId,addressType) => {
+    tbl_clientaddressinfo.getAllAddressDetailsForLoanIDAndAddressType(loanAppId,addressType.toString())
+      .then(data => {
+        if (global.DEBUG_MODE) console.log('Address Detail:', data);
+        setAddressLine1(data[0].address_line_1)
+        setAddressLine2(data[0].address_line_2)
+        setLandmark(data[0].landmark)
+        setPincode(data[0].pincode)
+        setCity(data[0].city)
+        setDistrict(data[0].district)
+        setState(data[0].state)
+        setCountry(data[0].country)
+        setYearsAtResidence(data[0].years_at_residence)
+        setOwnerName(data[0].owner_name)
+        setYearsAtCity(data[0].years_in_current_city_or_town)
+        //spinner
+        setAddressTypeLabel(data[0].address_type)
+        setGeoClassificationLabel(data[0].geo_classification)
+        setAddressOwnerTypeLabel(data[0].address_ownership)
+        setOwnerDetailsLabel(data[0].owner_details)
+      })
+      .catch(error => {
+        if (global.DEBUG_MODE) console.error('Error fetching bank details:', error);
+      });
+  }
+
+  const getSystemCodeDetail = () => {
+
+    const filterAddressTypeData = userCodeDetail.filter((data) => data.masterId === 'ADDRESS_TYPE');
+    setaddressTypeData(filterAddressTypeData)
+
+    const filterOwnershipTypeData = userCodeDetail.filter((data) => data.masterId === 'ADDRESS_OWNERSHIP_TYPE');
+    setAddressOwnerTypeData(filterOwnershipTypeData)
+
+    const filterOwnerDetailsData = userCodeDetail.filter((data) => data.masterId === 'OWNER_DETAILS');
+    setOwnerDetailsData(filterOwnerDetailsData)
+
+    const filterGeoClassificationData = userCodeDetail.filter((data) => data.masterId === 'GEO_CLASSIFICATION');
+    setGeoClassificationData(filterGeoClassificationData)
+
+  }
+
+  const makeSystemMandatoryFields = () => {
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_addresstype' && data.pageId === 1).map((value, index) => {
+
+      if (value.mandatory) {
+        setAddressTypeMan(true);
+      }
+      if (value.hide) {
+        setAddressTypeVisible(false);
+      }
+      if (value.disable) {
+        setAddressTypeDisable(true);
+      }
+      if (value.captionChange) {
+        setAddressTypeCaption(value[0].fieldCaptionChange)
+      }
+    });
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addressline1' && data.pageId === 1).map((value, index) => {
+
+      if (value.mandatory) {
+        setAddressLine1Man(true);
+      }
+      if (value.hide) {
+        setAddressLine1Visible(false);
+      }
+      if (value.disable) {
+        setAddressLine1Disable(true);
+      }
+      if (value.captionChange) {
+        setAddressLine1Caption(value[0].fieldCaptionChange)
+      }
+    });
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addressline2' && data.pageId === 1).map((value, index) => {
+
+      if (value.mandatory) {
+        setAddressLine2Man(true);
+      }
+      if (value.hide) {
+        setAddressLine2Visible(false);
+      }
+      if (value.disable) {
+        setAddressLine2Disable(true);
+      }
+      if (value.captionChange) {
+        setAddressLine2Caption(value[0].fieldCaptionChange)
+      }
+    });
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_landmark' && data.pageId === 1).map((value, index) => {
+
+      if (value.mandatory) {
+        setLandmarkMan(true);
+      }
+      if (value.hide) {
+        setLandmarkVisible(false);
+      }
+      if (value.disable) {
+        setLandmarkDisable(true);
+      }
+      if (value.captionChange) {
+        setLandmarkCaption(value[0].fieldCaptionChange)
+      }
+    });
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_pincode' && data.pageId === 1).map((value, index) => {
+
+      if (value.mandatory) {
+        setPincodeMan(true);
+      }
+      if (value.hide) {
+        setPincodeVisible(false);
+      }
+      if (value.disable) {
+        setPincodeDisable(true);
+      }
+      if (value.captionChange) {
+        setPincodeCaption(value[0].fieldCaptionChange)
+      }
+    });
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_city' && data.pageId === 1).map((value, index) => {
+
+      if (value.mandatory) {
+        setCityMan(true);
+      }
+      if (value.hide) {
+        setCityVisible(false);
+      }
+      if (value.disable) {
+        setCityDisable(true);
+      }
+      if (value.captionChange) {
+        setCityCaption(value[0].fieldCaptionChange)
+      }
+    });
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_district' && data.pageId === 1).map((value, index) => {
+
+      if (value.mandatory) {
+        setDistrictMan(true);
+      }
+      if (value.hide) {
+        setDistrictVisible(false);
+      }
+      if (value.disable) {
+        setDistrictDisable(true);
+      }
+      if (value.captionChange) {
+        setDistrictCaption(value[0].fieldCaptionChange)
+      }
+    });
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_state' && data.pageId === 1).map((value, index) => {
+
+      if (value.mandatory) {
+        setStateMan(true)
+      }
+      if (value.hide) {
+        setStateVisible(false)
+      }
+      if (value.disable) {
+        setStateDisable(true)
+      }
+      if (value.captionChange) {
+        setStateCaption(value[0].fieldCaptionChange)
+      }
+    });
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_country' && data.pageId === 1).map((value, index) => {
+
+      if (value.mandatory) {
+        setCountryMan(true)
+      }
+      if (value.hide) {
+        setCountryVisible(false)
+      }
+      if (value.disable) {
+        setCountryDisable(true)
+      }
+      if (value.captionChange) {
+        setCountryCaption(value[0].fieldCaptionChange)
+      }
+    });
+
+
+
+  }
 
   const updateDatainParent = (
     fieldName,
@@ -195,40 +405,207 @@ const AddressDetails = (props, { navigation }) => {
   };
 
   const validateData = () => {
-    let flag = false;
-    let errMsg = '';
+    var flag = false;
+    var i = 1;
+    var errorMessage = '';
 
-    DataArray.forEach(item => {
-      if (
-        (item.IsHide === '' || item.IsHide === '0') &&
-        item.isMandatory === '1' &&
-        (item.fieldValue === '' || item.fieldValue === undefined)
-      ) {
-        errMsg += `${errorCounter}) Please Select ${item.fieldName}\n`;
-        errorCounter++;
-        // console.log('errMsg:', errMsg);
+    if (addressTypeMan && addressTypeVisible) {
+      if (addressTypeLabel === 'Select' || addressTypeLabel === '') {
+        errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + addressTypeCaption + '\n';
+        i++;
+        flag = true;
       }
-    });
-
-    if (errMsg !== '') {
-      setErrMsg(errMsg);
-      flag = true;
     }
 
+    if (addressLine1Man && addressLine1Visible) {
+      if (addressLine1 === '') {
+        errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + addressLine1Caption + '\n';
+        i++;
+        flag = true;
+      }
+    }
+
+    if (addressLine2Man && addressLine2Visible) {
+      if (addressLine2 === '') {
+        errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + addressLine2Caption + '\n';
+        i++;
+        flag = true;
+      }
+    }
+
+    if (landmarkMan && landmarkVisible) {
+      if (landmark === '') {
+        errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + landmarkCaption + '\n';
+        i++;
+        flag = true;
+      }
+    }
+
+    if (pincodeMan && pincodeVisible) {
+      if (pincode === '') {
+        errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + pincodeCaption + '\n';
+        i++;
+        flag = true;
+      }
+    }
+
+    if (cityMan && cityVisible) {
+      if (city === '') {
+        errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + cityCaption + '\n';
+        i++;
+        flag = true;
+      }
+    }
+
+    if (districtMan && districtVisible) {
+      if (district === '') {
+        errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + districtCaption + '\n';
+        i++;
+        flag = true;
+      }
+    }
+
+    if (stateMan && stateVisible) {
+      if (state === '') {
+        errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + stateCaption + '\n';
+        i++;
+        flag = true;
+      }
+    }
+
+    if (countryMan && countryVisible) {
+      if (country === '') {
+        errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + countryCaption + '\n';
+        i++;
+        flag = true;
+      }
+    }
+
+    if (geoClassificationMan && geoClassificationVisible) {
+      if (geoClassificationLabel === 'Select' || geoClassificationLabel === '') {
+        errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + geoClassificationCaption + '\n';
+        i++;
+        flag = true;
+      }
+    }
+
+    if (yearsAtResidenceMan && yearsAtResidenceVisible) {
+      if (yearsAtResidence === '') {
+        errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + yearsAtResidenceCaption + '\n';
+        i++;
+        flag = true;
+      }
+    }
+
+    if (yearsAtCityMan && yearsAtCityVisible) {
+      if (yearsAtCity === '') {
+        errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + yearsAtCityCaption + '\n';
+        i++;
+        flag = true;
+      }
+    }
+
+    if (addressOwnerTypeMan && addressOwnerTypeVisible) {
+      if (addressOwnerTypeLabel === 'Select' || addressOwnerTypeLabel === '') {
+        errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + addressOwnerTypeCaption + '\n';
+        i++;
+        flag = true;
+      }
+    }
+
+    if (ownerDetailsMan && ownerDetailsVisible) {
+      if (ownerDetailsLabel === 'Select' || ownerDetailsLabel === '') {
+        errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + ownerDetailsCaption + '\n';
+        i++;
+        flag = true;
+      }
+    }
+
+    if (ownerNameMan && ownerNameVisible) {
+      if (ownerName === '') {
+        errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + ownerNameCaption + '\n';
+        i++;
+        flag = true;
+      }
+    }
+
+
+    setErrMsg(errorMessage);
     return flag;
   };
 
   const addressSubmit = () => {
     if (validateData()) {
       showBottomSheet();
+      //alert(errMsg)
+    } else {
+      // alert(addressTypeLabel+" "+addressLine1+" "+addressLine2+" "+landmark+" "+pincode+" "+city+" "+
+      // district+" "+state+" "+country+" "+geoClassificationLabel+" "+yearsAtResidence+" "+yearsAtCity+" "+
+      // addressOwnerTypeLabel+" "+ownerDetailsLabel+" "+ownerName)
+      insertData()
     }
   };
+
+  const insertData = () => {
+    tbl_clientaddressinfo.insertClientAddress(
+      "12345",
+      "820",
+      "A",
+      addressTypeLabel.trim(),
+      addressLine1.trim(),
+      addressLine2.trim(),
+      landmark.trim(),
+      pincode.trim(),
+      city.trim(),
+      district.trim(),
+      state.trim(),
+      country.trim(),
+      "",
+      "",
+      addressOwnerTypeLabel.trim(),
+      ownerDetailsLabel.trim(),
+      ownerName.trim(),
+      geoClassificationLabel.trim(),
+      yearsAtResidence.trim(),
+      yearsAtCity.trim(),
+      "A",
+      "Ganishkar",
+      new Date(),
+      "Ganishkar",
+      new Date(),
+      "Ganishkar",
+      new Date()
+    )
+      .then(result => {
+        if (global.DEBUG_MODE) console.log('Inserted Address detail:', result);
+
+        tbl_clientaddressinfo.getAllAddressDetailsForLoanID('12345')
+          .then(data => {
+            if (global.DEBUG_MODE) console.log('Address Detail:', data);
+          })
+          .catch(error => {
+            if (global.DEBUG_MODE) console.error('Error fetching bank details:', error);
+          });
+      })
+      .catch(error => {
+        if (global.DEBUG_MODE) console.error('Error Inserting Address detail:', error);
+      });
+  }
 
   const handlePickerClick = (componentName, label, index) => {
 
     if (componentName === 'AddressTypePicker') {
       setAddressTypeLabel(label);
       setAddressTypeIndex(index);
+    } else if (componentName === 'GeoClassificationPicker') {
+      setGeoClassificationLabel(label);
+      setGeoClassificationIndex(index);
+    } else if (componentName === 'AddressOwnershipPicker') {
+      setAddressOwnerTypeLabel(label);
+      setAddressOwnerTypeIndex(index);
+    } else if (componentName === 'OwnerDetailsPicker') {
+      setOwnerDetailsLabel(label);
+      setOwnerDetailsIndex(index);
     }
 
   }
@@ -258,10 +635,56 @@ const AddressDetails = (props, { navigation }) => {
       }
     } else if (componentName === 'pincode') {
       if (textValue.length > 0) {
+        setPincode(textValue)
+      }
+    } else if (componentName === 'city') {
+      if (textValue.length > 0) {
         if (Common.isValidText(textValue))
-          setPincode(textValue)
+          setCity(textValue)
       } else {
         setPincode(textValue)
+      }
+    } else if (componentName === 'district') {
+      if (textValue.length > 0) {
+        if (Common.isValidText(textValue))
+          setDistrict(textValue)
+      } else {
+        setDistrict(textValue)
+      }
+    } else if (componentName === 'state') {
+      if (textValue.length > 0) {
+        if (Common.isValidText(textValue))
+          setState(textValue)
+      } else {
+        setState(textValue)
+      }
+    } else if (componentName === 'country') {
+      if (textValue.length > 0) {
+        if (Common.isValidText(textValue))
+          setCountry(textValue)
+      } else {
+        setCountry(textValue)
+      }
+    } else if (componentName === 'YearAtResidence') {
+      if (textValue.length > 0) {
+        if (Common.isValidText(textValue))
+          setYearsAtResidence(textValue)
+      } else {
+        setYearsAtResidence(textValue)
+      }
+    } else if (componentName === 'YearAtCity') {
+      if (textValue.length > 0) {
+        if (Common.isValidText(textValue))
+          setYearsAtCity(textValue)
+      } else {
+        setYearsAtCity(textValue)
+      }
+    } else if (componentName === 'OwnerName') {
+      if (textValue.length > 0) {
+        if (Common.isValidText(textValue))
+          setOwnerName(textValue)
+      } else {
+        setOwnerName(textValue)
       }
     }
 
@@ -288,7 +711,7 @@ const AddressDetails = (props, { navigation }) => {
         textClose={language[0][props.language].str_ok}
       />
       <View style={{ width: '100%', height: 56, alignItems: 'center', justifyContent: 'center', }}>
-        <HeadComp textval={language[0][props.language].str_addaddressbutton} />
+        <HeadComp textval={language[0][props.language].str_addaddressbutton} props={props}/>
       </View>
 
       <ScrollView style={styles.scrollView}
@@ -327,7 +750,7 @@ const AddressDetails = (props, { navigation }) => {
           <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
             <TextComp textVal={pincodeCaption} textStyle={Commonstyles.inputtextStyle} Visible={pincodeMan} />
           </View>
-          <TextInputComp textValue={pincode} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={pincodeDisable} ComponentName='pincode' reference={pincodeRef} returnKey="next" handleClick={handleClick} handleReference={handleReference} length={30} />
+          <TextInputComp textValue={pincode} textStyle={Commonstyles.textinputtextStyle} type='number-pad' Disable={pincodeDisable} ComponentName='pincode' reference={pincodeRef} returnKey="next" handleClick={handleClick} handleReference={handleReference} length={6} />
         </View>}
 
         {cityVisible && <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
@@ -451,9 +874,13 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = state => {
   const { language } = state.languageReducer;
+  const { profileDetails } = state.profileReducer;
+  const { mobileCodeDetails } = state.mobilecodeReducer;
   return {
     language: language,
-  };
+    profiledetail: profileDetails,
+    mobilecodedetail: mobileCodeDetails
+  }
 };
 
 const mapDispatchToProps = dispatch => ({
