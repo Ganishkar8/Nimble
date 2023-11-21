@@ -152,7 +152,7 @@ const LoanApplicationMain = (props, { navigation }) => {
 
 
     const nextScreen = () => {
-        props.navigation.navigate('ProfileShortBasicDetails')
+        props.navigation.navigate('AddressMainList')
     }
 
     const onClickMainList = (item, substageId) => {

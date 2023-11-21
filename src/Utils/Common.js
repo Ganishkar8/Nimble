@@ -27,6 +27,13 @@ const isValidAlphaText = (text) => {
   return textRegex.test(text);
 };
 
+const isValidPin = (text) => {
+  // Regular expression to validate a pincode
+  const sixDigitNumberPattern = /^[0-9]{6}$/;
+
+  return sixDigitNumberPattern.test(text);
+};
+
 
 export async function getDeviceName() {
   var manufacturer = await getManufacturer();
@@ -183,5 +190,6 @@ export function showErrorAlert(title, message, buttontext) {
 
 export default {
   isValidPhoneNumber, isValidText, convertDateFormat, isDateGreaterThan, isValidAlphaText, showErrorAlert, getSystemCodeDescription,
-  numberRegex, CS_URL, CS_URL1, integerPattern, formatDate, getCodeDescription, formatTime, hasOnlyOneKey, getCurrentDateTime, getNetworkConnection
+  numberRegex, CS_URL, CS_URL1, integerPattern, formatDate, getCodeDescription, formatTime, hasOnlyOneKey, getCurrentDateTime, getNetworkConnection,
+  isValidPin
 };
