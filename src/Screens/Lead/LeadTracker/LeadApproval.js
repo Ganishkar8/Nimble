@@ -48,6 +48,8 @@ const LeadApproval = (props, { navigation, route }) => {
     const [commentDisable, setCommentDisable] = useState(false);
     const [logData, setLogData] = useState(props.route.params.logDetail);
     const [systemCodeDetail, setSystemCodeDetail] = useState(props.mobilecodedetail.leadSystemCodeDto);
+    const [errorModalVisible, setErrorModalVisible] = useState(false);
+    const [apiError, setApiError] = useState('');
 
     useEffect(() => {
         //below code is used for hiding  bottom tab
@@ -74,23 +76,6 @@ const LeadApproval = (props, { navigation, route }) => {
     }, [navigation]);
 
 
-    const pickerData = async () => {
-        tbl_SystemCodeDetails.getSystemCodeDetailsBasedOnID('LeadStatus').then(value => {
-            if (value !== undefined && value.length > 0) {
-                console.log(value)
-
-                for (var i = 0; i < value.length; i++) {
-                    if (value[i].IsDefault === '1') {
-                        setLeadStatusLabel(value[i].SubCodeID);
-                        setLeadStatusIndex(i + 1);
-                    }
-                }
-
-                setLeadStatusData(value)
-
-            }
-        })
-    }
 
     const handleClick = (componentName, textValue) => {
 
@@ -139,9 +124,9 @@ const LeadApproval = (props, { navigation, route }) => {
         const dataArray = [];
         systemCodeDetail.filter((data) => data.masterId === 'LEAD_STATUS').map((value, index) => {
             if (value.subCodeId.toUpperCase() == 'APPROVED') {
-                dataArray.push({ label: value.label, subCodeId: value.subCodeId, checked: false })
+                dataArray.push({ Description: value.Description, subCodeId: value.subCodeId, checked: false })
             } else if (value.subCodeId.toUpperCase() == 'REJECTED') {
-                dataArray.push({ label: value.label, subCodeId: value.subCodeId, checked: false })
+                dataArray.push({ Description: value.Description, subCodeId: value.subCodeId, checked: false })
             }
 
         });

@@ -541,7 +541,7 @@ const LeadManagement = (props, { navigation, route }) => {
 
         const data = [];
         systemCodeDetail.filter((data) => data.masterId === 'LEAD_STATUS').map((value, index) => {
-            data.push({ name: value.label, id: value.subCodeId, checked: false })
+            data.push({ name: value.Description, id: value.subCodeId, checked: false })
         });
         setStatusDataArr(data);
 
@@ -573,7 +573,7 @@ const LeadManagement = (props, { navigation, route }) => {
 
         const data = [];
         systemCodeDetail.filter((data) => data.masterId === 'LEAD_TYPE').map((value, index) => {
-            data.push({ name: value.label, id: value.subCodeId, checked: false })
+            data.push({ name: value.Description, id: value.subCodeId, checked: false })
         });
         setTypeDataArr(data);
 
@@ -609,8 +609,9 @@ const LeadManagement = (props, { navigation, route }) => {
                 setLoading(false);
                 var data = [];
                 for (var i = 0; i < response.data.length; i++) {
-                    data.push({ id: response.data[i], label: response.data[i] })
+                    data.push({ Description: response.data[i], subCodeId: response.data[i] })
                 }
+
                 setAgentData(data)
 
             })

@@ -137,6 +137,8 @@ const LeadCreationLoan = (props, { navigation }) => {
         const filteredLeadTypeData = systemCodeDetail.filter((data) => data.masterId === 'LEAD_TYPE');
         setLeadTypeData(filteredLeadTypeData);
 
+        alert(JSON.stringify(filteredLeadTypeData))
+
     }
 
 

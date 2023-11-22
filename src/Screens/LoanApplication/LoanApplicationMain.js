@@ -126,7 +126,7 @@ const LoanApplicationMain = (props, { navigation }) => {
     const isScreenVisible = useIsFocused();
     const [bottomLeadSheetVisible, setBottomLeadSheetVisible] = useState(false);
     const showLeadBottomSheet = () => {
-        setBottomLeadSheetVisible(true)
+        setBottomLeadSheetVisible(true);
         setTimeout(() => { setBottomLeadSheetVisible(false) }, 2000);
     };
     const hideLeadBottomSheet = () => setBottomLeadSheetVisible(false);
@@ -171,8 +171,7 @@ const LoanApplicationMain = (props, { navigation }) => {
         setProcessSubStageData(fiterStatusPosition)
 
         const filteredProcessModuleStage = processModule.filter((data) => {
-            return data.wfId === 85 && data.subStageId === item.stageId;
-            return data.wfId === 85 && data.subStageId === item.stageId;
+            return data.wfId === 109 && data.subStageId === item.stageId;
         }).map((data) => {
             const extraJSON = { subDataIsCompleted: false, nestedSubData: [] };
             return { ...data, ...extraJSON };
@@ -181,16 +180,12 @@ const LoanApplicationMain = (props, { navigation }) => {
         setProcessModuleData(filteredProcessModuleStage);
 
         filteredProcessModuleStage.forEach((data) => {
-            if (data.wfId === 85) {
-                if (data.wfId === 85) {
-
-                    processPage.forEach((data1) => {
-                        if (data1.moduleId === data.id) {
-                            data.nestedSubData.push(data1);
-                        }
-                    });
-
-                }
+            if (data.wfId === 109) {
+                processPage.forEach((data1) => {
+                    if (data1.moduleId === data.id) {
+                        data.nestedSubData.push(data1);
+                    }
+                });
             }
         });
 
@@ -211,8 +206,7 @@ const LoanApplicationMain = (props, { navigation }) => {
     const getProcessSubStage = async () => {
 
         const filteredProcessSubStage = processSubStage.filter((data) => {
-            return data.wfId === 85 && (data.stageId === 1 || data.stageId === 2 || data.stageId === 3 || data.stageId === 4);
-            return data.wfId === 85 && (data.stageId === 1 || data.stageId === 2 || data.stageId === 3 || data.stageId === 4);
+            return data.wfId === 109 && (data.stageId === 1 || data.stageId === 2 || data.stageId === 3 || data.stageId === 4);
         }).map((data) => {
             const extraJSON = { isSelected: data.stageId === 1 };
             return { ...data, ...extraJSON };
@@ -221,26 +215,21 @@ const LoanApplicationMain = (props, { navigation }) => {
         setProcessSubStageData(filteredProcessSubStage);
 
         const filteredProcessModuleStage = processModule.filter((data) => {
-            return data.wfId === 85 && data.subStageId === 1;
-            return data.wfId === 85 && data.subStageId === 1;
+            return data.wfId === 109 && data.subStageId === 1;
         }).map((data) => {
             const extraJSON = { subDataIsCompleted: false, nestedSubData: [] };
             return { ...data, ...extraJSON };
         });
 
         filteredProcessModuleStage.forEach((data) => {
-            if (data.wfId === 85) {
-                if (data.wfId === 85) {
+            if (data.wfId === 109) {
+                processPage.forEach((data1) => {
+                    if (data1.moduleId === data.id) {
+                        data.nestedSubData.push(data1);
+                    }
+                });
 
-                    processPage.forEach((data1) => {
-                        if (data1.moduleId === data.id) {
-                            data.nestedSubData.push(data1);
-                        }
-                    });
-
-                    data.nestedSubData.sort((a, b) => a.id - b.id);
-
-                }
+                data.nestedSubData.sort((a, b) => a.id - b.id);
             }
         });
 
@@ -295,19 +284,19 @@ const LoanApplicationMain = (props, { navigation }) => {
                                         }}>
                                             <View >
                                                 <View style={{ width: 40, height: 40, backgroundColor: Colors.white, borderRadius: 30, alignItems: 'center', justifyContent: 'center' }}>
-                                                    {item.id == 1 &&
+                                                    {item.stageId == 1 &&
                                                         <Image source={require('../../Images/pro.png')}
                                                             style={{ width: 22, height: 22, resizeMode: 'contain' }} />
                                                     }
-                                                    {item.id == 2 &&
+                                                    {item.stageId == 2 &&
                                                         <Image source={require('../../Images/file.png')}
                                                             style={{ width: 22, height: 22, resizeMode: 'contain' }} />
                                                     }
-                                                    {item.id == 3 &&
+                                                    {item.stageId == 3 &&
                                                         <Image source={require('../../Images/bag.png')}
                                                             style={{ width: 22, height: 22, resizeMode: 'contain' }} />
                                                     }
-                                                    {item.id == 4 &&
+                                                    {item.stageId == 4 &&
                                                         <Image source={require('../../Images/path.png')}
                                                             style={{ width: 22, height: 22, resizeMode: 'contain' }} />
                                                     }

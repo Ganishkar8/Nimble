@@ -153,7 +153,7 @@ export function getSystemCodeDescription(systemCodeDetail, type, subCodeId) {
   const matchingItem = systemCodeDetail.find((data) => data.masterId === type && data.subCodeId === subCodeId);
 
   if (matchingItem) {
-    return matchingItem.label;
+    return matchingItem.Description;
   } else {
     return ''; // Or any other appropriate value for no match
   }

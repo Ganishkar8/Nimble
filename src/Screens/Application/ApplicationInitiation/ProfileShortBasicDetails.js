@@ -44,6 +44,7 @@ import tbl_client from '../../../Database/Table/tbl_client';
 
 
 const ProfileShortBasicDetails = (props, { navigation }) => {
+  var aadhar = "";
   const [loading, setLoading] = useState(false);
 
   const [custCatgLabel, setCustCatgLabel] = useState('');
@@ -281,6 +282,8 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [apiError, setApiError] = useState('');
 
+  const [aadharNumber, setAadharNumber] = useState('');
+
   const [dedupeModalVisible, setDedupeModalVisible] = useState(false);
 
   useEffect(() => {
@@ -410,7 +413,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
 
   const makeSystemMandatoryFields = () => {
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_leadid' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_ld_id' && data.pageId === 1).map((value, index) => {
       setLeadIDCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -427,7 +430,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_loantype' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ln_type' && data.pageId === 1).map((value, index) => {
       setLoanTypeCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -444,7 +447,24 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_productid' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_gender' && data.pageId === 1).map((value, index) => {
+      setGenderCaption(value.fieldName)
+
+      if (value.isMandatory) {
+        setGenderMan(true);
+      }
+      if (value.isHide) {
+        setGenderVisible(false);
+      }
+      if (value.isDisable) {
+        setGenderDisable(true);
+      }
+      if (value.isCaptionChange) {
+        setGenderCaption(value[0].fieldCaptionChange)
+      }
+    });
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_pd_id' && data.pageId === 1).map((value, index) => {
       setProductTypeCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -461,7 +481,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_loanpurpose' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ln_prps' && data.pageId === 1).map((value, index) => {
       setLoanPurposeCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -478,7 +498,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_custcategory' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_cust_cat' && data.pageId === 1).map((value, index) => {
       setCustCatgCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -495,7 +515,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_clientsubcategory' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_cust_subcat' && data.pageId === 1).map((value, index) => {
       setCustomerSubCategoryCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -512,7 +532,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_workflowid' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_wf_id' && data.pageId === 1).map((value, index) => {
       setWorkflowIDCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -545,7 +565,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_loanamount' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_ln_amt' && data.pageId === 1).map((value, index) => {
       setLoanAmountCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -579,7 +599,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_maritalstatus' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_mrt_sts' && data.pageId === 1).map((value, index) => {
       setMaritalStatusCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -596,7 +616,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_kyctype1' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_kyc_type_1' && data.pageId === 1).map((value, index) => {
       setKycType1Caption(value.fieldName)
 
       if (value.isMandatory) {
@@ -613,7 +633,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_kyctype2' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_kyc_type_2 ' && data.pageId === 1).map((value, index) => {
       setKycType2Caption(value.fieldName)
 
       if (value.isMandatory) {
@@ -630,7 +650,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_kyctype3' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_kyctype_3' && data.pageId === 1).map((value, index) => {
       setKycType3Caption(value.fieldName)
 
       if (value.isMandatory) {
@@ -647,7 +667,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_kyctype4' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_kyc_type_4' && data.pageId === 1).map((value, index) => {
       setKycType4Caption(value.fieldName)
 
       if (value.isMandatory) {
@@ -664,7 +684,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_mobilenumber' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_mbl_no' && data.pageId === 1).map((value, index) => {
       setMobileNumberCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -698,7 +718,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'chck_msme' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'chck_is_msme' && data.pageId === 1).map((value, index) => {
       setchkMsmeCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -715,7 +735,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_udyamregnum' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_udyam_registration_number' && data.pageId === 1).map((value, index) => {
       setURNumberCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -740,46 +760,47 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   }
 
   const updateBasicDetails = () => {
+
     if (validate()) {
       showBottomSheet();
     } else {
       const appDetails = {
-        "customerCategoryId": 1234,
+        "customerCategoryId": custCatgLabel,
         "leadId": 0,
-        "customerSubcategoryId": 0,
-        "customerTypeId": 521,
-        "loanTypeId": 440,
-        "loanPurposeId": 0,
-        "productId": 0,
-        "workflowId": 1,
+        "customerSubcategoryId": CustomerSubCategoryLabel,
+        "customerTypeId": 'NEW',
+        "loanTypeId": loanTypeLabel,
+        "loanPurposeId": LoanPurposeLabel,
+        "productId": ProductTypeLabel,
+        "workflowId": 94,
         "consent": true,
-        "applicationAppliedBy": 0,
+        "applicationAppliedBy": global.USERID,
         "clientDetail": [
           {
-            "clientTypeId": 1672,
-            "titleId": 0,
-            "firstName": "aaaaaa",
-            "middleName": "s",
-            "maritalStatusId": 0,
-            "kycTypeId1": 0,
-            "kycIdValue1": "string",
-            "kycTypeId2": 0,
-            "kycIdValue2": "string",
-            "kycTypeId3": 0,
-            "kycIdValue3": "string",
-            "kycTypeId4": 0,
-            "kycIdValue4": "string",
-            "udyamRegistrationNumber": "string",
-            "lastName": "Anure",
-            "mobileNumber": 8884821182,
-            "email": "string",
+            "clientTypeId": 'APP',
+            "titleId": titleLabel,
+            "firstName": Name,
+            "middleName": "",
+            "lastName": "",
+            "maritalStatusId": MaritalStatusLabel,
+            "kycTypeId1": KycType1Label,
+            "kycIdValue1": kycID1,
+            "kycTypeId2": KycType2Label,
+            "kycIdValue2": kycID2,
+            "kycTypeId3": KycType3Label,
+            "kycIdValue3": kycID3,
+            "kycTypeId4": KycType4Label,
+            "kycIdValue4": kycID4,
+            "udyamRegistrationNumber": URNumber,
+            "mobileNumber": mobileNumber,
+            "email": Email,
             "active": true,
-            "aadharNumberVerified": true,
-            "udyamRegistrationNumberVerified": true,
+            "aadharNumberVerified": false,
+            "udyamRegistrationNumberVerified": false,
             "mobileNumberVerified": true,
             "msme": false,
-            "emailVerified": true,
-            "panVerified": true
+            "emailVerified": false,
+            "panVerified": false
           }
         ],
         "active": true,
@@ -788,7 +809,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       const baseURL = '8901';
       setLoading(true);
       apiInstancelocal(baseURL)
-        .put(`api/v2/profile-short/basic-details/1`, appDetails)
+        .put(`api/v2/profile-short/basic-details/${global.LOANAPPLICATIONID}`, appDetails)
         .then(async response => {
           // Handle the response data
           if (global.DEBUG_MODE) console.log('LeadCreationBasicApiResponse::' + JSON.stringify(response.data),);
@@ -810,8 +831,6 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
 
   const internalDedupeCheck = () => {
 
-    props.navigation.navigate('AadharOTPVerification', { aadharNumber: 'mobileNumber' });
-    return;
     if (validate()) {
       showBottomSheet();
     } else {
@@ -850,7 +869,6 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           await insertData();
           if (response.data.clientExistingDetails == null) {
             setClientTypeLabel('NEW');
-            props.navigation.navigate('AadharOTPVerification', { aadharNumber: 'mobileNumber' });
           } else {
             props.dedupeAction(response.data)
             setDedupeModalVisible(true);
@@ -859,8 +877,8 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
 
           global.isDedupeDone = "1";
           setClientTypeVisible(true)
-
           setLoading(false);
+          generateAadharOTP();
 
         })
         .catch(error => {
@@ -922,15 +940,69 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
 
   };
 
+  const generateAadharOTP = () => {
+
+    const appDetails =
+    {
+      "clientId": 0,
+      "aadharNumber": aadhar,
+      "createdBy": global.USERID
+    }
+    const baseURL = '8901';
+    setLoading(true);
+    apiInstancelocal(baseURL)
+      .post('/api/v2/aadharOtp/generate/otp', appDetails)
+      .then(async response => {
+        // Handle the response data
+        if (global.DEBUG_MODE) console.log('AadharOTPApiResponse::' + JSON.stringify(response.data),);
+
+        if (response.status == 200) {
+          props.navigation.navigate('AadharOTPVerification', { aadharNumber: aadharNumber });
+        }
+
+        setLoading(false);
+
+
+
+      })
+      .catch(error => {
+        // Handle the error
+        if (global.DEBUG_MODE) console.log('MobileOTPApiResponse::::' + JSON.stringify(error.response));
+        setLoading(false);
+        if (error.response.data != null) {
+          setApiError(error.response.data.message);
+          setErrorModalVisible(true)
+        }
+      });
+
+  };
+
   const refresh = () => {
     alert('data1')
   }
 
   const validate = () => {
-    var flag = false;
+    var flag = false; isAadharAvailable = false;
     var i = 1;
     var errorMessage = '';
-    return flag;
+
+    if (KycType1Label == '001') {
+      setAadharNumber(kycID1);
+      aadhar = kycID1;
+      isAadharAvailable = true;
+    } else if (KycType2Label == '001') {
+      setAadharNumber(kycID2);
+      aadhar = kycID2;
+      isAadharAvailable = true;
+    } else if (KycType3Label == '001') {
+      setAadharNumber(kycID3);
+      aadhar = kycID3;
+      isAadharAvailable = true;
+    } else if (KycType4Label == '001') {
+      setAadharNumber(kycID4);
+      aadhar = kycID4;
+      isAadharAvailable = true;
+    }
 
     if (custCatgMan && custCatgVisible) {
       if (custCatgLabel === 'Select') {
@@ -1203,6 +1275,19 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
         flag = true;
       }
     }
+
+    if (!isAadharAvailable) {
+      errorMessage =
+        errorMessage +
+        i +
+        ')' +
+        ' ' +
+        'Please Select Aadhar as a KYC Type' +
+        '\n';
+      i++;
+      flag = true;
+    }
+
     setErrMsg(errorMessage);
     return false;
   };
@@ -2277,11 +2362,11 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
         </View>
 
         <ButtonViewComp
-          textValue={language[0][props.language].str_dedupecheck.toUpperCase()}
+          textValue={global.isDedupeDone == '1' ? language[0][props.language].str_next.toUpperCase() : language[0][props.language].str_dedupecheck.toUpperCase()}
           textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
           viewStyle={Commonstyles.buttonView}
           innerStyle={Commonstyles.buttonViewInnerStyle}
-          handleClick={internalDedupeCheck}
+          handleClick={updateBasicDetails}
         />
       </ScrollView>
     </SafeAreaView>

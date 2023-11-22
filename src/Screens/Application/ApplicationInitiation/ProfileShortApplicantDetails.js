@@ -30,8 +30,25 @@ import ButtonViewComp from '../../../Components/ButtonViewComp';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import ChildHeadComp from '../../../Components/ChildHeadComp';
 import DateComp from '../../../Components/Filter/DateComp';
+import DateInputComp from '../../../Components/DateInputComp';
+import MapView, { Marker } from 'react-native-maps';
+import ImagePicker, { ImageOrVideo } from 'react-native-image-crop-picker';
 
 const ProfileShortApplicantDetails = (props, { navigation }) => {
+
+  const [
+    currentLongitude,
+    setCurrentLongitude
+  ] = useState(0.0);
+  const [
+    currentLatitude,
+    setCurrentLatitude
+  ] = useState(0.0);
+  const [
+    locationStatus,
+    setLocationStatus
+  ] = useState('');
+
   const [loading, setLoading] = useState(false);
   const [firstName, setFirstName] = useState('');
   const [firstNameCaption, setFirstNameCaption] = useState('FIRST NAME');
@@ -55,6 +72,15 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
   const firstNameRef = useRef(null);
   const middleNameRef = useRef(null);
   const lastNameRef = useRef(null);
+
+  const [MaritalStatusMan, setMaritalStatusMan] = useState(false);
+  const [MaritalStatusVisible, setMaritalStatusVisible] = useState(true);
+  const [MaritalStatusDisable, setMaritalStatusDisable] = useState(false);
+  const [MaritalStatusData, setMaritalStatusData] = useState([]);
+  const [MaritalStatusCaption, setMaritalStatusCaption] =
+    useState('MARITAL STATUS');
+  const [MaritalStatusLabel, setMaritalStatusLabel] = useState('');
+  const [MaritalStatusIndex, setMaritalStatusIndex] = useState('');
 
   const [gpslatlon, setGPSLatLon] = useState('');
   const mapRef = useRef(null);
@@ -138,19 +164,30 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
   const [FatherNameDisable, setFatherNameDisable] = useState(false);
   const FatherNameRef = useRef(null);
 
-  const [HusbandName, setHusbandName] = useState('');
-  const [HusbandNameCaption, setHusbandNameCaption] = useState('HUSBAND NAME');
-  const [HusbandNameMan, setHusbandNameMan] = useState(false);
-  const [HusbandNameVisible, setHusbandNameVisible] = useState(true);
-  const [HusbandNameDisable, setHusbandNameDisable] = useState(false);
-  const HusbandNameRef = useRef(null);
+  const [SpouseName, setSpouseName] = useState('');
+  const [SpouseNameCaption, setSpouseNameCaption] = useState('HUSBAND NAME');
+  const [SpouseNameMan, setSpouseNameMan] = useState(false);
+  const [SpouseNameVisible, setSpouseNameVisible] = useState(true);
+  const [SpouseNameDisable, setSpouseNameDisable] = useState(false);
+  const SpouseNameRef = useRef(null);
+
+  const [leadsystemCodeDetail, setLeadSystemCodeDetail] = useState(props.mobilecodedetail.leadSystemCodeDto);
+  const [systemCodeDetail, setSystemCodeDetail] = useState(props.mobilecodedetail.t_SystemCodeDetail);
+  const [leaduserCodeDetail, setLeadUserCodeDetail] = useState(props.mobilecodedetail.leadUserCodeDto);
+  const [userCodeDetail, setUserCodeDetail] = useState(props.mobilecodedetail.t_UserCodeDetail);
+  const [bankUserCodeDetail, setBankUserCodeDetail] = useState(props.mobilecodedetail.t_BankUserCode);
+
+  const [systemMandatoryField, setSystemMandatoryField] = useState(props.mobilecodedetail.processSystemMandatoryFields);
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [apiError, setApiError] = useState('');
+
 
   useEffect(() => {
     props.navigation
       .getParent()
       ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     makeSystemMandatoryFields();
-    pickerData();
+    getSystemCodeDetail();
 
     return () =>
       props.navigation
@@ -158,370 +195,315 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
         ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
   }, [navigation]);
 
-  const pickerData = async () => {
-    tbl_SystemCodeDetails.getSystemCodeDetailsBasedOnID('Title').then(value => {
-      if (value !== undefined && value.length > 0) {
-        console.log(value);
+  const getSystemCodeDetail = async () => {
 
-        for (var i = 0; i < value.length; i++) {
-          if (value[i].IsDefault === '1') {
-            setTitleLabel(value[i].SubCodeID);
-            setTitleIndex(i + 1);
-          }
-        }
+    const filteredMaritalStatusData = userCodeDetail.filter((data) => data.ID === 'MaritalStatusID');
+    setMaritalStatusData(filteredMaritalStatusData);
 
-        setTitleData(value);
-      }
-    });
-    tbl_SystemCodeDetails
-      .getSystemCodeDetailsBasedOnID('Gender')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
+    const filteredTitleData = leaduserCodeDetail.filter((data) => data.masterId === 'TITLE');
+    setTitleData(filteredTitleData);
 
-          for (var i = 0; i < value.length; i++) {
-            if (value[i].IsDefault === '1') {
-              setGenderLabel(value[i].SubCodeID);
-              setGenderIndex(i + 1);
-            }
-          }
+    const filteredGenderData = leadsystemCodeDetail.filter((data) => data.masterId === 'GENDER');
+    setGenderData(filteredGenderData);
 
-          setGenderData(value);
-        }
-      });
-    tbl_SystemCodeDetails.getSystemCodeDetailsBasedOnID('Caste').then(value => {
-      if (value !== undefined && value.length > 0) {
-        console.log(value);
+    const filteredCasteData = leaduserCodeDetail.filter((data) => data.masterId === 'CASTE');
+    setCasteData(filteredCasteData);
 
-        for (var i = 0; i < value.length; i++) {
-          if (value[i].IsDefault === '1') {
-            setCasteLabel(value[i].SubCodeID);
-            setCasteIndex(i + 1);
-          }
-        }
+    const filteredReligionData = leaduserCodeDetail.filter((data) => data.masterId === 'RELIGION');
+    setReligionData(filteredReligionData);
 
-        setCasteData(value);
-      }
-    });
-    tbl_SystemCodeDetails
-      .getSystemCodeDetailsBasedOnID('Religion')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
+    const filteredMotherTongueData = leaduserCodeDetail.filter((data) => data.masterId === 'MOTHER_TONGUE');
+    setMotherTongueData(filteredMotherTongueData);
 
-          for (var i = 0; i < value.length; i++) {
-            if (value[i].IsDefault === '1') {
-              setReligionLabel(value[i].SubCodeID);
-              setReligionIndex(i + 1);
-            }
-          }
+    const filteredEADData = leaduserCodeDetail.filter((data) => data.masterId === 'EDUCATIONAL_QUALIFICATION');
+    setEADData(filteredEADData);
 
-          setReligionData(value);
-        }
-      });
-    tbl_SystemCodeDetails
-      .getSystemCodeDetailsBasedOnID('MotherTongue')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-
-          for (var i = 0; i < value.length; i++) {
-            if (value[i].IsDefault === '1') {
-              setMotherTongueLabel(value[i].SubCodeID);
-              setMotherTongueIndex(i + 1);
-            }
-          }
-
-          setMotherTongueData(value);
-        }
-      });
-    tbl_SystemCodeDetails.getSystemCodeDetailsBasedOnID('EAD').then(value => {
-      if (value !== undefined && value.length > 0) {
-        console.log(value);
-
-        for (var i = 0; i < value.length; i++) {
-          if (value[i].IsDefault === '1') {
-            setEADLabel(value[i].SubCodeID);
-            setEADIndex(i + 1);
-          }
-        }
-
-        setEADData(value);
-      }
-    });
   };
 
   const makeSystemMandatoryFields = () => {
-    //firstName
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('et_firstname')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value[0]);
-          setFirstNameCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setFirstNameMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setFirstNameVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setFirstNameDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setFirstNameCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
 
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('et_lastname')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setLastNameCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setLastNameMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setLastNameVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setLastNameDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setLastNameCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_title' && data.pageId === 4).map((value, index) => {
+      setTitleCaption(value.fieldName)
+      if (value.mandatory) {
+        setTitleMan(true);
+      }
+      if (value.hide) {
+        setTitleVisible(false);
+      }
+      if (value.disable) {
+        setTitleDisable(true);
+      }
+      if (value.captionChange) {
+        setTitleCaption(value[0].fieldCaptionChange)
+      }
+    });
 
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('et_middlename')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setMiddleNameCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setMiddleNameMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setMiddleNameVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setMiddleNameDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setMiddleNameCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
 
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_title')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setTitleCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setTitleMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setTitleVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setTitleDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setTitleCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_firstname' && data.pageId === 4).map((value, index) => {
+      setFirstNameCaption(value.fieldName)
 
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_gender')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setGenderCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setGenderMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setGenderVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setGenderDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setGenderCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
+      if (value.isMandatory) {
+        setFirstNameMan(true);
+      }
+      if (value.isHide) {
+        setFirstNameVisible(false);
+      }
+      if (value.isDisable) {
+        setFirstNameDisable(true);
+      }
+      if (value.isCaptionChange) {
+        setFirstNameCaption(value[0].fieldCaptionChange)
+      }
+    });
 
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_dob')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setDOBCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setDOBMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setDOBVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setDOBDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setDOBCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_middlename' && data.pageId === 4).map((value, index) => {
+      setMiddleNameCaption(value.fieldName)
 
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_age')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setAgeCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setAgeMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setAgeVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setAgeDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setAgeCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
+      if (value.isMandatory) {
+        setMiddleNameMan(true);
+      }
+      if (value.isHide) {
+        setMiddleNameVisible(false);
+      }
+      if (value.isDisable) {
+        setMiddleNameDisable(true);
+      }
+      if (value.isCaptionChange) {
+        setMiddleNameCaption(value[0].fieldCaptionChange)
+      }
+    });
 
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_fathername')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setFatherNameCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setFatherNameMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setFatherNameVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setFatherNameDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setFatherNameCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_lastname' && data.pageId === 4).map((value, index) => {
+      setLastNameCaption(value.fieldName)
 
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_husbandname')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setHusbandNameCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setHusbandNameMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setHusbandNameVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setHusbandNameDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setHusbandNameCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_caste')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setCasteCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setCasteMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setCasteVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setCasteDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setCasteCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_religion')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setReligionCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setReligionMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setReligionVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setReligionDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setReligionCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_mothertongue')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setMotherTongueCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setMotherTongueMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setMotherTongueVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setMotherTongueDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setMotherTongueCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
-    tbl_SystemMandatoryFields
-      .getSystemMandatoryFieldsBasedOnFieldUIID('sp_educationqualification')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-          setEADCaption(value[0].FieldName);
-          if (value[0].IsMandatory == '1') {
-            setEADMan(true);
-          }
-          if (value[0].IsHide == '1') {
-            setEADVisible(false);
-          }
-          if (value[0].IsDisable == '1') {
-            setEADDisable(true);
-          }
-          if (value[0].IsCaptionChange == '1') {
-            setEADCaption(value[0].FieldCaptionChange);
-          }
-        }
-      });
+      if (value.isMandatory) {
+        setLastNameMan(true);
+      }
+      if (value.isHide) {
+        setLastNameVisible(false);
+      }
+      if (value.isDisable) {
+        setLastNameDisable(true);
+      }
+      if (value.isCaptionChange) {
+        setLastNameCaption(value[0].fieldCaptionChange)
+      }
+    });
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_maritalstatus' && data.pageId === 4).map((value, index) => {
+      setMaritalStatusCaption(value.fieldName)
+
+      if (value.isMandatory) {
+        setMaritalStatusMan(true);
+      }
+      if (value.isHide) {
+        setMaritalStatusVisible(false);
+      }
+      if (value.isDisable) {
+        setMaritalStatusDisable(true);
+      }
+      if (value.isCaptionChange) {
+        setMaritalStatusCaption(value[0].fieldCaptionChange)
+      }
+    });
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_gender' && data.pageId === 4).map((value, index) => {
+      setGenderCaption(value.fieldName)
+
+      if (value.isMandatory) {
+        setGenderMan(true);
+      }
+      if (value.isHide) {
+        setGenderVisible(false);
+      }
+      if (value.isDisable) {
+        setGenderDisable(true);
+      }
+      if (value.isCaptionChange) {
+        setGenderCaption(value[0].fieldCaptionChange)
+      }
+    });
+
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_dob' && data.pageId === 4).map((value, index) => {
+      setDOBCaption(value.fieldName)
+
+      if (value.isMandatory) {
+        setDOBMan(true);
+      }
+      if (value.isHide) {
+        setDOBVisible(false);
+      }
+      if (value.isDisable) {
+        setDOBDisable(true);
+      }
+      if (value.isCaptionChange) {
+        setDOBCaption(value[0].fieldCaptionChange)
+      }
+    });
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_age' && data.pageId === 4).map((value, index) => {
+      setAgeCaption(value.fieldName)
+
+      if (value.isMandatory) {
+        setAgeMan(true);
+      }
+      if (value.isHide) {
+        setAgeVisible(false);
+      }
+      if (value.isDisable) {
+        setAgeDisable(true);
+      }
+      if (value.isCaptionChange) {
+        setAgeCaption(value[0].fieldCaptionChange)
+      }
+    });
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_fathername' && data.pageId === 4).map((value, index) => {
+      setFatherNameCaption(value.fieldName)
+
+      if (value.isMandatory) {
+        setFatherNameMan(true);
+      }
+      if (value.isHide) {
+        setFatherNameVisible(false);
+      }
+      if (value.isDisable) {
+        setFatherNameDisable(true);
+      }
+      if (value.isCaptionChange) {
+        setFatherNameCaption(value[0].fieldCaptionChange)
+      }
+    });
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_spousename' && data.pageId === 4).map((value, index) => {
+      setSpouseNameCaption(value.fieldName)
+
+      if (value.isMandatory) {
+        setFatherNameMan(true);
+      }
+      if (value.isHide) {
+        setFatherNameVisible(false);
+      }
+      if (value.isDisable) {
+        setFatherNameDisable(true);
+      }
+      if (value.isCaptionChange) {
+        setSpouseNameCaption(value[0].fieldCaptionChange)
+      }
+    });
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_caste' && data.pageId === 4).map((value, index) => {
+      setCasteCaption(value.fieldName)
+
+      if (value.isMandatory) {
+        setCasteMan(true);
+      }
+      if (value.isHide) {
+        setCasteVisible(false);
+      }
+      if (value.isDisable) {
+        setCasteDisable(true);
+      }
+      if (value.isCaptionChange) {
+        setCasteCaption(value[0].fieldCaptionChange)
+      }
+    });
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_religion' && data.pageId === 4).map((value, index) => {
+      setReligionCaption(value.fieldName)
+
+      if (value.isMandatory) {
+        setReligionMan(true);
+      }
+      if (value.isHide) {
+        setReligionVisible(false);
+      }
+      if (value.isDisable) {
+        setReligionDisable(true);
+      }
+      if (value.isCaptionChange) {
+        setReligionCaption(value[0].fieldCaptionChange)
+      }
+    });
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_mothertongue' && data.pageId === 4).map((value, index) => {
+      setMotherTongueCaption(value.fieldName)
+
+      if (value.isMandatory) {
+        setMotherTongueMan(true);
+      }
+      if (value.isHide) {
+        setMotherTongueVisible(false);
+      }
+      if (value.isDisable) {
+        setMotherTongueDisable(true);
+      }
+      if (value.isCaptionChange) {
+        setMotherTongueCaption(value[0].fieldCaptionChange)
+      }
+    });
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_eduqual' && data.pageId === 4).map((value, index) => {
+      setEADCaption(value.fieldName)
+
+      if (value.isMandatory) {
+        setEADMan(true);
+      }
+      if (value.isHide) {
+        setEADVisible(false);
+      }
+      if (value.isDisable) {
+        setEADDisable(true);
+      }
+      if (value.isCaptionChange) {
+        setEADCaption(value[0].fieldCaptionChange)
+      }
+    });
+
+
   };
+
+  const updateImage = async () => {
+    if (imageUri) {
+
+      setLoading(true);
+      insertLead(global.leadID, false)
+      const formData = new FormData();
+      formData.append('file', {
+        uri: imageUri,
+        type: fileType,
+        name: fileName,
+      });
+
+      try {
+        const response = await fetch(global.BASEURL + '8094/api/documents', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          // Handle the response from Cloudinary
+
+          setDocID(data.docId);
+
+        } else {
+          if (global.DEBUG_MODE) console.log('Upload failed:', response.status);
+          setApiError(response.status);
+          setErrorModalVisible(true)
+        }
+      } catch (error) {
+        if (global.DEBUG_MODE) console.log('Upload error:', error);
+        setApiError(error.response.data.message);
+        setErrorModalVisible(true)
+      } finally {
+        setLoading(false);
+      }
+    }
+  }
 
   const updateApplicantDetails = () => {
     if (validate()) {
@@ -565,6 +547,113 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
           alert(error);
         });
     }
+  };
+
+  const zoomToMarker = () => {
+    if (mapRef.current) {
+      mapRef.current.animateToRegion(
+        {
+          latitude: currentLatitude,
+          longitude: currentLongitude,
+          latitudeDelta: 0.02, // Adjust the zoom level as needed
+          longitudeDelta: 0.02,
+        },
+        1000, // Duration of the animation in milliseconds
+      );
+    }
+  };
+
+  const pickImage = () => {
+    // setVisible(false)
+
+    hidephotoBottomSheet();
+    ImagePicker.openCamera({
+      cropping: true,
+    }).then(image => {
+      setImageFile(image)
+
+      const lastDotIndex = image.path.lastIndexOf('.');
+      var imageName = 'Photo' + '_' + global.leadID;
+      if (lastDotIndex !== -1) {
+        // Get the substring from the last dot to the end of the string
+        const fileExtension = image.path.substring(lastDotIndex);
+        imageName = imageName + fileExtension;
+        console.log('File extension:', fileExtension);
+      }
+
+      // const imageName = image.path.split('/').pop();
+      setTime(Common.getCurrentDateTime());
+      setFileType(image.mime)
+      setFileName(imageName)
+      setImageUri(image.path)
+      setVisible(false)
+      props.onChange?.(image);
+    })
+
+  };
+
+  const selectImage = async () => {
+    // setVisible(false)
+
+    hidephotoBottomSheet();
+    ImagePicker.openPicker({
+      width: 300,
+      height: 400,
+      cropping: true,
+    }).then(image => {
+      setImageFile(image);
+
+      const lastDotIndex = image.path.lastIndexOf('.');
+      var imageName = 'Photo' + '_' + global.leadID;
+      if (lastDotIndex !== -1) {
+        // Get the substring from the last dot to the end of the string
+        const fileExtension = image.path.substring(lastDotIndex);
+        imageName = imageName + fileExtension;
+        console.log('File extension:', fileExtension);
+      }
+      setFileType(image.mime)
+      setFileName(imageName)
+      setImageUri(image.path)
+      setVisible(false)
+      setDeleteVisible(false)
+      props.onChange?.(image);
+    })
+
+  };
+
+  const getOneTimeLocation = () => {
+    setLocationStatus('Getting Location ...');
+    Geolocation.getCurrentPosition(
+      //Will give you the current location
+      position => {
+        setLocationStatus('You are Here');
+
+        //getting the Longitude from the location json
+        const currentLongitude = JSON.stringify(position.coords.longitude);
+
+        //getting the Latitude from the location json
+        const currentLatitude = JSON.stringify(position.coords.latitude);
+
+        //Setting Longitude state
+        setCurrentLongitude(parseFloat(currentLongitude));
+
+        //Setting Longitude state
+        setCurrentLatitude(parseFloat(currentLatitude));
+
+        // setGPSLatLon(currentLatitude+","+currentLongitude)
+        zoomToMarker();
+        setGPSLatLon(prevCount => currentLatitude + ',' + currentLongitude);
+      },
+      error => {
+        setLocationStatus(error.message);
+        console.log(error);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 30000,
+        maximumAge: 1000,
+      },
+    );
   };
 
   const validate = () => {
@@ -684,15 +773,15 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
         flag = true;
       }
     }
-    if (HusbandNameMan && HusbandNameVisible) {
-      if (HusbandName.length <= 0) {
+    if (SpouseNameMan && SpouseNameVisible) {
+      if (SpouseName.length <= 0) {
         errorMessage =
           errorMessage +
           i +
           ')' +
           ' ' +
           language[0][props.language].str_plsenter +
-          HusbandNameCaption +
+          SpouseNameCaption +
           '\n';
         i++;
         flag = true;
@@ -771,8 +860,8 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       setAge(textValue);
     } else if (componentName === 'FatherName') {
       setFatherName(textValue);
-    } else if (componentName === 'HusbandName') {
-      setHusbandName(textValue);
+    } else if (componentName === 'SpouseName') {
+      setSpouseName(textValue);
     }
   };
 
@@ -788,7 +877,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
     } else if (componentName === 'Age') {
       FatherNameRef.current.focus();
     } else if (componentName === 'FatherName') {
-      HusbandNameRef.current.focus();
+      SpouseNameRef.current.focus();
     }
   };
 
@@ -1013,12 +1102,15 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
             </View>
           )}
 
+
           {DOBVisible && (
             <View
               style={{
                 width: '100%',
+                marginTop: 19,
+                paddingHorizontal: 0,
                 alignItems: 'center',
-                marginTop: '4%',
+                justifyContent: 'center',
               }}>
               <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                 <TextComp
@@ -1027,6 +1119,25 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
                   Visible={DOBMan}
                 />
               </View>
+
+              <View style={{ width: '100%', alignItems: 'center' }}>
+                <DateInputComp textStyle={[Commonstyles.inputtextStyle, { width: '90%' }]} ComponentName="expiryDate1"
+                  textValue={DOB}
+                  type="numeric"
+                  handleClick={handleClick}
+                  handleReference={handleReference} />
+              </View>
+              {/* <TextInputComp
+                textValue={expiryDate1}
+                textStyle={Commonstyles.textinputtextStyle}
+                type="numeric"
+                Disable={expiryDate1Disable}
+                ComponentName="expiryDate1"
+                reference={expityDate1Ref}
+                returnKey="next"
+                handleClick={handleClick}
+                handleReference={handleReference}
+              /> */}
             </View>
           )}
 
@@ -1091,7 +1202,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
             </View>
           )}
 
-          {HusbandNameVisible && (
+          {SpouseNameVisible && (
             <View
               style={{
                 width: '100%',
@@ -1102,19 +1213,19 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
               }}>
               <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                 <TextComp
-                  textVal={HusbandNameCaption}
+                  textVal={SpouseNameCaption}
                   textStyle={Commonstyles.inputtextStyle}
-                  Visible={HusbandNameMan}
+                  Visible={SpouseNameMan}
                 />
               </View>
 
               <TextInputComp
-                textValue={HusbandName}
+                textValue={SpouseName}
                 textStyle={Commonstyles.textinputtextStyle}
                 type="email-address"
-                Disable={HusbandNameDisable}
-                ComponentName="HusbandName"
-                reference={HusbandNameRef}
+                Disable={SpouseNameDisable}
+                ComponentName="SpouseName"
+                reference={SpouseNameRef}
                 returnKey="done"
                 handleClick={handleClick}
                 handleReference={handleReference}
@@ -1272,12 +1383,16 @@ const styles = StyleSheet.create({
   },
 });
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   const { language } = state.languageReducer;
+  const { profileDetails } = state.profileReducer;
+  const { mobileCodeDetails } = state.mobilecodeReducer;
   return {
     language: language,
-  };
-};
+    profiledetail: profileDetails,
+    mobilecodedetail: mobileCodeDetails
+  }
+}
 
 const mapDispatchToProps = dispatch => ({
   languageAction: item => dispatch(languageAction(item)),

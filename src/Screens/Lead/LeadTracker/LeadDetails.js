@@ -100,18 +100,6 @@ const LeadDetails = (props, { navigation, route }) => {
             })
         }
 
-        tbl_SystemCodeDetails.getSystemCodeDetailsBasedOnID('LeadStatus').then(value => {
-            if (value !== undefined && value.length > 0) {
-                setLeadStatusData(value)
-            }
-        })
-
-        tbl_SystemCodeDetails.getSystemCodeDetailsBasedOnID('LNTP').then(value => {
-            if (value !== undefined && value.length > 0) {
-                setLoanTypeData(value)
-
-            }
-        })
 
         return () =>
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
