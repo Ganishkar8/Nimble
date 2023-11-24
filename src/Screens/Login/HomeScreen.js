@@ -267,6 +267,9 @@ const HomeScreen = (props, { navigation }) => {
                                         props.navigation.navigate('ConsentScreen');
                                         global.isDedupeDone = '0';
                                         global.isMobileVerified = '0';
+                                        global.CLIENTID = '';
+                                        global.isAadharVerified = '';
+                                        global.LOANAPPLICATIONID = '';
                                     }} activeOpacity={0.5} style={{ width: '93%', height: 150, backgroundColor: '#ffffff99', marginTop: '3.5%', borderRadius: 10 }}>
                                         <View >
 
@@ -288,6 +291,9 @@ const HomeScreen = (props, { navigation }) => {
                                                             props.navigation.navigate('ConsentScreen');
                                                             global.isDedupeDone = '0';
                                                             global.isMobileVerified = '0';
+                                                            global.CLIENTID = '';
+                                                            global.isAadharVerified = '';
+                                                            global.LOANAPPLICATIONID = '';
                                                         }} activeOpacity={0.5} style={{ width: '70%', height: '100%', backgroundColor: '#0294ff', borderRadius: 25, alignItems: 'center', justifyContent: 'center' }}>
                                                             <View >
                                                                 <Image source={require('../../Images/forward_icon.png')}

@@ -400,7 +400,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
   const getClientData = () => {
 
-    tbl_client.getClientBasedOnID(global.TEMPAPPID).then(value => {
+    tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID).then(value => {
       if (value !== undefined && value.length > 0) {
         setKycType1Label(value[0].kycTypeId1);
         setkycID1(value[0].kycIdValue1);
