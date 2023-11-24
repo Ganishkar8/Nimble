@@ -75,35 +75,15 @@ const ReAssign = (props, { navigation }) => {
     }, [navigation]);
 
 
-    const pickerData = async () => {
-        tbl_SystemCodeDetails.getSystemCodeDetailsBasedOnID('Reason').then(value => {
-            if (value !== undefined && value.length > 0) {
-                console.log(value)
-
-                for (var i = 0; i < value.length; i++) {
-                    if (value[i].IsDefault === '1') {
-                        setReasonLabel(value[i].SubCodeID);
-                        setReasonIndex(i + 1);
-                    }
-                }
-
-                setReasonData(value)
-
-            }
-        })
-    }
 
     const callPickerApi = () => {
 
         const baseURL = '8082'
         setLoading(true)
 
+        const filteredReAssignData = systemCodeDetail.filter((data) => data.masterId === 'RE_ASSIGN_REASON');
+        setReasonData(filteredReAssignData);
 
-        const dataArray = [];
-        systemCodeDetail.filter((data) => data.masterId === 'RE_ASSIGN_REASON').map((value, index) => {
-            dataArray.push({ label: value.label, subCodeId: value.subCodeId })
-        });
-        setReasonData(dataArray)
 
         // var reasonresponse = false; var userresponse = false;
 

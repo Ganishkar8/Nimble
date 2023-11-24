@@ -55,6 +55,25 @@ const insertClient = (loanApplicationId, clientTypeId, relationTypeId, titleId, 
     });
 };
 
+const updateAadharData = (name, dob, age, gender, fatherName, spouseName, imgDmsId, docDmsId, loanApplicationId) => {
+    const db = databaseInstance.getInstance();
+
+    return new Promise((resolve, reject) => {
+        db.transaction(tx => {
+            tx.executeSql(
+                `UPDATE ${tableName} SET firstName = ?, dateOfBirth = ?, age = ?, genderId = ?, fatherName = ?, spouseName= ?, image = ?, dmsId = ? WHERE loanApplicationId = ?`,
+                [name, dob, age, gender, fatherName, spouseName, imgDmsId, docDmsId, loanApplicationId],
+                (_, result) => {
+                    resolve(result);
+                },
+                error => {
+                    reject(error);
+                },
+            );
+        });
+    });
+}
+
 const getClientBasedOnID = id => {
     const db = databaseInstance.getInstance();
 
@@ -100,4 +119,5 @@ export default {
     insertClient,
     getClientBasedOnID,
     deleteAllClient,
+    updateAadharData
 };

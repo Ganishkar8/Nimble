@@ -41,6 +41,8 @@ const { Value, Text: AnimatedText } = Animated;
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Button, Menu, Divider } from 'react-native-paper';
 import { useIsFocused } from '@react-navigation/native';
+import ErrorModal from '../../../Components/ErrorModal';
+import tbl_client from '../../../Database/Table/tbl_client';
 const CELL_COUNT = 3;
 const CELL_SIZE = 46;
 const CELL_BORDER_RADIUS = 8;
@@ -64,6 +66,8 @@ const animateCell = ({ hasValue, index, isFocused }) => {
     ]).start();
 };
 
+const aadharJSON = [{ "id": 10, "clientId": 0, "aadharNumber": "717485993554", "requestId": "222933c2-f353-4447-ba88-a72630adb9dc", "isConsent": "Y", "statusCode": 101, "statusMessage": null, "otp": "205365", "otpSentMsg": "OTP sent to registered mobile number", "otpVerifiedTime": "2023-11-23T09:05:35.32327601", "caseId": "1000", "shareCode": "3554", "createdBy": "329", "createdDate": "2023-11-23T09:04:32.314335", "aadharResultDetails": { "id": 4, "aadharDetailId": null, "resultGeneratedTime": "2023-11-23 09:05:08.726", "maskedAadhaarNumber": "XXXX XXXX 3554", "name": "Ajith A", "dob": "1998-04-20", "gender": "M", "address": "NEW NO -49/84 OLD NO -49/32B, VELLAMODI VILAI, Agastheeswaram, Kanyakumari, Agasteeswaram, Eathamozhi, Tamil Nadu, India, 629501", "mobileHash": "f7b3836fc99631bc09b630961302ff60af4a54a43dd1a44e24758a5d363c0b25", "emailHash": "31960ecc93b7257bce32f0d2dddaa948da91eb16d521cff44370e70306d759af", "fatherName": null, "resultMessage": "Aadhaar XML file downloaded successfully", "imgDmsId": 3715, "docDmsId": 3716, "createdBy": "329", "createdDate": "2023-11-23T09:05:35.343698967" } }]
+
 const AadharOTPVerification = (props, { navigation }) => {
     const [mobileOTP, setMobileOTP] = useState('');
     const [aadharNumber, setaadharNumber] = useState(props.route.params.aadharNumber);
@@ -83,6 +87,10 @@ const AadharOTPVerification = (props, { navigation }) => {
     const challengeCodeRef = useRef(null);
     let Url = Common.CS_URL; // Initialize with your initial URL
     let goForRetry = true;
+
+    const [errorModalVisible, setErrorModalVisible] = useState(false);
+    const [apiError, setApiError] = useState('');
+
 
     const [menuvisible, setMenuVisible] = React.useState(false);
     const [instance, setInstance] = React.useState('LIV');
@@ -167,23 +175,63 @@ const AadharOTPVerification = (props, { navigation }) => {
     }, [timeLeft]);
 
 
+    const generateAadharOTP = () => {
+
+        const appDetails =
+        {
+            "clientId": 0,
+            "aadharNumber": aadharNumber,
+            "createdBy": global.USERID
+        }
+        const baseURL = '8901';
+        setLoading(true);
+        apiInstancelocal(baseURL)
+            .post('/api/v2/aadharOtp/generate/otp', appDetails)
+            .then(async response => {
+                // Handle the response data
+                if (global.DEBUG_MODE) console.log('AadharOTPApiResponse::' + JSON.stringify(response.data),);
+
+                if (response.status == 200) {
+                    setTimeLeft(60)
+                }
+
+                setLoading(false);
+
+
+
+            })
+            .catch(error => {
+                // Handle the error
+                if (global.DEBUG_MODE) console.log('AadharOTPApiResponse::::' + JSON.stringify(error.response));
+                setLoading(false);
+                if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
+
+    };
 
     const validateOTP = () => {
 
         const appDetails = {
-            "generatedFor": ``,
-            "process": "Profile Short motp",
-            "otp": global.USERTYPEID,
+            "aadharNumber": aadharNumber,
+            "otp": mobileOTP,
+            "clientId": 0,
+            "createdBy": global.USERID
         }
-        const baseURL = '8908';
+        const baseURL = '8901';
         setLoading(true);
         apiInstancelocal(baseURL)
-            .post('/api/v1/otp/verify-otp', appDetails)
+            .post('/api/v2/aadharOtp/verify/otp', appDetails)
             .then(async response => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log('AadharOTPVerifyApiResponse::' + JSON.stringify(response.data),);
 
-                props.navigation.navigate('ProfileShortKYCVerificationStatus', { 'isAadharVerified': '0' });
+                global.isAadharVerified = "1";
+                if (checkPermissions) {
+                    props.navigation.navigate('ProfileShortKYCVerificationStatus', { 'isAadharVerified': '1' });
+                }
 
                 setLoading(false);
 
@@ -207,9 +255,12 @@ const AadharOTPVerification = (props, { navigation }) => {
             global.isAadharVerified = "0";
             props.navigation.navigate('ProfileShortKYCVerificationStatus', { 'isAadharVerified': '0' });
         } else {
-            global.isAadharVerified = "1";
-            props.navigation.navigate('ProfileShortKYCVerificationStatus', { 'isAadharVerified': '0' });
-            //validateOTP();
+            if (mobileOTP.length < 6) {
+                setApiError('Please Enter OTP');
+                setErrorModalVisible(true)
+                return;
+            }
+            validateOTP();
         }
     }
 
@@ -286,20 +337,39 @@ const AadharOTPVerification = (props, { navigation }) => {
         }
     };
 
-    const sendDataBack = () => {
-        props.navigation.goBack();
-        props.navigation.emit('isAadharVerified', '1');
+    const parseAadharData = async () => {
+
+        const data = aadharJSON[0].aadharResultDetails;
+
+        var name = data.name;
+        var dob = Common.convertDateFormat(data.dob);
+        var gender = data.gender;
+        var fatherName = '';
+        var spouseName = '';
+        var image = data.imgDmsId;
+        var dmsId = data.docDmsId;
+        var age = Common.calculateAge(dob);
+
+        await tbl_client.updateAadharData(name, dob, age, gender, fatherName, spouseName, image, dmsId, global.TEMPAPPID);
+
+        global.isAadharVerified = "1";
+        props.navigation.navigate('ProfileShortKYCVerificationStatus', { 'isAadharVerified': '1' });
+
     };
 
-    const getCheckbox = (value) => {
+    const getCheckbox = (componentName, value) => {
         setIsManualKYC(value)
+    };
+
+    const closeErrorModal = () => {
+        setErrorModalVisible(false);
     };
 
     return (
 
         <View style={{ flex: 1, backgroundColor: Colors.lightwhite }}>
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
-
+            <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
             <View style={{ width: '100%', height: 56, alignItems: 'center', justifyContent: 'center', }}>
 
                 <HeadComp textval={language[0][props.language].str_aadharotpverification} props={props} />
@@ -341,7 +411,7 @@ const AadharOTPVerification = (props, { navigation }) => {
                         <Text style={{ color: Colors.darkblue, marginTop: 20, fontFamily: 'Poppins-Medium', }}>{`${Math.floor(timeLeft / 60)}:${timeLeft % 60 < 10 ? '0' : ''}${timeLeft % 60}`}</Text>
                     }
                     {timeLeft == 0 &&
-                        <TouchableOpacity onPress={() => { setTimeLeft(60) }} style={{ width: '70%' }}>
+                        <TouchableOpacity onPress={() => { generateAadharOTP() }} style={{ width: '70%' }}>
                             <Text style={{ color: Colors.darkblue, marginTop: 20, alignSelf: 'flex-end', fontFamily: 'Poppins-Medium', }}>Resend?</Text>
                         </TouchableOpacity>
                     }
@@ -352,14 +422,14 @@ const AadharOTPVerification = (props, { navigation }) => {
                             Disable={false}
                             Visible={false}
                             textCaption={'Select Manual KYC'}
-                            onClick={getCheckbox}
+                            handleClick={getCheckbox}
                         />
                     </View>
 
 
                 </View>
 
-                <ButtonViewComp textValue={language[0][props.language].str_submit.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} viewStyle={[Commonstyles.buttonView, { marginTop: 60, marginBottom: 20 }]} innerStyle={Commonstyles.buttonViewInnerStyle} handleClick={checkPermissions} />
+                <ButtonViewComp textValue={language[0][props.language].str_submit.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} viewStyle={[Commonstyles.buttonView, { marginTop: 60, marginBottom: 20 }]} innerStyle={Commonstyles.buttonViewInnerStyle} handleClick={manualKYC} />
 
 
             </ScrollView>

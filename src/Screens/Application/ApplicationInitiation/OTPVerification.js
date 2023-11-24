@@ -167,6 +167,46 @@ const OTPVerification = (props, { navigation }) => {
 
 
 
+    const generateOTP = () => {
+
+        const appDetails = {
+            "loanApplicationId": global.LOANAPPLICATIONID,
+            "clientId": 0,
+            "generatedFor": `91${mobileNumber}`,
+            "userId": global.USERID,
+            "process": "Profile Short motp",
+            "userType": global.USERTYPEID,
+            "otpType": "23"
+        }
+        const baseURL = '8908';
+        setLoading(true);
+        apiInstancelocal(baseURL)
+            .post('/api/v1/otp/send-otp', appDetails)
+            .then(async response => {
+                // Handle the response data
+                if (global.DEBUG_MODE) console.log('MobileOTPApiResponse::' + JSON.stringify(response.data),);
+
+                if (response.status == 200) {
+                    setTimeLeft(60)
+                }
+
+                setLoading(false);
+
+
+
+            })
+            .catch(error => {
+                // Handle the error
+                if (global.DEBUG_MODE) console.log('MobileOTPApiResponse::::' + JSON.stringify(error.response));
+                setLoading(false);
+                if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
+
+    };
+
     const validateOTP = () => {
 
         if (mobileOTP.length < 6) {
@@ -265,7 +305,7 @@ const OTPVerification = (props, { navigation }) => {
                         <Text style={{ color: Colors.darkblue, marginTop: 20, fontFamily: 'Poppins-Medium', }}>{`${Math.floor(timeLeft / 60)}:${timeLeft % 60 < 10 ? '0' : ''}${timeLeft % 60}`}</Text>
                     }
                     {timeLeft == 0 &&
-                        <TouchableOpacity onPress={() => { setTimeLeft(60) }} style={{ width: '70%' }}>
+                        <TouchableOpacity onPress={() => { generateOTP() }} style={{ width: '70%' }}>
                             <Text style={{ color: Colors.darkblue, marginTop: 20, alignSelf: 'flex-end', fontFamily: 'Poppins-Medium', }}>Resend?</Text>
                         </TouchableOpacity>
                     }

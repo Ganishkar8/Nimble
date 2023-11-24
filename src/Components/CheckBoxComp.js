@@ -3,12 +3,12 @@ import { Text, Image, View, StyleSheet } from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
 import Colors from '../Utils/Colors';
 
-const CheckBoxComp = ({ textCaption, textStyle, Visible, Disable, onClick }) => {
+const CheckBoxComp = ({ textCaption, ComponentName, textStyle, Visible, Disable, handleClick }) => {
   const [isSelected, setSelection] = useState(false);
 
   const valueChange = () => {
     setSelection(!isSelected);
-    onClick(!isSelected)
+    handleClick(ComponentName, !isSelected)
   }
 
   return (

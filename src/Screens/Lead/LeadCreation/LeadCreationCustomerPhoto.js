@@ -63,6 +63,7 @@ import ImageDetailComp from '../../../Components/ImageDetailComp';
 import { profileAction } from '../../../Utils/redux/actions/ProfileAction';
 import ButtonViewComp from '../../../Components/ButtonViewComp';
 import ErrorModal from '../../../Components/ErrorModal';
+import { useIsFocused } from '@react-navigation/native';
 
 const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
@@ -113,10 +114,12 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [apiError, setApiError] = useState('');
+  const isScreenVisible = useIsFocused();
 
   useEffect(() => {
 
     getData();
+
 
   }, [gpslatlon]);
 
@@ -403,7 +406,6 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
     })
 
   };
-
 
   const getOneTimeLocation = () => {
     setLocationStatus('Getting Location ...');

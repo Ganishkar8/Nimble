@@ -86,6 +86,7 @@ const ConsentScreen = (props, { navigation }) => {
                     if (response.data != null) {
                         if (global.DEBUG_MODE) console.log("TempIDCreationApiResponse::" + JSON.stringify(response.data));
                         global.TEMPAPPID = response.data.tempNumber;
+                        global.LOANAPPLICATIONID = response.data.id;
                         props.navigation.replace('LoanApplicationMain')
                     } else {
                         setApiError('Not a Valid Response from Api');
@@ -99,12 +100,12 @@ const ConsentScreen = (props, { navigation }) => {
             .catch((error) => {
                 setLoading(false)
                 if (global.DEBUG_MODE) console.log("TempIDCreationApiResponse::" + JSON.stringify(error.response));
-                props.navigation.replace('LoanApplicationMain')
-                global.TEMPAPPID = '1115153454';
-                // if (error.response.data != null) {
-                //     setApiError(error.response.data.message);
-                //     setErrorModalVisible(true)
-                // }
+                //props.navigation.replace('LoanApplicationMain')
+                //global.TEMPAPPID = '1115153454';
+                if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
             });
 
 

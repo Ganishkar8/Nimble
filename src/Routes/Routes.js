@@ -9,8 +9,8 @@ import MPINLogin from '../Screens/Login/MPINLogin';
 import AddressMainList from '../Screens/Application/Address/AddressMainList';
 import AddressDetails from '../Screens/Application/Address/AddressDetails';
 import DemographicsAddressDetails from '../Screens/LoanDemographics/DemoGraphicAddress/DemographicsAddressDetails';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {NavigationContainer} from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { NavigationContainer } from '@react-navigation/native';
 import ProfileShortBasicDetails from '../Screens/Application/ApplicationInitiation/ProfileShortBasicDetails';
 import ProfileShortExistingClientDetails from '../Screens/Application/ApplicationInitiation/ProfileShortExistingClientDetails';
 import ProfileShortKYCVerificationStatus from '../Screens/Application/ApplicationInitiation/ProfileShortKYCVerificationStatus';
@@ -38,99 +38,75 @@ const Route = () => {
         <Stack.Screen
           name="SplashScreen"
           component={SplashScreen}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="BankRegistration"
           component={BankRegistration}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="SetUpMPIN"
           component={SetUpMPIN}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="MPINLogin"
           component={MPINLogin}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="LoginScreen"
           component={LoginScreen}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
         />
 
         <Stack.Screen
           name="BottomNavigation"
           component={BottomNavigation}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
         />
-        <Stack.Screen
-          name="ProfileShortBasicDetails"
-          component={ProfileShortBasicDetails}
-          options={{headerShown: false}}
-        />
-        <Stack.Screen
-          name="ProfileShortExistingClientDetails"
-          component={ProfileShortExistingClientDetails}
-          options={{headerShown: false}}
-        />
+
 
         <Stack.Screen
           name="AddressMainList"
           component={AddressMainList}
-          options={{headerShown: false}}
-        />
-        <Stack.Screen
-          name="ProfileShortKYCVerificationStatus"
-          component={ProfileShortKYCVerificationStatus}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
         />
 
         <Stack.Screen
-          name="ProfileShortApplicantDetails"
-          component={ProfileShortApplicantDetails}
-          options={{headerShown: false}}
-        />
-        <Stack.Screen
-          name="LeadCreationCustomerPhoto"
-          component={LeadCreationCustomerPhoto}
-          options={{headerShown: false}}
-        />
-        <Stack.Screen
           name="DemographicsGSTDetails"
           component={DemographicsGSTDetails}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
         />
 
         <Stack.Screen
           name="AddressDetails"
           component={AddressDetails}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
         />
 
         <Stack.Screen
           name="DemographicsAddressDetails"
           component={DemographicsAddressDetails}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
         />
 
         <Stack.Screen
           name="BankDetails"
           component={BankDetails}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
         />
 
         <Stack.Screen
           name="LoanDemographicsGSTDetails"
           component={LoanDemographicsGSTDetails}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="LoanDemographicsFinancialDetails"
           component={LoanDemographicsFinancialDetails}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
         />
       </Stack.Navigator>
     </NavigationContainer>

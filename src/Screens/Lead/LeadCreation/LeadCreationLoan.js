@@ -128,14 +128,15 @@ const LeadCreationLoan = (props, { navigation }) => {
 
     const getSystemCodeDetail = () => {
 
-        const filteredLoanTypeData = systemCodeDetail.filter((data) => data.masterId === 'LNTP');
+        const filteredLoanTypeData = systemCodeDetail.filter((data) => data.masterId === 'LNTP').sort((a, b) => a.Description.localeCompare(b.Description));
         setLoanTypeData(filteredLoanTypeData);
 
-        const filteredLoanPurposeData = systemCodeDetail.filter((data) => data.masterId === 'LNPC');
+        const filteredLoanPurposeData = systemCodeDetail.filter((data) => data.masterId === 'LNPC').sort((a, b) => a.Description.localeCompare(b.Description));
         setLoanPurposeData(filteredLoanPurposeData);
 
-        const filteredLeadTypeData = systemCodeDetail.filter((data) => data.masterId === 'LEAD_TYPE');
+        const filteredLeadTypeData = systemCodeDetail.filter((data) => data.masterId === 'LEAD_TYPE').sort((a, b) => a.Description.localeCompare(b.Description));
         setLeadTypeData(filteredLeadTypeData);
+
 
     }
 

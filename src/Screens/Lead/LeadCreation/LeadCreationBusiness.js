@@ -101,18 +101,18 @@ const LeadCreationBusiness = (props, { navigation }) => {
     const monthsRef = useRef(null);
 
     const monthArray = [
-        { subCodeId: 0, label: '0' },
-        { subCodeId: 1, label: '1' },
-        { subCodeId: 2, label: '2' },
-        { subCodeId: 3, label: '3' },
-        { subCodeId: 4, label: '4' },
-        { subCodeId: 5, label: '5' },
-        { subCodeId: 6, label: '6' },
-        { subCodeId: 7, label: '7' },
-        { subCodeId: 8, label: '8' },
-        { subCodeId: 9, label: '9' },
-        { subCodeId: 10, label: '10' },
-        { subCodeId: 11, label: '11' },
+        { subCodeId: 0, Description: '0' },
+        { subCodeId: 1, Description: '1' },
+        { subCodeId: 2, Description: '2' },
+        { subCodeId: 3, Description: '3' },
+        { subCodeId: 4, Description: '4' },
+        { subCodeId: 5, Description: '5' },
+        { subCodeId: 6, Description: '6' },
+        { subCodeId: 7, Description: '7' },
+        { subCodeId: 8, Description: '8' },
+        { subCodeId: 9, Description: '9' },
+        { subCodeId: 10, Description: '10' },
+        { subCodeId: 11, Description: '11' },
     ]
 
     const [monthData, setMonthData] = useState(monthArray);
@@ -140,7 +140,7 @@ const LeadCreationBusiness = (props, { navigation }) => {
 
     const getSystemCodeDetail = () => {
 
-        const filteredIndustryTypeData = systemCodeDetail.filter((data) => data.masterId === 'CREDIT_SCORE_INDUSTRY_TYPE_SUB_CATEGORY');
+        const filteredIndustryTypeData = systemCodeDetail.filter((data) => data.masterId === 'CREDIT_SCORE_INDUSTRY_TYPE_SUB_CATEGORY').sort((a, b) => a.Description.localeCompare(b.Description));
         setIndustryTypeData(filteredIndustryTypeData);
 
     }

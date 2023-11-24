@@ -51,8 +51,8 @@ import tbl_leadSystemMandatoryField from '../../Database/Table/tbl_leadSystemMan
 
 const LoginScreen = (props, { navigation }) => {
 
-    const [userID, setUserID] = useState('shahid@gmail.com');
-    const [password, setPassword] = useState('12345');
+    const [userID, setUserID] = useState('');
+    const [password, setPassword] = useState('');
     const [activationCode, setActivationCode] = useState('');
     const [secureTextEntry, setSecureTextEntry] = useState(true);
     const [loading, setLoading] = useState(false);

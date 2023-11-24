@@ -22,6 +22,7 @@ import ConsentScreen from '../Screens/LoanApplication/ConsentScreen';
 import AadharOTPVerification from '../Screens/Application/ApplicationInitiation/AadharOTPVerification';
 import ProfileShortKYCVerificationStatus from '../Screens/Application/ApplicationInitiation/ProfileShortKYCVerificationStatus';
 import ProfileShortApplicantDetails from '../Screens/Application/ApplicationInitiation/ProfileShortApplicantDetails';
+import ProfileShortExistingClientDetails from '../Screens/Application/ApplicationInitiation/ProfileShortExistingClientDetails';
 
 const Stack = createNativeStackNavigator();
 
@@ -128,6 +129,12 @@ export default HomeStack = () => {
         name="ConsentScreen"
         component={ConsentScreen}
         options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="ProfileShortExistingClientDetails"
+        component={ProfileShortExistingClientDetails}
+        options={{ headerShown: false }}
       />
 
       <Stack.Screen

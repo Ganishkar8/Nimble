@@ -128,13 +128,13 @@ const LeadCreationBasic = (props, { navigation, route }) => {
 
     const getSystemCodeDetail = () => {
 
-        const filteredCustomerCategoryData = systemCodeDetail.filter((data) => data.masterId === 'CUSTOMER_CATEGORY');
+        const filteredCustomerCategoryData = systemCodeDetail.filter((data) => data.masterId === 'CUSTOMER_CATEGORY').sort((a, b) => a.Description.localeCompare(b.Description));
         setCustCatData(filteredCustomerCategoryData);
 
-        const filteredGenderData = systemCodeDetail.filter((data) => data.masterId === 'GENDER');
+        const filteredGenderData = systemCodeDetail.filter((data) => data.masterId === 'GENDER').sort((a, b) => a.Description.localeCompare(b.Description));
         setGenderData(filteredGenderData);
 
-        const filteredTitleData = userCodeDetail.filter((data) => data.masterId === 'TITLE');
+        const filteredTitleData = userCodeDetail.filter((data) => data.masterId === 'TITLE').sort((a, b) => a.Description.localeCompare(b.Description));
         setTitleData(filteredTitleData);
 
     }
