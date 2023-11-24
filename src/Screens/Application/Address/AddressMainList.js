@@ -94,30 +94,32 @@ const AddressMainList = (props, { navigation }) => {
             />
           </View>
         </TouchableOpacity>
-        <View style={{ width: '20%' }}>
-          <IconButtonViewComp
-            textValue={'Delete'.toUpperCase()}
-            textStyle={{
-              color: Colors.skyBlue,
-              fontSize: 13,
-              fontWeight: 500,
-            }}
-            viewStyle={{
-              width: '100%',
-              // height: 50,
-              marginTop: 10,
-              justifyContent: 'flex-end',
-              alignItems: 'center',
-            }}
-            innerStyle={{
-              width: '100%',
-              // height: 50,
-              marginTop: 10,
-              justifyContent: 'flex-end',
-              alignItems: 'center',
-            }}
-          />
-        </View>
+        <TouchableOpacity activeOpacity={8} onPress={() => handleClick('delete', item)}>
+          <View style={{ width: '20%' }}>
+            <IconButtonViewComp
+              textValue={'Delete'.toUpperCase()}
+              textStyle={{
+                color: Colors.skyBlue,
+                fontSize: 13,
+                fontWeight: 500,
+              }}
+              viewStyle={{
+                width: '100%',
+                // height: 50,
+                marginTop: 10,
+                justifyContent: 'flex-end',
+                alignItems: 'center',
+              }}
+              innerStyle={{
+                width: '100%',
+                // height: 50,
+                marginTop: 10,
+                justifyContent: 'flex-end',
+                alignItems: 'center',
+              }}
+            />
+          </View>
+        </TouchableOpacity>
       </View>
 
       <View
@@ -143,6 +145,9 @@ const AddressMainList = (props, { navigation }) => {
       props.navigation.navigate('AddressDetails', { addressType: data })
     } else if (value === 'new') {
       props.navigation.navigate('AddressDetails', { addressType: 'new' })
+    } else if (value === 'delete') {
+      tbl_clientaddressinfo.deleteDataBasedOnLoanIDAndAddressType(data.loanApplicationId,data.address_type)
+      getAddressData()
     }
   }
 
