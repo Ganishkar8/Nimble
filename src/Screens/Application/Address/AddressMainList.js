@@ -24,6 +24,8 @@ import IconButtonViewComp from '../../../Components/IconButtonViewComp';
 import tbl_clientaddressinfo from '../../../Database/Table/tbl_clientaddressinfo';
 import tbl_UserCodeDetails from '../../../Database/Table/tbl_UserCodeDetails';
 import { useIsFocused } from '@react-navigation/native';
+import apiInstancelocal from '../../../Utils/apiInstancelocal';
+import ErrorModal from '../../../Components/ErrorModal';
 
 
 
@@ -32,6 +34,8 @@ const AddressMainList = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
   const [addressDetails, setAddressDetails] = useState([]);
   const isScreenVisible = useIsFocused();
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [apiError, setApiError] = useState('');
 
   useEffect(() => {
     props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
@@ -42,7 +46,29 @@ const AddressMainList = (props, { navigation }) => {
       props.navigation
         .getParent()
         ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
-  }, [props.navigation,isScreenVisible]);
+  }, [props.navigation, isScreenVisible]);
+
+  // const getAddressDataOnline = () => {
+  //   const baseURL = '8901';
+  //   setLoading(true);
+  //   apiInstancelocal(baseURL)
+  //     .get(`api/v2/profile-short/address-details/12`)
+  //     .then(async response => {
+  //       // Handle the response data
+  //       if (global.DEBUG_MODE) console.log('GetAddressResponse::' + JSON.stringify(response.data),);
+
+  //       setLoading(false);
+  //     })
+  //     .catch(error => {
+  //       // Handle the error
+  //       if (global.DEBUG_MODE) console.log('GetAddressError' + JSON.stringify(error.response));
+  //       setLoading(false);
+  //       if (error.response.data != null) {
+  //         setApiError(error.response.data.message);
+  //         setErrorModalVisible(true)
+  //       }
+  //     });
+  // }
 
 
   const getAddressData = () => {
@@ -150,13 +176,19 @@ const AddressMainList = (props, { navigation }) => {
     } else if (value === 'new') {
       props.navigation.navigate('AddressDetails', { addressType: 'new' })
     } else if (value === 'delete') {
-      tbl_clientaddressinfo.deleteDataBasedOnLoanIDAndAddressType(data.loanApplicationId,data.address_type)
+      tbl_clientaddressinfo.deleteDataBasedOnLoanIDAndAddressType(data.loanApplicationId, data.address_type)
       getAddressData()
     }
   }
 
+  const closeErrorModal = () => {
+    setErrorModalVisible(false);
+  };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
+      <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
+
       {loading ? <Loading /> : null}
       <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
 
