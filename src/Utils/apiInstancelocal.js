@@ -14,6 +14,7 @@ const apiInstancelocal = baseURL => {
   // Request interceptor
   instance.interceptors.request.use(
     config => {
+      console.log('MobileRequest::' + JSON.stringify(config));
       console.log('MobileRequestHeader::' + config.headers);
       console.log('MobileRequestData::' + JSON.stringify(config.data));
       console.log('MobileRequestbaseUrl::' + config.baseURL);
