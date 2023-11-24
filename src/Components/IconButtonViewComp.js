@@ -15,7 +15,7 @@ const IconButtonViewComp = ({
   handleClick,
 }) => {
   const onClick = () => {
-    handleClick();
+    //handleClick();
   };
 
   let iconSource;
@@ -29,9 +29,7 @@ const IconButtonViewComp = ({
 
   return (
     <View style={viewStyle}>
-      <TouchableOpacity
-        onPress={onClick}
-        activeOpacity={0.8}
+      <View
         style={innerStyle}>
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
           {icon && (
@@ -43,7 +41,7 @@ const IconButtonViewComp = ({
           )}
           <TextComp textVal={textValue} textStyle={textStyle} />
         </View>
-      </TouchableOpacity>
+      </View>
     </View>
   );
 };

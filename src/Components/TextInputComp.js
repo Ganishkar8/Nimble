@@ -2,6 +2,7 @@ import React from 'react';
 import { TextInput, View } from 'react-native';
 import Colors from '../Utils/Colors';
 import Commonstyles from '../Utils/Commonstyles';
+import Common from '../Utils/Common';
 
 const TextInputComp = ({
   textValue,
@@ -16,7 +17,14 @@ const TextInputComp = ({
   length, multilines
 }) => {
   const setValue = txt => {
-    handleClick(ComponentName, txt);
+    if (type == 'numeric') {
+      if (Common.numberRegex.test(txt)) {
+        handleClick(ComponentName, txt);
+      }
+    } else {
+      handleClick(ComponentName, txt);
+    }
+
   };
 
   return (

@@ -418,14 +418,14 @@ const LeadManagement = (props, { navigation, route }) => {
 
     const insertLead = async (leadData) => {
         await tbl_lead_creation_lead_details.insertLeadCreationLeadDetails(leadData.id, leadData.leadNumber, leadData.branchId, leadData.isActive, leadData.createdBy, leadData.leadCreationBasicDetails.createdOn);
-        await tbl_lead_creation_basic_details.insertLeadCreationBasicDetails(leadData.id, leadData.leadCreationBasicDetails.customerCategoryId, leadData.leadCreationBasicDetails.titleId, leadData.leadCreationBasicDetails.firstName, leadData.leadCreationBasicDetails.middleName, leadData.leadCreationBasicDetails.lastName, leadData.leadCreationBasicDetails.genderId, leadData.leadCreationBasicDetails.mobileNumber, global.USERID);
+        await tbl_lead_creation_basic_details.insertLeadCreationBasicDetails(leadData.id, leadData.leadCreationBasicDetails.customerCategory, leadData.leadCreationBasicDetails.title, leadData.leadCreationBasicDetails.firstName, leadData.leadCreationBasicDetails.middleName, leadData.leadCreationBasicDetails.lastName, leadData.leadCreationBasicDetails.gender, leadData.leadCreationBasicDetails.mobileNumber, global.USERID);
 
         if (!Common.hasOnlyOneKey(leadData.leadCreationBusinessDetails)) {
-            await tbl_lead_creation_business_details.insertLeadCreationBusinessDetails(leadData.id, leadData.leadCreationBusinessDetails.industryTypeId, leadData.leadCreationBusinessDetails.businessName, leadData.leadCreationBusinessDetails.businessVintageYear, leadData.leadCreationBusinessDetails.businessVintageMonth, leadData.leadCreationBusinessDetails.incomeBusinessTurnover, global.USERID);
+            await tbl_lead_creation_business_details.insertLeadCreationBusinessDetails(leadData.id, leadData.leadCreationBusinessDetails.industryType, leadData.leadCreationBusinessDetails.businessName, leadData.leadCreationBusinessDetails.businessVintageYear, leadData.leadCreationBusinessDetails.businessVintageMonth, leadData.leadCreationBusinessDetails.incomeBusinessTurnover, global.USERID);
         }
 
         if (!Common.hasOnlyOneKey(leadData.leadCreationLoanDetails)) {
-            await tbl_lead_creation_loan_details.insertLeadCreationLoanDetails(leadData.id, leadData.leadCreationLoanDetails.loanTypeId, leadData.leadCreationLoanDetails.loanProductId, leadData.leadCreationLoanDetails.loanPurposeId, leadData.leadCreationLoanDetails.loanAmount, leadData.leadCreationLoanDetails.leadTypeId, global.USERID);
+            await tbl_lead_creation_loan_details.insertLeadCreationLoanDetails(leadData.id, leadData.leadCreationLoanDetails.loanType, leadData.leadCreationLoanDetails.loanProduct, leadData.leadCreationLoanDetails.loanPurpose, leadData.leadCreationLoanDetails.loanAmount, leadData.leadCreationLoanDetails.leadType, global.USERID);
         }
 
         // if (!Common.hasOnlyOneKey(leadData.leadCreationDms)) {
@@ -670,7 +670,11 @@ const LeadManagement = (props, { navigation, route }) => {
             }
             setUpperData(fiterPosition)
         }
+        if (global.USERTYPEID == '1163') {
+            mainFilterDataArr.splice(4, 0, { name: 'Agent Name', isSelected: false, id: 'AGN' });
+        }
         setMainFilteredData(mainFilterDataArr)
+        setFilterVisible(mainFilterData[0].id)
         //alert(JSON.stringify(fiterPosition))
         setDateFilterValue({
             FromDate: '',
@@ -828,21 +832,25 @@ const LeadManagement = (props, { navigation, route }) => {
 
                     const itemData = item.customerName
                         ? item.customerName.toUpperCase()
-                        : ''.toUpperCase();
+                        : '';
                     const itemDataID = item.leadId
                         ? item.leadId.toString()
-                        : ''.toUpperCase();
+                        : '';
                     const regex = /^[0-9]+$/;
-                    let textData = ''
-                    if (regex.test(text)) {
-                        textData = text
-                        console.log("String consists of only numbers.");
-                    } else {
-                        textData = text.toUpperCase();
-                        console.log("String contains non-numeric characters.");
-                    }
+                    //let textData = ''
+                    // if (regex.test(text)) {
+                    //     textData = text
+                    //     console.log("String consists of only numbers.");
+                    // } else {
+                    //     textData = text.toUpperCase();
+                    //     console.log("String contains non-numeric characters.");
+                    // }
                     //const textData = text.toUpperCase();
-                    return ((itemData.indexOf(textData) > -1) || (itemDataID.indexOf(textData) > -1));
+                    const textParts = text.toUpperCase().split(/\s+/);
+                    return textParts.every((part) =>
+                        itemData.includes(part) || itemDataID.includes(part)
+                    );
+                    // return ((itemData.indexOf(textData) > -1) || (itemDataID.indexOf(textData) > -1));
                 });
             setFilteredData(newData);
             setSearch(text);

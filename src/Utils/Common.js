@@ -22,9 +22,16 @@ const isValidText = (text) => {
 
 const isValidAlphaText = (text) => {
   // Regular expression to validate a mobile number with a country code
-  const textRegex = /^[a-zA-Z0-9]+$/;
+  const textRegex = /^[a-zA-Z0-9 ]+$/;
 
   return textRegex.test(text);
+};
+
+const isValidPin = (text) => {
+  // Regular expression to validate a pincode
+  const sixDigitNumberPattern = /^[0-9]{6}$/;
+
+  return sixDigitNumberPattern.test(text);
 };
 
 
@@ -128,7 +135,7 @@ export function convertDateFormat(inputDate) {
   const date = new Date(parts[0], parts[1] - 1, parts[2]); // Month is zero-based
 
   // Format the date in "dd-mm-yyyy" format
-  const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+  const formattedDate = `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
 
   return formattedDate;
 }
@@ -181,7 +188,93 @@ export function showErrorAlert(title, message, buttontext) {
   );
 }
 
+export function isValidEmail(email) {
+  // Regular expression for validating an Email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  return emailRegex.test(email);
+};
+
+export function isValidPAN(panNumber) {
+  // Define the PAN number regex pattern
+  const panRegex = /[A-Za-z]{5}[0-9]{4}[A-Za-z]/;
+
+  // Test the entered PAN number against the regex pattern
+  return panRegex.test(panNumber);
+};
+
+const d = [
+  [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+  [1, 2, 3, 4, 0, 6, 7, 8, 9, 5],
+  [2, 3, 4, 0, 1, 7, 8, 9, 5, 6],
+  [3, 4, 0, 1, 2, 8, 9, 5, 6, 7],
+  [4, 0, 1, 2, 3, 9, 5, 6, 7, 8],
+  [5, 9, 8, 7, 6, 0, 4, 3, 2, 1],
+  [6, 5, 9, 8, 7, 1, 0, 4, 3, 2],
+  [7, 6, 5, 9, 8, 2, 1, 0, 4, 3],
+  [8, 7, 6, 5, 9, 3, 2, 1, 0, 4],
+  [9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+];
+
+const p = [
+  [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+  [1, 5, 7, 6, 2, 8, 3, 0, 9, 4],
+  [5, 8, 0, 3, 7, 9, 6, 1, 4, 2],
+  [8, 9, 1, 6, 0, 4, 3, 5, 2, 7],
+  [9, 4, 5, 3, 1, 2, 6, 8, 7, 0],
+  [4, 2, 8, 6, 5, 7, 3, 9, 0, 1],
+  [2, 7, 9, 3, 8, 0, 6, 4, 1, 5],
+  [7, 0, 4, 6, 9, 1, 3, 2, 5, 8],
+];
+
+// Validate Verhoeff algorithm
+export function validateVerhoeff(num) {
+  let c = 0;
+  const myArray = stringToReversedIntArray(num);
+
+  for (let i = 0; i < myArray.length; i++) {
+    c = d[c][p[i % 8][myArray[i]]];
+  }
+
+  return c === 0;
+};
+
+// Converts a string to a reversed integer array
+const stringToReversedIntArray = (num) => {
+  const myArray = [];
+
+  for (let i = 0; i < num.length; i++) {
+    try {
+      myArray[i] = parseInt(num.substring(i, i + 1));
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  return reverse(myArray);
+};
+
+// Helper function to reverse an array
+const reverse = (array) => array.slice().reverse();
+
+
+export function calculateAge(birthdate) {
+  const today = new Date();
+  const parts = birthdate.split('/'); // Assuming the date is in 'DD/MM/YYYY' format
+  const birthDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+
+  return age;
+};
+
 export default {
   isValidPhoneNumber, isValidText, convertDateFormat, isDateGreaterThan, isValidAlphaText, showErrorAlert, getSystemCodeDescription,
-  numberRegex, CS_URL, CS_URL1, integerPattern, formatDate, getCodeDescription, formatTime, hasOnlyOneKey, getCurrentDateTime, getNetworkConnection
+  numberRegex, CS_URL, CS_URL1, integerPattern, formatDate, getCodeDescription, formatTime, hasOnlyOneKey, getCurrentDateTime, getNetworkConnection,
+  isValidPin, isValidPAN, validateVerhoeff, isValidEmail, calculateAge
 };

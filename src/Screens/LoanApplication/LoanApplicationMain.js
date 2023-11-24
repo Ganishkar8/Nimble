@@ -152,13 +152,14 @@ const LoanApplicationMain = (props, { navigation }) => {
 
 
     const nextScreen = () => {
+        // props.navigation.navigate('AddressMainList')
         props.navigation.navigate('ProfileShortBasicDetails')
     }
 
     const onClickMainList = (item, substageId) => {
         let fiterStatusPosition = processSubStageData
         for (let i = 0; i < fiterStatusPosition.length; i++) {
-            if (fiterStatusPosition[i].stageId == item.stageId) {
+            if (fiterStatusPosition[i].id == item.id) {
                 fiterStatusPosition[i].isSelected = true
                 setSelectedData(fiterStatusPosition[i].subStageName)
             } else {
@@ -171,7 +172,7 @@ const LoanApplicationMain = (props, { navigation }) => {
         setProcessSubStageData(fiterStatusPosition)
 
         const filteredProcessModuleStage = processModule.filter((data) => {
-            return data.wfId === 109 && data.subStageId === item.stageId;
+            return data.wfId === 111 && data.process_sub_stage_id === item.id;
         }).map((data) => {
             const extraJSON = { subDataIsCompleted: false, nestedSubData: [] };
             return { ...data, ...extraJSON };
@@ -180,9 +181,9 @@ const LoanApplicationMain = (props, { navigation }) => {
         setProcessModuleData(filteredProcessModuleStage);
 
         filteredProcessModuleStage.forEach((data) => {
-            if (data.wfId === 109) {
+            if (data.wfId === 111) {
                 processPage.forEach((data1) => {
-                    if (data1.moduleId === data.id) {
+                    if (data1.processModuleId === data.id) {
                         data.nestedSubData.push(data1);
                     }
                 });
@@ -206,25 +207,25 @@ const LoanApplicationMain = (props, { navigation }) => {
     const getProcessSubStage = async () => {
 
         const filteredProcessSubStage = processSubStage.filter((data) => {
-            return data.wfId === 109 && (data.stageId === 1 || data.stageId === 2 || data.stageId === 3 || data.stageId === 4);
+            return data.wfId === 111 && (data.stageId === 1);
         }).map((data) => {
-            const extraJSON = { isSelected: data.stageId === 1 };
+            const extraJSON = { isSelected: data.subStageCode === 'PRF_SHRT' };
             return { ...data, ...extraJSON };
-        }).sort((a, b) => a.stageId - b.stageId);
-        //alert(JSON.stringify(processSubStage))
+        }).sort((a, b) => a.displayOrder - b.displayOrder);
+
         setProcessSubStageData(filteredProcessSubStage);
 
         const filteredProcessModuleStage = processModule.filter((data) => {
-            return data.wfId === 109 && data.subStageId === 1;
+            return data.wfId === 111 && data.process_sub_stage_id === filteredProcessSubStage[0].id;
         }).map((data) => {
             const extraJSON = { subDataIsCompleted: false, nestedSubData: [] };
             return { ...data, ...extraJSON };
         });
 
         filteredProcessModuleStage.forEach((data) => {
-            if (data.wfId === 109) {
+            if (data.wfId === 111) {
                 processPage.forEach((data1) => {
-                    if (data1.moduleId === data.id) {
+                    if (data1.processModuleId === data.id) {
                         data.nestedSubData.push(data1);
                     }
                 });

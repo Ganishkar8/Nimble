@@ -27,3 +27,4 @@ global.isMobileVerified = '0';
 global.isAadharVerified = '0';
 global.isDedupeDone = '0';
 global.LOANAPPLICATIONID = '';
+global.CLIENTID = '';

@@ -18,9 +18,8 @@ const DateInputComp = ({ textValue, textStyle, Disable, type, ComponentName, ref
         const month = (currentDate.getMonth() + 1).toString().padStart(2, '0'); // Note: Months are 0-indexed, so we add 1.
         const year = currentDate.getFullYear();
         const formattedDatee = `${day}/${month}/${year}`;
-        // setDatee(formattedDatee)
-        //alert(textValue)
-    }, []);
+        setDatee(textValue)
+    }, [textValue]);
 
     const displayDatepicker = () => {
         showMode('date');
@@ -47,6 +46,7 @@ const DateInputComp = ({ textValue, textStyle, Disable, type, ComponentName, ref
         console.log("FormattedDate::" + formattedDate)
         console.log("Event::" + JSON.stringify(event))
         setDatee(formattedDate);
+        handleClick(ComponentName, formattedDate);
 
     };
     const setValue = txt => {
@@ -85,8 +85,12 @@ const DateInputComp = ({ textValue, textStyle, Disable, type, ComponentName, ref
                     returnKeyType={returnKey}
                     onSubmitEditing={() => { handleReference(ComponentName) }}
                 />
-                <TouchableOpacity style={{ alignItems: 'flex-end' }} activeOpacity={2} onPress={displayDatepicker}>
-                    <Ionicons name='calendar-clear-outline' size={22} color={Colors.darkblue} style={{ marginTop: 12 }} />
+                <TouchableOpacity style={{ alignItems: 'flex-end' }} activeOpacity={2} onPress={() => {
+                    if (!Disable) {
+                        displayDatepicker();
+                    }
+                }}>
+                    <Ionicons name='calendar-clear-outline' size={22} color={Disable ? Colors.lightgrey : Colors.darkblue} style={{ marginTop: 12 }} />
                 </TouchableOpacity>
             </View>
             <View style={{ width: '98%', height: 0.9, backgroundColor: Colors.line }} />
@@ -98,7 +102,7 @@ const DateInputComp = ({ textValue, textStyle, Disable, type, ComponentName, ref
                     is24Hour={true}
                     display="default"
                     onChange={changeSelectedDate}
-                    maximumDate={new Date()}
+
                 />
             )}
         </View>

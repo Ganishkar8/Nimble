@@ -8,6 +8,7 @@ import {
   Image,
   Text,
   Button,
+  Platform, PermissionsAndroid
 } from 'react-native';
 import apiInstance from '../../../Utils/apiInstance';
 import apiInstancelocal from '../../../Utils/apiInstancelocal';
@@ -43,8 +44,11 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import ImagePicker, { ImageOrVideo } from 'react-native-image-crop-picker';
 import ImageBottomPreview from '../../../Components/ImageBottomPreview';
 import ImageDetailComp from '../../../Components/ImageDetailComp';
+import Geolocation from 'react-native-geolocation-service';
 
 const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [apiError, setApiError] = useState('');
   const [loading, setLoading] = useState(false);
   const [errMsg, setErrMsg] = useState('');
   const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
@@ -173,6 +177,11 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const showImageBottomSheet = () => { setBottomSheetVisible(true) };
   const hideImageBottomSheet = () => setBottomSheetVisible(false);
 
+  const showLocationBottomSheet = () => setLocationSheetVisible(true);
+  const hideLocationBottomSheet = () => setLocationSheetVisible(false);
+
+  const [locationSheetVisible, setLocationSheetVisible] = useState(false);
+
   useEffect(() => {
     props.navigation
       .getParent()
@@ -180,12 +189,121 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
     getClientData();
     getSystemCodeDetail();
+    if (global.isAadharVerified == '1') {
+
+    }
 
     return () =>
       props.navigation
         .getParent()
         ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
   }, [navigation]);
+
+
+  const checkPermissions = async () => {
+    const permissionsToRequest = [];
+
+    if (Platform.OS === 'android') {
+      // Camera permission
+      const cameraPermission = await PermissionsAndroid.check(
+        PermissionsAndroid.PERMISSIONS.CAMERA
+      );
+      if (cameraPermission !== PermissionsAndroid.RESULTS.GRANTED) {
+        permissionsToRequest.push(PermissionsAndroid.PERMISSIONS.CAMERA);
+      }
+
+      // Location permission
+      const locationPermission = await PermissionsAndroid.check(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+      );
+      if (locationPermission !== PermissionsAndroid.RESULTS.GRANTED) {
+        permissionsToRequest.push(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+      }
+
+      // Request all pending permissions
+      return requestPermissions(permissionsToRequest);
+    } else {
+      // For iOS and other platforms, use react-native-permissions
+      const cameraResult = await check(PERMISSIONS.IOS.CAMERA);
+      const locationResult = await check(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
+
+      const permissionsToRequest = [];
+
+      if (cameraResult !== RESULTS.GRANTED) {
+        permissionsToRequest.push(PERMISSIONS.IOS.CAMERA);
+      }
+
+      if (locationResult !== RESULTS.GRANTED) {
+        permissionsToRequest.push(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
+      }
+
+      // Request all pending permissions
+      request(permissionsToRequest);
+    }
+  };
+
+  const requestPermissions = async (permissions) => {
+    if (Platform.OS === 'android') {
+      try {
+        const grantedPermissions = await PermissionsAndroid.requestMultiple(permissions);
+        const allPermissionsGranted = Object.values(grantedPermissions).every(
+          status => status === PermissionsAndroid.RESULTS.GRANTED
+        );
+
+        if (allPermissionsGranted) {
+          // All permissions granted
+
+        } else {
+
+          // Handle denied permissions
+        }
+        return allPermissionsGranted
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      // For iOS and other platforms, use react-native-permissions
+      const results = await request(permissions);
+
+      if (results.every(result => result === RESULTS.GRANTED)) {
+        // All permissions granted
+      } else {
+        // Handle denied permissions
+      }
+    }
+  };
+
+  const getOneTimeLocation = () => {
+    showLocationBottomSheet();
+    Geolocation.getCurrentPosition(
+      //Will give you the current location
+      (position) => {
+
+
+
+        //getting the Longitude from the location json
+        const currentLongitude =
+          JSON.stringify(position.coords.longitude);
+
+        //getting the Latitude from the location json
+        const currentLatitude =
+          JSON.stringify(position.coords.latitude);
+
+        hideLocationBottomSheet();
+        props.navigation.navigate('ProfileShortApplicantDetails')
+
+      },
+      (error) => {
+
+        console.log(error)
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 30000,
+        maximumAge: 1000
+      },
+    );
+  };
 
   const getSystemCodeDetail = async () => {
 
@@ -216,11 +334,11 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       bankUserCodeDetail.forEach((data) => {
         if (data.ID === 'IndIdentitySettingID') {
           if (id1.length > 0 && id2.length > 0 && id3.length > 0 && id4.length > 0) {
-            if (id1 == data.SubCodeID || id2 == data.SubCodeID || id3 == data.SubCodeID || id4 == data.SubCodeID) {
-              dataArray.push({ 'subCodeId': data.SubCodeID, Description: data.Description });
+            if (id1 == data.subCodeId || id2 == data.subCodeId || id3 == data.subCodeId || id4 == data.subCodeId) {
+              dataArray.push({ 'subCodeId': data.subCodeId, Description: data.Description });
             }
           } else {
-            dataArray.push({ 'subCodeId': data.SubCodeID, Description: data.Description });
+            dataArray.push({ 'subCodeId': data.subCodeId, Description: data.Description });
           }
 
         }
@@ -234,8 +352,8 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     if (bankUserCodeDetail) {
       bankUserCodeDetail.forEach((data) => {
         if (data.ID === 'IndIdentitySettingID') {
-          if (data.SubCodeID != KycType2Label && data.SubCodeID != KycType3Label && data.SubCodeID != KycType4Label)
-            dataArray.push({ 'subCodeId': data.SubCodeID, Description: data.Description });
+          if (data.subCodeId != KycType2Label && data.subCodeId != KycType3Label && data.subCodeId != KycType4Label)
+            dataArray.push({ 'subCodeId': data.subCodeId, Description: data.Description });
         }
       });
     }
@@ -247,8 +365,8 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     if (bankUserCodeDetail) {
       bankUserCodeDetail.forEach((data) => {
         if (data.ID === 'IndIdentitySettingID') {
-          if (data.SubCodeID != KycType1Label && data.SubCodeID != KycType3Label && data.SubCodeID != KycType4Label)
-            dataArray.push({ 'subCodeId': data.SubCodeID, Description: data.Description });
+          if (data.subCodeId != KycType1Label && data.subCodeId != KycType3Label && data.subCodeId != KycType4Label)
+            dataArray.push({ 'subCodeId': data.subCodeId, Description: data.Description });
         }
       });
     }
@@ -259,8 +377,8 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     if (bankUserCodeDetail) {
       bankUserCodeDetail.forEach((data) => {
         if (data.ID === 'IndIdentitySettingID') {
-          if (data.SubCodeID != KycType1Label && data.SubCodeID != KycType2Label && data.SubCodeID != KycType4Label)
-            dataArray.push({ 'subCodeId': data.SubCodeID, Description: data.Description });
+          if (data.subCodeId != KycType1Label && data.subCodeId != KycType2Label && data.subCodeId != KycType4Label)
+            dataArray.push({ 'subCodeId': data.subCodeId, Description: data.Description });
         }
       });
     }
@@ -272,8 +390,8 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     if (bankUserCodeDetail) {
       bankUserCodeDetail.forEach((data) => {
         if (data.ID === 'IndIdentitySettingID') {
-          if (data.SubCodeID != KycType1Label && data.SubCodeID != KycType2Label && data.SubCodeID != KycType3Label)
-            dataArray.push({ 'subCodeId': data.SubCodeID, Description: data.Description });
+          if (data.subCodeId != KycType1Label && data.subCodeId != KycType2Label && data.subCodeId != KycType3Label)
+            dataArray.push({ 'subCodeId': data.subCodeId, Description: data.Description });
         }
       });
     }
@@ -313,121 +431,19 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
 
   const buttonNext = () => {
-    props.navigation.navigate('ProfileShortApplicantDetails')
+
+    checkPermissions().then(res => {
+      if (res == true) {
+        getOneTimeLocation();
+        setLoading(false)
+      } else {
+        setLoading(false)
+        setApiError('Permission Not Granted');
+        setErrorModalVisible(true)
+      }
+    });
   }
 
-  const validate = () => {
-    var flag = false;
-    var i = 1;
-    var errorMessage = '';
-
-    if (LoanApplicationIDMan && LoanApplicationIDVisible) {
-      if (LoanApplicationID.length <= 0) {
-        errorMessage =
-          errorMessage +
-          i +
-          ')' +
-          ' ' +
-          language[0][props.language].str_plsenter +
-          LoanApplicationIDCaption +
-          '\n';
-        i++;
-        flag = true;
-      }
-    }
-
-    if (KycSourceMan && KycSourceVisible) {
-      if (KycSourceLabel.length <= 0) {
-        errorMessage =
-          errorMessage +
-          i +
-          ')' +
-          ' ' +
-          language[0][props.language].str_plsselect +
-          KycSourceCaption +
-          '\n';
-        i++;
-        flag = true;
-      }
-    }
-
-    if (KycTypeMan && KycTypeVisible) {
-      if (KycTypeLabel.length <= 0) {
-        errorMessage =
-          errorMessage +
-          i +
-          ')' +
-          ' ' +
-          language[0][props.language].str_plsselect +
-          KycTypeCaption +
-          '\n';
-        i++;
-        flag = true;
-      }
-    }
-
-    if (kycIDMan && kycIDVisible) {
-      if (kycID.length <= 0) {
-        errorMessage =
-          errorMessage +
-          i +
-          ')' +
-          ' ' +
-          language[0][props.language].str_plsenter +
-          kycIDCaption +
-          '\n';
-        i++;
-        flag = true;
-      }
-    }
-
-    if (KycType1Man && KycType1Visible) {
-      if (KycType1Label.length <= 0) {
-        errorMessage =
-          errorMessage +
-          i +
-          ')' +
-          ' ' +
-          language[0][props.language].str_plsselect +
-          KycType1Caption +
-          '\n';
-        i++;
-        flag = true;
-      }
-    }
-
-    if (kycID1Man && kycID1Visible) {
-      if (kycID1.length <= 0) {
-        errorMessage =
-          errorMessage +
-          i +
-          ')' +
-          ' ' +
-          language[0][props.language].str_plsenter +
-          kycID1Caption +
-          '\n';
-        i++;
-        flag = true;
-      }
-    }
-
-    if (kycID2Man && kycID2Visible) {
-      if (kycID2.length <= 0) {
-        errorMessage =
-          errorMessage +
-          i +
-          ')' +
-          ' ' +
-          language[0][props.language].str_plsenter +
-          kycID2Caption +
-          '\n';
-        i++;
-        flag = true;
-      }
-    }
-    setErrMsg(errorMessage);
-    return flag;
-  };
 
   const handleClick = (componentName, textValue) => {
     if (componentName === 'LoanApplicationID') {
@@ -592,6 +608,157 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     }
   }
 
+  const uploadImage = async () => {
+
+    if (global.isAadharVerified == '1') {
+      buttonNext();
+      return;
+    }
+
+    if (validate()) {
+      showBottomSheet();
+      return;
+    }
+
+    Common.getNetworkConnection().then(value => {
+      if (value.isConnected == true) {
+        updateImage();
+      } else {
+        setApiError(language[0][props.language].str_errinternet);
+        setErrorModalVisible(true)
+      }
+
+    })
+
+
+  };
+
+  const validate = () => {
+    var flag = false;
+    var i = 1;
+    var errorMessage = '';
+
+    if (imageUri == null) {
+      errorMessage =
+        errorMessage +
+        i +
+        ')' +
+        ' ' +
+        language[0][props.language].str_errorimage +
+        '\n';
+      i++;
+      flag = true;
+    }
+
+    if (global.isAadharVerified == '0') {
+      if (KycTypeLabel.length <= 0) {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          language[0][props.language].str_plsselect +
+          KycTypeCaption +
+          '\n';
+        i++;
+        flag = true;
+      }
+
+      if (KycTypeLabel.length > 0) {
+        if (kycID.length <= 0) {
+          errorMessage =
+            errorMessage +
+            i +
+            ')' +
+            ' ' +
+            language[0][props.language].str_plsenter +
+            kycIDCaption +
+            '\n';
+          i++;
+          flag = true;
+        }
+      }
+
+    }
+
+    setErrMsg(errorMessage);
+    return flag;
+  };
+
+  const updateImage = async () => {
+    if (imageUri) {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append('file', {
+        uri: imageUri,
+        type: fileType,
+        name: fileName,
+      });
+
+      try {
+        const response = await fetch(global.BASEURL + '8094/api/documents', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          // Handle the response from Cloudinary
+
+          setDocID(data.docId);
+          updateKYCDetails(data.docId);
+        } else {
+          if (global.DEBUG_MODE) console.log('Upload failed:', response.status);
+          setApiError(response.status);
+          setErrorModalVisible(true)
+        }
+      } catch (error) {
+        if (global.DEBUG_MODE) console.log('Upload error:', error);
+        setApiError(error.response.data.message);
+        setErrorModalVisible(true)
+      } finally {
+        setLoading(false);
+      }
+    }
+  }
+
+  const updateKYCDetails = (id) => {
+    setLoading(true)
+    const appDetails = {
+      "id": global.LOANAPPLICATIONID,
+      "clientId": global.CLIENTID,
+      "kycType": KycTypeLabel,
+      "kycValue": kycID,
+      "kycExpiryDate": "",
+      "kycDMSId": parseInt(id),
+      "createdBy": global.USERID,
+    }
+
+    const baseURL = '8901'
+    apiInstancelocal(baseURL).post(`/api/v2/profile-short/manualKyc`, appDetails)
+      .then(async (response) => {
+        // Handle the response data
+
+        if (global.DEBUG_MODE) console.log("ManualKYCApiResponse::" + JSON.stringify(response.data));
+
+        buttonNext();
+        setLoading(false)
+
+      })
+      .catch((error) => {
+        // Handle the error
+        if (global.DEBUG_MODE) console.log("ManualKYCApiResponse:::" + JSON.stringify(error.response))
+        setLoading(false)
+        buttonNext()
+        if (error.response.data != null) {
+          setApiError(error.response.data.message);
+          setErrorModalVisible(true)
+        }
+      });
+
+  }
 
 
   return (
@@ -651,6 +818,30 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
         </View>
       </Modal>
 
+      <Modal
+        isVisible={locationSheetVisible}
+        onBackdropPress={() => { }}
+        backdropOpacity={0.5}
+        style={styles.modal}
+      >
+        <View style={styles.modalContent}>
+          <View style={{ alignItems: 'center' }}>
+
+            <View style={{ width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+
+              <TextComp textVal={"Fetching Location......"} textStyle={{ fontSize: 14, color: Colors.black, fontWeight: 600, marginTop: 30, marginBottom: 30 }} Visible={false} />
+
+
+            </View>
+
+
+
+
+          </View>
+
+
+        </View>
+      </Modal>
 
 
       <ScrollView
@@ -822,47 +1013,49 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
             </View>
           )}
 
-          <View
-            style={{
-              width: '100%',
-              alignItems: 'center',
-            }}>
+          {global.isAadharVerified == '0' &&
             <View
               style={{
-                width: '90%',
-                flexDirection: 'row',
+                width: '100%',
                 alignItems: 'center',
-                marginTop: 20,
               }}>
-              <TouchableOpacity style={{ width: '30%' }} onPress={pickDocument} activeOpacity={0}>
-                <View style={{ width: 40, height: 40, backgroundColor: '#DBDBDB', borderRadius: 10, justifyContent: 'center', alignItems: 'center' }}>
-                  <Image
-                    source={require('../../../Images/cloudcomputing.png')}
-                    style={{ width: 28, height: 22 }}
-                  />
-                  {/* <FontAwesome6 name="cloud-arrow-up" size={25} color="#b5b6b6" /> */}
-                </View>
-              </TouchableOpacity>
-
-              <Text style={{ width: '50%', color: Colors.dimmText, textAlign: 'left', fontFamily: 'PoppinsRegular' }}>
-                {fileName}
-              </Text>
-
-              {imageUri &&
-                <TouchableOpacity style={{ width: '20%', alignItems: 'flex-end' }}
-                  onPress={() => {
-                    showImageBottomSheet();
-                  }}>
-                  <Entypo
-                    name="dots-three-vertical"
-                    size={25}
-                    color={Colors.darkblue}
-                  />
+              <View
+                style={{
+                  width: '90%',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginTop: 20,
+                }}>
+                <TouchableOpacity style={{ width: '30%' }} onPress={pickDocument} activeOpacity={0}>
+                  <View style={{ width: 40, height: 40, backgroundColor: '#DBDBDB', borderRadius: 10, justifyContent: 'center', alignItems: 'center' }}>
+                    <Image
+                      source={require('../../../Images/cloudcomputing.png')}
+                      style={{ width: 28, height: 22 }}
+                    />
+                    {/* <FontAwesome6 name="cloud-arrow-up" size={25} color="#b5b6b6" /> */}
+                  </View>
                 </TouchableOpacity>
-              }
 
+                <Text style={{ width: '50%', color: Colors.dimmText, textAlign: 'left', fontFamily: 'PoppinsRegular' }}>
+                  {fileName}
+                </Text>
+
+                {imageUri &&
+                  <TouchableOpacity style={{ width: '20%', alignItems: 'flex-end' }}
+                    onPress={() => {
+                      showImageBottomSheet();
+                    }}>
+                    <Entypo
+                      name="dots-three-vertical"
+                      size={25}
+                      color={Colors.darkblue}
+                    />
+                  </TouchableOpacity>
+                }
+
+              </View>
             </View>
-          </View>
+          }
 
           <View
             style={{
@@ -1393,7 +1586,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
           textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
           viewStyle={Commonstyles.buttonView}
           innerStyle={Commonstyles.buttonViewInnerStyle}
-          handleClick={buttonNext}
+          handleClick={uploadImage}
         />
       </ScrollView>
     </SafeAreaView>

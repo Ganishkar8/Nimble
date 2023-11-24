@@ -100,8 +100,8 @@ const ConsentScreen = (props, { navigation }) => {
             .catch((error) => {
                 setLoading(false)
                 if (global.DEBUG_MODE) console.log("TempIDCreationApiResponse::" + JSON.stringify(error.response));
-                // props.navigation.replace('LoanApplicationMain')
-                // global.TEMPAPPID = '1115153454';
+                //props.navigation.replace('LoanApplicationMain')
+                //global.TEMPAPPID = '1115153454';
                 if (error.response.data != null) {
                     setApiError(error.response.data.message);
                     setErrorModalVisible(true)

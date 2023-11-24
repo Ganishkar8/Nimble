@@ -66,16 +66,7 @@ const Route = () => {
           component={BottomNavigation}
           options={{ headerShown: false }}
         />
-        <Stack.Screen
-          name="ProfileShortBasicDetails"
-          component={ProfileShortBasicDetails}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="ProfileShortExistingClientDetails"
-          component={ProfileShortExistingClientDetails}
-          options={{ headerShown: false }}
-        />
+
 
         <Stack.Screen
           name="AddressMainList"

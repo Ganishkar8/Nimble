@@ -57,8 +57,15 @@ const LeadApproval = (props, { navigation, route }) => {
         //pickerData();
         callPickerApi();
 
-        setApproverComment(leadData.leadCreationLeadLogDto.approverComments);
-        setLeadStatusLabel(leadData.leadCreationLeadLogDto.leadStatus)
+        //alert(leadStatusLabel)
+
+        if (leadData.leadCreationLeadLogDto.leadStatus.toUpperCase() == 'APPROVED' || leadData.leadCreationLeadLogDto.leadStatus.toUpperCase() == 'REJECTED') {
+            if (leadData.leadCreationLeadLogDto.leadStatus)
+                if (leadData.leadCreationLeadLogDto.approverComments) {
+                    setApproverComment(leadData.leadCreationLeadLogDto.approverComments);
+                }
+            setLeadStatusLabel(leadData.leadCreationLeadLogDto.leadStatus)
+        }
 
         if (global.USERTYPEID == '1164') {
             setStatusDisable(true);
@@ -101,7 +108,7 @@ const LeadApproval = (props, { navigation, route }) => {
         var errorMessage = '';
 
 
-        if (leadStatusLabel === '') {
+        if (leadStatusLabel.length <= 0) {
             errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + "LEAD STATUS" + '\n';
             i++;
             flag = true;

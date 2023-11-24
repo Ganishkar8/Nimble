@@ -6,6 +6,8 @@ import {
   SafeAreaView,
   ScrollView,
   TextInput,
+  Text,
+  Image
 } from 'react-native';
 import apiInstance from '../../../Utils/apiInstance';
 import apiInstancelocal from '../../../Utils/apiInstancelocal';
@@ -18,6 +20,7 @@ import { languageAction } from '../../../Utils/redux/actions/languageAction';
 import { language } from '../../../Utils/LanguageString';
 import Commonstyles from '../../../Utils/Commonstyles';
 import HeadComp from '../../../Components/HeadComp';
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import ProgressComp from '../../../Components/ProgressComp';
 import tbl_SystemMandatoryFields from '../../../Database/Table/tbl_SystemMandatoryFields';
 import Modal from 'react-native-modal';
@@ -33,6 +36,13 @@ import DateComp from '../../../Components/Filter/DateComp';
 import DateInputComp from '../../../Components/DateInputComp';
 import MapView, { Marker } from 'react-native-maps';
 import ImagePicker, { ImageOrVideo } from 'react-native-image-crop-picker';
+import tbl_client from '../../../Database/Table/tbl_client';
+import Entypo from 'react-native-vector-icons/Entypo';
+import Geolocation from 'react-native-geolocation-service';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useIsFocused } from '@react-navigation/native';
+
 
 const ProfileShortApplicantDetails = (props, { navigation }) => {
 
@@ -55,12 +65,12 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
   const [firstNameMan, setFirstNameMan] = useState(false);
   const [firstNameVisible, setFirstNameVisible] = useState(true);
   const [firstNameDisable, setFirstNameDisable] = useState(false);
-  const [middleName, setMiddleName] = useState('');
+  const [middleName, setMiddleName] = useState('dv');
   const [middleNameMan, setMiddleNameMan] = useState(false);
   const [middleNameCaption, setMiddleNameCaption] = useState('MIDDLE NAME');
   const [middleNameVisible, setMiddleNameVisible] = useState(true);
   const [middleNameDisable, setMiddleNameDisable] = useState(false);
-  const [lastName, setLastName] = useState('');
+  const [lastName, setLastName] = useState('dfd');
   const [lastNameCaption, setLastNameCaption] = useState('LAST NAME');
   const [lastNameMan, setLastNameMan] = useState(false);
   const [lastNameVisible, setLastNameVisible] = useState(true);
@@ -86,6 +96,8 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
   const mapRef = useRef(null);
   const [visible, setVisible] = useState(true);
   const [photoOptionvisible, setphotoOptionvisible] = useState(false);
+  const showphotoBottomSheet = () => setphotoOptionvisible(true);
+  const hidephotoBottomSheet = () => setphotoOptionvisible(false);
   const [imageUri, setImageUri] = useState(null);
   const [imageFile, setImageFile] = useState([]);
   const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
@@ -181,48 +193,56 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [apiError, setApiError] = useState('');
 
+  const isScreenVisible = useIsFocused();
 
   useEffect(() => {
     props.navigation
       .getParent()
       ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
-    makeSystemMandatoryFields();
-    getSystemCodeDetail();
+
+    if (isScreenVisible) {
+      makeSystemMandatoryFields();
+      getSystemCodeDetail();
+      getClientData();
+      getOneTimeLocation();
+    }
+
+
 
     return () =>
       props.navigation
         .getParent()
         ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
-  }, [navigation]);
+  }, [navigation, isScreenVisible]);
 
   const getSystemCodeDetail = async () => {
 
-    const filteredMaritalStatusData = userCodeDetail.filter((data) => data.ID === 'MaritalStatusID');
+    const filteredMaritalStatusData = userCodeDetail.filter((data) => data.ID === 'MaritalStatusID').sort((a, b) => a.Description.localeCompare(b.Description));
     setMaritalStatusData(filteredMaritalStatusData);
 
-    const filteredTitleData = leaduserCodeDetail.filter((data) => data.masterId === 'TITLE');
+    const filteredTitleData = leaduserCodeDetail.filter((data) => data.masterId === 'TITLE').sort((a, b) => a.Description.localeCompare(b.Description));
     setTitleData(filteredTitleData);
 
-    const filteredGenderData = leadsystemCodeDetail.filter((data) => data.masterId === 'GENDER');
+    const filteredGenderData = leadsystemCodeDetail.filter((data) => data.masterId === 'GENDER').sort((a, b) => a.Description.localeCompare(b.Description));
     setGenderData(filteredGenderData);
 
-    const filteredCasteData = leaduserCodeDetail.filter((data) => data.masterId === 'CASTE');
+    const filteredCasteData = leaduserCodeDetail.filter((data) => data.masterId === 'CASTE').sort((a, b) => a.Description.localeCompare(b.Description));
     setCasteData(filteredCasteData);
 
-    const filteredReligionData = leaduserCodeDetail.filter((data) => data.masterId === 'RELIGION');
+    const filteredReligionData = leaduserCodeDetail.filter((data) => data.masterId === 'RELIGION').sort((a, b) => a.Description.localeCompare(b.Description));
     setReligionData(filteredReligionData);
 
-    const filteredMotherTongueData = leaduserCodeDetail.filter((data) => data.masterId === 'MOTHER_TONGUE');
+    const filteredMotherTongueData = leaduserCodeDetail.filter((data) => data.masterId === 'MOTHER_TONGUE').sort((a, b) => a.Description.localeCompare(b.Description));
     setMotherTongueData(filteredMotherTongueData);
 
-    const filteredEADData = leaduserCodeDetail.filter((data) => data.masterId === 'EDUCATIONAL_QUALIFICATION');
+    const filteredEADData = leaduserCodeDetail.filter((data) => data.masterId === 'EDUCATIONAL_QUALIFICATION').sort((a, b) => a.Description.localeCompare(b.Description));
     setEADData(filteredEADData);
 
   };
 
   const makeSystemMandatoryFields = () => {
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_title' && data.pageId === 4).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_title' && data.pageId === 3).map((value, index) => {
       setTitleCaption(value.fieldName)
       if (value.mandatory) {
         setTitleMan(true);
@@ -239,7 +259,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
     });
 
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_firstname' && data.pageId === 4).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_first_name' && data.pageId === 3).map((value, index) => {
       setFirstNameCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -256,7 +276,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_middlename' && data.pageId === 4).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_middle_name' && data.pageId === 3).map((value, index) => {
       setMiddleNameCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -273,7 +293,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_lastname' && data.pageId === 4).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_last_name' && data.pageId === 3).map((value, index) => {
       setLastNameCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -307,7 +327,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_gender' && data.pageId === 4).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_gender' && data.pageId === 3).map((value, index) => {
       setGenderCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -325,7 +345,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
     });
 
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_dob' && data.pageId === 4).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_date_of_birth' && data.pageId === 3).map((value, index) => {
       setDOBCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -342,7 +362,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_age' && data.pageId === 4).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_age' && data.pageId === 3).map((value, index) => {
       setAgeCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -359,7 +379,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_fathername' && data.pageId === 4).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_fathers name' && data.pageId === 3).map((value, index) => {
       setFatherNameCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -376,7 +396,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_spousename' && data.pageId === 4).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_spouse name' && data.pageId === 3).map((value, index) => {
       setSpouseNameCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -393,7 +413,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_caste' && data.pageId === 4).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_caste' && data.pageId === 3).map((value, index) => {
       setCasteCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -410,7 +430,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_religion' && data.pageId === 4).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_religion' && data.pageId === 3).map((value, index) => {
       setReligionCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -427,7 +447,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_mothertongue' && data.pageId === 4).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_mother tongue' && data.pageId === 3).map((value, index) => {
       setMotherTongueCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -444,7 +464,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_eduqual' && data.pageId === 4).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_educational qualifications' && data.pageId === 3).map((value, index) => {
       setEADCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -464,11 +484,107 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
 
   };
 
+
+  const getClientData = async () => {
+
+    await tbl_client.getClientBasedOnID(global.TEMPAPPID).then(value => {
+      if (value !== undefined && value.length > 0) {
+        setTitleLabel(value[0].titleId);
+        setFirstName(value[0].firstName);
+        setMiddleName(value[0].middleName);
+        setLastName(value[0].lastName);
+        setGenderLabel(value[0].genderId);
+        setDOB(value[0].dateOfBirth);
+        setAge(value[0].age);
+        setFatherName(value[0].fatherName);
+        setSpouseName(value[0].spouseName);
+        setCasteLabel(value[0].casteId);
+        setReligionLabel(value[0].religionId);
+        setMotherTongueLabel(value[0].motherTongueId);
+        setEADLabel(value[0].educationQualificationId);
+        //getImage(value[0].image)
+        //getImage('3728')
+      }
+    })
+
+    if (global.isAadharVerified == '1') {
+      setFirstNameDisable(true);
+      setMiddleNameDisable(false);
+      setLastNameDisable(false);
+      setGenderDisable(true);
+      setDOBDisable(true);
+      setAgeDisable(true);
+      if (FatherName.length > 0) {
+        setFatherNameDisable(false)
+      }
+      if (SpouseName.length > 0) {
+        setSpouseNameDisable(false)
+      }
+    }
+
+  }
+
+  const getImage = (dmsID) => {
+    Common.getNetworkConnection().then(value => {
+      if (value.isConnected == true) {
+        setLoading(true)
+        const baseURL = '8094'
+        apiInstance(baseURL).get(`/api/documents/document/${dmsID}`)
+          .then(async (response) => {
+            // Handle the response data
+            console.log("GetPhotoApiResponse::" + JSON.stringify(response.data));
+            setFileName(response.data.fileName)
+            setVisible(false)
+            setImageUri('data:image/png;base64,' + response.data.base64Content)
+            // props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
+            setLoading(false)
+
+          })
+          .catch((error) => {
+            // Handle the error
+            if (global.DEBUG_MODE) console.log("GetPhotoApiResponse::" + JSON.stringify(error.response.data));
+            setLoading(false)
+            if (error.response.data != null) {
+              setApiError(error.response.data.message);
+              setErrorModalVisible(true)
+            } else if (error.response.httpStatusCode == 500) {
+              setApiError(error.response.message);
+              setErrorModalVisible(true)
+            }
+          });
+      } else {
+        setApiError(language[0][props.language].str_errinternetimage);
+        setErrorModalVisible(true)
+
+      }
+
+    })
+  }
+
+  const uploadImage = async () => {
+
+    if (validate()) {
+      showBottomSheet();
+      return;
+    }
+
+    Common.getNetworkConnection().then(value => {
+      if (value.isConnected == true) {
+        updateImage();
+      } else {
+        setApiError(language[0][props.language].str_errinternet);
+        setErrorModalVisible(true)
+      }
+
+    })
+
+
+  };
+
   const updateImage = async () => {
     if (imageUri) {
 
       setLoading(true);
-      insertLead(global.leadID, false)
       const formData = new FormData();
       formData.append('file', {
         uri: imageUri,
@@ -489,6 +605,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
           // Handle the response from Cloudinary
 
           setDocID(data.docId);
+          updateApplicantDetails(data.docId)
 
         } else {
           if (global.DEBUG_MODE) console.log('Upload failed:', response.status);
@@ -505,40 +622,43 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
     }
   }
 
-  const updateApplicantDetails = () => {
+  const updateApplicantDetails = (id) => {
     if (validate()) {
       showBottomSheet();
     } else {
       const appDetails = {
-        createdBy: global.USERID,
-        createdOn: '',
-        isActive: true,
-        branchId: 1180,
-        leadCreationBasicDetails: {
-          createdBy: global.USERID,
-          createdOn: '',
-          customerCategoryId: 5,
-          firstName: firstName,
-          middleName: middleName,
-          lastName: lastName,
-          mobileNumber: 7647865789,
-        },
-        leadCreationBusinessDetails: {},
-        leadCreationLoanDetails: {},
-        leadCreationDms: {},
-      };
+        "isActive": true,
+        "createdBy": global.USERID,
+        "id": 0,
+        "clientType": "APPL",
+        "relationType": "",
+        "title": TitleLabel,
+        "firstName": firstName,
+        "middleName": middleName,
+        "lastName": lastName,
+        "dateOfBirth": DOB,
+        "age": parseInt(Age),
+        "fatherName": FatherName,
+        "spouseName": SpouseName,
+        "caste": CasteLabel,
+        "religion": ReligionLabel,
+        "motherTongue": MotherTongueLabel,
+        "educationQualification": EADLabel,
+        "gender": GenderLabel,
+        "maritalStatus": "",
+        "dmsId": id,
+        "imageName": fileName,
+        "geoCode": currentLatitude + "," + currentLongitude,
+      }
       const baseURL = '8901';
       setLoading(true);
       apiInstancelocal(baseURL)
-        .post('/api/v1/lead-creation-initiation', appDetails)
+        .put(`/api/v2/profile-short/personal-details/${global.CLIENTID}`, appDetails)
         .then(async response => {
           // Handle the response data
-          console.log(
-            'LeadCreationBasicApiResponse::' + JSON.stringify(response.data),
-          );
-          global.leadID = response.data.id;
+          if (global.DEBUG_MODE) console.log('PersonalDetailApiResponse::' + JSON.stringify(response.data));
           setLoading(false);
-          props.navigation.navigate('LeadCreationBusiness');
+          props.navigation.navigate('AddressMainList')
         })
         .catch(error => {
           // Handle the error
@@ -582,7 +702,6 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
 
       // const imageName = image.path.split('/').pop();
-      setTime(Common.getCurrentDateTime());
       setFileType(image.mime)
       setFileName(imageName)
       setImageUri(image.path)
@@ -660,6 +779,19 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
     var flag = false;
     var i = 1;
     var errorMessage = '';
+
+    if (imageUri == null) {
+      errorMessage =
+        errorMessage +
+        i +
+        ')' +
+        ' ' +
+        language[0][props.language].str_errorimage +
+        '\n';
+      i++;
+      flag = true;
+    }
+
     if (TitleMan && TitleVisible) {
       if (TitleLabel.length <= 0) {
         errorMessage =
@@ -848,6 +980,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
   };
 
   const handleClick = (componentName, textValue) => {
+
     if (componentName === 'firstName') {
       setFirstName(textValue);
     } else if (componentName === 'middleName') {
@@ -908,6 +1041,55 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
     <SafeAreaView
       style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
       <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
+
+      <Modal
+        isVisible={photoOptionvisible}
+        onBackdropPress={hidephotoBottomSheet}
+        style={styles.modal}>
+        <View style={styles.modalContent}>
+          <TouchableOpacity
+            onPress={() => hidephotoBottomSheet()}
+            style={{
+              width: 33,
+              height: 33,
+              position: 'absolute',
+              right: 0,
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1,
+              backgroundColor: Colors.common,
+              borderBottomStartRadius: 10,
+            }}>
+            <AntDesign name="close" size={18} color={Colors.black} />
+          </TouchableOpacity>
+
+          <View style={{ width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+            <View style={{ width: '30%', alignItems: 'center' }}>
+              <TouchableOpacity onPress={() => pickImage()} activeOpacity={11}>
+                <View style={{
+                  width: 53, height: 53, borderRadius: 53, backgroundColor: '#E74C3C',
+                  alignItems: 'center', justifyContent: 'center'
+                }}>
+                  <Ionicons name='camera-outline' size={31} color={Colors.white} />
+                </View>
+              </TouchableOpacity>
+              <Text style={{ fontSize: 14, color: Colors.black, marginTop: 7, fontFamily: 'PoppinsRegular' }}>Camera</Text>
+            </View>
+            <View style={{ width: '30%', alignItems: 'center' }}>
+              <TouchableOpacity onPress={() => selectImage()} activeOpacity={11}>
+                <View style={{
+                  width: 53, height: 53, borderRadius: 53, backgroundColor: '#8E44AD',
+                  alignItems: 'center', justifyContent: 'center'
+                }}>
+                  <Ionicons name='image-outline' size={27} color={Colors.white} />
+                </View>
+              </TouchableOpacity>
+              <Text style={{ fontSize: 14, color: Colors.black, marginTop: 7 }}>Gallery</Text>
+            </View>
+
+          </View>
+        </View>
+      </Modal>
 
       <ScrollView
         style={styles.scrollView}
@@ -1121,10 +1303,11 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
               </View>
 
               <View style={{ width: '100%', alignItems: 'center' }}>
-                <DateInputComp textStyle={[Commonstyles.inputtextStyle, { width: '90%' }]} ComponentName="expiryDate1"
+                <DateInputComp textStyle={[Commonstyles.inputtextStyle, { width: '90%' }]} ComponentName="DOB"
                   textValue={DOB}
                   type="numeric"
                   handleClick={handleClick}
+                  Disable={DOBDisable}
                   handleReference={handleReference} />
               </View>
               {/* <TextInputComp
@@ -1161,7 +1344,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
               <TextInputComp
                 textValue={Age}
                 textStyle={Commonstyles.textinputtextStyle}
-                type="email-address"
+                type="numeric"
                 Disable={AgeDisable}
                 ComponentName="Age"
                 reference={AgeRef}
@@ -1332,6 +1515,181 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
               />
             </View>
           )}
+
+
+          <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+              <TextComp
+                textVal={language[0][props.language].str_capturecustpht}
+                textStyle={Commonstyles.inputtextStyle}
+                Visible={true}
+              />
+            </View>
+
+            {visible && (
+              <TouchableOpacity
+                onPress={() => {
+                  showphotoBottomSheet();
+                }}
+                style={{
+                  width: '90%',
+                  height: 170,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginTop: 10,
+                  paddingHorizontal: 0,
+                  borderRadius: 10,
+                  backgroundColor: '#e2e2e2',
+                }}>
+                <View>
+                  <Entypo name="camera" size={25} color={Colors.darkblack} />
+                </View>
+              </TouchableOpacity>
+            )}
+
+            {!visible && (
+              <TouchableOpacity style={{
+                width: '90%',
+                height: 170,
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginTop: 10,
+                paddingHorizontal: 0,
+                borderRadius: 10,
+                backgroundColor: '#e2e2e2',
+              }} onPress={() => { props.navigation.navigate('PreviewImage', { imageName: fileName, imageUri: imageUri }) }}>
+
+
+                <View style={{ width: '100%', height: 170 }}>
+                  <Image
+                    source={{ uri: imageUri }}
+                    style={{ width: '100%', height: 170, borderRadius: 10 }}
+                  />
+                </View>
+              </TouchableOpacity>
+            )}
+
+
+
+            {!visible && (
+              <View
+                style={{
+                  width: '90%',
+                  justifyContent: 'center',
+                  marginTop: 15,
+                  paddingHorizontal: 0,
+                  flexDirection: 'row',
+                }}>
+                <TextComp
+                  textVal={fileName}
+                  textStyle={{
+                    width: '90%',
+                    fontSize: 14,
+                    color: Colors.mediumgrey,
+                    fontFamily: 'PoppinsRegular'
+                  }}
+                  Visible={false}
+                />
+
+                <TouchableOpacity
+                  onPress={() => {
+                    showBottomSheet();
+                    setDeleteVisible(false);
+                  }}>
+                  <Entypo
+                    name="dots-three-vertical"
+                    size={25}
+                    color={Colors.darkblue}
+                  />
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+
+          <View
+            style={{
+              width: '100%',
+              marginTop: 19,
+              paddingHorizontal: 0,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+              <TextComp
+                textVal={language[0][props.language].str_gpslocation}
+                textStyle={Commonstyles.inputtextStyle}
+                Visible={true}
+              />
+            </View>
+
+            <View
+              style={{
+                width: '90%',
+                flexDirection: 'row',
+                marginTop: 3,
+                paddingHorizontal: 0,
+                borderBottomWidth: 1,
+                borderBottomColor: '#e2e2e2',
+              }}>
+              <TextInput
+                value={gpslatlon}
+                onChangeText={txt => setGPSLatLon(txt)}
+                placeholder={''}
+                editable={false}
+                placeholderTextColor={Colors.lightgrey}
+                secureTextEntry={false}
+                autoCapitalize="none"
+                style={Commonstyles.textinputtextStyle}
+              />
+
+              <TouchableOpacity
+                onPress={() => {
+                  getOneTimeLocation();
+                }}
+                style={{ marginLeft: 8, marginTop: 5 }}
+                activeOpacity={0.5}>
+                <FontAwesome6
+                  name="location-dot"
+                  size={23}
+                  color={Colors.darkblue}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+            <View
+              style={{
+                width: '90%',
+                marginTop: 3,
+                paddingHorizontal: 0,
+                borderBottomWidth: 1,
+                borderBottomColor: '#e2e2e2',
+              }}>
+              <MapView
+                style={{ width: '100%', height: 200, marginTop: 15 }}
+                ref={mapRef}
+                initialRegion={{
+                  latitude: currentLatitude,
+                  longitude: currentLongitude,
+                  latitudeDelta: 0.02,
+                  longitudeDelta: 0.02,
+                }}>
+                <Marker
+                  coordinate={{
+                    latitude: parseFloat(currentLatitude),
+                    longitude: parseFloat(currentLongitude),
+                  }}
+                  onDragEnd={e =>
+                    alert(JSON.stringify(e.nativeEvent.coordinate))
+                  }
+                //title={'Test Marker'}
+                //description={'This is a description of the marker'}
+                />
+              </MapView>
+            </View>
+          </View>
+
         </View>
 
         <ButtonViewComp
@@ -1339,7 +1697,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
           textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
           viewStyle={Commonstyles.buttonView}
           innerStyle={Commonstyles.buttonViewInnerStyle}
-          handleClick={updateApplicantDetails}
+          handleClick={uploadImage}
         />
       </ScrollView>
     </SafeAreaView>
