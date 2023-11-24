@@ -206,6 +206,10 @@ export const language = [
       str_outstandingamt: 'OUTSTANDING AMOUNT',
       str_overdueamt: 'OVERDUE AMOUNT',
       str_plsverify: 'Please Verify ',
+      str_aadharsuccess: 'Aadhar Authentication Successful',
+      str_proceed: 'Proceed',
+      str_view: 'View',
+      str_aadhaarpdfopen: 'Password of E-Aadhaar is the combination of the \nfirst 4 letters of name in CAPITAL and the year of \nbirth (YYYY). \nEg: If customer name is Sobha and year of birth is \n2000 then password of E -Aadhar will be \nSOBH2000.',
     },
 
     ta: {

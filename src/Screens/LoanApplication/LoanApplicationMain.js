@@ -198,8 +198,9 @@ const LoanApplicationMain = (props, { navigation }) => {
 
     const nestedDataClick = (item) => {
         //alert("Ganishkar "+JSON.stringify(item))
-        if (item.id == 5) {
-            props.navigation.navigate('AddressMainList')
+        if (item.pageCode == 'PRF_SHRT_APLCT_ADDRS_DTLS') {
+            props.navigation.navigate('AddressMainList');
+            //props.navigation.navigate('AadharOTPVerification', { aadharNumber: "989484039303" });
         }
     }
 

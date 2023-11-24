@@ -311,6 +311,7 @@ const createTables = async () => {
       modified_date TEXT,
       supervised_by TEXT,
       supervised_date TEXT,
+      isKyc TEXT,
       PRIMARY KEY (loanApplicationId, address_type)
     )`,
     // Add more CREATE TABLE queries for other tables...
