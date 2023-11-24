@@ -42,7 +42,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Button, Menu, Divider } from 'react-native-paper';
 import { useIsFocused } from '@react-navigation/native';
 import ErrorModal from '../../../Components/ErrorModal';
+import AadharSuccessModal from '../../../Components/AadharSuccessModal';
 import tbl_client from '../../../Database/Table/tbl_client';
+import tbl_clientaddressinfo from '../../../Database/Table/tbl_clientaddressinfo';
 const CELL_COUNT = 3;
 const CELL_SIZE = 46;
 const CELL_BORDER_RADIUS = 8;
@@ -68,6 +70,40 @@ const animateCell = ({ hasValue, index, isFocused }) => {
 
 const aadharJSON = [{ "id": 10, "clientId": 0, "aadharNumber": "717485993554", "requestId": "222933c2-f353-4447-ba88-a72630adb9dc", "isConsent": "Y", "statusCode": 101, "statusMessage": null, "otp": "205365", "otpSentMsg": "OTP sent to registered mobile number", "otpVerifiedTime": "2023-11-23T09:05:35.32327601", "caseId": "1000", "shareCode": "3554", "createdBy": "329", "createdDate": "2023-11-23T09:04:32.314335", "aadharResultDetails": { "id": 4, "aadharDetailId": null, "resultGeneratedTime": "2023-11-23 09:05:08.726", "maskedAadhaarNumber": "XXXX XXXX 3554", "name": "Ajith A", "dob": "1998-04-20", "gender": "M", "address": "NEW NO -49/84 OLD NO -49/32B, VELLAMODI VILAI, Agastheeswaram, Kanyakumari, Agasteeswaram, Eathamozhi, Tamil Nadu, India, 629501", "mobileHash": "f7b3836fc99631bc09b630961302ff60af4a54a43dd1a44e24758a5d363c0b25", "emailHash": "31960ecc93b7257bce32f0d2dddaa948da91eb16d521cff44370e70306d759af", "fatherName": null, "resultMessage": "Aadhaar XML file downloaded successfully", "imgDmsId": 3715, "docDmsId": 3716, "createdBy": "329", "createdDate": "2023-11-23T09:05:35.343698967" } }]
 
+const newAadharJson = [{
+    "aadharResultDetails": {
+        "id": 5,
+        "aadharDetailId": null,
+        "resultGeneratedTime": "2023-11-24 13:23:45.231",
+        "maskedAadhaarNumber": "XXXX XXXX 9303",
+        "name": "GANISHKAR S",
+        "dob": "1998-07-31",
+        "gender": "M",
+        "address": "NO 204, PUDUKOTTAI, Tirupathur, Vellore, Madapalli, TIRUPATTUR, Pudukottai, Tamil Nadu, India, 635602",
+        "mobileHash": "550019f61b6cad6a754a2604b2ef3466814d5a5efa0c6c9bc6e91edd0eb71619",
+        "emailHash": "2db9681832074c1657b2c0f1bd3c3c5a4a847a6c8e480790adcb8180a0516e80",
+        "fatherName": "Sivakumar",
+        "resultMessage": "Aadhaar XML file downloaded successfully",
+        "imgDmsId": 3745,
+        "docDmsId": 3746,
+        "createdBy": "",
+        "createdDate": "2023-11-24T13:23:57.963951047",
+        "spouseName": null,
+        "relativeName": null,
+        "houseNumber": "NO 204",
+        "street": "PUDUKOTTAI",
+        "landmark": null,
+        "subDistrict": "Tirupathur",
+        "district": "Vellore",
+        "vtcName": "Madapalli",
+        "location": "TIRUPATTUR",
+        "postOffice": "Pudukottai",
+        "state": "Tamil Nadu",
+        "country": "India",
+        "pinCode": "635602"
+    }
+}]
+
 const AadharOTPVerification = (props, { navigation }) => {
     const [mobileOTP, setMobileOTP] = useState('');
     const [aadharNumber, setaadharNumber] = useState(props.route.params.aadharNumber);
@@ -76,7 +112,7 @@ const AadharOTPVerification = (props, { navigation }) => {
     const [Visible, setVisible] = useState(false);
     const [errMsg, setErrMsg] = useState('');
     const [value, setValue] = useState('');
-    const [timeLeft, setTimeLeft] = useState(60);
+    const [timeLeft, setTimeLeft] = useState(10);
     const ref = useBlurOnFulfill({ value, cellCount: CELL_COUNT });
     const [, getCellOnLayoutHandler] = useClearByFocusCell({
         value,
@@ -90,6 +126,7 @@ const AadharOTPVerification = (props, { navigation }) => {
 
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const [apiError, setApiError] = useState('');
+    const [navAlertVisible, setNavAlertVisible] = useState(false);
 
 
     const [menuvisible, setMenuVisible] = React.useState(false);
@@ -226,21 +263,23 @@ const AadharOTPVerification = (props, { navigation }) => {
             .post('/api/v2/aadharOtp/verify/otp', appDetails)
             .then(async response => {
                 // Handle the response data
-                if (global.DEBUG_MODE) console.log('AadharOTPVerifyApiResponse::' + JSON.stringify(response.data),);
-
-                global.isAadharVerified = "1";
-                if (checkPermissions) {
-                    props.navigation.navigate('ProfileShortKYCVerificationStatus', { 'isAadharVerified': '1' });
-                }
-
+                if (global.DEBUG_MODE) console.log('AadharOTPVerifyApiResponseVerify::' + JSON.stringify(response.data));
+                if (global.DEBUG_MODE) console.log('AadharOTPVerifyApiResponseStatus::' + JSON.stringify(response.data.statusCode));
                 setLoading(false);
+                if (response.data.statusCode === 101) {
+                    //alert(JSON.stringify(response.data.aadharResultDetails))
+                    //setAadhaarResponse(response.data.aadharResultDetails)
+                    global.isAadharVerified = "1";
+                    insertData(response.data.aadharResultDetails)
 
-
+                } else {
+                    alert(response.data.statusCode)
+                }
 
             })
             .catch(error => {
                 // Handle the error
-                if (global.DEBUG_MODE) console.log('AadharOTPVerifyApiResponse::::' + JSON.stringify(error.response));
+                if (global.DEBUG_MODE) console.log('AadharOTPVerifyApiResponseError::::' + JSON.stringify(error.response));
                 setLoading(false);
                 if (error.response.data != null) {
                     setApiError(error.response.data.message);
@@ -249,6 +288,78 @@ const AadharOTPVerification = (props, { navigation }) => {
             });
 
     };
+
+    const insertData = async (aadhaarResponse) => {
+        let landmark = ""
+        if (aadhaarResponse.landmark === null) {
+            landmark = ""
+        } else {
+            landmark = aadhaarResponse.landmark
+        }
+        const data = aadhaarResponse;
+
+        var name = data.name;
+        var dob = Common.convertDateFormat(data.dob);
+        var gender = data.gender;
+        var fatherName = '';
+        var spouseName = '';
+        var image = data.imgDmsId;
+        var dmsId = data.docDmsId;
+        var age = Common.calculateAge(dob);
+
+        await tbl_client.updateAadharData(name, dob, age, gender, fatherName, spouseName, image, dmsId, global.TEMPAPPID);
+
+
+        await tbl_clientaddressinfo.insertClientAddress(
+            global.LOANAPPLICATIONID,
+            global.CLIENTID,
+            "APPL",
+            "P",
+            aadhaarResponse.houseNumber + " " + aadhaarResponse.street,
+            aadhaarResponse.vtcName + " " + aadhaarResponse.location,
+            landmark,
+            aadhaarResponse.pinCode,
+            "",
+            aadhaarResponse.district,
+            aadhaarResponse.state,
+            aadhaarResponse.country,
+            "",
+            "",
+            "",
+            "",
+            aadhaarResponse.name,
+            "",
+            "",
+            "",
+            "true",
+            global.USERID,
+            new Date(),
+            global.USERID,
+            new Date(),
+            global.USERID,
+            new Date(),
+            "1"
+        )
+            .then(result => {
+                if (global.DEBUG_MODE) console.log('Inserted Address detail:', result);
+            })
+            .catch(error => {
+                if (global.DEBUG_MODE) console.error('Error Inserting Address detail:', error);
+            });
+        global.isAadharVerified = "1";
+        setNavAlertVisible(true)
+
+    }
+    const proceedClick = (value) => {
+        if (value === 'proceed') {
+            setNavAlertVisible(false)
+            props.navigation.navigate('ProfileShortKYCVerificationStatus', { 'isAadharVerified': '1' });
+        }
+    }
+
+    const handleClick = () => {
+        
+    }
 
     const manualKYC = () => {
         if (isManualKYC) {
@@ -337,25 +448,6 @@ const AadharOTPVerification = (props, { navigation }) => {
         }
     };
 
-    const parseAadharData = async () => {
-
-        const data = aadharJSON[0].aadharResultDetails;
-
-        var name = data.name;
-        var dob = Common.convertDateFormat(data.dob);
-        var gender = data.gender;
-        var fatherName = '';
-        var spouseName = '';
-        var image = data.imgDmsId;
-        var dmsId = data.docDmsId;
-        var age = Common.calculateAge(dob);
-
-        await tbl_client.updateAadharData(name, dob, age, gender, fatherName, spouseName, image, dmsId, global.TEMPAPPID);
-
-        global.isAadharVerified = "1";
-        props.navigation.navigate('ProfileShortKYCVerificationStatus', { 'isAadharVerified': '1' });
-
-    };
 
     const getCheckbox = (componentName, value) => {
         setIsManualKYC(value)
@@ -369,6 +461,10 @@ const AadharOTPVerification = (props, { navigation }) => {
 
         <View style={{ flex: 1, backgroundColor: Colors.lightwhite }}>
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
+
+            <AadharSuccessModal isVisible={navAlertVisible} onClose={handleClick} textContent={language[0][props.language].str_aadharsuccess} textClose={language[0][props.language].str_proceed} textMainContent={language[0][props.language].str_aadhaarpdfopen} textViewContent={language[0][props.language].str_view} proceedClick={proceedClick} />
+
+
             <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
             <View style={{ width: '100%', height: 56, alignItems: 'center', justifyContent: 'center', }}>
 
