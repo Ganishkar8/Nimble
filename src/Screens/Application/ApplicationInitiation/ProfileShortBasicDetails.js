@@ -958,12 +958,6 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
 
   const updateBasicDetails = () => {
 
-
-    if (global.isDedupeDone == '1') {
-      generateLoanAppNum();
-      return;
-    }
-
     if (validate()) {
       showBottomSheet();
     } else {
@@ -990,16 +984,16 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
             "maritalStatus": MaritalStatusLabel,
             "kycTypeId1": KycType1Label,
             "kycIdValue1": kycID1,
-            "kycType1ExpiryDate": expiryDate1,
+            "kycType1ExpiryDate": expiryDate1.length > 0 ? Common.convertYearDateFormat(expiryDate1) : '',
             "kycTypeId2": KycType2Label,
             "kycIdValue2": kycID2,
-            "kycType2ExpiryDate": expiryDate2,
+            "kycType2ExpiryDate": expiryDate2.length > 0 ? Common.convertYearDateFormat(expiryDate2) : '',
             "kycTypeId3": KycType3Label,
             "kycIdValue3": kycID3,
-            "kycType3ExpiryDate": expiryDate3,
+            "kycType3ExpiryDate": expiryDate3.length > 0 ? Common.convertYearDateFormat(expiryDate3) : '',
             "kycTypeId4": KycType4Label,
             "kycIdValue4": kycID4,
-            "kycType4ExpiryDate": expiryDate4,
+            "kycType4ExpiryDate": expiryDate1.length > 0 ? Common.convertYearDateFormat(expiryDate4) : '',
             "udyamRegistrationNumber": URNumber,
             "mobileNumber": mobileNumber,
             "email": Email,
@@ -1030,9 +1024,15 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           global.CLIENTID = response.data.clientDetail[0].id;
           setLoading(false);
           await insertData();
+
+          if (global.isDedupeDone == '1') {
+            generateLoanAppNum();
+          } else {
+            internalDedupeCheck();
+          }
           // props.navigation.navigate('AadharOTPVerification', { aadharNumber: aadhar });
           // generateAadharOTP();
-          internalDedupeCheck();
+
         })
         .catch(error => {
           // Handle the error
@@ -1066,9 +1066,9 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           if (global.DEBUG_MODE) console.log('GenerateLoanAppNumBasicApiResponse::' + JSON.stringify(response.data),);
           global.TEMPAPPID = response.data.loanApplicationNumber;
           setLoading(false);
-          // generateAadharOTP();
-          global.isAadharVerified = "1";
-          props.navigation.navigate('ProfileShortKYCVerificationStatus', { 'isAadharVerified': '1' });
+          generateAadharOTP();
+          // global.isAadharVerified = "1";
+          // props.navigation.navigate('ProfileShortKYCVerificationStatus', { 'isAadharVerified': '1' });
         })
         .catch(error => {
           // Handle the error
@@ -1509,18 +1509,19 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           '\n';
         i++;
         flag = true;
-      } //else if (global.isMobileVerified.length <= 0 || global.isMobileVerified == '0') {
-      //     errorMessage =
-      //       errorMessage +
-      //       i +
-      //       ')' +
-      //       ' ' +
-      //       language[0][props.language].str_plsverify +
-      //       mobileNumberCaption +
-      //       '\n';
-      //     i++;
-      //     flag = true;
-      //   }
+      }
+      else if (global.isMobileVerified.length <= 0 || global.isMobileVerified == '0') {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          language[0][props.language].str_plsverify +
+          mobileNumberCaption +
+          '\n';
+        i++;
+        flag = true;
+      }
     }
 
     //alert(global.isMobileVerified)
@@ -1672,7 +1673,10 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     } else if (componentName === 'mobileNumber') {
       EmailRef.current.focus();
     } else if (componentName === 'Email') {
-      URNumberRef.current.focus();
+      if (URNumberVisible) {
+        URNumberRef.current.focus();
+      }
+
     }
   };
 

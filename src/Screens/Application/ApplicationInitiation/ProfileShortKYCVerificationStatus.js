@@ -45,6 +45,7 @@ import ImagePicker, { ImageOrVideo } from 'react-native-image-crop-picker';
 import ImageBottomPreview from '../../../Components/ImageBottomPreview';
 import ImageDetailComp from '../../../Components/ImageDetailComp';
 import Geolocation from 'react-native-geolocation-service';
+import { useIsFocused } from '@react-navigation/native';
 
 const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const [errorModalVisible, setErrorModalVisible] = useState(false);
@@ -182,6 +183,8 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
   const [locationSheetVisible, setLocationSheetVisible] = useState(false);
 
+  const isScreenVisible = useIsFocused();
+
   useEffect(() => {
     props.navigation
       .getParent()
@@ -197,7 +200,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       props.navigation
         .getParent()
         ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
-  }, [navigation]);
+  }, [navigation, isScreenVisible]);
 
 
   const checkPermissions = async () => {

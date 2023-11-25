@@ -209,7 +209,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       props.navigation
         .getParent()
         ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
-  }, [navigation]);
+  }, [navigation, isScreenVisible, gpslatlon]);
 
   const getSystemCodeDetail = async () => {
 
@@ -500,24 +500,29 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
         setEADLabel(value[0].educationQualificationId);
         //getImage(value[0].image)
         //getImage('3728')
+        disableAadharFields(value[0].fatherName, value[0].spouseName);
       }
     })
+
+
+  }
+
+  const disableAadharFields = (fatherName, spouseName) => {
 
     if (global.isAadharVerified == '1') {
       setFirstNameDisable(true);
       setMiddleNameDisable(false);
       setLastNameDisable(false);
       setGenderDisable(true);
-      setDOBDisable(false);
-      setAgeDisable(false);
-      if (FatherName.length > 0) {
+      setDOBDisable(true);
+      setAgeDisable(true);
+      if (fatherName.length > 0) {
         setFatherNameDisable(false)
       }
-      if (SpouseName.length > 0) {
+      if (spouseName.length > 0) {
         setSpouseNameDisable(false)
       }
     }
-
   }
 
   const getImage = (dmsID) => {
@@ -1307,6 +1312,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
                   type="numeric"
                   handleClick={handleClick}
                   Disable={DOBDisable}
+                  reference={DOBRef}
                   handleReference={handleReference} />
               </View>
               {/* <TextInputComp

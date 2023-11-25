@@ -127,7 +127,7 @@ const LoanApplicationMain = (props, { navigation }) => {
     const [bottomLeadSheetVisible, setBottomLeadSheetVisible] = useState(false);
     const showLeadBottomSheet = () => {
         setBottomLeadSheetVisible(true);
-        setTimeout(() => { setBottomLeadSheetVisible(false) }, 2000);
+        setTimeout(() => { hideLeadBottomSheet() }, 2000);
     };
     const hideLeadBottomSheet = () => setBottomLeadSheetVisible(false);
 
@@ -142,6 +142,7 @@ const LoanApplicationMain = (props, { navigation }) => {
 
 
     useEffect(() => {
+
         showLeadBottomSheet();
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         getProcessSubStage();
@@ -198,8 +199,9 @@ const LoanApplicationMain = (props, { navigation }) => {
 
     const nestedDataClick = (item) => {
         //alert("Ganishkar "+JSON.stringify(item))
-        if (item.id == 5) {
-            props.navigation.navigate('AddressMainList')
+        if (item.pageCode == 'PRF_SHRT_APLCT_ADDRS_DTLS') {
+            props.navigation.navigate('AddressMainList');
+            //props.navigation.navigate('AadharOTPVerification', { aadharNumber: "989484039303" });
         }
     }
 

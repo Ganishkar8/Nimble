@@ -27,6 +27,7 @@ import { useIsFocused } from '@react-navigation/native';
 import ErrorModal from '../../Components/ErrorModal';
 import Common from '../../Utils/Common';
 import { language } from '../../Utils/LanguageString';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const HomeScreen = (props, { navigation }) => {
 

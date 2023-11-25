@@ -9,7 +9,7 @@ import {
   SafeAreaView,
   FlatList, TouchableOpacity
 } from 'react-native';
-import { React, useState, useEffect, useFocusEffect } from 'react';
+import { React, useState, useEffect } from 'react';
 import MyStatusBar from '../../../Components/MyStatusBar';
 import HeadComp from '../../../Components/HeadComp';
 import { connect } from 'react-redux';
@@ -23,6 +23,7 @@ import Commonstyles from '../../../Utils/Commonstyles';
 import IconButtonViewComp from '../../../Components/IconButtonViewComp';
 import tbl_clientaddressinfo from '../../../Database/Table/tbl_clientaddressinfo';
 import tbl_UserCodeDetails from '../../../Database/Table/tbl_UserCodeDetails';
+import { useIsFocused } from '@react-navigation/native';
 
 
 
@@ -30,15 +31,18 @@ import tbl_UserCodeDetails from '../../../Database/Table/tbl_UserCodeDetails';
 const AddressMainList = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
   const [addressDetails, setAddressDetails] = useState([]);
+  const isScreenVisible = useIsFocused();
 
   useEffect(() => {
     props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
-    getAddressData()
+    if (isScreenVisible) {
+      getAddressData()
+    }
     return () =>
       props.navigation
         .getParent()
         ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
-  }, [props.navigation]);
+  }, [props.navigation,isScreenVisible]);
 
 
   const getAddressData = () => {
@@ -94,8 +98,8 @@ const AddressMainList = (props, { navigation }) => {
             />
           </View>
         </TouchableOpacity>
-        <TouchableOpacity activeOpacity={8} onPress={() => handleClick('delete', item)}>
-          <View style={{ width: '20%' }}>
+        <TouchableOpacity style={{ width: '20%' }} activeOpacity={8} onPress={() => handleClick('delete', item)}>
+          <View >
             <IconButtonViewComp
               textValue={'Delete'.toUpperCase()}
               textStyle={{

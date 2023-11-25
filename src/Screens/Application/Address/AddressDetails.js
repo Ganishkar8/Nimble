@@ -16,6 +16,7 @@ import PickerComp from '../../../Components/PickerComp';
 import TextInputComp from '../../../Components/TextInputComp';
 import Common from '../../../Utils/Common';
 import tbl_clientaddressinfo from '../../../Database/Table/tbl_clientaddressinfo';
+import apiInstancelocal from '../../../Utils/apiInstancelocal';
 
 const AddressDetails = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -143,6 +144,8 @@ const AddressDetails = (props, { navigation }) => {
   const [systemCodeDetail, setSystemCodeDetail] = useState(props.mobilecodedetail.leadSystemCodeDto);
   const [userCodeDetail, setUserCodeDetail] = useState(props.mobilecodedetail.leadUserCodeDto);
   const [systemMandatoryField, setSystemMandatoryField] = useState(props.mobilecodedetail.leadSystemMandatoryFieldDto);
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [apiError, setApiError] = useState('');
 
 
   useEffect(() => {
@@ -160,15 +163,14 @@ const AddressDetails = (props, { navigation }) => {
 
   const getExistingData = () => {
     if (isNew != 'new') {
-      //getExistingAddressData(isNew)
+      setLoading(true)
       //alert(JSON.stringify(isNew))
-      getExistingAddressData(isNew.loanApplicationId,isNew.address_type)
-      //setAddressLine1(isNew)
+      getExistingAddressData(isNew.loanApplicationId, isNew.address_type)
     }
   }
 
-  const getExistingAddressData = (loanAppId,addressType) => {
-    tbl_clientaddressinfo.getAllAddressDetailsForLoanIDAndAddressType(loanAppId,addressType.toString())
+  const getExistingAddressData = (loanAppId, addressType) => {
+    tbl_clientaddressinfo.getAllAddressDetailsForLoanIDAndAddressType(loanAppId, addressType.toString())
       .then(data => {
         if (global.DEBUG_MODE) console.log('Address Detail:', data);
         setAddressLine1(data[0].address_line_1)
@@ -187,14 +189,33 @@ const AddressDetails = (props, { navigation }) => {
         setGeoClassificationLabel(data[0].geo_classification)
         setAddressOwnerTypeLabel(data[0].address_ownership)
         setOwnerDetailsLabel(data[0].owner_details)
+        if (data[0].isKyc === "1") {
+          disableAadharFields(data)
+        }
+        setLoading(false)
       })
       .catch(error => {
         if (global.DEBUG_MODE) console.error('Error fetching bank details:', error);
+        setLoading(false)
       });
   }
 
-  const getSystemCodeDetail = () => {
+  const disableAadharFields = (data) => {
+    setAddressTypeDisable(true)
+    setAddressLine1Disable(true)
+    setAddressLine2Disable(true)
+    if (data[0].landmark != null && data[0].landmark != "") {
+      setLandmarkDisable(true)
+    }
+    setPincodeDisable(true)
+    setDistrictDisable(true)
+    setStateDisable(true)
+    setCountryDisable(true)
+    setOwnerNameDisable(true)
+  }
 
+  const getSystemCodeDetail = () => {
+    setLoading(true)
     const filterAddressTypeData = userCodeDetail.filter((data) => data.masterId === 'ADDRESS_TYPE');
     setaddressTypeData(filterAddressTypeData)
 
@@ -206,7 +227,7 @@ const AddressDetails = (props, { navigation }) => {
 
     const filterGeoClassificationData = userCodeDetail.filter((data) => data.masterId === 'GEO_CLASSIFICATION');
     setGeoClassificationData(filterGeoClassificationData)
-
+    setLoading(false)
   }
 
   const makeSystemMandatoryFields = () => {
@@ -359,51 +380,6 @@ const AddressDetails = (props, { navigation }) => {
 
   }
 
-  const updateDatainParent = (
-    fieldName,
-    newValue,
-    isMandatory,
-    IsHide,
-    IsDisable,
-    isPicker,
-  ) => {
-    // Find the index of the object in DataArray with the matching fieldName
-    const dataIndex = DataArray.findIndex(item => item.fieldName === fieldName);
-
-    if (dataIndex !== -1) {
-      // If the object with the same fieldName exists, get the existing object
-      const existingData = DataArray[dataIndex];
-
-      // Create a new object by merging the existingData with the new data
-      const newDataObject = {
-        fieldName: fieldName,
-        fieldValue: newValue,
-        isMandatory:
-          isMandatory !== undefined ? isMandatory : existingData.isMandatory,
-        isDisable: IsDisable !== undefined ? IsDisable : existingData.isDisable,
-        IsHide: IsHide !== undefined ? IsHide : existingData.IsHide,
-        isPicker: existingData.isPicker || false,
-      };
-
-      // Update the object in DataArray with the merged data
-      DataArray[dataIndex] = newDataObject;
-    } else {
-      // If not, add the new object to the array with the provided data
-      const newDataObject = {
-        fieldName: fieldName,
-        fieldValue: newValue,
-        isMandatory: isMandatory,
-        isDisable: IsDisable,
-        IsHide: IsHide,
-        isPicker: isPicker || false,
-      };
-
-      setNewDataArray(prevDataArray => [...prevDataArray, newDataObject]);
-    }
-
-    console.log('DataArray:', DataArray);
-  };
-
   const validateData = () => {
     var flag = false;
     var i = 1;
@@ -542,7 +518,53 @@ const AddressDetails = (props, { navigation }) => {
       // alert(addressTypeLabel+" "+addressLine1+" "+addressLine2+" "+landmark+" "+pincode+" "+city+" "+
       // district+" "+state+" "+country+" "+geoClassificationLabel+" "+yearsAtResidence+" "+yearsAtCity+" "+
       // addressOwnerTypeLabel+" "+ownerDetailsLabel+" "+ownerName)
-      insertData()
+      const appDetails = [{
+        "isActive": true,
+        "createdBy": global.USERID,
+        "createdDate": new Date(),
+        "modifiedBy": global.USERID,
+        "modifiedDate": new Date(),
+        "supervisedBy": global.USERID,
+        "id": 0,
+        "addressType": addressTypeLabel,
+        "addressLine1": addressLine1,
+        "addressLine2": addressLine2,
+        "landmark": landmark,
+        "pincode": pincode,
+        "city": city,
+        "district": district,
+        "state": state,
+        "country": country,
+        "mobileOrLandLineNumber": "",
+        "emailId": "",
+        "addressOwnership": addressOwnerTypeLabel,
+        "ownerDetails": ownerDetailsLabel,
+        "ownerName": ownerName,
+        "geoClassification": geoClassificationLabel,
+        "yearsAtResidence": parseInt(yearsAtResidence),
+        "yearsInCurrentCityOrTown": parseInt(yearsAtCity),
+        "supervisedDate": new Date()
+      }]
+      const baseURL = '8901';
+      setLoading(true);
+      apiInstancelocal(baseURL)
+        .put(`api/v2/profile-short/address-details/${global.CLIENTID}`, appDetails)
+        .then(async response => {
+          // Handle the response data
+          if (global.DEBUG_MODE) console.log('PostAddressResponse::' + JSON.stringify(response.data),);
+          
+          setLoading(false);
+        })
+        .catch(error => {
+          // Handle the error
+          if (global.DEBUG_MODE) console.log('PostAddressError' + JSON.stringify(error.response));
+          setLoading(false);
+          if (error.response.data != null) {
+            setApiError(error.response.data.message);
+            setErrorModalVisible(true)
+          }
+        });
+      //insertData()
     }
   };
 
@@ -574,18 +596,19 @@ const AddressDetails = (props, { navigation }) => {
       "Ganishkar",
       new Date(),
       "Ganishkar",
-      new Date()
+      new Date(),
+      "0"
     )
       .then(result => {
         if (global.DEBUG_MODE) console.log('Inserted Address detail:', result);
-
-        tbl_clientaddressinfo.getAllAddressDetailsForLoanID('12345')
-          .then(data => {
-            if (global.DEBUG_MODE) console.log('Address Detail:', data);
-          })
-          .catch(error => {
-            if (global.DEBUG_MODE) console.error('Error fetching bank details:', error);
-          });
+        props.navigation.navigate('AddressMainList')
+        // tbl_clientaddressinfo.getAllAddressDetailsForLoanID('12345')
+        //   .then(data => {
+        //     if (global.DEBUG_MODE) console.log('Address Detail:', data);
+        //   })
+        //   .catch(error => {
+        //     if (global.DEBUG_MODE) console.error('Error fetching bank details:', error);
+        //   });
       })
       .catch(error => {
         if (global.DEBUG_MODE) console.error('Error Inserting Address detail:', error);
@@ -711,7 +734,7 @@ const AddressDetails = (props, { navigation }) => {
         textClose={language[0][props.language].str_ok}
       />
       <View style={{ width: '100%', height: 56, alignItems: 'center', justifyContent: 'center', }}>
-        <HeadComp textval={language[0][props.language].str_addaddressbutton} props={props}/>
+        <HeadComp textval={language[0][props.language].str_addaddressbutton} props={props} />
       </View>
 
       <ScrollView style={styles.scrollView}
