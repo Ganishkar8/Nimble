@@ -82,6 +82,7 @@ export const language = [
       str_mulfive: 'in Multiple of 5000 ',
       str_leadmanagement: 'Lead Management',
       str_laonapptracker: 'Loan Application Tracker',
+      str_loanappdetails: 'Loan Application Details',
       str_laonappid: 'Loan Application ID',
       str_workflowstage: 'Workflow Stage',
       str_leadapprovalstatus: 'Lead Status',
@@ -215,6 +216,7 @@ export const language = [
       str_aadharsuccess: 'Aadhar Authentication Successful',
       str_proceed: 'Proceed',
       str_view: 'View',
+      str_reviewLoanAppForm: 'Review Loan Application',
       str_aadhaarpdfopen: 'Password of E-Aadhaar is the combination of the \nfirst 4 letters of name in CAPITAL and the year of \nbirth (YYYY). \nEg: If customer name is Sobha and year of birth is \n2000 then password of E -Aadhar will be \nSOBH2000.',
     },
 
