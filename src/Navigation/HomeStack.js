@@ -23,7 +23,7 @@ import AadharOTPVerification from '../Screens/Application/ApplicationInitiation/
 import ProfileShortKYCVerificationStatus from '../Screens/Application/ApplicationInitiation/ProfileShortKYCVerificationStatus';
 import ProfileShortApplicantDetails from '../Screens/Application/ApplicationInitiation/ProfileShortApplicantDetails';
 import ProfileShortExistingClientDetails from '../Screens/Application/ApplicationInitiation/ProfileShortExistingClientDetails';
-
+import LoanApplicationTrackerDetails from '../Screens/Application/ApplicationTracker/LoanApplicationTrackerDetails';
 const Stack = createNativeStackNavigator();
 
 export default HomeStack = () => {
@@ -73,6 +73,12 @@ export default HomeStack = () => {
       <Stack.Screen
         name="LoanApplicationTracker"
         component={LoanApplicationTracker}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="LoanApplicationTrackerDetails"
+        component={LoanApplicationTrackerDetails}
         options={{ headerShown: false }}
       />
 
