@@ -45,6 +45,7 @@ import ImagePicker, { ImageOrVideo } from 'react-native-image-crop-picker';
 import ImageBottomPreview from '../../../Components/ImageBottomPreview';
 import ImageDetailComp from '../../../Components/ImageDetailComp';
 import Geolocation from 'react-native-geolocation-service';
+import { useIsFocused } from '@react-navigation/native';
 
 const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const [errorModalVisible, setErrorModalVisible] = useState(false);
@@ -182,6 +183,8 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
   const [locationSheetVisible, setLocationSheetVisible] = useState(false);
 
+  const isScreenVisible = useIsFocused();
+
   useEffect(() => {
     props.navigation
       .getParent()
@@ -197,7 +200,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       props.navigation
         .getParent()
         ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
-  }, [navigation]);
+  }, [navigation, isScreenVisible]);
 
 
   const checkPermissions = async () => {
@@ -400,7 +403,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
   const getClientData = () => {
 
-    tbl_client.getClientBasedOnID(global.TEMPAPPID).then(value => {
+    tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID).then(value => {
       if (value !== undefined && value.length > 0) {
         setKycType1Label(value[0].kycTypeId1);
         setkycID1(value[0].kycIdValue1);
@@ -431,18 +434,59 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
 
   const buttonNext = () => {
-
-    checkPermissions().then(res => {
-      if (res == true) {
-        getOneTimeLocation();
-        setLoading(false)
-      } else {
-        setLoading(false)
-        setApiError('Permission Not Granted');
-        setErrorModalVisible(true)
-      }
-    });
+    if (global.CLIENTTYPE == 'APPL') {
+      global.COMPLETEDMODULE = 'PRF_SHRT_APLCT';
+      global.COMPLETEDPAGE = 'PRF_SHRT_APLCT_VRF_STATUS';
+    } else if (global.CLIENTTYPE == 'CO-APPL') {
+      global.COMPLETEDMODULE = 'PRF_SHRT_COAPLCT';
+      global.COMPLETEDPAGE = 'PRF_SHRT_COAPLCT_VRF_STATUS';
+    } else if (global.CLIENTTYPE == 'GRNTR') {
+      global.COMPLETEDMODULE = 'PRF_SHRT_GRNTR';
+      global.COMPLETEDPAGE = 'PRF_SHRT_GRNTR_VRF_STATUS';
+    }
+    updateLoanStatus();
   }
+
+  const updateLoanStatus = () => {
+
+    const appDetails = {
+      "loanApplicationId": global.LOANAPPLICATIONID,
+      "loanWorkflowStage": "LN_APP_INITIATION",
+      "subStageCode": "PRF_SHRT",
+      "moduleCode": global.COMPLETEDMODULE,
+      "pageCode": global.COMPLETEDPAGE,
+      "status": "Completed"
+    }
+    const baseURL = '8901';
+    setLoading(true);
+    apiInstancelocal(baseURL)
+      .post(`/api/v2/loan-application-status/updateStatus`, appDetails)
+      .then(async response => {
+        // Handle the response data
+        if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
+        setLoading(false);
+        checkPermissions().then(res => {
+          if (res == true) {
+            getOneTimeLocation();
+            setLoading(false)
+          } else {
+            setLoading(false)
+            setApiError('Permission Not Granted');
+            setErrorModalVisible(true)
+          }
+        });
+      })
+      .catch(error => {
+        // Handle the error
+        if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
+        setLoading(false);
+        if (error.response.data != null) {
+          setApiError(error.response.data.message);
+          setErrorModalVisible(true)
+        }
+      });
+
+  };
 
 
   const handleClick = (componentName, textValue) => {
@@ -760,6 +804,9 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
   }
 
+  const onGoBack = () => {
+    props.navigation.navigate('LoanApplicationMain')
+  }
 
   return (
     // enclose all components in this View tag
@@ -869,6 +916,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
             <HeadComp
               textval={language[0][props.language].str_profileshort}
               props={props}
+              onGoBack={onGoBack}
             />
           </View>
           <ChildHeadComp

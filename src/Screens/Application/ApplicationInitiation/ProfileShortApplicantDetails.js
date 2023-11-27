@@ -65,12 +65,12 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
   const [firstNameMan, setFirstNameMan] = useState(false);
   const [firstNameVisible, setFirstNameVisible] = useState(true);
   const [firstNameDisable, setFirstNameDisable] = useState(false);
-  const [middleName, setMiddleName] = useState('dv');
+  const [middleName, setMiddleName] = useState('');
   const [middleNameMan, setMiddleNameMan] = useState(false);
   const [middleNameCaption, setMiddleNameCaption] = useState('MIDDLE NAME');
   const [middleNameVisible, setMiddleNameVisible] = useState(true);
   const [middleNameDisable, setMiddleNameDisable] = useState(false);
-  const [lastName, setLastName] = useState('dfd');
+  const [lastName, setLastName] = useState('');
   const [lastNameCaption, setLastNameCaption] = useState('LAST NAME');
   const [lastNameMan, setLastNameMan] = useState(false);
   const [lastNameVisible, setLastNameVisible] = useState(true);
@@ -200,20 +200,16 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       .getParent()
       ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
 
-    if (isScreenVisible) {
-      makeSystemMandatoryFields();
-      getSystemCodeDetail();
-      getClientData();
-      getOneTimeLocation();
-    }
-
-
+    makeSystemMandatoryFields();
+    getSystemCodeDetail();
+    getClientData();
+    getOneTimeLocation();
 
     return () =>
       props.navigation
         .getParent()
         ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
-  }, [navigation, isScreenVisible]);
+  }, [navigation, isScreenVisible, gpslatlon]);
 
   const getSystemCodeDetail = async () => {
 
@@ -487,7 +483,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
 
   const getClientData = async () => {
 
-    await tbl_client.getClientBasedOnID(global.TEMPAPPID).then(value => {
+    await tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID).then(value => {
       if (value !== undefined && value.length > 0) {
         setTitleLabel(value[0].titleId);
         setFirstName(value[0].firstName);
@@ -504,8 +500,14 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
         setEADLabel(value[0].educationQualificationId);
         //getImage(value[0].image)
         //getImage('3728')
+        disableAadharFields(value[0].fatherName, value[0].spouseName);
       }
     })
+
+
+  }
+
+  const disableAadharFields = (fatherName, spouseName) => {
 
     if (global.isAadharVerified == '1') {
       setFirstNameDisable(true);
@@ -514,14 +516,13 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       setGenderDisable(true);
       setDOBDisable(true);
       setAgeDisable(true);
-      if (FatherName.length > 0) {
+      if (fatherName.length > 0) {
         setFatherNameDisable(false)
       }
-      if (SpouseName.length > 0) {
+      if (spouseName.length > 0) {
         setSpouseNameDisable(false)
       }
     }
-
   }
 
   const getImage = (dmsID) => {
@@ -629,14 +630,14 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       const appDetails = {
         "isActive": true,
         "createdBy": global.USERID,
-        "id": 0,
+        "id": global.CLIENTID,
         "clientType": "APPL",
         "relationType": "",
         "title": TitleLabel,
         "firstName": firstName,
         "middleName": middleName,
         "lastName": lastName,
-        "dateOfBirth": DOB,
+        "dateOfBirth": '1998-04-20',
         "age": parseInt(Age),
         "fatherName": FatherName,
         "spouseName": SpouseName,
@@ -657,6 +658,17 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
         .then(async response => {
           // Handle the response data
           if (global.DEBUG_MODE) console.log('PersonalDetailApiResponse::' + JSON.stringify(response.data));
+          await tbl_client.updatePersonalDetails(TitleLabel, firstName, middleName, lastName, DOB, Age, GenderLabel, FatherName, SpouseName, CasteLabel, ReligionLabel, MotherTongueLabel, EADLabel, gpslatlon, id, global.LOANAPPLICATIONID);
+          if (global.CLIENTTYPE == 'APPL') {
+            global.COMPLETEDMODULE = 'PRF_SHRT_APLCT';
+            global.COMPLETEDPAGE = 'PRF_SHRT_APLCT_PRSNL_DTLS';
+          } else if (global.CLIENTTYPE == 'CO-APPL') {
+            global.COMPLETEDMODULE = 'PRF_SHRT_COAPLCT';
+            global.COMPLETEDPAGE = 'PRF_SHRT_COAPLCT_PRSNL_DTLS';
+          } else if (global.CLIENTTYPE == 'GRNTR') {
+            global.COMPLETEDMODULE = 'PRF_SHRT_GRNTR';
+            global.COMPLETEDPAGE = 'PRF_SHRT_GRNTR_PRSNL_DTLS';
+          }
           setLoading(false);
           props.navigation.navigate('AddressMainList')
         })
@@ -693,7 +705,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       setImageFile(image)
 
       const lastDotIndex = image.path.lastIndexOf('.');
-      var imageName = 'Photo' + '_' + global.leadID;
+      var imageName = 'Photo' + '_' + global.CLIENTID;
       if (lastDotIndex !== -1) {
         // Get the substring from the last dot to the end of the string
         const fileExtension = image.path.substring(lastDotIndex);
@@ -1036,6 +1048,10 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
     }
   };
 
+  const onGoBack = () => {
+    props.navigation.navigate('LoanApplicationMain')
+  }
+
   return (
     // enclose all components in this View tag
     <SafeAreaView
@@ -1091,6 +1107,25 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
         </View>
       </Modal>
 
+      <View
+        style={{
+          width: '100%',
+          height: 56,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+        <HeadComp
+          textval={language[0][props.language].str_profileshort}
+          props={props}
+          onGoBack={onGoBack}
+        />
+      </View>
+
+      <ChildHeadComp
+        textval={language[0][props.language].str_applicantdetails}
+      />
+
+
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.contentContainer}
@@ -1106,22 +1141,6 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
             textClose={language[0][props.language].str_ok}
           />
 
-          <View
-            style={{
-              width: '100%',
-              height: 56,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-            <HeadComp
-              textval={language[0][props.language].str_profileshort}
-              props={props}
-            />
-          </View>
-
-          <ChildHeadComp
-            textval={language[0][props.language].str_applicantdetails}
-          />
 
           <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
             <View style={{ width: '90%', marginTop: 3 }}>
@@ -1308,6 +1327,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
                   type="numeric"
                   handleClick={handleClick}
                   Disable={DOBDisable}
+                  reference={DOBRef}
                   handleReference={handleReference} />
               </View>
               {/* <TextInputComp

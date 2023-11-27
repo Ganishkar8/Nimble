@@ -3,11 +3,11 @@ import { Text, TouchableOpacity, View } from 'react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Colors from '../Utils/Colors';
 
-const HeadComp = ({ textval, props }) => {
+const HeadComp = ({ textval, props, onGoBack }) => {
   return (
     <View style={{ width: '93%', flexDirection: 'row' }}>
       <TouchableOpacity
-        onPress={() => props.navigation.goBack()}
+        onPress={() => onGoBack()}
         style={{ width: '10%', height: 56, justifyContent: 'center' }}>
         <View>
           <Entypo name="chevron-left" size={25} color={Colors.darkblack} />

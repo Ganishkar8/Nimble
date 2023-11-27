@@ -148,6 +148,12 @@ const AddressDetails = (props, { navigation }) => {
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [apiError, setApiError] = useState('');
 
+  const [addressID, setAddressID] = useState('');
+  const [isKYC, setIsKYC] = useState('');
+
+
+  const [postorput, setPostORPut] = useState('post');
+
 
   useEffect(() => {
     props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
@@ -164,16 +170,18 @@ const AddressDetails = (props, { navigation }) => {
 
   const getExistingData = () => {
     if (isNew != 'new') {
-      setLoading(true)
-      //alert(JSON.stringify(isNew))
-      getExistingAddressData(isNew.loanApplicationId, isNew.address_type)
+      setPostORPut('put')
+      getExistingAddressData(isNew.loanApplicationId, isNew.id)
+    } else {
+      setPostORPut('post');
     }
   }
 
-  const getExistingAddressData = (loanAppId, addressType) => {
-    tbl_clientaddressinfo.getAllAddressDetailsForLoanIDAndAddressType(loanAppId, addressType.toString())
+  const getExistingAddressData = (loanAppId, id) => {
+    tbl_clientaddressinfo.getAllAddressDetailsForLoanIDAndID(loanAppId, id.toString())
       .then(data => {
         if (global.DEBUG_MODE) console.log('Address Detail:', data);
+        setAddressID(data[0].id)
         setAddressLine1(data[0].address_line_1)
         setAddressLine2(data[0].address_line_2)
         setLandmark(data[0].landmark)
@@ -193,6 +201,7 @@ const AddressDetails = (props, { navigation }) => {
         if (data[0].isKyc === "1") {
           disableAadharFields(data)
         }
+        setIsKYC(data[0].isKyc);
         setLoading(false)
       })
       .catch(error => {
@@ -216,7 +225,7 @@ const AddressDetails = (props, { navigation }) => {
   }
 
   const getSystemCodeDetail = () => {
-    setLoading(true)
+
     const filterAddressTypeData = userCodeDetail.filter((data) => data.masterId === 'ADDRESS_TYPE');
     setaddressTypeData(filterAddressTypeData)
 
@@ -228,7 +237,7 @@ const AddressDetails = (props, { navigation }) => {
 
     const filterGeoClassificationData = userCodeDetail.filter((data) => data.masterId === 'GEO_CLASSIFICATION');
     setGeoClassificationData(filterGeoClassificationData)
-    setLoading(false)
+
   }
 
   const makeSystemMandatoryFields = () => {
@@ -512,108 +521,174 @@ const AddressDetails = (props, { navigation }) => {
   };
 
   const addressSubmit = () => {
+    if (addressID.length <= 0) {
+      postAddressData();
+    } else {
+      updateAddressData();
+    }
+  }
+
+  const postAddressData = () => {
     if (validateData()) {
       showBottomSheet();
       //alert(errMsg)
     } else {
-    // alert(addressTypeLabel+" "+addressLine1+" "+addressLine2+" "+landmark+" "+pincode+" "+city+" "+
-    // district+" "+state+" "+country+" "+geoClassificationLabel+" "+yearsAtResidence+" "+yearsAtCity+" "+
-    // addressOwnerTypeLabel+" "+ownerDetailsLabel+" "+ownerName)
-        const appDetails = [{
-          "isActive": true,
-          "createdBy": global.USERID,
-          "createdDate": new Date(),
-          "modifiedBy": global.USERID,
-          "modifiedDate": new Date(),
-          "supervisedBy": global.USERID,
-          //"id": 0,
-          "addressType": addressTypeLabel,
-          "addressLine1": addressLine1,
-          "addressLine2": addressLine2,
-          "landmark": landmark,
-          "pincode": pincode,
-          "city": city,
-          "district": district,
-          "state": state,
-          "country": country,
-          "mobileOrLandLineNumber": "",
-          "emailId": "",
-          "addressOwnership": addressOwnerTypeLabel,
-          "ownerDetails": ownerDetailsLabel,
-          "ownerName": ownerName,
-          "geoClassification": geoClassificationLabel,
-          "yearsAtResidence": parseInt(yearsAtResidence),
-          "yearsInCurrentCityOrTown": parseInt(yearsAtCity),
-          "supervisedDate": new Date()
-        }]
-        const baseURL = '8901';
-        setLoading(true);
-        apiInstancelocal(baseURL)
-          .post(`api/v2/profile-short/address-details/12`, appDetails)
-          .then(async response => {
-            // Handle the response data
-            if (global.DEBUG_MODE) console.log('PostAddressResponse::' + JSON.stringify(response.data),);
+      // alert(addressTypeLabel+" "+addressLine1+" "+addressLine2+" "+landmark+" "+pincode+" "+city+" "+
+      // district+" "+state+" "+country+" "+geoClassificationLabel+" "+yearsAtResidence+" "+yearsAtCity+" "+
+      // addressOwnerTypeLabel+" "+ownerDetailsLabel+" "+ownerName)
+      const appDetails = [{
+        "isActive": true,
+        "createdBy": global.USERID,
+        "createdDate": new Date(),
+        "modifiedBy": global.USERID,
+        "modifiedDate": new Date(),
+        "supervisedBy": global.USERID,
+        "addressType": addressTypeLabel,
+        "addressLine1": addressLine1,
+        "addressLine2": addressLine2,
+        "landmark": landmark,
+        "pincode": pincode,
+        "city": city,
+        "district": district,
+        "state": state,
+        "country": country,
+        "mobileOrLandLineNumber": "",
+        "emailId": "",
+        "addressOwnership": addressOwnerTypeLabel,
+        "ownerDetails": ownerDetailsLabel,
+        "ownerName": ownerName,
+        "geoClassification": geoClassificationLabel,
+        "yearsAtResidence": parseInt(yearsAtResidence),
+        "yearsInCurrentCityOrTown": parseInt(yearsAtCity),
+        "supervisedDate": new Date()
+      }]
+      const baseURL = '8901';
+      setLoading(true);
+      apiInstancelocal(baseURL)
+        .post(`api/v2/profile-short/address-details/${global.CLIENTID}`, appDetails)
+        .then(async response => {
+          // Handle the response data
+          if (global.DEBUG_MODE) console.log('PostAddressResponse::' + JSON.stringify(response.data),);
 
-            setLoading(false);
-          })
-          .catch(error => {
-            // Handle the error
-            if (global.DEBUG_MODE) console.log('PostAddressError' + JSON.stringify(error.response));
-            setLoading(false);
-            if (error.response.data != null) {
-              setApiError(error.response.data.message);
-              setErrorModalVisible(true)
-            }
-          });
-        //insertData()
-      }
-    };
-
-    const insertData = () => {
-      tbl_clientaddressinfo.insertClientAddress(
-        "12345",
-        "820",
-        "A",
-        addressTypeLabel.trim(),
-        addressLine1.trim(),
-        addressLine2.trim(),
-        landmark.trim(),
-        pincode.trim(),
-        city.trim(),
-        district.trim(),
-        state.trim(),
-        country.trim(),
-        "",
-        "",
-        addressOwnerTypeLabel.trim(),
-        ownerDetailsLabel.trim(),
-        ownerName.trim(),
-        geoClassificationLabel.trim(),
-        yearsAtResidence.trim(),
-        yearsAtCity.trim(),
-        "A",
-        "Ganishkar",
-        new Date(),
-        "Ganishkar",
-        new Date(),
-        "Ganishkar",
-        new Date(),
-        "0"
-      )
-        .then(result => {
-          if (global.DEBUG_MODE) console.log('Inserted Address detail:', result);
-          props.navigation.navigate('AddressMainList')
-          // tbl_clientaddressinfo.getAllAddressDetailsForLoanID('12345')
-          //   .then(data => {
-          //     if (global.DEBUG_MODE) console.log('Address Detail:', data);
-          //   })
-          //   .catch(error => {
-          //     if (global.DEBUG_MODE) console.error('Error fetching bank details:', error);
-          //   });
+          setLoading(false);
+          insertData(response.data[0].id)
         })
         .catch(error => {
-          if (global.DEBUG_MODE) console.error('Error Inserting Address detail:', error);
+          // Handle the error
+          if (global.DEBUG_MODE) console.log('PostAddressError' + JSON.stringify(error.response));
+          setLoading(false);
+          if (error.response.data != null) {
+            setApiError(error.response.data.message);
+            setErrorModalVisible(true)
+          }
         });
+      //insertData()
+    }
+  };
+
+  const updateAddressData = () => {
+    if (validateData()) {
+      showBottomSheet();
+      //alert(errMsg)
+    } else {
+      // alert(addressTypeLabel+" "+addressLine1+" "+addressLine2+" "+landmark+" "+pincode+" "+city+" "+
+      // district+" "+state+" "+country+" "+geoClassificationLabel+" "+yearsAtResidence+" "+yearsAtCity+" "+
+      // addressOwnerTypeLabel+" "+ownerDetailsLabel+" "+ownerName)
+      const appDetails = {
+        "isActive": true,
+        "createdBy": global.USERID,
+        "createdDate": new Date(),
+        "modifiedBy": global.USERID,
+        "modifiedDate": new Date(),
+        "supervisedBy": global.USERID,
+        "addressType": addressTypeLabel,
+        "addressLine1": addressLine1,
+        "addressLine2": addressLine2,
+        "landmark": landmark,
+        "pincode": pincode,
+        "city": city,
+        "district": district,
+        "state": state,
+        "country": country,
+        "mobileOrLandLineNumber": "",
+        "emailId": "",
+        "addressOwnership": addressOwnerTypeLabel,
+        "ownerDetails": ownerDetailsLabel,
+        "ownerName": ownerName,
+        "geoClassification": geoClassificationLabel,
+        "yearsAtResidence": parseInt(yearsAtResidence),
+        "yearsInCurrentCityOrTown": parseInt(yearsAtCity),
+        "supervisedDate": new Date()
+      }
+      const baseURL = '8901';
+      setLoading(true);
+      apiInstancelocal(baseURL)
+        .put(`api/v2/profile-short/address-details/${addressID}`, appDetails)
+        .then(async response => {
+          // Handle the response data
+          if (global.DEBUG_MODE) console.log('UpdateAddressResponse::' + JSON.stringify(response.data),);
+          insertData(addressID)
+          setLoading(false);
+        })
+        .catch(error => {
+          // Handle the error
+          if (global.DEBUG_MODE) console.log('UpdateAddressError' + JSON.stringify(error.response));
+          setLoading(false);
+          if (error.response.data != null) {
+            setApiError(error.response.data.message);
+            setErrorModalVisible(true)
+          }
+        });
+      //insertData()
+    }
+  };
+
+  const insertData = (id) => {
+    tbl_clientaddressinfo.insertClientAddress(
+      global.LOANAPPLICATIONID,
+      id,
+      global.CLIENTID,
+      "APPL",
+      addressTypeLabel.trim(),
+      addressLine1.trim(),
+      addressLine2.trim(),
+      landmark.trim(),
+      pincode.trim(),
+      city.trim(),
+      district.trim(),
+      state.trim(),
+      country.trim(),
+      "",
+      "",
+      addressOwnerTypeLabel.trim(),
+      ownerDetailsLabel.trim(),
+      ownerName.trim(),
+      geoClassificationLabel.trim(),
+      yearsAtResidence.trim(),
+      yearsAtCity.trim(),
+      "true",
+      global.USERID,
+      new Date(),
+      global.USERID,
+      new Date(),
+      global.USERID,
+      new Date(),
+      isKYC
+    )
+      .then(result => {
+        if (global.DEBUG_MODE) console.log('Inserted Address detail:', result);
+        props.navigation.navigate('AddressMainList')
+        // tbl_clientaddressinfo.getAllAddressDetailsForLoanID('12345')
+        //   .then(data => {
+        //     if (global.DEBUG_MODE) console.log('Address Detail:', data);
+        //   })
+        //   .catch(error => {
+        //     if (global.DEBUG_MODE) console.error('Error fetching bank details:', error);
+        //   });
+      })
+      .catch(error => {
+        if (global.DEBUG_MODE) console.error('Error Inserting Address detail:', error);
+      });
   }
 
   const handlePickerClick = (componentName, label, index) => {
@@ -692,13 +767,13 @@ const AddressDetails = (props, { navigation }) => {
     } else if (componentName === 'YearAtResidence') {
       if (textValue.length > 0) {
         setYearsAtResidence(textValue)
-      }else {
+      } else {
         setYearsAtResidence(textValue)
       }
     } else if (componentName === 'YearAtCity') {
       if (textValue.length > 0) {
         setYearsAtCity(textValue)
-      }else{
+      } else {
         setYearsAtCity(textValue)
       }
     } else if (componentName === 'OwnerName') {
@@ -726,6 +801,10 @@ const AddressDetails = (props, { navigation }) => {
     setErrorModalVisible(false);
   };
 
+  const onGoBack = () => {
+    props.navigation.goBack();
+  }
+
   return (
     <SafeAreaView style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
       <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
@@ -739,7 +818,7 @@ const AddressDetails = (props, { navigation }) => {
         textClose={language[0][props.language].str_ok}
       />
       <View style={{ width: '100%', height: 56, alignItems: 'center', justifyContent: 'center', }}>
-        <HeadComp textval={language[0][props.language].str_addaddressbutton} props={props} />
+        <HeadComp textval={language[0][props.language].str_addaddressbutton} props={props} onGoBack={onGoBack} />
       </View>
 
       <ScrollView style={styles.scrollView}

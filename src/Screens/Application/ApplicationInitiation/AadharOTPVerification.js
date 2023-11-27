@@ -29,6 +29,7 @@ import Common from '../../../Utils/Common';
 import ButtonViewComp from '../../../Components/ButtonViewComp';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import DedupeModal from '../../../Components/DedupeModal';
+
 import {
     CodeField,
     Cursor,
@@ -135,6 +136,9 @@ const AadharOTPVerification = (props, { navigation }) => {
 
     const closeMenu = () => setMenuVisible(false);
 
+    const isScreenVisible = useIsFocused();
+
+
     const renderCell = ({ index, symbol, isFocused }) => {
         const hasValue = Boolean(symbol);
         const animatedCellStyle = {
@@ -209,7 +213,8 @@ const AadharOTPVerification = (props, { navigation }) => {
         return () => {
             clearInterval(timer); // Clean up the timer when the component unmounts
         };
-    }, [timeLeft]);
+    }, [timeLeft, isScreenVisible]);
+
 
 
     const generateAadharOTP = () => {
@@ -254,7 +259,7 @@ const AadharOTPVerification = (props, { navigation }) => {
         const appDetails = {
             "aadharNumber": aadharNumber,
             "otp": mobileOTP,
-            "clientId": 0,
+            "clientId": global.CLIENTID,
             "createdBy": global.USERID
         }
         const baseURL = '8901';
@@ -270,7 +275,17 @@ const AadharOTPVerification = (props, { navigation }) => {
                     //alert(JSON.stringify(response.data.aadharResultDetails))
                     //setAadhaarResponse(response.data.aadharResultDetails)
                     global.isAadharVerified = "1";
-                    insertData(response.data.aadharResultDetails)
+                    insertData(response.data.aadharResultDetails);
+                    if (global.CLIENTTYPE == 'APPL') {
+                        global.COMPLETEDMODULE = 'PRF_SHRT_APLCT';
+                        global.COMPLETEDPAGE = 'PRF_SHRT_APLCT_BSC_DTLS';
+                    } else if (global.CLIENTTYPE == 'CO-APPL') {
+                        global.COMPLETEDMODULE = 'PRF_SHRT_COAPLCT';
+                        global.COMPLETEDPAGE = 'PRF_SHRT_COAPLCT_BSC_DTLS';
+                    } else if (global.CLIENTTYPE == 'GRNTR') {
+                        global.COMPLETEDMODULE = 'PRF_SHRT_GRNTR';
+                        global.COMPLETEDPAGE = 'PRF_SHRT_GRNTR_BSC_DTLS';
+                    }
 
                 } else {
                     alert(response.data.statusCode)
@@ -280,6 +295,38 @@ const AadharOTPVerification = (props, { navigation }) => {
             .catch(error => {
                 // Handle the error
                 if (global.DEBUG_MODE) console.log('AadharOTPVerifyApiResponseError::::' + JSON.stringify(error.response));
+                setLoading(false);
+                if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
+
+    };
+
+    const updateLoanStatus = () => {
+
+        const appDetails = {
+            "loanApplicationId": global.LOANAPPLICATIONID,
+            "loanWorkflowStage": "LN_APP_INITIATION",
+            "subStageCode": "PRF_SHRT",
+            "moduleCode": global.COMPLETEDMODULE,
+            "pageCode": global.COMPLETEDPAGE,
+            "status": "Completed"
+        }
+        const baseURL = '8901';
+        setLoading(true);
+        apiInstancelocal(baseURL)
+            .post(`/api/v2/loan-application-status/updateStatus`, appDetails)
+            .then(async response => {
+                // Handle the response data
+                if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
+                setLoading(false);
+                setNavAlertVisible(true)
+            })
+            .catch(error => {
+                // Handle the error
+                if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
                 setLoading(false);
                 if (error.response.data != null) {
                     setApiError(error.response.data.message);
@@ -307,13 +354,14 @@ const AadharOTPVerification = (props, { navigation }) => {
         var dmsId = data.docDmsId;
         var age = Common.calculateAge(dob);
 
-        await tbl_client.updateAadharData(name, dob, age, gender, fatherName, spouseName, image, dmsId, global.TEMPAPPID);
+        await tbl_client.updateAadharData(name, dob, age, gender, fatherName, spouseName, image, dmsId, global.LOANAPPLICATIONID);
 
 
         await tbl_clientaddressinfo.insertClientAddress(
             global.LOANAPPLICATIONID,
+            "",
             global.CLIENTID,
-            "APPL",
+            global.COMPLETEDMODULE,
             "P",
             aadhaarResponse.houseNumber + " " + aadhaarResponse.street,
             aadhaarResponse.vtcName + " " + aadhaarResponse.location,
@@ -347,18 +395,19 @@ const AadharOTPVerification = (props, { navigation }) => {
                 if (global.DEBUG_MODE) console.error('Error Inserting Address detail:', error);
             });
         global.isAadharVerified = "1";
-        setNavAlertVisible(true)
+        updateLoanStatus();
 
     }
     const proceedClick = (value) => {
         if (value === 'proceed') {
             setNavAlertVisible(false)
-            props.navigation.navigate('ProfileShortKYCVerificationStatus', { 'isAadharVerified': '1' });
+            setMobileOTP('')
+            props.navigation.navigate('ProfileShortKYCVerificationStatus');
         }
     }
 
     const handleClick = () => {
-        
+
     }
 
     const manualKYC = () => {
@@ -457,6 +506,10 @@ const AadharOTPVerification = (props, { navigation }) => {
         setErrorModalVisible(false);
     };
 
+    const onGoBack = () => {
+        props.navigation.goBack();
+    }
+
     return (
 
         <View style={{ flex: 1, backgroundColor: Colors.lightwhite }}>
@@ -468,7 +521,7 @@ const AadharOTPVerification = (props, { navigation }) => {
             <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
             <View style={{ width: '100%', height: 56, alignItems: 'center', justifyContent: 'center', }}>
 
-                <HeadComp textval={language[0][props.language].str_aadharotpverification} props={props} />
+                <HeadComp textval={language[0][props.language].str_aadharotpverification} props={props} onGoBack={onGoBack} />
 
             </View>
 

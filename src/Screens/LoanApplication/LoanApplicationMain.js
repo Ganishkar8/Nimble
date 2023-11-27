@@ -126,8 +126,10 @@ const LoanApplicationMain = (props, { navigation }) => {
     const isScreenVisible = useIsFocused();
     const [bottomLeadSheetVisible, setBottomLeadSheetVisible] = useState(false);
     const showLeadBottomSheet = () => {
-        setBottomLeadSheetVisible(true);
-        setTimeout(() => { setBottomLeadSheetVisible(false) }, 2000);
+        if (isMounted) {
+            setBottomLeadSheetVisible(true);
+            setTimeout(() => { hideLeadBottomSheet() }, 1000);
+        }
     };
     const hideLeadBottomSheet = () => setBottomLeadSheetVisible(false);
 
@@ -140,20 +142,124 @@ const LoanApplicationMain = (props, { navigation }) => {
     const [processPageData, setprocessPageData] = useState();
     const [processPage, setprocessPage] = useState(props.mobilecodedetail.processPage);
 
+    const [completedSubStage, setCompletedSubStage] = useState('PRF_SHRT');
+    const [completedModule, setCompletedModule] = useState(global.COMPLETEDMODULE);
+    const [completedPage, setCompletedPage] = useState(global.COMPLETEDPAGE);
+    const [subStageOrder, setsubStageOrder] = useState();
+    const [moduleOrder, setModuleOrder] = useState();
+    const [pageOrder, setPageOrder] = useState();
+    const [isMounted, setIsMounted] = useState(true);
 
     useEffect(() => {
+
         showLeadBottomSheet();
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
-        getProcessSubStage();
+        getDisplayerOrder();
+        //getProcessSubStage();
 
-        return () =>
+        return () => {
+            setIsMounted(false);
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
+        }
     }, [navigation, isScreenVisible]);
 
 
+    const getDisplayerOrder = () => {
+
+        const filteredProcessSubStage = processSubStage.filter((data) => {
+            return data.wfId === 111 && (data.subStageCode === completedModule);
+        })
+
+        const filteredProcessModule = processModule.filter((data) => {
+            return data.wfId === 111 && (data.moduleCode === global.COMPLETEDMODULE);
+        })
+
+        const filteredProcessPage = processPage.filter((data) => {
+            return data.wfId === 111 && (data.pageCode === global.COMPLETEDPAGE);
+        })
+
+        let moduleOrder = 0;
+        let pageOrder = 0;
+        if (filteredProcessModule) {
+            if (filteredProcessModule.length > 0) {
+                moduleOrder = filteredProcessModule[0].displayOrder;
+            }
+        }
+        if (filteredProcessPage) {
+            if (filteredProcessPage.length > 0) {
+                pageOrder = filteredProcessPage[0].displayOrder;
+            }
+        }
+
+        getProcessSubStage(moduleOrder, pageOrder);
+
+        //alert(JSON.stringify(filteredProcessModule[0].displayOrder))
+
+    }
+
     const nextScreen = () => {
-        // props.navigation.navigate('AddressMainList')
-        props.navigation.navigate('ProfileShortBasicDetails')
+        //props.navigation.navigate('AddressMainList')
+        // props.navigation.navigate('ProfileShortBasicDetails')
+        findNavigation();
+    }
+
+    const findNavigation = () => {
+        let firstIncompleteData = null;
+
+        processModuleData.find((data) => {
+            if (firstIncompleteData) { return true; }
+            const incompleteNestedSubData = data.nestedSubData.filter((nestedData) => nestedData.nestedSubDataIsCompleted === false);
+            if (incompleteNestedSubData.length > 0) {
+                firstIncompleteData = { ...data, nestedSubData: incompleteNestedSubData };
+            }
+            return incompleteNestedSubData.length > 0;
+        });
+        if (firstIncompleteData.nestedSubData) {
+            if (firstIncompleteData.nestedSubData.length > 0) {
+                let currentPage = firstIncompleteData.nestedSubData[0];
+                if (currentPage.pageCode == 'PRF_SHRT_APLCT_BSC_DTLS') {
+                    props.navigation.navigate('ProfileShortBasicDetails');
+                    global.CLIENTTYPE = 'APPL';
+                } else if (currentPage.pageCode == 'PRF_SHRT_APLCT_VRF_STATUS') {
+                    props.navigation.navigate('ProfileShortKYCVerificationStatus');
+                    global.CLIENTTYPE = 'APPL';
+                } else if (currentPage.pageCode == 'PRF_SHRT_APLCT_PRSNL_DTLS') {
+                    props.navigation.navigate('ProfileShortApplicantDetails');
+                    global.CLIENTTYPE = 'APPL';
+                } else if (currentPage.pageCode == 'PRF_SHRT_APLCT_ADDRS_DTLS') {
+                    props.navigation.navigate('AddressMainList');
+                    global.CLIENTTYPE = 'APPL';
+                } else if (currentPage.pageCode == 'PRF_SHRT_COAPLCT_BSC_DTLS') {
+                    props.navigation.navigate('ProfileShortBasicDetails');
+                    global.CLIENTTYPE = 'CO-APPL';
+                } else if (currentPage.pageCode == 'PRF_SHRT_COAPLCT_VRF_STATUS') {
+                    props.navigation.navigate('ProfileShortKYCVerificationStatus');
+                    global.CLIENTTYPE = 'CO-APPL';
+                } else if (currentPage.pageCode == 'PRF_SHRT_COAPLCT_PRSNL_DTLS') {
+                    props.navigation.navigate('ProfileShortApplicantDetails');
+                    global.CLIENTTYPE = 'CO-APPL';
+                } else if (currentPage.pageCode == 'PRF_SHRT_COAPLCT_ADDRS_DTLS') {
+                    props.navigation.navigate('AddressMainList');
+                    global.CLIENTTYPE = 'CO-APPL';
+                } else if (currentPage.pageCode == 'PRF_SHRT_GRNTR_BSC_DTLS') {
+                    props.navigation.navigate('ProfileShortBasicDetails');
+                    global.CLIENTTYPE = 'GRNTR';
+                } else if (currentPage.pageCode == 'PRF_SHRT_GRNTR_VRF_STATUS') {
+                    props.navigation.navigate('ProfileShortKYCVerificationStatus');
+                    global.CLIENTTYPE = 'GRNTR';
+                } else if (currentPage.pageCode == 'PRF_SHRT_GRNTR_PRSNL_DTLS') {
+                    props.navigation.navigate('ProfileShortApplicantDetails');
+                    global.CLIENTTYPE = 'GRNTR';
+                } else if (currentPage.pageCode == 'PRF_SHRT_GRNTR_ADDRS_DTLS') {
+                    props.navigation.navigate('AddressMainList');
+                    global.CLIENTTYPE = 'GRNTR';
+                }
+
+
+            }
+        }
+        console.log(firstIncompleteData.nestedSubData[0]);
+
     }
 
     const onClickMainList = (item, substageId) => {
@@ -174,9 +280,9 @@ const LoanApplicationMain = (props, { navigation }) => {
         const filteredProcessModuleStage = processModule.filter((data) => {
             return data.wfId === 111 && data.process_sub_stage_id === item.id;
         }).map((data) => {
-            const extraJSON = { subDataIsCompleted: false, nestedSubData: [] };
+            const extraJSON = { subDataIsCompleted: true, nestedSubData: [] };
             return { ...data, ...extraJSON };
-        });
+        }).sort((a, b) => a.displayOrder - b.displayOrder);
         //alert(JSON.stringify(filteredProcessSubStage))
         setProcessModuleData(filteredProcessModuleStage);
 
@@ -184,9 +290,11 @@ const LoanApplicationMain = (props, { navigation }) => {
             if (data.wfId === 111) {
                 processPage.forEach((data1) => {
                     if (data1.processModuleId === data.id) {
-                        data.nestedSubData.push(data1);
+                        const extraJSON = { nestedSubDataIsCompleted: true };
+                        data.nestedSubData.push({ ...data1, ...extraJSON });
                     }
                 });
+                data.nestedSubData.sort((a, b) => a.displayOrder - b.displayOrder);
             }
         });
 
@@ -205,12 +313,12 @@ const LoanApplicationMain = (props, { navigation }) => {
     }
 
 
-    const getProcessSubStage = async () => {
+    const getProcessSubStage = async (moduleOrder, pageOrder) => {
 
         const filteredProcessSubStage = processSubStage.filter((data) => {
             return data.wfId === 111 && (data.stageId === 1);
         }).map((data) => {
-            const extraJSON = { isSelected: data.subStageCode === 'PRF_SHRT' };
+            const extraJSON = { isSelected: data.subStageCode === 'PRF_SHRT', subStageIsCompleted: false };
             return { ...data, ...extraJSON };
         }).sort((a, b) => a.displayOrder - b.displayOrder);
 
@@ -219,19 +327,23 @@ const LoanApplicationMain = (props, { navigation }) => {
         const filteredProcessModuleStage = processModule.filter((data) => {
             return data.wfId === 111 && data.process_sub_stage_id === filteredProcessSubStage[0].id;
         }).map((data) => {
-            const extraJSON = { subDataIsCompleted: false, nestedSubData: [] };
+            const subDataIsCompleted = data.displayOrder <= moduleOrder;
+
+            const extraJSON = { subDataIsCompleted, nestedSubData: [] };
             return { ...data, ...extraJSON };
-        });
+        }).sort((a, b) => a.displayOrder - b.displayOrder);
 
         filteredProcessModuleStage.forEach((data) => {
             if (data.wfId === 111) {
                 processPage.forEach((data1) => {
                     if (data1.processModuleId === data.id) {
-                        data.nestedSubData.push(data1);
+                        const nestedSubDataIsCompleted = data1.displayOrder <= pageOrder;
+                        const extraJSON = { nestedSubDataIsCompleted };
+                        data.nestedSubData.push({ ...data1, ...extraJSON });
                     }
                 });
 
-                data.nestedSubData.sort((a, b) => a.id - b.id);
+                data.nestedSubData.sort((a, b) => a.displayOrder - b.displayOrder);
             }
         });
 
@@ -245,12 +357,16 @@ const LoanApplicationMain = (props, { navigation }) => {
     }
 
 
+    const onGoBack = () => {
+        props.navigation.goBack();
+    }
+
     return (
 
         <View style={{ flex: 1, backgroundColor: '#fefefe' }}>
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
             <View style={{ width: '96%', height: 50, alignItems: 'center' }}>
-                <HeadComp textval={language[0][props.language].str_loanapplication} props={props} />
+                <HeadComp textval={language[0][props.language].str_loanapplication} props={props} onGoBack={onGoBack} />
             </View>
 
             <View style={{ width: '100%', height: 80, backgroundColor: Colors.maroon, marginTop: 10, flexDirection: 'row' }}>
@@ -376,7 +492,7 @@ const LoanApplicationMain = (props, { navigation }) => {
 
                                                                 </View>
                                                                 <View style={{ width: '60%', margin: 5, borderRadius: 20, justifyContent: 'center' }}>
-                                                                    <TextComp textVal={item.pageDescription} textStyle={{ color: item.subDataIsCompleted ? Colors.skyBlue : Colors.dimText, fontFamily: 'Poppins-Medium', marginLeft: 2 }} />
+                                                                    <TextComp textVal={item.pageDescription} textStyle={{ color: item.nestedSubDataIsCompleted ? Colors.skyBlue : Colors.dimText, fontFamily: 'Poppins-Medium', marginLeft: 2 }} />
                                                                 </View>
                                                             </View>
                                                             {/* {index != subData.length - 1 ? (

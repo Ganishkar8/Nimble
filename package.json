@@ -30,6 +30,7 @@
     "react-native-document-picker": "^9.0.1",
     "react-native-geolocation-service": "^5.3.1",
     "react-native-gesture-handler": "^2.12.1",
+    "react-native-get-random-values": "^1.10.0",
     "react-native-image-crop-picker": "^0.37.3",
     "react-native-linear-gradient": "^2.8.2",
     "react-native-maps": "^1.7.1",
@@ -50,6 +51,8 @@
     "react-native-xml2js": "^1.0.3",
     "react-redux": "^8.1.2",
     "redux": "^4.2.1",
+    "redux-persist": "^6.0.0",
+    "redux-persist-transform-encrypt": "^4.0.0",
     "redux-thunk": "^2.4.2"
   },
   "devDependencies": {

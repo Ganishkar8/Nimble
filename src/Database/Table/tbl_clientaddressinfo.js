@@ -2,20 +2,20 @@ import databaseInstance from '../DatabaseInstance';
 
 const tableName = 'tbl_clientaddressinfo';
 
-const insertClientAddress = (loanApplicationId, client_id, client_type, address_type, address_line_1, address_line_2,
+const insertClientAddress = (loanApplicationId, id, client_id, client_type, address_type, address_line_1, address_line_2,
     landmark, pincode, city, district, state, country, mobile_or_land_line_number, email_id, address_ownership, owner_details,
     owner_name, geo_classification, years_at_residence, years_in_current_city_or_town, is_active, created_by, created_date,
-    modified_by, modified_date, supervised_by, supervised_date,isKyc) => {
+    modified_by, modified_date, supervised_by, supervised_date, isKyc) => {
     const db = databaseInstance.getInstance();
 
     return new Promise((resolve, reject) => {
         db.transaction(tx => {
             tx.executeSql(
-                `INSERT OR REPLACE INTO ${tableName} ( loanApplicationId, client_id, client_type, address_type,address_line_1, address_line_2,landmark,pincode,city,district,state,country,mobile_or_land_line_number,email_id,address_ownership,owner_details,owner_name,geo_classification,years_at_residence,years_in_current_city_or_town,is_active,created_by,created_date,modified_by,modified_date,supervised_by,supervised_date,isKyc) VALUES (?, ?, ?, ?, ?,?,?,?,?,?,?, ?, ?, ?, ?, ?,?,?,?,?,?,?, ?, ?, ?, ?, ?,?)`,
-                [loanApplicationId, client_id, client_type, address_type, address_line_1, address_line_2,
+                `INSERT OR REPLACE INTO ${tableName} ( loanApplicationId,id, client_id, client_type, address_type,address_line_1, address_line_2,landmark,pincode,city,district,state,country,mobile_or_land_line_number,email_id,address_ownership,owner_details,owner_name,geo_classification,years_at_residence,years_in_current_city_or_town,is_active,created_by,created_date,modified_by,modified_date,supervised_by,supervised_date,isKyc) VALUES (?, ?, ?, ?, ?,?,?,?,?,?,?, ?, ?, ?, ?, ?,?,?,?,?,?,?, ?, ?, ?, ?, ?,?,?)`,
+                [loanApplicationId, id, client_id, client_type, address_type, address_line_1, address_line_2,
                     landmark, pincode, city, district, state, country, mobile_or_land_line_number, email_id, address_ownership, owner_details,
                     owner_name, geo_classification, years_at_residence, years_in_current_city_or_town, is_active, created_by, created_date,
-                    modified_by, modified_date, supervised_by, supervised_date,isKyc],
+                    modified_by, modified_date, supervised_by, supervised_date, isKyc],
                 (_, result) => {
                     resolve(result);
                 },
@@ -53,14 +53,14 @@ const getAllAddressDetailsForLoanID = (loanApplicationId) => {
     });
 };
 
-const getAllAddressDetailsForLoanIDAndAddressType = (loanApplicationId, addressType) => {
+const getAllAddressDetailsForLoanIDAndID = (loanApplicationId, id) => {
     const db = databaseInstance.getInstance();
 
     return new Promise((resolve, reject) => {
         db.transaction(tx => {
             tx.executeSql(
-                `SELECT * FROM ${tableName} WHERE loanApplicationId = ? AND address_type = ?`,
-                [loanApplicationId, addressType],
+                `SELECT * FROM ${tableName} WHERE loanApplicationId = ? AND id = ?`,
+                [loanApplicationId, id],
                 (_, result) => {
                     const rows = result.rows;
                     const addressDetails = [];
@@ -79,11 +79,38 @@ const getAllAddressDetailsForLoanIDAndAddressType = (loanApplicationId, addressT
     });
 };
 
-const deleteDataBasedOnLoanIDAndAddressType = (loanApplicationId, addressType) => {
+
+const getAllAddressDetails = () => {
+    const db = databaseInstance.getInstance();
+
+    return new Promise((resolve, reject) => {
+        db.transaction(tx => {
+            tx.executeSql(
+                `SELECT * FROM ${tableName}`,
+                [],
+                (_, result) => {
+                    const rows = result.rows;
+                    const addressDetails = [];
+
+                    for (let i = 0; i < rows.length; i++) {
+                        addressDetails.push(rows.item(i));
+                    }
+
+                    resolve(addressDetails);
+                },
+                error => {
+                    reject(error);
+                }
+            );
+        });
+    });
+};
+
+const deleteDataBasedOnLoanIDAndID = (loanApplicationId, id) => {
     const db = databaseInstance.getInstance();
     db.transaction((tx) => {
-        tx.executeSql(`DELETE FROM ${tableName} WHERE loanApplicationId = ? AND address_type = ?`,
-            [loanApplicationId, addressType],
+        tx.executeSql(`DELETE FROM ${tableName} WHERE loanApplicationId = ? AND id = ?`,
+            [loanApplicationId, id],
             (tx, results) => {
                 console.log('Rows affected:', results.rowsAffected);
             }, (error) => {
@@ -95,6 +122,7 @@ const deleteDataBasedOnLoanIDAndAddressType = (loanApplicationId, addressType) =
 export default {
     insertClientAddress,
     getAllAddressDetailsForLoanID,
-    getAllAddressDetailsForLoanIDAndAddressType,
-    deleteDataBasedOnLoanIDAndAddressType
+    getAllAddressDetailsForLoanIDAndID,
+    deleteDataBasedOnLoanIDAndID,
+    getAllAddressDetails
 };

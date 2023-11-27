@@ -135,7 +135,20 @@ export function convertDateFormat(inputDate) {
   const date = new Date(parts[0], parts[1] - 1, parts[2]); // Month is zero-based
 
   // Format the date in "dd-mm-yyyy" format
-  const formattedDate = `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+  const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+
+  return formattedDate;
+}
+
+export function convertYearDateFormat(inputDate) {
+  // Split the input date into year, month, and day
+  const parts = inputDate.split('-');
+
+  // Create a new date object using the year, month, and day
+  const date = new Date(parts[2], parts[1] - 1, parts[0]); // Months are 0-based in JavaScript Date objects
+
+  // Format the date in "dd-mm-yyyy" format
+  const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
 
   return formattedDate;
 }
@@ -260,7 +273,7 @@ const reverse = (array) => array.slice().reverse();
 
 export function calculateAge(birthdate) {
   const today = new Date();
-  const parts = birthdate.split('/'); // Assuming the date is in 'DD/MM/YYYY' format
+  const parts = birthdate.split('-'); // Assuming the date is in 'DD/MM/YYYY' format
   const birthDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
 
   let age = today.getFullYear() - birthDate.getFullYear();
@@ -276,5 +289,5 @@ export function calculateAge(birthdate) {
 export default {
   isValidPhoneNumber, isValidText, convertDateFormat, isDateGreaterThan, isValidAlphaText, showErrorAlert, getSystemCodeDescription,
   numberRegex, CS_URL, CS_URL1, integerPattern, formatDate, getCodeDescription, formatTime, hasOnlyOneKey, getCurrentDateTime, getNetworkConnection,
-  isValidPin, isValidPAN, validateVerhoeff, isValidEmail, calculateAge
+  isValidPin, isValidPAN, validateVerhoeff, isValidEmail, calculateAge, convertYearDateFormat
 };

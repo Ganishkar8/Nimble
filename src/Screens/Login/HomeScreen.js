@@ -27,6 +27,7 @@ import { useIsFocused } from '@react-navigation/native';
 import ErrorModal from '../../Components/ErrorModal';
 import Common from '../../Utils/Common';
 import { language } from '../../Utils/LanguageString';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const HomeScreen = (props, { navigation }) => {
 
@@ -201,7 +202,7 @@ const HomeScreen = (props, { navigation }) => {
                                         </View>
                                     </TouchableOpacity>
 
-                                    <TouchableOpacity onPress={() => props.navigation.navigate('LoanApplicationTracker')} activeOpacity={0.5} style={{ width: '48%', height: '100%', backgroundColor: '#ffffff99', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
+                                    <TouchableOpacity onPress={() => props.navigation.navigate('LoanApplicationTracker', { fromScreen: 'HomeScreen' })} activeOpacity={0.5} style={{ width: '48%', height: '100%', backgroundColor: '#ffffff99', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
                                         <View >
                                             <View style={{ flexDirection: 'column' }}>
                                                 <View style={styles.circularView1}>
@@ -267,6 +268,11 @@ const HomeScreen = (props, { navigation }) => {
                                         props.navigation.navigate('ConsentScreen');
                                         global.isDedupeDone = '0';
                                         global.isMobileVerified = '0';
+                                        global.CLIENTID = '';
+                                        global.isAadharVerified = '';
+                                        global.LOANAPPLICATIONID = '';
+                                        global.COMPLETEDMODULE = '';
+                                        global.COMPLETEDPAGE = '';
                                     }} activeOpacity={0.5} style={{ width: '93%', height: 150, backgroundColor: '#ffffff99', marginTop: '3.5%', borderRadius: 10 }}>
                                         <View >
 
@@ -288,6 +294,11 @@ const HomeScreen = (props, { navigation }) => {
                                                             props.navigation.navigate('ConsentScreen');
                                                             global.isDedupeDone = '0';
                                                             global.isMobileVerified = '0';
+                                                            global.CLIENTID = '';
+                                                            global.isAadharVerified = '';
+                                                            global.LOANAPPLICATIONID = '';
+                                                            global.COMPLETEDMODULE = '';
+                                                            global.COMPLETEDPAGE = '';
                                                         }} activeOpacity={0.5} style={{ width: '70%', height: '100%', backgroundColor: '#0294ff', borderRadius: 25, alignItems: 'center', justifyContent: 'center' }}>
                                                             <View >
                                                                 <Image source={require('../../Images/forward_icon.png')}

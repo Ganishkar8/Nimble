@@ -17,7 +17,7 @@ const DateInputComp = ({ textValue, textStyle, Disable, type, ComponentName, ref
         const day = currentDate.getDate().toString().padStart(2, '0');
         const month = (currentDate.getMonth() + 1).toString().padStart(2, '0'); // Note: Months are 0-indexed, so we add 1.
         const year = currentDate.getFullYear();
-        const formattedDatee = `${day}/${month}/${year}`;
+        const formattedDatee = `${day}-${month}-${year}`;
         setDatee(textValue)
     }, [textValue]);
 
@@ -42,7 +42,7 @@ const DateInputComp = ({ textValue, textStyle, Disable, type, ComponentName, ref
         const year = date.getFullYear();
 
         // Create the formatted date string
-        const formattedDate = `${day}/${month}/${year}`;
+        const formattedDate = `${day}-${month}-${year}`;
         console.log("FormattedDate::" + formattedDate)
         console.log("Event::" + JSON.stringify(event))
         setDatee(formattedDate);
@@ -60,7 +60,7 @@ const DateInputComp = ({ textValue, textStyle, Disable, type, ComponentName, ref
         let formattedDate = '';
         for (let i = 0; i < numericInput.length; i++) {
             if (i === 2 || i === 4) {
-                formattedDate += '/';
+                formattedDate += '-';
             }
             formattedDate += numericInput[i];
         }

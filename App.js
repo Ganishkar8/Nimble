@@ -7,18 +7,23 @@
 import 'react-native-gesture-handler'
 import React from 'react';
 import { Provider } from 'react-redux';
-import store from './src/Utils/redux/store';
+import reduxStore from './src/Utils/redux/store';
 import AppContainer from './src/Routes/Routes';
 import './src/Utils/Global';
 import { ModalPortal } from 'react-native-modals';
 import { PaperProvider } from 'react-native-paper';
-
+import { PersistGate } from 'redux-persist/integration/react'
 
 const App = () => {
+
+  const { store, persistor } = reduxStore();
+
   return (
     <Provider store={store}>
       <PaperProvider>
-        <AppContainer />
+        <PersistGate loading={null} persistor={persistor}>
+          <AppContainer />
+        </PersistGate>
       </PaperProvider>
       <ModalPortal />
     </Provider>
