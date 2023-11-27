@@ -163,7 +163,7 @@ const OTPVerification = (props, { navigation }) => {
         return () => {
             clearInterval(timer); // Clean up the timer when the component unmounts
         };
-    }, [timeLeft]);
+    }, [navigation, timeLeft]);
 
 
 
@@ -261,6 +261,12 @@ const OTPVerification = (props, { navigation }) => {
         setErrorModalVisible(false);
     };
 
+
+
+    const onGoBack = () => {
+        props.navigation.goBack();
+    }
+
     return (
 
         <View style={{ flex: 1, backgroundColor: Colors.lightwhite }}>
@@ -268,7 +274,7 @@ const OTPVerification = (props, { navigation }) => {
             <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
             <View style={{ width: '100%', height: 56, alignItems: 'center', justifyContent: 'center', }}>
 
-                <HeadComp textval={language[0][props.language].str_mobileotpverification} props={props} />
+                <HeadComp textval={language[0][props.language].str_mobileotpverification} props={props} onGoBack={onGoBack} />
 
             </View>
 

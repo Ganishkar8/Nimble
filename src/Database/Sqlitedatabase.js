@@ -285,6 +285,7 @@ const createTables = async () => {
     )`,
     `CREATE TABLE IF NOT EXISTS tbl_clientaddressinfo (
       loanApplicationId TEXT,
+      id TEXT,
       client_id TEXT,
       client_type TEXT,
       address_type TEXT,

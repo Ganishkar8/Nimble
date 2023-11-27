@@ -17,6 +17,7 @@ import TextInputComp from '../../../Components/TextInputComp';
 import Common from '../../../Utils/Common';
 import tbl_clientaddressinfo from '../../../Database/Table/tbl_clientaddressinfo';
 import apiInstancelocal from '../../../Utils/apiInstancelocal';
+import ErrorModal from '../../../Components/ErrorModal';
 
 const AddressDetails = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -147,6 +148,12 @@ const AddressDetails = (props, { navigation }) => {
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [apiError, setApiError] = useState('');
 
+  const [addressID, setAddressID] = useState('');
+  const [isKYC, setIsKYC] = useState('');
+
+
+  const [postorput, setPostORPut] = useState('post');
+
 
   useEffect(() => {
     props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
@@ -163,16 +170,18 @@ const AddressDetails = (props, { navigation }) => {
 
   const getExistingData = () => {
     if (isNew != 'new') {
-      setLoading(true)
-      //alert(JSON.stringify(isNew))
-      getExistingAddressData(isNew.loanApplicationId, isNew.address_type)
+      setPostORPut('put')
+      getExistingAddressData(isNew.loanApplicationId, isNew.id)
+    } else {
+      setPostORPut('post');
     }
   }
 
-  const getExistingAddressData = (loanAppId, addressType) => {
-    tbl_clientaddressinfo.getAllAddressDetailsForLoanIDAndAddressType(loanAppId, addressType.toString())
+  const getExistingAddressData = (loanAppId, id) => {
+    tbl_clientaddressinfo.getAllAddressDetailsForLoanIDAndID(loanAppId, id.toString())
       .then(data => {
         if (global.DEBUG_MODE) console.log('Address Detail:', data);
+        setAddressID(data[0].id)
         setAddressLine1(data[0].address_line_1)
         setAddressLine2(data[0].address_line_2)
         setLandmark(data[0].landmark)
@@ -192,6 +201,7 @@ const AddressDetails = (props, { navigation }) => {
         if (data[0].isKyc === "1") {
           disableAadharFields(data)
         }
+        setIsKYC(data[0].isKyc);
         setLoading(false)
       })
       .catch(error => {
@@ -215,7 +225,7 @@ const AddressDetails = (props, { navigation }) => {
   }
 
   const getSystemCodeDetail = () => {
-    setLoading(true)
+
     const filterAddressTypeData = userCodeDetail.filter((data) => data.masterId === 'ADDRESS_TYPE');
     setaddressTypeData(filterAddressTypeData)
 
@@ -227,7 +237,7 @@ const AddressDetails = (props, { navigation }) => {
 
     const filterGeoClassificationData = userCodeDetail.filter((data) => data.masterId === 'GEO_CLASSIFICATION');
     setGeoClassificationData(filterGeoClassificationData)
-    setLoading(false)
+
   }
 
   const makeSystemMandatoryFields = () => {
@@ -511,6 +521,14 @@ const AddressDetails = (props, { navigation }) => {
   };
 
   const addressSubmit = () => {
+    if (addressID.length <= 0) {
+      postAddressData();
+    } else {
+      updateAddressData();
+    }
+  }
+
+  const postAddressData = () => {
     if (validateData()) {
       showBottomSheet();
       //alert(errMsg)
@@ -525,7 +543,6 @@ const AddressDetails = (props, { navigation }) => {
         "modifiedBy": global.USERID,
         "modifiedDate": new Date(),
         "supervisedBy": global.USERID,
-        "id": 0,
         "addressType": addressTypeLabel,
         "addressLine1": addressLine1,
         "addressLine2": addressLine2,
@@ -548,12 +565,13 @@ const AddressDetails = (props, { navigation }) => {
       const baseURL = '8901';
       setLoading(true);
       apiInstancelocal(baseURL)
-        .put(`api/v2/profile-short/address-details/${global.CLIENTID}`, appDetails)
+        .post(`api/v2/profile-short/address-details/${global.CLIENTID}`, appDetails)
         .then(async response => {
           // Handle the response data
           if (global.DEBUG_MODE) console.log('PostAddressResponse::' + JSON.stringify(response.data),);
-          
+
           setLoading(false);
+          insertData(response.data[0].id)
         })
         .catch(error => {
           // Handle the error
@@ -568,11 +586,69 @@ const AddressDetails = (props, { navigation }) => {
     }
   };
 
-  const insertData = () => {
+  const updateAddressData = () => {
+    if (validateData()) {
+      showBottomSheet();
+      //alert(errMsg)
+    } else {
+      // alert(addressTypeLabel+" "+addressLine1+" "+addressLine2+" "+landmark+" "+pincode+" "+city+" "+
+      // district+" "+state+" "+country+" "+geoClassificationLabel+" "+yearsAtResidence+" "+yearsAtCity+" "+
+      // addressOwnerTypeLabel+" "+ownerDetailsLabel+" "+ownerName)
+      const appDetails = {
+        "isActive": true,
+        "createdBy": global.USERID,
+        "createdDate": new Date(),
+        "modifiedBy": global.USERID,
+        "modifiedDate": new Date(),
+        "supervisedBy": global.USERID,
+        "addressType": addressTypeLabel,
+        "addressLine1": addressLine1,
+        "addressLine2": addressLine2,
+        "landmark": landmark,
+        "pincode": pincode,
+        "city": city,
+        "district": district,
+        "state": state,
+        "country": country,
+        "mobileOrLandLineNumber": "",
+        "emailId": "",
+        "addressOwnership": addressOwnerTypeLabel,
+        "ownerDetails": ownerDetailsLabel,
+        "ownerName": ownerName,
+        "geoClassification": geoClassificationLabel,
+        "yearsAtResidence": parseInt(yearsAtResidence),
+        "yearsInCurrentCityOrTown": parseInt(yearsAtCity),
+        "supervisedDate": new Date()
+      }
+      const baseURL = '8901';
+      setLoading(true);
+      apiInstancelocal(baseURL)
+        .put(`api/v2/profile-short/address-details/${addressID}`, appDetails)
+        .then(async response => {
+          // Handle the response data
+          if (global.DEBUG_MODE) console.log('UpdateAddressResponse::' + JSON.stringify(response.data),);
+          insertData(addressID)
+          setLoading(false);
+        })
+        .catch(error => {
+          // Handle the error
+          if (global.DEBUG_MODE) console.log('UpdateAddressError' + JSON.stringify(error.response));
+          setLoading(false);
+          if (error.response.data != null) {
+            setApiError(error.response.data.message);
+            setErrorModalVisible(true)
+          }
+        });
+      //insertData()
+    }
+  };
+
+  const insertData = (id) => {
     tbl_clientaddressinfo.insertClientAddress(
-      "12345",
-      "820",
-      "A",
+      global.LOANAPPLICATIONID,
+      id,
+      global.CLIENTID,
+      "APPL",
       addressTypeLabel.trim(),
       addressLine1.trim(),
       addressLine2.trim(),
@@ -590,14 +666,14 @@ const AddressDetails = (props, { navigation }) => {
       geoClassificationLabel.trim(),
       yearsAtResidence.trim(),
       yearsAtCity.trim(),
-      "A",
-      "Ganishkar",
+      "true",
+      global.USERID,
       new Date(),
-      "Ganishkar",
+      global.USERID,
       new Date(),
-      "Ganishkar",
+      global.USERID,
       new Date(),
-      "0"
+      isKYC
     )
       .then(result => {
         if (global.DEBUG_MODE) console.log('Inserted Address detail:', result);
@@ -690,15 +766,13 @@ const AddressDetails = (props, { navigation }) => {
       }
     } else if (componentName === 'YearAtResidence') {
       if (textValue.length > 0) {
-        if (Common.isValidText(textValue))
-          setYearsAtResidence(textValue)
+        setYearsAtResidence(textValue)
       } else {
         setYearsAtResidence(textValue)
       }
     } else if (componentName === 'YearAtCity') {
       if (textValue.length > 0) {
-        if (Common.isValidText(textValue))
-          setYearsAtCity(textValue)
+        setYearsAtCity(textValue)
       } else {
         setYearsAtCity(textValue)
       }
@@ -723,9 +797,19 @@ const AddressDetails = (props, { navigation }) => {
 
   };
 
+  const closeErrorModal = () => {
+    setErrorModalVisible(false);
+  };
+
+  const onGoBack = () => {
+    props.navigation.goBack();
+  }
+
   return (
     <SafeAreaView style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
       <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
+      <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
+
       <ErrorMessageModal
         isVisible={bottomErrorSheetVisible}
         hideBottomSheet={hideBottomSheet}
@@ -734,7 +818,7 @@ const AddressDetails = (props, { navigation }) => {
         textClose={language[0][props.language].str_ok}
       />
       <View style={{ width: '100%', height: 56, alignItems: 'center', justifyContent: 'center', }}>
-        <HeadComp textval={language[0][props.language].str_addaddressbutton} props={props} />
+        <HeadComp textval={language[0][props.language].str_addaddressbutton} props={props} onGoBack={onGoBack} />
       </View>
 
       <ScrollView style={styles.scrollView}
@@ -815,14 +899,14 @@ const AddressDetails = (props, { navigation }) => {
           <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
             <TextComp textVal={yearsAtResidenceCaption} textStyle={Commonstyles.inputtextStyle} Visible={yearsAtResidenceMan} />
           </View>
-          <TextInputComp textValue={yearsAtResidence} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={yearsAtResidenceDisable} ComponentName='YearAtResidence' reference={yearAtResidenceRef} returnKey="next" handleClick={handleClick} handleReference={handleReference} length={30} />
+          <TextInputComp textValue={yearsAtResidence} textStyle={Commonstyles.textinputtextStyle} type='number-pad' Disable={yearsAtResidenceDisable} ComponentName='YearAtResidence' reference={yearAtResidenceRef} returnKey="next" handleClick={handleClick} handleReference={handleReference} length={2} />
         </View>}
 
         {yearsAtCityVisible && <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
           <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
             <TextComp textVal={yearsAtCityCaption} textStyle={Commonstyles.inputtextStyle} Visible={yearsAtCityMan} />
           </View>
-          <TextInputComp textValue={yearsAtCity} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={yearsAtCityDisable} ComponentName='YearAtCity' reference={yearInCurrentCityRef} returnKey="next" handleClick={handleClick} handleReference={handleReference} length={30} />
+          <TextInputComp textValue={yearsAtCity} textStyle={Commonstyles.textinputtextStyle} type='number-pad' Disable={yearsAtCityDisable} ComponentName='YearAtCity' reference={yearInCurrentCityRef} returnKey="next" handleClick={handleClick} handleReference={handleReference} length={2} />
         </View>}
 
         {addressOwnerTypeVisible && <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>

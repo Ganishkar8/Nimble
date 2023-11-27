@@ -301,10 +301,10 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
           tbl_lead_creation_dms.deleteLeadCreationDmsDetailsBasedOnID(global.leadID),
           tbl_lead_image.deleteLeadImageDetailsBasedOnID(global.leadID),
         ];
-        props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
-
         await Promise.all(deletePromises);
         setLoading(false)
+        props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
+
 
       })
       .catch((error) => {

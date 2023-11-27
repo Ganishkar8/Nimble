@@ -28,3 +28,6 @@ global.isAadharVerified = '0';
 global.isDedupeDone = '0';
 global.LOANAPPLICATIONID = '';
 global.CLIENTID = '';
+global.CLIENTTYPE = '';
+global.COMPLETEDMODULE = '';
+global.COMPLETEDPAGE = '';

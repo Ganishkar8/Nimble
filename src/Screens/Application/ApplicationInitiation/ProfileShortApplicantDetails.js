@@ -658,8 +658,18 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
         .then(async response => {
           // Handle the response data
           if (global.DEBUG_MODE) console.log('PersonalDetailApiResponse::' + JSON.stringify(response.data));
-          setLoading(false);
           await tbl_client.updatePersonalDetails(TitleLabel, firstName, middleName, lastName, DOB, Age, GenderLabel, FatherName, SpouseName, CasteLabel, ReligionLabel, MotherTongueLabel, EADLabel, gpslatlon, id, global.LOANAPPLICATIONID);
+          if (global.CLIENTTYPE == 'APPL') {
+            global.COMPLETEDMODULE = 'PRF_SHRT_APLCT';
+            global.COMPLETEDPAGE = 'PRF_SHRT_APLCT_PRSNL_DTLS';
+          } else if (global.CLIENTTYPE == 'CO-APPL') {
+            global.COMPLETEDMODULE = 'PRF_SHRT_COAPLCT';
+            global.COMPLETEDPAGE = 'PRF_SHRT_COAPLCT_PRSNL_DTLS';
+          } else if (global.CLIENTTYPE == 'GRNTR') {
+            global.COMPLETEDMODULE = 'PRF_SHRT_GRNTR';
+            global.COMPLETEDPAGE = 'PRF_SHRT_GRNTR_PRSNL_DTLS';
+          }
+          setLoading(false);
           props.navigation.navigate('AddressMainList')
         })
         .catch(error => {
@@ -1038,6 +1048,10 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
     }
   };
 
+  const onGoBack = () => {
+    props.navigation.navigate('LoanApplicationMain')
+  }
+
   return (
     // enclose all components in this View tag
     <SafeAreaView
@@ -1103,6 +1117,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
         <HeadComp
           textval={language[0][props.language].str_profileshort}
           props={props}
+          onGoBack={onGoBack}
         />
       </View>
 
