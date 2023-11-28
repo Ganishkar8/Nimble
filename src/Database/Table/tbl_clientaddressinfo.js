@@ -27,14 +27,14 @@ const insertClientAddress = (loanApplicationId, id, client_id, client_type, addr
     });
 };
 
-const getAllAddressDetailsForLoanID = (loanApplicationId) => {
+const getAllAddressDetailsForLoanID = (loanApplicationId, client_type) => {
     const db = databaseInstance.getInstance();
 
     return new Promise((resolve, reject) => {
         db.transaction(tx => {
             tx.executeSql(
-                `SELECT * FROM ${tableName} WHERE loanApplicationId = ${loanApplicationId}`,
-                [],
+                `SELECT * FROM ${tableName} WHERE loanApplicationId = ? AND client_type = ?`,
+                [loanApplicationId, client_type],
                 (_, result) => {
                     const rows = result.rows;
                     const addressDetails = [];

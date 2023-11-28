@@ -213,7 +213,7 @@ const AadharOTPVerification = (props, { navigation }) => {
         return () => {
             clearInterval(timer); // Clean up the timer when the component unmounts
         };
-    }, [timeLeft, isScreenVisible]);
+    }, [props.navigation, timeLeft, isScreenVisible]);
 
 
 
@@ -275,7 +275,6 @@ const AadharOTPVerification = (props, { navigation }) => {
                     //alert(JSON.stringify(response.data.aadharResultDetails))
                     //setAadhaarResponse(response.data.aadharResultDetails)
                     global.isAadharVerified = "1";
-                    insertData(response.data.aadharResultDetails);
                     if (global.CLIENTTYPE == 'APPL') {
                         global.COMPLETEDMODULE = 'PRF_SHRT_APLCT';
                         global.COMPLETEDPAGE = 'PRF_SHRT_APLCT_BSC_DTLS';
@@ -286,6 +285,7 @@ const AadharOTPVerification = (props, { navigation }) => {
                         global.COMPLETEDMODULE = 'PRF_SHRT_GRNTR';
                         global.COMPLETEDPAGE = 'PRF_SHRT_GRNTR_BSC_DTLS';
                     }
+                    insertData(response.data.aadharResultDetails);
 
                 } else {
                     alert(response.data.statusCode)

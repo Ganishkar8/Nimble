@@ -8,7 +8,7 @@ import {
   Image,
   Text,
   Button,
-  Platform, PermissionsAndroid
+  Platform, PermissionsAndroid, BackHandler
 } from 'react-native';
 import apiInstance from '../../../Utils/apiInstance';
 import apiInstancelocal from '../../../Utils/apiInstancelocal';
@@ -46,6 +46,7 @@ import ImageBottomPreview from '../../../Components/ImageBottomPreview';
 import ImageDetailComp from '../../../Components/ImageDetailComp';
 import Geolocation from 'react-native-geolocation-service';
 import { useIsFocused } from '@react-navigation/native';
+import ErrorModal from '../../../Components/ErrorModal';
 
 const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const [errorModalVisible, setErrorModalVisible] = useState(false);
@@ -189,19 +190,24 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     props.navigation
       .getParent()
       ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
-
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
     getClientData();
     getSystemCodeDetail();
     if (global.isAadharVerified == '1') {
 
     }
 
-    return () =>
-      props.navigation
-        .getParent()
-        ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
-  }, [navigation, isScreenVisible]);
 
+    return () => {
+      props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
+      backHandler.remove();
+    }
+  }, [props.navigation, isScreenVisible]);
+
+  const handleBackButton = () => {
+    onGoBack();
+    return true; // Prevent default back button behavior
+  };
 
   const checkPermissions = async () => {
     const permissionsToRequest = [];
@@ -293,7 +299,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
           JSON.stringify(position.coords.latitude);
 
         hideLocationBottomSheet();
-        props.navigation.navigate('ProfileShortApplicantDetails')
+        props.navigation.replace('ProfileShortApplicantDetails')
 
       },
       (error) => {
@@ -332,6 +338,11 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   }
 
   const getKYCType = (id1, id2, id3, id4) => {
+    if (id1 == null) id1 = ''
+    if (id2 == null) id2 = ''
+    if (id3 == null) id3 = ''
+    if (id4 == null) id4 = ''
+
     let dataArray = [];
     if (bankUserCodeDetail) {
       bankUserCodeDetail.forEach((data) => {
@@ -403,7 +414,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
   const getClientData = () => {
 
-    tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID).then(value => {
+    tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE).then(value => {
       if (value !== undefined && value.length > 0) {
         setKycType1Label(value[0].kycTypeId1);
         setkycID1(value[0].kycIdValue1);
@@ -694,7 +705,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       flag = true;
     }
 
-    if (global.isAadharVerified == '0') {
+    if (!(global.isAadharVerified == '1')) {
       if (KycTypeLabel.length <= 0) {
         errorMessage =
           errorMessage +
@@ -772,7 +783,6 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     setLoading(true)
     const appDetails = {
       "id": global.LOANAPPLICATIONID,
-      "clientId": global.CLIENTID,
       "kycType": KycTypeLabel,
       "kycValue": kycID,
       "kycExpiryDate": "",
@@ -781,7 +791,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     }
 
     const baseURL = '8901'
-    apiInstancelocal(baseURL).post(`/api/v2/profile-short/manualKyc`, appDetails)
+    apiInstancelocal(baseURL).post(`/api/v2/profile-short/manualKyc/${global.CLIENTID}`, appDetails)
       .then(async (response) => {
         // Handle the response data
 
@@ -795,7 +805,6 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
         // Handle the error
         if (global.DEBUG_MODE) console.log("ManualKYCApiResponse:::" + JSON.stringify(error.response))
         setLoading(false)
-        buttonNext()
         if (error.response.data != null) {
           setApiError(error.response.data.message);
           setErrorModalVisible(true)
@@ -803,6 +812,10 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       });
 
   }
+
+  const closeErrorModal = () => {
+    setErrorModalVisible(false);
+  };
 
   const onGoBack = () => {
     props.navigation.navigate('LoanApplicationMain')
@@ -813,7 +826,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     <SafeAreaView
       style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
       <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
-
+      <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
       <ImageBottomPreview bottomSheetVisible={bottomSheetVisible} previewImage={previewImage} hideBottomSheet={hideImageBottomSheet} reTakePhoto={reTakePhoto} fileName={fileName} detailHide={true} deleteVisible={deleteVisible} deletePhoto={deletePhoto} onDeleteorCancel={onDeleteorCancel} />
 
       <Modal
@@ -920,7 +933,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
             />
           </View>
           <ChildHeadComp
-            textval={language[0][props.language].str_applicantdetails}
+            textval={global.CLIENTTYPE == 'APPL' ? language[0][props.language].str_applicantdetails : global.CLIENTTYPE == 'CO-APPL' ? language[0][props.language].str_coapplicantdetails : language[0][props.language].str_guarantordetails}
           />
 
           <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
@@ -1061,7 +1074,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
             </View>
           )}
 
-          {global.isAadharVerified == '0' &&
+          {!(global.isAadharVerified == '1') &&
             <View
               style={{
                 width: '100%',

@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, SafeAreaView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, SafeAreaView, StyleSheet, BackHandler } from 'react-native';
 import { React, useState, useRef, useEffect } from 'react';
 import MyStatusBar from '../../../Components/MyStatusBar';
 import HeadComp from '../../../Components/HeadComp';
@@ -157,16 +157,21 @@ const AddressDetails = (props, { navigation }) => {
 
   useEffect(() => {
     props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
-    // pickerData();
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
     getSystemCodeDetail()
     getExistingData()
 
 
-    return () =>
-      props.navigation
-        .getParent()
-        ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
-  }, [navigation]);
+    return () => {
+      props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
+      backHandler.remove();
+    }
+  }, [props.navigation]);
+
+  const handleBackButton = () => {
+    onGoBack();
+    return true; // Prevent default back button behavior
+  };
 
   const getExistingData = () => {
     if (isNew != 'new') {
@@ -648,7 +653,7 @@ const AddressDetails = (props, { navigation }) => {
       global.LOANAPPLICATIONID,
       id,
       global.CLIENTID,
-      "APPL",
+      global.CLIENTTYPE,
       addressTypeLabel.trim(),
       addressLine1.trim(),
       addressLine2.trim(),

@@ -68,6 +68,8 @@ const HomeScreen = (props, { navigation }) => {
         setErrorModalVisible(false);
     };
 
+
+
     const getProfileDetails = () => {
 
         const baseURL = '8901'

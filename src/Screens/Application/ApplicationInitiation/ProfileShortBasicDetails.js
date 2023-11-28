@@ -8,6 +8,7 @@ import {
   Image,
   Text,
   CheckBox,
+  BackHandler
 } from 'react-native';
 import apiInstance from '../../../Utils/apiInstance';
 import apiInstancelocal from '../../../Utils/apiInstancelocal';
@@ -41,6 +42,8 @@ import ErrorModal from '../../../Components/ErrorModal';
 import DedupeModal from '../../../Components/DedupeModal';
 import { useIsFocused } from '@react-navigation/native';
 import tbl_client from '../../../Database/Table/tbl_client';
+import tbl_loanApplication from '../../../Database/Table/tbl_loanApplication';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 
 const ProfileShortBasicDetails = (props, { navigation }) => {
@@ -309,9 +312,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     props.navigation
       .getParent()
       ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
-    makeSystemMandatoryFields();
-    getSystemCodeDetail();
-    hideFields()
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
 
     if (KycType1Label !== null || KycType2Label !== null || KycType3Label !== null || KycType4Label !== null) {
       getID1data(workflowIDLabel);
@@ -320,25 +321,110 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       getID4data(workflowIDLabel);
     }
 
-    if (isScreenVisible) {
+    if (isDedupeDone) {
+      fieldsDisable();
+    }
+
+
+    return () => {
+      props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
+      backHandler.remove();
+    }
+
+  }, [props.navigation, KycType1Label, KycType2Label, KycType3Label, KycType4Label, isScreenVisible, isDedupeDone]);
+
+  const handleBackButton = () => {
+    onGoBack();
+    return true; // Prevent default back button behavior
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      makeSystemMandatoryFields();
+      getSystemCodeDetail();
+      hideFields();
+      getApplicantData();
+
       if (global.isDedupeDone == 1) {
         setClientTypeVisible(true)
       }
       if (global.isMobileVerified == '1') {
         setMobileNumberDisable(true)
       }
-    }
 
-    if (isDedupeDone) {
-      fieldsDisable();
-    }
+      return () => {
+        console.log('Screen is blurred');
+      };
+    }, [])
+  );
 
-    return () =>
-      props.navigation
-        .getParent()
-        ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
-  }, [navigation, KycType1Label, KycType2Label, KycType3Label, KycType4Label, isScreenVisible, isDedupeDone]);
+  const getApplicantData = () => {
+    tbl_loanApplication.getLoanAppBasedOnID(global.LOANAPPLICATIONID, 'APPL')
+      .then(data => {
+        if (global.DEBUG_MODE) console.log('Applicant Data:', data);
+        if (data !== undefined && data.length > 0) {
 
+          getID1data(data[0].workflow_id);
+          getID2data(data[0].workflow_id);
+          getID3data(data[0].workflow_id);
+          getID4data(data[0].workflow_id);
+          setWorkflowIDLabel(data[0].workflow_id)
+        }
+
+      })
+      .catch(error => {
+        if (global.DEBUG_MODE) console.error('Error fetching Applicant details:', error);
+      });
+
+    tbl_loanApplication.getLoanAppBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
+      .then(data => {
+        if (global.DEBUG_MODE) console.log('Applicant Data:', data);
+        if (data !== undefined && data.length > 0) {
+          setLeadID('');
+          setLoanTypeLabel(data[0].loan_type)
+          setProductTypeLabel(data[0].product)
+          setCustCatgLabel(data[0].customer_category)
+          setCustomerSubCategoryLabel(data[0].customer_subcategory)
+          setWorkflowIDLabel(data[0].workflow_id)
+          setLoanAmount(data[0].loan_amount)
+          setLoanPurposeLabel(data[0].loan_purpose);
+        }
+
+      })
+      .catch(error => {
+        if (global.DEBUG_MODE) console.error('Error fetching Applicant details:', error);
+      });
+
+    tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
+      .then(data => {
+        if (global.DEBUG_MODE) console.log('Applicant Data:', data);
+        if (data !== undefined && data.length > 0) {
+          setRelationTypeLabel(data[0].relationTypeId)
+          setTitleLabel(data[0].titleId);
+          setName(data[0].firstName)
+          setGenderLabel(data[0].genderId)
+          setMaritalStatusLabel(data[0].maritalStatusId)
+          setKycType1Label(data[0].kycTypeId1)
+          setkycID1(data[0].kycIdValue1)
+          setExpiry1Date(data[0].expiryDate1)
+          setKycType2Label(data[0].kycTypeId2)
+          setkycID2(data[0].kycIdValue2)
+          setExpiry2Date(data[0].expiryDate2)
+          setKycType3Label(data[0].customer_subcategory)
+          setkycID3(data[0].kycTypeId3)
+          setExpiry3Date(data[0].kycIdValue3)
+          setMobileNumber(data[0].mobileNumber)
+          setEmail(data[0].email);
+          setURNumber(data[0].udyamRegistrationNumber);
+          setchkMsme(data[0].isMsme == true)
+        }
+
+      })
+      .catch(error => {
+        if (global.DEBUG_MODE) console.error('Error fetching Applicant details:', error);
+      });
+
+  }
 
   const fieldsDisable = () => {
     setLoanTypeDisable(true);
@@ -389,10 +475,10 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     const filteredCustomerTypeData = leadsystemCodeDetail.filter((data) => data.masterId === 'CUSTOMER_TYPE').sort((a, b) => a.Description.localeCompare(b.Description));;
     setClientTypeData(filteredCustomerTypeData);
 
-    getID1data();
-    getID2data();
-    getID3data();
-    getID4data();
+    // getID1data();
+    // getID2data();
+    // getID3data();
+    // getID4data();
 
   };
 
@@ -459,7 +545,6 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
 
   const getID2data = (wfID) => {
     let dataArray = [];
-
 
     if (bankUserCodeDetail) {
 
@@ -1016,6 +1101,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
         .put(`api/v2/profile-short/basic-details/${global.LOANAPPLICATIONID}`, appDetails)
         .then(async response => {
           // Handle the response data
+
           if (global.DEBUG_MODE) console.log('LeadCreationBasicApiResponse::' + JSON.stringify(response.data),);
           if (global.CLIENTTYPE == 'APPL') {
             global.CLIENTID = response.data.clientDetail[0].id;
@@ -1036,7 +1122,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
         })
         .catch(error => {
           // Handle the error
-          if (global.DEBUG_MODE) console.log('Error' + JSON.stringify(error.response));
+          if (global.DEBUG_MODE) console.log('Error' + JSON.stringify(error));
           setLoading(false);
           if (error.response.data != null) {
             setApiError(error.response.data.message);
@@ -1066,9 +1152,15 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           if (global.DEBUG_MODE) console.log('GenerateLoanAppNumBasicApiResponse::' + JSON.stringify(response.data),);
           global.TEMPAPPID = response.data.loanApplicationNumber;
           setLoading(false);
-          generateAadharOTP();
-          // global.isAadharVerified = "1";
-          // props.navigation.navigate('ProfileShortKYCVerificationStatus', { 'isAadharVerified': '1' });
+          if (global.CLIENTTYPE == 'APPL') {
+            createWorkFlow();
+          } else {
+            if (KycType1Label == '001' || KycType2Label == '001' || KycType3Label == '001' || KycType4Label == '001') {
+              generateAadharOTP();
+            } else {
+              updateLoanStatus();
+            }
+          }
         })
         .catch(error => {
           // Handle the error
@@ -1080,6 +1172,82 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           }
         });
     }
+  };
+
+  const updateLoanStatus = () => {
+
+    const appDetails = {
+      "loanApplicationId": global.LOANAPPLICATIONID,
+      "loanWorkflowStage": "LN_APP_INITIATION",
+      "subStageCode": "PRF_SHRT",
+      "moduleCode": global.COMPLETEDMODULE,
+      "pageCode": global.COMPLETEDPAGE,
+      "status": "Completed"
+    }
+    const baseURL = '8901';
+    setLoading(true);
+    apiInstancelocal(baseURL)
+      .post(`/api/v2/loan-application-status/updateStatus`, appDetails)
+      .then(async response => {
+        // Handle the response data
+        if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
+        setLoading(false);
+        if (global.CLIENTTYPE == 'APPL') {
+          global.COMPLETEDMODULE = 'PRF_SHRT_APLCT';
+          global.COMPLETEDPAGE = 'PRF_SHRT_APLCT_BSC_DTLS';
+        } else if (global.CLIENTTYPE == 'CO-APPL') {
+          global.COMPLETEDMODULE = 'PRF_SHRT_COAPLCT';
+          global.COMPLETEDPAGE = 'PRF_SHRT_COAPLCT_BSC_DTLS';
+        } else if (global.CLIENTTYPE == 'GRNTR') {
+          global.COMPLETEDMODULE = 'PRF_SHRT_GRNTR';
+          global.COMPLETEDPAGE = 'PRF_SHRT_GRNTR_BSC_DTLS';
+        }
+        props.navigation.replace('ProfileShortKYCVerificationStatus');
+      })
+      .catch(error => {
+        // Handle the error
+        if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
+        setLoading(false);
+
+        if (error.response.data != null) {
+          setApiError(error.response.data.message);
+          setErrorModalVisible(true)
+        }
+      });
+
+  };
+
+  const createWorkFlow = () => {
+
+    const appDetails = {
+      "wfId": workflowIDLabel,
+      "loanApplicationId": global.LOANAPPLICATIONID,
+      "createdBy": global.USERID
+    }
+    const baseURL = '8901';
+    setLoading(true);
+    apiInstancelocal(baseURL)
+      .post(`/api/v2/loan-application-status/createWorkFlow`, appDetails)
+      .then(async response => {
+        // Handle the response data
+        if (global.DEBUG_MODE) console.log('CreateWorkFlowApiResponse::' + JSON.stringify(response.data),);
+        setLoading(false);
+        if (KycType1Label == '001' || KycType2Label == '001' || KycType3Label == '001' || KycType4Label == '001') {
+          generateAadharOTP();
+        } else {
+          updateLoanStatus();
+        }
+      })
+      .catch(error => {
+        // Handle the error
+        if (global.DEBUG_MODE) console.log('CreateWorkFlowApiResponse' + JSON.stringify(error.response));
+        setLoading(false);
+        if (error.response.data != null) {
+          setApiError(error.response.data.message);
+          setErrorModalVisible(true)
+        }
+      });
+
   };
 
   const internalDedupeCheck = () => {
@@ -1151,8 +1319,10 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
 
   const insertData = async () => {
 
-    await tbl_client.insertClient(global.LOANAPPLICATIONID, global.CLIENTTYPE, "", titleLabel, Name, "", "", "", "", "", "", "", "", "", "", genderLabel, MaritalStatusLabel, mobileNumber, Email, "",
+    await tbl_client.insertClient(global.CLIENTID, global.LOANAPPLICATIONID, global.CLIENTTYPE, "", titleLabel, Name, "", "", "", "", "", "", "", "", "", "", genderLabel, MaritalStatusLabel, mobileNumber, Email, "",
       KycType1Label, kycID1, expiryDate1, KycType2Label, kycID2, expiryDate2, KycType3Label, kycID3, expiryDate3, KycType4Label, kycID4, expiryDate4, chkMsme, "", "", URNumber, "", isMobileVerified, isEmailVerified, "dedupeCheck", "isDedupePassed", "dmsId", "image", "geoCode", "1", "", "", "", "", "", "", "", "lmsClientId", "lmsCustomerTypeId");
+
+    await tbl_loanApplication.insertLoanApplication(global.CLIENTID, global.CLIENTTYPE, global.LOANAPPLICATIONID, global.TEMPAPPID, '1180', global.leadID, custCatgLabel, CustomerSubCategoryLabel, clientTypeLabel, loanTypeLabel, LoanPurposeLabel, ProductTypeLabel, LoanAmount, workflowIDLabel, '', 'true', 'true', '', '', '', '', 'lms_application_number', 'is_manual_kyc', '', '', '', '', '', '', '', '', '');
 
   }
 
@@ -1537,17 +1707,17 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
     }
 
-    if (!isAadharAvailable) {
-      errorMessage =
-        errorMessage +
-        i +
-        ')' +
-        ' ' +
-        'Please Select Aadhar as a KYC Type' +
-        '\n';
-      i++;
-      flag = true;
-    }
+    // if (!isAadharAvailable) {
+    //   errorMessage =
+    //     errorMessage +
+    //     i +
+    //     ')' +
+    //     ' ' +
+    //     'Please Select Aadhar as a KYC Type' +
+    //     '\n';
+    //   i++;
+    //   flag = true;
+    // }
 
     if (isAadharAvailable) {
       if (!Common.validateVerhoeff(aadhar)) {
@@ -1838,7 +2008,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   };
 
   const onGoBack = () => {
-    props.navigation.goBack();
+    props.navigation.replace('LoanApplicationMain')
   }
 
   return (

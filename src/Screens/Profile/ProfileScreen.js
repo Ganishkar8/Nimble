@@ -29,9 +29,6 @@ const ProfileScreen = ({ navigation }) => {
 
     useEffect(() => {
 
-        // if (isScreenVisible) {
-        //getProfileDetails();
-        //  }
         BackHandler.addEventListener('hardwareBackPress', handleBackButton);
 
         // Remove the event listener when the component unmounts
@@ -46,35 +43,13 @@ const ProfileScreen = ({ navigation }) => {
         return true; // Prevent default back button behavior
     };
 
-    const getProfileDetails = () => {
-
-        const baseURL = '8908'
-        setLoading(true)
-        apiInstancelocal(baseURL).get(`/api/users/${global.USERID}`)
-            .then(async (response) => {
-                // Handle the response data
-                console.log("ProfileApiResponse::" + JSON.stringify(response.data));
-                setLoading(false)
-                setpersonalInfo(response.data)
-
-            })
-            .catch((error) => {
-                // Handle the error
-                console.log("Error" + JSON.stringify(error.response))
-                setLoading(false)
-                alert(error);
-            });
-
-
-
+    const onGoBack = () => {
+        props.navigation.goBack();
     }
-
 
     return (
         // enclose all components in this View tag
         <SafeAreaView style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
-
-
 
             <ScrollView style={styles.scrollView}
                 contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">

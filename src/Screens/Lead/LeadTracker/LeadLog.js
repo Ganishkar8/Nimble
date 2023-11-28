@@ -245,6 +245,10 @@ const LeadLog = (props, { navigation }) => {
         setErrorModalVisible(false);
     };
 
+    const onGoBack = () => {
+        props.navigation.goBack();
+    }
+
     return (
 
         <SafeAreaView style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
@@ -257,7 +261,7 @@ const LeadLog = (props, { navigation }) => {
 
                 <View style={{ width: '100%', height: 56, alignItems: 'center', justifyContent: 'center', }}>
 
-                    <HeadComp textval={language[0][props.language].str_leadlog} props={props} />
+                    <HeadComp textval={language[0][props.language].str_leadlog} props={props} onGoBack={onGoBack} />
 
                 </View>
 

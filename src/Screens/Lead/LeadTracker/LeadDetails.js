@@ -188,6 +188,9 @@ const LeadDetails = (props, { navigation, route }) => {
 
     }
 
+    const onGoBack = () => {
+        props.navigation.goBack();
+    }
 
     return (
 

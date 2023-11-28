@@ -40,6 +40,10 @@ const LanguageSettingsScreen = (props, { navigation }) => {
         return true; // Prevent default back button behavior
     };
 
+    const onGoBack = () => {
+        props.navigation.goBack();
+    }
+
     return (
         // enclose all components in this View tag
         <SafeAreaView style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
@@ -56,7 +60,7 @@ const LanguageSettingsScreen = (props, { navigation }) => {
 
                     }}>
 
-                        <HeadComp textval={'Language Settings'} props={props} />
+                        <HeadComp textval={'Language Settings'} props={props} onGoBack={onGoBack} />
 
                     </View>
 

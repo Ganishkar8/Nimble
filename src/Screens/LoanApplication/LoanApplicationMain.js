@@ -8,6 +8,7 @@ import {
     ScrollView,
     TouchableOpacity,
     SafeAreaView,
+    BackHandler
 } from 'react-native';
 
 //redux
@@ -24,6 +25,7 @@ import ButtonViewComp from '../../Components/ButtonViewComp';
 import Commonstyles from '../../Utils/Commonstyles';
 import { useIsFocused } from '@react-navigation/native';
 import BottomToastModal from '../../Components/BottomToastModal';
+import { useFocusEffect } from '@react-navigation/native';
 
 
 const data = [
@@ -152,17 +154,31 @@ const LoanApplicationMain = (props, { navigation }) => {
 
     useEffect(() => {
 
-        showLeadBottomSheet();
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
-        getDisplayerOrder();
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
         //getProcessSubStage();
 
         return () => {
             setIsMounted(false);
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
+            backHandler.remove();
         }
-    }, [navigation, isScreenVisible]);
+    }, [props.navigation, isScreenVisible]);
 
+    const handleBackButton = () => {
+        onGoBack();
+        return true; // Prevent default back button behavior
+    };
+
+    useFocusEffect(
+        React.useCallback(() => {
+            showLeadBottomSheet();
+            getDisplayerOrder();
+            return () => {
+                console.log('Screen is blurred');
+            };
+        }, [])
+    );
 
     const getDisplayerOrder = () => {
 
@@ -218,41 +234,41 @@ const LoanApplicationMain = (props, { navigation }) => {
             if (firstIncompleteData.nestedSubData.length > 0) {
                 let currentPage = firstIncompleteData.nestedSubData[0];
                 if (currentPage.pageCode == 'PRF_SHRT_APLCT_BSC_DTLS') {
+                    global.CLIENTTYPE = 'APPL';
                     props.navigation.navigate('ProfileShortBasicDetails');
-                    global.CLIENTTYPE = 'APPL';
                 } else if (currentPage.pageCode == 'PRF_SHRT_APLCT_VRF_STATUS') {
+                    global.CLIENTTYPE = 'APPL';
                     props.navigation.navigate('ProfileShortKYCVerificationStatus');
-                    global.CLIENTTYPE = 'APPL';
                 } else if (currentPage.pageCode == 'PRF_SHRT_APLCT_PRSNL_DTLS') {
+                    global.CLIENTTYPE = 'APPL';
                     props.navigation.navigate('ProfileShortApplicantDetails');
-                    global.CLIENTTYPE = 'APPL';
                 } else if (currentPage.pageCode == 'PRF_SHRT_APLCT_ADDRS_DTLS') {
-                    props.navigation.navigate('AddressMainList');
                     global.CLIENTTYPE = 'APPL';
+                    props.navigation.navigate('AddressMainList');
                 } else if (currentPage.pageCode == 'PRF_SHRT_COAPLCT_BSC_DTLS') {
                     props.navigation.navigate('ProfileShortBasicDetails');
                     global.CLIENTTYPE = 'CO-APPL';
                 } else if (currentPage.pageCode == 'PRF_SHRT_COAPLCT_VRF_STATUS') {
-                    props.navigation.navigate('ProfileShortKYCVerificationStatus');
                     global.CLIENTTYPE = 'CO-APPL';
+                    props.navigation.navigate('ProfileShortKYCVerificationStatus');
                 } else if (currentPage.pageCode == 'PRF_SHRT_COAPLCT_PRSNL_DTLS') {
-                    props.navigation.navigate('ProfileShortApplicantDetails');
                     global.CLIENTTYPE = 'CO-APPL';
+                    props.navigation.navigate('ProfileShortApplicantDetails');
                 } else if (currentPage.pageCode == 'PRF_SHRT_COAPLCT_ADDRS_DTLS') {
-                    props.navigation.navigate('AddressMainList');
                     global.CLIENTTYPE = 'CO-APPL';
-                } else if (currentPage.pageCode == 'PRF_SHRT_GRNTR_BSC_DTLS') {
-                    props.navigation.navigate('ProfileShortBasicDetails');
-                    global.CLIENTTYPE = 'GRNTR';
-                } else if (currentPage.pageCode == 'PRF_SHRT_GRNTR_VRF_STATUS') {
-                    props.navigation.navigate('ProfileShortKYCVerificationStatus');
-                    global.CLIENTTYPE = 'GRNTR';
-                } else if (currentPage.pageCode == 'PRF_SHRT_GRNTR_PRSNL_DTLS') {
-                    props.navigation.navigate('ProfileShortApplicantDetails');
-                    global.CLIENTTYPE = 'GRNTR';
-                } else if (currentPage.pageCode == 'PRF_SHRT_GRNTR_ADDRS_DTLS') {
                     props.navigation.navigate('AddressMainList');
+                } else if (currentPage.pageCode == 'PRF_SHRT_GRNTR_BSC_DTLS') {
                     global.CLIENTTYPE = 'GRNTR';
+                    props.navigation.navigate('ProfileShortBasicDetails');
+                } else if (currentPage.pageCode == 'PRF_SHRT_GRNTR_VRF_STATUS') {
+                    global.CLIENTTYPE = 'GRNTR';
+                    props.navigation.navigate('ProfileShortKYCVerificationStatus');
+                } else if (currentPage.pageCode == 'PRF_SHRT_GRNTR_PRSNL_DTLS') {
+                    global.CLIENTTYPE = 'GRNTR';
+                    props.navigation.navigate('ProfileShortApplicantDetails');
+                } else if (currentPage.pageCode == 'PRF_SHRT_GRNTR_ADDRS_DTLS') {
+                    global.CLIENTTYPE = 'GRNTR';
+                    props.navigation.navigate('AddressMainList');
                 }
 
 
@@ -358,7 +374,7 @@ const LoanApplicationMain = (props, { navigation }) => {
 
 
     const onGoBack = () => {
-        props.navigation.goBack();
+        props.navigation.replace('HomeScreen');
     }
 
     return (

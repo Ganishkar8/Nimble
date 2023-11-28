@@ -70,6 +70,8 @@ export const language = [
       str_yesdelete: 'Yes,Delete',
       str_error: 'Error',
       str_ok: 'Ok',
+      str_yes: 'Yes',
+      str_no: 'No',
       str_errFirstname: 'Please Enter FIRST NAME',
       str_errMiddlename: 'Please Enter MIDDLE NAME',
       str_errLastname: 'Please Enter LAST NAME',
@@ -215,6 +217,7 @@ export const language = [
       str_aadharsuccess: 'Aadhar Authentication Successful',
       str_proceed: 'Proceed',
       str_view: 'View',
+      str_deletedesc: 'Are you sure you want to delete?',
       str_aadhaarpdfopen: 'Password of E-Aadhaar is the combination of the \nfirst 4 letters of name in CAPITAL and the year of \nbirth (YYYY). \nEg: If customer name is Sobha and year of birth is \n2000 then password of E -Aadhar will be \nSOBH2000.',
     },
 

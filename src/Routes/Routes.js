@@ -68,46 +68,6 @@ const Route = () => {
         />
 
 
-        <Stack.Screen
-          name="AddressMainList"
-          component={AddressMainList}
-          options={{ headerShown: false }}
-        />
-
-        <Stack.Screen
-          name="DemographicsGSTDetails"
-          component={DemographicsGSTDetails}
-          options={{ headerShown: false }}
-        />
-
-        <Stack.Screen
-          name="AddressDetails"
-          component={AddressDetails}
-          options={{ headerShown: false }}
-        />
-
-        <Stack.Screen
-          name="DemographicsAddressDetails"
-          component={DemographicsAddressDetails}
-          options={{ headerShown: false }}
-        />
-
-        <Stack.Screen
-          name="BankDetails"
-          component={BankDetails}
-          options={{ headerShown: false }}
-        />
-
-        <Stack.Screen
-          name="LoanDemographicsGSTDetails"
-          component={LoanDemographicsGSTDetails}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="LoanDemographicsFinancialDetails"
-          component={LoanDemographicsFinancialDetails}
-          options={{ headerShown: false }}
-        />
       </Stack.Navigator>
     </NavigationContainer>
   );
