@@ -48,31 +48,8 @@ const ProfessionalDetailsScreen = (props, { navigation }) => {
         return true; // Prevent default back button behavior
     };
 
-    const getProfessionalDetails = () => {
-
-        const baseURL = '8901'
-        setLoading(true)
-        apiInstance(baseURL).post(`/api/v1/user-personal-details/getall/userID/${global.USERID}`)
-            .then(async (response) => {
-                // Handle the response data
-                console.log("ProfessionalApiResponse::" + JSON.stringify(response.data));
-                setLoading(false)
-                setAgentType(response.data.agentType)
-                setagencyName(response.data.agencyName)
-                setSupervisorID(response.data.supervisorName)
-                //alert(JSON.stringify(response.data))
-
-
-            })
-            .catch((error) => {
-                // Handle the error
-                console.log("Error" + JSON.stringify(error.response))
-                setLoading(false)
-                alert(error);
-            });
-
-
-
+    const onGoBack = () => {
+        props.navigation.goBack();
     }
 
     return (
@@ -90,7 +67,7 @@ const ProfessionalDetailsScreen = (props, { navigation }) => {
                         width: '100%', height: 56, alignItems: 'center', justifyContent: 'center',
 
                     }}>
-                        <HeadComp textval={'Professional Details'} props={props} />
+                        <HeadComp textval={'Professional Details'} props={props} onGoBack={onGoBack} />
 
                     </View>
 

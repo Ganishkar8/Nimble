@@ -1,42 +1,20 @@
-/* eslint-disable prettier/prettier */
+
 import databaseInstance from '../DatabaseInstance';
 
 const tableName = 'tbl_loanApplication';
 
-const insertSystemMandatoryFields = (
-  moduleID,
-  fieldName,
-  isMandatory,
-  fieldUIID,
-  fieldTabID,
-  moduleTypeID,
-  isDisable,
-  isCaptionChange,
-  fieldCaptionChange,
-  isHide,
-  minLength,
-  maxLength,
-) => {
+const insertLoanApplication = (id, clientType, loan_application_number, temp_number, branch_id, lead_id, customer_category, customer_subcategory, customer_type, loan_type, loan_purpose,
+  product, loan_amount, workflow_id, source_id, consent, is_active, status, application_applied_by, application_creation_date, lms_application_number, is_manual_kyc, manual_kyc_status, manual_kyc_approved_by, manual_kyc_approved_date, created_by,
+  created_date, modified_by, modified_date, supervised_by, supervised_date) => {
+
   const db = databaseInstance.getInstance();
 
   return new Promise((resolve, reject) => {
+
     db.transaction(tx => {
       tx.executeSql(
-        `INSERT INTO ${tableName} (ModuleID, FieldName, IsMandatory, FieldUIID, FieldTabID, ModuleTypeID, IsDisable, IsCaptionChange, FieldCaptionChange , IsHide, MinLength, MaxLength) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          moduleID,
-          fieldName,
-          isMandatory,
-          fieldUIID,
-          fieldTabID,
-          moduleTypeID,
-          isDisable,
-          isCaptionChange,
-          fieldCaptionChange,
-          isHide,
-          minLength,
-          maxLength,
-        ],
+        `INSERT OR REPLACE INTO ${tableName} (id,clientType,loan_application_number,temp_number,branch_id,lead_id,customer_category,customer_subcategory,customer_type,loan_type,loan_purpose,product,loan_amount,workflow_id,source_id,consent,is_active,status,application_applied_by,application_creation_date,lms_application_number,is_manual_kyc,manual_kyc_status,manual_kyc_approved_by,manual_kyc_approved_date,created_by,created_date,modified_by,modified_date,supervised_by,supervised_date) VALUES (?, ?, ?, ?, ?,?,?,?,?,?,?, ?, ?, ?, ?, ?,?,?,?,?,?,?, ?, ?, ?, ?, ?,?,?,?,?)`,
+        [id, clientType, loan_application_number, temp_number, branch_id, lead_id, customer_category, customer_subcategory, customer_type, loan_type, loan_purpose, product, loan_amount, workflow_id, source_id, consent, is_active, status, application_applied_by, application_creation_date, lms_application_number, is_manual_kyc, manual_kyc_status, manual_kyc_approved_by, manual_kyc_approved_date, created_by, created_date, modified_by, modified_date, supervised_by, supervised_date],
         (_, result) => {
           resolve(result);
         },
@@ -48,23 +26,24 @@ const insertSystemMandatoryFields = (
   });
 };
 
-const getAllSystemMandatoryFields = () => {
+
+const getLoanAppBasedOnID = (id, clientType) => {
   const db = databaseInstance.getInstance();
 
   return new Promise((resolve, reject) => {
     db.transaction(tx => {
       tx.executeSql(
-        `SELECT * FROM ${tableName}`,
-        [],
+        `SELECT * FROM ${tableName} WHERE id = ? AND clientType=?`,
+        [id, clientType],
         (_, result) => {
           const rows = result.rows;
-          const systemMandatoryFields = [];
+          const clientData = [];
 
           for (let i = 0; i < rows.length; i++) {
-            systemMandatoryFields.push(rows.item(i));
+            clientData.push(rows.item(i));
           }
 
-          resolve(systemMandatoryFields);
+          resolve(clientData);
         },
         error => {
           reject(error);
@@ -74,62 +53,8 @@ const getAllSystemMandatoryFields = () => {
   });
 };
 
-const getSystemMandatoryFieldsBasedOnFieldUIID = fielduiid => {
-  const db = databaseInstance.getInstance();
 
-  return new Promise((resolve, reject) => {
-    db.transaction(tx => {
-      tx.executeSql(
-        `SELECT * FROM ${tableName} WHERE FieldUIID = ?`,
-        [fielduiid],
-        (_, result) => {
-          const rows = result.rows;
-          const systemMandatoryFields = [];
-
-          for (let i = 0; i < rows.length; i++) {
-            systemMandatoryFields.push(rows.item(i));
-          }
-
-          resolve(systemMandatoryFields);
-        },
-        error => {
-          reject(error);
-        },
-      );
-    });
-  });
-};
-
-const getSystemMandatoryFieldsBasedOnFieldUIIDModuleID = (
-  fielduiid,
-  moduleID,
-) => {
-  const db = databaseInstance.getInstance();
-
-  return new Promise((resolve, reject) => {
-    db.transaction(tx => {
-      tx.executeSql(
-        `SELECT * FROM ${tableName} WHERE FieldUIID = ? AND moduleID = ?`,
-        [fielduiid, moduleID],
-        (_, result) => {
-          const rows = result.rows;
-          const systemMandatoryFields = [];
-
-          for (let i = 0; i < rows.length; i++) {
-            systemMandatoryFields.push(rows.item(i));
-          }
-
-          resolve(systemMandatoryFields);
-        },
-        error => {
-          reject(error);
-        },
-      );
-    });
-  });
-};
-
-const deleteAllSystemMandatoryFields = async () => {
+const deleteAllLoan = async () => {
   try {
     const db = databaseInstance.getInstance(); // Execute the DELETE query
 
@@ -144,9 +69,7 @@ const deleteAllSystemMandatoryFields = async () => {
 };
 
 export default {
-  getAllSystemMandatoryFields,
-  insertSystemMandatoryFields,
-  deleteAllSystemMandatoryFields,
-  getSystemMandatoryFieldsBasedOnFieldUIID,
-  getSystemMandatoryFieldsBasedOnFieldUIIDModuleID,
+  insertLoanApplication,
+  getLoanAppBasedOnID,
+  deleteAllLoan,
 };

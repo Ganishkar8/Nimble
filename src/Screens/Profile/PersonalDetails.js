@@ -43,6 +43,10 @@ const PersonalDetailsScreen = (props, { navigation, route }) => {
         return true; // Prevent default back button behavior
     };
 
+    const onGoBack = () => {
+        props.navigation.goBack();
+    }
+
     return (
         // enclose all components in this View tag
         <SafeAreaView style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
@@ -58,7 +62,7 @@ const PersonalDetailsScreen = (props, { navigation, route }) => {
                         width: '100%', height: 56, alignItems: 'center', justifyContent: 'center',
 
                     }}>
-                        <HeadComp textval={'Personal Details'} props={props} />
+                        <HeadComp textval={'Personal Details'} props={props} onGoBack={onGoBack} />
 
                     </View>
 

@@ -87,7 +87,7 @@ const ConsentScreen = (props, { navigation }) => {
                         if (global.DEBUG_MODE) console.log("TempIDCreationApiResponse::" + JSON.stringify(response.data));
                         global.TEMPAPPID = response.data.tempNumber;
                         global.LOANAPPLICATIONID = response.data.id;
-                        props.navigation.replace('LoanApplicationMain')
+                        props.navigation.replace('LoanApplicationMain', { fromScreen: 'ConsentScreen' })
                     } else {
                         setApiError('Not a Valid Response from Api');
                         setErrorModalVisible(true)

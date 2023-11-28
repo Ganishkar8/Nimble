@@ -64,11 +64,6 @@ export default HomeStack = () => {
         component={ReAssign}
         options={{ headerShown: false, tabBarVisible: false }}
       />
-      <Stack.Screen
-        name="ProfileShortBasicDetails"
-        component={ProfileShortBasicDetails}
-        options={{ headerShown: false, tabBarVisible: false }}
-      />
 
       <Stack.Screen
         name="LoanApplicationTracker"
@@ -114,18 +109,6 @@ export default HomeStack = () => {
       />
 
       <Stack.Screen
-        name="AddressMainList"
-        component={AddressMainList}
-        options={{ headerShown: false, tabBarVisible: false }}
-      />
-
-      <Stack.Screen
-        name="AddressDetails"
-        component={AddressDetails}
-        options={{ headerShown: false, tabBarVisible: false }}
-      />
-
-      <Stack.Screen
         name="LoanApplicationMain"
         component={LoanApplicationMain}
         options={{ headerShown: false, tabBarVisible: false }}
@@ -134,6 +117,12 @@ export default HomeStack = () => {
       <Stack.Screen
         name="ConsentScreen"
         component={ConsentScreen}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="ProfileShortBasicDetails"
+        component={ProfileShortBasicDetails}
         options={{ headerShown: false, tabBarVisible: false }}
       />
 
@@ -165,6 +154,18 @@ export default HomeStack = () => {
         name="ProfileShortApplicantDetails"
         component={ProfileShortApplicantDetails}
         options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="AddressMainList"
+        component={AddressMainList}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="AddressDetails"
+        component={AddressDetails}
+        options={{ headerShown: false, tabBarVisible: false }}
       />
 
     </Stack.Navigator>

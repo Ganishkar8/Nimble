@@ -68,6 +68,8 @@ const HomeScreen = (props, { navigation }) => {
         setErrorModalVisible(false);
     };
 
+
+
     const getProfileDetails = () => {
 
         const baseURL = '8901'
@@ -265,7 +267,6 @@ const HomeScreen = (props, { navigation }) => {
 
                                 {global.USERTYPEID == '1164' &&
                                     <TouchableOpacity onPress={() => {
-                                        props.navigation.navigate('ConsentScreen');
                                         global.isDedupeDone = '0';
                                         global.isMobileVerified = '0';
                                         global.CLIENTID = '';
@@ -273,6 +274,7 @@ const HomeScreen = (props, { navigation }) => {
                                         global.LOANAPPLICATIONID = '';
                                         global.COMPLETEDMODULE = '';
                                         global.COMPLETEDPAGE = '';
+                                        props.navigation.navigate('ConsentScreen');
                                     }} activeOpacity={0.5} style={{ width: '93%', height: 150, backgroundColor: '#ffffff99', marginTop: '3.5%', borderRadius: 10 }}>
                                         <View >
 

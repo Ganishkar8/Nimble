@@ -20,31 +20,48 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import Common from '../../../Utils/Common';
 import ErrorModal from '../../../Components/ErrorModal';
 import Loading from '../../../Components/Loading';
+import apiInstance from '../../../Utils/apiInstance';
+import tbl_loanApplication from '../../../Database/Table/tbl_loanApplication';
+import tbl_client from '../../../Database/Table/tbl_client';
+import tbl_clientaddressinfo from '../../../Database/Table/tbl_clientaddressinfo';
 
 
 const LoanApplicationTrackerDetails = (props, { navigation }) => {
 
-    const [listData, setListData] = useState([])
+    const [listData, setListData] = useState(props.route.params.leadData)
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const [apiError, setApiError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [bg, setBg] = useState('');
 
     useEffect(() => {
-        //alert(JSON.stringify(props.route.params.leadData))
-        setListData(props.route.params.leadData)
-    }, []);
+        props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
+        if (global.LOANSTATUS == 'MANUAL KYC PENDING' || global.LOANSTATUS == 'INPROGRESS') {
+            setBg('YELLOW')
+        } else if (global.LOANSTATUS == 'MANUAL KYC APPROVED' || global.LOANSTATUS == 'APPROVED') {
+            setBg('GREEN')
+        } else if (global.LOANSTATUS == 'MANUAL KYC REJECTED' || global.LOANSTATUS == 'REJECTED') {
+            setBg('RED')
+        } else if (global.LOANSTATUS == 'DRAFT') {
+            setBg('GREY')
+        }
+        return () => {
+            props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
+
+        }
+    }, [props.navigation]);
 
     const getLoanAppIdDetails = () => {
 
         const baseURL = '8901'
         setLoading(true)
-        let loanAppIDNew = props.route.params.leadData.loanApplicationId
+        let loanAppIDNew = listData.loanApplicationId
 
         apiInstance(baseURL).get(`/api/v2/profile-short/${loanAppIDNew}`)
             .then((response) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log("LoanAppDetails::" + JSON.stringify(response.data));
-
+                insertData(response.data);
             })
             .catch((error) => {
                 // Handle the error
@@ -56,6 +73,50 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
                 }
             });
     }
+
+    const insertData = async (value) => {
+
+        global.COMPLETEDSUBSTAGE = value.currentStatus.subStageCode;
+        global.COMPLETEDMODULE = value.currentStatus.moduleCode;
+        global.COMPLETEDPAGE = value.currentStatus.pageCode;
+        global.LOANAPPLICATIONID = value.id;
+        global.TEMPAPPID = value.loanApplicationNumber;
+
+        const deletePromises = [
+            tbl_client.deleteAllClient(),
+            tbl_loanApplication.deleteAllLoan(),
+            tbl_clientaddressinfo.deleteAllAddress(),
+        ];
+        await Promise.all(deletePromises);
+        var loanApplicationID = value.id;
+        tbl_loanApplication.insertLoanApplication(loanApplicationID, 'APPL', value.loanApplicationNumber, value.tempNumber, value.branchId, value.leadId, value.customerCategory, value.customerSubcategory, value.customerType, value.loanType, value.loanPurpose,
+            value.product, value.loanAmount, value.workflowId, '', value.consent, '', '', value.applicationAppliedBy, '', value.lmsApplicationNumber, value.isManualKyc, value.manualKycStatus, '', '', value.createdBy, value.createdDate, '', value.modifiedDate, '', '')
+
+        await value.clientDetail.forEach(async (client) => {
+            var dob = '';
+            if (client.dateOfBirth && client.dateOfBirth != undefined) {
+                dob = Common.convertDateFormat(client.dateOfBirth);
+            }
+            await tbl_client.insertClient(client.id, loanApplicationID, client.clientType, client.relationType, client.title, client.firstName, client.middleName, client.lastName, dob, client.age, client.fatherName, client.spouseName, client.caste, client.religion, client.motherTongue, client.educationQualification, client.gender, client.maritalStatus, client.mobileNumber, client.email, client.isKycManual,
+                client.kycTypeId1, client.kycIdValue1, client.kycType1ExpiryDate, client.kycTypeId2, client.kycIdValue2, client.kycType2ExpiryDate, client.kycTypeId3, client.kycIdValue3, client.kycType3ExpiryDate, client.kycTypeId4, client.kycIdValue4, client.kycType4ExpiryDate, client.msme, client.aadharNumberVerified, client.panVerified, client.udyamRegistrationNumber, client.udyamRegistrationNumberVerified, client.mobileNumberVerified, client.emailVerified, value.dedupeCheck, client.dedupePassed, client.dmsId, client.imageName, client.geoCode, 'true', '', '', '', '', '', '', '', value.lmsClientId, value.lmsCustomerTypeId);
+
+            // If there are clientAddress details, iterate through them
+            if (client.clientAddress && client.clientAddress.length > 0) {
+
+                if (Common.DEBUG_MODE) console.log('Client Address Details:' + client.clientAddress);
+                client.clientAddress.forEach((address) => {
+                    tbl_clientaddressinfo.insertClientAddress(loanApplicationID, address.id, client.id, client.clientType, address.addressType, address.addressLine1, address.addressLine2, address.landmark, address.pincode, address.city, address.district, address.state, address.country, address.mobileOrLandLineNumber, address.emailId, address.addressOwnership, address.ownerDetails, address.ownerName, address.geoClassification, address.yearsAtResidence, address.yearsInCurrentCityOrTown, 'true', '', '', '', '', '', '', client.aadharNumberVerified);
+                });
+            }
+
+        });
+        setLoading(false);
+        props.navigation.navigate('LoanApplicationMain', { fromScreen: 'ApplicationTrackerDetails' })
+    }
+
+    const closeErrorModal = () => {
+        setErrorModalVisible(false);
+    };
 
     return (
         <View style={{ flex: 1, backgroundColor: '#fefefe' }}>
@@ -85,7 +146,7 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
                             <Text style={{ color: Colors.black, fontSize: 14, marginLeft: 26, fontFamily: 'Poppins-Medium' }}>{language[0][props.language].str_status}</Text>
                         </View>
                         <View style={{ width: '65%', flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'flex-end' }}>
-                            <View style={listData.status == 'APPROVED' ? styles.approvedbackground : listData.status == 'PENDING' ? styles.pendingbackground : listData.status == 'DRAFT' ? styles.draftbackground : styles.rejectedbackground}>
+                            <View style={bg == 'GREEN' ? styles.approvedbackground : bg == 'YELLOW' ? styles.pendingbackground : bg == 'GREY' ? styles.draftbackground : styles.rejectedbackground}>
                                 <Text style={{ color: Colors.black, fontSize: 12, fontFamily: 'Poppins-Medium' }}>{listData.status}</Text>
                             </View>
                         </View>
@@ -129,7 +190,7 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
                                 <Text style={styles.headText}>{language[0][props.language].str_completiondate}</Text>
                             </View>
                             <View style={{ width: '55%' }}>
-                                <Text style={styles.childText}>:  {listData.status == 'APPROVED' ? Common.formatDate(listData.completionDate) : listData.status == 'REJECTED' ? Common.formatDate(listData.completionDate) : ''} </Text>
+                                <Text style={styles.childText}>:  {bg == 'GREEN' ? Common.formatDate(listData.completionDate) : bg == 'RED' ? Common.formatDate(listData.completionDate) : ''} </Text>
                             </View>
                         </View>
                         <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, marginBottom: 5 }}>
@@ -145,7 +206,7 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
             </View>
 
             <TouchableOpacity activeOpacity={0.5} style={{ width: '100%', marginTop: '8%', alignItems: 'center' }}
-                onPress={() => alert('Hello')}>
+                onPress={() => getLoanAppIdDetails()}>
                 <View style={{ flexDirection: 'row' }}>
 
                     <View style={{ width: '52%', justifyContent: 'center' }}>

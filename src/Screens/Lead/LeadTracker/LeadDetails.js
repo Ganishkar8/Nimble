@@ -29,6 +29,7 @@ import tbl_SystemCodeDetails from '../../../Database/Table/tbl_SystemCodeDetails
 import Common from '../../../Utils/Common';
 import Commonstyles from '../../../Utils/Commonstyles';
 import { useIsFocused } from '@react-navigation/native';
+import ErrorModal from '../../../Components/ErrorModal';
 
 const data = [
 
@@ -118,10 +119,11 @@ const LeadDetails = (props, { navigation, route }) => {
             .then((response) => {
                 // Handle the response data
                 if (response.status == 200) {
-                    console.log("ResponseDataApi::" + JSON.stringify(response.data));
+                    if (global.DEBUG_MODE) console.log("LeadDetailsApiResponse::" + JSON.stringify(response.data));
                     setLeadData(response.data)
                 } else {
-                    alert('Server Error!!')
+                    setApiError('Server Error!!');
+                    setErrorModalVisible(true)
                 }
                 setLoading(false)
                 // const decodedToken = jwtDecode(response.data.jwtToken);
@@ -130,7 +132,11 @@ const LeadDetails = (props, { navigation, route }) => {
             .catch((error) => {
                 // Handle the error
                 setLoading(false)
-                console.error("ErrorDataApi::" + error);
+                if (global.DEBUG_MODE) console.log('LeadDetailsApiResponse::::' + JSON.stringify(error.response));
+                if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
             });
     }
 
@@ -188,11 +194,18 @@ const LeadDetails = (props, { navigation, route }) => {
 
     }
 
+    const closeErrorModal = () => {
+        setErrorModalVisible(false);
+    };
+
+    const onGoBack = () => {
+        props.navigation.goBack();
+    }
 
     return (
 
         <SafeAreaView style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
-
+            <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
 
             <ScrollView style={styles.scrollView}

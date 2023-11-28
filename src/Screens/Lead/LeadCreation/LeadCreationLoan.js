@@ -681,6 +681,10 @@ const LeadCreationLoan = (props, { navigation }) => {
         setErrorModalVisible(false);
     };
 
+    const onGoBack = () => {
+        props.navigation.goBack();
+    }
+
     return (
         // enclose all components in this View tag
         <SafeAreaView style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
@@ -690,7 +694,7 @@ const LeadCreationLoan = (props, { navigation }) => {
                 width: '100%', height: 56, alignItems: 'center', justifyContent: 'center',
 
             }}>
-                <HeadComp textval={leadType != 'COMP' ? language[0][props.language].str_leadcreation : language[0][props.language].str_captureddetails} props={props} />
+                <HeadComp textval={leadType != 'COMP' ? language[0][props.language].str_leadcreation : language[0][props.language].str_captureddetails} props={props} onGoBack={onGoBack} />
             </View>
 
             <View style={{ width: '100%', justifyContent: 'center', alignItems: 'flex-end' }}>

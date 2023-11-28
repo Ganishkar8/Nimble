@@ -7,7 +7,8 @@ import {
   ScrollView,
   TextInput,
   Text,
-  Image
+  Image,
+  BackHandler
 } from 'react-native';
 import apiInstance from '../../../Utils/apiInstance';
 import apiInstancelocal from '../../../Utils/apiInstancelocal';
@@ -42,7 +43,9 @@ import Geolocation from 'react-native-geolocation-service';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useIsFocused } from '@react-navigation/native';
-
+import ErrorModal from '../../../Components/ErrorModal';
+import ImageBottomPreview from '../../../Components/ImageBottomPreview';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 const ProfileShortApplicantDetails = (props, { navigation }) => {
 
@@ -101,6 +104,9 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
   const [imageUri, setImageUri] = useState(null);
   const [imageFile, setImageFile] = useState([]);
   const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
+  const showImageBottomSheet = () => { setBottomSheetVisible(true) };
+  const hideImageBottomSheet = () => setBottomSheetVisible(false);
+
   const [deleteVisible, setDeleteVisible] = useState(false);
   const [docID, setDocID] = useState('');
   const [fileName, setFileName] = useState('');
@@ -193,23 +199,39 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [apiError, setApiError] = useState('');
 
+  const [kycManual, setKYCManual] = useState('0');
+
   const isScreenVisible = useIsFocused();
 
   useEffect(() => {
     props.navigation
       .getParent()
       ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
 
-    makeSystemMandatoryFields();
-    getSystemCodeDetail();
-    getClientData();
-    getOneTimeLocation();
 
-    return () =>
-      props.navigation
-        .getParent()
-        ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
-  }, [navigation, isScreenVisible, gpslatlon]);
+    return () => {
+      props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
+      backHandler.remove();
+    }
+  }, [props.navigation, isScreenVisible, gpslatlon]);
+
+  const handleBackButton = () => {
+    onGoBack();
+    return true; // Prevent default back button behavior
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      makeSystemMandatoryFields();
+      getSystemCodeDetail();
+      getClientData();
+      getOneTimeLocation();
+      return () => {
+        console.log('Screen is blurred');
+      };
+    }, [])
+  );
 
   const getSystemCodeDetail = async () => {
 
@@ -483,7 +505,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
 
   const getClientData = async () => {
 
-    await tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID).then(value => {
+    await tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE).then(value => {
       if (value !== undefined && value.length > 0) {
         setTitleLabel(value[0].titleId);
         setFirstName(value[0].firstName);
@@ -500,6 +522,18 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
         setEADLabel(value[0].educationQualificationId);
         //getImage(value[0].image)
         //getImage('3728')
+        if (value[0].dmsId.length > 0) {
+          getImage(value[0].dmsId);
+        }
+
+        setKYCManual(value[0].isKycManual)
+        alert(value[0].isKycManual)
+        if (global.USERTYPEID == 1163) {
+          if (!(value[0].isKycManual == '1')) {
+            fieldsDisable();
+          }
+        }
+
         disableAadharFields(value[0].fatherName, value[0].spouseName);
       }
     })
@@ -525,12 +559,31 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
     }
   }
 
+  const fieldsDisable = () => {
+
+    setTitleDisable(true);
+    setFirstNameDisable(true);
+    setMiddleNameDisable(false);
+    setLastNameDisable(false);
+    setGenderDisable(true);
+    setDOBDisable(true);
+    setAgeDisable(true);
+    setFatherNameDisable(false)
+    setSpouseNameDisable(false)
+    setCasteDisable(true);
+    setReligionDisable(true);
+    setMotherTongueDisable(true);
+    setEADDisable(true);
+
+  }
+
   const getImage = (dmsID) => {
+
     Common.getNetworkConnection().then(value => {
       if (value.isConnected == true) {
         setLoading(true)
         const baseURL = '8094'
-        apiInstance(baseURL).get(`/api/documents/document/${dmsID}`)
+        apiInstance(baseURL).get(`/api/documents/document/${parseInt(dmsID)}`)
           .then(async (response) => {
             // Handle the response data
             console.log("GetPhotoApiResponse::" + JSON.stringify(response.data));
@@ -543,8 +596,8 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
           })
           .catch((error) => {
             // Handle the error
-            if (global.DEBUG_MODE) console.log("GetPhotoApiResponse::" + JSON.stringify(error.response.data));
             setLoading(false)
+            if (global.DEBUG_MODE) console.log("GetPhotoApiResponse::" + JSON.stringify(error.response.data));
             if (error.response.data != null) {
               setApiError(error.response.data.message);
               setErrorModalVisible(true)
@@ -563,6 +616,13 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
   }
 
   const uploadImage = async () => {
+
+    if (global.USERTYPEID == 1163) {
+      if (!(kycManual == '1')) {
+        props.navigation.replace('AddressMainList')
+        return;
+      }
+    }
 
     if (validate()) {
       showBottomSheet();
@@ -624,6 +684,10 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
   }
 
   const updateApplicantDetails = (id) => {
+    var manualKYC = false;
+    if (global.isAadharVerified == '1') {
+      manualKYC = true;
+    }
     if (validate()) {
       showBottomSheet();
     } else {
@@ -631,13 +695,12 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
         "isActive": true,
         "createdBy": global.USERID,
         "id": global.CLIENTID,
-        "clientType": "APPL",
-        "relationType": "",
+        "clientType": global.CLIENTTYPE,
         "title": TitleLabel,
         "firstName": firstName,
         "middleName": middleName,
         "lastName": lastName,
-        "dateOfBirth": '1998-04-20',
+        "dateOfBirth": Common.convertYearDateFormat(DOB),
         "age": parseInt(Age),
         "fatherName": FatherName,
         "spouseName": SpouseName,
@@ -650,6 +713,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
         "dmsId": id,
         "imageName": fileName,
         "geoCode": currentLatitude + "," + currentLongitude,
+        "kycManual": manualKYC,
       }
       const baseURL = '8901';
       setLoading(true);
@@ -670,7 +734,12 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
             global.COMPLETEDPAGE = 'PRF_SHRT_GRNTR_PRSNL_DTLS';
           }
           setLoading(false);
-          props.navigation.navigate('AddressMainList')
+          if (global.USERTYPEID == 1163) {
+            props.navigation.replace('AddressMainList')
+          } else {
+            updateLoanStatus();
+          }
+
         })
         .catch(error => {
           // Handle the error
@@ -679,6 +748,39 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
           alert(error);
         });
     }
+  };
+
+  const updateLoanStatus = () => {
+
+    const appDetails = {
+      "loanApplicationId": global.LOANAPPLICATIONID,
+      "loanWorkflowStage": "LN_APP_INITIATION",
+      "subStageCode": "PRF_SHRT",
+      "moduleCode": global.COMPLETEDMODULE,
+      "pageCode": global.COMPLETEDPAGE,
+      "status": "Completed"
+    }
+    const baseURL = '8901';
+    setLoading(true);
+    apiInstancelocal(baseURL)
+      .post(`/api/v2/loan-application-status/updateStatus`, appDetails)
+      .then(async response => {
+        // Handle the response data
+        if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
+        setLoading(false);
+        props.navigation.replace('AddressMainList')
+
+      })
+      .catch(error => {
+        // Handle the error
+        if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
+        setLoading(false);
+        if (error.response.data != null) {
+          setApiError(error.response.data.message);
+          setErrorModalVisible(true)
+        }
+      });
+
   };
 
   const zoomToMarker = () => {
@@ -1049,7 +1151,39 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
   };
 
   const onGoBack = () => {
-    props.navigation.navigate('LoanApplicationMain')
+    props.navigation.navigate('LoanApplicationMain', { fromScreen: 'PersonalDetail' })
+  }
+
+  const closeErrorModal = () => {
+    setErrorModalVisible(false);
+  };
+
+  const previewImage = () => {
+    setBottomSheetVisible(false);
+    props.navigation.navigate('PreviewImage', { imageName: fileName, imageUri: imageUri })
+  }
+
+  const reTakePhoto = () => {
+    setphotoOptionvisible(true)
+    setBottomSheetVisible(false);
+  }
+
+  const deletePhoto = () => {
+    setDeleteVisible(true);
+  }
+
+  const onDeleteorCancel = (value) => {
+    if (value == 'Cancel') {
+      setDeleteVisible(false);
+      hideImageBottomSheet();
+    } else {
+      setImageUri(null);
+      setFileName('');
+      setFileType('');
+      setImageFile('');
+      setDeleteVisible(false);
+      hideImageBottomSheet();
+    }
   }
 
   return (
@@ -1057,6 +1191,8 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
     <SafeAreaView
       style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
       <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
+      <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
+      <ImageBottomPreview bottomSheetVisible={bottomSheetVisible} previewImage={previewImage} hideBottomSheet={hideImageBottomSheet} reTakePhoto={reTakePhoto} fileName={fileName} detailHide={true} deleteVisible={deleteVisible} deletePhoto={deletePhoto} onDeleteorCancel={onDeleteorCancel} />
 
       <Modal
         isVisible={photoOptionvisible}
@@ -1122,7 +1258,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       </View>
 
       <ChildHeadComp
-        textval={language[0][props.language].str_applicantdetails}
+        textval={global.CLIENTTYPE == 'APPL' ? language[0][props.language].str_applicantdetails : global.CLIENTTYPE == 'CO-APPL' ? language[0][props.language].str_coapplicantdetails : language[0][props.language].str_guarantordetails}
       />
 
 
@@ -1613,7 +1749,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
 
                 <TouchableOpacity
                   onPress={() => {
-                    showBottomSheet();
+                    showImageBottomSheet();
                     setDeleteVisible(false);
                   }}>
                   <Entypo

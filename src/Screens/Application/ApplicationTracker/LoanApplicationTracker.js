@@ -63,7 +63,6 @@ const LeadManagement = (props, { navigation, route }) => {
         { name: 'Sort', isSelected: true, id: 'SO' },
         { name: 'Status', isSelected: false, id: 'ST' },
         { name: 'Date', isSelected: false, id: 'DT' },
-        { name: 'Type', isSelected: false, id: 'TP' },
         { name: 'Ageing', isSelected: false, id: 'AG' }
 
     ]
@@ -113,25 +112,6 @@ const LeadManagement = (props, { navigation, route }) => {
     const [systemMandatoryField, setSystemMandatoryField] = useState(props.mobilecodedetail.leadSystemMandatoryFieldDto);
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const [apiError, setApiError] = useState('');
-    const data1 = [
-        {
-            "customerName": "Ganishkar",
-            "agentName": "shahid s shahid / 329",
-            "approverName": "ANIL P SURDUSE / 327",
-            "loanApplicationId": 68,
-            "loanApplicationNumber": "123456789",
-            "wfId": "12",
-            "workflowStage": "Loan Application Initiation",
-            "loanType": "Unsecured",
-            "customerCategory": "Individual",
-            "customerType": "NEW",
-            "product": "Enterprise Loan Monthly",
-            "creationDate": "2023-11-24T16:22:42.399728",
-            "completionDate": "2023-11-24T16:22:42.399728",
-            "status": "APPROVED",
-            "ageing": 2
-        }
-    ]
 
     useEffect(() => {
         //getPendingData()
@@ -154,8 +134,6 @@ const LeadManagement = (props, { navigation, route }) => {
             setAgentIndex('')
             Common.getNetworkConnection().then(value => {
                 if (value.isConnected == true) {
-                    setPendingData(data1)
-                    setFilteredData(data1)
                     getPendingData(null, null, null, null, null, null, null, null);
                     //getDraftData();
                 } else {
@@ -184,7 +162,7 @@ const LeadManagement = (props, { navigation, route }) => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
             backHandler.remove();
         }
-    }, [navigation, isScreenVisible]);
+    }, [props.navigation, isScreenVisible]);
 
     const handleBackButton = () => {
         props.navigation.goBack();
@@ -613,12 +591,7 @@ const LeadManagement = (props, { navigation, route }) => {
             data2[i].checked = false
         }
         setStatusFilterValue(data2);
-        var data1 = typeDataArr;
-        for (let i = 0; i < data1.length; i++) {
 
-            data1[i].checked = false
-        }
-        setTypeDataArr(data1)
 
         setAgeFilterValue('')
         setVisible(false)
@@ -655,9 +628,21 @@ const LeadManagement = (props, { navigation, route }) => {
 
     const listView = ({ item }) => {
 
+        var bg = '';
+        if (item.status.toUpperCase() == 'MANUAL KYC PENDING' || item.status.toUpperCase() == 'INPROGRESS') {
+            bg = 'YELLOW'
+        } else if (item.status.toUpperCase() == 'MANUAL KYC APPROVED' || item.status.toUpperCase() == 'APPROVED') {
+            bg = 'GREEN'
+        } else if (item.status.toUpperCase() == 'MANUAL KYC REJECTED' || item.status.toUpperCase() == 'REJECTED') {
+            bg = 'RED'
+        } else if (item.status.toUpperCase() == 'DRAFT') {
+            bg = 'GREY'
+        }
+
         return (
             <View>
                 <TouchableOpacity onPress={() => {
+                    global.LOANSTATUS = item.status.toUpperCase();
                     props.navigation.navigate('LoanApplicationTrackerDetails', { leadData: item })
                 }} activeOpacity={0.9}>
                     <View style={{
@@ -676,7 +661,7 @@ const LeadManagement = (props, { navigation, route }) => {
                                 <Text style={{ color: Colors.black, fontSize: 14, marginLeft: 26, fontFamily: 'Poppins-Medium' }}>{language[0][props.language].str_appstatus}</Text>
                             </View>
                             <View style={{ width: '50%', flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'flex-end' }}>
-                                <View style={item.status.toUpperCase() == 'APPROVED' ? styles.approvedbackground : item.status.toUpperCase() == 'PENDING' ? styles.pendingbackground : item.status.toUpperCase() == 'DRAFT' ? styles.draftbackground : styles.rejectedbackground}>
+                                <View style={bg == 'GREEN' ? styles.approvedbackground : bg == 'YELLOW' ? styles.pendingbackground : bg == 'GREY' ? styles.draftbackground : styles.rejectedbackground}>
                                     <Text style={{ color: Colors.black, fontSize: 12, fontFamily: 'Poppins-Medium' }}>{item.status}</Text>
                                 </View>
                             </View>
@@ -740,7 +725,7 @@ const LeadManagement = (props, { navigation, route }) => {
                             </View>
                         </View>
                         }
-                        <View style={{ width: '100%', height: 5, backgroundColor: item.status.toUpperCase() == 'APPROVED' ? Colors.approvedBorder : item.status.toUpperCase() == 'PENDING' ? Colors.pendingBorder : item.status.toUpperCase() == 'DRAFT' ? Colors.lightgrey : Colors.rejectedBorder, marginTop: 13, borderBottomLeftRadius: 8, borderBottomRightRadius: 8 }} />
+                        <View style={{ width: '100%', height: 5, backgroundColor: bg == 'GREEN' ? Colors.approvedBorder : bg == 'YELLOW' ? Colors.pendingBorder : bg == 'GREY' ? Colors.lightgrey : Colors.rejectedBorder, marginTop: 13, borderBottomLeftRadius: 8, borderBottomRightRadius: 8 }} />
 
                     </View>
                 </TouchableOpacity>
@@ -1107,12 +1092,16 @@ const LeadManagement = (props, { navigation, route }) => {
                     icon="plus"
                     color={Colors.white}
                     style={styles.fab}
-                    label='Create New Lead'
+                    label='Create New Application'
                     onPress={() => {
-                        global.LEADTYPE = 'NEW';
-                        global.leadID = '';
-                        global.leadNumber = '';
-                        props.navigation.navigate('LeadCreationBasic', { leadData: [] });
+                        global.isDedupeDone = '0';
+                        global.isMobileVerified = '0';
+                        global.CLIENTID = '';
+                        global.isAadharVerified = '';
+                        global.LOANAPPLICATIONID = '';
+                        global.COMPLETEDMODULE = '';
+                        global.COMPLETEDPAGE = '';
+                        props.navigation.navigate('ConsentScreen');
                     }}
                 />
             }

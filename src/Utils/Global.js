@@ -29,5 +29,7 @@ global.isDedupeDone = '0';
 global.LOANAPPLICATIONID = '';
 global.CLIENTID = '';
 global.CLIENTTYPE = '';
+global.COMPLETEDSUBSTAGE = '';
 global.COMPLETEDMODULE = '';
 global.COMPLETEDPAGE = '';
+global.LOANSTATUS = '';

@@ -31,6 +31,7 @@ import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import apiInstancelocal from '../../../Utils/apiInstancelocal';
 import { profileAction } from '../../../Utils/redux/actions/ProfileAction';
 import Common from '../../../Utils/Common';
+import apiInstance from '../../../Utils/apiInstance';
 
 
 const statusDataArr = [
@@ -101,7 +102,7 @@ const ReAssign = (props, { navigation }) => {
         //         alert(error);
         //     });
 
-        apiInstancelocal('8901').post(`/api/v1/lead-Approved/ReAssignedDrowdown/${profileDetail.branchId}`)
+        apiInstance('8901').post(`/api/v1/lead-Approved/ReAssignedDrowdown/${profileDetail.branchId}`)
             .then(async (response) => {
                 //userresponse = true;
                 //if (reasonresponse && userresponse) {
@@ -214,7 +215,7 @@ const ReAssign = (props, { navigation }) => {
         }
         const baseURL = '8901'
         setLoading(true)
-        apiInstancelocal(baseURL).post(`api/v1/lead-Approved/ReAssignedByBm/true/${global.leadID}`, appDetails)
+        apiInstance(baseURL).post(`api/v1/lead-Approved/ReAssignedByBm/true/${global.leadID}`, appDetails)
             .then(async (response) => {
                 // Handle the response data
                 setLoading(false)
@@ -254,6 +255,10 @@ const ReAssign = (props, { navigation }) => {
 
         setErrMsg(errorMessage);
         return flag;
+    }
+
+    const onGoBack = () => {
+        props.navigation.goBack();
     }
 
     return (
@@ -331,7 +336,7 @@ const ReAssign = (props, { navigation }) => {
 
                     <View style={{ width: '100%', height: 56, alignItems: 'center', justifyContent: 'center', }}>
 
-                        <HeadComp textval={language[0][props.language].str_reassign} props={props} />
+                        <HeadComp textval={language[0][props.language].str_reassign} props={props} onGoBack={onGoBack} />
 
                     </View>
 

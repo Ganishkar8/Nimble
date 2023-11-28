@@ -25,7 +25,7 @@ const CheckBoxComp = ({ textCaption, ComponentName, textStyle, Visible, Disable,
         }}>
         <CheckBox
           value={isSelected}
-          enabled={!Disable}
+          disabled={Disable}
           onValueChange={valueChange}
           color="#000000"
           style={styles.checkbox}

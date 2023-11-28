@@ -874,6 +874,10 @@ const LeadManagement = (props, { navigation, route }) => {
         setErrorModalVisible(false);
     };
 
+    const onGoBack = () => {
+        props.navigation.goBack();
+    }
+
     return (
 
         <View style={{ flex: 1, backgroundColor: '#fefefe' }}>

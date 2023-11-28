@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, SafeAreaView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, SafeAreaView, StyleSheet, BackHandler } from 'react-native';
 import { React, useState, useRef, useEffect } from 'react';
 import MyStatusBar from '../../../Components/MyStatusBar';
 import HeadComp from '../../../Components/HeadComp';
@@ -18,6 +18,7 @@ import Common from '../../../Utils/Common';
 import tbl_clientaddressinfo from '../../../Database/Table/tbl_clientaddressinfo';
 import apiInstancelocal from '../../../Utils/apiInstancelocal';
 import ErrorModal from '../../../Components/ErrorModal';
+import tbl_client from '../../../Database/Table/tbl_client';
 
 const AddressDetails = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -153,28 +154,70 @@ const AddressDetails = (props, { navigation }) => {
 
 
   const [postorput, setPostORPut] = useState('post');
+  const [kycManual, setKYCManual] = useState('0');
 
 
   useEffect(() => {
     props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
-    // pickerData();
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
     getSystemCodeDetail()
     getExistingData()
 
 
-    return () =>
-      props.navigation
-        .getParent()
-        ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
-  }, [navigation]);
+    return () => {
+      props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
+      backHandler.remove();
+    }
+  }, [props.navigation]);
+
+  const handleBackButton = () => {
+    onGoBack();
+    return true; // Prevent default back button behavior
+  };
 
   const getExistingData = () => {
+
+    tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE).then(value => {
+      if (value !== undefined && value.length > 0) {
+
+        setKYCManual(value[0].isKycManual)
+
+        if (global.USERTYPEID == 1163) {
+          if (!(value[0].isKycManual == '1')) {
+            fieldsDisable();
+          }
+        }
+
+      }
+    })
+
+
     if (isNew != 'new') {
       setPostORPut('put')
       getExistingAddressData(isNew.loanApplicationId, isNew.id)
     } else {
       setPostORPut('post');
     }
+  }
+
+  const fieldsDisable = () => {
+
+    setAddressTypeDisable(true);
+    setAddressLine1Disable(true);
+    setAddressLine2Disable(false);
+    setLandmarkDisable(false);
+    setPincodeDisable(true);
+    setCityDisable(true);
+    setDistrictDisable(true);
+    setStateDisable(false)
+    setCountryDisable(false)
+    setGeoClassificationDisable(true);
+    setYearsAtResidenceDisable(true);
+    setYearsAtCityDisable(true);
+    setAddressOwnerTypeDisable(true);
+    setOwnerDetailsDisable(true);
+    setOwnerNameDisable(true);
+
   }
 
   const getExistingAddressData = (loanAppId, id) => {
@@ -521,6 +564,14 @@ const AddressDetails = (props, { navigation }) => {
   };
 
   const addressSubmit = () => {
+
+    if (global.USERTYPEID == 1163) {
+      if (!(kycManual == '1')) {
+        props.navigation.replace('AddressMainList')
+        return;
+      }
+    }
+
     if (addressID.length <= 0) {
       postAddressData();
     } else {
@@ -648,7 +699,7 @@ const AddressDetails = (props, { navigation }) => {
       global.LOANAPPLICATIONID,
       id,
       global.CLIENTID,
-      "APPL",
+      global.CLIENTTYPE,
       addressTypeLabel.trim(),
       addressLine1.trim(),
       addressLine2.trim(),
@@ -677,7 +728,7 @@ const AddressDetails = (props, { navigation }) => {
     )
       .then(result => {
         if (global.DEBUG_MODE) console.log('Inserted Address detail:', result);
-        props.navigation.navigate('AddressMainList')
+        props.navigation.replace('AddressMainList')
         // tbl_clientaddressinfo.getAllAddressDetailsForLoanID('12345')
         //   .then(data => {
         //     if (global.DEBUG_MODE) console.log('Address Detail:', data);

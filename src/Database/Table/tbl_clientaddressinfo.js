@@ -27,14 +27,14 @@ const insertClientAddress = (loanApplicationId, id, client_id, client_type, addr
     });
 };
 
-const getAllAddressDetailsForLoanID = (loanApplicationId) => {
+const getAllAddressDetailsForLoanID = (loanApplicationId, client_type) => {
     const db = databaseInstance.getInstance();
 
     return new Promise((resolve, reject) => {
         db.transaction(tx => {
             tx.executeSql(
-                `SELECT * FROM ${tableName} WHERE loanApplicationId = ${loanApplicationId}`,
-                [],
+                `SELECT * FROM ${tableName} WHERE loanApplicationId = ? AND client_type = ?`,
+                [loanApplicationId, client_type],
                 (_, result) => {
                     const rows = result.rows;
                     const addressDetails = [];
@@ -119,10 +119,24 @@ const deleteDataBasedOnLoanIDAndID = (loanApplicationId, id) => {
     });
 };
 
+const deleteAllAddress = () => {
+    const db = databaseInstance.getInstance();
+    db.transaction((tx) => {
+        tx.executeSql(`DELETE FROM ${tableName}`,
+            [],
+            (tx, results) => {
+                console.log('Rows affected:', results.rowsAffected);
+            }, (error) => {
+                console.error('Error executing SQL:', error);
+            });
+    });
+};
+
 export default {
     insertClientAddress,
     getAllAddressDetailsForLoanID,
     getAllAddressDetailsForLoanIDAndID,
     deleteDataBasedOnLoanIDAndID,
-    getAllAddressDetails
+    getAllAddressDetails,
+    deleteAllAddress
 };

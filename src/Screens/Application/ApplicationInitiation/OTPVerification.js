@@ -163,7 +163,7 @@ const OTPVerification = (props, { navigation }) => {
         return () => {
             clearInterval(timer); // Clean up the timer when the component unmounts
         };
-    }, [navigation, timeLeft]);
+    }, [props.navigation, timeLeft]);
 
 
 
