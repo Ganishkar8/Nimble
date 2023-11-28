@@ -33,7 +33,7 @@ const getLoanAppBasedOnID = (id, clientType) => {
   return new Promise((resolve, reject) => {
     db.transaction(tx => {
       tx.executeSql(
-        `SELECT * FROM ${tableName} WHERE loan_application_number = ? AND clientType=?`,
+        `SELECT * FROM ${tableName} WHERE id = ? AND clientType=?`,
         [id, clientType],
         (_, result) => {
           const rows = result.rows;
@@ -54,7 +54,7 @@ const getLoanAppBasedOnID = (id, clientType) => {
 };
 
 
-const deleteAllClient = async () => {
+const deleteAllLoan = async () => {
   try {
     const db = databaseInstance.getInstance(); // Execute the DELETE query
 
@@ -71,5 +71,5 @@ const deleteAllClient = async () => {
 export default {
   insertLoanApplication,
   getLoanAppBasedOnID,
-  deleteAllClient,
+  deleteAllLoan,
 };

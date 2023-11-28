@@ -14,6 +14,9 @@ const PreviewImage = (props, { navigation, route }) => {
 
     }, []);
 
+    const onGoBack = () => {
+        props.navigation.goBack();
+    }
 
     const getImageSize = (uri) => {
         Image.getSize(uri, (width, height) => {
@@ -32,7 +35,7 @@ const PreviewImage = (props, { navigation, route }) => {
                 width: '100%', height: 56, alignItems: 'center', justifyContent: 'center',
 
             }}>
-                <HeadComp textval={imageName} props={props} />
+                <HeadComp textval={imageName} props={props} onGoBack={onGoBack} />
             </View>
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#00000080' }}>
                 <Image

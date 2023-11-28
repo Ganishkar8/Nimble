@@ -185,6 +185,8 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const [locationSheetVisible, setLocationSheetVisible] = useState(false);
 
   const isScreenVisible = useIsFocused();
+  const [onlyView, setOnlyView] = useState(false);
+
 
   useEffect(() => {
     props.navigation
@@ -197,6 +199,12 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
     }
 
+    if (global.USERTYPEID == 1163) {
+      if (global.LOANSTATUS == 'MANUAL KYC PENDING' || global.LOANSTATUS == 'MANUAL KYC REJECTED') {
+
+      }
+      setOnlyView(true);
+    }
 
     return () => {
       props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
@@ -445,6 +453,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
 
   const buttonNext = () => {
+
     if (global.CLIENTTYPE == 'APPL') {
       global.COMPLETEDMODULE = 'PRF_SHRT_APLCT';
       global.COMPLETEDPAGE = 'PRF_SHRT_APLCT_VRF_STATUS';
@@ -665,6 +674,11 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
   const uploadImage = async () => {
 
+    if (onlyView) {
+      props.navigation.replace('ProfileShortApplicantDetails')
+      return;
+    }
+
     if (global.isAadharVerified == '1') {
       buttonNext();
       return;
@@ -781,14 +795,13 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
   const updateKYCDetails = (id) => {
     setLoading(true)
-    const appDetails = {
-      "id": global.LOANAPPLICATIONID,
+    const appDetails = [{
       "kycType": KycTypeLabel,
       "kycValue": kycID,
       "kycExpiryDate": "",
       "kycDMSId": parseInt(id),
       "createdBy": global.USERID,
-    }
+    }]
 
     const baseURL = '8901'
     apiInstancelocal(baseURL).post(`/api/v2/profile-short/manualKyc/${global.CLIENTID}`, appDetails)
@@ -818,7 +831,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   };
 
   const onGoBack = () => {
-    props.navigation.navigate('LoanApplicationMain')
+    props.navigation.navigate('LoanApplicationMain', { fromScreen: 'KYCVerificationStatus' })
   }
 
   return (

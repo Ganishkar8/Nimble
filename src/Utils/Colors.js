@@ -26,5 +26,6 @@ export default {
     draftBg: '#9f9f9f',
     skyblue: '#f5f8fa',
     disableBg: '#dfe6ea',
-    maroon: '#FFF2C5'
+    maroon: '#FFF2C5',
+    borderbg: '#DBDBDB'
 }

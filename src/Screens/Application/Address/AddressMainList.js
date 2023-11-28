@@ -30,6 +30,7 @@ import TextComp from '../../../Components/TextComp';
 import Common from '../../../Utils/Common';
 import ButtonViewComp from '../../../Components/ButtonViewComp';
 import DeleteConfirmModel from '../../../Components/DeleteConfirmModel';
+import tbl_client from '../../../Database/Table/tbl_client';
 
 const AddressMainList = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -42,6 +43,7 @@ const AddressMainList = (props, { navigation }) => {
   const [processModule, setProcessModule] = useState(props.mobilecodedetail.processModule);
   const [processModuleLength, setProcessModuleLength] = useState(0);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [kycManual, setKYCManual] = useState('0');
 
   useEffect(() => {
     props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
@@ -65,40 +67,27 @@ const AddressMainList = (props, { navigation }) => {
     return true; // Prevent default back button behavior
   };
 
-  // const getAddressDataOnline = () => {
-  //   const baseURL = '8901';
-  //   setLoading(true);
-  //   apiInstancelocal(baseURL)
-  //     .get(`api/v2/profile-short/address-details/12`)
-  //     .then(async response => {
-  //       // Handle the response data
-  //       if (global.DEBUG_MODE) console.log('GetAddressResponse::' + JSON.stringify(response.data),);
-
-  //       setLoading(false);
-  //     })
-  //     .catch(error => {
-  //       // Handle the error
-  //       if (global.DEBUG_MODE) console.log('GetAddressError' + JSON.stringify(error.response));
-  //       setLoading(false);
-  //       if (error.response.data != null) {
-  //         setApiError(error.response.data.message);
-  //         setErrorModalVisible(true)
-  //       }
-  //     });
-  // }
-
-
   const getAddressData = () => {
+
+    tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE).then(value => {
+      if (value !== undefined && value.length > 0) {
+
+        setKYCManual(value[0].isKycManual)
+
+        if (global.USERTYPEID == 1163) {
+          if (!(value[0].isKycManual == '1')) {
+
+          }
+        }
+
+      }
+    })
 
     tbl_clientaddressinfo.getAllAddressDetailsForLoanID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
       .then(data => {
         if (global.DEBUG_MODE) console.log('Address Detail:', data);
         setAddressDetails(data)
         setRefreshFlatList(!refreshFlatlist)
-        // for(let i = 0; i < data.length; i++){
-
-        // }
-
       })
       .catch(error => {
         if (global.DEBUG_MODE) console.error('Error fetching bank details:', error);
@@ -281,7 +270,7 @@ const AddressMainList = (props, { navigation }) => {
         if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
         setLoading(false);
         if (processModuleLength == 1) {
-          props.navigation.navigate('LoanApplicationMain');
+          props.navigation.navigate('LoanApplicationMain', { fromScreen: 'AddressDetail' });
         } else if (processModuleLength == 2) {
           if (global.CLIENTTYPE == 'APPL') {
             global.isDedupeDone = '0';
@@ -289,12 +278,12 @@ const AddressMainList = (props, { navigation }) => {
             global.CLIENTID = '';
             global.isAadharVerified = '0';
             global.CLIENTTYPE = 'CO-APPL';
-            props.navigation.navigate('ProfileShortBasicDetails');
+            props.navigation.replace('ProfileShortBasicDetails');
             // props.navigation.navigate('LoanApplicationMain');
           } else if (global.CLIENTTYPE == 'CO-APPL') {
-            props.navigation.navigate('LoanApplicationMain');
+            props.navigation.navigate('LoanApplicationMain', { fromScreen: 'AddressDetail' });
           } else if (global.CLIENTTYPE == 'GRNTR') {
-            props.navigation.navigate('LoanApplicationMain');
+            props.navigation.replace('LoanApplicationMain', { fromScreen: 'AddressDetail' });
           }
         } else if (processModuleLength == 3) {
           if (global.CLIENTTYPE == 'APPL') {
@@ -303,7 +292,7 @@ const AddressMainList = (props, { navigation }) => {
             global.CLIENTID = '';
             global.isAadharVerified = '0';
             global.CLIENTTYPE = 'CO-APPL';
-            props.navigation.navigate('ProfileShortBasicDetails');
+            props.navigation.replace('ProfileShortBasicDetails');
             //props.navigation.navigate('LoanApplicationMain');
           } else if (global.CLIENTTYPE == 'CO-APPL') {
             global.isDedupeDone = '0';
@@ -311,10 +300,10 @@ const AddressMainList = (props, { navigation }) => {
             global.CLIENTID = '';
             global.isAadharVerified = '0';
             global.CLIENTTYPE = 'GRNTR';
-            props.navigation.navigate('ProfileShortBasicDetails');
+            props.navigation.replace('ProfileShortBasicDetails');
             //props.navigation.navigate('LoanApplicationMain');
           } else if (global.CLIENTTYPE == 'GRNTR') {
-            props.navigation.navigate('LoanApplicationMain');
+            props.navigation.replace('LoanApplicationMain', { fromScreen: 'AddressDetail' });
           }
         }
 
@@ -330,8 +319,43 @@ const AddressMainList = (props, { navigation }) => {
       });
 
   };
+
+  const approveManualKYC = (status) => {
+
+    const appDetails = {
+      "kycType": "001",
+      "kycValue": "123456789012",
+      "kycDmsId": 100,
+      "kycExpiryDate": null,
+      "manualKycStatus": status,
+      "manualKycApprovedBy": "Muthu"
+    }
+    const baseURL = '8901';
+    setLoading(true);
+    apiInstancelocal(baseURL)
+      .put(`api/v2/profile-short/manualKyc/${global.CLIENTID}`, appDetails)
+      .then(async response => {
+        // Handle the response data
+        if (global.DEBUG_MODE) console.log('ApproveKYCApiResponse::' + JSON.stringify(response.data),);
+        setLoading(false);
+        props.navigation.replace('LoanApplicationMain', { fromScreen: 'AddressDetail' });
+
+
+      })
+      .catch(error => {
+        // Handle the error
+        if (global.DEBUG_MODE) console.log('ApproveKYCApiResponse' + JSON.stringify(error.response));
+        setLoading(false);
+        if (error.response.data != null) {
+          setApiError(error.response.data.message);
+          setErrorModalVisible(true)
+        }
+      });
+
+  };
+
   const onGoBack = () => {
-    props.navigation.navigate('LoanApplicationMain')
+    props.navigation.navigate('LoanApplicationMain', { fromScreen: 'AddressDetail' })
   }
 
   const closeErrorModal = () => {
@@ -411,7 +435,8 @@ const AddressMainList = (props, { navigation }) => {
         keyExtractor={item => item.loanApplicationId}
       />
 
-      {addressDetails.length > 0 && <ButtonViewComp
+
+      {addressDetails.length > 0 && global.USERTYPEID == 1164 && <ButtonViewComp
         textValue={language[0][props.language].str_submit.toUpperCase()}
         textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
         viewStyle={[Commonstyles.buttonView, { marginBottom: 20 }]}
@@ -419,6 +444,30 @@ const AddressMainList = (props, { navigation }) => {
         handleClick={buttonNext}
       />
       }
+
+      <View style={{ flexDirection: 'row' }}>
+
+        {kycManual == '1' && global.USERTYPEID == 1163 && <ButtonViewComp
+          textValue={language[0][props.language].str_approve.toUpperCase()}
+          textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
+          viewStyle={[Commonstyles.buttonView, { width: '50%', marginBottom: 20 }]}
+          innerStyle={Commonstyles.buttonViewInnerStyle}
+          handleClick={() => approveManualKYC('Approved')}
+        />
+        }
+
+        {kycManual == '1' && global.USERTYPEID == 1163 && <ButtonViewComp
+          textValue={language[0][props.language].str_reject.toUpperCase()}
+          textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
+          viewStyle={[Commonstyles.buttonView, { width: '50%', marginBottom: 20 }]}
+          innerStyle={Commonstyles.buttonViewInnerStyle}
+          handleClick={() => { approveManualKYC('Rejected') }}
+        />
+        }
+
+      </View>
+
+
 
     </SafeAreaView>
   );

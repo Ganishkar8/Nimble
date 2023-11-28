@@ -119,10 +119,24 @@ const deleteDataBasedOnLoanIDAndID = (loanApplicationId, id) => {
     });
 };
 
+const deleteAllAddress = () => {
+    const db = databaseInstance.getInstance();
+    db.transaction((tx) => {
+        tx.executeSql(`DELETE FROM ${tableName}`,
+            [],
+            (tx, results) => {
+                console.log('Rows affected:', results.rowsAffected);
+            }, (error) => {
+                console.error('Error executing SQL:', error);
+            });
+    });
+};
+
 export default {
     insertClientAddress,
     getAllAddressDetailsForLoanID,
     getAllAddressDetailsForLoanIDAndID,
     deleteDataBasedOnLoanIDAndID,
-    getAllAddressDetails
+    getAllAddressDetails,
+    deleteAllAddress
 };

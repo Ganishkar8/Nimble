@@ -55,7 +55,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   const [custCatgCaption, setCustCatgCaption] = useState('CUSTOMER CATEGORY');
 
   const [mobileNumber, setMobileNumber] = useState('');
-  const [isMobileVerified, setIsMobileVerified] = useState('');
+  const [isMobileVerified, setIsMobileVerified] = useState('0');
   const [mobileNumberCaption, setMobileNumberCaption] =
     useState('MOBILE NUMBER');
   const [mobileNumberMan, setMobileNumberMan] = useState(false);
@@ -307,6 +307,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
 
   const [dedupeModalVisible, setDedupeModalVisible] = useState(false);
   const [isDedupeDone, setIsDedupeDone] = useState(false);
+  const [onlyView, setOnlyView] = useState(false);
 
   useEffect(() => {
     props.navigation
@@ -350,7 +351,17 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
       if (global.isMobileVerified == '1') {
         setMobileNumberDisable(true)
+        setIsMobileVerified('1');
       }
+
+
+      if (global.USERTYPEID == 1163) {
+        setOnlyView(true);
+        if (global.LOANSTATUS == 'MANUAL KYC PENDING' || global.LOANSTATUS == 'MANUAL KYC REJECTED') {
+
+        }
+      }
+
 
       return () => {
         console.log('Screen is blurred');
@@ -359,6 +370,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   );
 
   const getApplicantData = () => {
+
     tbl_loanApplication.getLoanAppBasedOnID(global.LOANAPPLICATIONID, 'APPL')
       .then(data => {
         if (global.DEBUG_MODE) console.log('Applicant Data:', data);
@@ -385,9 +397,12 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           setProductTypeLabel(data[0].product)
           setCustCatgLabel(data[0].customer_category)
           setCustomerSubCategoryLabel(data[0].customer_subcategory)
-          setWorkflowIDLabel(data[0].workflow_id)
+          setWorkflowIDLabel(parseInt(data[0].workflow_id))
           setLoanAmount(data[0].loan_amount)
           setLoanPurposeLabel(data[0].loan_purpose);
+          getProductID(data[0].loan_type)
+          setClientTypeLabel(data[0].customer_type);
+          getWorkFlowID(data[0].loan_type, data[0].product, data[0].customer_category)
         }
 
       })
@@ -417,6 +432,18 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           setEmail(data[0].email);
           setURNumber(data[0].udyamRegistrationNumber);
           setchkMsme(data[0].isMsme == true)
+          setIsDedupeDone(data[0].dedupeCheck)
+          setIsDedupeDone(true)
+          global.isDedupeDone = "1";
+          if (data[0].isMobileVerified) {
+            global.isMobileVerified = "1";
+            setIsMobileVerified('1')
+          }
+          setIsMobileVerified('1')
+          global.isMobileVerified = "1";
+          fieldsDisable();
+          setWorkflowIDDisable(true);
+          setLoanAmountDisable(true);
         }
 
       })
@@ -443,7 +470,8 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     setKycType4Disable(true);
     setMobileNumberDisable(true);
     setEmailDisable(true);
-
+    setchkMsmeDisable(true);
+    setURNumberDisable(true);
   }
 
   const getSystemCodeDetail = async () => {
@@ -992,6 +1020,11 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
 
   const updateBasicDetails = () => {
 
+    if (onlyView) {
+      props.navigation.replace('ProfileShortKYCVerificationStatus');
+      return;
+    }
+
     if (validate()) {
       showBottomSheet();
     } else {
@@ -1016,6 +1049,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
               "firstName": Name,
               "middleName": "",
               "lastName": "",
+              "gender": genderLabel,
               "relationType": relationTypeLabel,
               "maritalStatus": MaritalStatusLabel,
               "kycTypeId1": KycType1Label,
@@ -1059,6 +1093,8 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
               "firstName": Name,
               "middleName": "",
               "lastName": "",
+              "customerType": clientTypeLabel,
+              "gender": genderLabel,
               "relationType": relationTypeLabel,
               "maritalStatus": MaritalStatusLabel,
               "kycTypeId1": KycType1Label,
@@ -1112,7 +1148,12 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           await insertData();
 
           if (global.isDedupeDone == '1') {
-            generateLoanAppNum();
+            if (global.CLIENTTYPE == 'APPL') {
+              generateLoanAppNum();
+            } else {
+              updateLoanStatus();
+            }
+
           } else {
             internalDedupeCheck();
           }
@@ -1152,14 +1193,10 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           if (global.DEBUG_MODE) console.log('GenerateLoanAppNumBasicApiResponse::' + JSON.stringify(response.data),);
           global.TEMPAPPID = response.data.loanApplicationNumber;
           setLoading(false);
-          if (global.CLIENTTYPE == 'APPL') {
-            createWorkFlow();
+          if (KycType1Label == '001' || KycType2Label == '001' || KycType3Label == '001' || KycType4Label == '001') {
+            generateAadharOTP();
           } else {
-            if (KycType1Label == '001' || KycType2Label == '001' || KycType3Label == '001' || KycType4Label == '001') {
-              generateAadharOTP();
-            } else {
-              updateLoanStatus();
-            }
+            updateLoanStatus();
           }
         })
         .catch(error => {
@@ -1320,9 +1357,9 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   const insertData = async () => {
 
     await tbl_client.insertClient(global.CLIENTID, global.LOANAPPLICATIONID, global.CLIENTTYPE, "", titleLabel, Name, "", "", "", "", "", "", "", "", "", "", genderLabel, MaritalStatusLabel, mobileNumber, Email, "",
-      KycType1Label, kycID1, expiryDate1, KycType2Label, kycID2, expiryDate2, KycType3Label, kycID3, expiryDate3, KycType4Label, kycID4, expiryDate4, chkMsme, "", "", URNumber, "", isMobileVerified, isEmailVerified, "dedupeCheck", "isDedupePassed", "dmsId", "image", "geoCode", "1", "", "", "", "", "", "", "", "lmsClientId", "lmsCustomerTypeId");
+      KycType1Label, kycID1, expiryDate1, KycType2Label, kycID2, expiryDate2, KycType3Label, kycID3, expiryDate3, KycType4Label, kycID4, expiryDate4, chkMsme, "", "", URNumber, "", isMobileVerified, isEmailVerified, isDedupeDone, "", "", "", "", "1", "", "", "", "", "", "", "", "", "");
 
-    await tbl_loanApplication.insertLoanApplication(global.CLIENTID, global.CLIENTTYPE, global.LOANAPPLICATIONID, global.TEMPAPPID, '1180', global.leadID, custCatgLabel, CustomerSubCategoryLabel, clientTypeLabel, loanTypeLabel, LoanPurposeLabel, ProductTypeLabel, LoanAmount, workflowIDLabel, '', 'true', 'true', '', '', '', '', 'lms_application_number', 'is_manual_kyc', '', '', '', '', '', '', '', '', '');
+    await tbl_loanApplication.insertLoanApplication(global.LOANAPPLICATIONID, global.CLIENTTYPE, global.TEMPAPPID, global.TEMPAPPID, '1180', global.leadID, custCatgLabel, CustomerSubCategoryLabel, clientTypeLabel, loanTypeLabel, LoanPurposeLabel, ProductTypeLabel, LoanAmount, workflowIDLabel, '', 'true', 'true', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '');
 
   }
 
@@ -2008,7 +2045,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   };
 
   const onGoBack = () => {
-    props.navigation.replace('LoanApplicationMain')
+    props.navigation.replace('LoanApplicationMain', { fromScreen: 'BasicDetail' })
   }
 
   return (
@@ -2799,7 +2836,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
                     color: 'darkblue',
                     justifyContent: 'center'
                   }}>
-                  {global.isMobileVerified == '0' &&
+                  {isMobileVerified == '0' &&
                     <TouchableOpacity onPress={onClick}>
                       <Text
                         style={{
@@ -2811,7 +2848,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
                     </TouchableOpacity>
                   }
 
-                  {global.isMobileVerified == '1' &&
+                  {isMobileVerified == '1' &&
 
                     <Text
                       style={{
