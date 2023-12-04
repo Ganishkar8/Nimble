@@ -4,7 +4,7 @@ import Colors from '../Utils/Colors';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-const DateInputComp = ({ textValue, textStyle, Disable, type, ComponentName, reference, returnKey, handleClick, handleReference }) => {
+const DateInputComp = ({ textValue, textStyle, Disable, type, ComponentName, reference, returnKey, handleClick, handleReference, minDate, maxDate }) => {
 
     const [mydate, setDate] = React.useState(new Date());
     const [date, setDatee] = React.useState(textValue);
@@ -102,6 +102,8 @@ const DateInputComp = ({ textValue, textStyle, Disable, type, ComponentName, ref
                     is24Hour={true}
                     display="default"
                     onChange={changeSelectedDate}
+                    maximumDate={minDate}
+                    minimumDate={maxDate}
 
                 />
             )}

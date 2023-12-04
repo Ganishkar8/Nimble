@@ -29,7 +29,8 @@ import Common from '../../../Utils/Common';
 import ButtonViewComp from '../../../Components/ButtonViewComp';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import DedupeModal from '../../../Components/DedupeModal';
-
+import RNFS, { writeFile } from 'react-native-fs';
+import Share from 'react-native-share';
 import {
     CodeField,
     Cursor,
@@ -69,41 +70,6 @@ const animateCell = ({ hasValue, index, isFocused }) => {
     ]).start();
 };
 
-const aadharJSON = [{ "id": 10, "clientId": 0, "aadharNumber": "717485993554", "requestId": "222933c2-f353-4447-ba88-a72630adb9dc", "isConsent": "Y", "statusCode": 101, "statusMessage": null, "otp": "205365", "otpSentMsg": "OTP sent to registered mobile number", "otpVerifiedTime": "2023-11-23T09:05:35.32327601", "caseId": "1000", "shareCode": "3554", "createdBy": "329", "createdDate": "2023-11-23T09:04:32.314335", "aadharResultDetails": { "id": 4, "aadharDetailId": null, "resultGeneratedTime": "2023-11-23 09:05:08.726", "maskedAadhaarNumber": "XXXX XXXX 3554", "name": "Ajith A", "dob": "1998-04-20", "gender": "M", "address": "NEW NO -49/84 OLD NO -49/32B, VELLAMODI VILAI, Agastheeswaram, Kanyakumari, Agasteeswaram, Eathamozhi, Tamil Nadu, India, 629501", "mobileHash": "f7b3836fc99631bc09b630961302ff60af4a54a43dd1a44e24758a5d363c0b25", "emailHash": "31960ecc93b7257bce32f0d2dddaa948da91eb16d521cff44370e70306d759af", "fatherName": null, "resultMessage": "Aadhaar XML file downloaded successfully", "imgDmsId": 3715, "docDmsId": 3716, "createdBy": "329", "createdDate": "2023-11-23T09:05:35.343698967" } }]
-
-const newAadharJson = [{
-    "aadharResultDetails": {
-        "id": 5,
-        "aadharDetailId": null,
-        "resultGeneratedTime": "2023-11-24 13:23:45.231",
-        "maskedAadhaarNumber": "XXXX XXXX 9303",
-        "name": "GANISHKAR S",
-        "dob": "1998-07-31",
-        "gender": "M",
-        "address": "NO 204, PUDUKOTTAI, Tirupathur, Vellore, Madapalli, TIRUPATTUR, Pudukottai, Tamil Nadu, India, 635602",
-        "mobileHash": "550019f61b6cad6a754a2604b2ef3466814d5a5efa0c6c9bc6e91edd0eb71619",
-        "emailHash": "2db9681832074c1657b2c0f1bd3c3c5a4a847a6c8e480790adcb8180a0516e80",
-        "fatherName": "Sivakumar",
-        "resultMessage": "Aadhaar XML file downloaded successfully",
-        "imgDmsId": 3745,
-        "docDmsId": 3746,
-        "createdBy": "",
-        "createdDate": "2023-11-24T13:23:57.963951047",
-        "spouseName": null,
-        "relativeName": null,
-        "houseNumber": "NO 204",
-        "street": "PUDUKOTTAI",
-        "landmark": null,
-        "subDistrict": "Tirupathur",
-        "district": "Vellore",
-        "vtcName": "Madapalli",
-        "location": "TIRUPATTUR",
-        "postOffice": "Pudukottai",
-        "state": "Tamil Nadu",
-        "country": "India",
-        "pinCode": "635602"
-    }
-}]
 
 const AadharOTPVerification = (props, { navigation }) => {
     const [mobileOTP, setMobileOTP] = useState('');
@@ -113,7 +79,7 @@ const AadharOTPVerification = (props, { navigation }) => {
     const [Visible, setVisible] = useState(false);
     const [errMsg, setErrMsg] = useState('');
     const [value, setValue] = useState('');
-    const [timeLeft, setTimeLeft] = useState(10);
+    const [timeLeft, setTimeLeft] = useState(60);
     const ref = useBlurOnFulfill({ value, cellCount: CELL_COUNT });
     const [, getCellOnLayoutHandler] = useClearByFocusCell({
         value,
@@ -129,6 +95,9 @@ const AadharOTPVerification = (props, { navigation }) => {
     const [apiError, setApiError] = useState('');
     const [navAlertVisible, setNavAlertVisible] = useState(false);
 
+    const [pdfDmsID, setpdfDmsID] = useState('');
+    const [pdfBase64, setpdfBase64] = useState('');
+    const [aadharPdfPath, setaadharPdfPath] = useState('');
 
     const [menuvisible, setMenuVisible] = React.useState(false);
     const [instance, setInstance] = React.useState('LIV');
@@ -275,16 +244,8 @@ const AadharOTPVerification = (props, { navigation }) => {
                     //alert(JSON.stringify(response.data.aadharResultDetails))
                     //setAadhaarResponse(response.data.aadharResultDetails)
                     global.isAadharVerified = "1";
-                    if (global.CLIENTTYPE == 'APPL') {
-                        global.COMPLETEDMODULE = 'PRF_SHRT_APLCT';
-                        global.COMPLETEDPAGE = 'PRF_SHRT_APLCT_BSC_DTLS';
-                    } else if (global.CLIENTTYPE == 'CO-APPL') {
-                        global.COMPLETEDMODULE = 'PRF_SHRT_COAPLCT';
-                        global.COMPLETEDPAGE = 'PRF_SHRT_COAPLCT_BSC_DTLS';
-                    } else if (global.CLIENTTYPE == 'GRNTR') {
-                        global.COMPLETEDMODULE = 'PRF_SHRT_GRNTR';
-                        global.COMPLETEDPAGE = 'PRF_SHRT_GRNTR_BSC_DTLS';
-                    }
+                    setpdfDmsID(response.data.aadharResultDetails.docDmsId)
+                    getImage(response.data.aadharResultDetails.docDmsId);
                     insertData(response.data.aadharResultDetails);
 
                 } else {
@@ -304,14 +265,101 @@ const AadharOTPVerification = (props, { navigation }) => {
 
     };
 
+
+    const getImage = (dmsID) => {
+
+        Common.getNetworkConnection().then(value => {
+            if (value.isConnected == true) {
+                setLoading(true)
+                const baseURL = '8094'
+                apiInstance(baseURL).get(`/api/documents/document/${parseInt(dmsID)}`)
+                    .then(async (response) => {
+                        // Handle the response data
+                        console.log("GetPhotoApiResponse::" + JSON.stringify(response.data));
+
+                        setpdfBase64('data:application/pdf;base64,' + response.data.base64Content)
+                        var base64pdf = response.data.base64Content;
+                        var fileName = response.data.fileName;
+                        saveBase64Pdf(base64pdf, fileName)
+
+                        // props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
+                        setLoading(false)
+
+                    })
+                    .catch((error) => {
+                        // Handle the error
+                        setLoading(false)
+                        if (global.DEBUG_MODE) console.log("GetPhotoApiResponse::" + JSON.stringify(error));
+                        if (error.response.data != null) {
+                            setApiError(error.response.data.message);
+                            setErrorModalVisible(true)
+                        } else if (error.response.httpStatusCode == 500) {
+                            setApiError(error.response.message);
+                            setErrorModalVisible(true)
+                        }
+                    });
+            } else {
+                setApiError(language[0][props.language].str_errinternetimage);
+                setErrorModalVisible(true)
+
+            }
+
+        })
+    }
+
+    const saveBase64Pdf = async (base64Data, filename) => {
+        const path = RNFS.ExternalDirectoryPath + `/${filename}`;
+
+        try {
+            await RNFS.writeFile(path, base64Data, 'base64');
+            setaadharPdfPath(path);
+            console.log('PDF saved successfully at:', path);
+            return path;
+        } catch (error) {
+            console.error('Error saving PDF:', error);
+            return null;
+        }
+    };
+
+    const openWithThirdPartyApp = async (pdfPath) => {
+        if (pdfPath) {
+            try {
+                const fileExists = await RNFS.exists(pdfPath);
+                if (fileExists) {
+                    const options = {
+                        url: `file://${pdfPath}`,
+                    };
+                    await Share.open(options);
+                } else {
+                    console.error('PDF file does not exist.');
+                }
+            } catch (error) {
+                console.error('Error opening with third-party app:', error);
+            }
+        }
+    };
+
     const updateLoanStatus = () => {
+
+        var module = ''; var page = '';
+
+        if (global.CLIENTTYPE == 'APPL') {
+            module = 'PRF_SHRT_APLCT';
+            page = 'PRF_SHRT_APLCT_BSC_DTLS';
+        } else if (global.CLIENTTYPE == 'CO-APPL') {
+            module = 'PRF_SHRT_COAPLCT';
+            page = 'PRF_SHRT_COAPLCT_BSC_DTLS';
+        } else if (global.CLIENTTYPE == 'GRNTR') {
+            module = 'PRF_SHRT_GRNTR';
+            page = 'PRF_SHRT_GRNTR_BSC_DTLS';
+        }
 
         const appDetails = {
             "loanApplicationId": global.LOANAPPLICATIONID,
             "loanWorkflowStage": "LN_APP_INITIATION",
             "subStageCode": "PRF_SHRT",
-            "moduleCode": global.COMPLETEDMODULE,
-            "pageCode": global.COMPLETEDPAGE,
+            "moduleCode": module,
+            "pageCode": page,
             "status": "Completed"
         }
         const baseURL = '8901';
@@ -322,6 +370,16 @@ const AadharOTPVerification = (props, { navigation }) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
+                if (global.CLIENTTYPE == 'APPL') {
+                    global.COMPLETEDMODULE = 'PRF_SHRT_APLCT';
+                    global.COMPLETEDPAGE = 'PRF_SHRT_APLCT_BSC_DTLS';
+                } else if (global.CLIENTTYPE == 'CO-APPL') {
+                    global.COMPLETEDMODULE = 'PRF_SHRT_COAPLCT';
+                    global.COMPLETEDPAGE = 'PRF_SHRT_COAPLCT_BSC_DTLS';
+                } else if (global.CLIENTTYPE == 'GRNTR') {
+                    global.COMPLETEDMODULE = 'PRF_SHRT_GRNTR';
+                    global.COMPLETEDPAGE = 'PRF_SHRT_GRNTR_BSC_DTLS';
+                }
                 setNavAlertVisible(true)
             })
             .catch(error => {
@@ -354,14 +412,14 @@ const AadharOTPVerification = (props, { navigation }) => {
         var dmsId = data.docDmsId;
         var age = Common.calculateAge(dob);
 
-        await tbl_client.updateAadharData(name, dob, age, gender, fatherName, spouseName, image, dmsId, global.LOANAPPLICATIONID);
+        await tbl_client.updateAadharData(name, dob, age, gender, fatherName, spouseName, '', '', global.LOANAPPLICATIONID, global.CLIENTTYPE);
 
 
         await tbl_clientaddressinfo.insertClientAddress(
             global.LOANAPPLICATIONID,
             "",
             global.CLIENTID,
-            global.COMPLETEDMODULE,
+            global.CLIENTTYPE,
             "P",
             aadhaarResponse.houseNumber + " " + aadhaarResponse.street,
             aadhaarResponse.vtcName + " " + aadhaarResponse.location,
@@ -510,12 +568,17 @@ const AadharOTPVerification = (props, { navigation }) => {
         props.navigation.goBack();
     }
 
+    const onViewClick = () => {
+
+        openWithThirdPartyApp(aadharPdfPath)
+    }
+
     return (
 
         <View style={{ flex: 1, backgroundColor: Colors.lightwhite }}>
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
 
-            <AadharSuccessModal isVisible={navAlertVisible} onClose={handleClick} textContent={language[0][props.language].str_aadharsuccess} textClose={language[0][props.language].str_proceed} textMainContent={language[0][props.language].str_aadhaarpdfopen} textViewContent={language[0][props.language].str_view} proceedClick={proceedClick} />
+            <AadharSuccessModal isVisible={navAlertVisible} onClose={handleClick} textContent={language[0][props.language].str_aadharsuccess} textClose={language[0][props.language].str_proceed} textMainContent={language[0][props.language].str_aadhaarpdfopen} textViewContent={language[0][props.language].str_view} proceedClick={proceedClick} onViewClick={onViewClick} />
 
 
             <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />

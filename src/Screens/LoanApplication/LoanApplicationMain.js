@@ -187,7 +187,7 @@ const LoanApplicationMain = (props, { navigation }) => {
     );
 
     const getWorkFlowID = () => {
-        tbl_loanApplication.getLoanAppBasedOnID(global.LOANAPPLICATIONID, 'APPL')
+        tbl_loanApplication.getLoanAppWorkFlowID(global.LOANAPPLICATIONID, 'APPL')
             .then(data => {
                 if (global.DEBUG_MODE) console.log('Applicant Data:', data);
                 if (data !== undefined && data.length > 0) {
@@ -262,51 +262,51 @@ const LoanApplicationMain = (props, { navigation }) => {
                 if (currentPage.pageCode == 'PRF_SHRT_APLCT_BSC_DTLS') {
                     global.CLIENTTYPE = 'APPL';
                     await getClientID(global.CLIENTTYPE);
-                    props.navigation.navigate('ProfileShortBasicDetails');
+                    props.navigation.replace('ProfileShortBasicDetails');
                 } else if (currentPage.pageCode == 'PRF_SHRT_APLCT_VRF_STATUS') {
                     global.CLIENTTYPE = 'APPL';
                     await getClientID(global.CLIENTTYPE);
-                    props.navigation.navigate('ProfileShortKYCVerificationStatus');
+                    props.navigation.replace('ProfileShortKYCVerificationStatus');
                 } else if (currentPage.pageCode == 'PRF_SHRT_APLCT_PRSNL_DTLS') {
                     global.CLIENTTYPE = 'APPL';
                     await getClientID('APPL');
-                    props.navigation.navigate('ProfileShortApplicantDetails');
+                    props.navigation.replace('ProfileShortApplicantDetails');
                 } else if (currentPage.pageCode == 'PRF_SHRT_APLCT_ADDRS_DTLS') {
                     global.CLIENTTYPE = 'APPL';
                     await getClientID(global.CLIENTTYPE);
-                    props.navigation.navigate('AddressMainList');
+                    props.navigation.replace('AddressMainList');
                 } else if (currentPage.pageCode == 'PRF_SHRT_COAPLCT_BSC_DTLS') {
                     global.CLIENTTYPE = 'CO-APPL';
                     await getClientID(global.CLIENTTYPE);
-                    props.navigation.navigate('ProfileShortBasicDetails');
+                    props.navigation.replace('ProfileShortBasicDetails');
                 } else if (currentPage.pageCode == 'PRF_SHRT_COAPLCT_VRF_STATUS') {
                     global.CLIENTTYPE = 'CO-APPL';
                     await getClientID(global.CLIENTTYPE);
-                    props.navigation.navigate('ProfileShortKYCVerificationStatus');
+                    props.navigation.replace('ProfileShortKYCVerificationStatus');
                 } else if (currentPage.pageCode == 'PRF_SHRT_COAPLCT_PRSNL_DTLS') {
                     global.CLIENTTYPE = 'CO-APPL';
                     await getClientID(global.CLIENTTYPE);
-                    props.navigation.navigate('ProfileShortApplicantDetails');
+                    props.navigation.replace('ProfileShortApplicantDetails');
                 } else if (currentPage.pageCode == 'PRF_SHRT_COAPLCT_ADDRS_DTLS') {
                     global.CLIENTTYPE = 'CO-APPL';
                     await getClientID(global.CLIENTTYPE);
-                    props.navigation.navigate('AddressMainList');
+                    props.navigation.replace('AddressMainList');
                 } else if (currentPage.pageCode == 'PRF_SHRT_GRNTR_BSC_DTLS') {
                     global.CLIENTTYPE = 'GRNTR';
                     await getClientID(global.CLIENTTYPE);
-                    props.navigation.navigate('ProfileShortBasicDetails');
+                    props.navigation.replace('ProfileShortBasicDetails');
                 } else if (currentPage.pageCode == 'PRF_SHRT_GRNTR_VRF_STATUS') {
                     global.CLIENTTYPE = 'GRNTR';
                     await getClientID(global.CLIENTTYPE);
-                    props.navigation.navigate('ProfileShortKYCVerificationStatus');
+                    props.navigation.replace('ProfileShortKYCVerificationStatus');
                 } else if (currentPage.pageCode == 'PRF_SHRT_GRNTR_PRSNL_DTLS') {
                     global.CLIENTTYPE = 'GRNTR';
                     await getClientID(global.CLIENTTYPE);
-                    props.navigation.navigate('ProfileShortApplicantDetails');
+                    props.navigation.replace('ProfileShortApplicantDetails');
                 } else if (currentPage.pageCode == 'PRF_SHRT_GRNTR_ADDRS_DTLS') {
                     global.CLIENTTYPE = 'GRNTR';
                     await getClientID(global.CLIENTTYPE);
-                    props.navigation.navigate('AddressMainList');
+                    props.navigation.replace('AddressMainList');
                 }
 
 
@@ -317,11 +317,12 @@ const LoanApplicationMain = (props, { navigation }) => {
     }
 
     const getClientID = (clientType) => {
-        tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID, clientType)
+        tbl_client.getOnlyClientBasedOnID(global.LOANAPPLICATIONID, clientType)
             .then(data => {
                 if (global.DEBUG_MODE) console.log('Applicant Data:', data);
                 if (data !== undefined && data.length > 0) {
                     global.CLIENTID = data[0].id;
+                    global.isAadharVerified = data[0].isAadharNumberVerified;
                     return global.CLIENTID;
                 } else {
                     return '';
@@ -334,6 +335,11 @@ const LoanApplicationMain = (props, { navigation }) => {
     }
 
     const onClickMainList = (item, substageId) => {
+
+        // if (!(item.subStageCode == 'PRF_SHRT')) {
+        //     return;
+        // }
+
         let fiterStatusPosition = processSubStageData
         for (let i = 0; i < fiterStatusPosition.length; i++) {
             if (fiterStatusPosition[i].id == item.id) {
@@ -344,21 +350,19 @@ const LoanApplicationMain = (props, { navigation }) => {
             }
         }
 
-        //alert(JSON.stringify(item))
-
         setProcessSubStageData(fiterStatusPosition)
 
         const filteredProcessModuleStage = processModule.filter((data) => {
-            return data.wfId === workflowIDLabel && data.process_sub_stage_id === item.id;
+            return data.wfId === parseInt(workflowIDLabel) && data.process_sub_stage_id === item.id;
         }).map((data) => {
             const extraJSON = { subDataIsCompleted: true, nestedSubData: [] };
             return { ...data, ...extraJSON };
         }).sort((a, b) => a.displayOrder - b.displayOrder);
-        //alert(JSON.stringify(filteredProcessSubStage))
+
         setProcessModuleData(filteredProcessModuleStage);
 
         filteredProcessModuleStage.forEach((data) => {
-            if (data.wfId === workflowIDLabel) {
+            if (data.wfId === parseInt(workflowIDLabel)) {
                 processPage.forEach((data1) => {
                     if (data1.processModuleId === data.id) {
                         const extraJSON = { nestedSubDataIsCompleted: true };
@@ -382,51 +386,51 @@ const LoanApplicationMain = (props, { navigation }) => {
             if (item.pageCode == 'PRF_SHRT_APLCT_BSC_DTLS') {
                 global.CLIENTTYPE = 'APPL';
                 await getClientID(global.CLIENTTYPE);
-                props.navigation.navigate('ProfileShortBasicDetails');
+                props.navigation.replace('ProfileShortBasicDetails');
             } else if (item.pageCode == 'PRF_SHRT_APLCT_VRF_STATUS') {
                 global.CLIENTTYPE = 'APPL';
                 await getClientID(global.CLIENTTYPE);
-                props.navigation.navigate('ProfileShortKYCVerificationStatus');
+                props.navigation.replace('ProfileShortKYCVerificationStatus');
             } else if (item.pageCode == 'PRF_SHRT_APLCT_PRSNL_DTLS') {
                 global.CLIENTTYPE = 'APPL';
                 await getClientID('APPL');
-                props.navigation.navigate('ProfileShortApplicantDetails');
+                props.navigation.replace('ProfileShortApplicantDetails');
             } else if (item.pageCode == 'PRF_SHRT_APLCT_ADDRS_DTLS') {
                 global.CLIENTTYPE = 'APPL';
                 await getClientID(global.CLIENTTYPE);
-                props.navigation.navigate('AddressMainList');
+                props.navigation.replace('AddressMainList');
             } else if (item.pageCode == 'PRF_SHRT_COAPLCT_BSC_DTLS') {
                 global.CLIENTTYPE = 'CO-APPL';
                 await getClientID(global.CLIENTTYPE);
-                props.navigation.navigate('ProfileShortBasicDetails');
+                props.navigation.replace('ProfileShortBasicDetails');
             } else if (item.pageCode == 'PRF_SHRT_COAPLCT_VRF_STATUS') {
                 global.CLIENTTYPE = 'CO-APPL';
                 await getClientID(global.CLIENTTYPE);
-                props.navigation.navigate('ProfileShortKYCVerificationStatus');
+                props.navigation.replace('ProfileShortKYCVerificationStatus');
             } else if (item.pageCode == 'PRF_SHRT_COAPLCT_PRSNL_DTLS') {
                 global.CLIENTTYPE = 'CO-APPL';
                 await getClientID(global.CLIENTTYPE);
-                props.navigation.navigate('ProfileShortApplicantDetails');
+                props.navigation.replace('ProfileShortApplicantDetails');
             } else if (item.pageCode == 'PRF_SHRT_COAPLCT_ADDRS_DTLS') {
                 global.CLIENTTYPE = 'CO-APPL';
                 await getClientID(global.CLIENTTYPE);
-                props.navigation.navigate('AddressMainList');
+                props.navigation.replace('AddressMainList');
             } else if (item.pageCode == 'PRF_SHRT_GRNTR_BSC_DTLS') {
                 global.CLIENTTYPE = 'GRNTR';
                 await getClientID(global.CLIENTTYPE);
-                props.navigation.navigate('ProfileShortBasicDetails');
+                props.navigation.replace('ProfileShortBasicDetails');
             } else if (item.pageCode == 'PRF_SHRT_GRNTR_VRF_STATUS') {
                 global.CLIENTTYPE = 'GRNTR';
                 await getClientID(global.CLIENTTYPE);
-                props.navigation.navigate('ProfileShortKYCVerificationStatus');
+                props.navigation.replace('ProfileShortKYCVerificationStatus');
             } else if (item.pageCode == 'PRF_SHRT_GRNTR_PRSNL_DTLS') {
                 global.CLIENTTYPE = 'GRNTR';
                 await getClientID(global.CLIENTTYPE);
-                props.navigation.navigate('ProfileShortApplicantDetails');
+                props.navigation.replace('ProfileShortApplicantDetails');
             } else if (item.pageCode == 'PRF_SHRT_GRNTR_ADDRS_DTLS') {
                 global.CLIENTTYPE = 'GRNTR';
                 await getClientID(global.CLIENTTYPE);
-                props.navigation.navigate('AddressMainList');
+                props.navigation.replace('AddressMainList');
             }
         }
 
@@ -619,7 +623,7 @@ const LoanApplicationMain = (props, { navigation }) => {
 
                                                                 </View>
                                                                 <View style={{ width: '60%', margin: 5, borderRadius: 20, justifyContent: 'center' }}>
-                                                                    <TextComp textVal={item.pageDescription} textStyle={{ color: item.nestedSubDataIsCompleted ? Colors.skyBlue : Colors.dimText, fontFamily: 'Poppins-Medium', marginLeft: 2 }} />
+                                                                    <TextComp textVal={item.pageName} textStyle={{ color: item.nestedSubDataIsCompleted ? Colors.skyBlue : Colors.dimText, fontFamily: 'Poppins-Medium', marginLeft: 2 }} />
                                                                 </View>
                                                             </View>
                                                             {/* {index != subData.length - 1 ? (

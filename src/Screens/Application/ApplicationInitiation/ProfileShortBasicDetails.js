@@ -371,7 +371,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
 
   const getApplicantData = () => {
 
-    tbl_loanApplication.getLoanAppBasedOnID(global.LOANAPPLICATIONID, 'APPL')
+    tbl_loanApplication.getLoanAppWorkFlowID(global.LOANAPPLICATIONID, 'APPL')
       .then(data => {
         if (global.DEBUG_MODE) console.log('Applicant Data:', data);
         if (data !== undefined && data.length > 0) {
@@ -381,6 +381,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           getID3data(data[0].workflow_id);
           getID4data(data[0].workflow_id);
           setWorkflowIDLabel(data[0].workflow_id)
+
         }
 
       })
@@ -472,6 +473,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     setEmailDisable(true);
     setchkMsmeDisable(true);
     setURNumberDisable(true);
+    setRelationTypeDisable(true);
   }
 
   const getSystemCodeDetail = async () => {
@@ -532,7 +534,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
 
       kycConifig.forEach((data1) => {
 
-        if (data1.wfId == wfID) {
+        if (data1.wfId == wfID && data1.clientTypeCode == global.CLIENTTYPE) {
           if (data1.isKycType1Mandatory) {
             setKycType1Man(true)
           }
@@ -578,7 +580,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
 
       kycConifig.forEach((data1) => {
 
-        if (data1.wfId == wfID) {
+        if (data1.wfId == wfID && data1.clientTypeCode == global.CLIENTTYPE) {
           if (data1.isKycType2Mandatory) {
             setKycType2Man(true)
           }
@@ -625,7 +627,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
 
       kycConifig.forEach((data1) => {
 
-        if (data1.wfId == wfID) {
+        if (data1.wfId == wfID && data1.clientTypeCode == global.CLIENTTYPE) {
           if (data1.isKycType3Mandatory) {
             setKycType3Man(true)
           }
@@ -666,12 +668,11 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   const getID4data = (wfID) => {
     let dataArray = [];
 
-
     if (bankUserCodeDetail) {
 
       kycConifig.forEach((data1) => {
 
-        if (data1.productConfigurationId == wfID) {
+        if (data1.wfId == wfID && data1.clientTypeCode == global.CLIENTTYPE) {
           if (data1.isKycType4Mandatory) {
             setKycType4Man(true)
           }
@@ -1151,11 +1152,16 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
             if (global.CLIENTTYPE == 'APPL') {
               generateLoanAppNum();
             } else {
-              updateLoanStatus();
+              if (KycType1Label == '001' || KycType2Label == '001' || KycType3Label == '001' || KycType4Label == '001') {
+                generateAadharOTP();
+              } else {
+                updateLoanStatus();
+              }
             }
 
           } else {
             internalDedupeCheck();
+            //updateLoanStatus();
           }
           // props.navigation.navigate('AadharOTPVerification', { aadharNumber: aadhar });
           // generateAadharOTP();
@@ -1213,12 +1219,25 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
 
   const updateLoanStatus = () => {
 
+    var module = ''; var page = '';
+
+    if (global.CLIENTTYPE == 'APPL') {
+      module = 'PRF_SHRT_APLCT';
+      page = 'PRF_SHRT_APLCT_BSC_DTLS';
+    } else if (global.CLIENTTYPE == 'CO-APPL') {
+      module = 'PRF_SHRT_COAPLCT';
+      page = 'PRF_SHRT_COAPLCT_BSC_DTLS';
+    } else if (global.CLIENTTYPE == 'GRNTR') {
+      module = 'PRF_SHRT_GRNTR';
+      page = 'PRF_SHRT_GRNTR_BSC_DTLS';
+    }
+
     const appDetails = {
       "loanApplicationId": global.LOANAPPLICATIONID,
       "loanWorkflowStage": "LN_APP_INITIATION",
       "subStageCode": "PRF_SHRT",
-      "moduleCode": global.COMPLETEDMODULE,
-      "pageCode": global.COMPLETEDPAGE,
+      "moduleCode": module,
+      "pageCode": page,
       "status": "Completed"
     }
     const baseURL = '8901';
@@ -2506,7 +2525,8 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
                   textValue={expiryDate1}
                   type="numeric"
                   handleClick={handleClick}
-                  handleReference={handleReference} />
+                  handleReference={handleReference}
+                  minDate={new Date()} />
               </View>
               {/* <TextInputComp
                 textValue={expiryDate1}
@@ -2597,7 +2617,8 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
                   textValue={expiryDate2}
                   type="numeric"
                   handleClick={handleClick}
-                  handleReference={handleReference} />
+                  handleReference={handleReference}
+                  minDate={new Date()} />
               </View>
               {/* <TextInputComp
                 textValue={expiryDate1}
@@ -2689,7 +2710,8 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
                   textValue={expiryDate3}
                   type="numeric"
                   handleClick={handleClick}
-                  handleReference={handleReference} />
+                  handleReference={handleReference}
+                  minDate={new Date()} />
               </View>
               {/* <TextInputComp
                 textValue={expiryDate1}
@@ -2780,7 +2802,8 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
                   textValue={expiryDate4}
                   type="numeric"
                   handleClick={handleClick}
-                  handleReference={handleReference} />
+                  handleReference={handleReference}
+                  minDate={new Date()} />
               </View>
               {/* <TextInputComp
                 textValue={expiryDate1}

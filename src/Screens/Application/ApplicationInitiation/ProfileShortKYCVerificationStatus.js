@@ -184,8 +184,12 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
   const [locationSheetVisible, setLocationSheetVisible] = useState(false);
 
+  const [isAadharVerified, setIsAadharVerified] = useState(false);
+
   const isScreenVisible = useIsFocused();
   const [onlyView, setOnlyView] = useState(false);
+  const [hideRetake, setHideRetake] = useState(false);
+  const [hideDelete, setHideDelete] = useState(false);
 
 
   useEffect(() => {
@@ -194,16 +198,28 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
     getClientData();
-    getSystemCodeDetail();
-    if (global.isAadharVerified == '1') {
 
+    if (global.isAadharVerified == '1') {
+      setIsAadharVerified(true);
+      getSystemCodeDetail(true);
+    } else {
+      setIsAadharVerified(false);
+      getSystemCodeDetail(false);
     }
+
 
     if (global.USERTYPEID == 1163) {
       if (global.LOANSTATUS == 'MANUAL KYC PENDING' || global.LOANSTATUS == 'MANUAL KYC REJECTED') {
 
       }
       setOnlyView(true);
+      fieldsdisable();
+      getClientID();
+      setHideRetake(true);
+      setHideDelete(true);
+    } else {
+      setHideRetake(true);
+      setHideDelete(true);
     }
 
     return () => {
@@ -216,6 +232,107 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     onGoBack();
     return true; // Prevent default back button behavior
   };
+
+  const fieldsdisable = () => {
+    setKycSourceDisable(true);
+    setKycTypeDisable(true);
+    setkycIDDisable(true);
+    setKycType1Disable(true);
+    setkycID1Disable(true);
+    setKycType2Disable(true);
+    setkycID2Disable(true);
+    setKycType3Disable(true);
+    setkycID3Disable(true);
+    setKycType4Disable(true);
+    setkycID4Disable(true);
+  }
+
+  const getClientID = () => {
+    tbl_client.getOnlyClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
+      .then(data => {
+        if (global.DEBUG_MODE) console.log('Applicant Data:', data);
+        if (data !== undefined && data.length > 0) {
+          getKYCManualDetails(data[0].id);
+          global.isAadharVerified = data[0].isAadharNumberVerified;
+          if (data[0].isAadharNumberVerified == 1) {
+            setIsAadharVerified(true);
+          } else {
+            setIsAadharVerified(false);
+
+          }
+
+        }
+
+      })
+      .catch(error => {
+        if (global.DEBUG_MODE) console.error('Error fetching Applicant details:', error);
+      });
+  }
+
+
+  const getImage = (dmsID) => {
+
+    Common.getNetworkConnection().then(value => {
+      if (value.isConnected == true) {
+        setLoading(true)
+        const baseURL = '8094'
+        apiInstance(baseURL).get(`/api/documents/document/${parseInt(dmsID)}`)
+          .then(async (response) => {
+            // Handle the response data
+            console.log("GetPhotoApiResponse::" + JSON.stringify(response.data));
+            setFileName(response.data.fileName)
+            setImageUri('data:image/png;base64,' + response.data.base64Content)
+            // props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
+            setLoading(false)
+
+          })
+          .catch((error) => {
+            // Handle the error
+            setLoading(false)
+            if (global.DEBUG_MODE) console.log("GetPhotoApiResponse::" + JSON.stringify(error.response.data));
+            if (error.response.data != null) {
+              setApiError(error.response.data.message);
+              setErrorModalVisible(true)
+            } else if (error.response.httpStatusCode == 500) {
+              setApiError(error.response.message);
+              setErrorModalVisible(true)
+            }
+          });
+      } else {
+        setApiError(language[0][props.language].str_errinternetimage);
+        setErrorModalVisible(true)
+
+      }
+
+    })
+  }
+
+  const getKYCManualDetails = (id) => {
+
+    const baseURL = '8901'
+    setLoading(true)
+
+    apiInstance(baseURL).get(`/api/v2/profile-short/manualKyc/${id}`)
+      .then((response) => {
+        // Handle the response data
+        if (global.DEBUG_MODE) console.log("ManualKYCDetails::" + JSON.stringify(response.data));
+        setLoading(false)
+        if (response.data.kycDmsId != null && response.data.kycDmsId.length > 0) {
+          getImage(response.data.kycDmsId);
+        }
+        setKycTypeLabel(response.data.kycType)
+        setkycID(response.data.kycValue)
+      })
+      .catch((error) => {
+        // Handle the error
+        setLoading(false)
+        if (global.DEBUG_MODE) console.log("ManualKYCDetailsError::" + JSON.stringify(error.response.data));
+        if (error.response.data != null) {
+          setApiError(error.response.data.message);
+          setErrorModalVisible(true)
+        }
+      });
+  }
 
   const checkPermissions = async () => {
     const permissionsToRequest = [];
@@ -322,10 +439,10 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     );
   };
 
-  const getSystemCodeDetail = async () => {
+  const getSystemCodeDetail = async (adharVerified) => {
 
 
-    if (global.isAadharVerified == '1') {
+    if (adharVerified) {
       setKycSourceVisible(false);
       setKycTypeDisable(true);
       setkycIDDisable(true);
@@ -445,6 +562,11 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
           setKycTypeLabel(value[0].kycTypeId4);
           setkycID(value[0].kycIdValue4);
         }
+        if (value[0].isKycManual == '1') {
+
+        } else {
+
+        }
         getKYCType(value[0].kycTypeId1, value[0].kycTypeId2, value[0].kycTypeId3, value[0].kycTypeId4);
       }
 
@@ -453,28 +575,30 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
 
   const buttonNext = () => {
-
-    if (global.CLIENTTYPE == 'APPL') {
-      global.COMPLETEDMODULE = 'PRF_SHRT_APLCT';
-      global.COMPLETEDPAGE = 'PRF_SHRT_APLCT_VRF_STATUS';
-    } else if (global.CLIENTTYPE == 'CO-APPL') {
-      global.COMPLETEDMODULE = 'PRF_SHRT_COAPLCT';
-      global.COMPLETEDPAGE = 'PRF_SHRT_COAPLCT_VRF_STATUS';
-    } else if (global.CLIENTTYPE == 'GRNTR') {
-      global.COMPLETEDMODULE = 'PRF_SHRT_GRNTR';
-      global.COMPLETEDPAGE = 'PRF_SHRT_GRNTR_VRF_STATUS';
-    }
     updateLoanStatus();
   }
 
   const updateLoanStatus = () => {
 
+    var module = ''; var page = '';
+
+    if (global.CLIENTTYPE == 'APPL') {
+      module = 'PRF_SHRT_APLCT';
+      page = 'PRF_SHRT_APLCT_VRF_STATUS';
+    } else if (global.CLIENTTYPE == 'CO-APPL') {
+      module = 'PRF_SHRT_COAPLCT';
+      page = 'PRF_SHRT_COAPLCT_VRF_STATUS';
+    } else if (global.CLIENTTYPE == 'GRNTR') {
+      module = 'PRF_SHRT_GRNTR';
+      page = 'PRF_SHRT_GRNTR_VRF_STATUS';
+    }
+
     const appDetails = {
       "loanApplicationId": global.LOANAPPLICATIONID,
       "loanWorkflowStage": "LN_APP_INITIATION",
       "subStageCode": "PRF_SHRT",
-      "moduleCode": global.COMPLETEDMODULE,
-      "pageCode": global.COMPLETEDPAGE,
+      "moduleCode": module,
+      "pageCode": page,
       "status": "Completed"
     }
     const baseURL = '8901';
@@ -485,6 +609,16 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
         // Handle the response data
         if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
         setLoading(false);
+        if (global.CLIENTTYPE == 'APPL') {
+          global.COMPLETEDMODULE = 'PRF_SHRT_APLCT';
+          global.COMPLETEDPAGE = 'PRF_SHRT_APLCT_VRF_STATUS';
+        } else if (global.CLIENTTYPE == 'CO-APPL') {
+          global.COMPLETEDMODULE = 'PRF_SHRT_COAPLCT';
+          global.COMPLETEDPAGE = 'PRF_SHRT_COAPLCT_VRF_STATUS';
+        } else if (global.CLIENTTYPE == 'GRNTR') {
+          global.COMPLETEDMODULE = 'PRF_SHRT_GRNTR';
+          global.COMPLETEDPAGE = 'PRF_SHRT_GRNTR_VRF_STATUS';
+        }
         checkPermissions().then(res => {
           if (res == true) {
             getOneTimeLocation();
@@ -679,7 +813,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       return;
     }
 
-    if (global.isAadharVerified == '1') {
+    if (isAadharVerified) {
       buttonNext();
       return;
     }
@@ -719,7 +853,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       flag = true;
     }
 
-    if (!(global.isAadharVerified == '1')) {
+    if (!isAadharVerified) {
       if (KycTypeLabel.length <= 0) {
         errorMessage =
           errorMessage +
@@ -775,15 +909,17 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
         if (response.ok) {
           const data = await response.json();
           // Handle the response from Cloudinary
-
+          setLoading(false)
           setDocID(data.docId);
           updateKYCDetails(data.docId);
         } else {
+          setLoading(false)
           if (global.DEBUG_MODE) console.log('Upload failed:', response.status);
           setApiError(response.status);
           setErrorModalVisible(true)
         }
       } catch (error) {
+        setLoading(false)
         if (global.DEBUG_MODE) console.log('Upload error:', error);
         setApiError(error.response.data.message);
         setErrorModalVisible(true)
@@ -809,7 +945,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
         // Handle the response data
 
         if (global.DEBUG_MODE) console.log("ManualKYCApiResponse::" + JSON.stringify(response.data));
-
+        tbl_client.updateKYCManual("1", global.LOANAPPLICATIONID, global.CLIENTTYPE)
         buttonNext();
         setLoading(false)
 
@@ -831,7 +967,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   };
 
   const onGoBack = () => {
-    props.navigation.navigate('LoanApplicationMain', { fromScreen: 'KYCVerificationStatus' })
+    props.navigation.replace('LoanApplicationMain', { fromScreen: 'KYCVerificationStatus' })
   }
 
   return (
@@ -840,7 +976,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
       <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
       <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
-      <ImageBottomPreview bottomSheetVisible={bottomSheetVisible} previewImage={previewImage} hideBottomSheet={hideImageBottomSheet} reTakePhoto={reTakePhoto} fileName={fileName} detailHide={true} deleteVisible={deleteVisible} deletePhoto={deletePhoto} onDeleteorCancel={onDeleteorCancel} />
+      <ImageBottomPreview bottomSheetVisible={bottomSheetVisible} previewImage={previewImage} hideBottomSheet={hideImageBottomSheet} reTakePhoto={reTakePhoto} fileName={fileName} detailHide={true} deleteVisible={deleteVisible} deletePhoto={deletePhoto} onDeleteorCancel={onDeleteorCancel} hideDelete={hideDelete} hideRetake={hideRetake} />
 
       <Modal
         isVisible={photoOptionvisible}
@@ -1087,7 +1223,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
             </View>
           )}
 
-          {!(global.isAadharVerified == '1') &&
+          {!isAadharVerified &&
             <View
               style={{
                 width: '100%',

@@ -652,6 +652,7 @@ const LeadManagement = (props, { navigation, route }) => {
 
         setAgeFilterValue('')
         setVisible(false)
+        setAgentLabel('')
 
         if (value == "1") {
             Common.getNetworkConnection().then(value => {

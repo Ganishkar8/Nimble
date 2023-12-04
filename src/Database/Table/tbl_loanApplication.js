@@ -53,6 +53,31 @@ const getLoanAppBasedOnID = (id, clientType) => {
   });
 };
 
+const getLoanAppWorkFlowID = (id, clientType) => {
+  const db = databaseInstance.getInstance();
+
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        `SELECT workflow_id FROM ${tableName} WHERE id = ? AND clientType=?`,
+        [id, clientType],
+        (_, result) => {
+          const rows = result.rows;
+          const clientData = [];
+
+          for (let i = 0; i < rows.length; i++) {
+            clientData.push(rows.item(i));
+          }
+
+          resolve(clientData);
+        },
+        error => {
+          reject(error);
+        },
+      );
+    });
+  });
+};
 
 const deleteAllLoan = async () => {
   try {
@@ -72,4 +97,5 @@ export default {
   insertLoanApplication,
   getLoanAppBasedOnID,
   deleteAllLoan,
+  getLoanAppWorkFlowID
 };

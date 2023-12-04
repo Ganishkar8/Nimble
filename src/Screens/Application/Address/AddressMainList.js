@@ -31,6 +31,8 @@ import Common from '../../../Utils/Common';
 import ButtonViewComp from '../../../Components/ButtonViewComp';
 import DeleteConfirmModel from '../../../Components/DeleteConfirmModel';
 import tbl_client from '../../../Database/Table/tbl_client';
+import tbl_loanApplication from '../../../Database/Table/tbl_loanApplication';
+import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 
 const AddressMainList = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -44,16 +46,16 @@ const AddressMainList = (props, { navigation }) => {
   const [processModuleLength, setProcessModuleLength] = useState(0);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [kycManual, setKYCManual] = useState('0');
+  const [errMsg, setErrMsg] = useState('');
+  const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
+  const [communicationAvailable, setCommunicationAvailable] = useState(false);
+  const showBottomSheet = () => setBottomErrorSheetVisible(true);
+  const hideBottomSheet = () => setBottomErrorSheetVisible(false);
 
   useEffect(() => {
     props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
-    const filteredProcessModuleStage = processModule.filter((data) => {
-      return data.wfId === 111 && data.process_sub_stage_id === 12;
-    })
-    if (filteredProcessModuleStage) {
-      setProcessModuleLength(filteredProcessModuleStage.length);
-    }
+
     getAddressData()
 
     return () => {
@@ -68,6 +70,24 @@ const AddressMainList = (props, { navigation }) => {
   };
 
   const getAddressData = () => {
+
+    // tbl_loanApplication.getLoanAppWorkFlowID(global.LOANAPPLICATIONID, 'APPL')
+    //   .then(data => {
+    //     if (global.DEBUG_MODE) console.log('Applicant Data:', data);
+    //     if (data !== undefined && data.length > 0) {
+    //       const filteredProcessModuleStage = processModule.filter((data1) => {
+    //         return data1.wfId === parseInt(data[0].workflow_id) && data1.process_sub_stage_id === 1;
+    //       })
+    //       alert(data[0].workflow_id)
+    //       if (filteredProcessModuleStage) {
+    //         setProcessModuleLength(filteredProcessModuleStage.length);
+    //       }
+    //     }
+
+    //   })
+    //   .catch(error => {
+    //     if (global.DEBUG_MODE) console.error('Error fetching Applicant details:', error);
+    //   });
 
     tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE).then(value => {
       if (value !== undefined && value.length > 0) {
@@ -86,103 +106,125 @@ const AddressMainList = (props, { navigation }) => {
     tbl_clientaddressinfo.getAllAddressDetailsForLoanID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
       .then(data => {
         if (global.DEBUG_MODE) console.log('Address Detail:', data);
-        setAddressDetails(data)
-        setRefreshFlatList(!refreshFlatlist)
+        if (data !== undefined && data.length > 0) {
+          setAddressDetails(data)
+          const communicationAddress = data.find(item => item.address_type === 'C');
+          if (communicationAddress) {
+            setCommunicationAvailable(true);
+          }
+          setRefreshFlatList(!refreshFlatlist)
+        }
       })
       .catch(error => {
         if (global.DEBUG_MODE) console.error('Error fetching bank details:', error);
       });
   }
 
-  const FlatView = ({ item }) => (
+  const FlatView = ({ item }) => {
 
-    <View style={{ marginLeft: 10, marginRight: 10 }}>
-      <View>
-        <Text style={{ fontSize: 14, fontFamily: 'Poppins-SemiBold', marginTop: 5, color: Colors.black }}>
-          {Common.getSystemCodeDescription(props.mobilecodedetail.leadUserCodeDto, 'ADDRESS_TYPE', item.address_type)}
-        </Text>
-        <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: Colors.mediumgrey }}>{`${item.address_line_1},${item.address_line_2}`}</Text>
-        <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: Colors.mediumgrey }}>{`${item.district},${item.state}`}</Text>
-      </View>
+    var bg = '';
 
-      <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
-        <TouchableOpacity activeOpacity={8} onPress={() => handleClick('edit', item)}>
-          <View>
-            <IconButtonViewComp
-              textValue={'Edit'.toUpperCase()}
-              textStyle={{
-                color: Colors.skyBlue,
-                fontSize: 13,
-                fontWeight: 500,
-              }}
-              viewStyle={{
-                width: '100%',
-                // height: 50,
-                marginTop: 10,
-                justifyContent: 'flex-end',
-                alignItems: 'center',
-              }}
-              innerStyle={{
-                width: '100%',
-                // height: 50,
-                marginTop: 10,
-                justifyContent: 'flex-end',
-                alignItems: 'center',
-              }}
+    if (global.USERTYPEID == 1163) {
+      bg = 'GREY'
+    } else {
+      if (item.isKyc == '1') {
+        bg = 'GREY'
+      }
+    }
+    return (
+      <View style={{ marginLeft: 10, marginRight: 10 }}>
+        <View>
+          <Text style={{ fontSize: 14, fontFamily: 'Poppins-SemiBold', marginTop: 5, color: Colors.black }}>
+            {Common.getSystemCodeDescription(props.mobilecodedetail.leadUserCodeDto, 'ADDRESS_TYPE', item.address_type)}
+          </Text>
+          <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: Colors.mediumgrey }}>{`${item.address_line_1},${item.address_line_2}`}</Text>
+          <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: Colors.mediumgrey }}>{`${item.district},${item.state}`}</Text>
+        </View>
 
-            />
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity style={{ width: '20%' }} activeOpacity={0.8} onPress={() => {
-          if (item.isKyc != '1') {
-            handleClick('delete', item)
+        <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
+          <TouchableOpacity activeOpacity={8} onPress={() => handleClick('edit', item)}>
+            <View>
+              <IconButtonViewComp
+                textValue={'Edit'.toUpperCase()}
+                textStyle={{
+                  color: Colors.skyBlue,
+                  fontSize: 13,
+                  fontWeight: 500,
+                }}
+                viewStyle={{
+                  width: '100%',
+                  // height: 50,
+                  marginTop: 10,
+                  justifyContent: 'flex-end',
+                  alignItems: 'center',
+                }}
+                innerStyle={{
+                  width: '100%',
+                  // height: 50,
+                  marginTop: 10,
+                  justifyContent: 'flex-end',
+                  alignItems: 'center',
+                }}
+
+              />
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity style={{ width: '20%' }} activeOpacity={0.8} onPress={() => {
+
+            if (global.USERTYPEID == 1163) {
+
+            } else {
+              if (item.isKyc != '1') {
+                handleClick('delete', item)
+              }
+            }
           }
-        }
-        }>
-          <View >
-            <IconButtonViewComp
-              textValue={'Delete'.toUpperCase()}
-              textStyle={{
-                color: item.isKyc == '1' ? Colors.lightgrey : Colors.skyBlue,
-                fontSize: 13,
-                fontWeight: 500,
-              }}
-              viewStyle={{
-                width: '100%',
-                // height: 50,
-                marginTop: 10,
-                justifyContent: 'flex-end',
-                alignItems: 'center',
-              }}
-              innerStyle={{
-                width: '100%',
-                // height: 50,
-                marginTop: 10,
-                justifyContent: 'flex-end',
-                alignItems: 'center',
-              }}
-            />
-          </View>
-        </TouchableOpacity>
+          }>
+            <View >
+              <IconButtonViewComp
+                textValue={'Delete'.toUpperCase()}
+                textStyle={{
+                  color: bg == 'GREY' ? Colors.lightgrey : Colors.skyBlue,
+                  fontSize: 13,
+                  fontWeight: 500,
+                }}
+                viewStyle={{
+                  width: '100%',
+                  // height: 50,
+                  marginTop: 10,
+                  justifyContent: 'flex-end',
+                  alignItems: 'center',
+                }}
+                innerStyle={{
+                  width: '100%',
+                  // height: 50,
+                  marginTop: 10,
+                  justifyContent: 'flex-end',
+                  alignItems: 'center',
+                }}
+              />
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        <View
+          style={{
+            borderBottomWidth: 1,
+            borderBottomColor: '#DFE6EA',
+            marginVertical: 10,
+            marginHorizontal: 10,
+            paddingBottom: 10,
+            width: '100%',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+          }}
+        />
       </View>
+    )
 
-      <View
-        style={{
-          borderBottomWidth: 1,
-          borderBottomColor: '#DFE6EA',
-          marginVertical: 10,
-          marginHorizontal: 10,
-          paddingBottom: 10,
-          width: '100%',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexDirection: 'row',
-          flexWrap: 'wrap',
-        }}
-      />
-    </View>
-
-  );
+  }
 
   const handleClick = (value, data) => {
     if (value === 'edit') {
@@ -236,29 +278,36 @@ const AddressMainList = (props, { navigation }) => {
 
 
   const buttonNext = () => {
-    if (global.CLIENTTYPE == 'APPL') {
-      global.COMPLETEDMODULE = 'PRF_SHRT_APLCT';
-      global.COMPLETEDPAGE = 'PRF_SHRT_APLCT_ADDRS_DTLS';
-    } else if (global.CLIENTTYPE == 'CO-APPL') {
-      global.COMPLETEDMODULE = 'PRF_SHRT_COAPLCT';
-      global.COMPLETEDPAGE = 'PRF_SHRT_COAPLCT_ADDRS_DTLS';
-    } else if (global.CLIENTTYPE == 'GRNTR') {
-      global.COMPLETEDMODULE = 'PRF_SHRT_GRNTR';
-      global.COMPLETEDPAGE = 'PRF_SHRT_GRNTR_ADDRS_DTLS';
-    }
 
+    if (validate()) {
+      showBottomSheet();
+      return;
+    }
     updateLoanStatus();
 
   }
 
   const updateLoanStatus = () => {
 
+    var module = ''; var page = '';
+
+    if (global.CLIENTTYPE == 'APPL') {
+      module = 'PRF_SHRT_APLCT';
+      page = 'PRF_SHRT_APLCT_ADDRS_DTLS';
+    } else if (global.CLIENTTYPE == 'CO-APPL') {
+      module = 'PRF_SHRT_COAPLCT';
+      page = 'PRF_SHRT_COAPLCT_ADDRS_DTLS';
+    } else if (global.CLIENTTYPE == 'GRNTR') {
+      module = 'PRF_SHRT_GRNTR';
+      page = 'PRF_SHRT_GRNTR_ADDRS_DTLS';
+    }
+
     const appDetails = {
       "loanApplicationId": global.LOANAPPLICATIONID,
       "loanWorkflowStage": "LN_APP_INITIATION",
       "subStageCode": "PRF_SHRT",
-      "moduleCode": global.COMPLETEDMODULE,
-      "pageCode": global.COMPLETEDPAGE,
+      "moduleCode": module,
+      "pageCode": page,
       "status": "Completed"
     }
     const baseURL = '8901';
@@ -267,45 +316,46 @@ const AddressMainList = (props, { navigation }) => {
       .post(`/api/v2/loan-application-status/updateStatus`, appDetails)
       .then(async response => {
         // Handle the response data
+
         if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
         setLoading(false);
-        if (processModuleLength == 1) {
-          props.navigation.navigate('LoanApplicationMain', { fromScreen: 'AddressDetail' });
-        } else if (processModuleLength == 2) {
-          if (global.CLIENTTYPE == 'APPL') {
-            global.isDedupeDone = '0';
-            global.isMobileVerified = '0';
-            global.CLIENTID = '';
-            global.isAadharVerified = '0';
-            global.CLIENTTYPE = 'CO-APPL';
-            props.navigation.replace('ProfileShortBasicDetails');
-            // props.navigation.navigate('LoanApplicationMain');
-          } else if (global.CLIENTTYPE == 'CO-APPL') {
-            props.navigation.navigate('LoanApplicationMain', { fromScreen: 'AddressDetail' });
-          } else if (global.CLIENTTYPE == 'GRNTR') {
-            props.navigation.replace('LoanApplicationMain', { fromScreen: 'AddressDetail' });
-          }
-        } else if (processModuleLength == 3) {
-          if (global.CLIENTTYPE == 'APPL') {
-            global.isDedupeDone = '0';
-            global.isMobileVerified = '0';
-            global.CLIENTID = '';
-            global.isAadharVerified = '0';
-            global.CLIENTTYPE = 'CO-APPL';
-            props.navigation.replace('ProfileShortBasicDetails');
-            //props.navigation.navigate('LoanApplicationMain');
-          } else if (global.CLIENTTYPE == 'CO-APPL') {
-            global.isDedupeDone = '0';
-            global.isMobileVerified = '0';
-            global.CLIENTID = '';
-            global.isAadharVerified = '0';
-            global.CLIENTTYPE = 'GRNTR';
-            props.navigation.replace('ProfileShortBasicDetails');
-            //props.navigation.navigate('LoanApplicationMain');
-          } else if (global.CLIENTTYPE == 'GRNTR') {
-            props.navigation.replace('LoanApplicationMain', { fromScreen: 'AddressDetail' });
-          }
+        if (global.CLIENTTYPE == 'APPL') {
+          global.COMPLETEDMODULE = 'PRF_SHRT_APLCT';
+          global.COMPLETEDPAGE = 'PRF_SHRT_APLCT_ADDRS_DTLS';
+        } else if (global.CLIENTTYPE == 'CO-APPL') {
+          global.COMPLETEDMODULE = 'PRF_SHRT_COAPLCT';
+          global.COMPLETEDPAGE = 'PRF_SHRT_COAPLCT_ADDRS_DTLS';
+        } else if (global.CLIENTTYPE == 'GRNTR') {
+          global.COMPLETEDMODULE = 'PRF_SHRT_GRNTR';
+          global.COMPLETEDPAGE = 'PRF_SHRT_GRNTR_ADDRS_DTLS';
         }
+        global.isDedupeDone = '0';
+        global.isMobileVerified = '0';
+        global.CLIENTID = '';
+        global.isAadharVerified = '0';
+        props.navigation.replace('LoanApplicationMain', { fromScreen: 'AddressDetail' });
+        // if (processModuleLength == 1) {
+        //   props.navigation.navigate('LoanApplicationMain', { fromScreen: 'AddressDetail' });
+        // } else if (processModuleLength == 2) {
+        //   if (global.CLIENTTYPE == 'APPL') {
+        //     global.CLIENTTYPE = 'CO-APPL';
+        //     props.navigation.replace('ProfileShortBasicDetails');
+        //   } else if (global.CLIENTTYPE == 'CO-APPL') {
+        //     props.navigation.navigate('LoanApplicationMain', { fromScreen: 'AddressDetail' });
+        //   } else if (global.CLIENTTYPE == 'GRNTR') {
+        //     props.navigation.replace('LoanApplicationMain', { fromScreen: 'AddressDetail' });
+        //   }
+        // } else if (processModuleLength == 3) {
+        //   if (global.CLIENTTYPE == 'APPL') {
+        //     global.CLIENTTYPE = 'CO-APPL';
+        //     props.navigation.replace('ProfileShortBasicDetails');
+        //   } else if (global.CLIENTTYPE == 'CO-APPL') {
+        //     global.CLIENTTYPE = 'GRNTR';
+        //     props.navigation.replace('ProfileShortBasicDetails');
+        //   } else if (global.CLIENTTYPE == 'GRNTR') {
+        //     props.navigation.replace('LoanApplicationMain', { fromScreen: 'AddressDetail' });
+        //   }
+        // }
 
       })
       .catch(error => {
@@ -355,11 +405,32 @@ const AddressMainList = (props, { navigation }) => {
   };
 
   const onGoBack = () => {
-    props.navigation.navigate('LoanApplicationMain', { fromScreen: 'AddressDetail' })
+    props.navigation.replace('LoanApplicationMain', { fromScreen: 'AddressDetail' })
   }
 
   const closeErrorModal = () => {
     setErrorModalVisible(false);
+  };
+
+  const validate = () => {
+    var flag = false;
+    var i = 1;
+    var errorMessage = '';
+
+    if (!communicationAvailable) {
+      errorMessage =
+        errorMessage +
+        i +
+        ')' +
+        ' ' +
+        "Please Add Communication Address" +
+        '\n';
+      i++;
+      flag = true;
+    }
+
+    setErrMsg(errorMessage);
+    return flag;
   };
 
   const closeDeleteModal = () => {
@@ -376,6 +447,13 @@ const AddressMainList = (props, { navigation }) => {
       <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
       <DeleteConfirmModel isVisible={deleteModalVisible} onClose={closeDeleteModal} textContent={language[0][props.language].str_deletedesc} textClose={language[0][props.language].str_no} textDelete={language[0][props.language].str_yes} deleteClick={onDeleteClick} />
 
+      <ErrorMessageModal
+        isVisible={bottomErrorSheetVisible}
+        hideBottomSheet={hideBottomSheet}
+        errMsg={errMsg}
+        textError={language[0][props.language].str_error}
+        textClose={language[0][props.language].str_ok}
+      />
       {loading ? <Loading /> : null}
       <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
 
