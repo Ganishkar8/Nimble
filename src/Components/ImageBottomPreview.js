@@ -66,34 +66,35 @@ const ImageBottomPreview = props => {
 
                         </TouchableOpacity>
                     }
-
-                    <TouchableOpacity onPress={() => { props.reTakePhoto() }} activeOpacity={0.5} style={{ width: '100%', flexDirection: 'row', marginTop: 18 }}>
-                        <View style={{ flexDirection: 'row' }} >
-                            <View style={{ width: '15%', marginLeft: 3 }}>
-                                <Image source={require('../Images/fileupload.png')}
-                                    style={{ width: 16, height: 20 }} />
-                            </View>
-                            <View style={{ width: '85%', justifyContent: 'center' }}>
-                                <TextComp textVal={language[0][props.language].str_retake} textStyle={{ fontSize: 14, color: Colors.mediumgrey, fontFamily: 'PoppinsRegular' }} Visible={false} />
-                            </View>
-
-                        </View>
-                    </TouchableOpacity>
-
-
-                    <TouchableOpacity onPress={() => { props.deletePhoto(); }} activeOpacity={0.5} style={{ width: '100%', flexDirection: 'row', marginTop: 20, marginBottom: 20 }}>
-                        <View style={{ flexDirection: 'row' }}>
-                            <View style={{ width: '15%' }}>
-
-                                <MaterialCommunityIcons name='delete' size={25} color={Colors.darkblue} />
+                    {!props.hideRetake &&
+                        <TouchableOpacity onPress={() => { props.reTakePhoto() }} activeOpacity={0.5} style={{ width: '100%', flexDirection: 'row', marginTop: 18 }}>
+                            <View style={{ flexDirection: 'row' }} >
+                                <View style={{ width: '15%', marginLeft: 3 }}>
+                                    <Image source={require('../Images/fileupload.png')}
+                                        style={{ width: 16, height: 20 }} />
+                                </View>
+                                <View style={{ width: '85%', justifyContent: 'center' }}>
+                                    <TextComp textVal={language[0][props.language].str_retake} textStyle={{ fontSize: 14, color: Colors.mediumgrey, fontFamily: 'PoppinsRegular' }} Visible={false} />
+                                </View>
 
                             </View>
-                            <View style={{ width: '85%', justifyContent: 'center', marginLeft: 3 }}>
-                                <TextComp textVal={language[0][props.language].str_delete} textStyle={{ fontSize: 14, color: Colors.mediumgrey, fontFamily: 'PoppinsRegular' }} Visible={false} />
-                            </View>
+                        </TouchableOpacity>}
 
-                        </View>
-                    </TouchableOpacity>
+                    {!props.hideDelete &&
+                        <TouchableOpacity onPress={() => { props.deletePhoto(); }} activeOpacity={0.5} style={{ width: '100%', flexDirection: 'row', marginTop: 20, marginBottom: 20 }}>
+                            <View style={{ flexDirection: 'row' }}>
+                                <View style={{ width: '15%' }}>
+
+                                    <MaterialCommunityIcons name='delete' size={25} color={Colors.darkblue} />
+
+                                </View>
+                                <View style={{ width: '85%', justifyContent: 'center', marginLeft: 3 }}>
+                                    <TextComp textVal={language[0][props.language].str_delete} textStyle={{ fontSize: 14, color: Colors.mediumgrey, fontFamily: 'PoppinsRegular' }} Visible={false} />
+                                </View>
+
+                            </View>
+                        </TouchableOpacity>
+                    }
 
                 </View>}
 
@@ -135,7 +136,7 @@ const ImageBottomPreview = props => {
                             }}>
                             <TouchableOpacity
                                 onPress={() => {
-                                    props.onDeleteorCancel();
+                                    props.onDeleteorCancel('Cancel');
                                 }}
                                 activeOpacity={0.5}
                                 style={{
@@ -170,7 +171,7 @@ const ImageBottomPreview = props => {
                             }}>
                             <TouchableOpacity
                                 onPress={() => {
-                                    props.onDeleteorCancel();
+                                    props.onDeleteorCancel('Delete');
                                 }}
                                 activeOpacity={10}
                                 style={{

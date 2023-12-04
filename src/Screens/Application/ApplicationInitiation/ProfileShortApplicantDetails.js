@@ -8,7 +8,7 @@ import {
   TextInput,
   Text,
   Image,
-  BackHandler
+  BackHandler, PermissionsAndroid
 } from 'react-native';
 import apiInstance from '../../../Utils/apiInstance';
 import apiInstancelocal from '../../../Utils/apiInstancelocal';
@@ -201,6 +201,12 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
 
   const [kycManual, setKYCManual] = useState('0');
 
+  const [hideRetake, setHideRetake] = useState(false);
+  const [hideDelete, setHideDelete] = useState(false);
+
+
+  const [minAge, setMinAge] = useState(18);
+
   const isScreenVisible = useIsFocused();
 
   useEffect(() => {
@@ -209,6 +215,11 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
 
+    if (global.USERTYPEID == 1164) {
+      getlocationPermission();
+    } else {
+      zoomToMarker();
+    }
 
     return () => {
       props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
@@ -221,19 +232,111 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
     return true; // Prevent default back button behavior
   };
 
+  const getlocationPermission = () => {
+    checkPermissions().then(res => {
+      if (res == true) {
+        getOneTimeLocation();
+        setLoading(false)
+      } else {
+        setLoading(false)
+        setApiError('Permission Not Granted');
+        setErrorModalVisible(true)
+      }
+    });
+  }
+
   useFocusEffect(
     React.useCallback(() => {
       makeSystemMandatoryFields();
       getSystemCodeDetail();
       getClientData();
-      getOneTimeLocation();
+      if (global.USERTYPEID == 1164) {
+        setHideDelete(false);
+        setHideRetake(false);
+      }
       return () => {
         console.log('Screen is blurred');
       };
     }, [])
   );
 
+  const checkPermissions = async () => {
+    const permissionsToRequest = [];
+
+    if (Platform.OS === 'android') {
+      // Camera permission
+      const cameraPermission = await PermissionsAndroid.check(
+        PermissionsAndroid.PERMISSIONS.CAMERA
+      );
+      if (cameraPermission !== PermissionsAndroid.RESULTS.GRANTED) {
+        permissionsToRequest.push(PermissionsAndroid.PERMISSIONS.CAMERA);
+      }
+
+      // Location permission
+      const locationPermission = await PermissionsAndroid.check(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+      );
+      if (locationPermission !== PermissionsAndroid.RESULTS.GRANTED) {
+        permissionsToRequest.push(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+      }
+
+      // Request all pending permissions
+      return requestPermissions(permissionsToRequest);
+    } else {
+      // For iOS and other platforms, use react-native-permissions
+      const cameraResult = await check(PERMISSIONS.IOS.CAMERA);
+      const locationResult = await check(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
+
+      const permissionsToRequest = [];
+
+      if (cameraResult !== RESULTS.GRANTED) {
+        permissionsToRequest.push(PERMISSIONS.IOS.CAMERA);
+      }
+
+      if (locationResult !== RESULTS.GRANTED) {
+        permissionsToRequest.push(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
+      }
+
+      // Request all pending permissions
+      request(permissionsToRequest);
+    }
+  };
+
+  const requestPermissions = async (permissions) => {
+    if (Platform.OS === 'android') {
+      try {
+        const grantedPermissions = await PermissionsAndroid.requestMultiple(permissions);
+        const allPermissionsGranted = Object.values(grantedPermissions).every(
+          status => status === PermissionsAndroid.RESULTS.GRANTED
+        );
+
+        if (allPermissionsGranted) {
+          // All permissions granted
+
+        } else {
+
+          // Handle denied permissions
+        }
+        return allPermissionsGranted
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      // For iOS and other platforms, use react-native-permissions
+      const results = await request(permissions);
+
+      if (results.every(result => result === RESULTS.GRANTED)) {
+        // All permissions granted
+      } else {
+        // Handle denied permissions
+      }
+    }
+  };
+
   const getSystemCodeDetail = async () => {
+
+    const filteredMinAgeData = leadsystemCodeDetail.filter((data) => data.masterId === 'APPLICANT_MINIMUM_AGE').sort((a, b) => a.Description.localeCompare(b.Description));
+    setMinAge(filteredMinAgeData[0].Description)
 
     const filteredMaritalStatusData = userCodeDetail.filter((data) => data.ID === 'MaritalStatusID').sort((a, b) => a.Description.localeCompare(b.Description));
     setMaritalStatusData(filteredMaritalStatusData);
@@ -525,16 +628,38 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
         if (value[0].dmsId.length > 0) {
           getImage(value[0].dmsId);
         }
+        setDocID(value[0].dmsId);
+        if (value[0].geoCode.length > 0) {
+          const [latitude, longitude] = value[0].geoCode.split(',');
+          setCurrentLongitude(parseFloat(longitude));
+          setCurrentLatitude(parseFloat(latitude));
+          zoomToMarker();
+          setGPSLatLon(value[0].geoCode)
 
-        setKYCManual(value[0].isKycManual)
-        alert(value[0].isKycManual)
-        if (global.USERTYPEID == 1163) {
-          if (!(value[0].isKycManual == '1')) {
-            fieldsDisable();
-          }
         }
 
-        disableAadharFields(value[0].fatherName, value[0].spouseName);
+        setKYCManual(value[0].isKycManual)
+
+        if (!(value[0].isKycManual) == 1) {
+          global.isAadharVerified = "1";
+        } else {
+          global.isAadharVerified = "0";
+        }
+
+        if (global.USERTYPEID == 1163) {
+          if (value[0].isKycManual == '1') {
+            setHideDelete(true);
+            setHideRetake(true);
+          } else {
+            fieldsDisable();
+            setHideDelete(true);
+            setHideRetake(true);
+          }
+        } else {
+          disableAadharFields(value[0].fatherName, value[0].spouseName);
+        }
+
+
       }
     })
 
@@ -545,8 +670,10 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
 
     if (global.isAadharVerified == '1') {
       setFirstNameDisable(true);
-      setMiddleNameDisable(false);
-      setLastNameDisable(false);
+      setMiddleNameDisable(true);
+      setLastNameDisable(true);
+      setLastNameMan(false)
+      setMiddleNameMan(false)
       setGenderDisable(true);
       setDOBDisable(true);
       setAgeDisable(true);
@@ -563,13 +690,13 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
 
     setTitleDisable(true);
     setFirstNameDisable(true);
-    setMiddleNameDisable(false);
-    setLastNameDisable(false);
+    setMiddleNameDisable(true);
+    setLastNameDisable(true);
     setGenderDisable(true);
     setDOBDisable(true);
     setAgeDisable(true);
-    setFatherNameDisable(false)
-    setSpouseNameDisable(false)
+    setFatherNameDisable(true)
+    setSpouseNameDisable(true)
     setCasteDisable(true);
     setReligionDisable(true);
     setMotherTongueDisable(true);
@@ -618,7 +745,9 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
   const uploadImage = async () => {
 
     if (global.USERTYPEID == 1163) {
-      if (!(kycManual == '1')) {
+      if (kycManual == '1') {
+        updateApplicantDetails(docID)
+      } else {
         props.navigation.replace('AddressMainList')
         return;
       }
@@ -709,7 +838,6 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
         "motherTongue": MotherTongueLabel,
         "educationQualification": EADLabel,
         "gender": GenderLabel,
-        "maritalStatus": "",
         "dmsId": id,
         "imageName": fileName,
         "geoCode": currentLatitude + "," + currentLongitude,
@@ -723,16 +851,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
           // Handle the response data
           if (global.DEBUG_MODE) console.log('PersonalDetailApiResponse::' + JSON.stringify(response.data));
           await tbl_client.updatePersonalDetails(TitleLabel, firstName, middleName, lastName, DOB, Age, GenderLabel, FatherName, SpouseName, CasteLabel, ReligionLabel, MotherTongueLabel, EADLabel, gpslatlon, id, global.LOANAPPLICATIONID);
-          if (global.CLIENTTYPE == 'APPL') {
-            global.COMPLETEDMODULE = 'PRF_SHRT_APLCT';
-            global.COMPLETEDPAGE = 'PRF_SHRT_APLCT_PRSNL_DTLS';
-          } else if (global.CLIENTTYPE == 'CO-APPL') {
-            global.COMPLETEDMODULE = 'PRF_SHRT_COAPLCT';
-            global.COMPLETEDPAGE = 'PRF_SHRT_COAPLCT_PRSNL_DTLS';
-          } else if (global.CLIENTTYPE == 'GRNTR') {
-            global.COMPLETEDMODULE = 'PRF_SHRT_GRNTR';
-            global.COMPLETEDPAGE = 'PRF_SHRT_GRNTR_PRSNL_DTLS';
-          }
+
           setLoading(false);
           if (global.USERTYPEID == 1163) {
             props.navigation.replace('AddressMainList')
@@ -743,21 +862,36 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
         })
         .catch(error => {
           // Handle the error
-          console.log('Error' + JSON.stringify(error.response));
           setLoading(false);
-          alert(error);
+          if (error.response.data != null) {
+            setApiError(error.response.data.message);
+            setErrorModalVisible(true)
+          }
         });
     }
   };
 
   const updateLoanStatus = () => {
 
+    var module = ''; var page = '';
+
+    if (global.CLIENTTYPE == 'APPL') {
+      module = 'PRF_SHRT_APLCT';
+      page = 'PRF_SHRT_APLCT_PRSNL_DTLS';
+    } else if (global.CLIENTTYPE == 'CO-APPL') {
+      module = 'PRF_SHRT_COAPLCT';
+      page = 'PRF_SHRT_COAPLCT_PRSNL_DTLS';
+    } else if (global.CLIENTTYPE == 'GRNTR') {
+      module = 'PRF_SHRT_GRNTR';
+      page = 'PRF_SHRT_GRNTR_PRSNL_DTLS';
+    }
+
     const appDetails = {
       "loanApplicationId": global.LOANAPPLICATIONID,
       "loanWorkflowStage": "LN_APP_INITIATION",
       "subStageCode": "PRF_SHRT",
-      "moduleCode": global.COMPLETEDMODULE,
-      "pageCode": global.COMPLETEDPAGE,
+      "moduleCode": module,
+      "pageCode": page,
       "status": "Completed"
     }
     const baseURL = '8901';
@@ -768,6 +902,16 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
         // Handle the response data
         if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
         setLoading(false);
+        if (global.CLIENTTYPE == 'APPL') {
+          global.COMPLETEDMODULE = 'PRF_SHRT_APLCT';
+          global.COMPLETEDPAGE = 'PRF_SHRT_APLCT_PRSNL_DTLS';
+        } else if (global.CLIENTTYPE == 'CO-APPL') {
+          global.COMPLETEDMODULE = 'PRF_SHRT_COAPLCT';
+          global.COMPLETEDPAGE = 'PRF_SHRT_COAPLCT_PRSNL_DTLS';
+        } else if (global.CLIENTTYPE == 'GRNTR') {
+          global.COMPLETEDMODULE = 'PRF_SHRT_GRNTR';
+          global.COMPLETEDPAGE = 'PRF_SHRT_GRNTR_PRSNL_DTLS';
+        }
         props.navigation.replace('AddressMainList')
 
       })
@@ -855,6 +999,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
   };
 
   const getOneTimeLocation = () => {
+
     setLocationStatus('Getting Location ...');
     Geolocation.getCurrentPosition(
       //Will give you the current location
@@ -878,6 +1023,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
         setGPSLatLon(prevCount => currentLatitude + ',' + currentLongitude);
       },
       error => {
+        alert(error.message)
         setLocationStatus(error.message);
         console.log(error);
       },
@@ -1003,6 +1149,17 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
           '\n';
         i++;
         flag = true;
+      } else if (parseInt(Age) < parseInt(minAge)) {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          AgeCaption +
+          " Cannot be less than " + minAge +
+          '\n';
+        i++;
+        flag = true;
       }
     }
     if (FatherNameMan && FatherNameVisible) {
@@ -1103,6 +1260,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       setLastName(textValue);
     } else if (componentName === 'DOB') {
       setDOB(textValue);
+      setAge(Common.calculateAge(textValue).toString())
     } else if (componentName === 'Age') {
       setAge(textValue);
     } else if (componentName === 'FatherName') {
@@ -1151,7 +1309,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
   };
 
   const onGoBack = () => {
-    props.navigation.navigate('LoanApplicationMain', { fromScreen: 'PersonalDetail' })
+    props.navigation.replace('LoanApplicationMain', { fromScreen: 'PersonalDetail' })
   }
 
   const closeErrorModal = () => {
@@ -1192,7 +1350,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
       <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
       <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
-      <ImageBottomPreview bottomSheetVisible={bottomSheetVisible} previewImage={previewImage} hideBottomSheet={hideImageBottomSheet} reTakePhoto={reTakePhoto} fileName={fileName} detailHide={true} deleteVisible={deleteVisible} deletePhoto={deletePhoto} onDeleteorCancel={onDeleteorCancel} />
+      <ImageBottomPreview bottomSheetVisible={bottomSheetVisible} previewImage={previewImage} hideBottomSheet={hideImageBottomSheet} reTakePhoto={reTakePhoto} fileName={fileName} detailHide={true} deleteVisible={deleteVisible} deletePhoto={deletePhoto} onDeleteorCancel={onDeleteorCancel} hideDelete={hideDelete} hideRetake={hideRetake} />
 
       <Modal
         isVisible={photoOptionvisible}
@@ -1464,6 +1622,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
                   handleClick={handleClick}
                   Disable={DOBDisable}
                   reference={DOBRef}
+                  minDate={new Date()}
                   handleReference={handleReference} />
               </View>
               {/* <TextInputComp
@@ -1800,7 +1959,12 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
 
               <TouchableOpacity
                 onPress={() => {
-                  getOneTimeLocation();
+                  if (global.USERTYPEID == 1163) {
+                    zoomToMarker();
+                  } else {
+                    getlocationPermission();
+                  }
+
                 }}
                 style={{ marginLeft: 8, marginTop: 5 }}
                 activeOpacity={0.5}>

@@ -8,8 +8,8 @@ import {
   Image,
   Text,
   TextInput,
+  FlatList
 } from 'react-native';
-import CheckBox from '@react-native-community/checkbox';
 import apiInstance from '../../../Utils/apiInstance';
 import apiInstancelocal from '../../../Utils/apiInstancelocal';
 import Colors from '../../../Utils/Colors';
@@ -22,8 +22,6 @@ import { language } from '../../../Utils/LanguageString';
 import Commonstyles from '../../../Utils/Commonstyles';
 import HeadComp from '../../../Components/HeadComp';
 import ProgressComp from '../../../Components/ProgressComp';
-import tbl_SystemMandatoryFields from '../../../Database/Table/tbl_SystemMandatoryFields';
-import Modal from 'react-native-modal';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Common from '../../../Utils/Common';
 import tbl_SystemCodeDetails from '../../../Database/Table/tbl_SystemCodeDetails';
@@ -36,6 +34,11 @@ import CheckBoxComp from '../../../Components/CheckBoxComp';
 import { RadioButton } from 'react-native-paper';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import ModalContainer from '../../../Components/ModalContainer';
+import BusinessIncome from './Financial/BusinessIncome';
+import ImageComp from '../../../Components/ImageComp';
+import { Item } from 'react-native-paper/lib/typescript/components/Drawer/Drawer';
 
 const LoanDemographicsFinancialDetails = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -43,6 +46,49 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
   const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
   const showBottomSheet = () => setBottomErrorSheetVisible(true);
   const hideBottomSheet = () => setBottomErrorSheetVisible(false);
+
+  const [incomeModalVisible, setIncomeModalVisible] = useState(false);
+  const showIncomeSheet = (label) => {
+
+    setComponentName(label)
+    setIncomeModalVisible(true)
+  };
+  const hideIncomeSheet = () => setIncomeModalVisible(false);
+
+  const [incomeList, setIncomeList] = useState([]);
+  const [totalBusineesIncome, setTotalBusineesIncome] = useState([]);
+  const [refreshIncomeFlatlist, setRefreshIncomeFlatList] = useState(false);
+
+  const [otherIncomeList, setotherIncomeList] = useState([]);
+  const [totalOtherIncome, setOtherTotalIncome] = useState([]);
+  const [refreshOtherIncomeFlatlist, setRefreshOtherIncomeFlatList] = useState(false);
+
+  const [expenseList, setExpenseList] = useState([]);
+  const [totalBusineesExpenses, setTotalBusineesExpenses] = useState([]);
+  const [refreshExpenseFlatlist, setRefreshExpenseFlatList] = useState(false);
+
+  const [otherExpenseList, setotherExpenseList] = useState([]);
+  const [totalOtherExpense, setOtherTotalExpense] = useState([]);
+  const [refreshOtherExpenseFlatlist, setRefreshOtherExpenseFlatList] = useState(false);
+
+
+  const [earningTypeMan, setEarningTypeMan] = useState(false);
+  const [earningTypeVisible, setEarningTypeVisible] = useState(true);
+  const [earningTypeDisable, setEarningTypeDisable] = useState(false);
+  const [earningTypeData, setEarningTypeData] = useState([]);
+  const [earningTypeCaption, setEarningTypeCaption] = useState('EARNING TYPE');
+  const [earningTypeLabel, setEarningTypeLabel] = useState('');
+  const [earningTypeIndex, setEarningTypeIndex] = useState('');
+
+  const [earningFrequencyMan, setEarningFrequencyMan] = useState(false);
+  const [earningFrequencyVisible, setEarningFrequencyVisible] = useState(true);
+  const [earningFrequencyDisable, setEarningFrequencyDisable] = useState(false);
+  const [earningFrequencyData, setEarningFrequencyData] = useState([]);
+  const [earningFrequencyCaption, setEarningFrequencyCaption] = useState('EARNING FREQUENCY');
+  const [earningFrequencyLabel, setEarningFrequencyLabel] = useState('');
+  const [earningFrequencyIndex, setEarningFrequencyIndex] = useState('');
+
+  const [componentName, setComponentName] = useState('');
 
   const [ProductTypeMan, setProductTypeMan] = useState(false);
   const [ProductTypeVisible, setProductTypeVisible] = useState(true);
@@ -178,20 +224,18 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
   const handleReference = componentName => { };
 
   const handlePickerClick = (componentName, label, index) => {
-    if (componentName == 'ProductTypePicker') {
-      setProductTypeLabel(label);
-      setProductTypeIndex(index);
+    if (componentName == 'EarningTypePicker') {
+      setEarningTypeLabel(label);
+      setEarningTypeIndex(index);
+    } else if (componentName == 'EarningFrequencyPicker') {
+      setEarningFrequencyLabel(label);
+      setEarningFrequencyIndex(index);
     }
   };
   function isMultipleOf5000(number) {
     return number % 5000 === 0;
   }
 
-  // const AddGST = () => {
-  //   console.log(data);
-  //   setdata([...data, {id: data.length, Amount: 0, tname: ''}]);
-  //   console.log(data);
-  // };
 
   const AddGST = () => {
     const newDataArray = [...data];
@@ -204,11 +248,129 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
     setdata(newDataArray);
   };
 
-  const setSelection = count => {
-    //alert(count);
+  const addIncome = (incomeValue, incomeAmount, componentName) => {
+
+    if (componentName == 'Income') {
+
+      const newDataArray = [...incomeList];
+      const newObject = {
+        incomeLabel: incomeValue,
+        Amount: incomeAmount,
+        usercode: 'BUSINESS_INCOME',
+        colorCode: 'Green',
+      };
+      newDataArray.push(newObject);
+
+      const totalAmount = newDataArray.reduce((sum, incomeItem) => sum + parseFloat(incomeItem.Amount), 0);
+      setTotalBusineesIncome(totalAmount)
+      setIncomeList(newDataArray);
+
+      setRefreshIncomeFlatList(!refreshIncomeFlatlist)
+    } else if (componentName == 'OtherIncome') {
+      const newDataArray = [...otherIncomeList];
+      const newObject = {
+        incomeLabel: incomeValue,
+        Amount: incomeAmount,
+        usercode: 'OTHER_SOURCE_INCOME',
+        colorCode: 'Green',
+      };
+      newDataArray.push(newObject);
+      const totalAmount = newDataArray.reduce((sum, incomeItem) => sum + parseFloat(incomeItem.Amount), 0);
+      setOtherTotalIncome(totalAmount)
+      setotherIncomeList(newDataArray);
+    } else if (componentName == 'Expenses') {
+      const newDataArray = [...expenseList];
+      const newObject = {
+        incomeLabel: incomeValue,
+        Amount: incomeAmount,
+        usercode: 'BUSINESS_EXPENSES',
+        colorCode: 'Red',
+      };
+      newDataArray.push(newObject);
+      const totalAmount = newDataArray.reduce((sum, incomeItem) => sum + parseFloat(incomeItem.Amount), 0);
+      setTotalBusineesExpenses(totalAmount)
+      setExpenseList(newDataArray);
+    } else if (componentName == 'OtherExpense') {
+      const newDataArray = [...otherExpenseList];
+      const newObject = {
+        incomeLabel: incomeValue,
+        Amount: incomeAmount,
+        usercode: 'OTHER_SOURCE_EXPENSES',
+        colorCode: 'Red',
+      };
+      newDataArray.push(newObject);
+      const totalAmount = newDataArray.reduce((sum, incomeItem) => sum + parseFloat(incomeItem.Amount), 0);
+      setOtherTotalExpense(totalAmount)
+      setotherExpenseList(newDataArray);
+    }
   };
 
-  const OncustomeText = (value, index) => { };
+  const deleteIncomeList = (data) => {
+    if (data.usercode == 'BUSINESS_INCOME') {
+      const updatedIncomeList = incomeList.filter((item) => item.incomeLabel !== data.incomeLabel);
+      const totalAmount = updatedIncomeList.reduce((sum, incomeItem) => sum + parseFloat(incomeItem.Amount), 0);
+      setTotalBusineesIncome(totalAmount)
+      setIncomeList(updatedIncomeList);
+      setRefreshIncomeFlatList(!refreshIncomeFlatlist)
+    } else if (data.usercode == 'OTHER_SOURCE_INCOME') {
+      const updatedIncomeList = otherIncomeList.filter((item) => item.incomeLabel !== data.incomeLabel);
+      const totalAmount = updatedIncomeList.reduce((sum, incomeItem) => sum + parseFloat(incomeItem.Amount), 0);
+      setOtherTotalIncome(totalAmount)
+      setotherIncomeList(updatedIncomeList);
+      setRefreshOtherIncomeFlatList(!refreshOtherIncomeFlatlist)
+    } else if (data.usercode == 'BUSINESS_EXPENSES') {
+      const updatedIncomeList = expenseList.filter((item) => item.incomeLabel !== data.incomeLabel);
+      const totalAmount = updatedIncomeList.reduce((sum, incomeItem) => sum + parseFloat(incomeItem.Amount), 0);
+      setTotalBusineesExpenses(totalAmount)
+      setExpenseList(updatedIncomeList);
+      setRefreshExpenseFlatList(!refreshExpenseFlatlist)
+    } else if (data.usercode == 'OTHER_SOURCE_EXPENSES') {
+      const updatedIncomeList = expenseList.filter((item) => item.incomeLabel !== data.incomeLabel);
+      const totalAmount = updatedIncomeList.reduce((sum, incomeItem) => sum + parseFloat(incomeItem.Amount), 0);
+      setOtherTotalExpense(totalAmount)
+      setotherExpenseList(updatedIncomeList);
+      setRefreshOtherExpenseFlatList(!refreshOtherExpenseFlatlist)
+    }
+  }
+
+  const FlatView = ({ item }) => {
+
+
+    return (
+      <View style={{ width: '100%', alignItems: 'center', marginTop: 15 }}>
+        <View style={{ width: '90%', minHeight: 100, backgroundColor: item.colorCode == 'Green' ? '#B6F4B470' : '#FFEAE5', borderRadius: 5, flexDirection: 'row', alignItems: 'center' }}>
+
+          <ImageComp imageSrc={item.colorCode == 'Green' ? require('../../../Images/income.png') : require('../../../Images/expense.png')} imageStylee={{ marginLeft: 10, width: 30, height: 30 }} />
+
+          <View style={{ width: '80%' }}>
+
+            <Text style={{ width: '80%', fontSize: 12, fontFamily: 'PoppinsRegular', marginTop: 5, color: Colors.black, marginLeft: 10 }}>
+              {Common.getSystemCodeDescription(props.mobilecodedetail.leadUserCodeDto, item.usercode, item.incomeLabel)}
+            </Text>
+
+            <Text style={{ width: '80%', fontSize: 12, fontFamily: 'Poppins-Medium', marginTop: 5, color: Colors.black, marginLeft: 10 }}>
+              <FontAwesome
+                name="rupee"
+                size={10.9}
+                color="#343434"></FontAwesome> {item.Amount}
+            </Text>
+
+          </View>
+
+          <View>
+            <MaterialCommunityIcons
+              name="delete"
+              size={20}
+              onPress={() => { deleteIncomeList(item) }}
+              color="#F76464"></MaterialCommunityIcons>
+          </View>
+
+        </View>
+
+      </View >
+    )
+
+  }
 
   return (
     // enclose all components in this View tag
@@ -253,125 +415,417 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
                 textStyle={{
                   color: Colors.mediumgrey,
                   fontSize: 15,
-                  fontWeight: '500',
+                  fontFamily: 'Poppins-Medium'
                 }}
-                textVal={language[0][props.language].str_gstdetails}></TextComp>
+                textVal={language[0][props.language].str_financialdetails}></TextComp>
 
               <ProgressComp progressvalue={0.6} textvalue="4 of 6" />
             </View>
           </View>
 
-          {data.map((each, index) => (
-            <View
-              style={{
-                width: '100%',
-                alignItems: 'center',
-                marginTop: 15,
-              }}>
+          <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
+            <View style={{ width: '90%', marginTop: 10 }}>
+              <TextComp
+                textStyle={{
+                  color: Colors.mediumgrey,
+                  fontSize: 15,
+                  fontFamily: 'Poppinsregular'
+                }}
+                textVal={language[0][props.language].str_incomedetails.toUpperCase()}></TextComp>
+            </View>
+
+            {earningTypeVisible && (
               <View
                 style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
-                <View
-                  style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                   <TextComp
-                    textVal="ITEM 1"
+                    textVal={earningTypeCaption}
                     textStyle={Commonstyles.inputtextStyle}
-                    Visible={ProductTypeMan}
+                    Visible={earningTypeMan}
                   />
                 </View>
 
                 <PickerComp
-                  textLabel={ProductTypeLabel}
+                  textLabel={earningTypeLabel}
                   pickerStyle={Commonstyles.picker}
-                  Disable={ProductTypeDisable}
-                  pickerdata={ProductTypeData}
-                  componentName="ProductTypePicker"
+                  Disable={earningTypeDisable}
+                  pickerdata={earningTypeData}
+                  componentName="EarningTypePicker"
                   handlePickerClick={handlePickerClick}
-                  onValueChange={label =>
-                    updateDataInArray(each.id, { tname: label })
-                  }
                 />
               </View>
-              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
-                <TextComp
-                  textVal="AMOUNT"
-                  textStyle={Commonstyles.inputtextStyle}
-                  Visible={false}
-                />
-              </View>
+            )}
+
+            {earningFrequencyVisible && (
               <View
-                style={{
-                  width: '90%',
-                  flexDirection: 'row',
-                  marginTop: 3,
-                  paddingHorizontal: 0,
-                  borderBottomColor: 'grey',
-                  borderBottomWidth: 0.5,
-                }}>
-                <FontAwesome
-                  name="rupee"
-                  size={20}
-                  color="#343434"></FontAwesome>
-                <TextInput
-                  style={styles.textinputtextStyle}
-                  keyboardType="numeric"
-                  //value={()=> (each.id)}
-                  onChangeText={e => {
-                    const numericValue = e.replace(/[^0-9]/g, '');
-                    updateDataInArray(each.id, { Amount: numericValue });
-                  }}
+                style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+                <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                  <TextComp
+                    textVal={earningFrequencyCaption}
+                    textStyle={Commonstyles.inputtextStyle}
+                    Visible={earningFrequencyMan}
+                  />
+                </View>
+
+                <PickerComp
+                  textLabel={earningFrequencyLabel}
+                  pickerStyle={Commonstyles.picker}
+                  Disable={earningFrequencyDisable}
+                  pickerdata={earningFrequencyData}
+                  componentName="EarningFrequencyPicker"
+                  handlePickerClick={handlePickerClick}
                 />
               </View>
-              <View
-                style={{
-                  marginLeft: 220,
-                  marginTop: 15,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                }}>
-                <TouchableOpacity onPress={() => deleteItemFromArray(each.id)}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <AntDesign
-                      name="delete"
-                      size={20}
-                      color="#343434"></AntDesign>
-                    <Text
-                      style={{
-                        color: Colors.black,
-                        marginLeft: 5,
-                      }}>
-                      Delete
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              </View>
+            )}
+
+            <ModalContainer
+              visible={incomeModalVisible}
+              closeModal={hideIncomeSheet}
+              contentComponent={<BusinessIncome addIncome={addIncome} onCloseIncome={hideIncomeSheet} incomeList={incomeList} otherIncomeList={otherIncomeList} componentName={componentName} />} // Pass your custom component here
+            />
+
+          </View>
+
+
+          <View
+            style={{ width: '100%', alignItems: 'center', marginTop: 20 }}>
+            <View style={{ width: '90%' }}>
+              <TextComp
+                textStyle={{
+                  color: Colors.black,
+                  fontSize: 15,
+                  fontFamily: 'Poppinsregular'
+                }}
+                textVal={language[0][props.language].str_businessincome.toUpperCase()}></TextComp>
             </View>
-          ))}
+          </View>
+
+
+
+          <View style={{ marginTop: 15 }}>
+
+            <FlatList
+              data={incomeList}
+              renderItem={FlatView}
+              extraData={refreshIncomeFlatlist}
+              keyExtractor={item => item.incomeLabel}
+            />
+          </View>
+
 
           <View
             style={{
-              marginLeft: 220,
-              marginTop: 15,
+              marginTop: 25,
+              width: '90%',
               flexDirection: 'row',
-              alignItems: 'center',
+              justifyContent: 'flex-end',
             }}>
-            <TouchableOpacity onPress={AddGST}>
+            <TouchableOpacity onPress={() => showIncomeSheet('Income')}>
               <Text
                 style={{
                   color: Colors.darkblue,
+                  fontFamily: 'Poppins-Medium'
                 }}>
-                + Add Another GST IN
+                + Add Income
               </Text>
             </TouchableOpacity>
           </View>
+
+          {incomeList.length > 0 &&
+            <View style={{ width: '100%', marginTop: '3%', alignItems: 'center' }}>
+              <View style={{ width: '90%', marginTop: 10 }}>
+                <TextComp
+                  textStyle={{
+                    color: Colors.black,
+                    fontSize: 14,
+                    fontFamily: 'Poppins-SemiBold'
+                  }}
+                  textVal={language[0][props.language].str_totbusincome.toUpperCase()}></TextComp>
+
+                <Text style={{ fontSize: 14, fontFamily: 'Poppins-Medium', marginTop: 5, color: Colors.black }}>
+                  <FontAwesome
+                    name="rupee"
+                    size={10.9}
+                    color="#343434"></FontAwesome> {totalBusineesIncome}
+                </Text>
+
+              </View>
+
+
+
+            </View>
+          }
+
+
+          <View
+            style={{ width: '100%', alignItems: 'center', marginTop: 20 }}>
+            <View style={{ width: '90%' }}>
+              <TextComp
+                textStyle={{
+                  color: Colors.black,
+                  fontSize: 15,
+                  fontFamily: 'Poppinsregular'
+                }}
+                textVal={language[0][props.language].str_othsourceincome.toUpperCase()}></TextComp>
+            </View>
+          </View>
+
+          <View style={{ marginTop: 15 }}>
+            <FlatList
+              data={otherIncomeList}
+              renderItem={FlatView}
+              extraData={refreshOtherIncomeFlatlist}
+              keyExtractor={item => item.incomeLabel}
+            />
+          </View>
+
+          <View
+            style={{
+              marginTop: 25,
+              width: '90%',
+              flexDirection: 'row',
+              justifyContent: 'flex-end',
+            }}>
+            <TouchableOpacity onPress={() => showIncomeSheet('OtherIncome')}>
+              <Text
+                style={{
+                  color: Colors.darkblue,
+                  fontFamily: 'Poppins-Medium'
+                }}>
+                + Add Other Income
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {otherIncomeList.length > 0 &&
+            <View style={{ width: '100%', marginTop: '3%', alignItems: 'center' }}>
+              <View style={{ width: '90%', marginTop: 10 }}>
+                <TextComp
+                  textStyle={{
+                    color: Colors.black,
+                    fontSize: 14,
+                    fontFamily: 'Poppins-SemiBold'
+                  }}
+                  textVal={language[0][props.language].str_totothsourceincome.toUpperCase()}></TextComp>
+
+                <Text style={{ fontSize: 14, fontFamily: 'Poppins-Medium', marginTop: 5, color: Colors.black }}>
+                  <FontAwesome
+                    name="rupee"
+                    size={10.9}
+                    color="#343434"></FontAwesome> {totalOtherIncome}
+                </Text>
+
+              </View>
+
+
+
+            </View>
+          }
+
+          {otherIncomeList.length > 0 && incomeList.length > 0 &&
+            <View style={{ width: '100%', marginTop: '3%', alignItems: 'center' }}>
+              <View style={{ width: '90%', marginTop: 10 }}>
+                <TextComp
+                  textStyle={{
+                    color: Colors.black,
+                    fontSize: 14,
+                    fontFamily: 'Poppins-SemiBold'
+                  }}
+                  textVal={language[0][props.language].str_totavgmntincome.toUpperCase()}></TextComp>
+
+                <Text style={{ fontSize: 14, fontFamily: 'Poppins-Medium', marginTop: 5, color: Colors.black }}>
+                  <FontAwesome
+                    name="rupee"
+                    size={10.9}
+                    color="#343434"></FontAwesome> {totalOtherIncome + totalBusineesIncome}
+                </Text>
+
+              </View>
+
+
+
+            </View>
+          }
+
+
+          <View
+            style={{ width: '100%', alignItems: 'center', marginTop: 20 }}>
+            <View style={{ width: '90%' }}>
+              <TextComp
+                textStyle={{
+                  color: Colors.black,
+                  fontSize: 15,
+                  fontFamily: 'Poppinsregular'
+                }}
+                textVal={language[0][props.language].str_expensedetails.toUpperCase()}></TextComp>
+            </View>
+          </View>
+
+          <View
+            style={{ width: '100%', alignItems: 'center', marginTop: 20 }}>
+            <View style={{ width: '90%' }}>
+              <TextComp
+                textStyle={{
+                  color: Colors.black,
+                  fontSize: 15,
+                  fontFamily: 'Poppinsregular'
+                }}
+                textVal={language[0][props.language].str_businessexpdetails.toUpperCase()}></TextComp>
+            </View>
+          </View>
+
+
+
+          <View style={{ marginTop: 15 }}>
+
+            <FlatList
+              data={expenseList}
+              renderItem={FlatView}
+              extraData={refreshExpenseFlatlist}
+              keyExtractor={item => item.incomeLabel}
+            />
+          </View>
+
+
+          <View
+            style={{
+              marginTop: 25,
+              width: '90%',
+              flexDirection: 'row',
+              justifyContent: 'flex-end',
+            }}>
+            <TouchableOpacity onPress={() => showIncomeSheet('Expenses')}>
+              <Text
+                style={{
+                  color: Colors.darkblue,
+                  fontFamily: 'Poppins-Medium'
+                }}>
+                + Add Expenses
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {expenseList.length > 0 &&
+            <View style={{ width: '100%', marginTop: '3%', alignItems: 'center' }}>
+              <View style={{ width: '90%', marginTop: 10 }}>
+                <TextComp
+                  textStyle={{
+                    color: Colors.black,
+                    fontSize: 14,
+                    fontFamily: 'Poppins-SemiBold'
+                  }}
+                  textVal={language[0][props.language].str_totbusexpenses.toUpperCase()}></TextComp>
+
+                <Text style={{ fontSize: 14, fontFamily: 'Poppins-Medium', marginTop: 5, color: Colors.black }}>
+                  <FontAwesome
+                    name="rupee"
+                    size={10.9}
+                    color="#343434"></FontAwesome> {totalBusineesExpenses}
+                </Text>
+
+              </View>
+
+
+
+            </View>
+          }
+
+
+
+          <View
+            style={{ width: '100%', alignItems: 'center', marginTop: 20 }}>
+            <View style={{ width: '90%' }}>
+              <TextComp
+                textStyle={{
+                  color: Colors.black,
+                  fontSize: 15,
+                  fontFamily: 'Poppinsregular'
+                }}
+                textVal={language[0][props.language].str_othexpenses.toUpperCase()}></TextComp>
+            </View>
+          </View>
+
+          <View style={{ marginTop: 15 }}>
+            <FlatList
+              data={otherExpenseList}
+              renderItem={FlatView}
+              extraData={refreshOtherExpenseFlatlist}
+              keyExtractor={item => item.incomeLabel}
+            />
+          </View>
+
+          <View
+            style={{
+              marginTop: 25,
+              width: '90%',
+              flexDirection: 'row',
+              justifyContent: 'flex-end',
+            }}>
+            <TouchableOpacity onPress={() => showIncomeSheet('OtherExpense')}>
+              <Text
+                style={{
+                  color: Colors.darkblue,
+                  fontFamily: 'Poppins-Medium'
+                }}>
+                + Add Other Expenses
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {otherExpenseList.length > 0 &&
+            <View style={{ width: '100%', marginTop: '3%', alignItems: 'center' }}>
+              <View style={{ width: '90%', marginTop: 10 }}>
+                <TextComp
+                  textStyle={{
+                    color: Colors.black,
+                    fontSize: 14,
+                    fontFamily: 'Poppins-SemiBold'
+                  }}
+                  textVal={language[0][props.language].str_totothexpenses.toUpperCase()}></TextComp>
+
+                <Text style={{ fontSize: 14, fontFamily: 'Poppins-Medium', marginTop: 5, color: Colors.black }}>
+                  <FontAwesome
+                    name="rupee"
+                    size={10.9}
+                    color="#343434"></FontAwesome> {totalOtherExpense}
+                </Text>
+
+              </View>
+
+
+
+            </View>
+          }
+
+          {otherExpenseList.length > 0 && expenseList.length > 0 &&
+            <View style={{ width: '100%', marginTop: '3%', alignItems: 'center' }}>
+              <View style={{ width: '90%', marginTop: 10 }}>
+                <TextComp
+                  textStyle={{
+                    color: Colors.black,
+                    fontSize: 14,
+                    fontFamily: 'Poppins-SemiBold'
+                  }}
+                  textVal={language[0][props.language].str_totavgmntexpenses.toUpperCase()}></TextComp>
+
+                <Text style={{ fontSize: 14, fontFamily: 'Poppins-Medium', marginTop: 5, color: Colors.black }}>
+                  <FontAwesome
+                    name="rupee"
+                    size={10.9}
+                    color="#343434"></FontAwesome> {totalBusineesExpenses + totalOtherExpense}
+                </Text>
+
+              </View>
+
+
+
+            </View>
+          }
+
+
+
         </View>
 
-        {/* <ButtonViewComp
-          textValue={language[0][props.language].str_dedupecheck.toUpperCase()}
-          textStyle={{color: Colors.white, fontSize: 13, fontWeight: 500}}
-          viewStyle={Commonstyles.buttonView}
-          innerStyle={Commonstyles.buttonViewInnerStyle}
-          handleClick={updateBasicDetails}
-        /> */}
       </ScrollView>
     </SafeAreaView>
   );
@@ -429,13 +883,16 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
 });
-
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   const { language } = state.languageReducer;
+  const { profileDetails } = state.profileReducer;
+  const { mobileCodeDetails } = state.mobilecodeReducer;
   return {
     language: language,
-  };
-};
+    profiledetail: profileDetails,
+    mobilecodedetail: mobileCodeDetails
+  }
+}
 
 const mapDispatchToProps = dispatch => ({
   languageAction: item => dispatch(languageAction(item)),

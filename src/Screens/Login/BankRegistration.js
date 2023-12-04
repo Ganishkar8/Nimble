@@ -10,7 +10,8 @@ import {
     Alert,
     BackHandler,
     Modal,
-    TouchableOpacity
+    TouchableOpacity,
+    PermissionsAndroid
 } from 'react-native';
 import apiInstance from '../../Utils/apiInstance';
 import jwtDecode from 'jwt-decode';
@@ -44,6 +45,9 @@ const { Value, Text: AnimatedText } = Animated;
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Button, Menu, Divider } from 'react-native-paper';
 import { generateRequest, validateOTP } from '../../Utils/EKYC';
+import RNFS, { writeFile } from 'react-native-fs';
+import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
+
 const CELL_COUNT = 3;
 const CELL_SIZE = 46;
 const CELL_BORDER_RADIUS = 8;
@@ -161,8 +165,6 @@ const BankRegistration = (props, { navigation }) => {
         );
     };
 
-
-
     const isFocused = useIsFocused();
 
     useEffect(() => {
@@ -172,6 +174,13 @@ const BankRegistration = (props, { navigation }) => {
         if (isFocused) {
             BackHandler.addEventListener('hardwareBackPress', handleBackButton);
         }
+
+        if (global.DEBUG_MODE) {
+            requestWritePermission
+            writeToFile('vanka,111111111!')
+        }
+
+
 
         const fetchData = async () => {
             try {
@@ -190,6 +199,31 @@ const BankRegistration = (props, { navigation }) => {
             BackHandler.removeEventListener('hardwareBackPress', handleBackButton);
         };
     }, [isFocused]);
+
+    const requestWritePermission = async () => {
+        const result = await check(PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE);
+
+        if (result === RESULTS.GRANTED) {
+            // Permission already granted
+            return true;
+        } else {
+            const permissionResult = await request(PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE);
+            return permissionResult === RESULTS.GRANTED;
+        }
+    };
+
+    const writeToFile = async (content) => {
+        try {
+            const filePath = RNFS.ExternalDirectoryPath + '/log.txt';
+
+            // Write the content to the file
+            await RNFS.writeFile(filePath, content, 'utf8');
+
+            console.log('File written successfully:', filePath);
+        } catch (error) {
+            console.error('Error writing to file:', error);
+        }
+    };
 
 
     async function myDisplayy() {

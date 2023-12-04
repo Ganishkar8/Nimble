@@ -1,4 +1,5 @@
 import axios from 'axios';
+import RNFS from 'react-native-fs';
 
 const apiInstance = (baseURL, authToken) => {
 
@@ -17,9 +18,19 @@ const apiInstance = (baseURL, authToken) => {
     // Request interceptor
     instance.interceptors.request.use(
         (config) => {
-            console.log('MobileRequestHeader::' + config.headers)
-            console.log('MobileRequestData::' + JSON.stringify(config.data))
-            console.log('MobileRequestbaseUrl::' + config.baseURL)
+            if (global.DEBUG_MODE) console.log('MobileRequestHeader::' + config.headers)
+            if (global.DEBUG_MODE) console.log('MobileRequestData::' + JSON.stringify(config.data))
+            if (global.DEBUG_MODE) console.log('MobileRequestbaseUrl::' + config.baseURL)
+            if (global.DEBUG_MODE) {
+                const logTime = `------------------------------Date: ${new Date()} --------------------------------------------------------------------\n\n`;
+                const logBaseUrl = `Request Url: ${JSON.stringify(config.data)}\n`;
+                const logHeader = `Request Headers: ${JSON.stringify(config.headers)}\n`;
+                if (config.data != undefined) {
+                    var logData = `Request Data: ${JSON.stringify(config.data)}\n\n`;
+                }
+                const logcontent = logTime + logBaseUrl + logHeader + logData;
+                writeToFile(logcontent);
+            }
             // Modify the request config before it is sent
             // For example, you can add headers or perform other tasks
             // before the request is sent to the server
@@ -35,8 +46,11 @@ const apiInstance = (baseURL, authToken) => {
     // Response interceptor
     instance.interceptors.response.use(
         async (response) => {
-            console.log("ResponseData:", response);
 
+            if (global.DEBUG_MODE) {
+                console.log("ResponseData:", response);
+                writeToFile(`Response Data Data: ${JSON.stringify(response)}\n\n`);
+            }
             return response;
 
             // Modify the response data before it is returned to your code
@@ -52,6 +66,23 @@ const apiInstance = (baseURL, authToken) => {
 
     return instance;
 
+};
+
+
+
+const writeToFile = async (content) => {
+    try {
+        const logFileName = 'app_logs.txt';
+        const documentDirectoryPath = RNFS.ExternalDirectoryPath;
+        const logFilePath = `${documentDirectoryPath}/${logFileName}`;
+
+        // Write the content to the file
+        await RNFS.appendFile(logFilePath, content, 'utf8');
+
+        console.log('Log written successfully to:', logFilePath);
+    } catch (error) {
+        console.error('Error writing to log file:', error);
+    }
 };
 
 

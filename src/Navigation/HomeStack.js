@@ -24,6 +24,10 @@ import ProfileShortKYCVerificationStatus from '../Screens/Application/Applicatio
 import ProfileShortApplicantDetails from '../Screens/Application/ApplicationInitiation/ProfileShortApplicantDetails';
 import ProfileShortExistingClientDetails from '../Screens/Application/ApplicationInitiation/ProfileShortExistingClientDetails';
 import LoanApplicationTrackerDetails from '../Screens/Application/ApplicationTracker/LoanApplicationTrackerDetails';
+import DemographicsGSTDetails from '../Screens/Application/ApplicationInitiation/DemographicsGSTDetails';
+import LoanDemographicsGSTDetails from '../Screens/Application/ApplicationInitiation/LoanDemographicsGSTDetails';
+import LoanDemographicsFinancialDetails from '../Screens/Application/ApplicationInitiation/LoanDemographicsFinancialDetails';
+
 const Stack = createNativeStackNavigator();
 
 export default HomeStack = () => {
@@ -165,6 +169,24 @@ export default HomeStack = () => {
       <Stack.Screen
         name="AddressDetails"
         component={AddressDetails}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="DemographicsGSTDetails"
+        component={DemographicsGSTDetails}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="LoanDemographicsGSTDetails"
+        component={LoanDemographicsGSTDetails}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="LoanDemographicsFinancialDetails"
+        component={LoanDemographicsFinancialDetails}
         options={{ headerShown: false, tabBarVisible: false }}
       />
 

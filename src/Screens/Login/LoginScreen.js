@@ -107,7 +107,7 @@ const LoginScreen = (props, { navigation }) => {
     };
 
     const handleLinkPress = () => {
-        const url = 'https://www.freecodecamp.org/news/how-to-write-helpful-error-messages-to-improve-your-apps-ux/'; // Replace with the URL you want to open
+        const url = 'https://www.craftsilicon.com/asia/privacy-policy/'; // Replace with the URL you want to open
         Linking.openURL(url);
     };
 

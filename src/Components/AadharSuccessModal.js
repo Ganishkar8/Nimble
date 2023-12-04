@@ -3,12 +3,12 @@ import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Colors from '../Utils/Colors';
 import ImageComp from './ImageComp';
 
-const AadharSuccessModal = ({ isVisible, onClose, textContent, textClose, textMainContent, textViewContent, proceedClick }) => {
+const AadharSuccessModal = ({ isVisible, onClose, textContent, textClose, textMainContent, textViewContent, proceedClick, onViewClick }) => {
 
     const onClick = (value) => {
         if (value === 'proceed') {
             proceedClick(value)
-        }else {
+        } else {
             proceedClick(value)
         }
     };
@@ -29,18 +29,20 @@ const AadharSuccessModal = ({ isVisible, onClose, textContent, textClose, textMa
                     </View>
                     <Text style={{ color: Colors.black, fontWeight: 500 }}>{textContent}</Text>
 
-                    <View style={{
-                        width: 180, height: 50, borderColor: Colors.dimblack, borderRadius: 25, borderWidth: 1
-                        , alignItems: 'center', justifyContent: 'center', marginTop: 15
-                    }}>
-                        <Text style={{ color: Colors.darkblue, fontWeight: 500 }}>{textViewContent}</Text>
-                    </View>
+                    <TouchableOpacity activeOpacity={0.8} onPress={onViewClick}>
+                        <View style={{
+                            width: 180, height: 50, borderColor: Colors.dimblack, borderRadius: 25, borderWidth: 1
+                            , alignItems: 'center', justifyContent: 'center', marginTop: 15
+                        }}>
+                            <Text style={{ color: Colors.darkblue, fontWeight: 500 }}>{textViewContent}</Text>
+                        </View>
+                    </TouchableOpacity>
 
                     <View style={{ margin: 20 }}>
                         <Text style={{ color: Colors.dimblack }}>{textMainContent}</Text>
                     </View>
 
-                    <TouchableOpacity onPress={()=>onClick('proceed')} style={styles.closeButton}>
+                    <TouchableOpacity onPress={() => onClick('proceed')} style={styles.closeButton}>
                         <Text style={{ color: Colors.darkblue }}>{textClose}</Text>
                     </TouchableOpacity>
                 </View>

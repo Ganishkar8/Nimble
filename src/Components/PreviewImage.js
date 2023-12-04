@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, createRef } from 'react';
-import { Text, Image, View, Dimensions } from 'react-native';
+import { Text, Image, View, Dimensions, ScrollView, StyleSheet } from 'react-native';
 import HeadComp from './HeadComp';
+
 
 
 const PreviewImage = (props, { navigation, route }) => {
@@ -37,16 +38,31 @@ const PreviewImage = (props, { navigation, route }) => {
             }}>
                 <HeadComp textval={imageName} props={props} onGoBack={onGoBack} />
             </View>
-            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#00000080' }}>
-                <Image
-                    source={{ uri: imageUri }}
-                    style={{ width: '100%', height: imageHeight, marginBottom: 112 }}
-                />
+            <ScrollView style={styles.scrollView}
+                contentContainerStyle={styles.contentContainer}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled">
+                <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#00000080' }}>
+                    <Image
+                        source={{ uri: imageUri }}
+                        style={{ width: '100%', height: imageHeight, marginBottom: 112 }}
+                    />
 
-            </View>
+                </View>
+            </ScrollView>
 
         </View>
     );
 };
+
+const styles = StyleSheet.create({
+    scrollView: {
+        flex: 1,
+    },
+    contentContainer: {
+        paddingBottom: 50,
+        flexGrow: 1,
+    },
+});
 
 export default PreviewImage;

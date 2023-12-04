@@ -19,6 +19,7 @@ import tbl_clientaddressinfo from '../../../Database/Table/tbl_clientaddressinfo
 import apiInstancelocal from '../../../Utils/apiInstancelocal';
 import ErrorModal from '../../../Components/ErrorModal';
 import tbl_client from '../../../Database/Table/tbl_client';
+import apiInstance from '../../../Utils/apiInstance';
 
 const AddressDetails = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -156,6 +157,7 @@ const AddressDetails = (props, { navigation }) => {
   const [postorput, setPostORPut] = useState('post');
   const [kycManual, setKYCManual] = useState('0');
 
+  const [pincodeResponse, setPincodeResponse] = useState('');
 
   useEffect(() => {
     props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
@@ -204,13 +206,13 @@ const AddressDetails = (props, { navigation }) => {
 
     setAddressTypeDisable(true);
     setAddressLine1Disable(true);
-    setAddressLine2Disable(false);
-    setLandmarkDisable(false);
+    setAddressLine2Disable(true);
+    setLandmarkDisable(true);
     setPincodeDisable(true);
     setCityDisable(true);
     setDistrictDisable(true);
-    setStateDisable(false)
-    setCountryDisable(false)
+    setStateDisable(true)
+    setCountryDisable(true)
     setGeoClassificationDisable(true);
     setYearsAtResidenceDisable(true);
     setYearsAtCityDisable(true);
@@ -439,7 +441,7 @@ const AddressDetails = (props, { navigation }) => {
     var errorMessage = '';
 
     if (addressTypeMan && addressTypeVisible) {
-      if (addressTypeLabel === 'Select' || addressTypeLabel === '') {
+      if (addressTypeLabel.length <= 0) {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + addressTypeCaption + '\n';
         i++;
         flag = true;
@@ -447,7 +449,7 @@ const AddressDetails = (props, { navigation }) => {
     }
 
     if (addressLine1Man && addressLine1Visible) {
-      if (addressLine1 === '') {
+      if (addressLine1.length <= 0) {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + addressLine1Caption + '\n';
         i++;
         flag = true;
@@ -455,7 +457,7 @@ const AddressDetails = (props, { navigation }) => {
     }
 
     if (addressLine2Man && addressLine2Visible) {
-      if (addressLine2 === '') {
+      if (addressLine2.length <= 0) {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + addressLine2Caption + '\n';
         i++;
         flag = true;
@@ -463,7 +465,7 @@ const AddressDetails = (props, { navigation }) => {
     }
 
     if (landmarkMan && landmarkVisible) {
-      if (landmark === '') {
+      if (landmark.length <= 0) {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + landmarkCaption + '\n';
         i++;
         flag = true;
@@ -471,15 +473,19 @@ const AddressDetails = (props, { navigation }) => {
     }
 
     if (pincodeMan && pincodeVisible) {
-      if (pincode === '') {
+      if (pincode.length <= 0) {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + pincodeCaption + '\n';
+        i++;
+        flag = true;
+      } else if (pincode.length < 6) {
+        errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + "Valid " + pincodeCaption + '\n';
         i++;
         flag = true;
       }
     }
 
     if (cityMan && cityVisible) {
-      if (city === '') {
+      if (city.length <= 0) {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + cityCaption + '\n';
         i++;
         flag = true;
@@ -487,7 +493,7 @@ const AddressDetails = (props, { navigation }) => {
     }
 
     if (districtMan && districtVisible) {
-      if (district === '') {
+      if (district.length <= 0) {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + districtCaption + '\n';
         i++;
         flag = true;
@@ -495,7 +501,7 @@ const AddressDetails = (props, { navigation }) => {
     }
 
     if (stateMan && stateVisible) {
-      if (state === '') {
+      if (state.length <= 0) {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + stateCaption + '\n';
         i++;
         flag = true;
@@ -503,7 +509,7 @@ const AddressDetails = (props, { navigation }) => {
     }
 
     if (countryMan && countryVisible) {
-      if (country === '') {
+      if (country.length <= 0) {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + countryCaption + '\n';
         i++;
         flag = true;
@@ -511,7 +517,7 @@ const AddressDetails = (props, { navigation }) => {
     }
 
     if (geoClassificationMan && geoClassificationVisible) {
-      if (geoClassificationLabel === 'Select' || geoClassificationLabel === '') {
+      if (geoClassificationLabel.length <= 0) {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + geoClassificationCaption + '\n';
         i++;
         flag = true;
@@ -519,7 +525,7 @@ const AddressDetails = (props, { navigation }) => {
     }
 
     if (yearsAtResidenceMan && yearsAtResidenceVisible) {
-      if (yearsAtResidence === '') {
+      if (yearsAtResidence.length <= 0) {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + yearsAtResidenceCaption + '\n';
         i++;
         flag = true;
@@ -527,7 +533,7 @@ const AddressDetails = (props, { navigation }) => {
     }
 
     if (yearsAtCityMan && yearsAtCityVisible) {
-      if (yearsAtCity === '') {
+      if (yearsAtCity.length <= 0) {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + yearsAtCityCaption + '\n';
         i++;
         flag = true;
@@ -535,7 +541,7 @@ const AddressDetails = (props, { navigation }) => {
     }
 
     if (addressOwnerTypeMan && addressOwnerTypeVisible) {
-      if (addressOwnerTypeLabel === 'Select' || addressOwnerTypeLabel === '') {
+      if (addressOwnerTypeLabel.length <= 0) {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + addressOwnerTypeCaption + '\n';
         i++;
         flag = true;
@@ -543,7 +549,7 @@ const AddressDetails = (props, { navigation }) => {
     }
 
     if (ownerDetailsMan && ownerDetailsVisible) {
-      if (ownerDetailsLabel === 'Select' || ownerDetailsLabel === '') {
+      if (ownerDetailsLabel.length <= 0) {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + ownerDetailsCaption + '\n';
         i++;
         flag = true;
@@ -551,7 +557,7 @@ const AddressDetails = (props, { navigation }) => {
     }
 
     if (ownerNameMan && ownerNameVisible) {
-      if (ownerName === '') {
+      if (ownerName.length <= 0) {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + ownerNameCaption + '\n';
         i++;
         flag = true;
@@ -694,6 +700,41 @@ const AddressDetails = (props, { navigation }) => {
     }
   };
 
+
+  const getPinCode = (pincode) => {
+
+    const baseURL = '8082';
+    setLoading(true);
+    apiInstance(baseURL)
+      .get(`api/v1/pincode/new/${pincode}`)
+      .then(async response => {
+        // Handle the response data
+        if (global.DEBUG_MODE) console.log('PincodeApiResponse::' + JSON.stringify(response.data),);
+
+        setLoading(false);
+
+        setPincodeResponse(response.data);
+        setDistrict(response.data.city.name);
+        setState(response.data.city.state.name);
+        setCountry(response.data.city.state.country.name);
+        setDistrictDisable(true)
+        setStateDisable(true);
+        setCountryDisable(true);
+
+
+      })
+      .catch(error => {
+        // Handle the error
+        if (global.DEBUG_MODE) console.log('PincodeApiError' + JSON.stringify(error.response));
+        setLoading(false);
+        if (error.response.data != null) {
+          setApiError(error.response.data.message);
+          setErrorModalVisible(true)
+        }
+      });
+
+  };
+
   const insertData = (id) => {
     tbl_clientaddressinfo.insertClientAddress(
       global.LOANAPPLICATIONID,
@@ -784,9 +825,10 @@ const AddressDetails = (props, { navigation }) => {
         setLandmark(textValue)
       }
     } else if (componentName === 'pincode') {
-      if (textValue.length > 0) {
-        setPincode(textValue)
+      if (textValue.length == 6) {
+        getPinCode(textValue)
       }
+      setPincode(textValue)
     } else if (componentName === 'city') {
       if (textValue.length > 0) {
         if (Common.isValidText(textValue))

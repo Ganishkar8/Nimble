@@ -24,6 +24,7 @@ import apiInstance from '../../../Utils/apiInstance';
 import tbl_loanApplication from '../../../Database/Table/tbl_loanApplication';
 import tbl_client from '../../../Database/Table/tbl_client';
 import tbl_clientaddressinfo from '../../../Database/Table/tbl_clientaddressinfo';
+import { useIsFocused } from '@react-navigation/native';
 
 
 const LoanApplicationTrackerDetails = (props, { navigation }) => {
@@ -33,6 +34,7 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
     const [apiError, setApiError] = useState('');
     const [loading, setLoading] = useState(false);
     const [bg, setBg] = useState('');
+    const isScreenVisible = useIsFocused();
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
@@ -49,7 +51,7 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
 
         }
-    }, [props.navigation]);
+    }, [props.navigation, isScreenVisible]);
 
     const getLoanAppIdDetails = () => {
 
@@ -98,7 +100,7 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
                 dob = Common.convertDateFormat(client.dateOfBirth);
             }
             await tbl_client.insertClient(client.id, loanApplicationID, client.clientType, client.relationType, client.title, client.firstName, client.middleName, client.lastName, dob, client.age, client.fatherName, client.spouseName, client.caste, client.religion, client.motherTongue, client.educationQualification, client.gender, client.maritalStatus, client.mobileNumber, client.email, client.isKycManual,
-                client.kycTypeId1, client.kycIdValue1, client.kycType1ExpiryDate, client.kycTypeId2, client.kycIdValue2, client.kycType2ExpiryDate, client.kycTypeId3, client.kycIdValue3, client.kycType3ExpiryDate, client.kycTypeId4, client.kycIdValue4, client.kycType4ExpiryDate, client.msme, client.aadharNumberVerified, client.panVerified, client.udyamRegistrationNumber, client.udyamRegistrationNumberVerified, client.mobileNumberVerified, client.emailVerified, value.dedupeCheck, client.dedupePassed, client.dmsId, client.imageName, client.geoCode, 'true', '', '', '', '', '', '', '', value.lmsClientId, value.lmsCustomerTypeId);
+                client.kycTypeId1, client.kycIdValue1, client.kycType1ExpiryDate, client.kycTypeId2, client.kycIdValue2, client.kycType2ExpiryDate, client.kycTypeId3, client.kycIdValue3, client.kycType3ExpiryDate, client.kycTypeId4, client.kycIdValue4, client.kycType4ExpiryDate, client.msme, client.isAadharNumberVerified, client.panVerified, client.udyamRegistrationNumber, client.udyamRegistrationNumberVerified, client.mobileNumberVerified, client.emailVerified, value.dedupeCheck, client.dedupePassed, client.dmsId, client.imageName, client.geoCode, 'true', '', '', '', '', '', '', '', value.lmsClientId, value.lmsCustomerTypeId);
 
             // If there are clientAddress details, iterate through them
             if (client.clientAddress && client.clientAddress.length > 0) {

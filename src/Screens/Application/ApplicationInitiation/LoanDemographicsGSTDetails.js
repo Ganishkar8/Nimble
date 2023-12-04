@@ -8,6 +8,7 @@ import {
   Image,
   Text,
   TextInput,
+  FlatList
 } from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
 import apiInstance from '../../../Utils/apiInstance';
@@ -33,7 +34,9 @@ import ButtonViewComp from '../../../Components/ButtonViewComp';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import ChildHeadComp from '../../../Components/ChildHeadComp';
 import CheckBoxComp from '../../../Components/CheckBoxComp';
-import { RadioButton } from 'react-native-paper';
+import { RadioButton, Card } from 'react-native-paper';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 const LoanDemographicsGSTDetails = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -47,25 +50,58 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
   const [isSelected, setisSelected] = useState(false);
   const [value, setvalue] = useState(1);
   const [data, setdata] = useState([{ id: 0, isSelect: false, tname: '' }]);
+  const [availableGSTData, setAvailableGSTData] = useState([]);
+  const [refreshAvailableGSTFlatlist, setRefreshAvailableGSTFlatList] = useState(false);
+  const [refreshNotAvailableGSTFlatlist, setRefreshNotAvailableGSTFlatList] = useState(false);
+  const [notAvailableGSTData, setNotAvailableGSTData] = useState([]);
 
-  const [selectedValue, setSelectedValue] = useState(false);
+  const [selectedValue, setSelectedValue] = useState('Available');
   const [selectedValue1, setSelectedValue1] = useState(false);
   const [AvailableCaption, setAvailableCaption] = useState('Available');
   const [NotAvailableCaption, setNotAvailableCaption] =
     useState('Not Available');
 
+  const [captureReasonMan, setCaptureReasonMan] = useState(false);
+  const [captureReasonVisible, setCaptureReasonVisible] = useState(true);
+  const [captureReasonDisable, setCaptureReasonDisable] = useState(false);
+  const [captureReasonData, setCaptureReasonData] = useState([]);
+  const [captureReasonCaption, setCaptureReasonCaption] = useState('CAPTURE REASON');
+  const [captureReasonLabel, setCaptureReasonLabel] = useState('');
+  const [captureReasonIndex, setCaptureReasonIndex] = useState('');
+
+  const [timeFrameMan, setTimeFrameMan] = useState(false);
+  const [timeFrameVisible, setTimeFrameVisible] = useState(true);
+  const [timeFrameDisable, setTimeFrameDisable] = useState(false);
+  const [timeFrameData, setTimeFrameData] = useState([]);
+  const [timeFrameCaption, setTimeFrameCaption] = useState('TIME FRAME');
+  const [timeFrameLabel, setTimeFrameLabel] = useState('');
+  const [timeFrameIndex, setTimeFrameIndex] = useState('');
+
+
+  const [totalSales, setTotalSales] = useState('');
+  const [totalPurchases, setTotalPurchases] = useState('');
+
+  const [totalYearSales, setTotalYearSales] = useState('');
+  const [totalYearPurchases, setTotalYearPurchases] = useState('');
+
+  const [monthsData, setMonthsData] = useState([]);
+  const [refreshMonthsFlatlist, setRefreshMonthsFlatList] = useState(false);
+
+  const [yearsData, setYearsData] = useState([]);
+  const [refreshYearsFlatlist, setRefreshYearsFlatList] = useState(false);
+
   useEffect(() => {
     props.navigation
       .getParent()
       ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
-    makeSystemMandatoryFields();
-    pickerData();
+    getSystemCodeDetail();
+
 
     return () =>
       props.navigation
         .getParent()
         ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
-  }, [navigation]);
+  }, [props.navigation]);
 
   const updateDataInArray = (idToUpdate, updatedProperties) => {
     const updatedData = [...data];
@@ -82,53 +118,13 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
     console.log('data:', updatedData);
   };
 
-  const pickerData = async () => { };
-
-  const makeSystemMandatoryFields = () => { };
-
-  const updateBasicDetails = () => {
-    if (validate()) {
-      showBottomSheet();
-    } else {
-      const appDetails = {
-        createdBy: global.USERID,
-        createdOn: '',
-        isActive: true,
-        branchId: 1180,
-        leadCreationBasicDetails: {
-          createdBy: global.USERID,
-          createdOn: '',
-          customerCategoryId: 5,
-          firstName: firstName,
-          middleName: middleName,
-          lastName: lastName,
-          mobileNumber: 7647865789,
-        },
-        leadCreationBusinessDetails: {},
-        leadCreationLoanDetails: {},
-        leadCreationDms: {},
-      };
-      const baseURL = '8901';
-      setLoading(true);
-      apiInstancelocal(baseURL)
-        .post('/api/v1/lead-creation-initiation', appDetails)
-        .then(async response => {
-          // Handle the response data
-          console.log(
-            'LeadCreationBasicApiResponse::' + JSON.stringify(response.data),
-          );
-          global.leadID = response.data.id;
-          setLoading(false);
-          props.navigation.navigate('LeadCreationBusiness');
-        })
-        .catch(error => {
-          // Handle the error
-          console.log('Error' + JSON.stringify(error.response));
-          setLoading(false);
-          alert(error);
-        });
-    }
+  const getSystemCodeDetail = async () => {
+    let dataArray = [];
+    dataArray.push({ subCodeId: 'MON', Description: 'Monthly' })
+    dataArray.push({ subCodeId: 'YEAR', Description: 'Yearly' })
+    setTimeFrameData(dataArray)
   };
+
 
   const validate = () => {
     var flag = false;
@@ -150,33 +146,315 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
 
   const handleReference = componentName => { };
 
-  const handlePickerClick = (componentName, label, index) => { };
+
   function isMultipleOf5000(number) {
     return number % 5000 === 0;
   }
 
-  // const AddGST = () => {
-  //   console.log(data);
-  //   setdata([...data, {id: data.length, isSelect: false, tname: ''}]);
-  //   console.log(data);
-  // };
-
   const AddGST = () => {
-    const newDataArray = [...data];
+    const newDataArray = [...availableGSTData];
     const newObject = {
       id: newDataArray.length,
       isSelect: false,
-      tname: '',
+      gstLabel: 'GST IN',
+      gstNumber: '',
     };
     newDataArray.push(newObject);
-    setdata(newDataArray);
+    setAvailableGSTData(newDataArray);
   };
 
-  const setSelection = count => {
-    //alert(count);
+  const updateGSTData = (index, newGSTNumber) => {
+    const updatedDataArray = [...availableGSTData];
+
+    // Update the gstNumber property for the specified index
+    updatedDataArray[index].gstNumber = newGSTNumber;
+
+    // Set the state with the updated array
+    setAvailableGSTData(updatedDataArray);
+  }
+
+  const updateMonthsData = (index, value, newAmount) => {
+    const updatedDataArray = [...monthsData];
+
+    // Update the gstNumber property for the specified index
+    if (value == 'Sales') {
+      updatedDataArray[index].salesAmount = newAmount;
+    } else if (value == 'Purchase') {
+      updatedDataArray[index].purchaseAmount = newAmount;
+    }
+
+    setTotalSales(updatedDataArray.reduce((total, month) => total + parseInt(month.salesAmount), 0));
+    setTotalPurchases(updatedDataArray.reduce((total, month) => total + parseInt(month.purchaseAmount), 0));
+
+    // Set the state with the updated array
+    setMonthsData(updatedDataArray);
+  }
+
+  const updateYearsData = (index, value, newAmount) => {
+    const updatedDataArray = [...yearsData];
+
+    // Update the gstNumber property for the specified index
+    if (value == 'Sales') {
+      updatedDataArray[index].salesAmount = newAmount;
+    } else if (value == 'Purchase') {
+      updatedDataArray[index].purchaseAmount = newAmount;
+    }
+
+    setTotalYearSales(updatedDataArray.reduce((total, month) => total + parseInt(month.salesAmount), 0));
+    setTotalYearPurchases(updatedDataArray.reduce((total, month) => total + parseInt(month.purchaseAmount), 0));
+
+    // Set the state with the updated array
+    setYearsData(updatedDataArray);
+  }
+
+  const handlePickerClick = (componentName, label, index) => {
+    if (componentName == 'CaptureReasonPicker') {
+      setCaptureReasonLabel(label);
+      setCaptureReasonIndex(index);
+    } else if (componentName == 'TimeFramePicker') {
+      if (label == 'MON') {
+        generateLastTwelveMonths();
+      } else {
+        getLastTwoYearsArray();
+      }
+      setTimeFrameLabel(label);
+      setTimeFrameIndex(index);
+    }
   };
 
-  const OncustomeText = (value, index) => { };
+  const generateLastTwelveMonths = () => {
+    const currentDate = new Date();
+    const initialMonths = [];
+
+    for (let i = 0; i < 12; i++) {
+      const month = currentDate.toLocaleString('default', { month: 'short' });
+      const year = currentDate.getFullYear();
+      const salesAmount = '0';
+      const purchaseAmount = '0';
+      initialMonths.unshift({ month, year, salesAmount, purchaseAmount });
+      currentDate.setMonth(currentDate.getMonth() - 1);
+    }
+
+    setMonthsData(initialMonths);
+  };
+
+  const getLastTwoYearsArray = () => {
+    const currentYear = new Date().getFullYear();
+    const salesAmount = '0';
+    const purchaseAmount = '0';
+    const lastTwoYearsArray = [
+      { year: currentYear - 1, salesAmount, purchaseAmount },
+      { year: currentYear - 2, salesAmount, purchaseAmount },
+    ];
+    setYearsData(lastTwoYearsArray)
+  };
+
+  const deleteGSTList = (data) => { };
+
+  const FlatView = ({ item, index }) => {
+
+
+    return (
+      <View style={{ width: '100%', alignItems: 'center', marginTop: 15 }}>
+        <View style={{ width: '90%', flexDirection: 'row', alignItems: 'center' }}>
+
+          <View style={{ width: '90%', flexDirection: 'row', alignItems: 'center' }}>
+
+            <CheckBox
+              value={true}
+              disabled={true}
+              color="#000000"
+              style={styles.checkbox}
+              tintColors={{ true: Colors.darkblue }}
+            />
+
+            <Text style={{ width: '25%', fontSize: 13, fontFamily: 'PoppinsRegular', marginTop: 5, color: Colors.mediumgrey, marginLeft: 10 }}>
+              {item.gstLabel} {index + 1}
+            </Text>
+
+            <View style={{ backgroundColor: '#0294ff20', height: 40, borderRadius: 5, width: '70%' }}>
+
+              <TextInput
+                value={item.gstNumber}
+                onChangeText={txt => { updateGSTData(index, txt) }}
+                placeholder={''}
+                contextMenuHidden={true}
+                placeholderTextColor={Colors.lightgrey}
+                keyboardType={'email-address'}
+                multiline={false}
+                maxLength={25}
+                autoCapitalize="characters"
+                style={{ color: Colors.black, overflow: 'scroll' }}
+                returnKeyType={'done'}
+
+              />
+
+            </View>
+
+          </View>
+
+          {/* <View>
+            <MaterialCommunityIcons
+              name="delete"
+              size={20}
+              onPress={() => { deleteGSTList(item) }}
+              color="#F76464"></MaterialCommunityIcons>
+          </View> */}
+
+        </View>
+
+      </View >
+    )
+
+  }
+
+  const FlatMonthsView = ({ item, index }) => {
+
+
+    return (
+      <View style={{ width: '100%', alignItems: 'center' }}>
+        <View style={{ width: '90%', alignSelf: 'center', marginTop: 20, flexDirection: 'row', alignItems: 'center' }}>
+
+          <View style={{ width: '20%' }}>
+            <Text
+              style={{
+                color: Colors.mediumgrey,
+                fontFamily: 'PoppinsRegular'
+              }}>
+              {item.month.toUpperCase()}
+            </Text>
+          </View>
+
+          <View style={{ width: '20%' }}>
+            <Text
+              style={{
+                color: Colors.mediumgrey,
+                fontFamily: 'PoppinsRegular'
+              }}>
+              {item.year}
+            </Text>
+          </View>
+
+          <View style={{ width: '30%', backgroundColor: '#0294ff20', height: 40, borderRadius: 5, margin: 5, flexDirection: 'row', alignItems: 'center' }}>
+            <FontAwesome style={{ marginLeft: 10 }}
+              name="rupee"
+              size={14}
+              color="#343434"></FontAwesome>
+            <TextInput
+              value={item.salesAmount}
+              onChangeText={txt => { updateMonthsData(index, 'Sales', txt) }}
+              placeholder={''}
+              contextMenuHidden={true}
+              placeholderTextColor={Colors.lightgrey}
+              keyboardType={'numeric'}
+              multiline={false}
+              maxLength={25}
+              style={{ width: 70, color: Colors.black, overflow: 'scroll' }}
+              returnKeyType={'done'}
+
+            />
+          </View>
+
+          <View style={{ width: '30%', backgroundColor: '#0294ff20', height: 40, borderRadius: 5, margin: 5, flexDirection: 'row', alignItems: 'center' }}>
+            <FontAwesome style={{ marginLeft: 10 }}
+              name="rupee"
+              size={14}
+              color="#343434"></FontAwesome>
+            <TextInput
+              value={item.purchaseAmount}
+              onChangeText={txt => { updateMonthsData(index, 'Purchase', txt) }}
+              placeholder={''}
+              contextMenuHidden={true}
+              placeholderTextColor={Colors.lightgrey}
+              keyboardType={'numeric'}
+              multiline={false}
+              maxLength={25}
+              style={{ width: 70, color: Colors.black, overflow: 'scroll' }}
+              returnKeyType={'done'}
+
+            />
+          </View>
+
+        </View>
+
+      </View >
+    )
+
+  }
+
+  const FlatYearsView = ({ item, index }) => {
+
+
+    return (
+      <View style={{ width: '100%', alignItems: 'center' }}>
+        <View style={{ width: '90%', alignSelf: 'center', marginTop: 20, flexDirection: 'row', alignItems: 'center' }}>
+
+          <View style={{ width: '20%' }}>
+            <Text
+              style={{
+                color: Colors.mediumgrey,
+                fontFamily: 'PoppinsRegular'
+              }}>
+
+            </Text>
+          </View>
+
+          <View style={{ width: '20%' }}>
+            <Text
+              style={{
+                color: Colors.mediumgrey,
+                fontFamily: 'PoppinsRegular'
+              }}>
+              {item.year}
+            </Text>
+          </View>
+
+          <View style={{ width: '30%', backgroundColor: '#0294ff20', height: 40, borderRadius: 5, margin: 5, flexDirection: 'row', alignItems: 'center' }}>
+            <FontAwesome style={{ marginLeft: 10 }}
+              name="rupee"
+              size={14}
+              color="#343434"></FontAwesome>
+            <TextInput
+              value={item.salesAmount}
+              onChangeText={txt => { updateYearsData(index, 'Sales', txt) }}
+              placeholder={''}
+              contextMenuHidden={true}
+              placeholderTextColor={Colors.lightgrey}
+              keyboardType={'numeric'}
+              multiline={false}
+              maxLength={25}
+              style={{ width: 70, color: Colors.black, overflow: 'scroll' }}
+              returnKeyType={'done'}
+
+            />
+          </View>
+
+          <View style={{ width: '30%', backgroundColor: '#0294ff20', height: 40, borderRadius: 5, margin: 5, flexDirection: 'row', alignItems: 'center' }}>
+            <FontAwesome style={{ marginLeft: 10 }}
+              name="rupee"
+              size={14}
+              color="#343434"></FontAwesome>
+            <TextInput
+              value={item.purchaseAmount}
+              onChangeText={txt => { updateYearsData(index, 'Purchase', txt) }}
+              placeholder={''}
+              contextMenuHidden={true}
+              placeholderTextColor={Colors.lightgrey}
+              keyboardType={'numeric'}
+              multiline={false}
+              maxLength={25}
+              style={{ width: 70, color: Colors.black, overflow: 'scroll' }}
+              returnKeyType={'done'}
+
+            />
+          </View>
+
+        </View>
+
+      </View >
+    )
+
+  }
 
   return (
     // enclose all components in this View tag
@@ -256,13 +534,18 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
                 alignItems: 'center',
                 marginLeft: 10,
               }}>
-              <RadioButton.Android
-                value="option1"
-                status={selectedValue === 'option1' ? 'checked' : 'unchecked'}
-                onPress={() => setSelectedValue('option1')}
+              <RadioButton
+                value="Available"
+                status={selectedValue === 'Available' ? 'checked' : 'unchecked'}
+                onPress={() => setSelectedValue('Available')}
                 color="#007BFF"
               />
-              <Text viewStyle={Commonstyles.inputtextStyle}>
+              <Text style={{
+                color: Colors.mediumgrey,
+                fontSize: 14,
+                fontFamily: 'Poppins-Medium',
+                marginTop: 4
+              }}>
                 {AvailableCaption}
               </Text>
             </View>
@@ -273,77 +556,371 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
                 flexDirection: 'row',
                 alignItems: 'center',
               }}>
-              <RadioButton.Android
-                value="option2"
-                status={selectedValue1 === 'option2' ? 'checked' : 'unchecked'}
-                onPress={() => setSelectedValue1('option2')}
+              <RadioButton
+                value="NotAvailable"
+                status={selectedValue === 'NotAvailable' ? 'checked' : 'unchecked'}
+                onPress={() => setSelectedValue('NotAvailable')}
                 color="#007BFF"
               />
-              <Text viewStyle={Commonstyles.inputtextStyle}>
+              <Text style={{
+                color: Colors.mediumgrey,
+                fontSize: 14,
+                fontFamily: 'Poppins-Medium',
+                marginTop: 4
+              }}>
                 {NotAvailableCaption}
               </Text>
             </View>
           </View>
-          {data.map((each, index) => (
-            <View
-              style={{
-                width: '100%',
-                alignItems: 'center',
-                marginTop: 15,
-              }}>
+
+          {selectedValue == 'Available' &&
+            <View>
+              <View style={{ marginTop: 15 }}>
+
+                <FlatList
+                  data={availableGSTData}
+                  renderItem={FlatView}
+                  extraData={refreshAvailableGSTFlatlist}
+                  keyExtractor={item => item.gstLabel}
+                />
+              </View>
+
               <View
                 style={{
-                  width: '93%',
+                  marginTop: 25,
+                  width: '90%',
                   flexDirection: 'row',
-                  alignItems: 'center',
+                  justifyContent: 'flex-end',
                 }}>
-                <CheckBox
-                  value={each.isSelect}
-                  onValueChange={() =>
-                    updateDataInArray(each.id, {
-                      isSelect: !each.isSelect,
-                    })
-                  }
-                  style={styles.checkbox}
-                />
-                <Text
-                  style={{
-                    color: Colors.darkblue,
-                  }}>
-                  GST IN {index + 1}
-                </Text>
-                <TextInput
-                  style={Commonstyles.textinputtextStyle}
-                  //value={()=> (each.id)}
-                  onChangeText={e => updateDataInArray(each.id, { tname: e })}
-                />
-                {/* <TextInputComp
-                  textValue={each.tname}
-                  textStyle={Commonstyles.textinputtextStyle}
-                  type="email-address"
-                  handleClick={() =>
-                    updateDataInArray(each.id, {tname: each.tname})
-                  }></TextInputComp> */}
+                <TouchableOpacity onPress={() => AddGST()}>
+                  <Text
+                    style={{
+                      color: Colors.darkblue,
+                      fontFamily: 'Poppins-Medium'
+                    }}>
+                    + Add Another GST IN
+                  </Text>
+                </TouchableOpacity>
               </View>
             </View>
-          ))}
+          }
 
-          <View
-            style={{
-              marginLeft: 220,
-              marginTop: 15,
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}>
-            <TouchableOpacity onPress={AddGST}>
-              <Text
-                style={{
-                  color: Colors.darkblue,
-                }}>
-                + Add Another GST IN
-              </Text>
-            </TouchableOpacity>
-          </View>
+          {selectedValue == 'NotAvailable' &&
+
+
+
+            <View>
+
+              {captureReasonVisible && (
+                <View
+                  style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+                  <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                    <TextComp
+                      textVal={captureReasonCaption}
+                      textStyle={Commonstyles.inputtextStyle}
+                      Visible={captureReasonMan}
+                    />
+                  </View>
+
+                  <PickerComp
+                    textLabel={captureReasonLabel}
+                    pickerStyle={Commonstyles.picker}
+                    Disable={captureReasonDisable}
+                    pickerdata={captureReasonData}
+                    componentName="CaptureReasonPicker"
+                    handlePickerClick={handlePickerClick}
+                  />
+                </View>
+              )}
+
+              {timeFrameVisible && (
+                <View
+                  style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+                  <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                    <TextComp
+                      textVal={timeFrameCaption}
+                      textStyle={Commonstyles.inputtextStyle}
+                      Visible={timeFrameMan}
+                    />
+                  </View>
+
+                  <PickerComp
+                    textLabel={timeFrameLabel}
+                    pickerStyle={Commonstyles.picker}
+                    Disable={timeFrameDisable}
+                    pickerdata={timeFrameData}
+                    componentName="TimeFramePicker"
+                    handlePickerClick={handlePickerClick}
+                  />
+                </View>
+              )}
+
+              {timeFrameLabel == 'MON' &&
+
+                <View>
+                  <View
+                    style={{
+                      marginTop: 25,
+                      width: '90%',
+                      flexDirection: 'row',
+                      alignSelf: 'center',
+                      justifyContent: 'flex-start',
+                    }}>
+                    <Text
+                      style={{
+                        color: Colors.mediumgrey,
+                        fontFamily: 'Poppins-Medium'
+                      }}>
+                      Monthly sales info of last 12 Months
+                    </Text>
+
+                  </View>
+
+                  <View style={{ width: '90%', alignSelf: 'center', marginTop: 25, flexDirection: 'row' }}>
+
+                    <View style={{ width: '20%' }}>
+                      <Text
+                        style={{
+                          color: Colors.mediumgrey,
+                          fontFamily: 'Poppins-Medium'
+                        }}>
+                        Month
+                      </Text>
+                    </View>
+
+                    <View style={{ width: '20%' }}>
+                      <Text
+                        style={{
+                          color: Colors.mediumgrey,
+                          fontFamily: 'Poppins-Medium'
+                        }}>
+                        Year
+                      </Text>
+                    </View>
+
+                    <View style={{ width: '30%' }}>
+                      <Text
+                        style={{
+                          color: Colors.mediumgrey,
+                          fontFamily: 'Poppins-Medium'
+                        }}>
+                        Sales
+                      </Text>
+                    </View>
+
+                    <View style={{ width: '30%' }}>
+                      <Text
+                        style={{
+                          color: Colors.mediumgrey,
+                          fontFamily: 'Poppins-Medium'
+                        }}>
+                        Purchase
+                      </Text>
+                    </View>
+
+                  </View>
+
+                  <View style={{ marginTop: 15 }}>
+
+                    <FlatList
+                      data={monthsData}
+                      renderItem={FlatMonthsView}
+                      extraData={setRefreshMonthsFlatList}
+                      keyExtractor={item => item.month}
+                    />
+                  </View>
+
+                  <View style={{ width: '90%', alignSelf: 'center', marginTop: 25, flexDirection: 'row', alignItems: 'center' }}>
+
+                    <View style={{ width: '20%' }}>
+                      <Text
+                        style={{
+                          color: Colors.mediumgrey,
+                          fontFamily: 'Poppins-Medium'
+                        }}>
+                        Total
+                      </Text>
+                    </View>
+
+                    <View style={{ width: '20%' }}>
+                      <Text
+                        style={{
+                          color: Colors.mediumgrey,
+                          fontFamily: 'Poppins-Medium'
+                        }}>
+
+                      </Text>
+                    </View>
+
+                    <View style={{ width: '30%', backgroundColor: '#0294ff20', height: 40, borderRadius: 5, margin: 5, flexDirection: 'row', alignItems: 'center' }}>
+                      <FontAwesome style={{ marginLeft: 10 }}
+                        name="rupee"
+                        size={14}
+                        color="#343434"></FontAwesome>
+                      <Text
+                        style={{
+                          color: Colors.mediumgrey,
+                          fontFamily: 'Poppins-Medium', marginLeft: 4
+                        }}>
+                        {totalSales}
+                      </Text>
+                    </View>
+
+                    <View style={{ width: '30%', backgroundColor: '#0294ff20', height: 40, borderRadius: 5, margin: 5, flexDirection: 'row', alignItems: 'center' }}>
+                      <FontAwesome style={{ marginLeft: 10 }}
+                        name="rupee"
+                        size={14}
+                        color="#343434"></FontAwesome>
+                      <Text
+                        style={{
+                          color: Colors.mediumgrey,
+                          fontFamily: 'Poppins-Medium', marginLeft: 4
+                        }}>
+                        {totalPurchases}
+                      </Text>
+                    </View>
+
+                  </View>
+
+                </View>
+
+              }
+
+
+              {timeFrameLabel == 'YEAR' &&
+
+                <View>
+                  <View
+                    style={{
+                      marginTop: 25,
+                      width: '90%',
+                      flexDirection: 'row',
+                      alignSelf: 'center',
+                      justifyContent: 'flex-start',
+                    }}>
+                    <Text
+                      style={{
+                        color: Colors.mediumgrey,
+                        fontFamily: 'Poppins-Medium'
+                      }}>
+                      Yearly sales info of last 2 Year
+                    </Text>
+
+                  </View>
+
+                  <View style={{ width: '90%', alignSelf: 'center', marginTop: 25, flexDirection: 'row' }}>
+
+                    <View style={{ width: '20%' }}>
+                      <Text
+                        style={{
+                          color: Colors.mediumgrey,
+                          fontFamily: 'Poppins-Medium'
+                        }}>
+
+                      </Text>
+                    </View>
+
+                    <View style={{ width: '20%' }}>
+                      <Text
+                        style={{
+                          color: Colors.mediumgrey,
+                          fontFamily: 'Poppins-Medium'
+                        }}>
+                        Year
+                      </Text>
+                    </View>
+
+                    <View style={{ width: '30%' }}>
+                      <Text
+                        style={{
+                          color: Colors.mediumgrey,
+                          fontFamily: 'Poppins-Medium'
+                        }}>
+                        Sales
+                      </Text>
+                    </View>
+
+                    <View style={{ width: '30%' }}>
+                      <Text
+                        style={{
+                          color: Colors.mediumgrey,
+                          fontFamily: 'Poppins-Medium'
+                        }}>
+                        Purchase
+                      </Text>
+                    </View>
+
+                  </View>
+
+                  <View style={{ marginTop: 15 }}>
+
+                    <FlatList
+                      data={yearsData}
+                      renderItem={FlatYearsView}
+                      extraData={setRefreshYearsFlatList}
+                      keyExtractor={item => item.year}
+                    />
+                  </View>
+
+                  <View style={{ width: '90%', alignSelf: 'center', marginTop: 25, flexDirection: 'row', alignItems: 'center' }}>
+
+                    <View style={{ width: '20%' }}>
+                      <Text
+                        style={{
+                          color: Colors.mediumgrey,
+                          fontFamily: 'Poppins-Medium'
+                        }}>
+                        Total
+                      </Text>
+                    </View>
+
+                    <View style={{ width: '20%' }}>
+                      <Text
+                        style={{
+                          color: Colors.mediumgrey,
+                          fontFamily: 'Poppins-Medium'
+                        }}>
+
+                      </Text>
+                    </View>
+
+                    <View style={{ width: '30%', backgroundColor: '#0294ff20', height: 40, borderRadius: 5, margin: 5, flexDirection: 'row', alignItems: 'center' }}>
+                      <FontAwesome style={{ marginLeft: 10 }}
+                        name="rupee"
+                        size={14}
+                        color="#343434"></FontAwesome>
+                      <Text
+                        style={{
+                          color: Colors.mediumgrey,
+                          fontFamily: 'Poppins-Medium', marginLeft: 4
+                        }}>
+                        {totalYearSales}
+                      </Text>
+                    </View>
+
+                    <View style={{ width: '30%', backgroundColor: '#0294ff20', height: 40, borderRadius: 5, margin: 5, flexDirection: 'row', alignItems: 'center' }}>
+                      <FontAwesome style={{ marginLeft: 10 }}
+                        name="rupee"
+                        size={14}
+                        color="#343434"></FontAwesome>
+                      <Text
+                        style={{
+                          color: Colors.mediumgrey,
+                          fontFamily: 'Poppins-Medium', marginLeft: 4
+                        }}>
+                        {totalYearPurchases}
+                      </Text>
+                    </View>
+
+                  </View>
+
+                </View>
+
+              }
+
+            </View>
+          }
+
         </View>
 
         {/* <ButtonViewComp
