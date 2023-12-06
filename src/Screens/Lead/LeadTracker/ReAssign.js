@@ -209,7 +209,7 @@ const ReAssign = (props, { navigation }) => {
             return;
         }
         const appDetails = {
-            "reasonId": reasonLabel,
+            "reason": reasonLabel,
             "userName": global.USERID,
             "fausername": reAssignedtoID
         }

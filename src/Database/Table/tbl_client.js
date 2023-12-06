@@ -62,8 +62,8 @@ const updateAadharData = (name, dob, age, gender, fatherName, spouseName, imgDms
     return new Promise((resolve, reject) => {
         db.transaction(tx => {
             tx.executeSql(
-                `UPDATE ${tableName} SET firstName = ?, dateOfBirth = ?, age = ?, genderId = ?, fatherName = ?, spouseName= ?, image = ?, dmsId = ? WHERE loanApplicationId = ? AND clientTypeId = ?`,
-                [name, dob, age, gender, fatherName, spouseName, imgDmsId, docDmsId, loanApplicationId, clientTypeId],
+                `UPDATE ${tableName} SET firstName = ?, dateOfBirth = ?, age = ?, genderId = ?, fatherName = ?, spouseName= ?, image = ?, dmsId = ?,isAadharNumberVerified=? WHERE loanApplicationId = ? AND clientTypeId = ?`,
+                [name, dob, age, gender, fatherName, spouseName, imgDmsId, docDmsId, loanApplicationId, clientTypeId, '1'],
                 (_, result) => {
                     resolve(result);
                 },

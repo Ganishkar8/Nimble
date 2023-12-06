@@ -241,6 +241,7 @@ export const language = [
       str_totothexpenses: 'Total Other Expenses',
       str_totavgmntincome: 'Total Average Monthly Income',
       str_totavgmntexpenses: 'Total Average Monthly Expenses',
+      str_familydetails: 'Family Details',
       str_accoutnnonotmatching: 'Account Number and Confirm Account Number Not Matching',
     },
 

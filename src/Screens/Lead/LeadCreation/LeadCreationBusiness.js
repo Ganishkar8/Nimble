@@ -64,7 +64,7 @@ const LeadCreationBusiness = (props, { navigation }) => {
     const [checked, setChecked] = React.useState('first');
     const [industryTypeLabel, setIndustryTypeLabel] = useState('');
     const [industryTypeIndex, setIndustryTypeIndex] = useState('');
-    const [industryTypeCaption, setIndustryTypeCaption] = useState('INDUSTRY TYPE');
+    const [industryTypeCaption, setIndustryTypeCaption] = useState('INDUSTRY LINE');
     const [industryTypeMan, setIndustryTypeMan] = useState(false);
     const [industryTypeVisible, setIndustryTypeVisible] = useState(true);
     const [industryTypeDisable, setIndustryTypeDisable] = useState(false);
@@ -140,13 +140,12 @@ const LeadCreationBusiness = (props, { navigation }) => {
 
     const getSystemCodeDetail = () => {
 
-        const filteredIndustryTypeData = systemCodeDetail.filter((data) => data.masterId === 'CREDIT_SCORE_INDUSTRY_TYPE_SUB_CATEGORY').sort((a, b) => a.Description.localeCompare(b.Description));
+        const filteredIndustryTypeData = userCodeDetail.filter((data) => data.masterId === 'INDUSTRY_TYPE').sort((a, b) => a.Description.localeCompare(b.Description));
         setIndustryTypeData(filteredIndustryTypeData);
 
     }
 
     const makeSystemMandatoryFields = () => {
-
 
         systemMandatoryField.filter((data) => data.fieldUiid === 'sp_industrytype').map((value, index) => {
             setIndustryTypeCaption(value.fieldName)
@@ -343,7 +342,7 @@ const LeadCreationBusiness = (props, { navigation }) => {
         var errorMessage = '';
 
         if (industryTypeMan && industryTypeVisible) {
-            if (industryTypeLabel === 'Select') {
+            if (industryTypeLabel.length <= 0) {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + industryTypeCaption + '\n';
                 i++;
                 flag = true;
@@ -373,7 +372,7 @@ const LeadCreationBusiness = (props, { navigation }) => {
         }
 
         if (monthsMan && monthsVisible) {
-            if (monthLabel === 'Select') {
+            if (monthLabel.length <= 0) {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + monthsCaption + '\n';
                 i++;
                 flag = true;
