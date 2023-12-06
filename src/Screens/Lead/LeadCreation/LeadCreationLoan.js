@@ -570,7 +570,7 @@ const LeadCreationLoan = (props, { navigation }) => {
         var errorMessage = '';
 
         if (loanTypeMan && loanTypeVisible) {
-            if (loanTypeLabel === '') {
+            if (loanTypeLabel.length <= 0) {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + loanTypeCaption + '\n';
                 i++;
                 flag = true;
@@ -586,7 +586,7 @@ const LeadCreationLoan = (props, { navigation }) => {
         }
 
         if (loanPurposeMan && loanPurposeVisible) {
-            if (loanPurposeLabel === '') {
+            if (loanPurposeLabel.length <= 0) {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + loanPurposeCaption + '\n';
                 i++;
                 flag = true;
@@ -616,7 +616,7 @@ const LeadCreationLoan = (props, { navigation }) => {
         }
 
         if (leadTypeMan && leadTypeVisible) {
-            if (leadTypeLabel === 'Select') {
+            if (leadTypeLabel.length <= 0) {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + leadTypeCaption + '\n';
                 i++;
                 flag = true;

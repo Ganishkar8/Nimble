@@ -370,7 +370,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   );
 
   const getApplicantData = () => {
-
+    setLoading(true);
     tbl_loanApplication.getLoanAppWorkFlowID(global.LOANAPPLICATIONID, 'APPL')
       .then(data => {
         if (global.DEBUG_MODE) console.log('Applicant Data:', data);
@@ -426,7 +426,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           setKycType2Label(data[0].kycTypeId2)
           setkycID2(data[0].kycIdValue2)
           setExpiry2Date(data[0].expiryDate2)
-          setKycType3Label(data[0].customer_subcategory)
+          setKycType3Label(data[0].kycTypeId3)
           setkycID3(data[0].kycTypeId3)
           setExpiry3Date(data[0].kycIdValue3)
           setMobileNumber(data[0].mobileNumber)
@@ -439,12 +439,17 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           if (data[0].isMobileVerified) {
             global.isMobileVerified = "1";
             setIsMobileVerified('1')
+          } else {
+            global.isMobileVerified = "0";
           }
-          setIsMobileVerified('1')
-          global.isMobileVerified = "1";
+          // setIsMobileVerified('1')
+          // global.isMobileVerified = "1";
           fieldsDisable();
           setWorkflowIDDisable(true);
           setLoanAmountDisable(true);
+          setLoading(false);
+        } else {
+          setLoading(false);
         }
 
       })
@@ -1069,12 +1074,12 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
               "mobileNumber": mobileNumber,
               "email": Email,
               "isActive": true,
-              "aadharNumberVerified": false,
+              "isAadharNumberVerified": false,
               "udyamRegistrationNumberVerified": false,
-              "mobileNumberVerified": true,
-              "msme": chkMsme,
-              "emailVerified": false,
-              "panVerified": false,
+              "isMobileNumberVerified": true,
+              "isMsme": chkMsme,
+              "isEmailVerified": false,
+              "isPanVerified": false,
               "dedupeCheck": isDedupeDone,
               "clientAddress": [],
             }
@@ -1482,8 +1487,23 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       isAadharAvailable = true;
     }
 
+    if (relationTypeMan && relationTypeVisible) {
+      if (relationTypeLabel.length <= 0) {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          language[0][props.language].str_plsselect +
+          relationTypeCaption +
+          '\n';
+        i++;
+        flag = true;
+      }
+    }
+
     if (custCatgMan && custCatgVisible) {
-      if (custCatgLabel === 'Select') {
+      if (custCatgLabel.length <= 0) {
         errorMessage =
           errorMessage +
           i +
@@ -1593,6 +1613,51 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
     }
 
+    if (titleMan && titleVisible) {
+      if (titleLabel.length <= 0) {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          language[0][props.language].str_plsselect +
+          titleCaption +
+          '\n';
+        i++;
+        flag = true;
+      }
+    }
+
+    if (NameMan && NameVisible) {
+      if (Name.length <= 0) {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          language[0][props.language].str_plsenter +
+          NameCaption +
+          '\n';
+        i++;
+        flag = true;
+      }
+    }
+
+    if (genderMan && genderVisible) {
+      if (genderLabel.length <= 0) {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          language[0][props.language].str_plsselect +
+          genderCaption +
+          '\n';
+        i++;
+        flag = true;
+      }
+    }
+
     if (MaritalStatusMan && MaritalStatusVisible) {
       if (MaritalStatusLabel.length <= 0) {
         errorMessage =
@@ -1694,20 +1759,6 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
     }
 
-    if (NameMan && NameVisible) {
-      if (Name.length <= 0) {
-        errorMessage =
-          errorMessage +
-          i +
-          ')' +
-          ' ' +
-          language[0][props.language].str_plsenter +
-          NameCaption +
-          '\n';
-        i++;
-        flag = true;
-      }
-    }
     if (mobileNumberMan && mobileNumberVisible) {
       if (mobileNumber.length <= 0) {
         errorMessage =

@@ -681,7 +681,7 @@ const LeadManagement = (props, { navigation, route }) => {
                                 <Text style={styles.headText}>{language[0][props.language].str_laonappid}</Text>
                             </View>
                             <View style={{ width: '55%' }}>
-                                <Text style={styles.childText}>:  {item.loanApplicationId}</Text>
+                                <Text style={styles.childText}>:  {item.loanApplicationNumber}</Text>
                             </View>
                         </View>
                         <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
@@ -689,7 +689,7 @@ const LeadManagement = (props, { navigation, route }) => {
                                 <Text style={styles.headText}>{language[0][props.language].str_workflowstage}</Text>
                             </View>
                             <View style={{ width: '55%' }}>
-                                <Text style={styles.childText}>:   {item.wfId}</Text>
+                                <Text style={styles.childText}>:   {item.workflowStage}</Text>
                             </View>
                         </View>
                         <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>

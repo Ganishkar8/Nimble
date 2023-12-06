@@ -190,6 +190,7 @@ const OTPVerification = (props, { navigation }) => {
                     setTimeLeft(60)
                 }
 
+                setMobileOTP('')
                 setLoading(false);
 
 

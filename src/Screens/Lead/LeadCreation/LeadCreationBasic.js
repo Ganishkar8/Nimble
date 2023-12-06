@@ -431,7 +431,7 @@ const LeadCreationBasic = (props, { navigation, route }) => {
         var errorMessage = '';
 
         if (custCatgMan && custCatgVisible) {
-            if (custCatgLabel === 'Select') {
+            if (custCatgLabel.length <= 0) {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + custCatgCaption + '\n';
                 i++;
                 flag = true;
@@ -439,7 +439,7 @@ const LeadCreationBasic = (props, { navigation, route }) => {
         }
 
         if (titleMan && titleVisible) {
-            if (custCatgLabel === '') {
+            if (titleLabel.length <= 0) {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + titleCaption + '\n';
                 i++;
                 flag = true;
@@ -447,7 +447,7 @@ const LeadCreationBasic = (props, { navigation, route }) => {
         }
 
         if (genderMan && genderVisible) {
-            if (genderLabel === '') {
+            if (genderLabel.length <= 0) {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + genderCaption + '\n';
                 i++;
                 flag = true;

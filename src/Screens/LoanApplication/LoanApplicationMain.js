@@ -233,9 +233,9 @@ const LoanApplicationMain = (props, { navigation }) => {
             }
         }
 
+        setModuleOrder(moduleOrder);
+        setPageOrder(pageOrder);
         getProcessSubStage(moduleOrder, pageOrder, workFlowID);
-
-        //alert(JSON.stringify(filteredProcessModule[0].displayOrder))
 
     }
 
@@ -325,6 +325,9 @@ const LoanApplicationMain = (props, { navigation }) => {
                     global.isAadharVerified = data[0].isAadharNumberVerified;
                     return global.CLIENTID;
                 } else {
+                    global.CLIENTID = '';
+                    global.isAadharVerified = '0';
+                    global.isDedupeDone = '0';
                     return '';
                 }
 
@@ -340,6 +343,7 @@ const LoanApplicationMain = (props, { navigation }) => {
         //     return;
         // }
 
+
         let fiterStatusPosition = processSubStageData
         for (let i = 0; i < fiterStatusPosition.length; i++) {
             if (fiterStatusPosition[i].id == item.id) {
@@ -352,28 +356,50 @@ const LoanApplicationMain = (props, { navigation }) => {
 
         setProcessSubStageData(fiterStatusPosition)
 
+        // const filteredProcessModuleStage = processModule.filter((data) => {
+        //     return data.wfId === parseInt(workflowIDLabel) && data.process_sub_stage_id === item.id;
+        // }).map((data) => {
+        //     const extraJSON = { subDataIsCompleted: true, nestedSubData: [] };
+        //     return { ...data, ...extraJSON };
+        // }).sort((a, b) => a.displayOrder - b.displayOrder);
+
+        // setProcessModuleData(filteredProcessModuleStage);
+
+        // filteredProcessModuleStage.forEach((data) => {
+        //     if (data.wfId === parseInt(workflowIDLabel)) {
+        //         processPage.forEach((data1) => {
+        //             if (data1.processModuleId === data.id) {
+        //                 const extraJSON = { nestedSubDataIsCompleted: true };
+        //                 data.nestedSubData.push({ ...data1, ...extraJSON });
+        //             }
+        //         });
+        //         data.nestedSubData.sort((a, b) => a.displayOrder - b.displayOrder);
+        //     }
+        // });
+        // setProcessModuleData(filteredProcessModuleStage);
+
         const filteredProcessModuleStage = processModule.filter((data) => {
             return data.wfId === parseInt(workflowIDLabel) && data.process_sub_stage_id === item.id;
         }).map((data) => {
-            const extraJSON = { subDataIsCompleted: true, nestedSubData: [] };
+            const subDataIsCompleted = data.displayOrder <= moduleOrder;
+
+            const extraJSON = { subDataIsCompleted, nestedSubData: [] };
             return { ...data, ...extraJSON };
         }).sort((a, b) => a.displayOrder - b.displayOrder);
-
-        setProcessModuleData(filteredProcessModuleStage);
 
         filteredProcessModuleStage.forEach((data) => {
             if (data.wfId === parseInt(workflowIDLabel)) {
                 processPage.forEach((data1) => {
                     if (data1.processModuleId === data.id) {
-                        const extraJSON = { nestedSubDataIsCompleted: true };
+                        const nestedSubDataIsCompleted = data1.displayOrder <= pageOrder;
+                        const extraJSON = { nestedSubDataIsCompleted };
                         data.nestedSubData.push({ ...data1, ...extraJSON });
                     }
                 });
+
                 data.nestedSubData.sort((a, b) => a.displayOrder - b.displayOrder);
             }
         });
-
-
         setProcessModuleData(filteredProcessModuleStage);
 
         setRefreshFlatList(!refreshFlatlist)
@@ -381,58 +407,66 @@ const LoanApplicationMain = (props, { navigation }) => {
 
     const nestedDataClick = async (item) => {
 
-        if (global.USERTYPEID == 1163) {
+        //if (global.USERTYPEID == 1163) {
 
-            if (item.pageCode == 'PRF_SHRT_APLCT_BSC_DTLS') {
-                global.CLIENTTYPE = 'APPL';
-                await getClientID(global.CLIENTTYPE);
-                props.navigation.replace('ProfileShortBasicDetails');
-            } else if (item.pageCode == 'PRF_SHRT_APLCT_VRF_STATUS') {
-                global.CLIENTTYPE = 'APPL';
-                await getClientID(global.CLIENTTYPE);
-                props.navigation.replace('ProfileShortKYCVerificationStatus');
-            } else if (item.pageCode == 'PRF_SHRT_APLCT_PRSNL_DTLS') {
-                global.CLIENTTYPE = 'APPL';
-                await getClientID('APPL');
-                props.navigation.replace('ProfileShortApplicantDetails');
-            } else if (item.pageCode == 'PRF_SHRT_APLCT_ADDRS_DTLS') {
-                global.CLIENTTYPE = 'APPL';
-                await getClientID(global.CLIENTTYPE);
-                props.navigation.replace('AddressMainList');
-            } else if (item.pageCode == 'PRF_SHRT_COAPLCT_BSC_DTLS') {
-                global.CLIENTTYPE = 'CO-APPL';
-                await getClientID(global.CLIENTTYPE);
-                props.navigation.replace('ProfileShortBasicDetails');
-            } else if (item.pageCode == 'PRF_SHRT_COAPLCT_VRF_STATUS') {
-                global.CLIENTTYPE = 'CO-APPL';
-                await getClientID(global.CLIENTTYPE);
-                props.navigation.replace('ProfileShortKYCVerificationStatus');
-            } else if (item.pageCode == 'PRF_SHRT_COAPLCT_PRSNL_DTLS') {
-                global.CLIENTTYPE = 'CO-APPL';
-                await getClientID(global.CLIENTTYPE);
-                props.navigation.replace('ProfileShortApplicantDetails');
-            } else if (item.pageCode == 'PRF_SHRT_COAPLCT_ADDRS_DTLS') {
-                global.CLIENTTYPE = 'CO-APPL';
-                await getClientID(global.CLIENTTYPE);
-                props.navigation.replace('AddressMainList');
-            } else if (item.pageCode == 'PRF_SHRT_GRNTR_BSC_DTLS') {
-                global.CLIENTTYPE = 'GRNTR';
-                await getClientID(global.CLIENTTYPE);
-                props.navigation.replace('ProfileShortBasicDetails');
-            } else if (item.pageCode == 'PRF_SHRT_GRNTR_VRF_STATUS') {
-                global.CLIENTTYPE = 'GRNTR';
-                await getClientID(global.CLIENTTYPE);
-                props.navigation.replace('ProfileShortKYCVerificationStatus');
-            } else if (item.pageCode == 'PRF_SHRT_GRNTR_PRSNL_DTLS') {
-                global.CLIENTTYPE = 'GRNTR';
-                await getClientID(global.CLIENTTYPE);
-                props.navigation.replace('ProfileShortApplicantDetails');
-            } else if (item.pageCode == 'PRF_SHRT_GRNTR_ADDRS_DTLS') {
-                global.CLIENTTYPE = 'GRNTR';
-                await getClientID(global.CLIENTTYPE);
-                props.navigation.replace('AddressMainList');
-            }
+        if (item.pageCode == 'PRF_SHRT_APLCT_BSC_DTLS') {
+            global.CLIENTTYPE = 'APPL';
+            await getClientID(global.CLIENTTYPE);
+            props.navigation.replace('ProfileShortBasicDetails');
+        } else if (item.pageCode == 'PRF_SHRT_APLCT_VRF_STATUS') {
+            global.CLIENTTYPE = 'APPL';
+            await getClientID(global.CLIENTTYPE);
+            props.navigation.replace('ProfileShortKYCVerificationStatus');
+        } else if (item.pageCode == 'PRF_SHRT_APLCT_PRSNL_DTLS') {
+            global.CLIENTTYPE = 'APPL';
+            await getClientID('APPL');
+            props.navigation.replace('ProfileShortApplicantDetails');
+        } else if (item.pageCode == 'PRF_SHRT_APLCT_ADDRS_DTLS') {
+            global.CLIENTTYPE = 'APPL';
+            await getClientID(global.CLIENTTYPE);
+            props.navigation.replace('AddressMainList');
+        } else if (item.pageCode == 'PRF_SHRT_COAPLCT_BSC_DTLS') {
+            global.CLIENTTYPE = 'CO-APPL';
+            await getClientID(global.CLIENTTYPE);
+            props.navigation.replace('ProfileShortBasicDetails');
+        } else if (item.pageCode == 'PRF_SHRT_COAPLCT_VRF_STATUS') {
+            global.CLIENTTYPE = 'CO-APPL';
+            await getClientID(global.CLIENTTYPE);
+            props.navigation.replace('ProfileShortKYCVerificationStatus');
+        } else if (item.pageCode == 'PRF_SHRT_COAPLCT_PRSNL_DTLS') {
+            global.CLIENTTYPE = 'CO-APPL';
+            await getClientID(global.CLIENTTYPE);
+            props.navigation.replace('ProfileShortApplicantDetails');
+        } else if (item.pageCode == 'PRF_SHRT_COAPLCT_ADDRS_DTLS') {
+            global.CLIENTTYPE = 'CO-APPL';
+            await getClientID(global.CLIENTTYPE);
+            props.navigation.replace('AddressMainList');
+        } else if (item.pageCode == 'PRF_SHRT_GRNTR_BSC_DTLS') {
+            global.CLIENTTYPE = 'GRNTR';
+            await getClientID(global.CLIENTTYPE);
+            props.navigation.replace('ProfileShortBasicDetails');
+        } else if (item.pageCode == 'PRF_SHRT_GRNTR_VRF_STATUS') {
+            global.CLIENTTYPE = 'GRNTR';
+            await getClientID(global.CLIENTTYPE);
+            props.navigation.replace('ProfileShortKYCVerificationStatus');
+        } else if (item.pageCode == 'PRF_SHRT_GRNTR_PRSNL_DTLS') {
+            global.CLIENTTYPE = 'GRNTR';
+            await getClientID(global.CLIENTTYPE);
+            props.navigation.replace('ProfileShortApplicantDetails');
+        } else if (item.pageCode == 'PRF_SHRT_GRNTR_ADDRS_DTLS') {
+            global.CLIENTTYPE = 'GRNTR';
+            await getClientID(global.CLIENTTYPE);
+            props.navigation.replace('AddressMainList');
+        } else if (item.pageCode == 'DMGRC_APPL_FMLY_DTLS') {
+            global.CLIENTTYPE = 'APPL';
+            await getClientID(global.CLIENTTYPE);
+            props.navigation.replace('FamilyDetailList');
+        } else if (item.pageCode == 'DMGRC_APPL_BSN_DTLS') {
+            global.CLIENTTYPE = 'APPL';
+            await getClientID(global.CLIENTTYPE);
+            props.navigation.replace('LoanDemographicBusinessDetail');
         }
+        //}
 
     }
 
@@ -473,10 +507,6 @@ const LoanApplicationMain = (props, { navigation }) => {
 
 
         setProcessModuleData(filteredProcessModuleStage);
-
-        // alert(JSON.stringify(filteredProcessModuleStage))
-
-
 
     }
 

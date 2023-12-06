@@ -168,7 +168,7 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
                                 <Text style={styles.headText}>{language[0][props.language].str_laonappid}</Text>
                             </View>
                             <View style={{ width: '55%' }}>
-                                <Text style={styles.childText}>:  {listData.loanApplicationId}</Text>
+                                <Text style={styles.childText}>:  {listData.loanApplicationNumber}</Text>
                             </View>
                         </View>
                         <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
@@ -176,7 +176,7 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
                                 <Text style={styles.headText}>{language[0][props.language].str_workflowstage}</Text>
                             </View>
                             <View style={{ width: '55%' }}>
-                                <Text style={styles.childText}>:   {listData.wfId}</Text>
+                                <Text style={styles.childText}>:   {listData.workflowStage}</Text>
                             </View>
                         </View>
                         <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>

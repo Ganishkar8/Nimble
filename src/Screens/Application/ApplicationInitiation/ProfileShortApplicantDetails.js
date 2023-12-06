@@ -204,6 +204,9 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
   const [hideRetake, setHideRetake] = useState(false);
   const [hideDelete, setHideDelete] = useState(false);
 
+  const [isAadharVerified, setIsAadharVerified] = useState(false);
+
+
 
   const [minAge, setMinAge] = useState(18);
 
@@ -640,10 +643,17 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
 
         setKYCManual(value[0].isKycManual)
 
-        if (!(value[0].isKycManual) == 1) {
-          global.isAadharVerified = "1";
+        // if (!(value[0].isKycManual) == 1) {
+        //   global.isAadharVerified = "1";
+        // } else {
+        //   global.isAadharVerified = "0";
+        // }
+
+        if (value[0].isAadharNumberVerified == 1) {
+          setIsAadharVerified(true);
         } else {
-          global.isAadharVerified = "0";
+          setIsAadharVerified(false);
+
         }
 
         if (global.USERTYPEID == 1163) {
@@ -668,7 +678,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
 
   const disableAadharFields = (fatherName, spouseName) => {
 
-    if (global.isAadharVerified == '1') {
+    if (isAadharVerified) {
       setFirstNameDisable(true);
       setMiddleNameDisable(true);
       setLastNameDisable(true);
@@ -814,7 +824,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
 
   const updateApplicantDetails = (id) => {
     var manualKYC = false;
-    if (global.isAadharVerified == '1') {
+    if (isAadharVerified) {
       manualKYC = true;
     }
     if (validate()) {

@@ -406,15 +406,16 @@ const AadharOTPVerification = (props, { navigation }) => {
         var name = data.name;
         var dob = Common.convertDateFormat(data.dob);
         var gender = data.gender;
-        var fatherName = '';
-        var spouseName = '';
+        var fatherName = data.fatherName;
+        var spouseName = data.spouseName;
         var image = data.imgDmsId;
         var dmsId = data.docDmsId;
         var age = Common.calculateAge(dob);
 
         await tbl_client.updateAadharData(name, dob, age, gender, fatherName, spouseName, '', '', global.LOANAPPLICATIONID, global.CLIENTTYPE);
 
-
+        if (global.DEBUG_MODE) console.log('Gender::' + JSON.stringify(response.data));
+        if (global.DEBUG_MODE) console.log('FatherName::' + JSON.stringify(response.data));
         await tbl_clientaddressinfo.insertClientAddress(
             global.LOANAPPLICATIONID,
             "",
