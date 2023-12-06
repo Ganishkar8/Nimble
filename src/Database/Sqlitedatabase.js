@@ -323,6 +323,43 @@ const createTables = async () => {
       isKyc TEXT,
       PRIMARY KEY (loanApplicationId, client_type,address_type)
     )`,
+    `CREATE TABLE IF NOT EXISTS tbl_loanaddressinfo (
+      loanApplicationId TEXT,
+      id TEXT,
+      client_id TEXT,
+      client_type TEXT,
+      address_type TEXT,
+      address_line_1 TEXT,
+      address_line_2 TEXT,
+      landmark TEXT,
+      pincode TEXT,
+      city TEXT,
+      district TEXT,
+      state TEXT,
+      country TEXT,
+      mobile_or_land_line_number TEXT,
+      email_id TEXT,
+      address_ownership TEXT,
+      owner_details TEXT,
+      owner_name TEXT,
+      is_active TEXT,
+      isKyc TEXT,
+      PRIMARY KEY (loanApplicationId, client_type,address_type)
+    )`,
+    `CREATE TABLE IF NOT EXISTS tbl_loanbankdetails (
+      loanApplicationId TEXT,
+      client_id TEXT,
+      client_type TEXT,
+      account_type TEXT,
+      account_holder_name TEXT,
+      ifsc_code TEXT,
+      bank_name TEXT,
+      branch_name TEXT,
+      account_number TEXT,
+      mobile_number TEXT,
+      upi_id TEXT,
+      PRIMARY KEY (loanApplicationId, client_type)
+    )`,
     // Add more CREATE TABLE queries for other tables...
   ];
 
