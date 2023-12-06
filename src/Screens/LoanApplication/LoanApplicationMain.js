@@ -465,6 +465,22 @@ const LoanApplicationMain = (props, { navigation }) => {
             global.CLIENTTYPE = 'APPL';
             await getClientID(global.CLIENTTYPE);
             props.navigation.replace('LoanDemographicBusinessDetail');
+        } else if (item.pageCode == 'DMGRC_APPL_BSN_ADDR_DTLS') {
+            global.CLIENTTYPE = 'APPL';
+            await getClientID(global.CLIENTTYPE);
+            props.navigation.replace('LoanAddressList');
+        } else if (item.pageCode == 'DMGRC_APPL_GST_DTLS') {
+            global.CLIENTTYPE = 'APPL';
+            await getClientID(global.CLIENTTYPE);
+            props.navigation.replace('LoanDemographicsGSTDetails');
+        } else if (item.pageCode == 'DMGRC_APPL_FNCL_DTLS') {
+            global.CLIENTTYPE = 'APPL';
+            await getClientID(global.CLIENTTYPE);
+            props.navigation.replace('LoanDemographicsFinancialDetails');
+        } else if (item.pageCode == 'DMGRC_APPL_BNK_DTLS') {
+            global.CLIENTTYPE = 'APPL';
+            await getClientID(global.CLIENTTYPE);
+            props.navigation.replace('BankList');
         }
         //}
 

@@ -1679,6 +1679,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
               />
             </View>
           )}
+
           {FatherNameVisible && (
             <View
               style={{

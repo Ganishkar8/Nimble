@@ -176,7 +176,10 @@ export const language = [
       str_available: 'Available',
       str_notavailable: 'Not Available',
       str_addressdetail: 'Address Details',
+      str_baddressdetail: 'Business Address Details (Optional)',
+      str_bankdetail: 'Bank Details (Optional)',
       str_addaddressbutton: 'Add Address',
+      str_addbankdetailsbutton: 'Bank Details',
       str_fileName: 'File Name',
       str_time: 'Time',
       str_geolocation: 'Geo Location',
@@ -239,6 +242,7 @@ export const language = [
       str_totavgmntincome: 'Total Average Monthly Income',
       str_totavgmntexpenses: 'Total Average Monthly Expenses',
       str_familydetails: 'Family Details',
+      str_accoutnnonotmatching: 'Account Number and Confirm Account Number Not Matching',
     },
 
     ta: {

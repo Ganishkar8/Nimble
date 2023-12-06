@@ -30,6 +30,10 @@ import LoanDemographicsFinancialDetails from '../Screens/Application/Application
 import LoanDemographicFamilyDetails from '../Screens/Application/ApplicationInitiation/LoanDemographicFamilyDetails';
 import FamilyDetailList from '../Screens/Application/ApplicationInitiation/FamilyDetailList';
 import LoanDemographicBusinessDetail from '../Screens/Application/ApplicationInitiation/LoanDemographicBusinessDetail';
+import LoanAddressList from '../Screens/Application/LoanAddress/LoanAddressList';
+import LoanAddressDetails from '../Screens/Application/LoanAddress/LoanAddressDetails';
+import BankList from '../Screens/Application/BankDetails/BankList';
+import BankDetailsScreen from '../Screens/Application/BankDetails/BankDetailsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -208,6 +212,30 @@ export default HomeStack = () => {
       <Stack.Screen
         name="LoanDemographicBusinessDetail"
         component={LoanDemographicBusinessDetail}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="LoanAddressList"
+        component={LoanAddressList}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="LoanAddressDetails"
+        component={LoanAddressDetails}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="BankList"
+        component={BankList}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="BankDetailsScreen"
+        component={BankDetailsScreen}
         options={{ headerShown: false, tabBarVisible: false }}
       />
 
