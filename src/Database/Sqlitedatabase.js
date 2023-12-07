@@ -426,6 +426,16 @@ const createTables = async () => {
       dmsId TEXT,
       PRIMARY KEY (loanApplicationId, client_type,client_id)
     )`,
+    `CREATE TABLE IF NOT EXISTS tbl_finexpdetails (
+      loanApplicationId TEXT,
+      client_id TEXT,
+      client_type TEXT,
+      id TEXT,
+      usercode TEXT,
+      incomeLabel TEXT,
+      Amount TEXT,
+      PRIMARY KEY (loanApplicationId,client_id, client_type,usercode,incomeLabel)
+    )`,
     // Add more CREATE TABLE queries for other tables...
   ];
 
