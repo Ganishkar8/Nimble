@@ -573,7 +573,7 @@ const LoanDemographicFamilyDetails = (props) => {
                 setRelationTypeDisable(true);
             }
             if (value.isCaptionChange) {
-                setRelationTypeCaption(value[0].fieldCaptionChange)
+                setRelationTypeCaption(value.fieldCaptionChange)
             }
         });
 

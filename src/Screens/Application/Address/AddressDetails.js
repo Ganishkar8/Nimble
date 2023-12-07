@@ -163,7 +163,8 @@ const AddressDetails = (props, { navigation }) => {
     props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
     getSystemCodeDetail()
-    getExistingData()
+    makeSystemMandatoryFields();
+    getExistingData();
 
 
     return () => {

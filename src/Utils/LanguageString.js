@@ -59,6 +59,7 @@ export const language = [
       str_leadtype: 'LEAD TYPE',
       str_phtcapture: 'Photo capture and geo tagging',
       str_capturecustpht: 'CAPTURE CUSTOMER PHOTO',
+      str_capturepassbookimg: 'CAPTURE PASSBOOK IMAGE',
       str_gpslocation: 'GPS LOCATION',
       str_preview: 'Preview',
       str_retake: 'Re-Take/Upload',

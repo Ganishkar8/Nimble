@@ -456,6 +456,10 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
 
   }
 
+  const onGoBack = () => {
+    props.navigation.replace('LoanApplicationMain', { fromScreen: 'LoanGSTDetails' })
+  }
+
   return (
     // enclose all components in this View tag
     <SafeAreaView
@@ -487,6 +491,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
             <HeadComp
               textval={language[0][props.language].str_loandemographics}
               props={props}
+              onGoBack={onGoBack}
             />
           </View>
           <ChildHeadComp

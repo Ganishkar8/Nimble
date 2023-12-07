@@ -212,7 +212,7 @@ const LoanAddressDetails = (props, { navigation }) => {
     }
 
     const getExistingAddressData = (loanAppId, id) => {
-        tbl_loanaddressinfo.getAllLoanAddressDetailsForLoanIDAndID('123', id.toString())
+        tbl_loanaddressinfo.getAllLoanAddressDetailsForLoanIDAndID(loanAppId, id.toString())
             .then(data => {
                 if (global.DEBUG_MODE) console.log('Address Detail:', data);
                 setAddressID(data[0].id)
@@ -229,7 +229,7 @@ const LoanAddressDetails = (props, { navigation }) => {
                 setEmail(data[0].email_id)
                 //spinner
                 setAddressTypeLabel(data[0].address_type)
-                if(global.DEBUG_MODE) console.log("LoanAddressType::"+data[0].address_type)
+                if (global.DEBUG_MODE) console.log("LoanAddressType::" + data[0].address_type)
                 setAddressOwnerTypeLabel(data[0].address_ownership)
                 setOwnerDetailsLabel(data[0].owner_details)
                 if (data[0].isKyc === "1") {
@@ -715,7 +715,7 @@ const LoanAddressDetails = (props, { navigation }) => {
 
     const insertData = (id) => {
         tbl_loanaddressinfo.insertLoanAddress(
-            '123',
+            global.LOANAPPLICATIONID,
             id,
             global.CLIENTID,
             global.CLIENTTYPE,

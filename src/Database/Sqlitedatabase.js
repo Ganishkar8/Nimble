@@ -377,6 +377,7 @@ const createTables = async () => {
       PRIMARY KEY (loanApplicationId, client_type,address_type)
     )`,
     `CREATE TABLE IF NOT EXISTS tbl_loanbankdetails (
+      id TEXT,
       loanApplicationId TEXT,
       client_id TEXT,
       client_type TEXT,
@@ -388,7 +389,42 @@ const createTables = async () => {
       account_number TEXT,
       mobile_number TEXT,
       upi_id TEXT,
-      PRIMARY KEY (loanApplicationId, client_type)
+      dmsId TEXT,
+      accountUsedFor TEXT,
+      verificationStatus TEXT,
+      PRIMARY KEY (loanApplicationId, client_type,account_type)
+    )`,
+    `CREATE TABLE IF NOT EXISTS tbl_loanbusinessDetail (
+      loanApplicationId TEXT,
+      id TEXT,
+      client_id TEXT,
+      client_type TEXT,
+      customerSubCatg TEXT,
+      enterpriseShopName TEXT,
+      udyamRegNum TEXT,
+      dateofReg TEXT,
+      dateofIncorp TEXT,
+      dateofBusiness TEXT,
+      year TEXT,
+      month TEXT,
+      industryType TEXT,
+      industryLine TEXT,
+      companyType TEXT,
+      enterpriseType TEXT,
+      businessLocation TEXT,
+      noofEmployees TEXT,
+      operatingdays TEXT,
+      operatingtiming TEXT,
+      bookKeepingStatus TEXT,
+      homeBasedBusiness TEXT,
+      custTransMode TEXT,
+      timeByPromoter TEXT,
+      npmRate TEXT,
+      purchaseFrequency TEXT,
+      typeofPurchase TEXT,
+      salesFrequency TEXT,
+      dmsId TEXT,
+      PRIMARY KEY (loanApplicationId, client_type,client_id)
     )`,
     // Add more CREATE TABLE queries for other tables...
   ];

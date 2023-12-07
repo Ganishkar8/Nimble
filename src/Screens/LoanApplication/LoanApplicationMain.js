@@ -194,8 +194,10 @@ const LoanApplicationMain = (props, { navigation }) => {
                     getDisplayerOrder(data[0].workflow_id);
                     setWorkflowIDLabel(data[0].workflow_id);
                 } else {
-                    getDisplayerOrder(props.mobilecodedetail.wfConfig1s[0].wfId);
-                    setWorkflowIDLabel(props.mobilecodedetail.wfConfig1s[0].wfId);
+                    // getDisplayerOrder(props.mobilecodedetail.wfConfig1s[0].wfId);
+                    getDisplayerOrder(126);
+                    //setWorkflowIDLabel(props.mobilecodedetail.wfConfig1s[0].wfId);
+                    setWorkflowIDLabel(126);
                 }
 
             })
@@ -236,6 +238,7 @@ const LoanApplicationMain = (props, { navigation }) => {
         setModuleOrder(moduleOrder);
         setPageOrder(pageOrder);
         getProcessSubStage(moduleOrder, pageOrder, workFlowID);
+
 
     }
 
