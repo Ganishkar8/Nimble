@@ -39,6 +39,7 @@ import ModalContainer from '../../../Components/ModalContainer';
 import BusinessIncome from './Financial/BusinessIncome';
 import ImageComp from '../../../Components/ImageComp';
 import { Item } from 'react-native-paper/lib/typescript/components/Drawer/Drawer';
+import tbl_finexpdetails from '../../../Database/Table/tbl_finexpdetails';
 
 const LoanDemographicsFinancialDetails = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -107,8 +108,7 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
   const [selectedValue, setSelectedValue] = useState(false);
   const [selectedValue1, setSelectedValue1] = useState(false);
   const [AvailableCaption, setAvailableCaption] = useState('Available');
-  const [NotAvailableCaption, setNotAvailableCaption] =
-    useState('Not Available');
+  const [NotAvailableCaption, setNotAvailableCaption] = useState('Not Available');
 
   useEffect(() => {
     props.navigation
@@ -116,12 +116,62 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
       ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     makeSystemMandatoryFields();
     pickerData();
+    getSavedData()
 
     return () =>
       props.navigation
         .getParent()
         ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
   }, [navigation]);
+
+  const getSavedData = () => {
+    tbl_finexpdetails.getFinExpDetails(global.LOANAPPLICATIONID,
+      global.CLIENTID,
+      global.CLIENTTYPE, 'BUSINESS_INCOME').then(data => {
+        if (global.DEBUG_MODE) console.log('BUSINESS_INCOME Detail:', JSON.stringify(data));
+        setIncomeList(data)
+      })
+      .catch(error => {
+        if (global.DEBUG_MODE) console.error('Error fetching BUSINESS_INCOME details:', error);
+      });
+    tbl_finexpdetails.getFinExpDetails(global.LOANAPPLICATIONID,
+      global.CLIENTID,
+      global.CLIENTTYPE, 'OTHER_SOURCE_INCOME').then(data => {
+        if (global.DEBUG_MODE) console.log('OTHER_SOURCE_INCOME Detail:', JSON.stringify(data));
+        setotherIncomeList(data)
+      })
+      .catch(error => {
+        if (global.DEBUG_MODE) console.error('Error fetching OTHER_SOURCE_INCOME details:', error);
+      });
+    tbl_finexpdetails.getFinExpDetails(global.LOANAPPLICATIONID,
+      global.CLIENTID,
+      global.CLIENTTYPE, 'BUSINESS_EXPENSES').then(data => {
+        if (global.DEBUG_MODE) console.log('BUSINESS_EXPENSES Detail:', JSON.stringify(data));
+        setExpenseList(data)
+      })
+      .catch(error => {
+        if (global.DEBUG_MODE) console.error('Error fetching BUSINESS_EXPENSES details:', error);
+      });
+    tbl_finexpdetails.getFinExpDetails(global.LOANAPPLICATIONID,
+      global.CLIENTID,
+      global.CLIENTTYPE, 'OTHER_SOURCE_EXPENSES').then(data => {
+        if (global.DEBUG_MODE) console.log('OTHER_SOURCE_EXPENSES Detail:', JSON.stringify(data));
+        setotherExpenseList(data)
+      })
+      .catch(error => {
+        if (global.DEBUG_MODE) console.error('Error fetching OTHER_SOURCE_EXPENSES details:', error);
+      });
+
+      tbl_finexpdetails.getFinExpDetailsAll(global.LOANAPPLICATIONID,
+        global.CLIENTID,
+        global.CLIENTTYPE).then(data => {
+          if (global.DEBUG_MODE) console.log('All Detail:', JSON.stringify(data));
+          setotherExpenseList(data)
+        })
+        .catch(error => {
+          if (global.DEBUG_MODE) console.error('Error fetching OTHER_SOURCE_EXPENSES details:', error);
+        });
+  }
 
   const updateDataInArray = (idToUpdate, updatedProperties) => {
     const updatedData = [...data];
@@ -137,6 +187,10 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
     }
     console.log('data:', updatedData);
   };
+
+  const onGoBack = () => {
+    props.navigation.goBack();
+  }
 
   const pickerData = async () => {
     tbl_SystemCodeDetails
@@ -370,6 +424,91 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
       </View >
     )
 
+  }
+
+  const saveIncome = () => {
+    //alert(JSON.stringify("IncomeList::"+incomeList+'\n'+"OtherIncomeList::"+otherinco))
+    console.log('IncomeSaveData::', "IncomeList::" + JSON.stringify(incomeList) + '\n' + "OtherIncomeList::" + JSON.stringify(otherIncomeList));
+    console.log('IncomeSaveDataTotal::', "TotalIncome::" + totalBusineesIncome + '\n' + "TotalOtherIncome::" + totalOtherIncome);
+    console.log('ExpenseSaveData::', "ExpenseList::" + JSON.stringify(expenseList) + '\n' + "OtherExpenseList::" + JSON.stringify(otherExpenseList));
+    console.log('ExpenseSaveDataTotal::', "TotalExpense::" + totalBusineesExpenses + '\n' + "TotalOtherExpense::" + totalOtherExpense);
+    var AvgMonthlyIncome = parseInt(totalBusineesIncome) + parseInt(totalOtherIncome)
+    var AvgMonthlyExpense = parseInt(totalBusineesExpenses) + parseInt(totalOtherExpense)
+    console.log('IncomeSize::', incomeList.length);
+    const mergedIncomeArray = [...incomeList, ...otherIncomeList];
+    const mergedExpenseArray = [...expenseList, ...otherExpenseList];
+    const mergedArray = [...incomeList, ...otherIncomeList, ...expenseList, ...otherExpenseList];
+    console.log('MergedIncomeArray::', mergedIncomeArray);
+    console.log('MergedExpenseArray::', mergedExpenseArray);
+    console.log('MergedTotalArray::', mergedArray);
+    const incomeOfObjects = [];
+    for (let i = 0; i < mergedIncomeArray.length; i++) {
+      incomeOfObjects.push({
+        "incomeType": mergedIncomeArray[i].usercode,
+        "incomeAmount": parseInt(mergedIncomeArray[i].Amount)
+      })
+    }
+    const expenseOfObjects = [];
+    for (let i = 0; i < mergedExpenseArray.length; i++) {
+      expenseOfObjects.push({
+        "incomeType": mergedExpenseArray[i].usercode,
+        "incomeAmount": parseInt(mergedExpenseArray[i].Amount)
+      })
+    }
+    console.log('IncomeOfObjects::', incomeOfObjects);
+    console.log('ExpenseOfObjects::', expenseOfObjects);
+    for (let i = 0; i < mergedArray.length; i++) {
+      tbl_finexpdetails.insertIncExpDetails(
+        global.LOANAPPLICATIONID,
+        global.CLIENTID,
+        global.CLIENTTYPE,
+        '',
+        mergedArray[i].usercode,
+        mergedArray[i].incomeLabel,
+        mergedArray[i].Amount,
+      ).then(result => {
+        if (global.DEBUG_MODE) console.log('Inserted Financial detail:', result);
+      })
+        .catch(error => {
+          if (global.DEBUG_MODE) console.error('Error Inserting Financial detail:', error);
+        });
+    }
+    // const appDetails = {
+    //   "earningType": 'Mon',
+    //   "earningFrequency": 'D',
+    //   "totalBusinessIncome": totalBusineesIncome,
+    //   "totalOtherSourceIncome": totalOtherIncome,
+    //   "totalAvgMonthlyIncome": AvgMonthlyIncome,
+    //   "totalBusinessExpense": totalBusineesExpenses,
+    //   "totalOtherSourceExpense": totalOtherExpense,
+    //   "totalAvgMonthlyExpense": AvgMonthlyExpense,
+    //   "createdBy": global.USERID,
+    //   "createdDate": new Date(),
+    //   "modifiedBy": global.USERID,
+    //   "modifiedDate": new Date(),
+    //   "clientIncomeDetails": incomeOfObjects,
+    //   "clientExpenseDetails": expenseOfObjects
+    // }
+    // console.log('AppDetails::', appDetails);
+    // const baseURL = '8901';
+    //   setLoading(true);
+    //   apiInstancelocal(baseURL)
+    //    // .post(`api/v2/loan-demographics/241/financialDetail`, appDetails)
+    //     .put(`api/v2/loan-demographics/financialDetail/6`, appDetails)
+    //     .then(async response => {
+    //       // Handle the response data
+    //       if (global.DEBUG_MODE) console.log('FinancialResponse::' + JSON.stringify(response.data),);
+    //       setLoading(false);
+    //     })
+    //     .catch(error => {
+    //       // Handle the error
+    //       if (global.DEBUG_MODE) console.log('FinancialError' + JSON.stringify(error.response));
+    //       setLoading(false);
+    //       if (error.response.data != null) {
+    //        // setApiError(error.response.data.message);
+    //         //setErrorModalVisible(true)
+    //       }
+    //     });
   }
 
   return (
@@ -821,6 +960,13 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
 
             </View>
           }
+          <ButtonViewComp
+            textValue={language[0][props.language].str_next.toUpperCase()}
+            textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
+            viewStyle={Commonstyles.buttonView}
+            innerStyle={Commonstyles.buttonViewInnerStyle}
+            handleClick={saveIncome}
+          />
 
 
 
