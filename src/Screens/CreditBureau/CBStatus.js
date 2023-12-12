@@ -8,6 +8,7 @@ import {
     ScrollView,
     TouchableOpacity,
     SafeAreaView,
+    BackHandler
 } from 'react-native';
 
 //redux
@@ -22,6 +23,13 @@ import Colors from '../../Utils/Colors';
 import TextComp from '../../Components/TextComp';
 import LinearGradient from 'react-native-linear-gradient';
 import { it } from 'react-native-paper-dates';
+import HeadComp from '../../Components/HeadComp';
+import ButtonViewComp from '../../Components/ButtonViewComp';
+import apiInstance from '../../Utils/apiInstance';
+import ErrorModal from '../../Components/ErrorModal';
+import { useIsFocused } from '@react-navigation/native';
+import Commonstyles from '../../Utils/Commonstyles';
+import Common from '../../Utils/Common';
 
 const data = [
 
@@ -38,11 +46,28 @@ const CBStatus = (props, { navigation }) => {
 
     const [cbResponse, setCBResponse] = useState(data);
     const [refreshFlatlist, setRefreshFlatList] = useState(false);
-
+    const isScreenVisible = useIsFocused();
+    const [errorModalVisible, setErrorModalVisible] = useState(false);
+    const [apiError, setApiError] = useState('');
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
+        return () => {
+            props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
+            backHandler.remove();
+        }
+    }, [props.navigation, isScreenVisible]);
 
-    }, []);
+    const handleBackButton = () => {
+        onGoBack();
+        return true; // Prevent default back button behavior
+    };
+
+    const onGoBack = () => {
+        props.navigation.goBack();
+    }
 
     const toggleBottomNavigationView = () => {
         //Toggling the visibility state of the bottom sheet
@@ -64,6 +89,53 @@ const CBStatus = (props, { navigation }) => {
         setCBResponse(fiterPosition)
         setRefreshFlatList(!refreshFlatlist)
     }
+
+    const updateLoanStatus = () => {
+
+        var module = ''; var page = '';
+
+        module = 'CB_BRE_DCSN';
+        page = 'CB_CHK_BRE_DCSN';
+
+
+        const appDetails = {
+            "loanApplicationId": global.LOANAPPLICATIONID,
+            "loanWorkflowStage": "LN_APP_INITIATION",
+            "subStageCode": "CB_CHK",
+            "moduleCode": module,
+            "pageCode": page,
+            "status": "Completed"
+        }
+        const baseURL = '8901';
+        setLoading(true);
+        apiInstance(baseURL)
+            .post(`/api/v2/loan-application-status/updateStatus`, appDetails)
+            .then(async response => {
+                // Handle the response data
+                if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
+                setLoading(false);
+                global.COMPLETEDSUBSTAGE = 'LN_DEMGRP';
+                global.COMPLETEDMODULE = 'CB_BRE_DCSN';
+                global.COMPLETEDPAGE = 'CB_CHK_BRE_DCSN';
+
+                props.navigation.replace('LoanApplicationMain', { fromScreen: 'CBStatus' })
+
+            })
+            .catch(error => {
+                // Handle the error
+                if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
+                setLoading(false);
+                if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
+
+    };
+
+    const closeErrorModal = () => {
+        setErrorModalVisible(false);
+    };
 
     const listView = ({ item }) => {
 
@@ -216,6 +288,15 @@ const CBStatus = (props, { navigation }) => {
                     keyExtractor={(item, index) => index.toString()}
                 />
             </View>
+            <View style={styles.fab}>
+                <ButtonViewComp
+                    textValue={language[0][props.language].str_next.toUpperCase()}
+                    textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
+                    viewStyle={Commonstyles.buttonView}
+                    innerStyle={Commonstyles.buttonViewInnerStyle}
+                    handleClick={updateLoanStatus}
+                />
+            </View>
         </View>
 
     );
@@ -262,6 +343,13 @@ const styles = StyleSheet.create({
         height: 150,
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
+    }, fab: {
+        position: 'absolute',
+        margin: 0,
+        right: 0,
+        bottom: 12,
+        width: '100%',
+
     },
 
 });

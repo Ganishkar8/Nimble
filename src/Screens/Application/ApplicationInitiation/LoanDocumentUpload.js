@@ -35,30 +35,32 @@ import tbl_bankdetails from '../../../Database/Table/tbl_bankdetails';
 import tbl_loanApplication from '../../../Database/Table/tbl_loanApplication';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import tbl_loanaddressinfo from '../../../Database/Table/tbl_loanaddressinfo';
+import tbl_nomineeDetails from '../../../Database/Table/tbl_nomineeDetails';
 
-const BankList = (props, { navigation }) => {
+const LoanDocumentUpload = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
-    const [bankDetails, setBankDetails] = useState([]);
-    const [addressID, setAddressID] = useState('');
+    const [nomineeDetails, setNomineeDetails] = useState([]);
+    const [nomineeID, setNomineeID] = useState('');
     const isScreenVisible = useIsFocused();
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const [apiError, setApiError] = useState('');
     const [refreshFlatlist, setRefreshFlatList] = useState(false);
-    const [processModule, setProcessModule] = useState(props.mobilecodedetail.processModule);
-    const [processModuleLength, setProcessModuleLength] = useState(0);
+
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-    const [kycManual, setKYCManual] = useState('0');
+
     const [errMsg, setErrMsg] = useState('');
     const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
     const [communicationAvailable, setCommunicationAvailable] = useState(false);
     const showBottomSheet = () => setBottomErrorSheetVisible(true);
     const hideBottomSheet = () => setBottomErrorSheetVisible(false);
 
+    const [documentList, setDocumentList] = useState();
+
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
 
-        getBankData()
+        getDocuments();
 
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
@@ -71,13 +73,13 @@ const BankList = (props, { navigation }) => {
         return true; // Prevent default back button behavior
     };
 
-    const getBankData = () => {
+    const getNomineeData = () => {
 
-        tbl_bankdetails.getAllBankDetailsDetailsForLoanID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
+        tbl_nomineeDetails.getAllNomineeDetails(global.LOANAPPLICATIONID)
             .then(data => {
-                if (global.DEBUG_MODE) console.log('Bank Detail:', data);
+                if (global.DEBUG_MODE) console.log('Nominee Detail:', data);
                 if (data !== undefined && data.length > 0) {
-                    setBankDetails(data)
+                    setNomineeDetails(data)
 
                     setRefreshFlatList(!refreshFlatlist)
                 }
@@ -89,109 +91,49 @@ const BankList = (props, { navigation }) => {
 
     const FlatView = ({ item }) => {
 
-        var bg = '';
-
-        if (global.USERTYPEID == 1163) {
-            bg = 'GREY'
-        } else {
-            if (item.isKyc == '1') {
-                bg = 'GREY'
-            }
-        }
         return (
             <View style={{ marginLeft: 10, marginRight: 10 }}>
-                <View>
-                    <Text style={{ fontSize: 14, fontFamily: 'Poppins-SemiBold', marginTop: 5, color: Colors.black }}>
-                        {item.account_holder_name}
-                    </Text>
-                    <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: Colors.black }}>Acc No : {`${item.account_number}`}</Text>
-                    <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: Colors.black }}>IFSC Code : {`${item.ifsc_code}`}</Text>
-                    <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: Colors.black }}>
-                        {Common.getSystemCodeDescription(props.mobilecodedetail.leadSystemCodeDto, 'ACCOUNT_TYPE', item.account_type)}
-                    </Text>
-                    <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: Colors.black }}>{`${item.branch_name}, ${item.bank_name}`}</Text>
-                </View>
-
-                <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
-                    <TouchableOpacity activeOpacity={8} onPress={() => handleClick('edit', item)}>
-                        <View>
-                            <IconButtonViewComp
-                                textValue={'Edit'.toUpperCase()}
-                                textStyle={{
-                                    color: Colors.skyBlue,
-                                    fontSize: 13,
-                                    fontWeight: 500,
-                                }}
-                                viewStyle={{
-                                    width: '100%',
-                                    // height: 50,
-                                    marginTop: 10,
-                                    justifyContent: 'flex-end',
-                                    alignItems: 'center',
-                                }}
-                                innerStyle={{
-                                    width: '100%',
-                                    // height: 50,
-                                    marginTop: 10,
-                                    justifyContent: 'flex-end',
-                                    alignItems: 'center',
-                                }}
-
-                            />
-                        </View>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={{ width: '20%' }} activeOpacity={0.8} onPress={() => {
-
-                        if (global.USERTYPEID == 1163) {
-
-                        } else {
-                            if (item.isKyc != '1') {
-                                handleClick('delete', item)
-                            }
-                        }
-                    }
-                    }>
-                        <View >
-                            <IconButtonViewComp
-                                textValue={'Delete'.toUpperCase()}
-                                textStyle={{
-                                    color: bg == 'GREY' ? Colors.lightgrey : Colors.skyBlue,
-                                    fontSize: 13,
-                                    fontWeight: 500,
-                                }}
-                                viewStyle={{
-                                    width: '100%',
-                                    // height: 50,
-                                    marginTop: 10,
-                                    justifyContent: 'flex-end',
-                                    alignItems: 'center',
-                                }}
-                                innerStyle={{
-                                    width: '100%',
-                                    // height: 50,
-                                    marginTop: 10,
-                                    justifyContent: 'flex-end',
-                                    alignItems: 'center',
-                                }}
-                            />
-                        </View>
-                    </TouchableOpacity>
-                </View>
-
                 <View
                     style={{
-                        borderBottomWidth: 1,
-                        borderBottomColor: '#DFE6EA',
-                        marginVertical: 10,
-                        marginHorizontal: 10,
-                        paddingBottom: 10,
                         width: '100%',
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        flexDirection: 'row',
-                        flexWrap: 'wrap',
-                    }}
-                />
+                    }}>
+                    <View
+                        style={{
+                            width: '90%',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            marginTop: 20,
+                        }}>
+                        <TouchableOpacity style={{ width: '30%' }} onPress={pickDocument} activeOpacity={0}>
+                            <View style={{ width: 40, height: 40, backgroundColor: '#DBDBDB', borderRadius: 10, justifyContent: 'center', alignItems: 'center' }}>
+                                <Image
+                                    source={require('../../../Images/cloudcomputing.png')}
+                                    style={{ width: 28, height: 22 }}
+                                />
+                                {/* <FontAwesome6 name="cloud-arrow-up" size={25} color="#b5b6b6" /> */}
+                            </View>
+                        </TouchableOpacity>
+
+                        <Text style={{ width: '50%', color: Colors.dimmText, textAlign: 'left', fontFamily: 'PoppinsRegular' }}>
+                            {item.documentCategoryName}
+                        </Text>
+
+                        {item.dsmId &&
+                            <TouchableOpacity style={{ width: '20%', alignItems: 'flex-end' }}
+                                onPress={() => {
+                                    //showImageBottomSheet();
+                                }}>
+                                <Entypo
+                                    name="dots-three-vertical"
+                                    size={25}
+                                    color={Colors.darkblue}
+                                />
+                            </TouchableOpacity>
+                        }
+
+                    </View>
+                </View>
             </View>
         )
 
@@ -199,13 +141,11 @@ const BankList = (props, { navigation }) => {
 
     const handleClick = (value, data) => {
         if (value === 'edit') {
-            props.navigation.navigate('BankDetailsScreen', { bankType: data })
+            props.navigation.navigate('LoanNomineeDetails', { bankType: data })
         } else if (value === 'new') {
-            props.navigation.navigate('BankDetailsScreen', { bankType: 'new' })
+            props.navigation.navigate('LoanNomineeDetails', { bankType: 'new' })
         } else if (value === 'delete') {
-            //setAddressID(data.id);
-            //setDeleteModalVisible(true);
-            deletedata(data.client_id)
+            deletedata(data.id)
         }
     }
 
@@ -215,13 +155,13 @@ const BankList = (props, { navigation }) => {
         const baseURL = '8901';
         setLoading(true);
         apiInstancelocal(baseURL)
-            .delete(`/api/v2/profile-short/address-details/${addressID}`)
+            .delete(`/api/v2/profile-short/address-details/${nomineeID}`)
             .then(async response => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log('DeleteAddressResponse::' + JSON.stringify(response.data),);
 
                 setLoading(false);
-                deletedata(addressID);
+                deletedata(nomineeID);
             })
             .catch(error => {
                 // Handle the error
@@ -235,15 +175,15 @@ const BankList = (props, { navigation }) => {
 
     };
 
-    const deletedata = async (clientType) => {
+    const deletedata = async (id) => {
 
         const deletePromises = [
-            tbl_bankdetails.deleteBankDataBasedOnLoanIDAndType('123', clientType)
+            tbl_bankdetails.deleteBankDataBasedOnLoanIDAndType(global.LOANAPPLICATIONID, id)
         ];
         await Promise.all(deletePromises);
 
-        const newArray = bankDetails.filter(item => item.loanApplicationId !== '123');
-        setBankDetails(newArray);
+        const newArray = nomineeDetails.filter(item => item.id !== id);
+        setNomineeDetails(newArray);
         setRefreshFlatList(!refreshFlatlist);
 
     }
@@ -263,16 +203,8 @@ const BankList = (props, { navigation }) => {
 
         var module = ''; var page = '';
 
-        if (global.CLIENTTYPE == 'APPL') {
-            module = 'LN_DMGP_APLCT';
-            page = 'DMGRC_APPL_BNK_DTLS';
-        } else if (global.CLIENTTYPE == 'CO-APPL') {
-            module = 'LN_DMGP_COAPLCT';
-            page = 'DMGRC_COAPPL_BNK_DTLS';
-        } else if (global.CLIENTTYPE == 'GRNTR') {
-            module = 'LN_DMGP_GRNTR';
-            page = 'DMGRC_GRNTR_BNK_DTLS';
-        }
+        module = 'NMNE_DTLS';
+        page = 'NMN_DTLS';
 
         const appDetails = {
             "loanApplicationId": global.LOANAPPLICATIONID,
@@ -291,17 +223,10 @@ const BankList = (props, { navigation }) => {
 
                 if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
-                if (global.CLIENTTYPE == 'APPL') {
-                    global.COMPLETEDMODULE = 'LN_DMGP_APLCT';
-                    global.COMPLETEDPAGE = 'DMGRC_APPL_BNK_DTLS';
-                } else if (global.CLIENTTYPE == 'CO-APPL') {
-                    global.COMPLETEDMODULE = 'LN_DMGP_COAPLCT';
-                    global.COMPLETEDPAGE = 'DMGRC_COAPPL_BNK_DTLS';
-                } else if (global.CLIENTTYPE == 'GRNTR') {
-                    global.COMPLETEDSUBSTAGE = 'BRE';
-                    global.COMPLETEDMODULE = 'LN_DMGP_GRNTR';
-                    global.COMPLETEDPAGE = 'DMGRC_GRNTR_BNK_DTLS';
-                }
+
+                global.COMPLETEDMODULE = 'NMNE_DTLS';
+                global.COMPLETEDPAGE = 'NMN_DTLS';
+
 
                 props.navigation.replace('LoanApplicationMain', { fromScreen: 'BankList' });
 
@@ -319,31 +244,29 @@ const BankList = (props, { navigation }) => {
 
     };
 
-    const approveManualKYC = (status) => {
+    const getDocuments = () => {
+
 
         const appDetails = {
-            "kycType": "001",
-            "kycValue": "123456789012",
-            "kycDmsId": 100,
-            "kycExpiryDate": null,
-            "manualKycStatus": status,
-            "manualKycApprovedBy": "Muthu"
+            "loanApplicationId": global.LOANAPPLICATIONID,
+            "clientType": global.CLIENTTYPE,
+            "workflowStage": "LN_APP_INITIATION"
         }
-        const baseURL = '8901';
+        const baseURL = '8096';
         setLoading(true);
         apiInstancelocal(baseURL)
-            .put(`api/v2/profile-short/manualKyc/${global.CLIENTID}`, appDetails)
+            .post(`/api/v1/stagewise-document-check-configurations/stage-wise/documents`, appDetails)
             .then(async response => {
                 // Handle the response data
-                if (global.DEBUG_MODE) console.log('ApproveKYCApiResponse::' + JSON.stringify(response.data),);
-                setLoading(false);
-                props.navigation.replace('LoanApplicationMain', { fromScreen: 'AddressDetail' });
 
+                if (global.DEBUG_MODE) console.log('DocumentApiResponse::' + JSON.stringify(response.data),);
+                setLoading(false);
+                setDocumentList(response.data);
 
             })
             .catch(error => {
                 // Handle the error
-                if (global.DEBUG_MODE) console.log('ApproveKYCApiResponse' + JSON.stringify(error.response));
+                if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
                 setLoading(false);
                 if (error.response.data != null) {
                     setApiError(error.response.data.message);
@@ -353,33 +276,13 @@ const BankList = (props, { navigation }) => {
 
     };
 
+
     const onGoBack = () => {
-        props.navigation.replace('LoanApplicationMain', { fromScreen: 'BankList' })
+        props.navigation.replace('LoanApplicationMain', { fromScreen: 'LoanNomineeList' })
     }
 
     const closeErrorModal = () => {
         setErrorModalVisible(false);
-    };
-
-    const validate = () => {
-        var flag = false;
-        var i = 1;
-        var errorMessage = '';
-
-        if (!communicationAvailable) {
-            errorMessage =
-                errorMessage +
-                i +
-                ')' +
-                ' ' +
-                "Please Add Communication Address" +
-                '\n';
-            i++;
-            flag = true;
-        }
-
-        setErrMsg(errorMessage);
-        return flag;
     };
 
     const closeDeleteModal = () => {
@@ -414,28 +317,18 @@ const BankList = (props, { navigation }) => {
                     justifyContent: 'center',
                 }}>
                 <HeadComp
-                    textval={language[0][props.language].str_loanDemographics}
+                    textval={language[0][props.language].str_loannomineedtls}
                     props={props}
                     onGoBack={onGoBack}
                 />
             </View>
 
             <ChildHeadComp
-                textval={global.CLIENTTYPE == 'APPL' ? language[0][props.language].str_applicantdetails : global.CLIENTTYPE == 'CO-APPL' ? language[0][props.language].str_coapplicantdetails : language[0][props.language].str_guarantordetails}
+                textval={language[0][props.language].str_nomineeDetails}
             />
 
             <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
                 <View style={{ width: '90%', marginTop: 3 }}>
-                    <TextComp
-                        textStyle={{
-                            color: Colors.mediumgrey,
-                            fontSize: 15,
-                            fontFamily: 'Poppins-Medium'
-                        }}
-                        textVal={
-                            language[0][props.language].str_bankdetail
-                        }></TextComp>
-
                     <ProgressComp progressvalue={1} textvalue="6 of 6" />
                 </View>
             </View>
@@ -446,7 +339,7 @@ const BankList = (props, { navigation }) => {
                         icon={'+'}
                         textValue={language[0][
                             props.language
-                        ].str_addbankdetailsbutton.toUpperCase()}
+                        ].str_nomineeDetails.toUpperCase()}
                         textStyle={{ color: Colors.skyBlue, fontSize: 13, fontWeight: 500 }}
                         viewStyle={Commonstyles.buttonView}
                         innerStyle={Commonstyles.buttonViewBorderStyle}
@@ -456,43 +349,20 @@ const BankList = (props, { navigation }) => {
             </TouchableOpacity>
 
             <FlatList
-                data={bankDetails}
+                data={documentList}
                 renderItem={FlatView}
                 extraData={refreshFlatlist}
-                keyExtractor={item => item.loanApplicationId}
+                keyExtractor={(item, index) => index.toString()}
             />
 
 
-            {bankDetails.length > 0 && global.USERTYPEID == 1164 && <ButtonViewComp
+            <ButtonViewComp
                 textValue={language[0][props.language].str_submit.toUpperCase()}
                 textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
                 viewStyle={[Commonstyles.buttonView, { marginBottom: 20 }]}
                 innerStyle={Commonstyles.buttonViewInnerStyle}
                 handleClick={buttonNext}
             />
-            }
-
-            <View style={{ flexDirection: 'row' }}>
-
-                {kycManual == '1' && global.USERTYPEID == 1163 && <ButtonViewComp
-                    textValue={language[0][props.language].str_approve.toUpperCase()}
-                    textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
-                    viewStyle={[Commonstyles.buttonView, { width: '50%', marginBottom: 20 }]}
-                    innerStyle={Commonstyles.buttonViewInnerStyle}
-                    handleClick={() => approveManualKYC('Approved')}
-                />
-                }
-
-                {kycManual == '1' && global.USERTYPEID == 1163 && <ButtonViewComp
-                    textValue={language[0][props.language].str_reject.toUpperCase()}
-                    textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
-                    viewStyle={[Commonstyles.buttonView, { width: '50%', marginBottom: 20 }]}
-                    innerStyle={Commonstyles.buttonViewInnerStyle}
-                    handleClick={() => { approveManualKYC('Rejected') }}
-                />
-                }
-
-            </View>
 
 
 
@@ -515,4 +385,4 @@ const mapDispatchToProps = dispatch => ({
     languageAction: item => dispatch(languageAction(item)),
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(BankList);
+export default connect(mapStateToProps, mapDispatchToProps)(LoanDocumentUpload);

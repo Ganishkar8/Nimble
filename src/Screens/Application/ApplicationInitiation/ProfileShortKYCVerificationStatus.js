@@ -779,9 +779,6 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     props.navigation.navigate('PreviewImage', { imageName: fileName, imageUri: imageUri })
   }
 
-  const imageDetail = () => {
-
-  }
 
   const reTakePhoto = () => {
     pickDocument();

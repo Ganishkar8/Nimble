@@ -399,6 +399,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           setCustCatgLabel(data[0].customer_category)
           setCustomerSubCategoryLabel(data[0].customer_subcategory)
           setWorkflowIDLabel(parseInt(data[0].workflow_id))
+          callLoanAmount(parseInt(data[0].workflow_id));
           setLoanAmount(data[0].loan_amount)
           setLoanPurposeLabel(data[0].loan_purpose);
           getProductID(data[0].loan_type)
@@ -1069,7 +1070,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
               "kycType3ExpiryDate": expiryDate3.length > 0 ? Common.convertYearDateFormat(expiryDate3) : '',
               "kycTypeId4": KycType4Label,
               "kycIdValue4": kycID4,
-              "kycType4ExpiryDate": expiryDate1.length > 0 ? Common.convertYearDateFormat(expiryDate4) : '',
+              "kycType4ExpiryDate": expiryDate4.length > 0 ? Common.convertYearDateFormat(expiryDate4) : '',
               "udyamRegistrationNumber": URNumber,
               "mobileNumber": mobileNumber,
               "email": Email,
@@ -1082,6 +1083,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
               "isPanVerified": false,
               "dedupeCheck": isDedupeDone,
               "clientAddress": [],
+              "clientBankDetail": [],
             }
           ],
           "isActive": true,
@@ -1783,7 +1785,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
         i++;
         flag = true;
       }
-      else if (global.isMobileVerified.length <= 0 || global.isMobileVerified == '0') {
+      else if (!isMobileVerified) {
         errorMessage =
           errorMessage +
           i +

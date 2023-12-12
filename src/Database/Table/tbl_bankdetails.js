@@ -2,16 +2,16 @@ import databaseInstance from '../DatabaseInstance';
 
 const tableName = 'tbl_loanbankdetails';
 
-const insertBankDetails = (loanApplicationId, client_id, client_type, account_type, account_holder_name, ifsc_code,
-    bank_name, branch_name, account_number, mobile_number, upi_id) => {
+const insertBankDetails = (id, loanApplicationId, client_id, client_type, account_type, account_holder_name, ifsc_code,
+    bank_name, branch_name, account_number, mobile_number, upi_id, dmsId, accountUsedFor, verificationStatus) => {
     const db = databaseInstance.getInstance();
 
     return new Promise((resolve, reject) => {
         db.transaction(tx => {
             tx.executeSql(
-                `INSERT OR REPLACE INTO ${tableName} ( loanApplicationId, client_id, client_type, account_type,account_holder_name, ifsc_code,bank_name,branch_name,account_number,mobile_number,upi_id) VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
-                [loanApplicationId, client_id, client_type, account_type, account_holder_name, ifsc_code,
-                    bank_name, branch_name, account_number, mobile_number, upi_id],
+                `INSERT OR REPLACE INTO ${tableName} (id, loanApplicationId, client_id, client_type, account_type,account_holder_name, ifsc_code,bank_name,branch_name,account_number,mobile_number,upi_id,dmsId,accountUsedFor,verificationStatus) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+                [id, loanApplicationId, client_id, client_type, account_type, account_holder_name, ifsc_code,
+                    bank_name, branch_name, account_number, mobile_number, upi_id, dmsId, accountUsedFor, verificationStatus],
                 (_, result) => {
                     resolve(result);
                 },

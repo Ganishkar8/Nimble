@@ -14,9 +14,10 @@ const TextInputComp = ({
   returnKey,
   handleClick,
   handleReference,
-  length, multilines
+  length, multilines, secureText
 }) => {
   const setValue = txt => {
+
     if (type == 'numeric') {
       if (Common.numberRegex.test(txt)) {
         handleClick(ComponentName, txt);
@@ -37,7 +38,7 @@ const TextInputComp = ({
         editable={!Disable}
         contextMenuHidden={true}
         placeholderTextColor={Colors.lightgrey}
-        secureTextEntry={false}
+        secureTextEntry={secureText}
         keyboardType={type}
         multiline={multilines ? true : false}
         maxLength={length}

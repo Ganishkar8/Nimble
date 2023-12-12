@@ -146,7 +146,7 @@ const LoanApplicationMain = (props, { navigation }) => {
     const [processPageData, setprocessPageData] = useState();
     const [processPage, setprocessPage] = useState(props.mobilecodedetail.processPage);
 
-    const [completedSubStage, setCompletedSubStage] = useState('PRF_SHRT');
+    const [completedSubStage, setCompletedSubStage] = useState(global.COMPLETEDSUBSTAGE);
     const [completedModule, setCompletedModule] = useState(global.COMPLETEDMODULE);
     const [completedPage, setCompletedPage] = useState(global.COMPLETEDPAGE);
     const [subStageOrder, setsubStageOrder] = useState();
@@ -194,8 +194,10 @@ const LoanApplicationMain = (props, { navigation }) => {
                     getDisplayerOrder(data[0].workflow_id);
                     setWorkflowIDLabel(data[0].workflow_id);
                 } else {
-                    getDisplayerOrder(props.mobilecodedetail.wfConfig1s[0].wfId);
-                    setWorkflowIDLabel(props.mobilecodedetail.wfConfig1s[0].wfId);
+                    // getDisplayerOrder(props.mobilecodedetail.wfConfig1s[0].wfId);
+                    getDisplayerOrder(126);
+                    //setWorkflowIDLabel(props.mobilecodedetail.wfConfig1s[0].wfId);
+                    setWorkflowIDLabel(126);
                 }
 
             })
@@ -208,9 +210,21 @@ const LoanApplicationMain = (props, { navigation }) => {
 
         workFlowID = parseInt(workFlowID)
 
+        var substage = global.COMPLETEDSUBSTAGE;
+        var stageId = 1;
+        let subStageOrder = 0;
+        if (substage.length <= 0) {
+            substage = 'PRF_SHRT'
+            global.COMPLETEDSUBSTAGE = 'PRF_SHRT';
+        }
+
         const filteredProcessSubStage = processSubStage.filter((data) => {
-            return data.wfId === workFlowID && (data.subStageCode === global.COMPLETEDSUBSTAGE);
+            return data.wfId === workFlowID && (data.subStageCode === substage);
         })
+        if (filteredProcessSubStage.length > 0) {
+            stageId = filteredProcessSubStage[0].stageId;
+            subStageOrder = filteredProcessSubStage[0].displayOrder;
+        }
 
         const filteredProcessModule = processModule.filter((data) => {
             return data.wfId === workFlowID && (data.moduleCode === global.COMPLETEDMODULE);
@@ -222,11 +236,13 @@ const LoanApplicationMain = (props, { navigation }) => {
 
         let moduleOrder = 0;
         let pageOrder = 0;
+
         if (filteredProcessModule) {
             if (filteredProcessModule.length > 0) {
                 moduleOrder = filteredProcessModule[0].displayOrder;
             }
         }
+
         if (filteredProcessPage) {
             if (filteredProcessPage.length > 0) {
                 pageOrder = filteredProcessPage[0].displayOrder;
@@ -235,7 +251,8 @@ const LoanApplicationMain = (props, { navigation }) => {
 
         setModuleOrder(moduleOrder);
         setPageOrder(pageOrder);
-        getProcessSubStage(moduleOrder, pageOrder, workFlowID);
+        getProcessSubStage(stageId, subStageOrder, moduleOrder, pageOrder, workFlowID);
+
 
     }
 
@@ -259,6 +276,7 @@ const LoanApplicationMain = (props, { navigation }) => {
         if (firstIncompleteData.nestedSubData) {
             if (firstIncompleteData.nestedSubData.length > 0) {
                 let currentPage = firstIncompleteData.nestedSubData[0];
+
                 if (currentPage.pageCode == 'PRF_SHRT_APLCT_BSC_DTLS') {
                     global.CLIENTTYPE = 'APPL';
                     await getClientID(global.CLIENTTYPE);
@@ -307,6 +325,66 @@ const LoanApplicationMain = (props, { navigation }) => {
                     global.CLIENTTYPE = 'GRNTR';
                     await getClientID(global.CLIENTTYPE);
                     props.navigation.replace('AddressMainList');
+                } else if (currentPage.pageCode == 'CB_CHK_CB_RSPNS') {
+                    props.navigation.navigate('CBResponseScreen');
+                } else if (currentPage.pageCode == 'CB_CHK_BRE_DCSN') {
+                    props.navigation.navigate('CBStatus');
+                } else if (currentPage.pageCode == 'DMGRC_APPL_FMLY_DTLS') {
+                    global.CLIENTTYPE = 'APPL';
+                    await getClientID(global.CLIENTTYPE);
+                    props.navigation.replace('FamilyDetailList');
+                } else if (currentPage.pageCode == 'DMGRC_APPL_BSN_DTLS') {
+                    global.CLIENTTYPE = 'APPL';
+                    await getClientID(global.CLIENTTYPE);
+                    props.navigation.replace('LoanDemographicBusinessDetail');
+                } else if (currentPage.pageCode == 'DMGRC_APPL_BSN_ADDR_DTLS') {
+                    global.CLIENTTYPE = 'APPL';
+                    await getClientID(global.CLIENTTYPE);
+                    props.navigation.replace('LoanAddressList');
+                } else if (currentPage.pageCode == 'DMGRC_APPL_GST_DTLS') {
+                    global.CLIENTTYPE = 'APPL';
+                    await getClientID(global.CLIENTTYPE);
+                    props.navigation.replace('LoanDemographicsGSTDetails');
+                } else if (currentPage.pageCode == 'DMGRC_APPL_FNCL_DTLS') {
+                    global.CLIENTTYPE = 'APPL';
+                    await getClientID(global.CLIENTTYPE);
+                    props.navigation.replace('LoanDemographicsFinancialDetails');
+                } else if (currentPage.pageCode == 'DMGRC_APPL_BNK_DTLS') {
+                    global.CLIENTTYPE = 'APPL';
+                    await getClientID(global.CLIENTTYPE);
+                    props.navigation.replace('BankList');
+                } else if (currentPage.pageCode == 'DMGRC_COAPPL_BSN_DTLS') {
+                    global.CLIENTTYPE = 'CO-APPL';
+                    await getClientID(global.CLIENTTYPE);
+                    props.navigation.replace('LoanDemographicBusinessDetail');
+                } else if (currentPage.pageCode == 'DMGRC_COAPPL_BSN_ADDR_DTLS') {
+                    global.CLIENTTYPE = 'CO-APPL';
+                    await getClientID(global.CLIENTTYPE);
+                    props.navigation.replace('LoanAddressList');
+                } else if (currentPage.pageCode == 'DMGRC_COAPPL_FNCL_DTLS') {
+                    global.CLIENTTYPE = 'CO-APPL';
+                    await getClientID(global.CLIENTTYPE);
+                    props.navigation.replace('LoanDemographicsFinancialDetails');
+                } else if (currentPage.pageCode == 'DMGRC_COAPPL_BNK_DTLS') {
+                    global.CLIENTTYPE = 'CO-APPL';
+                    await getClientID(global.CLIENTTYPE);
+                    props.navigation.replace('BankList');
+                } else if (currentPage.pageCode == 'DMGRC_GRNTR_BSN_DTLS') {
+                    global.CLIENTTYPE = 'GRNTR';
+                    await getClientID(global.CLIENTTYPE);
+                    props.navigation.replace('LoanDemographicBusinessDetail');
+                } else if (currentPage.pageCode == 'DMGRC_GRNTR_BSN_ADDR_DTLS') {
+                    global.CLIENTTYPE = 'GRNTR';
+                    await getClientID(global.CLIENTTYPE);
+                    props.navigation.replace('LoanAddressList');
+                } else if (currentPage.pageCode == 'DMGRC_GRNTR_FNCL_DTLS') {
+                    global.CLIENTTYPE = 'GRNTR';
+                    await getClientID(global.CLIENTTYPE);
+                    props.navigation.replace('LoanDemographicsFinancialDetails');
+                } else if (currentPage.pageCode == 'DMGRC_GRNTR_BNK_DTLS') {
+                    global.CLIENTTYPE = 'GRNTR';
+                    await getClientID(global.CLIENTTYPE);
+                    props.navigation.replace('BankList');
                 }
 
 
@@ -481,25 +559,58 @@ const LoanApplicationMain = (props, { navigation }) => {
             global.CLIENTTYPE = 'APPL';
             await getClientID(global.CLIENTTYPE);
             props.navigation.replace('BankList');
+        } else if (item.pageCode == 'CB_CHK_CB_RSPNS') {
+            props.navigation.navigate('CBResponseScreen');
+        } else if (item.pageCode == 'CB_CHK_BRE_DCSN') {
+            props.navigation.navigate('CBStatus');
+        } else if (item.pageCode == 'LN_PRDT_SLCTN') {
+            global.CLIENTTYPE = 'APPL';
+            props.navigation.navigate('LoanDemographicProductSelection');
+        } else if (item.pageCode == 'NMN_DTLS') {
+            global.CLIENTTYPE = 'APPL';
+            props.navigation.navigate('LoanNomineeList');
+        } else if (item.pageCode == 'DOC_UPLD_APPLCNT') {
+            global.CLIENTTYPE = 'APPL';
+            props.navigation.navigate('LoanDocumentUpload');
+        } else if (item.pageCode == 'DOC_UPLD_COAPPLCNT') {
+            global.CLIENTTYPE = 'CO-APPL';
+            props.navigation.navigate('LoanDocumentUpload');
+        } else if (item.pageCode == 'DOC_UPLD_GRNTR') {
+            global.CLIENTTYPE = 'GRNTR';
+            props.navigation.navigate('LoanDocumentUpload');
         }
         //}
 
     }
 
 
-    const getProcessSubStage = async (moduleOrder, pageOrder, workFlowID) => {
+    const getProcessSubStage = async (stageId, subStageOrder, moduleOrder, pageOrder, workFlowID) => {
+
+        var substage = global.COMPLETEDSUBSTAGE;
+        var stageId = 1;
+        if (substage.length <= 0) {
+            substage = 'PRF_SHRT'
+        }
 
         const filteredProcessSubStage = processSubStage.filter((data) => {
-            return data.wfId === workFlowID && (data.stageId === 1);
+            return data.wfId === workFlowID && (data.stageId === stageId);
         }).map((data) => {
-            const extraJSON = { isSelected: data.subStageCode === 'PRF_SHRT', subStageIsCompleted: false };
+            const subDataIsCompleted = data.displayOrder <= subStageOrder;
+
+            const extraJSON = { isSelected: data.subStageCode === substage, subDataIsCompleted };
             return { ...data, ...extraJSON };
         }).sort((a, b) => a.displayOrder - b.displayOrder);
+
+
+        const filteredAndSelectedProcessSubStage = filteredProcessSubStage
+            .filter(data => data.isSelected === true);
+
+        if (global.DEBUG_MODE) console.log('filteredAndSelectedProcessSubStage::' + JSON.stringify(filteredAndSelectedProcessSubStage));
 
         setProcessSubStageData(filteredProcessSubStage);
 
         const filteredProcessModuleStage = processModule.filter((data) => {
-            return data.wfId === workFlowID && data.process_sub_stage_id === filteredProcessSubStage[0].id;
+            return data.wfId === workFlowID && data.process_sub_stage_id === filteredAndSelectedProcessSubStage[0].id;
         }).map((data) => {
             const subDataIsCompleted = data.displayOrder <= moduleOrder;
 
@@ -573,7 +684,7 @@ const LoanApplicationMain = (props, { navigation }) => {
                             <TouchableOpacity activeOpacity={1} onPress={() => onClickMainList(item, item.id)}>
                                 <View>
                                     <View style={{ flexDirection: 'row' }}>
-                                        <LinearGradient colors={item.isSelected ? (['#D2FF21', '#FAD420', '#FFCE20']) : (['#ECECEC', '#DBDBDB', '#ECECEC'])} style={{
+                                        <LinearGradient colors={item.subStageCode == global.COMPLETEDSUBSTAGE ? (['#D2FF21', '#FAD420', '#FFCE20']) : item.subDataIsCompleted ? (['#8EF2CB', '#50C56F', '#3BB650']) : (['#ECECEC', '#DBDBDB', '#ECECEC'])} style={{
                                             width: 60, height: 60, backgroundColor: Colors.skyBlue, margin: 4, borderRadius: 30,
                                             alignItems: 'center', justifyContent: 'center'
                                         }}>
