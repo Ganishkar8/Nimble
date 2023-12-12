@@ -244,6 +244,10 @@ export const language = [
       str_totavgmntexpenses: 'Total Average Monthly Expenses',
       str_familydetails: 'Family Details',
       str_accoutnnonotmatching: 'Account Number and Confirm Account Number Not Matching',
+      str_nomineeDetails: 'Nominee Details',
+      str_loannomineedtls: 'Loan (Nominee Details)',
+      str_repayschedule: 'Repayment Schedule',
+      str_repayscheduledtls: 'Repayment Schedule Details (Yearly/Monthly)',
     },
 
     ta: {

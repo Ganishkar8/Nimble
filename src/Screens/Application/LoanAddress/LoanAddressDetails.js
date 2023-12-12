@@ -555,12 +555,12 @@ const LoanAddressDetails = (props, { navigation }) => {
                 return;
             }
         }
-        insertData('1')
-        // if (addressID.length <= 0) {
-        //     postAddressData();
-        // } else {
-        //     updateAddressData();
-        // }
+
+        if (addressID.length <= 0) {
+            postAddressData();
+        } else {
+            updateAddressData();
+        }
     }
 
     const postAddressData = () => {
@@ -568,9 +568,7 @@ const LoanAddressDetails = (props, { navigation }) => {
             showBottomSheet();
             //alert(errMsg)
         } else {
-            // alert(addressTypeLabel+" "+addressLine1+" "+addressLine2+" "+landmark+" "+pincode+" "+city+" "+
-            // district+" "+state+" "+country+" "+geoClassificationLabel+" "+yearsAtResidence+" "+yearsAtCity+" "+
-            // addressOwnerTypeLabel+" "+ownerDetailsLabel+" "+ownerName)
+
             const appDetails = [{
                 "isActive": true,
                 "createdBy": global.USERID,
@@ -626,9 +624,7 @@ const LoanAddressDetails = (props, { navigation }) => {
             showBottomSheet();
             //alert(errMsg)
         } else {
-            // alert(addressTypeLabel+" "+addressLine1+" "+addressLine2+" "+landmark+" "+pincode+" "+city+" "+
-            // district+" "+state+" "+country+" "+geoClassificationLabel+" "+yearsAtResidence+" "+yearsAtCity+" "+
-            // addressOwnerTypeLabel+" "+ownerDetailsLabel+" "+ownerName)
+
             const appDetails = {
                 "isActive": true,
                 "createdBy": global.USERID,

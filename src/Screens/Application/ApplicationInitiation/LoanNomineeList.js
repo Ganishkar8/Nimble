@@ -31,22 +31,23 @@ import Common from '../../../Utils/Common';
 import ButtonViewComp from '../../../Components/ButtonViewComp';
 import DeleteConfirmModel from '../../../Components/DeleteConfirmModel';
 import tbl_client from '../../../Database/Table/tbl_client';
+import tbl_bankdetails from '../../../Database/Table/tbl_bankdetails';
 import tbl_loanApplication from '../../../Database/Table/tbl_loanApplication';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import tbl_loanaddressinfo from '../../../Database/Table/tbl_loanaddressinfo';
+import tbl_nomineeDetails from '../../../Database/Table/tbl_nomineeDetails';
 
-const LoanAddressList = (props, { navigation }) => {
+const LoanNomineeList = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
-    const [addressDetails, setAddressDetails] = useState([]);
-    const [addressID, setAddressID] = useState('');
+    const [nomineeDetails, setNomineeDetails] = useState([]);
+    const [nomineeID, setNomineeID] = useState('');
     const isScreenVisible = useIsFocused();
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const [apiError, setApiError] = useState('');
     const [refreshFlatlist, setRefreshFlatList] = useState(false);
-    const [processModule, setProcessModule] = useState(props.mobilecodedetail.processModule);
-    const [processModuleLength, setProcessModuleLength] = useState(0);
+
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-    const [kycManual, setKYCManual] = useState('0');
+
     const [errMsg, setErrMsg] = useState('');
     const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
     const [communicationAvailable, setCommunicationAvailable] = useState(false);
@@ -57,7 +58,7 @@ const LoanAddressList = (props, { navigation }) => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
 
-        getAddressData()
+        getNomineeData()
 
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
@@ -70,49 +71,14 @@ const LoanAddressList = (props, { navigation }) => {
         return true; // Prevent default back button behavior
     };
 
-    const getAddressData = () => {
+    const getNomineeData = () => {
 
-        // tbl_loanApplication.getLoanAppWorkFlowID(global.LOANAPPLICATIONID, 'APPL')
-        //   .then(data => {
-        //     if (global.DEBUG_MODE) console.log('Applicant Data:', data);
-        //     if (data !== undefined && data.length > 0) {
-        //       const filteredProcessModuleStage = processModule.filter((data1) => {
-        //         return data1.wfId === parseInt(data[0].workflow_id) && data1.process_sub_stage_id === 1;
-        //       })
-        //       alert(data[0].workflow_id)
-        //       if (filteredProcessModuleStage) {
-        //         setProcessModuleLength(filteredProcessModuleStage.length);
-        //       }
-        //     }
-
-        //   })
-        //   .catch(error => {
-        //     if (global.DEBUG_MODE) console.error('Error fetching Applicant details:', error);
-        //   });
-
-        tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE).then(value => {
-            if (value !== undefined && value.length > 0) {
-
-                setKYCManual(value[0].isKycManual)
-
-                if (global.USERTYPEID == 1163) {
-                    if (!(value[0].isKycManual == '1')) {
-
-                    }
-                }
-
-            }
-        })
-
-        tbl_loanaddressinfo.getAllLoanAddressDetailsForLoanID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
+        tbl_nomineeDetails.getAllNomineeDetails(global.LOANAPPLICATIONID)
             .then(data => {
-                if (global.DEBUG_MODE) console.log('Address Detail:', data);
+                if (global.DEBUG_MODE) console.log('Nominee Detail:', data);
                 if (data !== undefined && data.length > 0) {
-                    setAddressDetails(data)
-                    const communicationAddress = data.find(item => item.address_type === 'C');
-                    if (communicationAddress) {
-                        setCommunicationAvailable(true);
-                    }
+                    setNomineeDetails(data)
+
                     setRefreshFlatList(!refreshFlatlist)
                 }
             })
@@ -125,21 +91,16 @@ const LoanAddressList = (props, { navigation }) => {
 
         var bg = '';
 
-        if (global.USERTYPEID == 1163) {
-            bg = 'GREY'
-        } else {
-            if (item.isKyc == '1') {
-                bg = 'GREY'
-            }
-        }
         return (
             <View style={{ marginLeft: 10, marginRight: 10 }}>
                 <View>
                     <Text style={{ fontSize: 14, fontFamily: 'Poppins-SemiBold', marginTop: 5, color: Colors.black }}>
-                        {Common.getSystemCodeDescription(props.mobilecodedetail.leadUserCodeDto, 'ADDRESS_TYPE', item.address_type)}
+                        {item.account_holder_name}
                     </Text>
-                    <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: Colors.mediumgrey }}>{`${item.address_line_1},${item.address_line_2}`}</Text>
-                    <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: Colors.mediumgrey }}>{`${item.district},${item.state}`}</Text>
+                    <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 12.5, color: Colors.black }}>Relationship status with Borrower : {`${Common.getSystemCodeDescription(props.mobilecodedetail.leadSystemCodeDto, 'RELATIONSHIP', item.relstatuswithBorrower)}`}</Text>
+                    <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 12.5, color: Colors.black }}>Aadhar ID : {`${item.aadharId}`}</Text>
+                    <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 12.5, color: Colors.black }}>Nominee Bank A/C No : {`${item.nomineeBankAccNo}`}</Text>
+                    <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 12.5, color: Colors.black }}>{`${item.nomineeBankBranch}, ${item.nomineeBankName}`}</Text>
                 </View>
 
                 <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
@@ -229,12 +190,11 @@ const LoanAddressList = (props, { navigation }) => {
 
     const handleClick = (value, data) => {
         if (value === 'edit') {
-            props.navigation.navigate('LoanAddressDetails', { addressType: data })
+            props.navigation.navigate('LoanNomineeDetails', { bankType: data })
         } else if (value === 'new') {
-            props.navigation.navigate('LoanAddressDetails', { addressType: 'new' })
+            props.navigation.navigate('LoanNomineeDetails', { bankType: 'new' })
         } else if (value === 'delete') {
-            setAddressID(data.id);
-            setDeleteModalVisible(true);
+            deletedata(data.id)
         }
     }
 
@@ -244,13 +204,13 @@ const LoanAddressList = (props, { navigation }) => {
         const baseURL = '8901';
         setLoading(true);
         apiInstancelocal(baseURL)
-            .delete(`/api/v2/profile-short/address-details/${addressID}`)
+            .delete(`/api/v2/profile-short/address-details/${nomineeID}`)
             .then(async response => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log('DeleteAddressResponse::' + JSON.stringify(response.data),);
 
                 setLoading(false);
-                deletedata(addressID);
+                deletedata(nomineeID);
             })
             .catch(error => {
                 // Handle the error
@@ -264,15 +224,15 @@ const LoanAddressList = (props, { navigation }) => {
 
     };
 
-    const deletedata = async (addressID) => {
+    const deletedata = async (id) => {
 
         const deletePromises = [
-            tbl_loanaddressinfo.deleteLoanDataBasedOnLoanIDAndID(global.LOANAPPLICATIONID, addressID)
+            tbl_bankdetails.deleteBankDataBasedOnLoanIDAndType(global.LOANAPPLICATIONID, id)
         ];
         await Promise.all(deletePromises);
 
-        const newArray = addressDetails.filter(item => item.id !== addressID);
-        setAddressDetails(newArray);
+        const newArray = nomineeDetails.filter(item => item.id !== id);
+        setNomineeDetails(newArray);
         setRefreshFlatList(!refreshFlatlist);
 
     }
@@ -280,10 +240,10 @@ const LoanAddressList = (props, { navigation }) => {
 
     const buttonNext = () => {
 
-        if (validate()) {
-            showBottomSheet();
-            return;
-        }
+        // if (validate()) {
+        //     showBottomSheet();
+        //     return;
+        // }
         updateLoanStatus();
 
     }
@@ -292,16 +252,8 @@ const LoanAddressList = (props, { navigation }) => {
 
         var module = ''; var page = '';
 
-        if (global.CLIENTTYPE == 'APPL') {
-            module = 'LN_DMGP_APLCT';
-            page = 'DMGRC_APPL_BSN_ADDR_DTLS';
-        } else if (global.CLIENTTYPE == 'CO-APPL') {
-            module = 'LN_DMGP_COAPLCT';
-            page = 'DMGRC_COAPPL_BSN_ADDR_DTLS';
-        } else if (global.CLIENTTYPE == 'GRNTR') {
-            module = 'LN_DMGP_GRNTR';
-            page = 'DMGRC_GRNTR_BSN_ADDR_DTLS';
-        }
+        module = 'NMNE_DTLS';
+        page = 'NMN_DTLS';
 
         const appDetails = {
             "loanApplicationId": global.LOANAPPLICATIONID,
@@ -320,23 +272,12 @@ const LoanAddressList = (props, { navigation }) => {
 
                 if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
-                if (global.CLIENTTYPE == 'APPL') {
-                    global.COMPLETEDMODULE = 'LN_DMGP_APLCT';
-                    global.COMPLETEDPAGE = 'DMGRC_APPL_BSN_ADDR_DTLS';
-                } else if (global.CLIENTTYPE == 'CO-APPL') {
-                    global.COMPLETEDMODULE = 'LN_DMGP_COAPLCT';
-                    global.COMPLETEDPAGE = 'DMGRC_COAPPL_BSN_ADDR_DTLS';
-                } else if (global.CLIENTTYPE == 'GRNTR') {
-                    global.COMPLETEDMODULE = 'LN_DMGP_GRNTR';
-                    global.COMPLETEDPAGE = 'DMGRC_GRNTR_BSN_ADDR_DTLS';
-                }
 
-                if (global.CLIENTTYPE == 'APPL') {
-                    props.navigation.replace('LoanDemographicsGSTDetails');
-                } else {
-                    props.navigation.replace('LoanDemographicsFinancialDetails');
-                }
+                global.COMPLETEDMODULE = 'NMNE_DTLS';
+                global.COMPLETEDPAGE = 'NMN_DTLS';
 
+
+                props.navigation.replace('LoanApplicationMain', { fromScreen: 'BankList' });
 
 
             })
@@ -352,67 +293,13 @@ const LoanAddressList = (props, { navigation }) => {
 
     };
 
-    const approveManualKYC = (status) => {
-
-        const appDetails = {
-            "kycType": "001",
-            "kycValue": "123456789012",
-            "kycDmsId": 100,
-            "kycExpiryDate": null,
-            "manualKycStatus": status,
-            "manualKycApprovedBy": "Muthu"
-        }
-        const baseURL = '8901';
-        setLoading(true);
-        apiInstancelocal(baseURL)
-            .put(`api/v2/profile-short/manualKyc/${global.CLIENTID}`, appDetails)
-            .then(async response => {
-                // Handle the response data
-                if (global.DEBUG_MODE) console.log('ApproveKYCApiResponse::' + JSON.stringify(response.data),);
-                setLoading(false);
-                props.navigation.replace('LoanApplicationMain', { fromScreen: 'AddressDetail' });
-
-
-            })
-            .catch(error => {
-                // Handle the error
-                if (global.DEBUG_MODE) console.log('ApproveKYCApiResponse' + JSON.stringify(error.response));
-                setLoading(false);
-                if (error.response.data != null) {
-                    setApiError(error.response.data.message);
-                    setErrorModalVisible(true)
-                }
-            });
-
-    };
 
     const onGoBack = () => {
-        props.navigation.replace('LoanApplicationMain', { fromScreen: 'AddressDetail' })
+        props.navigation.replace('LoanApplicationMain', { fromScreen: 'LoanNomineeList' })
     }
 
     const closeErrorModal = () => {
         setErrorModalVisible(false);
-    };
-
-    const validate = () => {
-        var flag = false;
-        var i = 1;
-        var errorMessage = '';
-
-        if (!communicationAvailable) {
-            errorMessage =
-                errorMessage +
-                i +
-                ')' +
-                ' ' +
-                "Please Add Communication Address" +
-                '\n';
-            i++;
-            flag = true;
-        }
-
-        setErrMsg(errorMessage);
-        return flag;
     };
 
     const closeDeleteModal = () => {
@@ -447,29 +334,19 @@ const LoanAddressList = (props, { navigation }) => {
                     justifyContent: 'center',
                 }}>
                 <HeadComp
-                    textval={language[0][props.language].str_loanDemographics}
+                    textval={language[0][props.language].str_loannomineedtls}
                     props={props}
                     onGoBack={onGoBack}
                 />
             </View>
 
             <ChildHeadComp
-                textval={global.CLIENTTYPE == 'APPL' ? language[0][props.language].str_applicantdetails : global.CLIENTTYPE == 'CO-APPL' ? language[0][props.language].str_coapplicantdetails : language[0][props.language].str_guarantordetails}
+                textval={language[0][props.language].str_nomineeDetails}
             />
 
             <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
                 <View style={{ width: '90%', marginTop: 3 }}>
-                    <TextComp
-                        textStyle={{
-                            color: Colors.mediumgrey,
-                            fontSize: 15,
-                            fontFamily: 'Poppins-Medium'
-                        }}
-                        textVal={
-                            language[0][props.language].str_baddressdetail
-                        }></TextComp>
-
-                    <ProgressComp progressvalue={0.60} textvalue="4 of 6" />
+                    <ProgressComp progressvalue={1} textvalue="6 of 6" />
                 </View>
             </View>
 
@@ -479,7 +356,7 @@ const LoanAddressList = (props, { navigation }) => {
                         icon={'+'}
                         textValue={language[0][
                             props.language
-                        ].str_addaddressbutton.toUpperCase()}
+                        ].str_nomineeDetails.toUpperCase()}
                         textStyle={{ color: Colors.skyBlue, fontSize: 13, fontWeight: 500 }}
                         viewStyle={Commonstyles.buttonView}
                         innerStyle={Commonstyles.buttonViewBorderStyle}
@@ -489,21 +366,22 @@ const LoanAddressList = (props, { navigation }) => {
             </TouchableOpacity>
 
             <FlatList
-                data={addressDetails}
+                data={nomineeDetails}
                 renderItem={FlatView}
                 extraData={refreshFlatlist}
                 keyExtractor={item => item.loanApplicationId}
             />
 
 
-            {addressDetails.length > 0 && global.USERTYPEID == 1164 && <ButtonViewComp
+            <ButtonViewComp
                 textValue={language[0][props.language].str_submit.toUpperCase()}
                 textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
                 viewStyle={[Commonstyles.buttonView, { marginBottom: 20 }]}
                 innerStyle={Commonstyles.buttonViewInnerStyle}
                 handleClick={buttonNext}
             />
-            }
+
+
 
         </SafeAreaView>
     );
@@ -524,4 +402,4 @@ const mapDispatchToProps = dispatch => ({
     languageAction: item => dispatch(languageAction(item)),
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(LoanAddressList);
+export default connect(mapStateToProps, mapDispatchToProps)(LoanNomineeList);

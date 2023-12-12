@@ -436,6 +436,27 @@ const createTables = async () => {
       Amount TEXT,
       PRIMARY KEY (loanApplicationId,client_id, client_type,usercode,incomeLabel)
     )`,
+    `CREATE TABLE IF NOT EXISTS tbl_nomineeDetails (
+      loanApplicationId TEXT,
+      client_type TEXT,
+      id TEXT,
+      isNomineeId TEXT,
+      relstatuswithBorrower TEXT,
+      titleId TEXT,
+      fullName TEXT,
+      aadharId TEXT,
+      dateOfBirth TEXT,
+      age TEXT,
+      genderId TEXT,
+      mobileNum TEXT,
+      nomineePercent TEXT,
+      nomineeBankAccNo TEXT,
+      nomineeIfsc TEXT,
+      nomineeBankName TEXT,
+      nomineeBankBranch TEXT,
+      nomineeNameInBank TEXT,
+      PRIMARY KEY (loanApplicationId, client_type)
+    )`,
     // Add more CREATE TABLE queries for other tables...
   ];
 

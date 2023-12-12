@@ -8,13 +8,14 @@ import {
     ScrollView,
     TouchableOpacity,
     SafeAreaView,
+    BackHandler
 } from 'react-native';
 
 //redux
 import { connect } from 'react-redux';
 import { languageAction } from '../../Utils/redux/actions/languageAction';
 import { language } from '../../Utils/LanguageString';
-//
+import ErrorModal from '../../Components/ErrorModal';
 import MyStatusBar from '../../Components/MyStatusBar';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -22,6 +23,12 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Colors from '../../Utils/Colors';
 import TextComp from '../../Components/TextComp';
 import { BottomSheet } from 'react-native-btr';
+import { useIsFocused } from '@react-navigation/native';
+import HeadComp from '../../Components/HeadComp';
+import ButtonViewComp from '../../Components/ButtonViewComp';
+import apiInstance from '../../Utils/apiInstance';
+import Commonstyles from '../../Utils/Commonstyles';
+import Common from '../../Utils/Common';
 
 const data = [
 
@@ -39,19 +46,82 @@ const CBResponseScreen = (props, { navigation }) => {
 
     const [cbResponse, setCBResponse] = useState(data);
     const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
+    const isScreenVisible = useIsFocused();
+    const [errorModalVisible, setErrorModalVisible] = useState(false);
+    const [apiError, setApiError] = useState('');
+    const [loading, setLoading] = useState(false);
 
 
     useEffect(() => {
+        props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
+        return () => {
+            props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
+            backHandler.remove();
+        }
+    }, [props.navigation, isScreenVisible]);
 
-    }, []);
+    const handleBackButton = () => {
+        onGoBack();
+        return true; // Prevent default back button behavior
+    };
+
+    const onGoBack = () => {
+        props.navigation.goBack();
+    }
 
     const toggleBottomNavigationView = () => {
         //Toggling the visibility state of the bottom sheet
         setBottomSheetVisible(!bottomSheetVisible);
     };
 
-    const updateLeadDetails = () => {
-    }
+    const updateLoanStatus = () => {
+
+        var module = ''; var page = '';
+
+        module = 'CB_RSPNS';
+        page = 'CB_CHK_CB_RSPNS';
+
+
+        const appDetails = {
+            "loanApplicationId": global.LOANAPPLICATIONID,
+            "loanWorkflowStage": "LN_APP_INITIATION",
+            "subStageCode": "CB_CHK",
+            "moduleCode": module,
+            "pageCode": page,
+            "status": "Completed"
+        }
+        const baseURL = '8901';
+        setLoading(true);
+        apiInstance(baseURL)
+            .post(`/api/v2/loan-application-status/updateStatus`, appDetails)
+            .then(async response => {
+                // Handle the response data
+                if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
+                setLoading(false);
+                global.COMPLETEDMODULE = 'CB_RSPNS';
+                global.COMPLETEDPAGE = 'CB_CHK_CB_RSPNS';
+
+                props.navigation.replace('CBStatus')
+
+            })
+            .catch(error => {
+                // Handle the error
+                if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
+                setLoading(false);
+                if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
+
+    };
+
+    const closeErrorModal = () => {
+        setErrorModalVisible(false);
+    };
+
+
 
     const listView = ({ item }) => {
 
@@ -133,29 +203,13 @@ const CBResponseScreen = (props, { navigation }) => {
         )
     }
 
-
-
     return (
 
         <View style={{ flex: 1, backgroundColor: Colors.approvedBg }}>
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
-            <View style={{ width: '100%', height: 58, alignItems: 'center', backgroundColor: Colors.white }}>
-                <View style={{ width: '93%', flexDirection: 'row' }}>
-                    <TouchableOpacity onPress={() => props.navigation.goBack()} style={{ width: '10%', height: 56, justifyContent: 'center' }}>
-                        <View >
-                            <Entypo name='chevron-left' size={25} color={Colors.darkblack} />
-                        </View>
-                    </TouchableOpacity>
-                    <View style={{ width: '80%', height: 56, justifyContent: 'center' }}>
-                        <TextComp textVal={language[0][props.language].str_cbresponseheader}
-                            textStyle={{ color: Colors.darkblack, fontWeight: 400, fontSize: 18 }} />
-                    </View>
-                    <TouchableOpacity onPress={() => props.navigation.goBack()} style={{ width: '10%', height: 56, justifyContent: 'center' }}>
-                        <View >
-                            <Ionicons name='refresh' size={25} color={Colors.skyBlue} />
-                        </View>
-                    </TouchableOpacity>
-                </View>
+            <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
+            <View style={{ width: '96%', height: 50, alignItems: 'center' }}>
+                <HeadComp textval={language[0][props.language].str_cbresponseheader} props={props} onGoBack={onGoBack} />
             </View>
 
             <View style={{ width: '100%', justifyContent: 'center', marginBottom: 110 }}>
@@ -208,19 +262,16 @@ const CBResponseScreen = (props, { navigation }) => {
                 </View>
             </BottomSheet>
             <View style={styles.fab}>
-                <View
-                    style={{
-                        marginTop: 10,
-                        justifyContent: 'center',
-                        alignItems: 'center', marginTop: 90
-                    }}>
-                    <TouchableOpacity activeOpacity={10} style={styles.enableBg}>
-                        <View >
-                            <TextComp textVal={language[0][props.language].str_next.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} />
 
-                        </View>
-                    </TouchableOpacity>
-                </View>
+
+                <ButtonViewComp
+                    textValue={language[0][props.language].str_next.toUpperCase()}
+                    textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
+                    viewStyle={Commonstyles.buttonView}
+                    innerStyle={Commonstyles.buttonViewInnerStyle}
+                    handleClick={updateLoanStatus}
+                />
+
             </View>
         </View>
 

@@ -612,48 +612,32 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
   const getClientData = async () => {
 
     await tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE).then(value => {
+      if (global.DEBUG_MODE) console.log('ApplicantData::' + JSON.stringify(value));
       if (value !== undefined && value.length > 0) {
-        setTitleLabel(value[0].titleId);
-        setFirstName(value[0].firstName);
-        setMiddleName(value[0].middleName);
-        setLastName(value[0].lastName);
-        setGenderLabel(value[0].genderId);
-        setDOB(value[0].dateOfBirth);
-        setAge(value[0].age);
-        setFatherName(value[0].fatherName);
-        setSpouseName(value[0].spouseName);
-        setCasteLabel(value[0].casteId);
-        setReligionLabel(value[0].religionId);
-        setMotherTongueLabel(value[0].motherTongueId);
-        setEADLabel(value[0].educationQualificationId);
-        //getImage(value[0].image)
-        //getImage('3728')
-        if (value[0].dmsId.length > 0) {
-          getImage(value[0].dmsId);
-        }
-        setDocID(value[0].dmsId);
-        if (value[0].geoCode.length > 0) {
-          const [latitude, longitude] = value[0].geoCode.split(',');
-          setCurrentLongitude(parseFloat(longitude));
-          setCurrentLatitude(parseFloat(latitude));
-          zoomToMarker();
-          setGPSLatLon(value[0].geoCode)
+        value[0].titleId !== undefined ? setTitleLabel(value[0].titleId) : setTitleLabel('');
+        value[0].firstName !== undefined ? setFirstName(value[0].firstName) : setFirstName('');
+        value[0].middleName !== undefined ? setMiddleName(value[0].middleName) : setMiddleName('');
+        value[0].lastName !== undefined ? setLastName(value[0].lastName) : setLastName('');
+        value[0].genderId !== undefined ? setGenderLabel(value[0].genderId) : setGenderLabel('');
+        value[0].dateOfBirth !== undefined ? setDOB(value[0].dateOfBirth) : setDOB('');
+        value[0].age !== undefined ? setAge(value[0].age) : setAge('');
+        value[0].fatherName !== undefined ? setFatherName(value[0].fatherName) : setFatherName('');
+        value[0].spouseName !== undefined ? setSpouseName(value[0].spouseName) : setSpouseName('');
+        value[0].casteId !== undefined ? setCasteLabel(value[0].casteId) : setCasteLabel('');
+        value[0].religionId !== undefined ? setReligionLabel(value[0].religionId) : setReligionLabel('');
+        value[0].motherTongueId !== undefined ? setMotherTongueLabel(value[0].motherTongueId) : setMotherTongueLabel('');
+        value[0].educationQualificationId !== undefined ? setEADLabel(value[0].educationQualificationId) : setEADLabel('');
+        value[0].isKycManual !== undefined ? setKYCManual(value[0].isKycManual) : setKYCManual('');
 
-        }
-
-        setKYCManual(value[0].isKycManual)
-
-        // if (!(value[0].isKycManual) == 1) {
-        //   global.isAadharVerified = "1";
-        // } else {
-        //   global.isAadharVerified = "0";
-        // }
-
-        if (value[0].isAadharNumberVerified == 1) {
-          setIsAadharVerified(true);
-        } else {
-          setIsAadharVerified(false);
-
+        var aadharverify = false;
+        if (value[0].isAadharNumberVerified !== undefined) {
+          if (value[0].isAadharNumberVerified == 1) {
+            setIsAadharVerified(true);
+            aadharverify = true;
+          } else {
+            setIsAadharVerified(false);
+            aadharverify = false;
+          }
         }
 
         if (global.USERTYPEID == 1163) {
@@ -665,10 +649,25 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
             setHideDelete(true);
             setHideRetake(true);
           }
-        } else {
-          disableAadharFields(value[0].fatherName, value[0].spouseName);
         }
 
+        disableAadharFields(aadharverify, value[0].fatherName, value[0].spouseName);
+        if (value[0].dmsId !== undefined) {
+          if (value[0].dmsId.length > 0) {
+            getImage(value[0].dmsId);
+          }
+          setDocID(value[0].dmsId);
+        }
+
+        if (value[0].geoCode !== undefined) {
+          if (value[0].geoCode.length > 0) {
+            const [latitude, longitude] = value[0].geoCode.split(',');
+            setCurrentLongitude(parseFloat(longitude));
+            setCurrentLatitude(parseFloat(latitude));
+            zoomToMarker();
+            setGPSLatLon(value[0].geoCode)
+          }
+        }
 
       }
     })
@@ -676,22 +675,28 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
 
   }
 
-  const disableAadharFields = (fatherName, spouseName) => {
+  const disableAadharFields = (aadharverify, fatherName, spouseName) => {
 
-    if (isAadharVerified) {
+    if (aadharverify) {
       setFirstNameDisable(true);
       setMiddleNameDisable(true);
+      setMiddleNameMan(false);
       setLastNameDisable(true);
       setLastNameMan(false)
+
       setMiddleNameMan(false)
       setGenderDisable(true);
       setDOBDisable(true);
       setAgeDisable(true);
-      if (fatherName.length > 0) {
-        setFatherNameDisable(false)
+      if (fatherName !== undefined && fatherName !== null) {
+        if (fatherName.length > 0) {
+          setFatherNameDisable(false)
+        }
       }
-      if (spouseName.length > 0) {
-        setSpouseNameDisable(false)
+      if (spouseName !== undefined && spouseName !== null) {
+        if (spouseName.length > 0) {
+          setSpouseNameDisable(false)
+        }
       }
     }
   }

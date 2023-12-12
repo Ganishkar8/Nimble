@@ -559,10 +559,10 @@ const BankDetailsScreen = (props, { navigation }) => {
                     // Handle the response from Cloudinary
                     setLoading(false)
                     setDocID(data.docId);
-                    if (addressID.length <= 0) {
-                        postBankData();
+                    if (bankID.length <= 0) {
+                        postBankData(data.docId);
                     } else {
-                        updateBankData();
+                        updateBankData(data.docId);
                     }
 
                 } else {
@@ -629,7 +629,7 @@ const BankDetailsScreen = (props, { navigation }) => {
         }
     };
 
-    const updateBankData = () => {
+    const updateBankData = (dmsID) => {
         if (validateData()) {
             showBottomSheet();
         } else {

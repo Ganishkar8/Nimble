@@ -35,6 +35,15 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
     const [bg, setBg] = useState('');
     const isScreenVisible = useIsFocused();
+    const [processSubStageData, setProcessSubStageData] = useState();
+    const [processSubStage, setProcessSubStage] = useState(props.mobilecodedetail.processSubStage);
+
+    const [processModuleData, setProcessModuleData] = useState();
+    const [processModule, setProcessModule] = useState(props.mobilecodedetail.processModule);
+
+    const [processPageData, setprocessPageData] = useState();
+    const [processPage, setprocessPage] = useState(props.mobilecodedetail.processPage);
+
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
@@ -80,9 +89,35 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
 
         global.COMPLETEDSUBSTAGE = value.currentStatus.subStageCode;
         global.COMPLETEDMODULE = value.currentStatus.moduleCode;
-        global.COMPLETEDPAGE = value.currentStatus.pageCode;
         global.LOANAPPLICATIONID = value.id;
         global.TEMPAPPID = value.loanApplicationNumber;
+        const filteredProcessSubStage = processSubStage.filter((data) => {
+            return data.wfId === listData.wfId && (data.subStageCode === value.currentStatus.subStageCode);
+        }).sort((a, b) => a.displayOrder - b.displayOrder)
+
+        const filteredProcessModule = processModule.filter((data) => {
+            return data.wfId === listData.wfId && (data.moduleCode === value.currentStatus.moduleCode);
+        }).sort((a, b) => a.displayOrder - b.displayOrder)
+
+        const filteredProcessPage = processPage.filter((data) => {
+            return data.wfId === listData.wfId;
+        }).sort((a, b) => a.displayOrder - b.displayOrder)
+
+        const index = filteredProcessPage.findIndex(item => item.pageCode === value.currentStatus.pageCode);
+
+        if (index > 0) {
+            const previousPage = filteredProcessPage[index - 1];
+            global.COMPLETEDPAGE = previousPage.pageCode;
+            if (global.DEBUG_MODE) console.log(previousPage);
+        } else {
+            if (global.DEBUG_MODE) console.log("No previous entry found.");
+        }
+
+        setLoading(false);
+
+        if (global.DEBUG_MODE) console.log('filteredProcessSubStage::' + JSON.stringify(filteredProcessSubStage));
+        if (global.DEBUG_MODE) console.log('filteredProcessModule::' + JSON.stringify(filteredProcessModule));
+        if (global.DEBUG_MODE) console.log('filteredProcessPage::' + JSON.stringify(filteredProcessPage));
 
         const deletePromises = [
             tbl_client.deleteAllClient(),
@@ -229,8 +264,12 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
 
 const mapStateToProps = (state) => {
     const { language } = state.languageReducer;
+    const { profileDetails } = state.profileReducer;
+    const { mobileCodeDetails } = state.mobilecodeReducer;
     return {
-        language: language
+        language: language,
+        profiledetail: profileDetails,
+        mobilecodedetail: mobileCodeDetails
     }
 }
 

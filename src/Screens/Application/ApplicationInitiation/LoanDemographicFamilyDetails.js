@@ -846,20 +846,14 @@ const LoanDemographicFamilyDetails = (props) => {
         var module = ''; var page = '';
 
         if (global.CLIENTTYPE == 'APPL') {
-            module = 'PRF_SHRT_APLCT';
-            page = 'PRF_SHRT_APLCT_BSC_DTLS';
-        } else if (global.CLIENTTYPE == 'CO-APPL') {
-            module = 'PRF_SHRT_COAPLCT';
-            page = 'PRF_SHRT_COAPLCT_BSC_DTLS';
-        } else if (global.CLIENTTYPE == 'GRNTR') {
-            module = 'PRF_SHRT_GRNTR';
-            page = 'PRF_SHRT_GRNTR_BSC_DTLS';
+            module = 'LN_DMGP_APLCT';
+            page = 'DMGRC_APPL_FMLY_DTLS';
         }
 
         const appDetails = {
             "loanApplicationId": global.LOANAPPLICATIONID,
             "loanWorkflowStage": "LN_APP_INITIATION",
-            "subStageCode": "PRF_SHRT",
+            "subStageCode": "LN_DEMGRP",
             "moduleCode": module,
             "pageCode": page,
             "status": "Completed"
@@ -873,16 +867,10 @@ const LoanDemographicFamilyDetails = (props) => {
                 if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
                 if (global.CLIENTTYPE == 'APPL') {
-                    global.COMPLETEDMODULE = 'PRF_SHRT_APLCT';
-                    global.COMPLETEDPAGE = 'PRF_SHRT_APLCT_BSC_DTLS';
-                } else if (global.CLIENTTYPE == 'CO-APPL') {
-                    global.COMPLETEDMODULE = 'PRF_SHRT_COAPLCT';
-                    global.COMPLETEDPAGE = 'PRF_SHRT_COAPLCT_BSC_DTLS';
-                } else if (global.CLIENTTYPE == 'GRNTR') {
-                    global.COMPLETEDMODULE = 'PRF_SHRT_GRNTR';
-                    global.COMPLETEDPAGE = 'PRF_SHRT_GRNTR_BSC_DTLS';
+                    global.COMPLETEDMODULE = 'LN_DMGP_APLCT';
+                    global.COMPLETEDPAGE = 'DMGRC_APPL_FMLY_DTLS';
                 }
-                props.navigation.replace('ProfileShortKYCVerificationStatus');
+                props.navigation.replace('FamilyDetailList');
             })
             .catch(error => {
                 // Handle the error
@@ -902,7 +890,7 @@ const LoanDemographicFamilyDetails = (props) => {
 
         await tbl_familydetails.insertFamilyDetails(id, global.LOANAPPLICATIONID, 'APPL', relationTypeLabel, titleLabel, Name, '', '', DOB, Age, genderLabel, mobileNumber, KycType1Label, kycID1, expiryDate1, KycType2Label, kycID2, expiryDate2, KycType3Label, kycID3, expiryDate3, KycType4Label, kycID4, expiryDate4, '0', relationStatuswithCOAPPLabel, relationStatuswithGRNTRLabel);
 
-        props.navigation.replace('FamilyDetailList');
+        updateLoanStatus();
 
     }
 
@@ -1338,7 +1326,7 @@ const LoanDemographicFamilyDetails = (props) => {
     };
 
     const onGoBack = () => {
-        props.navigation.goBack();
+        props.navigation.replace('LoanApplicationMain', { fromScreen: 'LoanFamilyDetail' })
     }
 
     return (

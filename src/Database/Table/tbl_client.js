@@ -63,7 +63,7 @@ const updateAadharData = (name, dob, age, gender, fatherName, spouseName, imgDms
         db.transaction(tx => {
             tx.executeSql(
                 `UPDATE ${tableName} SET firstName = ?, dateOfBirth = ?, age = ?, genderId = ?, fatherName = ?, spouseName= ?, image = ?, dmsId = ?,isAadharNumberVerified=? WHERE loanApplicationId = ? AND clientTypeId = ?`,
-                [name, dob, age, gender, fatherName, spouseName, imgDmsId, docDmsId, loanApplicationId, clientTypeId, '1'],
+                [name, dob, age, gender, fatherName, spouseName, imgDmsId, docDmsId, '1', loanApplicationId, clientTypeId],
                 (_, result) => {
                     resolve(result);
                 },

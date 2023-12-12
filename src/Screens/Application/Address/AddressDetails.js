@@ -165,6 +165,7 @@ const AddressDetails = (props, { navigation }) => {
     getSystemCodeDetail()
     makeSystemMandatoryFields();
     getExistingData();
+    alert(isKYC)
 
 
     return () => {
@@ -227,28 +228,32 @@ const AddressDetails = (props, { navigation }) => {
     tbl_clientaddressinfo.getAllAddressDetailsForLoanIDAndID(loanAppId, id.toString())
       .then(data => {
         if (global.DEBUG_MODE) console.log('Address Detail:', data);
-        setAddressID(data[0].id)
-        setAddressLine1(data[0].address_line_1)
-        setAddressLine2(data[0].address_line_2)
-        setLandmark(data[0].landmark)
-        setPincode(data[0].pincode)
-        setCity(data[0].city)
-        setDistrict(data[0].district)
-        setState(data[0].state)
-        setCountry(data[0].country)
-        setYearsAtResidence(data[0].years_at_residence)
-        setOwnerName(data[0].owner_name)
-        setYearsAtCity(data[0].years_in_current_city_or_town)
-        //spinner
-        setAddressTypeLabel(data[0].address_type)
-        setGeoClassificationLabel(data[0].geo_classification)
-        setAddressOwnerTypeLabel(data[0].address_ownership)
-        setOwnerDetailsLabel(data[0].owner_details)
-        if (data[0].isKyc === "1") {
-          disableAadharFields(data)
+
+        if (data !== undefined && data.length > 0) {
+          setAddressID(data[0].id)
+          setAddressLine1(data[0].address_line_1)
+          setAddressLine2(data[0].address_line_2)
+          setLandmark(data[0].landmark)
+          setPincode(data[0].pincode)
+          setCity(data[0].city)
+          setDistrict(data[0].district)
+          setState(data[0].state)
+          setCountry(data[0].country)
+          setYearsAtResidence(data[0].years_at_residence)
+          setOwnerName(data[0].owner_name)
+          setYearsAtCity(data[0].years_in_current_city_or_town)
+          //spinner
+          setAddressTypeLabel(data[0].address_type)
+          setGeoClassificationLabel(data[0].geo_classification)
+          setAddressOwnerTypeLabel(data[0].address_ownership)
+          setOwnerDetailsLabel(data[0].owner_details)
+          if (data[0].isKyc === "1") {
+            disableAadharFields(data)
+          }
+          setIsKYC(data[0].isKyc);
+          setLoading(false)
         }
-        setIsKYC(data[0].isKyc);
-        setLoading(false)
+
       })
       .catch(error => {
         if (global.DEBUG_MODE) console.error('Error fetching bank details:', error);

@@ -275,7 +275,7 @@ const AadharOTPVerification = (props, { navigation }) => {
                 apiInstance(baseURL).get(`/api/documents/document/${parseInt(dmsID)}`)
                     .then(async (response) => {
                         // Handle the response data
-                        console.log("GetPhotoApiResponse::" + JSON.stringify(response.data));
+                        //  console.log("GetPhotoApiResponse::" + JSON.stringify(response.data));
 
                         setpdfBase64('data:application/pdf;base64,' + response.data.base64Content)
                         var base64pdf = response.data.base64Content;
@@ -406,7 +406,13 @@ const AadharOTPVerification = (props, { navigation }) => {
         var name = data.name;
         var dob = Common.convertDateFormat(data.dob);
         var gender = data.gender;
-        var fatherName = data.fatherName;
+        var fatherName = '';
+        if ('fatherName' in data) {
+            fatherName = data.fatherName;
+        } else if ('relativeName' in data) {
+            fatherName = data.relativeName;
+        }
+        //var fatherName = data.fatherName ? data.fatherName : data.relativeName ? data.relativeName : '';
         var spouseName = data.spouseName;
         var image = data.imgDmsId;
         var dmsId = data.docDmsId;
@@ -414,8 +420,8 @@ const AadharOTPVerification = (props, { navigation }) => {
 
         await tbl_client.updateAadharData(name, dob, age, gender, fatherName, spouseName, '', '', global.LOANAPPLICATIONID, global.CLIENTTYPE);
 
-        if (global.DEBUG_MODE) console.log('Gender::' + JSON.stringify(response.data));
-        if (global.DEBUG_MODE) console.log('FatherName::' + JSON.stringify(response.data));
+        if (global.DEBUG_MODE) console.log('Gender::' + JSON.stringify(gender));
+        if (global.DEBUG_MODE) console.log('FatherName::' + JSON.stringify(fatherName));
         await tbl_clientaddressinfo.insertClientAddress(
             global.LOANAPPLICATIONID,
             "",

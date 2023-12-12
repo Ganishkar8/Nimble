@@ -129,6 +129,8 @@ const AddressMainList = (props, { navigation }) => {
     } else {
       if (item.isKyc == '1') {
         bg = 'GREY'
+      } else {
+
       }
     }
     return (
@@ -326,6 +328,7 @@ const AddressMainList = (props, { navigation }) => {
           global.COMPLETEDMODULE = 'PRF_SHRT_COAPLCT';
           global.COMPLETEDPAGE = 'PRF_SHRT_COAPLCT_ADDRS_DTLS';
         } else if (global.CLIENTTYPE == 'GRNTR') {
+          global.COMPLETEDSUBSTAGE = 'CB_CHK';
           global.COMPLETEDMODULE = 'PRF_SHRT_GRNTR';
           global.COMPLETEDPAGE = 'PRF_SHRT_GRNTR_ADDRS_DTLS';
         }

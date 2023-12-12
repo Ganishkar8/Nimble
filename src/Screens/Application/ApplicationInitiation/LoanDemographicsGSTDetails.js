@@ -37,6 +37,7 @@ import CheckBoxComp from '../../../Components/CheckBoxComp';
 import { RadioButton, Card } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import ErrorModal from '../../../Components/ErrorModal';
 
 const LoanDemographicsGSTDetails = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -90,6 +91,15 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
   const [yearsData, setYearsData] = useState([]);
   const [refreshYearsFlatlist, setRefreshYearsFlatList] = useState(false);
 
+  const [leadsystemCodeDetail, setLeadSystemCodeDetail] = useState(props.mobilecodedetail.leadSystemCodeDto);
+  const [systemCodeDetail, setSystemCodeDetail] = useState(props.mobilecodedetail.t_SystemCodeDetail);
+  const [leaduserCodeDetail, setLeadUserCodeDetail] = useState(props.mobilecodedetail.leadUserCodeDto);
+  const [userCodeDetail, setUserCodeDetail] = useState(props.mobilecodedetail.t_UserCodeDetail);
+  const [bankUserCodeDetail, setBankUserCodeDetail] = useState(props.mobilecodedetail.t_BankUserCode);
+  const [systemMandatoryField, setSystemMandatoryField] = useState(props.mobilecodedetail.processSystemMandatoryFields);
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [apiError, setApiError] = useState('');
+
   useEffect(() => {
     props.navigation
       .getParent()
@@ -120,9 +130,13 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
 
   const getSystemCodeDetail = async () => {
     let dataArray = [];
-    dataArray.push({ subCodeId: 'MON', Description: 'Monthly' })
-    dataArray.push({ subCodeId: 'YEAR', Description: 'Yearly' })
-    setTimeFrameData(dataArray)
+
+    const filteredCaptureReasonData = leaduserCodeDetail.filter((data) => data.masterId === 'CAPTURE_REASON').sort((a, b) => a.Description.localeCompare(b.Description));;
+    setCaptureReasonData(filteredCaptureReasonData);
+
+    const filteredTimeFrameData = leaduserCodeDetail.filter((data) => data.masterId === 'TIME_FRAME').sort((a, b) => a.Description.localeCompare(b.Description));;
+    setTimeFrameData(filteredTimeFrameData);
+
   };
 
 
@@ -130,6 +144,82 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
     var flag = false;
     var i = 1;
     var errorMessage = '';
+
+    if (selectedValue == 'Available') {
+      const atLeastOneSelected = availableGSTData.some(item => item.isSelect);
+
+      const allValuesNotEmptyForSelected = availableGSTData
+        .filter(item => item.isSelect)
+        .every(item => item.gstNumber.length > 0);
+
+      if (atLeastOneSelected && allValuesNotEmptyForSelected) {
+        console.log('At least one item has isSelect true, and for those, values are not empty.');
+      } else {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          'Selected GST Number should not be empty' +
+          '\n';
+        i++;
+        flag = true;
+      }
+
+    } else {
+
+
+      if (captureReasonMan && captureReasonVisible) {
+        if (captureReasonLabel.length <= 0) {
+          errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + captureReasonCaption + '\n';
+          i++;
+          flag = true;
+        }
+      }
+
+      if (timeFrameMan && timeFrameVisible) {
+        if (timeFrameLabel.length <= 0) {
+          errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + timeFrameCaption + '\n';
+          i++;
+          flag = true;
+        }
+      }
+
+      if (timeFrameLabel == 'MNTL') {
+        const allAmountsNotEmpty = monthsData.every(item => item.salesAmount !== '' && item.purchaseAmount !== '');
+        if (allAmountsNotEmpty) {
+
+        } else {
+          errorMessage =
+            errorMessage +
+            i +
+            ')' +
+            ' ' +
+            'Sales and Purchase Should not be Empty' +
+            '\n';
+          i++;
+          flag = true;
+        }
+      } else {
+        const allAmountsNotEmpty = yearsData.every(item => item.salesAmount !== '' && item.purchaseAmount !== '');
+        if (allAmountsNotEmpty) {
+
+        } else {
+          errorMessage =
+            errorMessage +
+            i +
+            ')' +
+            ' ' +
+            'Sales and Purchase Should not be Empty' +
+            '\n';
+          i++;
+          flag = true;
+        }
+      }
+
+
+    }
+
 
     setErrMsg(errorMessage);
     return flag;
@@ -154,10 +244,12 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
   const AddGST = () => {
     const newDataArray = [...availableGSTData];
     const newObject = {
-      id: newDataArray.length,
+      isActive: true,
       isSelect: false,
       gstLabel: 'GST IN',
       gstNumber: '',
+      gstUserName: "",
+      isConsented: true,
     };
     newDataArray.push(newObject);
     setAvailableGSTData(newDataArray);
@@ -212,7 +304,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
       setCaptureReasonLabel(label);
       setCaptureReasonIndex(index);
     } else if (componentName == 'TimeFramePicker') {
-      if (label == 'MON') {
+      if (label == 'MNTL') {
         generateLastTwelveMonths();
       } else {
         getLastTwoYearsArray();
@@ -227,11 +319,12 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
     const initialMonths = [];
 
     for (let i = 0; i < 12; i++) {
-      const month = currentDate.toLocaleString('default', { month: 'short' });
+      const month = currentDate.getMonth() + 1;
+      const shortMonth = currentDate.toLocaleString('default', { month: 'short' });
       const year = currentDate.getFullYear();
       const salesAmount = '0';
       const purchaseAmount = '0';
-      initialMonths.unshift({ month, year, salesAmount, purchaseAmount });
+      initialMonths.unshift({ month, shortMonth, year, salesAmount, purchaseAmount });
       currentDate.setMonth(currentDate.getMonth() - 1);
     }
 
@@ -251,6 +344,21 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
 
   const deleteGSTList = (data) => { };
 
+  const valueChange = (gstData, index) => {
+    let filterGSTData = availableGSTData
+
+    for (let i = 0; i < filterGSTData.length; i++) {
+      if (i == index) {
+        filterGSTData[i].isSelect = true
+      } else {
+        filterGSTData[i].isSelect = false
+      }
+    }
+
+    setAvailableGSTData(filterGSTData);
+    setRefreshAvailableGSTFlatList(!refreshAvailableGSTFlatlist)
+  }
+
   const FlatView = ({ item, index }) => {
 
 
@@ -261,9 +369,10 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
           <View style={{ width: '90%', flexDirection: 'row', alignItems: 'center' }}>
 
             <CheckBox
-              value={true}
-              disabled={true}
+              value={item.isSelect}
+              disabled={false}
               color="#000000"
+              onValueChange={() => { valueChange(item, index) }}
               style={styles.checkbox}
               tintColors={{ true: Colors.darkblue }}
             />
@@ -321,7 +430,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
                 color: Colors.mediumgrey,
                 fontFamily: 'PoppinsRegular'
               }}>
-              {item.month.toUpperCase()}
+              {item.shortMonth.toUpperCase()}
             </Text>
           </View>
 
@@ -456,16 +565,194 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
 
   }
 
+  const postGSTDetailData = () => {
+    if (validate()) {
+      showBottomSheet();
+      //alert(errMsg)
+    } else {
+      let selectedGSTData = [];
+      let applicantSalesInfos = [];
+      if (selectedValue == 'Available') {
+        selectedGSTData = availableGSTData.filter(item => item.isSelect);
+      } else {
+        if (timeFrameLabel == 'MNTL') {
+          applicantSalesInfos = monthsData.map(item => ({
+            isActive: true,
+            month: parseInt(item.month),
+            year: parseInt(item.year),
+            sales: parseInt(item.salesAmount),
+            purchase: parseInt(item.purchaseAmount),
+            verifiedSales: 0,
+            verifiedPurchase: 0,
+            verified: true,
+          }));
+        } else {
+          applicantSalesInfos = yearsData.map(item => ({
+            isActive: true,
+            month: 0,
+            year: parseInt(item.year),
+            sales: parseInt(item.salesAmount),
+            purchase: parseInt(item.purchaseAmount),
+            verifiedSales: 0,
+            verifiedPurchase: 0,
+            verified: true,
+          }));
+        }
+      }
+      const appDetails = {
+        "isActive": true,
+        "createdBy": global.USERID,
+        "createdDate": new Date(),
+        "supervisedBy": global.USERID,
+        "isAvailable": selectedValue == 'Available' ? true : false,
+        "captureReason": captureReasonLabel,
+        "timeFrame": timeFrameLabel,
+        "applicantGstInfos": selectedGSTData,
+        "applicantSalesInfos": applicantSalesInfos,
+      }
+      const baseURL = '8901';
+      setLoading(true);
+      apiInstancelocal(baseURL)
+        .post(`/api/v2/loan-demographics/${global.TEMPAPPID}/applicant-sales-detail`, appDetails)
+        .then(async response => {
+          // Handle the response data
+          if (global.DEBUG_MODE) console.log('PostGSTResponse::' + JSON.stringify(response.data),);
+
+          setLoading(false);
+          updateLoanStatus();
+        })
+        .catch(error => {
+          // Handle the error
+          if (global.DEBUG_MODE) console.log('PostGSTError' + JSON.stringify(error.response));
+          setLoading(false);
+          if (error.response.data != null) {
+            setApiError(error.response.data.message);
+            setErrorModalVisible(true)
+          }
+        });
+      //insertData()
+    }
+  };
+
+  const updateGSTDetailData = () => {
+    if (validate()) {
+      showBottomSheet();
+      //alert(errMsg)
+    } else {
+
+      const appDetails = {
+        "isActive": true,
+        "createdBy": global.USERID,
+        "createdDate": new Date(),
+        "modifiedBy": global.USERID,
+        "modifiedDate": new Date(),
+        "supervisedBy": global.USERID,
+        "addressType": addressTypeLabel,
+        "addressLine1": addressLine1,
+        "addressLine2": addressLine2,
+        "landmark": landmark,
+        "pincode": pincode,
+        "city": city,
+        "district": district,
+        "state": state,
+        "country": country,
+        "mobileOrLandLineNumber": "",
+        "emailId": "",
+        "addressOwnership": addressOwnerTypeLabel,
+        "ownerDetails": ownerDetailsLabel,
+        "ownerName": ownerName,
+        "geoClassification": '',
+        "yearsAtResidence": '',
+        "yearsInCurrentCityOrTown": '',
+        "supervisedDate": new Date()
+      }
+      const baseURL = '8901';
+      setLoading(true);
+      apiInstancelocal(baseURL)
+        .put(`api/v2/profile-short/address-details/${addressID}`, appDetails)
+        .then(async response => {
+          // Handle the response data
+          if (global.DEBUG_MODE) console.log('UpdateAddressResponse::' + JSON.stringify(response.data),);
+          insertData(addressID)
+          setLoading(false);
+        })
+        .catch(error => {
+          // Handle the error
+          if (global.DEBUG_MODE) console.log('UpdateAddressError' + JSON.stringify(error.response));
+          setLoading(false);
+          if (error.response.data != null) {
+            setApiError(error.response.data.message);
+            setErrorModalVisible(true)
+          }
+        });
+      //insertData()
+    }
+  };
+
+  const updateLoanStatus = () => {
+
+    var module = ''; var page = '';
+
+    if (global.CLIENTTYPE == 'APPL') {
+      module = 'LN_DMGP_APLCT';
+      page = 'DMGRC_APPL_GST_DTLS';
+    }
+
+    const appDetails = {
+      "loanApplicationId": global.LOANAPPLICATIONID,
+      "loanWorkflowStage": "LN_APP_INITIATION",
+      "subStageCode": "LN_DEMGRP",
+      "moduleCode": module,
+      "pageCode": page,
+      "status": "Completed"
+    }
+    const baseURL = '8901';
+    setLoading(true);
+    apiInstancelocal(baseURL)
+      .post(`/api/v2/loan-application-status/updateStatus`, appDetails)
+      .then(async response => {
+        // Handle the response data
+        if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
+        setLoading(false);
+        if (global.CLIENTTYPE == 'APPL') {
+          global.COMPLETEDMODULE = 'LN_DMGP_APLCT';
+          global.COMPLETEDPAGE = 'DMGRC_APPL_GST_DTLS';
+        }
+        props.navigation.replace('LoanDemographicsFinancialDetails');
+      })
+      .catch(error => {
+        // Handle the error
+        if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
+        setLoading(false);
+
+        if (error.response.data != null) {
+          setApiError(error.response.data.message);
+          setErrorModalVisible(true)
+        }
+      });
+
+  };
+
+  const buttonNext = () => {
+
+    postGSTDetailData();
+
+  }
+
   const onGoBack = () => {
     props.navigation.replace('LoanApplicationMain', { fromScreen: 'LoanGSTDetails' })
   }
+
+  const closeErrorModal = () => {
+    setErrorModalVisible(false);
+  };
 
   return (
     // enclose all components in this View tag
     <SafeAreaView
       style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
       <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
-
+      <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.contentContainer}
@@ -660,7 +947,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
                 </View>
               )}
 
-              {timeFrameLabel == 'MON' &&
+              {timeFrameLabel == 'MNTL' &&
 
                 <View>
                   <View
@@ -792,7 +1079,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
               }
 
 
-              {timeFrameLabel == 'YEAR' &&
+              {timeFrameLabel == 'YRL' &&
 
                 <View>
                   <View
@@ -928,13 +1215,13 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
 
         </View>
 
-        {/* <ButtonViewComp
-          textValue={language[0][props.language].str_dedupecheck.toUpperCase()}
-          textStyle={{color: Colors.white, fontSize: 13, fontWeight: 500}}
-          viewStyle={Commonstyles.buttonView}
+        <ButtonViewComp
+          textValue={language[0][props.language].str_submit.toUpperCase()}
+          textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
+          viewStyle={[Commonstyles.buttonView, { marginBottom: 20 }]}
           innerStyle={Commonstyles.buttonViewInnerStyle}
-          handleClick={updateBasicDetails}
-        /> */}
+          handleClick={buttonNext}
+        />
       </ScrollView>
     </SafeAreaView>
   );
@@ -980,12 +1267,16 @@ const styles = StyleSheet.create({
   },
 });
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   const { language } = state.languageReducer;
+  const { profileDetails } = state.profileReducer;
+  const { mobileCodeDetails } = state.mobilecodeReducer;
   return {
     language: language,
-  };
-};
+    profiledetail: profileDetails,
+    mobilecodedetail: mobileCodeDetails
+  }
+}
 
 const mapDispatchToProps = dispatch => ({
   languageAction: item => dispatch(languageAction(item)),

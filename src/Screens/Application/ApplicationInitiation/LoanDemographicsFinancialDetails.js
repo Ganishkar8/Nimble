@@ -40,6 +40,7 @@ import BusinessIncome from './Financial/BusinessIncome';
 import ImageComp from '../../../Components/ImageComp';
 import { Item } from 'react-native-paper/lib/typescript/components/Drawer/Drawer';
 import tbl_finexpdetails from '../../../Database/Table/tbl_finexpdetails';
+import ErrorModal from '../../../Components/ErrorModal';
 
 const LoanDemographicsFinancialDetails = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -110,19 +111,39 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
   const [AvailableCaption, setAvailableCaption] = useState('Available');
   const [NotAvailableCaption, setNotAvailableCaption] = useState('Not Available');
 
+  const [leadsystemCodeDetail, setLeadSystemCodeDetail] = useState(props.mobilecodedetail.leadSystemCodeDto);
+  const [systemCodeDetail, setSystemCodeDetail] = useState(props.mobilecodedetail.t_SystemCodeDetail);
+  const [leaduserCodeDetail, setLeadUserCodeDetail] = useState(props.mobilecodedetail.leadUserCodeDto);
+  const [userCodeDetail, setUserCodeDetail] = useState(props.mobilecodedetail.t_UserCodeDetail);
+  const [bankUserCodeDetail, setBankUserCodeDetail] = useState(props.mobilecodedetail.t_BankUserCode);
+  const [systemMandatoryField, setSystemMandatoryField] = useState(props.mobilecodedetail.processSystemMandatoryFields);
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [apiError, setApiError] = useState('');
+
   useEffect(() => {
     props.navigation
       .getParent()
       ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     makeSystemMandatoryFields();
-    pickerData();
+    getSystemCodeDetail();
     getSavedData()
 
     return () =>
       props.navigation
         .getParent()
         ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
-  }, [navigation]);
+  }, [props.navigation]);
+
+  const getSystemCodeDetail = () => {
+
+    const filteredEarningTypeData = leaduserCodeDetail.filter((data) => data.masterId === 'EARNING_TYPE').sort((a, b) => a.Description.localeCompare(b.Description));;
+    setEarningTypeData(filteredEarningTypeData);
+
+    const filteredEarningFrequencyData = leaduserCodeDetail.filter((data) => data.masterId === 'EARNING_FREQUENCY').sort((a, b) => a.Description.localeCompare(b.Description));;
+    setEarningFrequencyData(filteredEarningFrequencyData);
+
+
+  }
 
   const getSavedData = () => {
     tbl_finexpdetails.getFinExpDetails(global.LOANAPPLICATIONID,
@@ -162,113 +183,73 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
         if (global.DEBUG_MODE) console.error('Error fetching OTHER_SOURCE_EXPENSES details:', error);
       });
 
-      tbl_finexpdetails.getFinExpDetailsAll(global.LOANAPPLICATIONID,
-        global.CLIENTID,
-        global.CLIENTTYPE).then(data => {
-          if (global.DEBUG_MODE) console.log('All Detail:', JSON.stringify(data));
-          setotherExpenseList(data)
-        })
-        .catch(error => {
-          if (global.DEBUG_MODE) console.error('Error fetching OTHER_SOURCE_EXPENSES details:', error);
-        });
+    tbl_finexpdetails.getFinExpDetailsAll(global.LOANAPPLICATIONID,
+      global.CLIENTID,
+      global.CLIENTTYPE).then(data => {
+        if (global.DEBUG_MODE) console.log('All Detail:', JSON.stringify(data));
+        setotherExpenseList(data)
+      })
+      .catch(error => {
+        if (global.DEBUG_MODE) console.error('Error fetching OTHER_SOURCE_EXPENSES details:', error);
+      });
   }
 
-  const updateDataInArray = (idToUpdate, updatedProperties) => {
-    const updatedData = [...data];
-
-    const dataIndex = updatedData.findIndex(item => item.id === idToUpdate);
-
-    if (dataIndex !== -1) {
-      updatedData[dataIndex] = {
-        ...updatedData[dataIndex],
-        ...updatedProperties,
-      };
-      setdata(updatedData);
-    }
-    console.log('data:', updatedData);
-  };
 
   const onGoBack = () => {
-    props.navigation.goBack();
+    props.navigation.replace('LoanApplicationMain', { fromScreen: 'LoanFinancialDetail' })
   }
 
-  const pickerData = async () => {
-    tbl_SystemCodeDetails
-      .getSystemCodeDetailsBasedOnID('ProductType')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-
-          for (var i = 0; i < value.length; i++) {
-            if (value[i].IsDefault === '1') {
-              setProductTypeLabel(value[i].SubCodeID);
-              setProductTypeIndex(i + 1);
-            }
-          }
-
-          setProductTypeData(value);
-        }
-      });
-  };
-
   const makeSystemMandatoryFields = () => { };
-
-  const updateBasicDetails = () => {
-    if (validate()) {
-      showBottomSheet();
-    } else {
-      const appDetails = {
-        createdBy: global.USERID,
-        createdOn: '',
-        isActive: true,
-        branchId: 1180,
-        leadCreationBasicDetails: {
-          createdBy: global.USERID,
-          createdOn: '',
-          customerCategoryId: 5,
-          firstName: firstName,
-          middleName: middleName,
-          lastName: lastName,
-          mobileNumber: 7647865789,
-        },
-        leadCreationBusinessDetails: {},
-        leadCreationLoanDetails: {},
-        leadCreationDms: {},
-      };
-      const baseURL = '8901';
-      setLoading(true);
-      apiInstancelocal(baseURL)
-        .post('/api/v1/lead-creation-initiation', appDetails)
-        .then(async response => {
-          // Handle the response data
-          console.log(
-            'LeadCreationBasicApiResponse::' + JSON.stringify(response.data),
-          );
-          global.leadID = response.data.id;
-          setLoading(false);
-          props.navigation.navigate('LeadCreationBusiness');
-        })
-        .catch(error => {
-          // Handle the error
-          console.log('Error' + JSON.stringify(error.response));
-          setLoading(false);
-          alert(error);
-        });
-    }
-  };
 
   const validate = () => {
     var flag = false;
     var i = 1;
     var errorMessage = '';
 
+    if (earningTypeMan && earningTypeVisible) {
+      if (earningTypeLabel.length <= 0) {
+        errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + earningTypeCaption + '\n';
+        i++;
+        flag = true;
+      }
+    }
+
+    if (earningFrequencyMan && earningFrequencyVisible) {
+      if (earningFrequencyLabel.length <= 0) {
+        errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + earningFrequencyCaption + '\n';
+        i++;
+        flag = true;
+      }
+    }
+
+    if (incomeList.length <= 0) {
+      errorMessage = errorMessage + i + ')' + ' ' + 'Please Add ' + 'Business Income' + '\n';
+      i++;
+      flag = true;
+    }
+
+    if (otherIncomeList.length <= 0) {
+      errorMessage = errorMessage + i + ')' + ' ' + 'Please Add ' + 'Other Source of Income' + '\n';
+      i++;
+      flag = true;
+    }
+
+    if (expenseList.length <= 0) {
+      errorMessage = errorMessage + i + ')' + ' ' + 'Please Add ' + 'Business Expense' + '\n';
+      i++;
+      flag = true;
+    }
+
+    if (otherExpenseList.length <= 0) {
+      errorMessage = errorMessage + i + ')' + ' ' + 'Please Add' + 'Other Source of Expense' + '\n';
+      i++;
+      flag = true;
+    }
+
     setErrMsg(errorMessage);
     return flag;
   };
 
-  const onSelect = () => {
-    alert('Hi');
-  };
 
   const handleClick = (index, textValue) => {
     //alert(index);
@@ -286,21 +267,10 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
       setEarningFrequencyIndex(index);
     }
   };
+
   function isMultipleOf5000(number) {
     return number % 5000 === 0;
   }
-
-
-  const AddGST = () => {
-    const newDataArray = [...data];
-    const newObject = {
-      id: newDataArray.length,
-      Amount: 0,
-      tname: '',
-    };
-    newDataArray.push(newObject);
-    setdata(newDataArray);
-  };
 
   const addIncome = (incomeValue, incomeAmount, componentName) => {
 
@@ -426,37 +396,147 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
 
   }
 
-  const saveIncome = () => {
-    //alert(JSON.stringify("IncomeList::"+incomeList+'\n'+"OtherIncomeList::"+otherinco))
-    console.log('IncomeSaveData::', "IncomeList::" + JSON.stringify(incomeList) + '\n' + "OtherIncomeList::" + JSON.stringify(otherIncomeList));
-    console.log('IncomeSaveDataTotal::', "TotalIncome::" + totalBusineesIncome + '\n' + "TotalOtherIncome::" + totalOtherIncome);
-    console.log('ExpenseSaveData::', "ExpenseList::" + JSON.stringify(expenseList) + '\n' + "OtherExpenseList::" + JSON.stringify(otherExpenseList));
-    console.log('ExpenseSaveDataTotal::', "TotalExpense::" + totalBusineesExpenses + '\n' + "TotalOtherExpense::" + totalOtherExpense);
-    var AvgMonthlyIncome = parseInt(totalBusineesIncome) + parseInt(totalOtherIncome)
-    var AvgMonthlyExpense = parseInt(totalBusineesExpenses) + parseInt(totalOtherExpense)
-    console.log('IncomeSize::', incomeList.length);
-    const mergedIncomeArray = [...incomeList, ...otherIncomeList];
-    const mergedExpenseArray = [...expenseList, ...otherExpenseList];
-    const mergedArray = [...incomeList, ...otherIncomeList, ...expenseList, ...otherExpenseList];
-    console.log('MergedIncomeArray::', mergedIncomeArray);
-    console.log('MergedExpenseArray::', mergedExpenseArray);
-    console.log('MergedTotalArray::', mergedArray);
-    const incomeOfObjects = [];
-    for (let i = 0; i < mergedIncomeArray.length; i++) {
-      incomeOfObjects.push({
-        "incomeType": mergedIncomeArray[i].usercode,
-        "incomeAmount": parseInt(mergedIncomeArray[i].Amount)
-      })
+  const callFinancialData = () => {
+
+    postFinancialData();
+
+  }
+
+  const postFinancialData = () => {
+    if (validate()) {
+      showBottomSheet();
+    } else {
+      console.log('IncomeSaveData::', "IncomeList::" + JSON.stringify(incomeList) + '\n' + "OtherIncomeList::" + JSON.stringify(otherIncomeList));
+      console.log('IncomeSaveDataTotal::', "TotalIncome::" + totalBusineesIncome + '\n' + "TotalOtherIncome::" + totalOtherIncome);
+      console.log('ExpenseSaveData::', "ExpenseList::" + JSON.stringify(expenseList) + '\n' + "OtherExpenseList::" + JSON.stringify(otherExpenseList));
+      console.log('ExpenseSaveDataTotal::', "TotalExpense::" + totalBusineesExpenses + '\n' + "TotalOtherExpense::" + totalOtherExpense);
+      var AvgMonthlyIncome = parseInt(totalBusineesIncome) + parseInt(totalOtherIncome)
+      var AvgMonthlyExpense = parseInt(totalBusineesExpenses) + parseInt(totalOtherExpense)
+      console.log('IncomeSize::', incomeList.length);
+      const mergedIncomeArray = [...incomeList, ...otherIncomeList];
+      const mergedExpenseArray = [...expenseList, ...otherExpenseList];
+      const mergedArray = [...incomeList, ...otherIncomeList, ...expenseList, ...otherExpenseList];
+      console.log('MergedIncomeArray::', mergedIncomeArray);
+      console.log('MergedExpenseArray::', mergedExpenseArray);
+      console.log('MergedTotalArray::', mergedArray);
+      const incomeOfObjects = [];
+      for (let i = 0; i < mergedIncomeArray.length; i++) {
+        incomeOfObjects.push({
+          "incomeType": mergedIncomeArray[i].incomeLabel,
+          "incomeAmount": parseInt(mergedIncomeArray[i].Amount),
+          "parentIncomeType": mergedIncomeArray[i].usercode,
+        })
+      }
+
+      const expenseOfObjects = [];
+      for (let i = 0; i < mergedExpenseArray.length; i++) {
+        expenseOfObjects.push({
+          "expensesType": mergedExpenseArray[i].incomeLabel,
+          "expenseAmount": parseInt(mergedExpenseArray[i].Amount),
+          "parentExpenseType": mergedExpenseArray[i].usercode,
+        })
+      }
+
+
+      console.log('IncomeOfObjects::', incomeOfObjects);
+      console.log('ExpenseOfObjects::', expenseOfObjects);
+
+      const appDetails = {
+        "earningType": earningTypeLabel,
+        "earningFrequency": earningFrequencyLabel,
+        "totalBusinessIncome": parseInt(totalBusineesIncome),
+        "totalOtherSourceIncome": parseInt(totalOtherIncome),
+        "totalAvgMonthlyIncome": parseInt(totalBusineesIncome) + parseInt(totalOtherIncome),
+        "totalBusinessExpense": parseInt(totalBusineesExpenses),
+        "totalOtherSourceExpense": parseInt(totalOtherExpense),
+        "totalAvgMonthlyExpense": parseInt(totalBusineesExpenses) + parseInt(totalOtherExpense),
+        "createdBy": global.USERID,
+        "createdDate": new Date(),
+        "clientIncomeDetails": incomeOfObjects,
+        "clientExpenseDetails": expenseOfObjects
+      }
+      const baseURL = '8901';
+      setLoading(true);
+      apiInstancelocal(baseURL)
+        .post(`/api/v2/loan-demographics/${global.CLIENTID}/financialDetail`, appDetails)
+        .then(async response => {
+          // Handle the response data
+          if (global.DEBUG_MODE) console.log('PostFinancialResponse::' + JSON.stringify(response.data),);
+
+          setLoading(false);
+          insertData(mergedArray);
+        })
+        .catch(error => {
+          // Handle the error
+          if (global.DEBUG_MODE) console.log('PostFinancialError' + JSON.stringify(error.response));
+          setLoading(false);
+          if (error.response.data != null) {
+            setApiError(error.response.data.message);
+            setErrorModalVisible(true)
+          }
+        });
+
     }
-    const expenseOfObjects = [];
-    for (let i = 0; i < mergedExpenseArray.length; i++) {
-      expenseOfObjects.push({
-        "incomeType": mergedExpenseArray[i].usercode,
-        "incomeAmount": parseInt(mergedExpenseArray[i].Amount)
-      })
+  }
+
+  const updateLoanStatus = () => {
+
+    var module = ''; var page = '';
+
+    if (global.CLIENTTYPE == 'APPL') {
+      module = 'LN_DMGP_APLCT';
+      page = 'DMGRC_APPL_FNCL_DTLS';
+    } else if (global.CLIENTTYPE == 'CO-APPL') {
+      module = 'LN_DMGP_COAPLCT';
+      page = 'DMGRC_COAPPL_FNCL_DTLS';
+    } else if (global.CLIENTTYPE == 'GRNTR') {
+      module = 'LN_DMGP_GRNTR';
+      page = 'DMGRC_GRNTR_FNCL_DTLS';
     }
-    console.log('IncomeOfObjects::', incomeOfObjects);
-    console.log('ExpenseOfObjects::', expenseOfObjects);
+
+    const appDetails = {
+      "loanApplicationId": global.LOANAPPLICATIONID,
+      "loanWorkflowStage": "LN_APP_INITIATION",
+      "subStageCode": "LN_DEMGRP",
+      "moduleCode": module,
+      "pageCode": page,
+      "status": "Completed"
+    }
+    const baseURL = '8901';
+    setLoading(true);
+    apiInstancelocal(baseURL)
+      .post(`/api/v2/loan-application-status/updateStatus`, appDetails)
+      .then(async response => {
+        // Handle the response data
+        if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
+        setLoading(false);
+        if (global.CLIENTTYPE == 'APPL') {
+          global.COMPLETEDMODULE = 'LN_DMGP_APLCT';
+          global.COMPLETEDPAGE = 'DMGRC_APPL_FNCL_DTLS';
+        } else if (global.CLIENTTYPE == 'CO-APPL') {
+          global.COMPLETEDMODULE = 'LN_DMGP_COAPLCT';
+          global.COMPLETEDPAGE = 'DMGRC_COAPPL_FNCL_DTLS';
+        } else if (global.CLIENTTYPE == 'GRNTR') {
+          global.COMPLETEDMODULE = 'LN_DMGP_GRNTR';
+          global.COMPLETEDPAGE = 'DMGRC_GRNTR_FNCL_DTLS';
+        }
+        props.navigation.replace('BankList');
+      })
+      .catch(error => {
+        // Handle the error
+        if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
+        setLoading(false);
+
+        if (error.response.data != null) {
+          setApiError(error.response.data.message);
+          setErrorModalVisible(true)
+        }
+      });
+
+  };
+
+  const insertData = (mergedArray) => {
+
     for (let i = 0; i < mergedArray.length; i++) {
       tbl_finexpdetails.insertIncExpDetails(
         global.LOANAPPLICATIONID,
@@ -473,50 +553,21 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
           if (global.DEBUG_MODE) console.error('Error Inserting Financial detail:', error);
         });
     }
-    // const appDetails = {
-    //   "earningType": 'Mon',
-    //   "earningFrequency": 'D',
-    //   "totalBusinessIncome": totalBusineesIncome,
-    //   "totalOtherSourceIncome": totalOtherIncome,
-    //   "totalAvgMonthlyIncome": AvgMonthlyIncome,
-    //   "totalBusinessExpense": totalBusineesExpenses,
-    //   "totalOtherSourceExpense": totalOtherExpense,
-    //   "totalAvgMonthlyExpense": AvgMonthlyExpense,
-    //   "createdBy": global.USERID,
-    //   "createdDate": new Date(),
-    //   "modifiedBy": global.USERID,
-    //   "modifiedDate": new Date(),
-    //   "clientIncomeDetails": incomeOfObjects,
-    //   "clientExpenseDetails": expenseOfObjects
-    // }
-    // console.log('AppDetails::', appDetails);
-    // const baseURL = '8901';
-    //   setLoading(true);
-    //   apiInstancelocal(baseURL)
-    //    // .post(`api/v2/loan-demographics/241/financialDetail`, appDetails)
-    //     .put(`api/v2/loan-demographics/financialDetail/6`, appDetails)
-    //     .then(async response => {
-    //       // Handle the response data
-    //       if (global.DEBUG_MODE) console.log('FinancialResponse::' + JSON.stringify(response.data),);
-    //       setLoading(false);
-    //     })
-    //     .catch(error => {
-    //       // Handle the error
-    //       if (global.DEBUG_MODE) console.log('FinancialError' + JSON.stringify(error.response));
-    //       setLoading(false);
-    //       if (error.response.data != null) {
-    //        // setApiError(error.response.data.message);
-    //         //setErrorModalVisible(true)
-    //       }
-    //     });
+
+    updateLoanStatus();
+
   }
+
+  const closeErrorModal = () => {
+    setErrorModalVisible(false);
+  };
 
   return (
     // enclose all components in this View tag
     <SafeAreaView
       style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
       <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
-
+      <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.contentContainer}
@@ -541,7 +592,7 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
             }}>
             <HeadComp
               textval={language[0][props.language].str_loandemographics}
-              props={props}
+              props={props} onGoBack={onGoBack}
             />
           </View>
           <ChildHeadComp
@@ -965,7 +1016,7 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
             textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
             viewStyle={Commonstyles.buttonView}
             innerStyle={Commonstyles.buttonViewInnerStyle}
-            handleClick={saveIncome}
+            handleClick={callFinancialData}
           />
 
 

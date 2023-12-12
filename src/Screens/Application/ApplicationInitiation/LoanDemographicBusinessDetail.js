@@ -991,7 +991,7 @@ const LoanDemographicBusinessDetail = (props) => {
                     if (global.DEBUG_MODE) console.log('PostBusinessDetailApiResponse::' + JSON.stringify(response.data),);
 
                     setLoading(false);
-                    await insertData(response.data[0].id);
+                    await insertData(response.data.id, imageID);
 
 
                 })
@@ -1083,20 +1083,20 @@ const LoanDemographicBusinessDetail = (props) => {
         var module = ''; var page = '';
 
         if (global.CLIENTTYPE == 'APPL') {
-            module = 'PRF_SHRT_APLCT';
-            page = 'PRF_SHRT_APLCT_BSC_DTLS';
+            module = 'LN_DMGP_APLCT';
+            page = 'DMGRC_APPL_BSN_DTLS';
         } else if (global.CLIENTTYPE == 'CO-APPL') {
-            module = 'PRF_SHRT_COAPLCT';
-            page = 'PRF_SHRT_COAPLCT_BSC_DTLS';
+            module = 'LN_DMGP_COAPLCT';
+            page = 'DMGRC_COAPPL_BSN_DTLS';
         } else if (global.CLIENTTYPE == 'GRNTR') {
-            module = 'PRF_SHRT_GRNTR';
-            page = 'PRF_SHRT_GRNTR_BSC_DTLS';
+            module = 'LN_DMGP_GRNTR';
+            page = 'DMGRC_GRNTR_BSN_DTLS';
         }
 
         const appDetails = {
             "loanApplicationId": global.LOANAPPLICATIONID,
             "loanWorkflowStage": "LN_APP_INITIATION",
-            "subStageCode": "PRF_SHRT",
+            "subStageCode": "LN_DEMGRP",
             "moduleCode": module,
             "pageCode": page,
             "status": "Completed"
@@ -1110,16 +1110,16 @@ const LoanDemographicBusinessDetail = (props) => {
                 if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
                 if (global.CLIENTTYPE == 'APPL') {
-                    global.COMPLETEDMODULE = 'PRF_SHRT_APLCT';
-                    global.COMPLETEDPAGE = 'PRF_SHRT_APLCT_BSC_DTLS';
+                    global.COMPLETEDMODULE = 'LN_DMGP_APLCT';
+                    global.COMPLETEDPAGE = 'DMGRC_APPL_BSN_DTLS';
                 } else if (global.CLIENTTYPE == 'CO-APPL') {
-                    global.COMPLETEDMODULE = 'PRF_SHRT_COAPLCT';
-                    global.COMPLETEDPAGE = 'PRF_SHRT_COAPLCT_BSC_DTLS';
+                    global.COMPLETEDMODULE = 'LN_DMGP_COAPLCT';
+                    global.COMPLETEDPAGE = 'DMGRC_COAPPL_BSN_DTLS';
                 } else if (global.CLIENTTYPE == 'GRNTR') {
-                    global.COMPLETEDMODULE = 'PRF_SHRT_GRNTR';
-                    global.COMPLETEDPAGE = 'PRF_SHRT_GRNTR_BSC_DTLS';
+                    global.COMPLETEDMODULE = 'LN_DMGP_GRNTR';
+                    global.COMPLETEDPAGE = 'DMGRC_GRNTR_BSN_DTLS';
                 }
-                props.navigation.replace('ProfileShortKYCVerificationStatus');
+                props.navigation.replace('LoanAddressList');
             })
             .catch(error => {
                 // Handle the error
@@ -1135,11 +1135,11 @@ const LoanDemographicBusinessDetail = (props) => {
     };
 
 
-    const insertData = async (id) => {
+    const insertData = async (id, imageID) => {
 
-        await tbl_loanbusinessDetail.insertBusinessDetail(global.LOANAPPLICATIONID, id, global.CLIENTID, 'APPL', CustomerSubCategoryLabel, entShopName, urmNumber, DOI, DOR, DOBC, year, monthLabel, industryTypeLabel, industryLineLabel, companyTypeLabel, enterpriseTypeLabel, businessLocationLabel, noofEmployee, operatingDays, operatingTimings, bookKeepStatusLabel, homeBasedBussinessLabel, actmLabel, timeByPromoter, npmRate, purchaseFrequencyLabel, typePurchaseLabel, salesFrequencyLabel, docID);
+        await tbl_loanbusinessDetail.insertBusinessDetail(global.LOANAPPLICATIONID, id, global.CLIENTID, 'APPL', CustomerSubCategoryLabel, entShopName, urmNumber, DOI, DOR, DOBC, year, monthLabel, industryTypeLabel, industryLineLabel, companyTypeLabel, enterpriseTypeLabel, businessLocationLabel, noofEmployee, operatingDays, operatingTimings, bookKeepStatusLabel, homeBasedBussinessLabel, actmLabel, timeByPromoter, npmRate, purchaseFrequencyLabel, typePurchaseLabel, salesFrequencyLabel, imageID);
 
-        props.navigation.replace('LoanAddressList');
+        updateLoanStatus();
 
     }
 

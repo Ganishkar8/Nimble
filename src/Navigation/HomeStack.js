@@ -34,6 +34,12 @@ import LoanAddressList from '../Screens/Application/LoanAddress/LoanAddressList'
 import LoanAddressDetails from '../Screens/Application/LoanAddress/LoanAddressDetails';
 import BankList from '../Screens/Application/BankDetails/BankList';
 import BankDetailsScreen from '../Screens/Application/BankDetails/BankDetailsScreen';
+import CBResponseScreen from '../Screens/CreditBureau/CBResponseScreen';
+import CBStatus from '../Screens/CreditBureau/CBStatus';
+import LoanDemographicProductSelection from '../Screens/Application/ApplicationInitiation/LoanDemographicProductSelection';
+import LoanNomineeList from '../Screens/Application/ApplicationInitiation/LoanNomineeList';
+import LoanNomineeDetails from '../Screens/Application/ApplicationInitiation/LoanNomineeDetails';
+import RepaymentSchedule from '../Screens/Application/ApplicationInitiation/RepaymentSchedule';
 
 const Stack = createNativeStackNavigator();
 
@@ -85,6 +91,18 @@ export default HomeStack = () => {
       <Stack.Screen
         name="LoanApplicationTrackerDetails"
         component={LoanApplicationTrackerDetails}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="CBResponseScreen"
+        component={CBResponseScreen}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="CBStatus"
+        component={CBStatus}
         options={{ headerShown: false }}
       />
 
@@ -178,6 +196,17 @@ export default HomeStack = () => {
         component={AddressDetails}
         options={{ headerShown: false, tabBarVisible: false }}
       />
+      <Stack.Screen
+        name="LoanNomineeList"
+        component={LoanNomineeList}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="LoanNomineeDetails"
+        component={LoanNomineeDetails}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
 
       <Stack.Screen
         name="DemographicsGSTDetails"
@@ -228,6 +257,12 @@ export default HomeStack = () => {
       />
 
       <Stack.Screen
+        name="LoanDemographicProductSelection"
+        component={LoanDemographicProductSelection}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
         name="BankList"
         component={BankList}
         options={{ headerShown: false, tabBarVisible: false }}
@@ -236,6 +271,12 @@ export default HomeStack = () => {
       <Stack.Screen
         name="BankDetailsScreen"
         component={BankDetailsScreen}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="RepaymentSchedule"
+        component={RepaymentSchedule}
         options={{ headerShown: false, tabBarVisible: false }}
       />
 
