@@ -181,9 +181,9 @@ const LoanDocumentUpload = (props, { navigation }) => {
             if (existingCode) {
                 // If the year exists, push the installment to its data array
                 const extraJSON = { dmsID: '', isImagePresent: false };
-                // existingCode.data.push({
-                //     ...installment, ...extraJSON
-                // });
+                existingCode.data.push({
+                    ...installment, ...extraJSON
+                });
             } else {
                 // If the year does not exist, create a new entry with the year and data array
                 const extraJSON = { dmsID: '', isImagePresent: false };
@@ -197,7 +197,7 @@ const LoanDocumentUpload = (props, { navigation }) => {
             return acc;
         }, []);
         console.log("OrganizedData::" + JSON.stringify(organizedData))
-       // setDocumentList(organizedData)
+        setDocumentList(organizedData)
 
 
 
