@@ -146,11 +146,18 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
   }
 
   const getSavedData = () => {
+    let totalExpenses = 0, totalOtherexpense = 0, totalIncome = 0, totalotherIncome = 0;
     tbl_finexpdetails.getFinExpDetails(global.LOANAPPLICATIONID,
       global.CLIENTID,
       global.CLIENTTYPE, 'BUSINESS_INCOME').then(data => {
         if (global.DEBUG_MODE) console.log('BUSINESS_INCOME Detail:', JSON.stringify(data));
-        setIncomeList(data)
+        const newData = data.map(item => {
+          const extraJson = { colorCode: 'Green' };
+          totalIncome += parseInt(item.Amount);
+          return { ...item, ...extraJson };
+        });
+        setIncomeList(newData)
+        setTotalBusineesIncome(totalIncome)
       })
       .catch(error => {
         if (global.DEBUG_MODE) console.error('Error fetching BUSINESS_INCOME details:', error);
@@ -159,7 +166,14 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
       global.CLIENTID,
       global.CLIENTTYPE, 'OTHER_SOURCE_INCOME').then(data => {
         if (global.DEBUG_MODE) console.log('OTHER_SOURCE_INCOME Detail:', JSON.stringify(data));
-        setotherIncomeList(data)
+        const newData = data.map(item => {
+          const extraJson = { colorCode: 'Green' };
+          totalotherIncome += parseInt(item.Amount);
+          return { ...item, ...extraJson };
+        });
+
+        setOtherTotalIncome(totalotherIncome);
+        setotherIncomeList(newData)
       })
       .catch(error => {
         if (global.DEBUG_MODE) console.error('Error fetching OTHER_SOURCE_INCOME details:', error);
@@ -168,7 +182,13 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
       global.CLIENTID,
       global.CLIENTTYPE, 'BUSINESS_EXPENSES').then(data => {
         if (global.DEBUG_MODE) console.log('BUSINESS_EXPENSES Detail:', JSON.stringify(data));
-        setExpenseList(data)
+        const newData = data.map(item => {
+          const extraJson = { colorCode: 'Red' };
+          totalExpenses += parseInt(item.Amount);
+          return { ...item, ...extraJson };
+        });
+        setTotalBusineesExpenses(totalExpenses)
+        setExpenseList(newData);
       })
       .catch(error => {
         if (global.DEBUG_MODE) console.error('Error fetching BUSINESS_EXPENSES details:', error);
@@ -177,21 +197,27 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
       global.CLIENTID,
       global.CLIENTTYPE, 'OTHER_SOURCE_EXPENSES').then(data => {
         if (global.DEBUG_MODE) console.log('OTHER_SOURCE_EXPENSES Detail:', JSON.stringify(data));
-        setotherExpenseList(data)
+        const newData = data.map(item => {
+          const extraJson = { colorCode: 'Red' };
+          totalOtherexpense += parseInt(item.Amount);
+          return { ...item, ...extraJson };
+        });
+        setOtherTotalExpense(totalOtherexpense)
+        setotherExpenseList(newData)
       })
       .catch(error => {
         if (global.DEBUG_MODE) console.error('Error fetching OTHER_SOURCE_EXPENSES details:', error);
       });
 
-    tbl_finexpdetails.getFinExpDetailsAll(global.LOANAPPLICATIONID,
-      global.CLIENTID,
-      global.CLIENTTYPE).then(data => {
-        if (global.DEBUG_MODE) console.log('All Detail:', JSON.stringify(data));
-        setotherExpenseList(data)
-      })
-      .catch(error => {
-        if (global.DEBUG_MODE) console.error('Error fetching OTHER_SOURCE_EXPENSES details:', error);
-      });
+    // tbl_finexpdetails.getFinExpDetailsAll(global.LOANAPPLICATIONID,
+    //   global.CLIENTID,
+    //   global.CLIENTTYPE).then(data => {
+    //     if (global.DEBUG_MODE) console.log('All Detail:', JSON.stringify(data));
+    //     setotherExpenseList(data)
+    //   })
+    //   .catch(error => {
+    //     if (global.DEBUG_MODE) console.error('Error fetching OTHER_SOURCE_EXPENSES details:', error);
+    //   });
   }
 
 

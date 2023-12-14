@@ -274,6 +274,7 @@ const HomeScreen = (props, { navigation }) => {
                                         global.LOANAPPLICATIONID = '';
                                         global.COMPLETEDMODULE = '';
                                         global.COMPLETEDPAGE = '';
+                                        global.COMPLETEDSUBSTAGE = '';
                                         props.navigation.navigate('ConsentScreen');
                                         //props.navigation.navigate('LoanDemographicsGSTDetails');
 
@@ -302,6 +303,7 @@ const HomeScreen = (props, { navigation }) => {
                                                             global.LOANAPPLICATIONID = '';
                                                             global.COMPLETEDMODULE = '';
                                                             global.COMPLETEDPAGE = '';
+                                                            global.COMPLETEDSUBSTAGE = '';
                                                             props.navigation.navigate('ConsentScreen');
                                                             //props.navigation.navigate('LoanDemographicsGSTDetails');
                                                         }} activeOpacity={0.5} style={{ width: '70%', height: '100%', backgroundColor: '#0294ff', borderRadius: 25, alignItems: 'center', justifyContent: 'center' }}>

@@ -56,7 +56,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
   const [refreshNotAvailableGSTFlatlist, setRefreshNotAvailableGSTFlatList] = useState(false);
   const [notAvailableGSTData, setNotAvailableGSTData] = useState([]);
 
-  const [selectedValue, setSelectedValue] = useState('Available');
+  const [selectedValue, setSelectedValue] = useState('NotAvailable');
   const [selectedValue1, setSelectedValue1] = useState(false);
   const [AvailableCaption, setAvailableCaption] = useState('Available');
   const [NotAvailableCaption, setNotAvailableCaption] =
@@ -99,12 +99,14 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
   const [systemMandatoryField, setSystemMandatoryField] = useState(props.mobilecodedetail.processSystemMandatoryFields);
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [apiError, setApiError] = useState('');
+  const [gstData, setGstData] = useState(global.LEADTRACKERDATA.applicantSalesDetail);
 
   useEffect(() => {
     props.navigation
       .getParent()
       ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     getSystemCodeDetail();
+    getData();
 
 
     return () =>
@@ -113,19 +115,57 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
         ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
   }, [props.navigation]);
 
-  const updateDataInArray = (idToUpdate, updatedProperties) => {
-    const updatedData = [...data];
+  const getData = () => {
 
-    const dataIndex = updatedData.findIndex(item => item.id === idToUpdate);
+    if (gstData != undefined) {
+      if (gstData.isAvailable) {
+        setSelectedValue('Available')
+        const newObject = gstData.applicantGstInfos.map(item => ({
+          isActive: item.isActive,
+          isSelect: true, // Add your default value for isSelect
+          gstLabel: 'GST IN',
+          gstNumber: item.gstNumber,
+          gstUserName: item.gstUserName,
+          isConsented: item.isConsented,
+        }));
 
-    if (dataIndex !== -1) {
-      updatedData[dataIndex] = {
-        ...updatedData[dataIndex],
-        ...updatedProperties,
-      };
-      setdata(updatedData);
+        setAvailableGSTData(newObject)
+      } else {
+        setSelectedValue('NotAvailable')
+        setCaptureReasonLabel(gstData.captureReason);
+        setTimeFrameLabel(gstData.timeFrame);
+        if (gstData.timeFrame == 'MNTL') {
+          const mappedArray = gstData.applicantSalesInfos.map(item => ({
+            month: item.month,
+            shortMonth: new Date(item.createdDate).toLocaleString('default', { month: 'short' }),
+            year: item.year.toString(),
+            salesAmount: item.sales.toString(),
+            purchaseAmount: item.purchase.toString(),
+          }));
+          const totalSalesAmount = mappedArray.reduce((total, item) => total + parseInt(item.salesAmount), 0);
+          const totalPurchaseAmount = mappedArray.reduce((total, item) => total + parseInt(item.purchaseAmount), 0);
+          setTotalSales(totalSalesAmount);
+          setTotalPurchases(totalPurchaseAmount);
+          setMonthsData(mappedArray);
+        } else {
+          const mappedArray = gstData.applicantSalesInfos.map(item => ({
+            year: item.year.toString(),
+            salesAmount: item.sales.toString(),
+            purchaseAmount: item.purchase.toString(),
+          }));
+          const totalSalesAmount = mappedArray.reduce((total, item) => total + parseInt(item.salesAmount), 0);
+          const totalPurchaseAmount = mappedArray.reduce((total, item) => total + parseInt(item.purchaseAmount), 0);
+          setTotalYearSales(totalSalesAmount);
+          setTotalYearPurchases(totalPurchaseAmount);
+          setYearsData(mappedArray);
+        }
+        //console.log(mappedArray);
+      }
+
     }
-    console.log('data:', updatedData);
+
+
+
   };
 
   const getSystemCodeDetail = async () => {

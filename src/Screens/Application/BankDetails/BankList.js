@@ -298,7 +298,6 @@ const BankList = (props, { navigation }) => {
                     global.COMPLETEDMODULE = 'LN_DMGP_COAPLCT';
                     global.COMPLETEDPAGE = 'DMGRC_COAPPL_BNK_DTLS';
                 } else if (global.CLIENTTYPE == 'GRNTR') {
-                    global.COMPLETEDSUBSTAGE = 'BRE';
                     global.COMPLETEDMODULE = 'LN_DMGP_GRNTR';
                     global.COMPLETEDPAGE = 'DMGRC_GRNTR_BNK_DTLS';
                 }

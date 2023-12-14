@@ -91,12 +91,25 @@ const getFinExpDetailsAll = (loanApplicationId, client_id, client_type) => {
     });
 };
 
-const deleteFinExpDetails = (loanApplicationId, client_id, client_type, usercode,incomeLabel) => {
+const deleteFinExpDetails = (loanApplicationId, client_id, client_type, usercode, incomeLabel) => {
     const db = databaseInstance.getInstance();
     db.transaction((tx) => {
         tx.executeSql(`DELETE FROM ${tableName} WHERE loanApplicationId = ? AND client_id = ? AND client_type = ? 
         AND usercode = ? AND incomeLabel = ?`,
-            [loanApplicationId, client_id, client_type, usercode,incomeLabel],
+            [loanApplicationId, client_id, client_type, usercode, incomeLabel],
+            (tx, results) => {
+                console.log('Rows affected:', results.rowsAffected);
+            }, (error) => {
+                console.error('Error executing SQL:', error);
+            });
+    });
+};
+
+const deleteAllFinExpDetails = () => {
+    const db = databaseInstance.getInstance();
+    db.transaction((tx) => {
+        tx.executeSql(`DELETE FROM ${tableName}`,
+            [],
             (tx, results) => {
                 console.log('Rows affected:', results.rowsAffected);
             }, (error) => {
@@ -111,5 +124,6 @@ export default {
     getMaxId,
     getFinExpDetails,
     deleteFinExpDetails,
-    getFinExpDetailsAll
+    getFinExpDetailsAll,
+    deleteAllFinExpDetails
 };

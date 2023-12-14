@@ -68,6 +68,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
     const [custCatgVisible, setCustCatgVisible] = useState(true);
     const [custCatgDisable, setCustCatgDisable] = useState(false);
     const [custCatData, setCustCatData] = useState([]);
+    const [repayscheduleData, setRepayScheduleData] = useState([]);
     const [errMsg, setErrMsg] = useState('');
     const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
     const showBottomSheet = () => setBottomErrorSheetVisible(true);
@@ -79,28 +80,8 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
     const showChargeModal = () => setChargeModalVisible(true);
     const hideChargeModal = () => setChargeModalVisible(false);
 
-    const chargeData = [
-        {
-            "id": 6,
-            "charge": "KOTAK",
-            "chargeDescription": "KOTAK Insurance Fee",
-            "chargeAmount": 0.0,
-            "taxAmount": 0.0,
-            "cessAmount": 0.0,
-            "paymentType": "L",
-            "remarks": "Applicant Fee :0.00 Co Applicant 0.00",
-            "taxId": null,
-            "isChargeIncludeTax": null,
-            "taxPercentage": null,
-            "finalChargeAmount": 0.0,
-            "chargeAmountTreatment": null,
-            "isActive": null,
-            "createdBy": null,
-            "createdDate": null,
-            "modifiedBy": null,
-            "modifiedDate": null
-        }
-    ]
+    const [chargeData, setChargeData] = useState([]);
+    const [loanProductLinkData, setLoanProductLinkData] = useState(global.LEADTRACKERDATA.applicantLoanProductLink);
 
     //loanType - dropdown
     const [relationTypeMan, setRelationTypeMan] = useState(false); //Manditory or not
@@ -206,6 +187,28 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
     const [interestRateDisable, setInterestRateDisable] = useState(false);
     const interestRateRef = useRef(null);
 
+    const [emiAmount, setEmiAmount] = useState('');
+    const [emiAmountCaption, setEmiAmountCaption] = useState("EMI AMOUNT");
+    const [emiAmountMan, setEmiAmountMan] = useState(false);
+    const [emiAmountVisible, setEmiAmountVisible] = useState(true);
+    const [emiAmountDisable, setEmiAmountDisable] = useState(false);
+    const emiAmountRef = useRef(null);
+
+    const [monthlyEmiDate, setMonthlyEmiDate] = useState('');
+    const [monthlyEmiDateCaption, setMonthlyEmiDateCaption] = useState("MONTHLY EMI DATE");
+    const [monthlyEmiDateMan, setMonthlyEmiDateMan] = useState(false);
+    const [monthlyEmiDateVisible, setMonthlyEmiDateVisible] = useState(true);
+    const [monthlyEmiDateDisable, setMonthlyEmiDateDisable] = useState(false);
+    const monthlyEmiDateRef = useRef(null);
+
+    const [installmentStartDate, setInstallmentStartDateDate] = useState('');
+    const [installmentStartDateCaption, setInstallmentStartDateDateCaption] = useState('INSTALMENT START DATE');
+    const [installmentStartDateMan, setInstallmentStartDateDateMan] = useState(false);
+    const [installmentStartDateVisible, setInstallmentStartDateDateVisible] = useState(true);
+    const [installmentStartDateDisable, setInstallmentStartDateDateDisable] = useState(false);
+    const installmentStartDateRef = useRef(null);
+
+
     const [totalCharges, setTotalCharges] = useState('');
     const [totalChargesCaption, setTotalChargesCaption] = useState("TOTAL CHARGES");
     const [totalChargesMan, setTotalChargesMan] = useState(false);
@@ -227,6 +230,10 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
     const [apiError, setApiError] = useState('');
     const [minLoanAmount, setMinLoanAmount] = useState(0);
     const [maxLoanAmount, setMaxLoanAmount] = useState(0);
+
+    const [minLoanTenure, setMinLoanTenure] = useState(0);
+    const [maxLoanTenure, setMaxLoanTenure] = useState(0);
+
 
     const [onlyView, setOnlyView] = useState(false);
 
@@ -275,35 +282,58 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
     );
 
     const getApplicantData = () => {
-        setLoading(true);
 
-        tbl_loanApplication.getLoanAppBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
-            .then(data => {
-                if (global.DEBUG_MODE) console.log('Loan Data:', data);
-                if (data !== undefined && data.length > 0) {
-                    // setLeadID('');
-                    setLoanTypeLabel(data[0].loan_type)
-                    setLoanProductLabel(data[0].product)
-                    // setProductTypeLabel(data[0].product)
-                    // setCustCatgLabel(data[0].customer_category)
-                    // setCustomerSubCategoryLabel(data[0].customer_subcategory)
-                    // setWorkflowIDLabel(parseInt(data[0].workflow_id))
-                    callLoanAmount(parseInt(data[0].workflow_id));
-                    // setLoanAmount(data[0].loan_amount)
-                    setLoanPurposeLabel(data[0].loan_purpose);
-                    getProductID(data[0].loan_type)
-                    setLoading(false)
-                    // setClientTypeLabel(data[0].customer_type);
-                    // getWorkFlowID(data[0].loan_type, data[0].product, data[0].customer_category)
-                } else {
-                    setLoading(false)
-                }
 
-            })
-            .catch(error => {
-                setLoading(false)
-                if (global.DEBUG_MODE) console.error('Error fetching Loan details:', error);
-            });
+
+        if (loanProductLinkData.length > 0) {
+
+            setLoanTypeLabel(loanProductLinkData[0].loanType)
+            getProductID(loanProductLinkData[0].loanType)
+            setLoanProductLabel(loanProductLinkData[0].loanProduct)
+            setLoanPurposeCatgLabel(loanProductLinkData[0].loanPurposeCategory)
+            setLoanPurposeLabel(loanProductLinkData[0].loanPurpose)
+            setLoanAmount(loanProductLinkData[0].loanAmount.toString())
+            setLoanTenure(loanProductLinkData[0].loanTenure.toString())
+            setRepaymentModeLabel(loanProductLinkData[0].repaymentMode)
+            setLoanRepaymentFreqLabel(loanProductLinkData[0].loanRepaymentFrequency)
+            setInsuranceCoverageLabel(loanProductLinkData[0].insuranceCoverage)
+            // setDisbursementDate(loanProductLinkData.loanType)
+            setDisbursementModeLabel(loanProductLinkData[0].disbursementMode)
+            // setInterestRate(loanProductLinkData.loanType)
+        } else {
+            setLoading(true);
+            tbl_loanApplication.getLoanAppBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
+                .then(data => {
+                    if (global.DEBUG_MODE) console.log('Loan Data:', data);
+                    if (data !== undefined && data.length > 0) {
+                        // setLeadID('');
+                        setLoanTypeLabel(data[0].loan_type)
+                        setLoanProductLabel(data[0].product)
+                        setLoanPurposeLabel(data[0].loan_purpose);
+                        // setProductTypeLabel(data[0].product)
+                        // setCustCatgLabel(data[0].customer_category)
+                        // setCustomerSubCategoryLabel(data[0].customer_subcategory)
+                        // setWorkflowIDLabel(parseInt(data[0].workflow_id))
+                        callLoanAmount(parseInt(data[0].workflow_id));
+                        callLoanTenure(data[0].product)
+                        // setLoanAmount(data[0].loan_amount)
+                        setLoanPurposeLabel(data[0].loan_purpose);
+                        getProductID(data[0].loan_type)
+                        setLoading(false)
+                        // setClientTypeLabel(data[0].customer_type);
+                        // getWorkFlowID(data[0].loan_type, data[0].product, data[0].customer_category)
+                    } else {
+                        setLoading(false)
+                    }
+
+                })
+                .catch(error => {
+                    setLoading(false)
+                    if (global.DEBUG_MODE) console.error('Error fetching Loan details:', error);
+                });
+        }
+
+
 
 
 
@@ -367,6 +397,16 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
             setMinLoanAmount(0)
             setMaxLoanAmount(0)
         }
+    }
+
+    const callLoanTenure = (productID) => {
+
+        const filteredProductIDData = props.mobilecodedetail.t_product.filter((data) => data.ProductID === productID);
+
+        const IntRateMenuID = filteredProductIDData[0].IntRateMenuID;
+        const filteredIntRateMenuData = props.mobilecodedetail.t_InterestRateMenuDetail.filter((data) => data.RateMenuID === IntRateMenuID);
+
+
     }
 
 
@@ -579,7 +619,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
     };
 
 
-    const callRepaySchedule = () => {
+    const callRepaySchedule = (disbursementDate) => {
 
         if (onlyView) {
             props.navigation.replace('ProfileShortKYCVerificationStatus');
@@ -601,13 +641,13 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                 "disbursementMode": disbursementModeLabel,
                 "repaymentMode": repaymentModeLabel,
                 "loanRepaymentFrequency": loanrepaymentFreqLabel,
-                "installmentStartDate": "2023-12-01",
+                "installmentStartDate": "2024-01-15",
                 "disbursementDate": Common.convertYearDateFormat(disbursementDate),
                 "insuranceCoverage": insuranceCoverageLabel,
                 "userId": global.USERID,
                 "branchID": props.profiledetail.userPersonalDetailsDto.branchId,
-                "term": 24,
-                "noOfInstallment": 24,
+                "term": loanTenure,
+                "noOfInstallment": loanTenure,
                 "gracePeriod": 0,
                 "loanApplicationId": global.LOANAPPLICATIONID
             }
@@ -616,13 +656,19 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
             const baseURL = '8901';
             setLoading(true);
             apiInstancelocal(baseURL)
-                .put(`/api/v2/loan-application/applicant-loan-product-link`, appDetails)
+                .post(`/api/v2/loan-application/applicant-loan-product-link`, appDetails)
                 .then(async response => {
                     // Handle the response data
 
                     if (global.DEBUG_MODE) console.log('RepaymentScheduleApiResponse::' + JSON.stringify(response.data),);
 
                     setLoading(false);
+                    setRepayScheduleData(response.data.loanRepaymentSchedules);
+                    setChargeData(response.data.loanProductChargeDetails);
+                    setEmiAmount(response.data.emiAmount.toString())
+                    setMonthlyEmiDate(response.data.monthlyEmiDate)
+                    setTotalCharges(response.data.totalCharges.toString())
+
                     //await insertData();
 
                 })
@@ -639,6 +685,10 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
     };
 
     const updateLoanStatus = () => {
+
+        if (repayscheduleData.length <= 0) {
+            return;
+        }
 
         var module = ''; var page = '';
 
@@ -886,7 +936,11 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
         } else if (componentName === 'LoanTenure') {
             setLoanTenure(textValue);
         } else if (componentName === 'DisbursementDate') {
+
             setDisbursementDate(textValue);
+            callRepaySchedule(textValue);
+
+
         } else if (componentName === 'InterestRate') {
             setInterestRate(textValue);
         }
@@ -955,13 +1009,13 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                     justifyContent: 'center',
                 }}>
                 <HeadComp
-                    textval={language[0][props.language].str_profileshort}
+                    textval={language[0][props.language].str_lnproductselection}
                     props={props}
                     onGoBack={onGoBack}
                 />
             </View>
             <ChildHeadComp
-                textval={global.CLIENTTYPE == 'APPL' ? language[0][props.language].str_applicantdetails : global.CLIENTTYPE == 'CO-APPL' ? language[0][props.language].str_coapplicantdetails : language[0][props.language].str_guarantordetails}
+                textval={language[0][props.language].str_lnproductselectioncharges}
             />
 
             <ScrollView
@@ -1297,6 +1351,37 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                         </View>
                     )}
 
+                    {emiAmountVisible && (
+                        <View
+                            style={{
+                                width: '100%',
+                                marginTop: 19,
+                                paddingHorizontal: 0,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}>
+                            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                                <TextComp
+                                    textVal={emiAmountCaption}
+                                    textStyle={Commonstyles.inputtextStyle}
+                                    Visible={emiAmountMan}
+                                />
+                            </View>
+
+                            <TextInputComp
+                                textValue={emiAmount}
+                                textStyle={Commonstyles.textinputtextStyle}
+                                type="numeric"
+                                Disable={emiAmountDisable}
+                                ComponentName="emiAmount"
+                                reference={emiAmountRef}
+                                returnKey="next"
+                                handleClick={handleClick}
+                                handleReference={handleReference}
+                            />
+                        </View>
+                    )}
+
                 </View>
 
                 <View
@@ -1308,7 +1393,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                         marginTop: 16
                     }}>
 
-                    <TouchableOpacity onPress={() => { props.navigation.navigate('RepaymentSchedule') }} activeOpacity={0.8} style={{
+                    <TouchableOpacity onPress={() => { props.navigation.navigate('RepaymentSchedule', { scheduledata: repayscheduleData }) }} activeOpacity={0.8} style={{
                         width: '90%',
                         height: 40,
                         flexDirection: 'row',
@@ -1323,6 +1408,68 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
 
                 </View>
 
+
+                {monthlyEmiDateVisible && (
+                    <View
+                        style={{
+                            width: '100%',
+                            marginTop: 19,
+                            paddingHorizontal: 0,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}>
+                        <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                            <TextComp
+                                textVal={monthlyEmiDateCaption}
+                                textStyle={Commonstyles.inputtextStyle}
+                                Visible={monthlyEmiDateMan}
+                            />
+                        </View>
+
+                        <TextInputComp
+                            textValue={monthlyEmiDate}
+                            textStyle={Commonstyles.textinputtextStyle}
+                            type="numeric"
+                            Disable={monthlyEmiDateDisable}
+                            ComponentName="MonthlyEmiDate"
+                            reference={monthlyEmiDateRef}
+                            returnKey="next"
+                            handleClick={handleClick}
+                            handleReference={handleReference}
+                        />
+                    </View>
+                )}
+
+                {installmentStartDateVisible && (
+                    <View
+                        style={{
+                            width: '100%',
+                            marginTop: 19,
+                            paddingHorizontal: 0,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}>
+                        <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                            <TextComp
+                                textVal={installmentStartDateCaption}
+                                textStyle={Commonstyles.inputtextStyle}
+                                Visible={installmentStartDateMan}
+                            />
+                        </View>
+
+                        <View style={{ width: '100%', alignItems: 'center' }}>
+                            <DateInputComp textStyle={[Commonstyles.inputtextStyle, { width: '90%' }]} ComponentName="DisbursementDate"
+                                textValue={installmentStartDate}
+                                type="numeric"
+                                handleClick={handleClick}
+                                Disable={installmentStartDateDisable}
+                                reference={installmentStartDateRef}
+                                minDate={new Date()}
+                                handleReference={handleReference} />
+                        </View>
+
+                    </View>
+                )}
 
 
                 <View style={{
@@ -1375,7 +1522,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                     textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
                     viewStyle={Commonstyles.buttonView}
                     innerStyle={Commonstyles.buttonViewInnerStyle}
-                    handleClick={callRepaySchedule}
+                    handleClick={updateLoanStatus}
                 />
             </ScrollView>
         </SafeAreaView>

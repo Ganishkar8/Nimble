@@ -220,7 +220,7 @@ const BankDetailsScreen = (props, { navigation }) => {
             setAccountTypeCaption(value.fieldName)
 
             if (value.mandatory) {
-                setAccountTypeVisible(true);
+                setAccountTypeMan(true);
             }
             if (value.hide) {
                 setAccountTypeVisible(false);
@@ -702,23 +702,7 @@ const BankDetailsScreen = (props, { navigation }) => {
     };
 
     const insertData = (id, dmsId) => {
-        tbl_bankdetails.insertBankDetails(
-            id,
-            global.LOANAPPLICATIONID,
-            global.CLIENTID,
-            global.CLIENTTYPE,
-            accountTypeLabel.trim(),
-            accountHolderName.trim(),
-            ifscCode.trim(),
-            bankName.trim(),
-            branchName.trim(),
-            accountNumber.trim(),
-            bankLinkedMobNo.trim(),
-            upiID.trim(),
-            dmsId,
-            accountToUseLabel,
-            "",
-        )
+        tbl_bankdetails.insertBankDetails(id, global.LOANAPPLICATIONID, global.CLIENTID, global.CLIENTTYPE, accountTypeLabel.trim(), accountHolderName.trim(), ifscCode.trim(), bankName.trim(), branchName.trim(), accountNumber.trim(), bankLinkedMobNo.trim(), upiID.trim(), dmsId, accountToUseLabel, "")
             .then(result => {
                 if (global.DEBUG_MODE) console.log('Inserted Bank detail:', result);
                 props.navigation.replace('BankList')

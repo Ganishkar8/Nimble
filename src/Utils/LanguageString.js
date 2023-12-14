@@ -248,6 +248,8 @@ export const language = [
       str_loannomineedtls: 'Loan (Nominee Details)',
       str_repayschedule: 'Repayment Schedule',
       str_repayscheduledtls: 'Repayment Schedule Details (Yearly/Monthly)',
+      str_lnproductselectioncharges: 'Loan Product Selection & Charges',
+      str_lnproductselection: 'Loan (Loan Product Selection)',
     },
 
     ta: {

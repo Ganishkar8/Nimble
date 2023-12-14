@@ -273,7 +273,7 @@ const LoanNomineeList = (props, { navigation }) => {
                 if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
 
-                global.COMPLETEDMODULE = 'NMNE_DTLS';
+                global.COMPLETEDMODULE = 'LN_PRDT_SLCTN';
                 global.COMPLETEDPAGE = 'NMN_DTLS';
 
 
@@ -373,13 +373,13 @@ const LoanNomineeList = (props, { navigation }) => {
             />
 
 
-            <ButtonViewComp
+            {nomineeDetails.length > 0 && <ButtonViewComp
                 textValue={language[0][props.language].str_submit.toUpperCase()}
                 textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
                 viewStyle={[Commonstyles.buttonView, { marginBottom: 20 }]}
                 innerStyle={Commonstyles.buttonViewInnerStyle}
                 handleClick={buttonNext}
-            />
+            />}
 
 
 

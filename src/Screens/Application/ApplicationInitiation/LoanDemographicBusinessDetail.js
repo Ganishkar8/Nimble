@@ -344,17 +344,17 @@ const LoanDemographicBusinessDetail = (props) => {
     const getApplicantData = () => {
 
 
-        // tbl_familydetails.getFamilyDetailsOnID(global.LOANAPPLICATIONID, 'APPL', familyID)
-        //     .then(data => {
-        //         if (global.DEBUG_MODE) console.log('Family Data:', data);
-        //         if (data !== undefined && data.length > 0) {
+        tbl_loanbusinessDetail.getBusinessDetailsBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE, global.CLIENTID)
+            .then(data => {
+                if (global.DEBUG_MODE) console.log('Business Data:', data);
+                if (data !== undefined && data.length > 0) {
 
-        //         }
+                }
 
-        //     })
-        //     .catch(error => {
-        //         if (global.DEBUG_MODE) console.error('Error fetching Family details:', error);
-        //     });
+            })
+            .catch(error => {
+                if (global.DEBUG_MODE) console.error('Error fetching Business details:', error);
+            });
 
 
     }
@@ -1137,7 +1137,7 @@ const LoanDemographicBusinessDetail = (props) => {
 
     const insertData = async (id, imageID) => {
 
-        await tbl_loanbusinessDetail.insertBusinessDetail(global.LOANAPPLICATIONID, id, global.CLIENTID, 'APPL', CustomerSubCategoryLabel, entShopName, urmNumber, DOI, DOR, DOBC, year, monthLabel, industryTypeLabel, industryLineLabel, companyTypeLabel, enterpriseTypeLabel, businessLocationLabel, noofEmployee, operatingDays, operatingTimings, bookKeepStatusLabel, homeBasedBussinessLabel, actmLabel, timeByPromoter, npmRate, purchaseFrequencyLabel, typePurchaseLabel, salesFrequencyLabel, imageID);
+        await tbl_loanbusinessDetail.insertBusinessDetail(global.LOANAPPLICATIONID, id, global.CLIENTID, global.CLIENTTYPE, CustomerSubCategoryLabel, entShopName, urmNumber, DOI, DOR, DOBC, year, monthLabel, industryTypeLabel, industryLineLabel, companyTypeLabel, enterpriseTypeLabel, businessLocationLabel, noofEmployee, operatingDays, operatingTimings, bookKeepStatusLabel, homeBasedBussinessLabel, actmLabel, timeByPromoter, npmRate, purchaseFrequencyLabel, typePurchaseLabel, salesFrequencyLabel, imageID);
 
         updateLoanStatus();
 
@@ -1421,6 +1421,8 @@ const LoanDemographicBusinessDetail = (props) => {
             setTimeByPromoter(textValue);
         } else if (componentName === 'NPMRate') {
             setNPMRate(textValue);
+        } else if (componentName === 'year') {
+            setYear(textValue);
         }
     };
 
@@ -1802,7 +1804,7 @@ const LoanDemographicBusinessDetail = (props) => {
                                     handleClick={handleClick}
                                     Disable={DORDisable}
                                     reference={DORRef}
-                                    minDate={new Date()}
+                                    maxDate={new Date()}
                                     handleReference={handleReference} />
                             </View>
 
@@ -1833,7 +1835,7 @@ const LoanDemographicBusinessDetail = (props) => {
                                     handleClick={handleClick}
                                     Disable={DOIDisable}
                                     reference={DOIRef}
-                                    minDate={new Date()}
+                                    maxDate={new Date()}
                                     handleReference={handleReference} />
                             </View>
 
@@ -1864,7 +1866,7 @@ const LoanDemographicBusinessDetail = (props) => {
                                     handleClick={handleClick}
                                     Disable={DOBCDisable}
                                     reference={DOBCRef}
-                                    minDate={new Date()}
+                                    maxDate={new Date()}
                                     handleReference={handleReference} />
                             </View>
 

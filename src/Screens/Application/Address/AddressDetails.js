@@ -165,8 +165,6 @@ const AddressDetails = (props, { navigation }) => {
     getSystemCodeDetail()
     makeSystemMandatoryFields();
     getExistingData();
-    alert(isKYC)
-
 
     return () => {
       props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });

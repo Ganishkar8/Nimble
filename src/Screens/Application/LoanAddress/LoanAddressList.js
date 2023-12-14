@@ -399,17 +399,17 @@ const LoanAddressList = (props, { navigation }) => {
         var i = 1;
         var errorMessage = '';
 
-        if (!communicationAvailable) {
-            errorMessage =
-                errorMessage +
-                i +
-                ')' +
-                ' ' +
-                "Please Add Communication Address" +
-                '\n';
-            i++;
-            flag = true;
-        }
+        // if (!communicationAvailable) {
+        //     errorMessage =
+        //         errorMessage +
+        //         i +
+        //         ')' +
+        //         ' ' +
+        //         "Please Add Communication Address" +
+        //         '\n';
+        //     i++;
+        //     flag = true;
+        // }
 
         setErrMsg(errorMessage);
         return flag;

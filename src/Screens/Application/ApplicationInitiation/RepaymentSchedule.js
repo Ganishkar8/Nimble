@@ -366,7 +366,7 @@ const RepaymentSchedule = (props, { navigation }) => {
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
-        const organizedData = data.reduce((acc, installment) => {
+        const organizedData = props.route.params.scheduledata.reduce((acc, installment) => {
             const year = installment.year.toString();
 
             // Check if the year is already present in the accumulator
@@ -538,11 +538,11 @@ const RepaymentSchedule = (props, { navigation }) => {
                                                 <View style={{ width: '85%', alignSelf: 'center', flexDirection: 'row' }}>
 
                                                     <View style={{ width: '25%' }}>
-                                                        <Text style={{ color: Colors.mediumgrey, fontSize: 12.5, fontFamily: 'Poppins-Medium' }}>Month</Text>
+                                                        <Text style={{ color: Colors.mediumgrey, fontSize: 12.5, fontFamily: 'Poppins-Medium' }}>{item.month}</Text>
                                                     </View>
 
                                                     <View style={{ width: '25%' }}>
-                                                        <Text style={{ color: Colors.mediumgrey, fontSize: 12.5, fontFamily: 'Poppins-Medium' }}>EMI</Text>
+                                                        <Text style={{ color: Colors.mediumgrey, fontSize: 12.5, fontFamily: 'Poppins-Medium' }}>{item.installmentAmount}</Text>
                                                     </View>
 
                                                     <View style={{ width: '25%' }}>

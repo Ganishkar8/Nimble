@@ -228,6 +228,7 @@ const LoanDemographicFamilyDetails = (props) => {
 
 
     const [aadharNumber, setAadharNumber] = useState('');
+    const [pageId, setPageId] = useState(global.CURRENTPAGEID);
 
     const [dedupeModalVisible, setDedupeModalVisible] = useState(false);
     const [isDedupeDone, setIsDedupeDone] = useState(false);
@@ -336,6 +337,8 @@ const LoanDemographicFamilyDetails = (props) => {
             .catch(error => {
                 if (global.DEBUG_MODE) console.error('Error fetching Family details:', error);
             });
+
+
 
 
     }
@@ -560,7 +563,7 @@ const LoanDemographicFamilyDetails = (props) => {
 
     const makeSystemMandatoryFields = async () => {
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_relationType' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_rlt_type' && data.pageId === pageId).map((value, index) => {
             setRelationTypeCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -577,7 +580,7 @@ const LoanDemographicFamilyDetails = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_relationTypecoapp' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_rlt_typeco' && data.pageId === pageId).map((value, index) => {
             setRelationStatuswithCOAPPCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -594,7 +597,7 @@ const LoanDemographicFamilyDetails = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_relationTypegrntr' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_rlt_typegrntr' && data.pageId === pageId).map((value, index) => {
             setRelationStatuswithGRNTRCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -611,7 +614,7 @@ const LoanDemographicFamilyDetails = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_gender' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_gender' && data.pageId === pageId).map((value, index) => {
             setGenderCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -1488,7 +1491,7 @@ const LoanDemographicFamilyDetails = (props) => {
                                     handleClick={handleClick}
                                     Disable={DOBDisable}
                                     reference={DOBRef}
-                                    minDate={new Date()}
+                                    maxDate={new Date()}
                                     handleReference={handleReference} />
                             </View>
                             {/* <TextInputComp

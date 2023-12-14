@@ -1637,7 +1637,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
                   handleClick={handleClick}
                   Disable={DOBDisable}
                   reference={DOBRef}
-                  minDate={new Date()}
+                  maxDate={new Date()}
                   handleReference={handleReference} />
               </View>
               {/* <TextInputComp

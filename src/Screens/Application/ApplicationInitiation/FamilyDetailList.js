@@ -84,6 +84,9 @@ const FamilyDetailList = (props, { navigation }) => {
             .catch(error => {
                 if (global.DEBUG_MODE) console.error('Error fetching Relation details:', error);
             });
+
+
+
     }
 
     const FlatView = ({ item }) => {
