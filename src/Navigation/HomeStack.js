@@ -40,6 +40,7 @@ import LoanDemographicProductSelection from '../Screens/Application/ApplicationI
 import LoanNomineeList from '../Screens/Application/ApplicationInitiation/LoanNomineeList';
 import LoanNomineeDetails from '../Screens/Application/ApplicationInitiation/LoanNomineeDetails';
 import RepaymentSchedule from '../Screens/Application/ApplicationInitiation/RepaymentSchedule';
+import LoanDocumentUpload from '../Screens/Application/ApplicationInitiation/LoanDocumentUpload';
 
 const Stack = createNativeStackNavigator();
 
@@ -277,6 +278,12 @@ export default HomeStack = () => {
       <Stack.Screen
         name="RepaymentSchedule"
         component={RepaymentSchedule}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="LoanDocumentUpload"
+        component={LoanDocumentUpload}
         options={{ headerShown: false, tabBarVisible: false }}
       />
 
