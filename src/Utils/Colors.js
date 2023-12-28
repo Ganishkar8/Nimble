@@ -27,5 +27,8 @@ export default {
     skyblue: '#f5f8fa',
     disableBg: '#dfe6ea',
     maroon: '#FFF2C5',
-    borderbg: '#DBDBDB'
+    borderbg: '#DBDBDB',
+    dimPink: '#E8B05033',
+    dimblue: '#0294FF33',
+    dimSkyBlue: '#BBBBBB4D',
 }
