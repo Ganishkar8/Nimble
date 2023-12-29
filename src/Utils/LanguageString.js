@@ -259,6 +259,7 @@ export const language = [
       str_g: 'Guarantor', 
       str_basic_details_optional: 'Basic Details Optional', 
       str_remarks: 'Remarks',
+      str_referencecheck: 'Reference Check',
     },
 
     ta: {
