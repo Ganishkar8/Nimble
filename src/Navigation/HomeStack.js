@@ -41,6 +41,10 @@ import LoanNomineeList from '../Screens/Application/ApplicationInitiation/LoanNo
 import LoanNomineeDetails from '../Screens/Application/ApplicationInitiation/LoanNomineeDetails';
 import RepaymentSchedule from '../Screens/Application/ApplicationInitiation/RepaymentSchedule';
 import LoanDocumentUpload from '../Screens/Application/ApplicationInitiation/LoanDocumentUpload';
+import CBPreview from '../Screens/Application/ApplicationInitiation/CBPreview';
+import BREView from '../Screens/Application/ApplicationInitiation/BREView';
+import FinalConsentScreen from '../Screens/LoanApplication/FinalConsentScreen';
+import ConsentOTPVerification from '../Screens/Application/ApplicationInitiation/ConsentOTPVerification';
 
 const Stack = createNativeStackNavigator();
 
@@ -114,8 +118,35 @@ export default HomeStack = () => {
       />
 
       <Stack.Screen
+        name="FinalConsentScreen"
+        component={FinalConsentScreen}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
         name="PreviewImage"
         component={PreviewImage}
+        options={{ headerShown: false }}
+
+      />
+
+      <Stack.Screen
+        name="CBPreview"
+        component={CBPreview}
+        options={{ headerShown: false }}
+
+      />
+
+      <Stack.Screen
+        name="BREView"
+        component={BREView}
+        options={{ headerShown: false }}
+
+      />
+
+      <Stack.Screen
+        name="ConsentOTPVerification"
+        component={ConsentOTPVerification}
         options={{ headerShown: false }}
 
       />

@@ -31,12 +31,12 @@ const PickerComp = ({
                         setPicker(itemValue, itemIndex)
                     }}>
                     {/* {componentName == 'productIdPicker' && */}
-                    <Picker.Item value='' label='Select' style={{ backgroundColor: '#fff', color: '#000', fontFamily: 'PoppinsRegular' }} />
+                    <Picker.Item key={0} value='' label='Select' style={{ backgroundColor: '#fff', color: '#000', fontFamily: 'PoppinsRegular' }} />
                     {/* } */}
 
                     {
 
-                        pickerdata.map(item => {
+                        pickerdata.map((item, index) => {
                             let labelValue;
 
                             // switch (componentName) {
@@ -49,7 +49,7 @@ const PickerComp = ({
                             //         labelValue = item.label;
                             // }
 
-                            return <Picker.Item value={item.subCodeId} label={item.Description} style={{ backgroundColor: '#fff', color: '#000', fontFamily: 'PoppinsRegular' }} />
+                            return <Picker.Item key={index + 1} value={item.subCodeId} label={item.Description} style={{ backgroundColor: '#fff', color: '#000', fontFamily: 'PoppinsRegular' }} />
                         })
                     }
                 </Picker>

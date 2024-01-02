@@ -39,6 +39,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import DateComp from '../../../Components/Filter/DateComp';
 import DateInputComp from '../../../Components/DateInputComp';
 import ErrorModal from '../../../Components/ErrorModal';
+import ErrorModal1 from '../../../Components/ErrorModal';
 import DedupeModal from '../../../Components/DedupeModal';
 import { useIsFocused } from '@react-navigation/native';
 import tbl_client from '../../../Database/Table/tbl_client';
@@ -309,6 +310,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     props.mobilecodedetail.processSystemMandatoryFields,
   );
   const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [errorModalVisible1, setErrorModalVisible1] = useState(false);
   const [apiError, setApiError] = useState('');
   const [minLoanAmount, setMinLoanAmount] = useState(0);
   const [maxLoanAmount, setMaxLoanAmount] = useState(0);
@@ -318,6 +320,8 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   const [dedupeModalVisible, setDedupeModalVisible] = useState(false);
   const [isDedupeDone, setIsDedupeDone] = useState(false);
   const [onlyView, setOnlyView] = useState(false);
+  const [pageId, setPageId] = useState(global.CURRENTPAGEID);
+
 
   useEffect(() => {
     props.navigation
@@ -396,7 +400,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     }, []),
   );
 
-  const getApplicantData = () => {
+  const getApplicantData = async () => {
     setLoading(true);
     tbl_loanApplication
       .getLoanAppWorkFlowID(global.LOANAPPLICATIONID, 'APPL')
@@ -443,7 +447,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           console.error('Error fetching Applicant details:', error);
       });
 
-    tbl_client
+    await tbl_client
       .getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
       .then(data => {
         if (global.DEBUG_MODE) console.log('Applicant Data:', data);
@@ -469,7 +473,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           setIsDedupeDone(data[0].dedupeCheck);
           setIsDedupeDone(true);
           global.isDedupeDone = '1';
-          if (data[0].isMobileVerified) {
+          if (data[0].isMobileNumberVerified == '1' || data[0].isMobileVerified) {
             global.isMobileVerified = '1';
             setIsMobileVerified('1');
           } else {
@@ -484,13 +488,63 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           setLoading(false);
         } else {
           setLoading(false);
-
+          const filteredrelationTypeData = leadsystemCodeDetail
+            .filter(data => data.masterId === 'RELATIONSHIP')
+            .sort((a, b) => a.Description.localeCompare(b.Description));
+          setRelationTypeData(filteredrelationTypeData);
         }
       })
       .catch(error => {
         if (global.DEBUG_MODE)
           console.error('Error fetching Applicant details:', error);
       });
+
+
+    await tbl_client
+      .getClientBasedOnID(global.LOANAPPLICATIONID, 'APPL')
+      .then(data => {
+        if (global.DEBUG_MODE) console.log('Applicant Data:', data);
+        if (data !== undefined && data.length > 0) {
+          if (global.CLIENTTYPE == 'CO-APPL') {
+            if (data[0].maritalStatusId == 'M') {
+              const filteredrelationTypeData = leadsystemCodeDetail
+                .filter(data => data.masterId === 'RELATIONSHIP' && data.subCodeId === 'SPS')
+                .sort((a, b) => a.Description.localeCompare(b.Description));
+              if (global.DEBUG_MODE) console.log('Filtered Data:', filteredrelationTypeData);
+              setRelationTypeData(filteredrelationTypeData);
+            } else {
+              const filteredrelationTypeData = leadsystemCodeDetail
+                .filter(data => data.masterId === 'RELATIONSHIP')
+                .sort((a, b) => a.Description.localeCompare(b.Description));
+              setRelationTypeData(filteredrelationTypeData);
+            }
+          } else {
+            if (data[0].maritalStatusId == 'M') {
+              const filteredrelationTypeData = leadsystemCodeDetail
+                .filter(data => data.masterId === 'RELATIONSHIP' && data.subCodeId != 'SPS')
+                .sort((a, b) => a.Description.localeCompare(b.Description));
+              setRelationTypeData(filteredrelationTypeData);
+            } else {
+              const filteredrelationTypeData = leadsystemCodeDetail
+                .filter(data => data.masterId === 'RELATIONSHIP')
+                .sort((a, b) => a.Description.localeCompare(b.Description));
+              setRelationTypeData(filteredrelationTypeData);
+            }
+
+          }
+        } else {
+          setLoading(false);
+          const filteredrelationTypeData = leadsystemCodeDetail
+            .filter(data => data.masterId === 'RELATIONSHIP')
+            .sort((a, b) => a.Description.localeCompare(b.Description));
+          setRelationTypeData(filteredrelationTypeData);
+        }
+      })
+      .catch(error => {
+        if (global.DEBUG_MODE)
+          console.error('Error fetching Applicant details:', error);
+      });
+
   };
 
   const fieldsDisable = () => {
@@ -516,10 +570,6 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   };
 
   const getSystemCodeDetail = async () => {
-    const filteredrelationTypeData = leadsystemCodeDetail
-      .filter(data => data.masterId === 'RELATIONSHIP')
-      .sort((a, b) => a.Description.localeCompare(b.Description));
-    setRelationTypeData(filteredrelationTypeData);
 
     const filteredLoanTypeData = leadsystemCodeDetail
       .filter(data => data.masterId === 'LNTP')
@@ -827,7 +877,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
 
   const makeSystemMandatoryFields = async () => {
     systemMandatoryField
-      .filter(data => data.fieldUiid === 'sp_relationType' && data.pageId === 1)
+      .filter(data => data.fieldUiid === 'sp_relationType' && data.pageId === pageId)
       .map((value, index) => {
         setRelationTypeCaption(value.fieldName);
 
@@ -846,7 +896,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       });
 
     systemMandatoryField
-      .filter(data => data.fieldUiid === 'sp_ln_type' && data.pageId === 1)
+      .filter(data => data.fieldUiid === 'sp_ln_type' && data.pageId === pageId)
       .map((value, index) => {
         setLoanTypeCaption(value.fieldName);
 
@@ -865,7 +915,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       });
 
     systemMandatoryField
-      .filter(data => data.fieldUiid === 'sp_gender' && data.pageId === 1)
+      .filter(data => data.fieldUiid === 'sp_gender' && data.pageId === pageId)
       .map((value, index) => {
         setGenderCaption(value.fieldName);
 
@@ -884,7 +934,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       });
 
     systemMandatoryField
-      .filter(data => data.fieldUiid === 'sp_pd_id' && data.pageId === 1)
+      .filter(data => data.fieldUiid === 'sp_pd_id' && data.pageId === pageId)
       .map((value, index) => {
         setProductTypeCaption(value.fieldName);
 
@@ -903,7 +953,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       });
 
     systemMandatoryField
-      .filter(data => data.fieldUiid === 'sp_ln_prps' && data.pageId === 1)
+      .filter(data => data.fieldUiid === 'sp_ln_prps' && data.pageId === pageId)
       .map((value, index) => {
         setLoanPurposeCaption(value.fieldName);
 
@@ -922,7 +972,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       });
 
     systemMandatoryField
-      .filter(data => data.fieldUiid === 'sp_cust_cat' && data.pageId === 1)
+      .filter(data => data.fieldUiid === 'sp_cust_cat' && data.pageId === pageId)
       .map((value, index) => {
         setCustCatgCaption(value.fieldName);
 
@@ -941,7 +991,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       });
 
     systemMandatoryField
-      .filter(data => data.fieldUiid === 'sp_cust_subcat' && data.pageId === 1)
+      .filter(data => data.fieldUiid === 'sp_cust_subcat' && data.pageId === pageId)
       .map((value, index) => {
         setCustomerSubCategoryCaption(value.fieldName);
 
@@ -960,7 +1010,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       });
 
     systemMandatoryField
-      .filter(data => data.fieldUiid === 'sp_wf_id' && data.pageId === 1)
+      .filter(data => data.fieldUiid === 'sp_wf_id' && data.pageId === pageId)
       .map((value, index) => {
         setWorkflowIDCaption(value.fieldName);
 
@@ -979,7 +1029,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       });
 
     systemMandatoryField
-      .filter(data => data.fieldUiid === 'sp_title' && data.pageId === 1)
+      .filter(data => data.fieldUiid === 'sp_title' && data.pageId === pageId)
       .map((value, index) => {
         setTitleCaption(value.fieldName);
         if (value.mandatory) {
@@ -997,7 +1047,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       });
 
     systemMandatoryField
-      .filter(data => data.fieldUiid === 'et_ln_amt' && data.pageId === 1)
+      .filter(data => data.fieldUiid === 'et_ln_amt' && data.pageId === pageId)
       .map((value, index) => {
         setLoanAmountCaption(value.fieldName);
 
@@ -1016,7 +1066,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       });
 
     systemMandatoryField
-      .filter(data => data.fieldUiid === 'et_name' && data.pageId === 1)
+      .filter(data => data.fieldUiid === 'et_name' && data.pageId === pageId)
       .map((value, index) => {
         setNameCaption(value.fieldName);
 
@@ -1035,7 +1085,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       });
 
     systemMandatoryField
-      .filter(data => data.fieldUiid === 'sp_mrt_sts' && data.pageId === 1)
+      .filter(data => data.fieldUiid === 'sp_mrt_sts' && data.pageId === pageId)
       .map((value, index) => {
         setMaritalStatusCaption(value.fieldName);
 
@@ -1054,7 +1104,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       });
 
     systemMandatoryField
-      .filter(data => data.fieldUiid === 'et_mbl_no' && data.pageId === 1)
+      .filter(data => data.fieldUiid === 'et_mbl_no' && data.pageId === pageId)
       .map((value, index) => {
         setMobileNumberCaption(value.fieldName);
 
@@ -1073,7 +1123,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       });
 
     systemMandatoryField
-      .filter(data => data.fieldUiid === 'et_email' && data.pageId === 1)
+      .filter(data => data.fieldUiid === 'et_email' && data.pageId === pageId)
       .map((value, index) => {
         setEmailCaption(value.fieldName);
 
@@ -1092,7 +1142,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       });
 
     systemMandatoryField
-      .filter(data => data.fieldUiid === 'chck_is_msme' && data.pageId === 1)
+      .filter(data => data.fieldUiid === 'chck_is_msme' && data.pageId === pageId)
       .map((value, index) => {
         setchkMsmeCaption(value.fieldName);
 
@@ -1136,6 +1186,31 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       return;
     }
 
+    var exp1 = '', exp2 = '', exp3 = '', exp4 = '';
+
+    if (expiryDate1 != undefined && expiryDate1 != null) {
+      if (expiryDate1.length > 0) {
+        exp1 = Common.convertYearDateFormat(expiryDate1)
+      }
+    }
+    if (expiryDate2 != undefined && expiryDate2 != null) {
+      if (expiryDate2.length > 0) {
+        exp2 = Common.convertYearDateFormat(expiryDate2)
+      }
+    }
+
+    if (expiryDate3 != undefined && expiryDate3 != null) {
+      if (expiryDate3.length > 0) {
+        exp3 = Common.convertYearDateFormat(expiryDate3)
+      }
+    }
+
+    if (expiryDate4 != undefined && expiryDate4 != null) {
+      if (expiryDate4.length > 0) {
+        exp4 = Common.convertYearDateFormat(expiryDate4)
+      }
+    }
+
     if (validate()) {
       showBottomSheet();
     } else {
@@ -1165,28 +1240,16 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
               maritalStatus: MaritalStatusLabel,
               kycTypeId1: KycType1Label,
               kycIdValue1: kycID1,
-              kycType1ExpiryDate:
-                expiryDate1.length > 0
-                  ? Common.convertYearDateFormat(expiryDate1)
-                  : '',
+              kycType1ExpiryDate: exp1,
               kycTypeId2: KycType2Label,
               kycIdValue2: kycID2,
-              kycType2ExpiryDate:
-                expiryDate2.length > 0
-                  ? Common.convertYearDateFormat(expiryDate2)
-                  : '',
+              kycType2ExpiryDate: exp2,
               kycTypeId3: KycType3Label,
               kycIdValue3: kycID3,
-              kycType3ExpiryDate:
-                expiryDate3.length > 0
-                  ? Common.convertYearDateFormat(expiryDate3)
-                  : '',
+              kycType3ExpiryDate: exp3,
               kycTypeId4: KycType4Label,
               kycIdValue4: kycID4,
-              kycType4ExpiryDate:
-                expiryDate4.length > 0
-                  ? Common.convertYearDateFormat(expiryDate4)
-                  : '',
+              kycType4ExpiryDate: exp4,
               udyamRegistrationNumber: URNumber,
               mobileNumber: mobileNumber,
               email: Email,
@@ -1200,6 +1263,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
               dedupeCheck: isDedupeDone,
               clientAddress: [],
               clientBankDetail: [],
+              clientManualKycLink: []
             },
           ],
           isActive: true,
@@ -1223,27 +1287,30 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
               maritalStatus: MaritalStatusLabel,
               kycTypeId1: KycType1Label,
               kycIdValue1: kycID1,
-              kycType1ExpiryDate: expiryDate1.length > 0 ? Common.convertYearDateFormat(expiryDate1) : '',
+              kycType1ExpiryDate: exp1,
               kycTypeId2: KycType2Label,
               kycIdValue2: kycID2,
-              kycType2ExpiryDate: expiryDate2.length > 0 ? Common.convertYearDateFormat(expiryDate2) : '',
+              kycType2ExpiryDate: exp2,
               kycTypeId3: KycType3Label,
               kycIdValue3: kycID3,
-              kycType3ExpiryDate: expiryDate3.length > 0 ? Common.convertYearDateFormat(expiryDate3) : '',
+              kycType3ExpiryDate: exp3,
               kycTypeId4: KycType4Label,
               kycIdValue4: kycID4,
-              kycType4ExpiryDate: expiryDate4.length > 0 ? Common.convertYearDateFormat(expiryDate4) : '',
+              kycType4ExpiryDate: exp4,
               udyamRegistrationNumber: URNumber,
               mobileNumber: mobileNumber,
               email: Email,
               isActive: true,
-              aadharNumberVerified: false,
+              isAadharNumberVerified: false,
               udyamRegistrationNumberVerified: false,
-              mobileNumberVerified: true,
-              msme: chkMsme,
-              emailVerified: false,
-              panVerified: false,
+              isMobileNumberVerified: true,
+              isMsme: chkMsme,
+              isEmailVerified: false,
+              isPanVerified: false,
               dedupeCheck: isDedupeDone,
+              clientAddress: [],
+              clientBankDetail: [],
+              clientManualKycLink: []
             },
           ],
           isActive: true,
@@ -1494,7 +1561,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       setLoading(true);
       apiInstancelocal(baseURL)
         .post(
-          `/api/v2/profile-short/internal-dedupe-check/${global.USERID}`,
+          `/api/v2/profile-short/internal-dedupe-check/${global.USERID}/loanApplicationId/${global.LOANAPPLICATIONID}`,
           appDetails,
         )
         .then(async response => {
@@ -1505,6 +1572,13 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           if (response.data.clientExistingDetails == null) {
             setClientTypeLabel('NEW');
             setClientTypeVisible(true);
+            if (global.CLIENTTYPE == 'APPL') {
+              setErrorModalVisible(true);
+              setApiError('No Result Found');
+            } else {
+              setErrorModalVisible1(true);
+              setApiError('No Result Found');
+            }
           } else {
             props.dedupeAction(response.data);
             setDedupeModalVisible(true);
@@ -1537,7 +1611,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       global.CLIENTID,
       global.LOANAPPLICATIONID,
       global.CLIENTTYPE,
-      '',
+      relationTypeLabel,
       titleLabel,
       Name,
       '',
@@ -1629,7 +1703,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
 
   const generateOTP = () => {
     const appDetails = {
-      loanApplicationId: 0,
+      loanApplicationId: global.LOANAPPLICATIONID,
       clientId: global.CLIENTID,
       generatedFor: `91${mobileNumber}`,
       userId: global.USERID,
@@ -2024,15 +2098,18 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           '\n';
         i++;
         flag = true;
-      } else if (!Common.isValidEmail) {
+      }
+    }
+
+    if (Email.length > 0) {
+      if (!Common.isValidEmail(Email)) {
         errorMessage =
           errorMessage +
           i +
           ')' +
           ' ' +
           language[0][props.language].str_plsenter +
-          'Valid ';
-        EmailCaption + '\n';
+          'Valid ' + EmailCaption + '\n';
         i++;
         flag = true;
       }
@@ -2061,7 +2138,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           '\n';
         i++;
         flag = true;
-      } else if (!isMobileVerified) {
+      } else if (isMobileVerified == '0') {
         errorMessage =
           errorMessage +
           i +
@@ -2089,6 +2166,22 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           '\n';
         i++;
         flag = true;
+      }
+    }
+
+    if (titleVisible && genderVisible) {
+      if (titleLabel === 'MR') {
+        if (genderLabel == 'F') {
+          errorMessage = errorMessage + i + ')' + ' ' + titleCaption + ' AND ' + genderCaption + ' Not matching' + '\n';
+          i++;
+          flag = true;
+        }
+      } else if (titleLabel === 'MRS' || titleLabel === 'MISS') {
+        if (genderLabel == 'M') {
+          errorMessage = errorMessage + i + ')' + ' ' + titleCaption + ' AND ' + genderCaption + ' Not matching' + '\n';
+          i++;
+          flag = true;
+        }
       }
     }
 
@@ -2121,6 +2214,57 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     if (KycType1Label == '007') {
       if (kycID1.length > 0) {
         if (!Common.isValidPAN(kycID1)) {
+          errorMessage =
+            errorMessage +
+            i +
+            ')' +
+            ' ' +
+            language[0][props.language].str_plsenter +
+            'Valid PAN' +
+            '\n';
+          i++;
+          flag = true;
+        }
+      }
+    }
+
+    if (KycType2Label == '007') {
+      if (kycID2.length > 0) {
+        if (!Common.isValidPAN(kycID2)) {
+          errorMessage =
+            errorMessage +
+            i +
+            ')' +
+            ' ' +
+            language[0][props.language].str_plsenter +
+            'Valid PAN' +
+            '\n';
+          i++;
+          flag = true;
+        }
+      }
+    }
+
+    if (KycType3Label == '007') {
+      if (kycID3.length > 0) {
+        if (!Common.isValidPAN(kycID3)) {
+          errorMessage =
+            errorMessage +
+            i +
+            ')' +
+            ' ' +
+            language[0][props.language].str_plsenter +
+            'Valid PAN' +
+            '\n';
+          i++;
+          flag = true;
+        }
+      }
+    }
+
+    if (KycType4Label == '007') {
+      if (kycID4.length > 0) {
+        if (!Common.isValidPAN(kycID4)) {
           errorMessage =
             errorMessage +
             i +
@@ -2253,6 +2397,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     } else if (componentName == 'KycType1Picker') {
       setKycType1Label(label);
       setKycType1Index(index);
+      setkycID1('');
       if (label == '001') {
         setkycNumberTypeID1('numeric');
       } else {
@@ -2260,13 +2405,16 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
       if (label == '002' || label == '008') {
         setExpiry1DateVisible(true);
+        setExpiry1DateMan(true);
       } else {
         setExpiry1Date('');
         setExpiry1DateVisible(false);
+        setExpiry1DateMan(false);
       }
     } else if (componentName == 'KycType2Picker') {
       setKycType2Label(label);
       setKycType2Index(index);
+      setkycID2('');
       if (label == '001') {
         setkycNumberTypeID2('numeric');
       } else {
@@ -2274,13 +2422,16 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
       if (label == '002' || label == '008') {
         setExpiry2DateVisible(true);
+        setExpiry2DateMan(true);
       } else {
         setExpiry2Date('');
         setExpiry2DateVisible(false);
+        setExpiry2DateMan(false);
       }
     } else if (componentName == 'KycType3Picker') {
       setKycType3Label(label);
       setKycType3Index(index);
+      setkycID3('');
       if (label == '001') {
         setkycNumberTypeID3('numeric');
       } else {
@@ -2288,13 +2439,16 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
       if (label == '002' || label == '008') {
         setExpiry3DateVisible(true);
+        setExpiry3DateMan(true);
       } else {
         setExpiry3Date('');
         setExpiry3DateVisible(false);
+        setExpiry3DateMan(false);
       }
     } else if (componentName == 'KycType4Picker') {
       setKycType4Label(label);
       setKycType4Index(index);
+      setkycID4('');
       if (label == '001') {
         setkycNumberTypeID4('numeric');
       } else {
@@ -2302,9 +2456,11 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
       if (label == '002' || label == '008') {
         setExpiry4DateVisible(true);
+        setExpiry4DateMan(true);
       } else {
         setExpiry4Date('');
         setExpiry4DateVisible(false);
+        setExpiry4DateMan(true);
       }
     } else if (componentName == 'workFlowIDPicker') {
       setWorkflowIDLabel(label);
@@ -2385,6 +2541,33 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     setErrorModalVisible(false);
   };
 
+  const closeErrorModal1 = (type) => {
+    setErrorModalVisible1(false);
+    if (
+      KycType1Label == '001' ||
+      KycType2Label == '001' ||
+      KycType3Label == '001' ||
+      KycType4Label == '001'
+    ) {
+      if (KycType1Label == '001') {
+        setAadharNumber(kycID1);
+        aadhar = kycID1;
+      } else if (KycType2Label == '001') {
+        setAadharNumber(kycID2);
+        aadhar = kycID2;
+      } else if (KycType3Label == '001') {
+        setAadharNumber(kycID3);
+        aadhar = kycID3;
+      } else if (KycType4Label == '001') {
+        setAadharNumber(kycID4);
+        aadhar = kycID4;
+      }
+      generateAadharOTP();
+    } else {
+      updateLoanStatus();
+    }
+  };
+
   const onGoBack = () => {
     props.navigation.replace('LoanApplicationMain', {
       fromScreen: 'BasicDetail',
@@ -2400,6 +2583,13 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
         isVisible={errorModalVisible}
         onClose={closeErrorModal}
         textContent={apiError}
+        textClose={language[0][props.language].str_ok}
+      />
+      <ErrorModal1
+        isVisible={errorModalVisible1}
+        onClose={closeErrorModal1}
+        textContent={apiError}
+        headText={'1'}
         textClose={language[0][props.language].str_ok}
       />
       <DedupeModal
@@ -3315,7 +3505,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
               ComponentName="chkMsme"
               returnKey="next"
               handleClick={handleClick}
-              Visible={chkMsmeVisible}
+              Visible={chkMsmeMan}
               textCaption={chkMsmeCaption}
             />
           </View>

@@ -125,7 +125,6 @@ const LoginScreen = (props, { navigation }) => {
                     if (global.DEBUG_MODE) console.log("ResponseLoginApi::" + JSON.stringify(response.data));
                     const decodedToken = await jwtDecode(response.data.jwtToken);
                     if (global.DEBUG_MODE) console.log("LoginJWTDecode::" + JSON.stringify(decodedToken));
-                    setLoading(false)
                     setUserID('')
                     setPassword('')
                     global.USERNAME = decodedToken.userName;
@@ -316,6 +315,7 @@ const LoginScreen = (props, { navigation }) => {
 
     const loginHandle = () => {
         setActivationSuccess(false);
+        setLoading(false)
         props.navigation.replace('BottomNavigation');
     };
 

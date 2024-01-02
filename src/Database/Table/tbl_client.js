@@ -113,6 +113,32 @@ const updateKYCManual = (kycmanual, loanApplicationId, clientTypeId) => {
     });
 }
 
+const getAllClientID = (id) => {
+    const db = databaseInstance.getInstance();
+
+    return new Promise((resolve, reject) => {
+        db.transaction(tx => {
+            tx.executeSql(
+                `SELECT id,loanApplicationId,clientTypeId,mobileNumber,email,isKycManual,kycTypeId1,kycIdValue1,expiryDate1,kycTypeId2,kycIdValue2,expiryDate2,kycTypeId3,kycIdValue3,expiryDate3,kycTypeId4,kycIdValue4,expiryDate4,isMsme,udyamRegistrationNumber FROM ${tableName} WHERE loanApplicationId = ?`,
+                [id],
+                (_, result) => {
+                    const rows = result.rows;
+                    const clientData = [];
+
+                    for (let i = 0; i < rows.length; i++) {
+                        clientData.push(rows.item(i));
+                    }
+
+                    resolve(clientData);
+                },
+                error => {
+                    reject(error);
+                },
+            );
+        });
+    });
+};
+
 const getClientBasedOnID = (id, clientType) => {
     const db = databaseInstance.getInstance();
 
@@ -187,5 +213,6 @@ export default {
     updateAadharData,
     updatePersonalDetails,
     getOnlyClientBasedOnID,
-    updateKYCManual
+    updateKYCManual,
+    getAllClientID
 };

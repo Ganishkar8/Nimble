@@ -17,6 +17,7 @@ const PreviewImage = (props, { navigation, route }) => {
 
     const onGoBack = () => {
         props.navigation.goBack();
+        return true;
     }
 
     const getImageSize = (uri) => {

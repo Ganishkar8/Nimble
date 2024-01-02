@@ -89,11 +89,11 @@ const getFamilyDetailsOnID = (id, clientType, relationTypeId) => {
 };
 
 
-const deleteFamilyDetailsBasedID = (loanApplicationId, relationTypeId) => {
+const deleteFamilyDetailsBasedID = (loanApplicationId, id) => {
     const db = databaseInstance.getInstance();
     db.transaction((tx) => {
-        tx.executeSql(`DELETE FROM ${tableName} WHERE loanApplicationId = ? AND relationTypeId = ?`,
-            [loanApplicationId, relationTypeId],
+        tx.executeSql(`DELETE FROM ${tableName} WHERE loanApplicationId = ? AND id = ?`,
+            [loanApplicationId, id],
             (tx, results) => {
                 console.log('Rows affected:', results.rowsAffected);
             }, (error) => {

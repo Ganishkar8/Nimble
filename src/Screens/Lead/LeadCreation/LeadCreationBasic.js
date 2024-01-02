@@ -320,6 +320,7 @@ const LeadCreationBasic = (props, { navigation, route }) => {
                 if (global.DEBUG_MODE) console.log("LeadCreationBasicApiResponse::" + JSON.stringify(response.data));
                 global.leadID = response.data.id;
                 global.leadNumber = response.data.leadNumber;
+                global.LEADTYPE = 'DRAFT';
                 insertLead(response.data, true)
                 setLoading(false)
             })
@@ -491,13 +492,13 @@ const LeadCreationBasic = (props, { navigation, route }) => {
 
         if (titleVisible && genderVisible) {
             if (titleLabel === 'MR') {
-                if (genderLabel == 'FEMALE') {
+                if (genderLabel == 'F') {
                     errorMessage = errorMessage + i + ')' + ' ' + titleCaption + ' AND ' + genderCaption + ' Not matching' + '\n';
                     i++;
                     flag = true;
                 }
             } else if (titleLabel === 'MRS' || titleLabel === 'MISS') {
-                if (genderLabel == 'MALE') {
+                if (genderLabel == 'M') {
                     errorMessage = errorMessage + i + ')' + ' ' + titleCaption + ' AND ' + genderCaption + ' Not matching' + '\n';
                     i++;
                     flag = true;

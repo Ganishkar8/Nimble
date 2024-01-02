@@ -100,6 +100,8 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [apiError, setApiError] = useState('');
   const [gstData, setGstData] = useState(global.LEADTRACKERDATA.applicantSalesDetail);
+  const [pageId, setPageId] = useState(global.CURRENTPAGEID);
+
 
   useEffect(() => {
     props.navigation
@@ -107,6 +109,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
       ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     getSystemCodeDetail();
     getData();
+    makeSystemMandatoryFields();
 
 
     return () =>
@@ -167,6 +170,43 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
 
 
   };
+
+  const makeSystemMandatoryFields = () => {
+
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_cpt_rsn' && data.pageId === pageId).map((value, index) => {
+
+      if (value.mandatory) {
+        setCaptureReasonMan(true);
+      }
+      if (value.hide) {
+        setCaptureReasonVisible(false);
+      }
+      if (value.disable) {
+        setCaptureReasonDisable(true);
+      }
+      if (value.captionChange) {
+        setCaptureReasonCaption(value[0].fieldCaptionChange)
+      }
+    });
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_tm_frm' && data.pageId === pageId).map((value, index) => {
+
+      if (value.mandatory) {
+        setTimeFrameMan(true);
+      }
+      if (value.hide) {
+        setTimeFrameVisible(false);
+      }
+      if (value.disable) {
+        setTimeFrameDisable(true);
+      }
+      if (value.captionChange) {
+        setTimeFrameCaption(value[0].fieldCaptionChange)
+      }
+    });
+
+  }
 
   const getSystemCodeDetail = async () => {
     let dataArray = [];
@@ -432,6 +472,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
                 keyboardType={'email-address'}
                 multiline={false}
                 maxLength={25}
+                editable={global.USERTYPEID == 1164 ? true : false}
                 autoCapitalize="characters"
                 style={{ color: Colors.black, overflow: 'scroll' }}
                 returnKeyType={'done'}
@@ -497,6 +538,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
               placeholderTextColor={Colors.lightgrey}
               keyboardType={'numeric'}
               multiline={false}
+              editable={global.USERTYPEID == 1164 ? true : false}
               maxLength={25}
               style={{ width: 70, color: Colors.black, overflow: 'scroll' }}
               returnKeyType={'done'}
@@ -517,6 +559,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
               placeholderTextColor={Colors.lightgrey}
               keyboardType={'numeric'}
               multiline={false}
+              editable={global.USERTYPEID == 1164 ? true : false}
               maxLength={25}
               style={{ width: 70, color: Colors.black, overflow: 'scroll' }}
               returnKeyType={'done'}
@@ -572,6 +615,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
               keyboardType={'numeric'}
               multiline={false}
               maxLength={25}
+              editable={global.USERTYPEID == 1164 ? true : false}
               style={{ width: 70, color: Colors.black, overflow: 'scroll' }}
               returnKeyType={'done'}
 
@@ -592,6 +636,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
               keyboardType={'numeric'}
               multiline={false}
               maxLength={25}
+              editable={global.USERTYPEID == 1164 ? true : false}
               style={{ width: 70, color: Colors.black, overflow: 'scroll' }}
               returnKeyType={'done'}
 
@@ -758,7 +803,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
           global.COMPLETEDMODULE = 'LN_DMGP_APLCT';
           global.COMPLETEDPAGE = 'DMGRC_APPL_GST_DTLS';
         }
-        props.navigation.replace('LoanDemographicsFinancialDetails');
+        navigatetoFinancial();
       })
       .catch(error => {
         // Handle the error
@@ -773,8 +818,20 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
 
   };
 
-  const buttonNext = () => {
+  const navigatetoFinancial = async () => {
 
+    var page = '';
+    page = 'DMGRC_APPL_FNCL_DTLS';
+
+    await Common.getPageID(global.FILTEREDPROCESSMODULE, page)
+    props.navigation.replace('LoanDemographicsFinancialDetails');
+  }
+
+  const buttonNext = () => {
+    if (global.USERTYPEID == 1163) {
+      navigatetoFinancial();
+      return;
+    }
     postGSTDetailData();
 
   }
@@ -871,6 +928,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
                 status={selectedValue === 'Available' ? 'checked' : 'unchecked'}
                 onPress={() => setSelectedValue('Available')}
                 color="#007BFF"
+                disabled={global.USERTYPEID == 1164 ? false : true}
               />
               <Text style={{
                 color: Colors.mediumgrey,
@@ -893,6 +951,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
                 status={selectedValue === 'NotAvailable' ? 'checked' : 'unchecked'}
                 onPress={() => setSelectedValue('NotAvailable')}
                 color="#007BFF"
+                disabled={global.USERTYPEID == 1164 ? false : true}
               />
               <Text style={{
                 color: Colors.mediumgrey,
@@ -924,15 +983,17 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
                   flexDirection: 'row',
                   justifyContent: 'flex-end',
                 }}>
-                <TouchableOpacity onPress={() => AddGST()}>
-                  <Text
-                    style={{
-                      color: Colors.darkblue,
-                      fontFamily: 'Poppins-Medium'
-                    }}>
-                    + Add Another GST IN
-                  </Text>
-                </TouchableOpacity>
+                {global.USERTYPEID == 1164 &&
+                  <TouchableOpacity onPress={() => AddGST()}>
+                    <Text
+                      style={{
+                        color: Colors.darkblue,
+                        fontFamily: 'Poppins-Medium'
+                      }}>
+                      + Add Another GST IN
+                    </Text>
+                  </TouchableOpacity>
+                }
               </View>
             </View>
           }

@@ -143,17 +143,20 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
 
         await value.clientDetail.forEach(async (client) => {
             var dob = '';
-            // if (client.dateOfBirth && client.dateOfBirth != undefined) {
-            //     dob = Common.convertDateFormat(client.dateOfBirth);
-            // }
+            if (client.dateOfBirth && client.dateOfBirth != undefined) {
+                dob = Common.convertDateFormat(client.dateOfBirth);
+            }
+            if (global.DEBUG_MODE) console.log('ClientDetails:' + JSON.stringify(client));
+
             await tbl_client.insertClient(client.id, loanApplicationID, client.clientType, client.relationType, client.title, client.firstName, client.middleName, client.lastName, dob, client.age, client.fatherName, client.spouseName, client.caste, client.religion, client.motherTongue, client.educationQualification, client.gender, client.maritalStatus, client.mobileNumber, client.email, client.isKycManual,
-                client.kycTypeId1, client.kycIdValue1, client.kycType1ExpiryDate, client.kycTypeId2, client.kycIdValue2, client.kycType2ExpiryDate, client.kycTypeId3, client.kycIdValue3, client.kycType3ExpiryDate, client.kycTypeId4, client.kycIdValue4, client.kycType4ExpiryDate, client.msme, client.isAadharNumberVerified, client.panVerified, client.udyamRegistrationNumber, client.udyamRegistrationNumberVerified, client.mobileNumberVerified, client.emailVerified, value.dedupeCheck, client.dedupePassed, client.dmsId, client.imageName, client.geoCode, 'true', '', '', '', '', '', '', '', value.lmsClientId, value.lmsCustomerTypeId);
+                client.kycTypeId1, client.kycIdValue1, client.kycType1ExpiryDate, client.kycTypeId2, client.kycIdValue2, client.kycType2ExpiryDate, client.kycTypeId3, client.kycIdValue3, client.kycType3ExpiryDate, client.kycTypeId4, client.kycIdValue4, client.kycType4ExpiryDate, client.isMsme, client.isAadharNumberVerified, client.isPanVerified, client.udyamRegistrationNumber, client.isUdyamRegistrationNumberVerified, client.isMobileNumberVerified, client.isEmailVerified, value.dedupeCheck, client.dedupePassed, client.dmsId, client.imageName, client.geoCode, 'true', '', '', '', '', '', '', '', value.lmsClientId, value.lmsCustomerTypeId);
 
             // If there are clientAddress details, iterate through them
             if (client.clientAddress && client.clientAddress.length > 0) {
 
-                if (Common.DEBUG_MODE) console.log('Client Address Details:' + client.clientAddress);
+                if (global.DEBUG_MODE) console.log('Client Address Details:' + JSON.stringify(client.clientAddress));
                 client.clientAddress.forEach((address) => {
+
                     if (address.addressType == 'P' || address.addressType == 'C') {
                         tbl_clientaddressinfo.insertClientAddress(loanApplicationID, address.id, client.id, client.clientType, address.addressType, address.addressLine1, address.addressLine2, address.landmark, address.pincode, address.city, address.district, address.state, address.country, address.mobileOrLandLineNumber, address.emailId, address.addressOwnership, address.ownerDetails, address.ownerName, address.geoClassification, address.yearsAtResidence, address.yearsInCurrentCityOrTown, 'true', '', '', '', '', '', '', client.aadharNumberVerified);
                     } else {
@@ -164,12 +167,12 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
 
             if (client.clientBankDetail && client.clientBankDetail.length > 0) {
 
-                if (Common.DEBUG_MODE) console.log('Client Bank Details:' + client.clientBankDetail);
+                if (global.DEBUG_MODE) console.log('Client Bank Details:' + client.clientBankDetail);
                 client.clientBankDetail.forEach((bankdetail) => {
                     tbl_bankdetails.insertBankDetails(bankdetail.id, loanApplicationID, client.id, client.clientType, bankdetail.accountType, bankdetail.accountHolderNameAsPerBank, bankdetail.ifscCode, bankdetail.bankName, bankdetail.branchName, bankdetail.accountNumber, bankdetail.bankLinkedMobileNo, bankdetail.upiId, bankdetail.dmsId, bankdetail.accountToBeUsedFor, "")
                 });
             }
-            if (Common.DEBUG_MODE) console.log('Client Business Details:' + client.clientBusinessDetail);
+            if (global.DEBUG_MODE) console.log('Client Business Details:' + client.clientBusinessDetail);
 
             if (client.clientBusinessDetail != undefined) {
                 const businessdetail = client.clientBusinessDetail
@@ -182,7 +185,7 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
 
             if (client.clientFinancialDetail != undefined) {
 
-                if (Common.DEBUG_MODE) console.log('Client Financial Details:' + client.clientFinancialDetail);
+                if (global.DEBUG_MODE) console.log('Client Financial Details:' + client.clientFinancialDetail);
                 //client.clientFinancialDetail.forEach((findetail) => {
                 const findetail = client.clientFinancialDetail;
                 findetail.clientIncomeDetails.forEach((incomedetail) => {
@@ -200,22 +203,22 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
 
         await value.familyDetail.forEach(async (client) => {
             var dob = '', exp1 = '', exp2 = '', exp3 = '', exp4 = '';
-            if (Common.DEBUG_MODE) console.log('Loan Family Details:' + client);
-            // if (client.dateOfBirth && client.dateOfBirth != undefined) {
-            //     dob = Common.convertDateFormat(client.dateOfBirth);
-            // }
-            // if (client.kycType1ExpiryDate && client.kycType1ExpiryDate != undefined) {
-            //     exp1 = Common.convertDateFormat(client.kycType1ExpiryDate);
-            // }
-            // if (client.kycType2ExpiryDate && client.kycType2ExpiryDate != undefined) {
-            //     exp2 = Common.convertDateFormat(client.kycType2ExpiryDate);
-            // }
-            // if (client.kycType3ExpiryDate && client.kycType3ExpiryDate != undefined) {
-            //     exp3 = Common.convertDateFormat(client.kycType3ExpiryDate);
-            // }
-            // if (client.kycType4ExpiryDate && client.kycType4ExpiryDate != undefined) {
-            //     exp4 = Common.convertDateFormat(client.kycType4ExpiryDate);
-            // }
+            if (global.DEBUG_MODE) console.log('Loan Family Details:' + client);
+            if (client.dateOfBirth && client.dateOfBirth != undefined) {
+                dob = Common.convertDateFormat(client.dateOfBirth);
+            }
+            if (client.kycType1ExpiryDate && client.kycType1ExpiryDate != undefined) {
+                exp1 = Common.convertDateFormat(client.kycType1ExpiryDate);
+            }
+            if (client.kycType2ExpiryDate && client.kycType2ExpiryDate != undefined) {
+                exp2 = Common.convertDateFormat(client.kycType2ExpiryDate);
+            }
+            if (client.kycType3ExpiryDate && client.kycType3ExpiryDate != undefined) {
+                exp3 = Common.convertDateFormat(client.kycType3ExpiryDate);
+            }
+            if (client.kycType4ExpiryDate && client.kycType4ExpiryDate != undefined) {
+                exp4 = Common.convertDateFormat(client.kycType4ExpiryDate);
+            }
             await tbl_familydetails.insertFamilyDetails(client.id, loanApplicationID, 'APPL', client.relationshipWithApplicant, 'MR', client.name, '', '', dob, client.age, 'MALE', client.mobileNumber, client.kycTypeId1, client.kycIdValue1, exp1, client.kycTypeId2, client.kycIdValue2, exp2, client.kycTypeId3, client.kycIdValue3, exp3, client.kycTypeId4, client.kycIdValue4, exp4, '0', client.relationshipWithCoApplicant, client.relationshipWithGuarantor);
 
         });
@@ -310,6 +313,14 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
                             </View>
                             <View style={{ width: '55%' }}>
                                 <Text style={styles.childText}>:  {listData.ageing} days</Text>
+                            </View>
+                        </View>
+                        <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, marginBottom: 5 }}>
+                            <View style={{ width: '45%' }}>
+                                <Text style={styles.headText}>{language[0][props.language].str_currentleadownerid}</Text>
+                            </View>
+                            <View style={{ width: '55%' }}>
+                                <Text style={styles.childText}>:  {listData.agentName}</Text>
                             </View>
                         </View>
                     </View>

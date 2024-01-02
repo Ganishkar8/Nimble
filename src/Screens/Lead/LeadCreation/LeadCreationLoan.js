@@ -131,7 +131,7 @@ const LeadCreationLoan = (props, { navigation }) => {
         const filteredLoanTypeData = systemCodeDetail.filter((data) => data.masterId === 'LNTP').sort((a, b) => a.Description.localeCompare(b.Description));
         setLoanTypeData(filteredLoanTypeData);
 
-        const filteredLoanPurposeData = systemCodeDetail.filter((data) => data.masterId === 'LNPC').sort((a, b) => a.Description.localeCompare(b.Description));
+        const filteredLoanPurposeData = userCodeDetail.filter((data) => data.masterId === 'LNPS').sort((a, b) => a.Description.localeCompare(b.Description));
         setLoanPurposeData(filteredLoanPurposeData);
 
         const filteredLeadTypeData = systemCodeDetail.filter((data) => data.masterId === 'LEAD_TYPE').sort((a, b) => a.Description.localeCompare(b.Description));

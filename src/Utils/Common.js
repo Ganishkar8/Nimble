@@ -2,15 +2,24 @@ import DeviceInfo from 'react-native-device-info';
 import { getManufacturer } from 'react-native-device-info';
 import NetInfo from '@react-native-community/netinfo';
 import { Alert } from 'react-native';
+import tbl_client from '../Database/Table/tbl_client';
 const numberRegex = /^(\d+)?$/;
 const integerPattern = /^[0-9]+$/;
 const CS_URL = "https://mbsreg.brnetsaas.com/MBSConnectREG/frmmbs.aspx";
 const CS_URL1 = "https://mbsreg1.brnetsaas.com/MBSConnectREG/frmmbs.aspx";
+
 const isValidPhoneNumber = (phoneNumber) => {
   // Regular expression to validate a mobile number with a country code
   const phoneRegex = /^(\+\d{1,3})?(\d{10})$/;
 
   return phoneRegex.test(phoneNumber);
+};
+
+const isEmailValid = (email) => {
+  // Regular expression for basic email validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  return emailRegex.test(email);
 };
 
 const isValidText = (text) => {
@@ -53,6 +62,23 @@ export async function getDeviceID() {
 
 export async function getNetworkConnection() {
   return await NetInfo.fetch();
+}
+
+export async function findDuplicateID() {
+  await tbl_client
+    .getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
+    .then(data => {
+      if (global.DEBUG_MODE) console.log('Applicant Data:', data);
+      if (data !== undefined && data.length > 0) {
+
+      } else {
+        return false;
+      }
+    })
+    .catch(error => {
+      if (global.DEBUG_MODE)
+        console.error('Error fetching Applicant details:', error);
+    });
 }
 
 export function getCodeDescription(data, id) {
@@ -286,8 +312,42 @@ export function calculateAge(birthdate) {
   return age;
 };
 
+export async function getClientID(clientType) {
+  await tbl_client.getOnlyClientBasedOnID(global.LOANAPPLICATIONID, clientType)
+    .then(data => {
+      if (global.DEBUG_MODE) console.log('Applicant Data:', data);
+      if (data !== undefined && data.length > 0) {
+        global.CLIENTID = data[0].id;
+        global.isAadharVerified = data[0].isAadharNumberVerified;
+        return global.CLIENTID;
+      } else {
+        global.CLIENTID = '';
+        global.isAadharVerified = '0';
+        global.isDedupeDone = '0';
+        global.isMobileVerified = '0';
+        return '';
+      }
+
+    })
+    .catch(error => {
+      if (global.DEBUG_MODE) console.error('Error fetching Applicant details:', error);
+    });
+}
+
+export async function getPageID(processModuleData, pageCode) {
+
+  await processModuleData.forEach((data) => {
+    const incompleteNestedSubData = data.nestedSubData.filter((nestedData) => nestedData.pageCode === pageCode);
+    if (incompleteNestedSubData.length > 0) {
+      global.CURRENTPAGEID = incompleteNestedSubData[0].pageId;
+      return incompleteNestedSubData[0].pageId;
+    }
+
+  });
+}
+
 export default {
-  isValidPhoneNumber, isValidText, convertDateFormat, isDateGreaterThan, isValidAlphaText, showErrorAlert, getSystemCodeDescription,
+  isValidPhoneNumber, isEmailValid, isValidText, convertDateFormat, isDateGreaterThan, isValidAlphaText, showErrorAlert, getSystemCodeDescription,
   numberRegex, CS_URL, CS_URL1, integerPattern, formatDate, getCodeDescription, formatTime, hasOnlyOneKey, getCurrentDateTime, getNetworkConnection,
-  isValidPin, isValidPAN, validateVerhoeff, isValidEmail, calculateAge, convertYearDateFormat
+  isValidPin, isValidPAN, validateVerhoeff, isValidEmail, calculateAge, convertYearDateFormat, getPageID, getClientID
 };

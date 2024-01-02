@@ -201,8 +201,8 @@ const LeadManagement = (props, { navigation, route }) => {
         await Promise.all(promises);
 
         // alert(JSON.stringify(data))
-        setFilteredData(data.slice().reverse())
-        setPendingData(data.slice().reverse())
+        setFilteredData(data.slice())
+        setPendingData(data.slice())
         setRefreshing(false)
     }
 
@@ -344,8 +344,8 @@ const LeadManagement = (props, { navigation, route }) => {
             .then((response) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(response.data));
-                setPendingData(response.data.slice().reverse())
-                setFilteredData(response.data.slice().reverse())
+                setPendingData(response.data.slice())
+                setFilteredData(response.data.slice())
                 setLoading(false)
                 setRefreshing(false)
                 if (response.data.length > 0) {
@@ -746,8 +746,8 @@ const LeadManagement = (props, { navigation, route }) => {
                     const itemData = item.customerName
                         ? item.customerName.toUpperCase()
                         : '';
-                    const itemDataID = item.leadId
-                        ? item.leadId.toString()
+                    const itemDataID = item.loanApplicationNumber
+                        ? item.loanApplicationNumber.toString()
                         : '';
                     const regex = /^[0-9]+$/;
                     //let textData = ''
@@ -1101,6 +1101,7 @@ const LeadManagement = (props, { navigation, route }) => {
                         global.LOANAPPLICATIONID = '';
                         global.COMPLETEDMODULE = '';
                         global.COMPLETEDPAGE = '';
+                        global.COMPLETEDSUBSTAGE = '';
                         props.navigation.navigate('ConsentScreen');
                     }}
                 />

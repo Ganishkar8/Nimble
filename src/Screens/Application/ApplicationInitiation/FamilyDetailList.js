@@ -52,13 +52,16 @@ const FamilyDetailList = (props, { navigation }) => {
     const [communicationAvailable, setCommunicationAvailable] = useState(false);
     const showBottomSheet = () => setBottomErrorSheetVisible(true);
     const hideBottomSheet = () => setBottomErrorSheetVisible(false);
+    const [onlyView, setOnlyView] = useState(false);
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
 
         getRelationData()
-
+        if (global.USERTYPEID == 1163) {
+            setOnlyView(true);
+        }
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
             backHandler.remove();
@@ -211,7 +214,7 @@ const FamilyDetailList = (props, { navigation }) => {
         const baseURL = '8901';
         setLoading(true);
         apiInstancelocal(baseURL)
-            .delete(`/api/v2/profile-short/address-details/${relationID}`)
+            .delete(`/api/v2/loan-demographics/familyDetails/${relationID}`)
             .then(async response => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log('DeleteAddressResponse::' + JSON.stringify(response.data),);
@@ -246,12 +249,25 @@ const FamilyDetailList = (props, { navigation }) => {
 
     const buttonNext = () => {
 
-        // if (validate()) {
-        //     showBottomSheet();
-        //     return;
-        // }
+        if (onlyView) {
+            navigatetoBusiness();
+            return;
+        }
         updateLoanStatus();
 
+    }
+
+    const navigatetoBusiness = async () => {
+        var page = '';
+        if (global.CLIENTTYPE == 'APPL') {
+            page = 'DMGRC_APPL_BSN_DTLS';
+        } else if (global.CLIENTTYPE == 'CO-APPL') {
+            page = 'DMGRC_COAPPL_BSN_DTLS';
+        } else if (global.CLIENTTYPE == 'GRNTR') {
+            page = 'DMGRC_GRNTR_BSN_DTLS';
+        }
+        await Common.getPageID(global.FILTEREDPROCESSMODULE, page)
+        props.navigation.replace('LoanDemographicBusinessDetail')
     }
 
     const updateLoanStatus = () => {
@@ -283,7 +299,7 @@ const FamilyDetailList = (props, { navigation }) => {
                 global.COMPLETEDMODULE = 'LN_DMGP_APLCT';
                 global.COMPLETEDPAGE = 'DMGRC_APPL_FMLY_DTLS';
 
-                props.navigation.replace('LoanDemographicBusinessDetail');
+                navigatetoBusiness();
 
 
             })
@@ -405,7 +421,7 @@ const FamilyDetailList = (props, { navigation }) => {
                 data={relationDetails}
                 renderItem={FlatView}
                 extraData={refreshFlatlist}
-                keyExtractor={item => item.loanApplicationId}
+                keyExtractor={(item, index) => index.toString()}
             />
 
 

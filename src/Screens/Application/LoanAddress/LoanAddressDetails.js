@@ -138,25 +138,31 @@ const LoanAddressDetails = (props, { navigation }) => {
 
     const [systemCodeDetail, setSystemCodeDetail] = useState(props.mobilecodedetail.leadSystemCodeDto);
     const [userCodeDetail, setUserCodeDetail] = useState(props.mobilecodedetail.leadUserCodeDto);
-    const [systemMandatoryField, setSystemMandatoryField] = useState(props.mobilecodedetail.leadSystemMandatoryFieldDto);
+    const [systemMandatoryField, setSystemMandatoryField] = useState(props.mobilecodedetail.processSystemMandatoryFields);
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const [apiError, setApiError] = useState('');
 
     const [addressID, setAddressID] = useState('');
     const [isKYC, setIsKYC] = useState('');
+    const [onlyView, setOnlyView] = useState(false);
 
 
     const [postorput, setPostORPut] = useState('post');
     const [kycManual, setKYCManual] = useState('0');
 
     const [pincodeResponse, setPincodeResponse] = useState('');
+    const [pageId, setPageId] = useState(global.CURRENTPAGEID);
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
         getSystemCodeDetail()
+        makeSystemMandatoryFields();
         getExistingData()
-
+        if (global.USERTYPEID == 1163) {
+            fieldsDisable();
+            setOnlyView(true);
+        }
 
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
@@ -273,7 +279,7 @@ const LoanAddressDetails = (props, { navigation }) => {
 
     const makeSystemMandatoryFields = () => {
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_addresstype' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_addr_address_type' && data.pageId === pageId).map((value, index) => {
 
             if (value.mandatory) {
                 setAddressTypeMan(true);
@@ -289,7 +295,7 @@ const LoanAddressDetails = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_addressline1' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_address_line_1' && data.pageId === pageId).map((value, index) => {
 
             if (value.mandatory) {
                 setAddressLine1Man(true);
@@ -305,7 +311,7 @@ const LoanAddressDetails = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_addressline2' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_address_line_2' && data.pageId === pageId).map((value, index) => {
 
             if (value.mandatory) {
                 setAddressLine2Man(true);
@@ -321,7 +327,7 @@ const LoanAddressDetails = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_landmark' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_landmark' && data.pageId === pageId).map((value, index) => {
 
             if (value.mandatory) {
                 setLandmarkMan(true);
@@ -337,7 +343,7 @@ const LoanAddressDetails = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_pincode' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_pincode' && data.pageId === pageId).map((value, index) => {
 
             if (value.mandatory) {
                 setPincodeMan(true);
@@ -353,7 +359,7 @@ const LoanAddressDetails = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_city' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_city/village' && data.pageId === pageId).map((value, index) => {
 
             if (value.mandatory) {
                 setCityMan(true);
@@ -369,7 +375,7 @@ const LoanAddressDetails = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_district' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_disrtict' && data.pageId === pageId).map((value, index) => {
 
             if (value.mandatory) {
                 setDistrictMan(true);
@@ -385,7 +391,7 @@ const LoanAddressDetails = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_state' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_state' && data.pageId === pageId).map((value, index) => {
 
             if (value.mandatory) {
                 setStateMan(true)
@@ -401,7 +407,7 @@ const LoanAddressDetails = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_country' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_country' && data.pageId === pageId).map((value, index) => {
 
             if (value.mandatory) {
                 setCountryMan(true)
@@ -417,7 +423,85 @@ const LoanAddressDetails = (props, { navigation }) => {
             }
         });
 
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_land_mb_no' && data.pageId === pageId).map((value, index) => {
 
+            if (value.mandatory) {
+                setMobileNoMan(true)
+            }
+            if (value.hide) {
+                setMobileNoVisible(false)
+            }
+            if (value.disable) {
+                setMobileNoDisable(true)
+            }
+            if (value.captionChange) {
+                setMobileNoCaption(value[0].fieldCaptionChange)
+            }
+        });
+
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_email' && data.pageId === pageId).map((value, index) => {
+
+            if (value.mandatory) {
+                setEmailMan(true)
+            }
+            if (value.hide) {
+                setEmailVisible(false)
+            }
+            if (value.disable) {
+                setEmailDisable(true)
+            }
+            if (value.captionChange) {
+                setEmailCaption(value[0].fieldCaptionChange)
+            }
+        });
+
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_addr_address ownership type' && data.pageId === pageId).map((value, index) => {
+
+            if (value.mandatory) {
+                setAddressOwnerTypeMan(true)
+            }
+            if (value.hide) {
+                setAddressOwnerTypeVisible(false)
+            }
+            if (value.disable) {
+                setAddressOwnerTypeDisable(true)
+            }
+            if (value.captionChange) {
+                setAddressOwnerTypeCaption(value[0].fieldCaptionChange)
+            }
+        });
+
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_addr_owner_details' && data.pageId === pageId).map((value, index) => {
+
+            if (value.mandatory) {
+                setOwnerDetailsMan(true)
+            }
+            if (value.hide) {
+                setOwnerDetailsVisible(false)
+            }
+            if (value.disable) {
+                setOwnerDetailsDisable(true)
+            }
+            if (value.captionChange) {
+                setOwnerDetailsCaption(value[0].fieldCaptionChange)
+            }
+        });
+
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_owner name' && data.pageId === pageId).map((value, index) => {
+
+            if (value.mandatory) {
+                setOwnerNameMan(true)
+            }
+            if (value.hide) {
+                setOwnerNameVisible(false)
+            }
+            if (value.disable) {
+                setOwnerNameDisable(true)
+            }
+            if (value.captionChange) {
+                setOwnerNameCaption(value[0].fieldCaptionChange)
+            }
+        });
 
     }
 
@@ -518,6 +602,20 @@ const LoanAddressDetails = (props, { navigation }) => {
             }
         }
 
+        if (email.length > 0) {
+            if (!Common.isValidEmail(email)) {
+                errorMessage =
+                    errorMessage +
+                    i +
+                    ')' +
+                    ' ' +
+                    language[0][props.language].str_plsenter +
+                    'Valid ' + emailCaption + '\n';
+                i++;
+                flag = true;
+            }
+        }
+
         if (addressOwnerTypeMan && addressOwnerTypeVisible) {
             if (addressOwnerTypeLabel.length <= 0) {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + addressOwnerTypeCaption + '\n';
@@ -550,10 +648,8 @@ const LoanAddressDetails = (props, { navigation }) => {
     const addressSubmit = () => {
 
         if (global.USERTYPEID == 1163) {
-            if (!(kycManual == '1')) {
-                props.navigation.replace('AddressMainList')
-                return;
-            }
+            props.navigation.replace('LoanAddressList')
+            return;
         }
 
         if (addressID.length <= 0) {
@@ -759,19 +855,19 @@ const LoanAddressDetails = (props, { navigation }) => {
     const handleClick = (componentName, textValue) => {
 
         if (componentName === 'addressLine1') {
-            if (textValue.length > 0) {
-                if (Common.isValidText(textValue))
-                    setAddressLine1(textValue)
-            } else {
-                setAddressLine1(textValue)
-            }
+            // if (textValue.length > 0) {
+            //     if (Common.isValidText(textValue))
+            //         setAddressLine1(textValue)
+            // } else {
+            setAddressLine1(textValue)
+            // }
         } else if (componentName === 'addressLine2') {
-            if (textValue.length > 0) {
-                if (Common.isValidText(textValue))
-                    setAddressLine2(textValue)
-            } else {
-                setAddressLine2(textValue)
-            }
+            // if (textValue.length > 0) {
+            //     if (Common.isValidText(textValue))
+            //         setAddressLine2(textValue)
+            // } else {
+            setAddressLine2(textValue)
+            // }
         } else if (componentName === 'landmark') {
             if (textValue.length > 0) {
                 if (Common.isValidText(textValue))
@@ -789,7 +885,7 @@ const LoanAddressDetails = (props, { navigation }) => {
                 if (Common.isValidText(textValue))
                     setCity(textValue)
             } else {
-                setPincode(textValue)
+                setCity(textValue)
             }
         } else if (componentName === 'district') {
             if (textValue.length > 0) {
@@ -886,14 +982,14 @@ const LoanAddressDetails = (props, { navigation }) => {
                     <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
                         <TextComp textVal={addressLine1Caption} textStyle={Commonstyles.inputtextStyle} Visible={addressLine1Man} />
                     </View>
-                    <TextInputComp textValue={addressLine1} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={addressLine1Disable} ComponentName='addressLine1' reference={addressLine1Ref} returnKey="next" handleClick={handleClick} handleReference={handleReference} length={30} />
+                    <TextInputComp textValue={addressLine1} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={addressLine1Disable} ComponentName='addressLine1' reference={addressLine1Ref} returnKey="next" handleClick={handleClick} handleReference={handleReference} length={150} />
                 </View>}
 
                 {addressLine2Visible && <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
                     <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
                         <TextComp textVal={addressLine2Caption} textStyle={Commonstyles.inputtextStyle} Visible={addressLine2Man} />
                     </View>
-                    <TextInputComp textValue={addressLine2} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={addressLine2Disable} ComponentName='addressLine2' reference={addressLine2Ref} returnKey="next" handleClick={handleClick} handleReference={handleReference} length={30} />
+                    <TextInputComp textValue={addressLine2} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={addressLine2Disable} ComponentName='addressLine2' reference={addressLine2Ref} returnKey="next" handleClick={handleClick} handleReference={handleReference} length={150} />
                 </View>}
 
                 {landmarkVisible && <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>

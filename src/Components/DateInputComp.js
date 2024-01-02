@@ -103,7 +103,7 @@ const DateInputComp = ({ textValue, textStyle, Disable, type, ComponentName, ref
                     display="default"
                     onChange={changeSelectedDate}
                     maximumDate={maxDate}
-                    minimumDate={minDate}
+                    minimumDate={minDate ? minDate : new Date(1900, 0, 1)}
 
                 />
             )}

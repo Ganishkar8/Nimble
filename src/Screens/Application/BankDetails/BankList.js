@@ -255,6 +255,10 @@ const BankList = (props, { navigation }) => {
         //     showBottomSheet();
         //     return;
         // }
+        if (global.USERTYPEID == 1163) {
+            props.navigation.replace('LoanApplicationMain', { fromScreen: 'BankList' });
+            return;
+        }
         updateLoanStatus();
 
     }
@@ -458,41 +462,18 @@ const BankList = (props, { navigation }) => {
                 data={bankDetails}
                 renderItem={FlatView}
                 extraData={refreshFlatlist}
-                keyExtractor={item => item.loanApplicationId}
+                keyExtractor={(item, index) => index.toString()}
             />
 
 
-            {bankDetails.length > 0 && global.USERTYPEID == 1164 && <ButtonViewComp
+            {/* {bankDetails.length > 0 && */}<ButtonViewComp
                 textValue={language[0][props.language].str_submit.toUpperCase()}
                 textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
                 viewStyle={[Commonstyles.buttonView, { marginBottom: 20 }]}
                 innerStyle={Commonstyles.buttonViewInnerStyle}
                 handleClick={buttonNext}
             />
-            }
-
-            <View style={{ flexDirection: 'row' }}>
-
-                {kycManual == '1' && global.USERTYPEID == 1163 && <ButtonViewComp
-                    textValue={language[0][props.language].str_approve.toUpperCase()}
-                    textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
-                    viewStyle={[Commonstyles.buttonView, { width: '50%', marginBottom: 20 }]}
-                    innerStyle={Commonstyles.buttonViewInnerStyle}
-                    handleClick={() => approveManualKYC('Approved')}
-                />
-                }
-
-                {kycManual == '1' && global.USERTYPEID == 1163 && <ButtonViewComp
-                    textValue={language[0][props.language].str_reject.toUpperCase()}
-                    textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
-                    viewStyle={[Commonstyles.buttonView, { width: '50%', marginBottom: 20 }]}
-                    innerStyle={Commonstyles.buttonViewInnerStyle}
-                    handleClick={() => { approveManualKYC('Rejected') }}
-                />
-                }
-
-            </View>
-
+            {/* } */}
 
 
         </SafeAreaView>

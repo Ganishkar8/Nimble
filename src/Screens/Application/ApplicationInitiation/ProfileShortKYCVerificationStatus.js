@@ -218,8 +218,8 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       setHideRetake(true);
       setHideDelete(true);
     } else {
-      setHideRetake(true);
-      setHideDelete(true);
+      setHideRetake(false);
+      setHideDelete(false);
     }
 
     return () => {
@@ -424,7 +424,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
           JSON.stringify(position.coords.latitude);
 
         hideLocationBottomSheet();
-        props.navigation.replace('ProfileShortApplicantDetails')
+        navigatetoPersonal();
 
       },
       (error) => {
@@ -803,10 +803,23 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     }
   }
 
+  const navigatetoPersonal = async () => {
+    var page = '';
+    if (global.CLIENTTYPE == 'APPL') {
+      page = 'PRF_SHRT_APLCT_PRSNL_DTLS';
+    } else if (global.CLIENTTYPE == 'CO-APPL') {
+      page = 'PRF_SHRT_COAPLCT_PRSNL_DTLS';
+    } else if (global.CLIENTTYPE == 'GRNTR') {
+      page = 'PRF_SHRT_GRNTR_PRSNL_DTLS';
+    }
+    await Common.getPageID(global.FILTEREDPROCESSMODULE, page)
+    props.navigation.replace('ProfileShortApplicantDetails')
+  }
+
   const uploadImage = async () => {
 
     if (onlyView) {
-      props.navigation.replace('ProfileShortApplicantDetails')
+      navigatetoPersonal();
       return;
     }
 

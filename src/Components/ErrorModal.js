@@ -3,7 +3,7 @@ import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Colors from '../Utils/Colors';
 import ImageComp from './ImageComp';
 
-const ErrorModal = ({ isVisible, onClose, textContent, textClose }) => {
+const ErrorModal = ({ isVisible, onClose, textContent, textClose, headText }) => {
     return (
         <Modal
             visible={isVisible}
@@ -16,7 +16,7 @@ const ErrorModal = ({ isVisible, onClose, textContent, textClose }) => {
 
                     <View style={{ justifyContent: 'flex-start' }}>
 
-                        <Text style={{ color: Colors.black, fontSize: 18, fontFamily: 'Poppins-Medium' }}>Try Again</Text>
+                        <Text style={{ color: Colors.black, fontSize: 18, fontFamily: 'Poppins-Medium' }}>{headText == '1' ? '' : 'Try Again'}</Text>
 
                     </View>
                     <Text style={{ color: Colors.dimblack, marginTop: 25, fontFamily: 'Poppins-Medium' }}>{textContent}</Text>

@@ -42,7 +42,7 @@ const AadharSuccessModal = ({ isVisible, onClose, textContent, textClose, textMa
                         <Text style={{ color: Colors.dimblack }}>{textMainContent}</Text>
                     </View>
 
-                    <TouchableOpacity onPress={() => onClick('proceed')} style={styles.closeButton}>
+                    <TouchableOpacity activeOpacity={0.8} onPress={() => onClick('proceed')} style={styles.closeButton}>
                         <Text style={{ color: Colors.darkblue }}>{textClose}</Text>
                     </TouchableOpacity>
                 </View>

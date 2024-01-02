@@ -100,12 +100,14 @@ const BankDetails = (props, { navigation }) => {
   const [systemMandatoryField, setSystemMandatoryField] = useState(props.mobilecodedetail.processSystemMandatoryFields);
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [apiError, setApiError] = useState('');
+  const [pageId, setPageId] = useState(global.CURRENTPAGEID);
 
   useEffect(() => {
     props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
     getSystemCodeDetail()
     makeSystemMandatoryFields();
+    alert(pageId)
 
 
     return () => {
@@ -128,7 +130,7 @@ const BankDetails = (props, { navigation }) => {
 
   const makeSystemMandatoryFields = () => {
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_accounttype' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_accounttype' && data.pageId === pageId).map((value, index) => {
       setAccountTypeCaption(value.fieldName)
 
       if (value.mandatory) {
@@ -145,7 +147,7 @@ const BankDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_aacholderName' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_aacholderName' && data.pageId === pageId).map((value, index) => {
       setAccountHolderNameCaption(value.fieldName)
 
       if (value.mandatory) {
@@ -162,7 +164,7 @@ const BankDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_ifscCode' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_ifscCode' && data.pageId === pageId).map((value, index) => {
       setIFSCCodeCaption(value.fieldName)
 
       if (value.mandatory) {
@@ -180,7 +182,7 @@ const BankDetails = (props, { navigation }) => {
     });
 
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_bankName' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_bankName' && data.pageId === pageId).map((value, index) => {
       setBankNameCaption(value.fieldName)
 
       if (value.mandatory) {
@@ -197,7 +199,7 @@ const BankDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_branchName' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_branchName' && data.pageId === pageId).map((value, index) => {
       setBranchNameCaption(value.fieldName)
 
       if (value.mandatory) {
@@ -214,7 +216,7 @@ const BankDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_accountNum' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_accountNum' && data.pageId === pageId).map((value, index) => {
       setAccountNumberCaption(value.fieldName)
 
       if (value.mandatory) {
@@ -231,7 +233,7 @@ const BankDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_confirmaccountNum' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_confirmaccountNum' && data.pageId === pageId).map((value, index) => {
       setConfirmAccountNumberCaption(value.fieldName)
 
       if (value.mandatory) {
@@ -248,7 +250,7 @@ const BankDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_banklinkedmob' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_banklinkedmob' && data.pageId === pageId).map((value, index) => {
       setBankLinkedNumberCaption(value.fieldName)
 
       if (value.mandatory) {
@@ -265,7 +267,7 @@ const BankDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_upiid' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_upiid' && data.pageId === pageId).map((value, index) => {
       setUPIIDCaption(value.fieldName)
 
       if (value.mandatory) {

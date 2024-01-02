@@ -167,6 +167,9 @@ export const language = [
       str_applicantdetails: 'Applicant Details',
       str_coapplicantdetails: 'Co-Applicant Details',
       str_guarantordetails: 'Guarantor Details',
+      str_applicant: 'Applicant',
+      str_coapplicant: 'Co-Applicant',
+      str_guarantor: 'Guarantor',
       str_personaldetails: 'Personal Details',
       str_basicdetails: 'Basic Details',
       str_existingclientdetails: 'Existing Client Details',
@@ -250,6 +253,12 @@ export const language = [
       str_repayscheduledtls: 'Repayment Schedule Details (Yearly/Monthly)',
       str_lnproductselectioncharges: 'Loan Product Selection & Charges',
       str_lnproductselection: 'Loan (Loan Product Selection)',
+      str_lndocupload: 'Loan (Document Upload)',
+      str_breview: 'BRE VIEW',
+      str_triggerCBResponse: 'Trigger CB Response',
+      str_editLoan: 'Edit Loan',
+      str_viewbreresult: 'View BRE Result',
+      str_consentotpverify: 'Consent OTP Verification',
     },
 
     ta: {

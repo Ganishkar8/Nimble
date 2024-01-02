@@ -80,7 +80,10 @@ const LeadManagement = (props, { navigation, route }) => {
     const [visible, setVisible] = useState(false);
     const [filterVisible, setFilterVisible] = useState('');
     const [bottomLeadSheetVisible, setBottomLeadSheetVisible] = useState(false);
-    const showBottomSheet = () => setBottomLeadSheetVisible(true);
+    const showBottomSheet = () => {
+        setBottomLeadSheetVisible(true);
+        setTimeout(() => hideBottomSheet(), 2000);
+    };
     const hideBottomSheet = () => setBottomLeadSheetVisible(false);
     const [sortModalVisible, setSortModalVisible] = useState(false);
     const showSortModalSheet = () => setSortModalVisible(true);
@@ -118,7 +121,7 @@ const LeadManagement = (props, { navigation, route }) => {
     useEffect(() => {
         //getPendingData()
         if (props.route.params.fromScreen == "LeadCompletion") {
-            // showBottomSheet();
+            //showBottomSheet();
         }
         if (isScreenVisible) {
             setSearch('')
@@ -792,7 +795,7 @@ const LeadManagement = (props, { navigation, route }) => {
                                 <Text style={styles.headText}>{language[0][props.language].str_completiondate}</Text>
                             </View>
                             <View style={{ width: '55%' }}>
-                                <Text style={styles.childText}>:  {item.leadStatus.toUpperCase() == 'APPROVED' ? Common.formatDate(item.completionDate) : item.leadStatus == 'REJECTED' ? Common.formatDate(item.completionDate) : ''} </Text>
+                                <Text style={styles.childText}>:  {item.leadStatus.toUpperCase() == 'APPROVED' ? Common.formatDate(item.completionDate) : item.leadStatus.toUpperCase() == 'REJECTED' ? Common.formatDate(item.completionDate) : ''} </Text>
                             </View>
                         </View>
                         <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
@@ -898,7 +901,7 @@ const LeadManagement = (props, { navigation, route }) => {
 
 
                             <View style={{ width: '100%', height: 30 }}>
-                                <TextComp textVal={"Lead ID Created"} textStyle={{ fontSize: 14, color: Colors.white, lineHeight: 20, fontFamily: 'PoppinsRegular' }} Visible={false} />
+                                <TextComp textVal={`Lead ID ${global.leadNumber} is successfully submitted`} textStyle={{ fontSize: 14, color: Colors.white, lineHeight: 20, fontFamily: 'PoppinsRegular' }} Visible={false} />
                             </View>
 
 

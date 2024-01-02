@@ -161,12 +161,14 @@ const LoanNomineeDetails = (props, { navigation }) => {
 
     const [systemCodeDetail, setSystemCodeDetail] = useState(props.mobilecodedetail.leadSystemCodeDto);
     const [userCodeDetail, setUserCodeDetail] = useState(props.mobilecodedetail.leadUserCodeDto);
-    const [systemMandatoryField, setSystemMandatoryField] = useState(props.mobilecodedetail.leadSystemMandatoryFieldDto);
+    const [systemMandatoryField, setSystemMandatoryField] = useState(props.mobilecodedetail.processSystemMandatoryFields);
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const [apiError, setApiError] = useState('');
 
     const [nomineeID, setNomineeID] = useState('');
     const [nomineeMaxID, setNomineeMaxID] = useState('');
+    const [pageId, setPageId] = useState(global.CURRENTPAGEID);
+
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
@@ -175,6 +177,9 @@ const LoanNomineeDetails = (props, { navigation }) => {
         makeSystemMandatoryFields();
         getExistingData()
 
+        if (global.USERTYPEID == 1163) {
+            fieldsDisable();
+        }
 
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
@@ -197,6 +202,21 @@ const LoanNomineeDetails = (props, { navigation }) => {
 
     const fieldsDisable = () => {
 
+        setIsNomineeDisable(true);
+        setRelationStatuswithBorrowerDisable(true);
+        setTitleDisable(true);
+        setFullNameDisable(true);
+        setAadharIDDisable(true);
+        setDOBDisable(true);
+        setAgeDisable(true);
+        setGenderDisable(true);
+        setMobileNumberDisable(true);
+        setNomineePercentDisable(true);
+        setNomineeAccountNumberDisable(true);
+        setNomineeIfscCodeDisable(true)
+        setNomineeBankNameDisable(true);
+        setNomineeBranchNameDisable(true);
+        setNomineeNameInBankDisable(true);
 
     }
 
@@ -251,7 +271,7 @@ const LoanNomineeDetails = (props, { navigation }) => {
 
     const makeSystemMandatoryFields = () => {
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_isnominee' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_is_nmn' && data.pageId === pageId).map((value, index) => {
 
             setIsNomineeCaption(value.fieldName)
 
@@ -269,7 +289,7 @@ const LoanNomineeDetails = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_relationTypeborr' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_rlt_type' && data.pageId === pageId).map((value, index) => {
             setRelationStatuswithBorrowerCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -286,7 +306,7 @@ const LoanNomineeDetails = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_title' && data.pageId === 3).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_title' && data.pageId === pageId).map((value, index) => {
             setTitleCaption(value.fieldName)
             if (value.mandatory) {
                 setTitleMan(true);
@@ -302,7 +322,7 @@ const LoanNomineeDetails = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_fullName' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_name' && data.pageId === pageId).map((value, index) => {
             setFullNameCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -319,7 +339,7 @@ const LoanNomineeDetails = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_aadharid' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_adhr_id' && data.pageId === pageId).map((value, index) => {
             setAadharIDCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -336,7 +356,7 @@ const LoanNomineeDetails = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_gender' && data.pageId === 3).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_gender' && data.pageId === pageId).map((value, index) => {
             setGenderCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -353,8 +373,7 @@ const LoanNomineeDetails = (props, { navigation }) => {
             }
         });
 
-
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_date_of_birth' && data.pageId === 3).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_date_of_birth' && data.pageId === pageId).map((value, index) => {
             setDOBCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -371,7 +390,7 @@ const LoanNomineeDetails = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_age' && data.pageId === 3).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_age' && data.pageId === pageId).map((value, index) => {
             setAgeCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -388,7 +407,7 @@ const LoanNomineeDetails = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_mbl_no' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_mbl_no' && data.pageId === pageId).map((value, index) => {
             setMobileNumberCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -405,7 +424,7 @@ const LoanNomineeDetails = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_nomineepercent' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_nmn_prctn' && data.pageId === pageId).map((value, index) => {
             setNomineePercentCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -422,7 +441,7 @@ const LoanNomineeDetails = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_nomineeaccNo' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_nmn_bk_acct' && data.pageId === pageId).map((value, index) => {
             setNomineeAccountNumberCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -439,7 +458,7 @@ const LoanNomineeDetails = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_nomineeifsc' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_nomineeifsc' && data.pageId === pageId).map((value, index) => {
             setNomineeIfscCodeCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -456,7 +475,7 @@ const LoanNomineeDetails = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_nomineebankName' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_nmn_bk_nm' && data.pageId === pageId).map((value, index) => {
             setNomineeBankNameCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -473,7 +492,7 @@ const LoanNomineeDetails = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_nomineebankBranch' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_nmn_bk_brc' && data.pageId === pageId).map((value, index) => {
             setNomineeBranchNameCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -490,7 +509,7 @@ const LoanNomineeDetails = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_nomineenameinBank' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_nmn_nm_bk' && data.pageId === pageId).map((value, index) => {
             setNomineeNameInBankCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -754,12 +773,32 @@ const LoanNomineeDetails = (props, { navigation }) => {
             }
         }
 
+        if (TitleVisible && GenderVisible) {
+            if (TitleLabel === 'MR') {
+                if (GenderLabel == 'F') {
+                    errorMessage = errorMessage + i + ')' + ' ' + TitleCaption + ' AND ' + GenderCaption + ' Not matching' + '\n';
+                    i++;
+                    flag = true;
+                }
+            } else if (TitleLabel === 'MRS' || TitleLabel === 'MISS') {
+                if (GenderLabel == 'M') {
+                    errorMessage = errorMessage + i + ')' + ' ' + TitleCaption + ' AND ' + GenderCaption + ' Not matching' + '\n';
+                    i++;
+                    flag = true;
+                }
+            }
+        }
+
         setErrMsg(errorMessage);
         return flag;
     };
 
     const nomineeSubmit = () => {
 
+        if (global.USERTYPEID == 1163) {
+            onGoBack();
+            return;
+        }
 
         Common.getNetworkConnection().then(value => {
             if (value.isConnected == true) {

@@ -351,7 +351,7 @@ const createTables = async () => {
       isMobileNumberVerified TEXT,
       relationWithCOAPPL TEXT,
       relationWithGRNTR TEXT,
-      PRIMARY KEY (loanApplicationId, clientTypeId,relationTypeId)
+      PRIMARY KEY (loanApplicationId, clientTypeId,id)
     )`,
     `CREATE TABLE IF NOT EXISTS tbl_loanaddressinfo (
       loanApplicationId TEXT,
@@ -374,7 +374,7 @@ const createTables = async () => {
       owner_name TEXT,
       is_active TEXT,
       isKyc TEXT,
-      PRIMARY KEY (loanApplicationId, client_type,address_type)
+      PRIMARY KEY (loanApplicationId, client_type,id)
     )`,
     `CREATE TABLE IF NOT EXISTS tbl_loanbankdetails (
       id TEXT,
@@ -392,7 +392,7 @@ const createTables = async () => {
       dmsId TEXT,
       accountUsedFor TEXT,
       verificationStatus TEXT,
-      PRIMARY KEY (loanApplicationId, client_type,account_type)
+      PRIMARY KEY (loanApplicationId, client_type,id)
     )`,
     `CREATE TABLE IF NOT EXISTS tbl_loanbusinessDetail (
       loanApplicationId TEXT,

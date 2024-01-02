@@ -52,13 +52,16 @@ const LoanAddressList = (props, { navigation }) => {
     const [communicationAvailable, setCommunicationAvailable] = useState(false);
     const showBottomSheet = () => setBottomErrorSheetVisible(true);
     const hideBottomSheet = () => setBottomErrorSheetVisible(false);
+    const [onlyView, setOnlyView] = useState(false);
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
 
         getAddressData()
-
+        if (global.USERTYPEID == 1163) {
+            setOnlyView(true);
+        }
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
             backHandler.remove();
@@ -280,8 +283,8 @@ const LoanAddressList = (props, { navigation }) => {
 
     const buttonNext = () => {
 
-        if (validate()) {
-            showBottomSheet();
+        if (onlyView) {
+            navigatetoGSTDetail();
             return;
         }
         updateLoanStatus();
@@ -331,11 +334,7 @@ const LoanAddressList = (props, { navigation }) => {
                     global.COMPLETEDPAGE = 'DMGRC_GRNTR_BSN_ADDR_DTLS';
                 }
 
-                if (global.CLIENTTYPE == 'APPL') {
-                    props.navigation.replace('LoanDemographicsGSTDetails');
-                } else {
-                    props.navigation.replace('LoanDemographicsFinancialDetails');
-                }
+                navigatetoGSTDetail();
 
 
 
@@ -351,6 +350,29 @@ const LoanAddressList = (props, { navigation }) => {
             });
 
     };
+
+    const navigatetoGSTDetail = async () => {
+
+        if (global.CLIENTTYPE == 'APPL') {
+            var page = '';
+            page = 'DMGRC_APPL_GST_DTLS';
+        } else {
+            var page = '';
+            if (global.CLIENTTYPE == 'APPL') {
+                page = 'DMGRC_APPL_FNCL_DTLS';
+            } else if (global.CLIENTTYPE == 'CO-APPL') {
+                page = 'DMGRC_COAPPL_FNCL_DTLS';
+            } else if (global.CLIENTTYPE == 'GRNTR') {
+                page = 'DMGRC_GRNTR_FNCL_DTLS';
+            }
+        }
+        await Common.getPageID(global.FILTEREDPROCESSMODULE, page)
+        if (global.CLIENTTYPE == 'APPL') {
+            props.navigation.replace('LoanDemographicsGSTDetails');
+        } else {
+            props.navigation.replace('LoanDemographicsFinancialDetails');
+        }
+    }
 
     const approveManualKYC = (status) => {
 
@@ -492,18 +514,18 @@ const LoanAddressList = (props, { navigation }) => {
                 data={addressDetails}
                 renderItem={FlatView}
                 extraData={refreshFlatlist}
-                keyExtractor={item => item.loanApplicationId}
+                keyExtractor={(item, index) => index.toString()}
             />
 
 
-            {addressDetails.length > 0 && global.USERTYPEID == 1164 && <ButtonViewComp
+            {/* {addressDetails.length > 0 && */}<ButtonViewComp
                 textValue={language[0][props.language].str_submit.toUpperCase()}
                 textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
                 viewStyle={[Commonstyles.buttonView, { marginBottom: 20 }]}
                 innerStyle={Commonstyles.buttonViewInnerStyle}
                 handleClick={buttonNext}
             />
-            }
+            {/* } */}
 
         </SafeAreaView>
     );

@@ -43,12 +43,14 @@ const AddressMainList = (props, { navigation }) => {
   const [apiError, setApiError] = useState('');
   const [refreshFlatlist, setRefreshFlatList] = useState(false);
   const [processModule, setProcessModule] = useState(props.mobilecodedetail.processModule);
-  const [processModuleLength, setProcessModuleLength] = useState(0);
+  const [processModuleLength, setProcessModuleLength] = useState(global.FILTEREDPROCESSMODULE.length);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [kycManual, setKYCManual] = useState('0');
   const [errMsg, setErrMsg] = useState('');
   const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
   const [communicationAvailable, setCommunicationAvailable] = useState(false);
+  const [IsManualKYCAvailable, setIsManualKYCAvailable] = useState(false);
+  const [permanentAvailable, setPermanentAvailable] = useState(false);
   const showBottomSheet = () => setBottomErrorSheetVisible(true);
   const hideBottomSheet = () => setBottomErrorSheetVisible(false);
 
@@ -71,23 +73,22 @@ const AddressMainList = (props, { navigation }) => {
 
   const getAddressData = () => {
 
-    // tbl_loanApplication.getLoanAppWorkFlowID(global.LOANAPPLICATIONID, 'APPL')
-    //   .then(data => {
-    //     if (global.DEBUG_MODE) console.log('Applicant Data:', data);
-    //     if (data !== undefined && data.length > 0) {
-    //       const filteredProcessModuleStage = processModule.filter((data1) => {
-    //         return data1.wfId === parseInt(data[0].workflow_id) && data1.process_sub_stage_id === 1;
-    //       })
-    //       alert(data[0].workflow_id)
-    //       if (filteredProcessModuleStage) {
-    //         setProcessModuleLength(filteredProcessModuleStage.length);
-    //       }
-    //     }
+    tbl_client.getAllClientID(global.LOANAPPLICATIONID)
+      .then(data => {
+        if (global.DEBUG_MODE) console.log('Applicant Data:', data);
+        if (data !== undefined && data.length > 0) {
+          data.forEach((client) => {
+            if (client.isKycManual == '1' || client.isKycManual == true) {
+              setIsManualKYCAvailable(true);
+              return;
+            }
+          });
+        }
 
-    //   })
-    //   .catch(error => {
-    //     if (global.DEBUG_MODE) console.error('Error fetching Applicant details:', error);
-    //   });
+      })
+      .catch(error => {
+        if (global.DEBUG_MODE) console.error('Error fetching Applicant details:', error);
+      });
 
     tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE).then(value => {
       if (value !== undefined && value.length > 0) {
@@ -109,8 +110,16 @@ const AddressMainList = (props, { navigation }) => {
         if (data !== undefined && data.length > 0) {
           setAddressDetails(data)
           const communicationAddress = data.find(item => item.address_type === 'C');
+          const permanentAddress = data.find(item => item.address_type === 'P');
           if (communicationAddress) {
             setCommunicationAvailable(true);
+          } else {
+            setCommunicationAvailable(false);
+          }
+          if (permanentAddress) {
+            setPermanentAvailable(true);
+          } else {
+            setPermanentAvailable(false);
           }
           setRefreshFlatList(!refreshFlatlist)
         }
@@ -137,7 +146,7 @@ const AddressMainList = (props, { navigation }) => {
       <View style={{ marginLeft: 10, marginRight: 10 }}>
         <View>
           <Text style={{ fontSize: 14, fontFamily: 'Poppins-SemiBold', marginTop: 5, color: Colors.black }}>
-            {Common.getSystemCodeDescription(props.mobilecodedetail.leadUserCodeDto, 'ADDRESS_TYPE', item.address_type)}
+            {Common.getSystemCodeDescription(props.mobilecodedetail.leadUserCodeDto, 'PRF_SHORT_ADDRESS_TYPE', item.address_type)}
           </Text>
           <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: Colors.mediumgrey }}>{`${item.address_line_1},${item.address_line_2}`}</Text>
           <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: Colors.mediumgrey }}>{`${item.district},${item.state}`}</Text>
@@ -273,6 +282,20 @@ const AddressMainList = (props, { navigation }) => {
     await Promise.all(deletePromises);
 
     const newArray = addressDetails.filter(item => item.id !== addressID);
+    if (newArray.length > 0) {
+      const communicationAddress = newArray.find(item => item.address_type === 'C');
+      const permanentAddress = newArray.find(item => item.address_type === 'P');
+      if (communicationAddress) {
+        setCommunicationAvailable(true);
+      } else {
+        setCommunicationAvailable(false);
+      }
+      if (permanentAddress) {
+        setPermanentAvailable(true);
+      } else {
+        setPermanentAvailable(false)
+      }
+    }
     setAddressDetails(newArray);
     setRefreshFlatList(!refreshFlatlist);
 
@@ -280,6 +303,11 @@ const AddressMainList = (props, { navigation }) => {
 
 
   const buttonNext = () => {
+
+    if (global.USERTYPEID == 1163) {
+      props.navigation.replace('LoanApplicationMain', { fromScreen: 'AddressDetail' });
+      return;
+    }
 
     if (validate()) {
       showBottomSheet();
@@ -328,7 +356,6 @@ const AddressMainList = (props, { navigation }) => {
           global.COMPLETEDMODULE = 'PRF_SHRT_COAPLCT';
           global.COMPLETEDPAGE = 'PRF_SHRT_COAPLCT_ADDRS_DTLS';
         } else if (global.CLIENTTYPE == 'GRNTR') {
-          global.COMPLETEDSUBSTAGE = 'CB_CHK';
           global.COMPLETEDMODULE = 'PRF_SHRT_GRNTR';
           global.COMPLETEDPAGE = 'PRF_SHRT_GRNTR_ADDRS_DTLS';
         }
@@ -336,29 +363,35 @@ const AddressMainList = (props, { navigation }) => {
         global.isMobileVerified = '0';
         global.CLIENTID = '';
         global.isAadharVerified = '0';
+        if (processModuleLength == 1) {
+          if (!IsManualKYCAvailable) {
+            global.COMPLETEDSUBSTAGE = 'CB_CHK';
+          }
+        } else if (processModuleLength == 2) {
+          if (global.CLIENTTYPE == 'APPL') {
+          } else if (global.CLIENTTYPE == 'CO-APPL') {
+            if (!IsManualKYCAvailable) {
+              global.COMPLETEDSUBSTAGE = 'CB_CHK';
+            }
+          } else if (global.CLIENTTYPE == 'GRNTR') {
+            if (!IsManualKYCAvailable) {
+              global.COMPLETEDSUBSTAGE = 'CB_CHK';
+            }
+          }
+        } else if (processModuleLength == 3) {
+          if (global.CLIENTTYPE == 'APPL') {
+
+          } else if (global.CLIENTTYPE == 'CO-APPL') {
+
+          } else if (global.CLIENTTYPE == 'GRNTR') {
+            if (!IsManualKYCAvailable) {
+              global.COMPLETEDSUBSTAGE = 'CB_CHK';
+            }
+          }
+        }
+
         props.navigation.replace('LoanApplicationMain', { fromScreen: 'AddressDetail' });
-        // if (processModuleLength == 1) {
-        //   props.navigation.navigate('LoanApplicationMain', { fromScreen: 'AddressDetail' });
-        // } else if (processModuleLength == 2) {
-        //   if (global.CLIENTTYPE == 'APPL') {
-        //     global.CLIENTTYPE = 'CO-APPL';
-        //     props.navigation.replace('ProfileShortBasicDetails');
-        //   } else if (global.CLIENTTYPE == 'CO-APPL') {
-        //     props.navigation.navigate('LoanApplicationMain', { fromScreen: 'AddressDetail' });
-        //   } else if (global.CLIENTTYPE == 'GRNTR') {
-        //     props.navigation.replace('LoanApplicationMain', { fromScreen: 'AddressDetail' });
-        //   }
-        // } else if (processModuleLength == 3) {
-        //   if (global.CLIENTTYPE == 'APPL') {
-        //     global.CLIENTTYPE = 'CO-APPL';
-        //     props.navigation.replace('ProfileShortBasicDetails');
-        //   } else if (global.CLIENTTYPE == 'CO-APPL') {
-        //     global.CLIENTTYPE = 'GRNTR';
-        //     props.navigation.replace('ProfileShortBasicDetails');
-        //   } else if (global.CLIENTTYPE == 'GRNTR') {
-        //     props.navigation.replace('LoanApplicationMain', { fromScreen: 'AddressDetail' });
-        //   }
-        // }
+
 
       })
       .catch(error => {
@@ -375,13 +408,16 @@ const AddressMainList = (props, { navigation }) => {
 
   const approveManualKYC = (status) => {
 
+    const filteredKYCData = global.LEADTRACKERDATA.clientDetail
+      .filter(data => data.clientType === global.CLIENTTYPE)
+
     const appDetails = {
-      "kycType": "001",
-      "kycValue": "123456789012",
-      "kycDmsId": 100,
-      "kycExpiryDate": null,
+      "kycType": filteredKYCData[0].clientManualKycLink[0].kycType,
+      "kycValue": filteredKYCData[0].clientManualKycLink[0].kycValue,
+      "kycDmsId": filteredKYCData[0].clientManualKycLink[0].kycDmsId,
+      "kycExpiryDate": filteredKYCData[0].clientManualKycLink.kycExpiryDate,
       "manualKycStatus": status,
-      "manualKycApprovedBy": "Muthu"
+      "manualKycApprovedBy": global.USERNAME
     }
     const baseURL = '8901';
     setLoading(true);
@@ -427,6 +463,18 @@ const AddressMainList = (props, { navigation }) => {
         ')' +
         ' ' +
         "Please Add Communication Address" +
+        '\n';
+      i++;
+      flag = true;
+    }
+
+    if (!permanentAvailable) {
+      errorMessage =
+        errorMessage +
+        i +
+        ')' +
+        ' ' +
+        "Please Add Permanent Address" +
         '\n';
       i++;
       flag = true;
@@ -513,7 +561,7 @@ const AddressMainList = (props, { navigation }) => {
         data={addressDetails}
         renderItem={FlatView}
         extraData={refreshFlatlist}
-        keyExtractor={item => item.loanApplicationId}
+        keyExtractor={(item, index) => index.toString()}
       />
 
 
