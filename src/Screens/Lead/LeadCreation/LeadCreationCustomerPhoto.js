@@ -303,7 +303,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
         ];
         await Promise.all(deletePromises);
         setLoading(false)
-        props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
+        props.navigation.replace('LeadManagement', { fromScreen: 'LeadCompletion' })
 
 
       })
@@ -331,7 +331,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
       console.log("LeadImage::::" + JSON.stringify(value))
     })
     if (nav == true) {
-      props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
+      props.navigation.replace('LeadManagement', { fromScreen: 'LeadCompletion' })
     }
   }
 

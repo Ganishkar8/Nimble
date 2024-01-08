@@ -203,6 +203,7 @@ const createTables = async () => {
       id TEXT,
       loanApplicationId TEXT,
       clientTypeId TEXT,
+      leadID TEXT,
       relationTypeId TEXT,
       titleId TEXT,
       firstName TEXT,

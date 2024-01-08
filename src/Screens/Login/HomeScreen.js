@@ -217,7 +217,22 @@ const HomeScreen = (props, { navigation }) => {
                                     </TouchableOpacity>
                                 </View>
 
-                                {global.USERTYPEID == '1164' &&
+                                <View style={{ width: '93%', height: 170, justifyContent: 'space-between', flexDirection: 'row', marginTop: '4%' }}>
+
+                                    <TouchableOpacity onPress={() => props.navigation.navigate('PdMainScreen')} activeOpacity={0.5} style={{ width: '48%', height: '100%', backgroundColor: '#ffffff99', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
+                                        <View >
+                                            <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+                                                <View style={styles.circularView1}>
+                                                    <Image source={require('../../Images/lead_list.png')}
+                                                        style={{ width: 22.5, height: 25 }} />
+                                                </View>
+                                                <Text style={styles.textstyle1}>Personal Discussion{'\n'}Tracker</Text>
+                                            </View>
+                                        </View>
+                                    </TouchableOpacity>
+                                </View>
+
+                                {/* {global.USERTYPEID == '1164' &&
 
                                     <TouchableOpacity onPress={() => {
                                         global.LEADTYPE = 'NEW';
@@ -275,7 +290,7 @@ const HomeScreen = (props, { navigation }) => {
                                         global.COMPLETEDMODULE = '';
                                         global.COMPLETEDPAGE = '';
                                         global.COMPLETEDSUBSTAGE = '';
-                                        props.navigation.navigate('ConsentScreen');
+                                        props.navigation.navigate('ConsentScreen', { leadData: [] });
                                         //props.navigation.navigate('LoanDemographicsGSTDetails');
 
                                     }} activeOpacity={0.5} style={{ width: '93%', height: 150, backgroundColor: '#ffffff99', marginTop: '3.5%', borderRadius: 10 }}>
@@ -304,7 +319,7 @@ const HomeScreen = (props, { navigation }) => {
                                                             global.COMPLETEDMODULE = '';
                                                             global.COMPLETEDPAGE = '';
                                                             global.COMPLETEDSUBSTAGE = '';
-                                                            props.navigation.navigate('ConsentScreen');
+                                                            props.navigation.navigate('ConsentScreen', { leadData: [] });
                                                             //props.navigation.navigate('LoanDemographicsGSTDetails');
                                                         }} activeOpacity={0.5} style={{ width: '70%', height: '100%', backgroundColor: '#0294ff', borderRadius: 25, alignItems: 'center', justifyContent: 'center' }}>
                                                             <View >
@@ -320,8 +335,7 @@ const HomeScreen = (props, { navigation }) => {
 
                                         </View>
                                     </TouchableOpacity>
-
-                                }
+                                } */}
 
 
                             </View>

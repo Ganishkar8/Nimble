@@ -111,13 +111,18 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
 
         const index = filteredProcessPage.findIndex(item => item.pageCode === value.currentStatus.pageCode);
 
-        if (index > 0) {
-            const previousPage = filteredProcessPage[index - 1];
-            global.COMPLETEDPAGE = previousPage.pageCode;
-            if (global.DEBUG_MODE) console.log(previousPage);
+        if (value.currentStatus.subStageStatus.toUpperCase() == 'COMPLETED') {
+            global.COMPLETEDPAGE = value.currentStatus.pageCode
         } else {
-            if (global.DEBUG_MODE) console.log("No previous entry found.");
+            if (index > 0) {
+                const previousPage = filteredProcessPage[index - 1];
+                global.COMPLETEDPAGE = previousPage.pageCode;
+                if (global.DEBUG_MODE) console.log(previousPage);
+            } else {
+                if (global.DEBUG_MODE) console.log("No previous entry found.");
+            }
         }
+
 
         setLoading(false);
 
@@ -148,7 +153,7 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
             }
             if (global.DEBUG_MODE) console.log('ClientDetails:' + JSON.stringify(client));
 
-            await tbl_client.insertClient(client.id, loanApplicationID, client.clientType, client.relationType, client.title, client.firstName, client.middleName, client.lastName, dob, client.age, client.fatherName, client.spouseName, client.caste, client.religion, client.motherTongue, client.educationQualification, client.gender, client.maritalStatus, client.mobileNumber, client.email, client.isKycManual,
+            await tbl_client.insertClient(client.id, loanApplicationID, client.clientType, client.leadId, client.relationType, client.title, client.firstName, client.middleName, client.lastName, dob, client.age, client.fatherName, client.spouseName, client.caste, client.religion, client.motherTongue, client.educationQualification, client.gender, client.maritalStatus, client.mobileNumber, client.email, client.isKycManual,
                 client.kycTypeId1, client.kycIdValue1, client.kycType1ExpiryDate, client.kycTypeId2, client.kycIdValue2, client.kycType2ExpiryDate, client.kycTypeId3, client.kycIdValue3, client.kycType3ExpiryDate, client.kycTypeId4, client.kycIdValue4, client.kycType4ExpiryDate, client.isMsme, client.isAadharNumberVerified, client.isPanVerified, client.udyamRegistrationNumber, client.isUdyamRegistrationNumberVerified, client.isMobileNumberVerified, client.isEmailVerified, value.dedupeCheck, client.dedupePassed, client.dmsId, client.imageName, client.geoCode, 'true', '', '', '', '', '', '', '', value.lmsClientId, value.lmsCustomerTypeId);
 
             // If there are clientAddress details, iterate through them
@@ -158,7 +163,7 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
                 client.clientAddress.forEach((address) => {
 
                     if (address.addressType == 'P' || address.addressType == 'C') {
-                        tbl_clientaddressinfo.insertClientAddress(loanApplicationID, address.id, client.id, client.clientType, address.addressType, address.addressLine1, address.addressLine2, address.landmark, address.pincode, address.city, address.district, address.state, address.country, address.mobileOrLandLineNumber, address.emailId, address.addressOwnership, address.ownerDetails, address.ownerName, address.geoClassification, address.yearsAtResidence, address.yearsInCurrentCityOrTown, 'true', '', '', '', '', '', '', client.aadharNumberVerified);
+                        tbl_clientaddressinfo.insertClientAddress(loanApplicationID, address.id, client.id, client.clientType, address.addressType, address.addressLine1, address.addressLine2, address.landmark, address.pincode, address.city, address.district, address.state, address.country, address.mobileOrLandLineNumber, address.emailId, address.addressOwnership, address.ownerDetails, address.ownerName, address.geoClassification, address.yearsAtResidence, address.yearsInCurrentCityOrTown, 'true', '', '', '', '', '', '', client.isAadharNumberVerified);
                     } else {
                         tbl_loanaddressinfo.insertLoanAddress(loanApplicationID, address.id, client.id, client.clientType, address.addressType, address.addressLine1, address.addressLine2, address.landmark, address.pincode, address.city, address.district, address.state, address.country, address.mobileOrLandLineNumber, address.emailId, address.addressOwnership, address.ownerDetails, address.ownerName, "true", "0")
                     }

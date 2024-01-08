@@ -206,7 +206,7 @@ const AadharOTPVerification = (props, { navigation }) => {
 
         const appDetails =
         {
-            "clientId": 0,
+            "clientId": global.CLIENTID,
             "aadharNumber": aadharNumber,
             "createdBy": global.USERID
         }
@@ -220,6 +220,9 @@ const AadharOTPVerification = (props, { navigation }) => {
 
                 if (response.status == 200) {
                     setTimeLeft(60)
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
                 }
 
                 setLoading(false);
@@ -265,7 +268,8 @@ const AadharOTPVerification = (props, { navigation }) => {
                     insertData(response.data.aadharResultDetails);
 
                 } else {
-                    alert(response.data.statusCode)
+                    setApiError(response.data.statusMessage);
+                    setErrorModalVisible(true)
                 }
 
             })
@@ -451,8 +455,8 @@ const AadharOTPVerification = (props, { navigation }) => {
             global.CLIENTID,
             global.CLIENTTYPE,
             "P",
-            aadhaarResponse.houseNumber + " " + aadhaarResponse.street,
-            aadhaarResponse.vtcName + " " + aadhaarResponse.location,
+            aadhaarResponse.address,
+            '',
             landmark,
             aadhaarResponse.pinCode,
             "",

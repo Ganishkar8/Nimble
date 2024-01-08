@@ -45,13 +45,12 @@ import tbl_lead_creation_basic_details from '../../../Database/Table/tbl_lead_cr
 import tbl_lead_creation_business_details from '../../../Database/Table/tbl_lead_creation_business_details';
 import tbl_lead_creation_loan_details from '../../../Database/Table/tbl_lead_creation_loan_details';
 import PickerComp from '../../../Components/PickerComp';
-import { it } from 'react-native-paper-dates';
-import { isParameter } from 'typescript';
 import ErrorModal from '../../../Components/ErrorModal';
+import { tr } from 'react-native-paper-dates';
 
 
 
-const LeadManagement = (props, { navigation, route }) => {
+const PDTracker = (props, { navigation, route }) => {
     const data = [
 
         { name: 'Filter', isSelected: false, id: 1 },
@@ -64,7 +63,6 @@ const LeadManagement = (props, { navigation, route }) => {
         { name: 'Sort', isSelected: true, id: 'SO' },
         { name: 'Status', isSelected: false, id: 'ST' },
         { name: 'Date', isSelected: false, id: 'DT' },
-        { name: 'Type', isSelected: false, id: 'TP' },
         { name: 'Ageing', isSelected: false, id: 'AG' }
 
     ]
@@ -80,10 +78,7 @@ const LeadManagement = (props, { navigation, route }) => {
     const [visible, setVisible] = useState(false);
     const [filterVisible, setFilterVisible] = useState('');
     const [bottomLeadSheetVisible, setBottomLeadSheetVisible] = useState(false);
-    const showBottomSheet = () => {
-        setBottomLeadSheetVisible(true);
-        setTimeout(() => hideBottomSheet(), 2000);
-    };
+    const showBottomSheet = () => setBottomLeadSheetVisible(true);
     const hideBottomSheet = () => setBottomLeadSheetVisible(false);
     const [sortModalVisible, setSortModalVisible] = useState(false);
     const showSortModalSheet = () => setSortModalVisible(true);
@@ -121,7 +116,7 @@ const LeadManagement = (props, { navigation, route }) => {
     useEffect(() => {
         //getPendingData()
         if (props.route.params.fromScreen == "LeadCompletion") {
-            //showBottomSheet();
+            // showBottomSheet();
         }
         if (isScreenVisible) {
             setSearch('')
@@ -167,10 +162,10 @@ const LeadManagement = (props, { navigation, route }) => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
             backHandler.remove();
         }
-    }, [navigation, isScreenVisible]);
+    }, [props.navigation, isScreenVisible]);
 
     const handleBackButton = () => {
-        props.navigation.replace('HomeScreen')
+        props.navigation.goBack();
         return true; // Prevent default back button behavior
     };
 
@@ -206,8 +201,8 @@ const LeadManagement = (props, { navigation, route }) => {
         await Promise.all(promises);
 
         // alert(JSON.stringify(data))
-        setFilteredData(data.slice().reverse())
-        setPendingData(data.slice().reverse())
+        setFilteredData(data.slice())
+        setPendingData(data.slice())
         setRefreshing(false)
     }
 
@@ -332,38 +327,25 @@ const LeadManagement = (props, { navigation, route }) => {
 
         const baseURL = '8901'
         setLoading(true)
-        var url = '';
-
-        if (global.USERTYPEID == '1163') {
-            url = 'BM-trackerWithCondition';
-            var appDetails = {
-                "status": status,
-                "leadType": leadType,
-                "from": from,
-                "to": to,
-                "operator": operator,
-                "ageing": ageing,
-                "agentName": agentName,
-                "sort": sort
-            }
-        } else {
-            url = 'lead-creation-cart/allCondition';
-            var appDetails = {
-                "status": status,
-                "leadType": leadType,
-                "from": from,
-                "to": to,
-                "operator": operator,
-                "ageing": ageing,
-                "sort": sort
-            }
+        const appDetails = {
+            "userId": global.USERID,
+            "userTypeId": global.USERTYPEID,
+            "status": status,
+            "leadType": leadType,
+            "from": from,
+            "to": to,
+            "operator": operator,
+            "ageing": ageing,
+            "agentName": agentName,
+            "sort": sort
         }
-        apiInstance(baseURL).post(`api/v1/${url}/${global.USERID}`, appDetails)
+
+        apiInstance(baseURL).post(`/api/v2/loan-tracker-status`, appDetails)
             .then((response) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(response.data));
-                setPendingData(response.data.slice().reverse())
-                setFilteredData(response.data.slice().reverse())
+                setPendingData(response.data.slice())
+                setFilteredData(response.data.slice())
                 setLoading(false)
                 setRefreshing(false)
                 if (response.data.length > 0) {
@@ -405,7 +387,6 @@ const LeadManagement = (props, { navigation, route }) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(response.data));
                 setLoading(false)
-                insertLead(response.data)
 
             })
             .catch((error) => {
@@ -419,42 +400,6 @@ const LeadManagement = (props, { navigation, route }) => {
             });
     }
 
-    const insertLead = async (leadData) => {
-        await tbl_lead_creation_lead_details.insertLeadCreationLeadDetails(leadData.id, leadData.leadNumber, leadData.branchId, leadData.isActive, leadData.createdBy, leadData.leadCreationBasicDetails.createdOn);
-        await tbl_lead_creation_basic_details.insertLeadCreationBasicDetails(leadData.id, leadData.leadCreationBasicDetails.customerCategory, leadData.leadCreationBasicDetails.title, leadData.leadCreationBasicDetails.firstName, leadData.leadCreationBasicDetails.middleName, leadData.leadCreationBasicDetails.lastName, leadData.leadCreationBasicDetails.gender, leadData.leadCreationBasicDetails.mobileNumber, global.USERID);
-
-        if (!Common.hasOnlyOneKey(leadData.leadCreationBusinessDetails)) {
-            await tbl_lead_creation_business_details.insertLeadCreationBusinessDetails(leadData.id, leadData.leadCreationBusinessDetails.industryType, leadData.leadCreationBusinessDetails.businessName, leadData.leadCreationBusinessDetails.businessVintageYear, leadData.leadCreationBusinessDetails.businessVintageMonth, leadData.leadCreationBusinessDetails.incomeBusinessTurnover, global.USERID);
-        }
-
-        if (!Common.hasOnlyOneKey(leadData.leadCreationLoanDetails)) {
-            await tbl_lead_creation_loan_details.insertLeadCreationLoanDetails(leadData.id, leadData.leadCreationLoanDetails.loanType, leadData.leadCreationLoanDetails.loanProduct, leadData.leadCreationLoanDetails.loanPurpose, leadData.leadCreationLoanDetails.loanAmount, leadData.leadCreationLoanDetails.leadType, global.USERID);
-        }
-
-        // if (!Common.hasOnlyOneKey(leadData.leadCreationDms)) {
-        //     await tbl_lead_creation_loan_details.insertLeadCreationLoanDetails(leadData.id, leadData.leadCreationDms.dmsId, leadData.leadCreationDms.fileName, leadData.leadCreationDms.fileInfo, leadData.leadCreationDms.fileType,leadData.leadCreationDms.geo_location,leadData.leadCreationDms.comments, global.USERID);
-
-        // }
-
-        tbl_lead_creation_lead_details.getLeadCreationLeadDetailsBasedOnLeadID(leadData.id).then(value => {
-            if (global.DEBUG_MODE) console.log("LeadDetails::::" + JSON.stringify(value))
-        })
-
-        tbl_lead_creation_basic_details.getLeadCreationBasicDetailsBasedOnLeadID(leadData.id).then(value => {
-            if (global.DEBUG_MODE) console.log("LeadBasicDetails::::" + JSON.stringify(value))
-        })
-
-        tbl_lead_creation_business_details.getLeadCreationBusinessDetailsBasedOnLeadID(leadData.id).then(value => {
-            if (global.DEBUG_MODE) console.log("LeadBusinessDetails::::" + JSON.stringify(value))
-        })
-
-        tbl_lead_creation_loan_details.getLeadCreationLoanDetailsBasedOnLeadID(leadData.id).then(value => {
-            if (global.DEBUG_MODE) console.log("LeadLoanDetails::::" + JSON.stringify(value))
-        })
-
-        props.navigation.navigate('LeadCreationBasic', { leadData: [] });
-
-    }
 
     const handleclick = (value, index) => {
         //alert(JSON.stringify(value))
@@ -646,16 +591,10 @@ const LeadManagement = (props, { navigation, route }) => {
             data2[i].checked = false
         }
         setStatusFilterValue(data2);
-        var data1 = typeDataArr;
-        for (let i = 0; i < data1.length; i++) {
 
-            data1[i].checked = false
-        }
-        setTypeDataArr(data1)
 
         setAgeFilterValue('')
         setVisible(false)
-        setAgentLabel('')
 
         if (value == "1") {
             Common.getNetworkConnection().then(value => {
@@ -689,51 +628,22 @@ const LeadManagement = (props, { navigation, route }) => {
 
     const listView = ({ item }) => {
 
+        var bg = '';
+        if (item.status.toUpperCase() == 'MANUAL KYC PENDING' || item.status.toUpperCase() == 'INPROGRESS') {
+            bg = 'YELLOW'
+        } else if (item.status.toUpperCase() == 'MANUAL KYC APPROVED' || item.status.toUpperCase() == 'APPROVED') {
+            bg = 'GREEN'
+        } else if (item.status.toUpperCase() == 'MANUAL KYC REJECTED' || item.status.toUpperCase() == 'REJECTED') {
+            bg = 'RED'
+        } else if (item.status.toUpperCase() == 'DRAFT') {
+            bg = 'GREY'
+        }
+
         return (
             <View>
                 <TouchableOpacity onPress={() => {
-                    global.leadID = item.id;
-                    global.leadNumber = item.leadId;
-                    global.leadTrackerData = item;
-                    if (global.USERTYPEID == '1163') {
-                        props.navigation.navigate('LeadDetails', { leadData: item })
-                    } else {
-                        if (item.leadStatus.toUpperCase() == 'DRAFT') {
-                            global.LEADTYPE = 'DRAFT';
-                            tbl_lead_creation_lead_details.getLeadCreationLeadDetailsBasedOnLeadID(item.id).then(value => {
-                                if (value !== undefined && value.length > 0) {
-                                    global.LEADTYPE = 'DRAFT';
-                                    Common.getNetworkConnection().then(value => {
-                                        if (value.isConnected == true) {
-                                            getLeadByID(item.id);
-                                            //props.navigation.navigate('LeadCreationBasic', { leadData: [] });
-                                        } else {
-                                            props.navigation.navigate('LeadCreationBasic', { leadData: [] });
-                                        }
-
-                                    })
-                                    //props.navigation.navigate('LeadCreationBasic', { leadData: [] });
-                                } else {
-                                    Common.getNetworkConnection().then(value => {
-                                        if (value.isConnected == true) {
-                                            getLeadByID(item.id);
-                                        } else {
-
-                                            setApiError(language[0][props.language].str_errinternet);
-                                            setErrorModalVisible(true)
-
-                                            // alert(language[0][props.language].str_errinternet)
-                                        }
-
-                                    })
-                                }
-                            })
-
-                        } else {
-                            props.navigation.navigate('LeadDetails', { leadData: item })
-                        }
-
-                    }
+                    global.LOANSTATUS = item.status.toUpperCase();
+                    props.navigation.navigate('LoanApplicationTrackerDetails', { leadData: item })
                 }} activeOpacity={0.9}>
                     <View style={{
                         width: '92%', margin: 13, backgroundColor: 'white',
@@ -748,11 +658,11 @@ const LeadManagement = (props, { navigation, route }) => {
 
                         <View style={{ width: '100%', flexDirection: 'row', marginTop: 13 }}>
                             <View style={{ width: '45%', flexDirection: 'row', alignItems: 'center' }}>
-                                <Text style={{ color: Colors.black, fontSize: 14, marginLeft: 26, fontFamily: 'Poppins-Medium' }}>{language[0][props.language].str_leadapprovalstatus}</Text>
+                                <Text style={{ color: Colors.black, fontSize: 14, marginLeft: 26, fontFamily: 'Poppins-Medium' }}>{language[0][props.language].str_appstatus}</Text>
                             </View>
-                            <View style={{ width: '55%', flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'flex-start' }}>
-                                <View style={item.leadStatus.toUpperCase() == 'APPROVED' ? styles.approvedbackground : item.leadStatus.toUpperCase() == 'PENDING' ? styles.pendingbackground : item.leadStatus.toUpperCase() == 'DRAFT' ? styles.draftbackground : styles.rejectedbackground}>
-                                    <Text style={{ color: Colors.black, fontSize: 12, fontFamily: 'Poppins-Medium' }}>{item.leadStatus}</Text>
+                            <View style={{ width: '50%', flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'flex-end' }}>
+                                <View style={bg == 'GREEN' ? styles.approvedbackground : bg == 'YELLOW' ? styles.pendingbackground : bg == 'GREY' ? styles.draftbackground : styles.rejectedbackground}>
+                                    <Text style={{ color: Colors.black, fontSize: 12, fontFamily: 'Poppins-Medium' }}>{item.status}</Text>
                                 </View>
                             </View>
                         </View>
@@ -768,18 +678,18 @@ const LeadManagement = (props, { navigation, route }) => {
                         </View>
                         <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
                             <View style={{ width: '45%' }}>
-                                <Text style={styles.headText}>{language[0][props.language].str_leadid}</Text>
+                                <Text style={styles.headText}>{language[0][props.language].str_laonappid}</Text>
                             </View>
                             <View style={{ width: '55%' }}>
-                                <Text style={styles.childText}>:  {item.leadId}</Text>
+                                <Text style={styles.childText}>:  {item.loanApplicationNumber}</Text>
                             </View>
                         </View>
                         <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
                             <View style={{ width: '45%' }}>
-                                <Text style={styles.headText}>{language[0][props.language].str_leadtype}</Text>
+                                <Text style={styles.headText}>{language[0][props.language].str_workflowstage}</Text>
                             </View>
                             <View style={{ width: '55%' }}>
-                                <Text style={styles.childText}>:   {item.leadType}</Text>
+                                <Text style={styles.childText}>:   {item.workflowStage}</Text>
                             </View>
                         </View>
                         <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
@@ -795,7 +705,7 @@ const LeadManagement = (props, { navigation, route }) => {
                                 <Text style={styles.headText}>{language[0][props.language].str_completiondate}</Text>
                             </View>
                             <View style={{ width: '55%' }}>
-                                <Text style={styles.childText}>:  {item.leadStatus.toUpperCase() == 'APPROVED' ? Common.formatDate(item.completionDate) : item.leadStatus.toUpperCase() == 'REJECTED' ? Common.formatDate(item.completionDate) : ''} </Text>
+                                <Text style={styles.childText}>:  {item.status.toUpperCase() == 'APPROVED' ? Common.formatDate(item.completionDate) : item.status == 'REJECTED' ? Common.formatDate(item.completionDate) : ''} </Text>
                             </View>
                         </View>
                         <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
@@ -815,8 +725,7 @@ const LeadManagement = (props, { navigation, route }) => {
                             </View>
                         </View>
                         }
-                        <View style={{ width: '100%', height: 5, backgroundColor: item.leadStatus.toUpperCase() == 'APPROVED' ? Colors.approvedBorder : item.leadStatus.toUpperCase() == 'PENDING' ? Colors.pendingBorder : item.leadStatus.toUpperCase() == 'DRAFT' ? Colors.lightgrey : Colors.rejectedBorder, marginTop: 13, borderBottomLeftRadius: 8, borderBottomRightRadius: 8 }} />
-
+                        <View style={{ width: '100%', height: 5, backgroundColor: bg == 'GREEN' ? Colors.approvedBorder : bg == 'YELLOW' ? Colors.pendingBorder : bg == 'GREY' ? Colors.lightgrey : Colors.rejectedBorder, marginTop: 13, borderBottomLeftRadius: 8, borderBottomRightRadius: 8 }} />
 
                     </View>
                 </TouchableOpacity>
@@ -837,8 +746,8 @@ const LeadManagement = (props, { navigation, route }) => {
                     const itemData = item.customerName
                         ? item.customerName.toUpperCase()
                         : '';
-                    const itemDataID = item.leadId
-                        ? item.leadId.toString()
+                    const itemDataID = item.loanApplicationNumber
+                        ? item.loanApplicationNumber.toString()
                         : '';
                     const regex = /^[0-9]+$/;
                     //let textData = ''
@@ -878,10 +787,6 @@ const LeadManagement = (props, { navigation, route }) => {
         setErrorModalVisible(false);
     };
 
-    const onGoBack = () => {
-        props.navigation.goBack();
-    }
-
     return (
 
         <View style={{ flex: 1, backgroundColor: '#fefefe' }}>
@@ -901,7 +806,7 @@ const LeadManagement = (props, { navigation, route }) => {
 
 
                             <View style={{ width: '100%', height: 30 }}>
-                                <TextComp textVal={`Lead ID ${global.leadNumber} is successfully submitted`} textStyle={{ fontSize: 14, color: Colors.white, lineHeight: 20, fontFamily: 'PoppinsRegular' }} Visible={false} />
+                                <TextComp textVal={"Lead ID Created"} textStyle={{ fontSize: 14, color: Colors.white, lineHeight: 20, fontFamily: 'PoppinsRegular' }} Visible={false} />
                             </View>
 
 
@@ -941,14 +846,14 @@ const LeadManagement = (props, { navigation, route }) => {
                     flexDirection: 'row'
                 }}>
                     <TouchableOpacity onPress={() => props.navigation.navigate('HomeScreen')} style={{ height: 56, justifyContent: 'center', marginLeft: 5 }}>
-                        <View >
+                        <View>
 
                             <Entypo name='chevron-left' size={25} color='#4e4e4e' />
 
                         </View>
                     </TouchableOpacity>
                     <View style={{ width: '90%', height: 56, justifyContent: 'center', marginLeft: 5 }}>
-                        <Text style={{ fontSize: 18, color: '#000', fontFamily: 'Poppins-Medium', marginTop: 3 }}>{language[0][props.language].str_leadmanagement}</Text>
+                        <Text style={{ fontSize: 18, color: '#000', fontFamily: 'Poppins-Medium', marginTop: 3 }}>{language[0][props.language].str_laonapptracker}</Text>
                     </View>
                 </View>
 
@@ -1008,7 +913,7 @@ const LeadManagement = (props, { navigation, route }) => {
                                 }
 
                             }}
-                            placeholder={'Search By Name or Lead ID'}
+                            placeholder={'Search By Name or Loan App ID'}
                             placeholderTextColor={'gray'}
                             keyboardType='default'
                             secureTextEntry={false}
@@ -1187,12 +1092,17 @@ const LeadManagement = (props, { navigation, route }) => {
                     icon="plus"
                     color={Colors.white}
                     style={styles.fab}
-                    label='Create New Lead'
+                    label='Create New Application'
                     onPress={() => {
-                        global.LEADTYPE = 'NEW';
-                        global.leadID = '';
-                        global.leadNumber = '';
-                        props.navigation.navigate('LeadCreationBasic', { leadData: [] });
+                        global.isDedupeDone = '0';
+                        global.isMobileVerified = '0';
+                        global.CLIENTID = '';
+                        global.isAadharVerified = '';
+                        global.LOANAPPLICATIONID = '';
+                        global.COMPLETEDMODULE = '';
+                        global.COMPLETEDPAGE = '';
+                        global.COMPLETEDSUBSTAGE = '';
+                        props.navigation.navigate('ConsentScreen', { leadData: [] });
                     }}
                 />
             }
@@ -1217,7 +1127,7 @@ const mapDispatchToProps = (dispatch) => ({
 });
 
 
-export default connect(mapStateToProps, mapDispatchToProps)(LeadManagement);
+export default connect(mapStateToProps, mapDispatchToProps)(PDTracker);
 
 const styles = StyleSheet.create({
 

@@ -27,6 +27,9 @@ import Common from '../../../Utils/Common';
 import ButtonViewComp from '../../../Components/ButtonViewComp';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import DedupeModal from '../../../Components/DedupeModal';
+import tbl_client from '../../../Database/Table/tbl_client';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+
 import {
     CodeField,
     Cursor,
@@ -151,6 +154,10 @@ const OTPVerification = (props, { navigation }) => {
     };
 
     useEffect(() => {
+        props.navigation
+            .getParent()
+            ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
+
         const timer = setInterval(() => {
             if (timeLeft > 0) {
                 setTimeLeft(timeLeft - 1);
@@ -161,10 +168,23 @@ const OTPVerification = (props, { navigation }) => {
         }, 1000); // Update every second (1000 milliseconds)
 
         return () => {
-            clearInterval(timer); // Clean up the timer when the component unmounts
+            clearInterval(timer);
+            props.navigation
+                .getParent()
+                ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
+            // Clean up the timer when the component unmounts
         };
     }, [props.navigation, timeLeft]);
 
+    useFocusEffect(
+        React.useCallback(() => {
+
+            return () => {
+                console.log('Screen is blurred');
+
+            };
+        }, [props.navigation]),
+    );
 
 
     const generateOTP = () => {
@@ -238,6 +258,7 @@ const OTPVerification = (props, { navigation }) => {
                     setMobileOTP('');
                     setTimeLeft(0);
                 } else if (response.status === 200) {
+                    // await tbl_client.updateIsMobileVerified('1', global.LOANAPPLICATIONID, global.CLIENTTYPE)
                     sendDataBack();
                 }
 

@@ -324,45 +324,56 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
 
 
   useEffect(() => {
-    props.navigation
-      .getParent()
-      ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      handleBackButton,
-    );
+    makeSystemMandatoryFields();
+    getSystemCodeDetail();
+    hideFields();
+    getApplicantData();
+  }, [props.navigation]);
 
-    if (
-      KycType1Label !== null ||
-      KycType2Label !== null ||
-      KycType3Label !== null ||
-      KycType4Label !== null
-    ) {
+  useEffect(() => {
+    if (KycType1Label !== null || KycType2Label !== null || KycType3Label !== null || KycType4Label !== null) {
       getID1data(workflowIDLabel);
       getID2data(workflowIDLabel);
       getID3data(workflowIDLabel);
       getID4data(workflowIDLabel);
     }
+  }, [KycType2Label, KycType3Label, KycType4Label, workflowIDLabel]);
 
+  useEffect(() => {
     if (isDedupeDone) {
       fieldsDisable();
     }
+  }, [isDedupeDone]);
+  // useEffect(() => {
 
-    return () => {
-      props.navigation
-        .getParent()
-        ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
-      backHandler.remove();
-    };
-  }, [
-    props.navigation,
-    KycType1Label,
-    KycType2Label,
-    KycType3Label,
-    KycType4Label,
-    isScreenVisible,
-    isDedupeDone,
-  ]);
+  //   makeSystemMandatoryFields();
+  //   getSystemCodeDetail();
+  //   hideFields();
+  //   getApplicantData();
+
+  //   if (KycType1Label !== null ||KycType2Label !== null || KycType3Label !== null || KycType4Label !== null
+  //   ) {
+  //     getID1data(workflowIDLabel);
+  //     getID2data(workflowIDLabel);
+  //     getID3data(workflowIDLabel);
+  //     getID4data(workflowIDLabel);
+  //   }
+
+  //   if (isDedupeDone) {
+  //     fieldsDisable();
+  //   }
+
+  //   return () => {
+
+  //   };
+  // }, [
+  //   props.navigation,
+  //   KycType1Label,
+  //   KycType2Label,
+  //   KycType3Label,
+  //   KycType4Label,
+  //   isDedupeDone,
+  // ]);
 
   const handleBackButton = () => {
     onGoBack();
@@ -371,10 +382,14 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
 
   useFocusEffect(
     React.useCallback(() => {
-      makeSystemMandatoryFields();
-      getSystemCodeDetail();
-      hideFields();
-      getApplicantData();
+
+      props.navigation
+        .getParent()
+        ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
+      const backHandler = BackHandler.addEventListener(
+        'hardwareBackPress',
+        handleBackButton,
+      );
 
       if (global.isDedupeDone == 1) {
         setClientTypeVisible(true);
@@ -396,6 +411,10 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
 
       return () => {
         console.log('Screen is blurred');
+        props.navigation
+          .getParent()
+          ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
+        backHandler.remove();
       };
     }, []),
   );
@@ -407,16 +426,22 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       .then(data => {
         if (global.DEBUG_MODE) console.log('Applicant Data:', data);
         if (data !== undefined && data.length > 0) {
-          getID1data(data[0].workflow_id);
-          getID2data(data[0].workflow_id);
-          getID3data(data[0].workflow_id);
-          getID4data(data[0].workflow_id);
-          setWorkflowIDLabel(data[0].workflow_id);
+
+          if (data[0].workflow_id !== undefined && data[0].workflow_id !== null) {
+            if (data[0].workflow_id.length > 0) {
+              getID1data(data[0].workflow_id);
+              getID2data(data[0].workflow_id);
+              getID3data(data[0].workflow_id);
+              getID4data(data[0].workflow_id);
+              setWorkflowIDLabel(data[0].workflow_id)
+            }
+          }
+
         }
       })
       .catch(error => {
         if (global.DEBUG_MODE)
-          console.error('Error fetching Applicant details:', error);
+          console.error('Error fetching Second Loan Applicant details:', error);
       });
 
     tbl_loanApplication
@@ -424,13 +449,21 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       .then(data => {
         if (global.DEBUG_MODE) console.log('Applicant Data:', data);
         if (data !== undefined && data.length > 0) {
-          setLeadID('');
-          setLoanTypeLabel(data[0].loan_type);
+          setLoanTypeLabel(data[0]?.loan_type ?? loanTypeLabel);
           setProductTypeLabel(data[0].product);
           setCustCatgLabel(data[0].customer_category);
-          setCustomerSubCategoryLabel(data[0].customer_subcategory);
-          setWorkflowIDLabel(parseInt(data[0].workflow_id));
-          callLoanAmount(parseInt(data[0].workflow_id));
+          if (data[0].customer_subcategory !== undefined && data[0].customer_subcategory !== null) {
+            if (data[0].customer_subcategory.length > 0) {
+              setCustomerSubCategoryLabel(data[0].customer_subcategory);
+            }
+          }
+          if (data[0].workflow_id !== undefined && data[0].workflow_id !== null) {
+            if (data[0].workflow_id.length > 0) {
+              setWorkflowIDLabel(parseInt(data[0].workflow_id))
+              callLoanAmount(parseInt(data[0].workflow_id));
+            }
+          }
+
           setLoanAmount(data[0].loan_amount);
           setLoanPurposeLabel(data[0].loan_purpose);
           getProductID(data[0].loan_type);
@@ -444,7 +477,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       })
       .catch(error => {
         if (global.DEBUG_MODE)
-          console.error('Error fetching Applicant details:', error);
+          console.error('Error fetching Loan Applicant details:', error);
       });
 
     await tbl_client
@@ -452,6 +485,16 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       .then(data => {
         if (global.DEBUG_MODE) console.log('Applicant Data:', data);
         if (data !== undefined && data.length > 0) {
+
+          if (data[0].leadID !== undefined && data[0].leadID !== null) {
+            if (data[0].leadID.length > 0) {
+              setLeadIDVisible(true);
+              setLeadID(data[0].leadID);
+            }
+          } else {
+            setLeadIDVisible(false);
+            setLeadID('');
+          }
           setRelationTypeLabel(data[0].relationTypeId);
           setTitleLabel(data[0].titleId);
           setName(data[0].firstName);
@@ -459,20 +502,64 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           setMaritalStatusLabel(data[0].maritalStatusId);
           setKycType1Label(data[0].kycTypeId1);
           setkycID1(data[0].kycIdValue1);
-          setExpiry1Date(data[0].expiryDate1);
+          if (data[0].kycTypeId1 == '002' || data[0].kycTypeId1 == '008') {
+            setExpiry1DateVisible(true);
+            setExpiry1DateMan(true);
+            setExpiry1Date(Common.convertDateFormat(data[0].expiryDate1));
+          } else {
+            setExpiry1Date('');
+            setExpiry1DateVisible(false);
+            setExpiry1DateMan(false);
+          }
           setKycType2Label(data[0].kycTypeId2);
           setkycID2(data[0].kycIdValue2);
-          setExpiry2Date(data[0].expiryDate2);
+          if (data[0].kycTypeId2 == '002' || data[0].kycTypeId2 == '008') {
+            setExpiry2DateVisible(true);
+            setExpiry2DateMan(true);
+            setExpiry2Date(Common.convertDateFormat(data[0].expiryDate2));
+          } else {
+            setExpiry2Date('');
+            setExpiry2DateVisible(false);
+            setExpiry2DateMan(false);
+          }
           setKycType3Label(data[0].kycTypeId3);
-          setkycID3(data[0].kycTypeId3);
-          setExpiry3Date(data[0].kycIdValue3);
+          setkycID3(data[0].kycIdValue3);
+          if (data[0].kycTypeId3 == '002' || data[0].kycTypeId3 == '008') {
+            setExpiry3DateVisible(true);
+            setExpiry3DateMan(true);
+            setExpiry3Date(Common.convertDateFormat(data[0].expiryDate3));
+          } else {
+            setExpiry3Date('');
+            setExpiry3DateVisible(false);
+            setExpiry3DateMan(false);
+          }
+          setKycType4Label(data[0].kycTypeId4);
+          setkycID4(data[0].kycIdValue4);
+          if (data[0].kycTypeId4 == '002' || data[0].kycTypeId4 == '008') {
+            setExpiry4DateVisible(true);
+            setExpiry4DateMan(true);
+            setExpiry4Date(Common.convertDateFormat(data[0].expiryDate4));
+          } else {
+            setExpiry4Date('');
+            setExpiry4DateVisible(false);
+            setExpiry4DateMan(false);
+          }
           setMobileNumber(data[0].mobileNumber);
           setEmail(data[0].email);
           setURNumber(data[0].udyamRegistrationNumber);
           setchkMsme(data[0].isMsme == true);
-          setIsDedupeDone(data[0].dedupeCheck);
-          setIsDedupeDone(true);
-          global.isDedupeDone = '1';
+          if (data[0].dedupeCheck == '1' || data[0].dedupeCheck == true) {
+            setIsDedupeDone(true);
+            global.isDedupeDone = '1';
+            fieldsDisable();
+            setClientTypeVisible(true)
+            setWorkflowIDDisable(true);
+            setLoanAmountDisable(true);
+          } else {
+            setIsDedupeDone(false);
+            global.isDedupeDone = '0';
+            setClientTypeVisible(false);
+          }
           if (data[0].isMobileNumberVerified == '1' || data[0].isMobileVerified) {
             global.isMobileVerified = '1';
             setIsMobileVerified('1');
@@ -482,9 +569,8 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           }
           // setIsMobileVerified('1')
           // global.isMobileVerified = "1";
-          fieldsDisable();
-          setWorkflowIDDisable(true);
-          setLoanAmountDisable(true);
+
+
           setLoading(false);
         } else {
           setLoading(false);
@@ -495,6 +581,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
         }
       })
       .catch(error => {
+        setLoading(false);
         if (global.DEBUG_MODE)
           console.error('Error fetching Applicant details:', error);
       });
@@ -518,19 +605,6 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
                 .sort((a, b) => a.Description.localeCompare(b.Description));
               setRelationTypeData(filteredrelationTypeData);
             }
-          } else {
-            if (data[0].maritalStatusId == 'M') {
-              const filteredrelationTypeData = leadsystemCodeDetail
-                .filter(data => data.masterId === 'RELATIONSHIP' && data.subCodeId != 'SPS')
-                .sort((a, b) => a.Description.localeCompare(b.Description));
-              setRelationTypeData(filteredrelationTypeData);
-            } else {
-              const filteredrelationTypeData = leadsystemCodeDetail
-                .filter(data => data.masterId === 'RELATIONSHIP')
-                .sort((a, b) => a.Description.localeCompare(b.Description));
-              setRelationTypeData(filteredrelationTypeData);
-            }
-
           }
         } else {
           setLoading(false);
@@ -542,8 +616,29 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       })
       .catch(error => {
         if (global.DEBUG_MODE)
-          console.error('Error fetching Applicant details:', error);
+          console.error('Error fetching Second Applicant details:', error);
       });
+
+    if (global.CLIENTTYPE == 'GRNTR') {
+      await tbl_client
+        .getClientBasedOnID(global.LOANAPPLICATIONID, 'CO-APPL')
+        .then(data1 => {
+          if (global.DEBUG_MODE) console.log('Applicant Data:', data1);
+          if (data1 !== undefined && data1.length > 0) {
+
+            const filteredrelationTypeData = leadsystemCodeDetail
+              .filter(data => data.masterId === 'RELATIONSHIP' && data.subCodeId !== data1[0].relationTypeId)
+              .sort((a, b) => a.Description.localeCompare(b.Description));
+            if (global.DEBUG_MODE) console.log('Filtered Data:', filteredrelationTypeData);
+            setRelationTypeData(filteredrelationTypeData);
+
+          }
+        })
+        .catch(error => {
+          if (global.DEBUG_MODE)
+            console.error('Error fetching Second Applicant details:', error);
+        });
+    }
 
   };
 
@@ -622,11 +717,13 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       let dataArray = [];
       if (workFlowDetail) {
         workFlowDetail.forEach(data => {
-          if (data.loanType === loanType && data.product === productID) {
-            dataArray.push({
-              subCodeId: data.wfId,
-              Description: data.workflowName,
-            });
+          if (data.isActive) {
+            if (data.loanType === loanType && data.product === productID) {
+              dataArray.push({
+                subCodeId: data.wfId,
+                Description: data.workflowName,
+              });
+            }
           }
         });
       }
@@ -1217,7 +1314,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       if (global.CLIENTTYPE == 'APPL') {
         var appDetails = {
           customerCategory: custCatgLabel,
-          leadId: 0,
+          leadId: leadID,
           customerSubcategory: CustomerSubCategoryLabel,
           customerType: clientTypeLabel,
           loanType: loanTypeLabel,
@@ -1336,35 +1433,40 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
             console.log(
               'LeadCreationBasicApiResponse::' + JSON.stringify(response.data),
             );
-          if (global.CLIENTTYPE == 'APPL') {
-            global.CLIENTID = response.data.clientDetail[0].id;
-          } else {
-            global.CLIENTID = response.data[0].id;
-          }
-          setLoading(false);
-          await insertData();
 
-          if (global.isDedupeDone == '1') {
+          if (response.data.statusCode === 202) {
+            setApiError(response.data.message);
+            setErrorModalVisible(true)
+            setLoading(false);
+          } else if (response.status === 200) {
             if (global.CLIENTTYPE == 'APPL') {
-              generateLoanAppNum();
+              global.CLIENTID = response.data.clientDetail[0].id;
             } else {
-              if (
-                KycType1Label == '001' ||
-                KycType2Label == '001' ||
-                KycType3Label == '001' ||
-                KycType4Label == '001'
-              ) {
-                generateAadharOTP();
-              } else {
-                updateLoanStatus();
-              }
+              global.CLIENTID = response.data[0].id;
             }
-          } else {
-            internalDedupeCheck();
-            //updateLoanStatus();
+            setLoading(false);
+            await insertData();
+
+            if (global.isDedupeDone == '1') {
+              if (global.CLIENTTYPE == 'APPL') {
+                generateLoanAppNum();
+              } else {
+                if (
+                  KycType1Label == '001' ||
+                  KycType2Label == '001' ||
+                  KycType3Label == '001' ||
+                  KycType4Label == '001'
+                ) {
+                  generateAadharOTP();
+                } else {
+                  updateLoanStatus();
+                }
+              }
+            } else {
+              internalDedupeCheck();
+            }
           }
-          // props.navigation.navigate('AadharOTPVerification', { aadharNumber: aadhar });
-          // generateAadharOTP();
+
         })
         .catch(error => {
           // Handle the error
@@ -1611,6 +1713,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       global.CLIENTID,
       global.LOANAPPLICATIONID,
       global.CLIENTTYPE,
+      leadID,
       relationTypeLabel,
       titleLabel,
       Name,
@@ -1762,6 +1865,9 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           props.navigation.navigate('AadharOTPVerification', {
             aadharNumber: aadhar,
           });
+        } else if (response.data.statusCode === 202) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
         }
 
         setLoading(false);
@@ -2056,6 +2162,21 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
     }
 
+    if (kycID1.length > 0) {
+      if (KycType1Label.length <= 0) {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          language[0][props.language].str_plsselect +
+          KycType1Caption +
+          '\n';
+        i++;
+        flag = true;
+      }
+    }
+
     if (KycType2Man && KycType2Visible) {
       if (KycType2Label.length <= 0) {
         errorMessage =
@@ -2080,6 +2201,111 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           ' ' +
           language[0][props.language].str_plsenter +
           kycID2Caption +
+          '\n';
+        i++;
+        flag = true;
+      }
+    }
+
+    if (kycID2.length > 0) {
+      if (KycType2Label.length <= 0) {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          language[0][props.language].str_plsselect +
+          KycType2Caption +
+          '\n';
+        i++;
+        flag = true;
+      }
+    }
+
+    if (KycType3Man && KycType3Visible) {
+      if (KycType3Label.length <= 0) {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          language[0][props.language].str_plsselect +
+          KycType3Caption +
+          '\n';
+        i++;
+        flag = true;
+      }
+    }
+
+    if (KycType3Label.length > 0) {
+      if (kycID3.length <= 0) {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          language[0][props.language].str_plsenter +
+          kycID3Caption +
+          '\n';
+        i++;
+        flag = true;
+      }
+    }
+
+    if (kycID3.length > 0) {
+      if (KycType3Label.length <= 0) {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          language[0][props.language].str_plsselect +
+          KycType3Caption +
+          '\n';
+        i++;
+        flag = true;
+      }
+    }
+
+    if (KycType4Man && KycType4Visible) {
+      if (KycType4Label.length <= 0) {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          language[0][props.language].str_plsselect +
+          KycType4Caption +
+          '\n';
+        i++;
+        flag = true;
+      }
+    }
+
+    if (KycType4Label.length > 0) {
+      if (kycID4.length <= 0) {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          language[0][props.language].str_plsenter +
+          kycID4Caption +
+          '\n';
+        i++;
+        flag = true;
+      }
+    }
+
+    if (kycID4.length > 0) {
+      if (KycType4Label.length <= 0) {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          language[0][props.language].str_plsselect +
+          KycType4Caption +
           '\n';
         i++;
         flag = true;
@@ -2469,7 +2695,8 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       getID2data(label);
       getID3data(label);
       getID4data(label);
-      if (label != '') {
+
+      if (label.toString().length > 0) {
         callLoanAmount(label);
       } else {
         setMinLoanAmount(0);

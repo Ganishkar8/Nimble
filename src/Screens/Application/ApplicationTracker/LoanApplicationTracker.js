@@ -56,7 +56,7 @@ const LeadManagement = (props, { navigation, route }) => {
         { name: 'Filter', isSelected: false, id: 1 },
         { name: 'Sort by', isSelected: false, id: 2 },
         { name: 'Pending', isSelected: false, id: 3 },
-        { name: "Today's Lead", isSelected: false, id: 4 }
+        { name: "Today's Application", isSelected: false, id: 4 }
     ]
     const mainFilterDataArr = [
 
@@ -115,6 +115,7 @@ const LeadManagement = (props, { navigation, route }) => {
 
     useEffect(() => {
         //getPendingData()
+
         if (props.route.params.fromScreen == "LeadCompletion") {
             // showBottomSheet();
         }
@@ -1102,7 +1103,7 @@ const LeadManagement = (props, { navigation, route }) => {
                         global.COMPLETEDMODULE = '';
                         global.COMPLETEDPAGE = '';
                         global.COMPLETEDSUBSTAGE = '';
-                        props.navigation.navigate('ConsentScreen');
+                        props.navigation.navigate('ConsentScreen', { leadData: [] });
                     }}
                 />
             }

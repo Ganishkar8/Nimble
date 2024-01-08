@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, createRef } from 'react';
-import { Text, Image, View, Dimensions, ScrollView, StyleSheet } from 'react-native';
+import { Text, Image, View, Dimensions, ScrollView, StyleSheet, BackHandler } from 'react-native';
 import HeadComp from './HeadComp';
 
 
@@ -10,14 +10,27 @@ const PreviewImage = (props, { navigation, route }) => {
     const [imageHeight, setImageHeight] = useState(null);
 
     useEffect(() => {
+        props.navigation
+            .getParent()
+            ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
 
         getImageSize(props.route.params.imageUri);
 
-    }, []);
+        return () => {
+            props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
+            backHandler.remove();
+        }
+    }, [props.navigation]);
+
+    const handleBackButton = () => {
+        onGoBack();
+        return true; // Prevent default back button behavior
+    };
 
     const onGoBack = () => {
         props.navigation.goBack();
-        return true;
+        //return true;
     }
 
     const getImageSize = (uri) => {

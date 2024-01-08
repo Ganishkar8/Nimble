@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TextInput } from 'react-native';
 import Colors from '../../Utils/Colors';
 import TextComp from '../TextComp';
-
+import Common from '../../Utils/Common';
 import { connect } from 'react-redux';
 import { languageAction } from '../../Utils/redux/actions/languageAction';
 import { language } from '../../Utils/LanguageString';
@@ -87,8 +87,10 @@ const AgeingComp = ({ props, filterClick, operatorid, ageValue }) => {
                             <TextInput
                                 value={age}
                                 onChangeText={txt => {
-                                    setAge(txt);
-                                    updateAgeData(txt, choosenIndex, choosenLabel);
+                                    if (Common.numberRegex.test(txt)) {
+                                        setAge(txt);
+                                        updateAgeData(txt, choosenIndex, choosenLabel);
+                                    }
                                 }}
                                 placeholder={''}
                                 placeholderTextColor={Colors.lightgrey}

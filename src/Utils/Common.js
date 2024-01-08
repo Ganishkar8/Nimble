@@ -90,21 +90,22 @@ export function getCodeDescription(data, id) {
 }
 
 export function formatDate(inputDate) {
-  const date = new Date(inputDate);
+
+  const date = new Date(inputDate); // Assuming inputDate is in UTC format
 
   // Define month names in abbreviated form (e.g., Jan, Feb, Mar).
   const monthNames = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
   ];
 
-  // Get day, month, and year components from the date object.
-  const day = date.getDate();
-  const monthIndex = date.getMonth();
-  const year = date.getFullYear();
+  // Formatting the date into "dd-Mon-yyyy" format
+  const day = ("0" + date.getUTCDate()).slice(-2);
+  const month = monthNames[date.getUTCMonth()];
+  const year = date.getUTCFullYear();
 
-  // Format the date in "dd-mmm-yyyy" format.
-  const formattedDate = `${day}-${monthNames[monthIndex]}-${year}`;
+  const formattedDate = `${day}-${month}-${year}`;
+
 
   return formattedDate;
 }
@@ -236,7 +237,7 @@ export function isValidEmail(email) {
 
 export function isValidPAN(panNumber) {
   // Define the PAN number regex pattern
-  const panRegex = /[A-Za-z]{5}[0-9]{4}[A-Za-z]/;
+  const panRegex = /^[A-Za-z]{5}[0-9]{4}[A-Za-z]$/;
 
   // Test the entered PAN number against the regex pattern
   return panRegex.test(panNumber);

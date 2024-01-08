@@ -218,7 +218,13 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       .getParent()
       ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
-
+    makeSystemMandatoryFields();
+    getSystemCodeDetail();
+    getClientData();
+    if (global.USERTYPEID == 1164) {
+      setHideDelete(false);
+      setHideRetake(false);
+    }
     if (global.USERTYPEID == 1164) {
       getlocationPermission();
     } else {
@@ -229,7 +235,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
       backHandler.remove();
     }
-  }, [props.navigation, isScreenVisible, gpslatlon]);
+  }, [props.navigation, gpslatlon]);
 
   const handleBackButton = () => {
     onGoBack();
@@ -251,13 +257,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
 
   useFocusEffect(
     React.useCallback(() => {
-      makeSystemMandatoryFields();
-      getSystemCodeDetail();
-      getClientData();
-      if (global.USERTYPEID == 1164) {
-        setHideDelete(false);
-        setHideRetake(false);
-      }
+
       return () => {
         console.log('Screen is blurred');
       };
@@ -1401,6 +1401,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       setFileType('');
       setImageFile('');
       setDeleteVisible(false);
+      setVisible(true)
       hideImageBottomSheet();
     }
   }

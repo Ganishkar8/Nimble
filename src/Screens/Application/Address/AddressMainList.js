@@ -51,6 +51,7 @@ const AddressMainList = (props, { navigation }) => {
   const [communicationAvailable, setCommunicationAvailable] = useState(false);
   const [IsManualKYCAvailable, setIsManualKYCAvailable] = useState(false);
   const [permanentAvailable, setPermanentAvailable] = useState(false);
+  const [addAddressVisible, setAddAddressVisible] = useState(false);
   const showBottomSheet = () => setBottomErrorSheetVisible(true);
   const hideBottomSheet = () => setBottomErrorSheetVisible(false);
 
@@ -59,6 +60,11 @@ const AddressMainList = (props, { navigation }) => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
 
     getAddressData()
+    if (global.USERTYPEID == 1163) {
+      setAddAddressVisible(false)
+    } else {
+      setAddAddressVisible(true)
+    }
 
     return () => {
       props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
@@ -120,6 +126,11 @@ const AddressMainList = (props, { navigation }) => {
             setPermanentAvailable(true);
           } else {
             setPermanentAvailable(false);
+          }
+          if (communicationAvailable && permanentAvailable) {
+            setAddAddressVisible(false)
+          } else {
+            setAddAddressVisible(true)
           }
           setRefreshFlatList(!refreshFlatlist)
         }
@@ -295,6 +306,11 @@ const AddressMainList = (props, { navigation }) => {
       } else {
         setPermanentAvailable(false)
       }
+      if (communicationAvailable && permanentAvailable) {
+        setAddAddressVisible(false)
+      } else {
+        setAddAddressVisible(true)
+      }
     }
     setAddressDetails(newArray);
     setRefreshFlatList(!refreshFlatlist);
@@ -411,6 +427,8 @@ const AddressMainList = (props, { navigation }) => {
     const filteredKYCData = global.LEADTRACKERDATA.clientDetail
       .filter(data => data.clientType === global.CLIENTTYPE)
 
+    alert(JSON.stringify(filteredKYCData))
+    return;
     const appDetails = {
       "kycType": filteredKYCData[0].clientManualKycLink[0].kycType,
       "kycValue": filteredKYCData[0].clientManualKycLink[0].kycValue,
@@ -427,13 +445,65 @@ const AddressMainList = (props, { navigation }) => {
         // Handle the response data
         if (global.DEBUG_MODE) console.log('ApproveKYCApiResponse::' + JSON.stringify(response.data),);
         setLoading(false);
-        props.navigation.replace('LoanApplicationMain', { fromScreen: 'AddressDetail' });
+        if (status === 'Rejected') {
+          updateFinalLoanStatus();
+        } else {
+          props.navigation.replace('LoanApplicationMain', { fromScreen: 'AddressDetail' });
+        }
+
 
 
       })
       .catch(error => {
         // Handle the error
         if (global.DEBUG_MODE) console.log('ApproveKYCApiResponse' + JSON.stringify(error.response));
+        setLoading(false);
+        if (error.response.data != null) {
+          setApiError(error.response.data.message);
+          setErrorModalVisible(true)
+        }
+      });
+
+  };
+
+  const updateFinalLoanStatus = () => {
+
+    var module = ''; var page = '';
+
+    if (global.CLIENTTYPE == 'APPL') {
+      module = 'PRF_SHRT_APLCT';
+      // page = 'PRF_SHRT_APLCT_ADDRS_DTLS';
+    } else if (global.CLIENTTYPE == 'CO-APPL') {
+      module = 'PRF_SHRT_COAPLCT';
+      // page = 'PRF_SHRT_COAPLCT_ADDRS_DTLS';
+    } else if (global.CLIENTTYPE == 'GRNTR') {
+      module = 'PRF_SHRT_GRNTR';
+      // page = 'PRF_SHRT_GRNTR_ADDRS_DTLS';
+    }
+
+    const appDetails = {
+      "loanApplicationId": global.LOANAPPLICATIONID,
+      "loanWorkflowStage": "LN_APP_INITIATION",
+      "subStageCode": "PRF_SHRT",
+      "moduleCode": null,
+      "pageCode": null,
+      "status": "Rejected"
+    }
+    const baseURL = '8901';
+    setLoading(true);
+    apiInstancelocal(baseURL)
+      .post(`/api/v2/loan-application-status/updateStatus`, appDetails)
+      .then(async response => {
+        // Handle the response data
+
+        if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
+
+        props.navigation.navigate('LoanApplicationTracker', { fromScreen: 'AddressMainList' })
+
+      })
+      .catch(error => {
+        // Handle the error
+        if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
         setLoading(false);
         if (error.response.data != null) {
           setApiError(error.response.data.message);
@@ -542,20 +612,22 @@ const AddressMainList = (props, { navigation }) => {
         </View>
       </View>
 
-      <TouchableOpacity activeOpacity={8} onPress={() => handleClick('new')}>
-        <View style={{ marginBottom: 10 }}>
-          <IconButtonViewComp
-            icon={'+'}
-            textValue={language[0][
-              props.language
-            ].str_addressdetail.toUpperCase()}
-            textStyle={{ color: Colors.skyBlue, fontSize: 13, fontWeight: 500 }}
-            viewStyle={Commonstyles.buttonView}
-            innerStyle={Commonstyles.buttonViewBorderStyle}
-          //handleClick={() => handleClick('new')}
-          />
-        </View>
-      </TouchableOpacity>
+      {addAddressVisible &&
+        <TouchableOpacity activeOpacity={8} onPress={() => handleClick('new')}>
+          <View style={{ marginBottom: 10 }}>
+            <IconButtonViewComp
+              icon={'+'}
+              textValue={language[0][
+                props.language
+              ].str_addressdetail.toUpperCase()}
+              textStyle={{ color: Colors.skyBlue, fontSize: 13, fontWeight: 500 }}
+              viewStyle={Commonstyles.buttonView}
+              innerStyle={Commonstyles.buttonViewBorderStyle}
+            //handleClick={() => handleClick('new')}
+            />
+          </View>
+        </TouchableOpacity>
+      }
 
       <FlatList
         data={addressDetails}

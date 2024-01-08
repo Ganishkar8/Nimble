@@ -177,7 +177,6 @@ const AddressDetails = (props, { navigation }) => {
     makeSystemMandatoryFields();
     getExistingData();
 
-
     return () => {
       props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
       backHandler.remove();
@@ -935,8 +934,15 @@ const AddressDetails = (props, { navigation }) => {
         .put(`api/v2/profile-short/address-details/${addressID}`, appDetails)
         .then(async response => {
           // Handle the response data
-          if (global.DEBUG_MODE) console.log('UpdateAddressResponse::' + JSON.stringify(response.data),);
-          insertData(addressID)
+          if (global.DEBUG_MODE) console.log('UpdateAddressResponse::' + JSON.stringify(response.data));
+
+          try {
+            insertData(addressID)
+          } catch (error) {
+
+            if (global.DEBUG_MODE) console.error('InsertAddressError:', error.message);
+
+          }
           setLoading(false);
         })
         .catch(error => {
@@ -993,23 +999,23 @@ const AddressDetails = (props, { navigation }) => {
       id,
       global.CLIENTID,
       global.CLIENTTYPE,
-      addressTypeLabel.trim(),
-      addressLine1.trim(),
-      addressLine2.trim(),
-      landmark.trim(),
-      pincode.trim(),
-      city.trim(),
-      district.trim(),
-      state.trim(),
-      country.trim(),
+      addressTypeLabel,
+      addressLine1,
+      addressLine2,
+      landmark,
+      pincode,
+      city,
+      district,
+      state,
+      country,
       "",
       "",
-      addressOwnerTypeLabel.trim(),
-      ownerDetailsLabel.trim(),
-      ownerName.trim(),
-      geoClassificationLabel.trim(),
-      yearsAtResidence.trim(),
-      yearsAtCity.trim(),
+      addressOwnerTypeLabel,
+      ownerDetailsLabel,
+      ownerName,
+      geoClassificationLabel,
+      yearsAtResidence,
+      yearsAtCity,
       "true",
       global.USERID,
       new Date(),

@@ -107,8 +107,6 @@ const BankDetails = (props, { navigation }) => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
     getSystemCodeDetail()
     makeSystemMandatoryFields();
-    alert(pageId)
-
 
     return () => {
       props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });

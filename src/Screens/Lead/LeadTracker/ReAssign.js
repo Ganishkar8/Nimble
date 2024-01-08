@@ -32,6 +32,7 @@ import apiInstancelocal from '../../../Utils/apiInstancelocal';
 import { profileAction } from '../../../Utils/redux/actions/ProfileAction';
 import Common from '../../../Utils/Common';
 import apiInstance from '../../../Utils/apiInstance';
+import ErrorModal from '../../../Components/ErrorModal';
 
 
 const statusDataArr = [
@@ -219,7 +220,13 @@ const ReAssign = (props, { navigation }) => {
             .then(async (response) => {
                 // Handle the response data
                 setLoading(false)
-                props.navigation.navigate('LeadManagement', { fromScreen: 'ReAssign' })
+                if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true)
+                } else if (response.status === 200) {
+                    props.navigation.navigate('LeadManagement', { fromScreen: 'ReAssign' })
+                }
+
 
             })
             .catch((error) => {
@@ -261,12 +268,16 @@ const ReAssign = (props, { navigation }) => {
         props.navigation.goBack();
     }
 
+    const closeErrorModal = () => {
+        setErrorModalVisible(false);
+    };
+
     return (
 
         <SafeAreaView style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
 
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
-
+            <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
             <ScrollView style={styles.scrollView}
                 contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                 {loading ? <Loading /> : null}
