@@ -120,7 +120,6 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
     getData();
 
-
   }, [gpslatlon]);
 
 
@@ -156,7 +155,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
       setDocID(data.leadCreationDms.dmsId);
       setFileName(data.leadCreationDms.fileName);
       setFileType(data.leadCreationDms.fileType);
-      setTime(data.leadCreationDms.createdOn)
+      setTime(data.leadCreationDms.photoTakenTime)
       const latLng = data.leadCreationDms.geoLocation;
       const [latitude, longitude] = latLng.split(',');
       setCurrentLongitude(parseFloat(longitude));
@@ -282,6 +281,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
         "fileType": fileType,
         "fileInfo": "",
         "comments": "",
+        "photoTakenTime": new Date(time),
         "geoLocation": currentLatitude + "," + currentLongitude
       }
     }
@@ -303,7 +303,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
         ];
         await Promise.all(deletePromises);
         setLoading(false)
-        props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
+        props.navigation.replace('LeadManagement', { fromScreen: 'LeadCompletion' })
 
 
       })
@@ -331,7 +331,7 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
       console.log("LeadImage::::" + JSON.stringify(value))
     })
     if (nav == true) {
-      props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
+      props.navigation.replace('LeadManagement', { fromScreen: 'LeadCompletion' })
     }
   }
 

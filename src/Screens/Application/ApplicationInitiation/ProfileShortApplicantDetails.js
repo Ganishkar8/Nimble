@@ -172,7 +172,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
   const [AgeCaption, setAgeCaption] = useState('AGE');
   const [AgeMan, setAgeMan] = useState(false);
   const [AgeVisible, setAgeVisible] = useState(true);
-  const [AgeDisable, setAgeDisable] = useState(false);
+  const [AgeDisable, setAgeDisable] = useState(true);
   const AgeRef = useRef(null);
 
   const [FatherName, setFatherName] = useState('');
@@ -205,6 +205,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
   const [hideDelete, setHideDelete] = useState(false);
 
   const [isAadharVerified, setIsAadharVerified] = useState(false);
+  const [pageId, setPageId] = useState(global.CURRENTPAGEID);
 
 
 
@@ -217,7 +218,13 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       .getParent()
       ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
-
+    makeSystemMandatoryFields();
+    getSystemCodeDetail();
+    getClientData();
+    if (global.USERTYPEID == 1164) {
+      setHideDelete(false);
+      setHideRetake(false);
+    }
     if (global.USERTYPEID == 1164) {
       getlocationPermission();
     } else {
@@ -228,7 +235,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
       backHandler.remove();
     }
-  }, [props.navigation, isScreenVisible, gpslatlon]);
+  }, [props.navigation, gpslatlon]);
 
   const handleBackButton = () => {
     onGoBack();
@@ -250,13 +257,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
 
   useFocusEffect(
     React.useCallback(() => {
-      makeSystemMandatoryFields();
-      getSystemCodeDetail();
-      getClientData();
-      if (global.USERTYPEID == 1164) {
-        setHideDelete(false);
-        setHideRetake(false);
-      }
+
       return () => {
         console.log('Screen is blurred');
       };
@@ -366,7 +367,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
 
   const makeSystemMandatoryFields = () => {
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_title' && data.pageId === 3).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_title' && data.pageId === pageId).map((value, index) => {
       setTitleCaption(value.fieldName)
       if (value.mandatory) {
         setTitleMan(true);
@@ -383,7 +384,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
     });
 
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_first_name' && data.pageId === 3).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_first_name' && data.pageId === pageId).map((value, index) => {
       setFirstNameCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -400,7 +401,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_middle_name' && data.pageId === 3).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_middle_name' && data.pageId === pageId).map((value, index) => {
       setMiddleNameCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -417,7 +418,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_last_name' && data.pageId === 3).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_last_name' && data.pageId === pageId).map((value, index) => {
       setLastNameCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -434,7 +435,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_maritalstatus' && data.pageId === 4).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_maritalstatus' && data.pageId === pageId).map((value, index) => {
       setMaritalStatusCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -451,7 +452,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_gender' && data.pageId === 3).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_gender' && data.pageId === pageId).map((value, index) => {
       setGenderCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -469,7 +470,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
     });
 
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_date_of_birth' && data.pageId === 3).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_date_of_birth' && data.pageId === pageId).map((value, index) => {
       setDOBCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -486,7 +487,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_age' && data.pageId === 3).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_age' && data.pageId === pageId).map((value, index) => {
       setAgeCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -503,7 +504,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_fathers name' && data.pageId === 3).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_fathers name' && data.pageId === pageId).map((value, index) => {
       setFatherNameCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -520,7 +521,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_spouse name' && data.pageId === 3).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_spouse name' && data.pageId === pageId).map((value, index) => {
       setSpouseNameCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -537,7 +538,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_caste' && data.pageId === 3).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_caste' && data.pageId === pageId).map((value, index) => {
       setCasteCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -554,7 +555,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_religion' && data.pageId === 3).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_religion' && data.pageId === pageId).map((value, index) => {
       setReligionCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -571,7 +572,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_mother tongue' && data.pageId === 3).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_mother tongue' && data.pageId === pageId).map((value, index) => {
       setMotherTongueCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -588,7 +589,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_educational qualifications' && data.pageId === 3).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_educational qualifications' && data.pageId === pageId).map((value, index) => {
       setEADCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -614,23 +615,37 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
     await tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE).then(value => {
       if (global.DEBUG_MODE) console.log('ApplicantData::' + JSON.stringify(value));
       if (value !== undefined && value.length > 0) {
-        value[0].titleId !== undefined ? setTitleLabel(value[0].titleId) : setTitleLabel('');
-        value[0].firstName !== undefined ? setFirstName(value[0].firstName) : setFirstName('');
-        value[0].middleName !== undefined ? setMiddleName(value[0].middleName) : setMiddleName('');
-        value[0].lastName !== undefined ? setLastName(value[0].lastName) : setLastName('');
-        value[0].genderId !== undefined ? setGenderLabel(value[0].genderId) : setGenderLabel('');
-        value[0].dateOfBirth !== undefined ? setDOB(value[0].dateOfBirth) : setDOB('');
-        value[0].age !== undefined ? setAge(value[0].age) : setAge('');
-        value[0].fatherName !== undefined ? setFatherName(value[0].fatherName) : setFatherName('');
-        value[0].spouseName !== undefined ? setSpouseName(value[0].spouseName) : setSpouseName('');
-        value[0].casteId !== undefined ? setCasteLabel(value[0].casteId) : setCasteLabel('');
-        value[0].religionId !== undefined ? setReligionLabel(value[0].religionId) : setReligionLabel('');
-        value[0].motherTongueId !== undefined ? setMotherTongueLabel(value[0].motherTongueId) : setMotherTongueLabel('');
-        value[0].educationQualificationId !== undefined ? setEADLabel(value[0].educationQualificationId) : setEADLabel('');
-        value[0].isKycManual !== undefined ? setKYCManual(value[0].isKycManual) : setKYCManual('');
+        setTitleLabel(value[0]?.titleId ?? '');
+        setFirstName(value[0]?.firstName ?? '');
+        setMiddleName(value[0]?.middleName ?? '');
+        setLastName(value[0]?.lastName ?? '');
+        setGenderLabel(value[0]?.genderId ?? '');
+        setDOB(value[0]?.dateOfBirth ?? '');
+        setAge(value[0]?.age ?? '');
+        setFatherName(value[0]?.fatherName ?? '');
+        setSpouseName(value[0]?.spouseName ?? '');
+        //value[0].titleId !== undefined ? setTitleLabel(value[0].titleId) : setTitleLabel('');
+        //value[0].firstName !== undefined ? setFirstName(value[0].firstName) : setFirstName('');
+        //value[0].middleName !== undefined ? setMiddleName(value[0].middleName) : setMiddleName('');
+        //value[0].lastName !== undefined ? setLastName(value[0].lastName) : setLastName('');
+        //value[0].genderId !== undefined ? setGenderLabel(value[0].genderId) : setGenderLabel('');
+        // value[0].dateOfBirth !== undefined ? setDOB(value[0].dateOfBirth) : setDOB('');
+        //value[0].age !== undefined ? setAge(value[0].age) : setAge('');
+        //value[0].fatherName !== undefined ? setFatherName(value[0].fatherName) : setFatherName('');
+        //value[0].spouseName !== undefined ? setSpouseName(value[0].spouseName) : setSpouseName('');
+        setCasteLabel(value[0]?.casteId ?? '');
+        setReligionLabel(value[0]?.religionId ?? '');
+        setMotherTongueLabel(value[0]?.motherTongueId ?? '');
+        setEADLabel(value[0]?.educationQualificationId ?? '');
+        setKYCManual(value[0]?.isKycManual ?? '');
+        // value[0].casteId !== undefined ? setCasteLabel(value[0].casteId) : setCasteLabel('');
+        //value[0].religionId !== undefined ? setReligionLabel(value[0].religionId) : setReligionLabel('');
+        //value[0].motherTongueId !== undefined ? setMotherTongueLabel(value[0].motherTongueId) : setMotherTongueLabel('');
+        //value[0].educationQualificationId !== undefined ? setEADLabel(value[0].educationQualificationId) : setEADLabel('');
+        //value[0].isKycManual !== undefined ? setKYCManual(value[0].isKycManual) : setKYCManual('');
 
         var aadharverify = false;
-        if (value[0].isAadharNumberVerified !== undefined) {
+        if (value[0].isAadharNumberVerified !== undefined && value[0].isAadharNumberVerified !== null) {
           if (value[0].isAadharNumberVerified == 1) {
             setIsAadharVerified(true);
             aadharverify = true;
@@ -652,14 +667,14 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
         }
 
         disableAadharFields(aadharverify, value[0].fatherName, value[0].spouseName);
-        if (value[0].dmsId !== undefined) {
+        if (value[0].dmsId !== undefined && value[0].dmsId !== null) {
           if (value[0].dmsId.length > 0) {
             getImage(value[0].dmsId);
           }
           setDocID(value[0].dmsId);
         }
 
-        if (value[0].geoCode !== undefined) {
+        if (value[0].geoCode !== undefined && value[0].geoCode !== null) {
           if (value[0].geoCode.length > 0) {
             const [latitude, longitude] = value[0].geoCode.split(',');
             setCurrentLongitude(parseFloat(longitude));
@@ -688,14 +703,15 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       setGenderDisable(true);
       setDOBDisable(true);
       setAgeDisable(true);
+
       if (fatherName !== undefined && fatherName !== null) {
         if (fatherName.length > 0) {
-          setFatherNameDisable(false)
+          setFatherNameDisable(true)
         }
       }
       if (spouseName !== undefined && spouseName !== null) {
         if (spouseName.length > 0) {
-          setSpouseNameDisable(false)
+          setSpouseNameDisable(true)
         }
       }
     }
@@ -763,7 +779,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       if (kycManual == '1') {
         updateApplicantDetails(docID)
       } else {
-        props.navigation.replace('AddressMainList')
+        navigatetoAddress();
         return;
       }
     }
@@ -869,7 +885,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
 
           setLoading(false);
           if (global.USERTYPEID == 1163) {
-            props.navigation.replace('AddressMainList')
+            navigatetoAddress();
           } else {
             updateLoanStatus();
           }
@@ -885,6 +901,19 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
         });
     }
   };
+
+  const navigatetoAddress = async () => {
+    var page = '';
+    if (global.CLIENTTYPE == 'APPL') {
+      page = 'PRF_SHRT_APLCT_ADDRS_DTLS';
+    } else if (global.CLIENTTYPE == 'CO-APPL') {
+      page = 'PRF_SHRT_COAPLCT_ADDRS_DTLS';
+    } else if (global.CLIENTTYPE == 'GRNTR') {
+      page = 'PRF_SHRT_GRNTR_ADDRS_DTLS';
+    }
+    await Common.getPageID(global.FILTEREDPROCESSMODULE, page)
+    props.navigation.replace('AddressMainList')
+  }
 
   const updateLoanStatus = () => {
 
@@ -927,7 +956,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
           global.COMPLETEDMODULE = 'PRF_SHRT_GRNTR';
           global.COMPLETEDPAGE = 'PRF_SHRT_GRNTR_PRSNL_DTLS';
         }
-        props.navigation.replace('AddressMainList')
+        navigatetoAddress();
 
       })
       .catch(error => {
@@ -1261,6 +1290,23 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
         flag = true;
       }
     }
+
+    if (TitleVisible && GenderVisible) {
+      if (TitleLabel === 'MR') {
+        if (GenderLabel == 'F') {
+          errorMessage = errorMessage + i + ')' + ' ' + TitleCaption + ' AND ' + GenderCaption + ' Not matching' + '\n';
+          i++;
+          flag = true;
+        }
+      } else if (TitleLabel === 'MRS' || TitleLabel === 'MISS') {
+        if (GenderLabel == 'M') {
+          errorMessage = errorMessage + i + ')' + ' ' + TitleCaption + ' AND ' + GenderCaption + ' Not matching' + '\n';
+          i++;
+          flag = true;
+        }
+      }
+    }
+
     setErrMsg(errorMessage);
     return flag;
   };
@@ -1355,6 +1401,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       setFileType('');
       setImageFile('');
       setDeleteVisible(false);
+      setVisible(true)
       hideImageBottomSheet();
     }
   }
@@ -1400,7 +1447,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
               </TouchableOpacity>
               <Text style={{ fontSize: 14, color: Colors.black, marginTop: 7, fontFamily: 'PoppinsRegular' }}>Camera</Text>
             </View>
-            <View style={{ width: '30%', alignItems: 'center' }}>
+            {/* <View style={{ width: '30%', alignItems: 'center' }}>
               <TouchableOpacity onPress={() => selectImage()} activeOpacity={11}>
                 <View style={{
                   width: 53, height: 53, borderRadius: 53, backgroundColor: '#8E44AD',
@@ -1410,7 +1457,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
                 </View>
               </TouchableOpacity>
               <Text style={{ fontSize: 14, color: Colors.black, marginTop: 7 }}>Gallery</Text>
-            </View>
+            </View> */}
 
           </View>
         </View>
@@ -1637,7 +1684,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
                   handleClick={handleClick}
                   Disable={DOBDisable}
                   reference={DOBRef}
-                  minDate={new Date()}
+                  maxDate={new Date()}
                   handleReference={handleReference} />
               </View>
               {/* <TextInputComp
@@ -1712,6 +1759,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
                 returnKey="next"
                 handleClick={handleClick}
                 handleReference={handleReference}
+                length={30}
               />
             </View>
           )}
@@ -1742,6 +1790,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
                 reference={SpouseNameRef}
                 returnKey="done"
                 handleClick={handleClick}
+                length={30}
                 handleReference={handleReference}
               />
             </View>

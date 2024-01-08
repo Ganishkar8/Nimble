@@ -194,6 +194,22 @@ const LeadDetails = (props, { navigation, route }) => {
 
     }
 
+    const initiateLoanApplication = () => {
+        if (global.USERTYPEID == 1164) {
+            if (leadStatus == 'APPROVED') {
+                global.isDedupeDone = '0';
+                global.isMobileVerified = '0';
+                global.CLIENTID = '';
+                global.isAadharVerified = '';
+                global.LOANAPPLICATIONID = '';
+                global.COMPLETEDMODULE = '';
+                global.COMPLETEDPAGE = '';
+                global.COMPLETEDSUBSTAGE = '';
+                props.navigation.navigate('ConsentScreen', { leadData: [leadData] });
+            }
+        }
+    };
+
     const closeErrorModal = () => {
         setErrorModalVisible(false);
     };
@@ -465,7 +481,7 @@ const LeadDetails = (props, { navigation, route }) => {
                         justifyContent: 'flex-end',
                         alignItems: 'center',
                     }}>
-                    <TouchableOpacity activeOpacity={10} style={global.USERTYPEID == '1163' ? Commonstyles.disableBg : leadStatus == 'APPROVED' ? Commonstyles.buttonViewInnerStyle : Commonstyles.disableBg}>
+                    <TouchableOpacity activeOpacity={0.8} onPress={initiateLoanApplication} style={global.USERTYPEID == '1163' ? Commonstyles.disableBg : leadStatus == 'APPROVED' ? Commonstyles.buttonViewInnerStyle : Commonstyles.disableBg}>
                         <View >
                             <TextComp textVal={language[0][props.language].str_initiateloanapplication.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13, fontFamily: 'Poppins-SemiBold', letterSpacing: 0.5 }} />
 

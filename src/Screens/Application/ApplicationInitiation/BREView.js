@@ -13,26 +13,26 @@ import {
 
 //redux
 import { connect } from 'react-redux';
-import { languageAction } from '../../Utils/redux/actions/languageAction';
-import { language } from '../../Utils/LanguageString';
+import { languageAction } from '../../../Utils/redux/actions/languageAction';
+import { language } from '../../../Utils/LanguageString';
 //
-import MyStatusBar from '../../Components/MyStatusBar';
+import MyStatusBar from '../../../Components/MyStatusBar';
 import Entypo from 'react-native-vector-icons/Entypo';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import Colors from '../../Utils/Colors';
-import TextComp from '../../Components/TextComp';
+import Colors from '../../../Utils/Colors';
+import TextComp from '../../../Components/TextComp';
 import LinearGradient from 'react-native-linear-gradient';
 import { it } from 'react-native-paper-dates';
-import HeadComp from '../../Components/HeadComp';
-import ButtonViewComp from '../../Components/ButtonViewComp';
-import apiInstance from '../../Utils/apiInstance';
-import ErrorModal from '../../Components/ErrorModal';
+import HeadComp from '../../../Components/HeadComp';
+import ButtonViewComp from '../../../Components/ButtonViewComp';
+import apiInstance from '../../../Utils/apiInstance';
+import ErrorModal from '../../../Components/ErrorModal';
 import { useIsFocused } from '@react-navigation/native';
-import Commonstyles from '../../Utils/Commonstyles';
-import Common from '../../Utils/Common';
-import Loading from '../../Components/Loading';
+import Commonstyles from '../../../Utils/Commonstyles';
+import Common from '../../../Utils/Common';
+import Loading from '../../../Components/Loading';
 
-const CBStatus = (props, { navigation }) => {
+const BREView = (props, { navigation }) => {
 
     const [cbResponse, setCBResponse] = useState([]);
     const [refreshFlatlist, setRefreshFlatList] = useState(false);
@@ -44,7 +44,7 @@ const CBStatus = (props, { navigation }) => {
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
-        getcbData();
+        getBreData();
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
             backHandler.remove();
@@ -81,21 +81,58 @@ const CBStatus = (props, { navigation }) => {
         setRefreshFlatList(!refreshFlatlist)
     }
 
-    const getcbData = () => {
+    const getBreData = () => {
 
         const baseURL = '8901';
         setLoading(true);
         apiInstance(baseURL)
-            .get(`/api/v2/getCb/${global.LOANAPPLICATIONID}`)
+            .get(`/api/v2/getBre/${global.LOANAPPLICATIONID}`)
             .then(async response => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log('CBResponseApiResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
-                const newData = response.data.map(item => {
-                    const extraJson = { isSelected: false };
-                    return { ...item, ...extraJson };
-                });
-                setCBResponse(newData)
+                if (response.data.length <= 0) {
+                    getBreCheckData();
+                } else {
+                    const newData = response.data.map(item => {
+                        const extraJson = { isSelected: false };
+                        return { ...item, ...extraJson };
+                    });
+                    setCBResponse(newData)
+                }
+
+            })
+            .catch(error => {
+                // Handle the error
+                if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
+                setLoading(false);
+                if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
+
+    };
+
+    const getBreCheckData = () => {
+
+        const baseURL = '8901';
+        setLoading(true);
+        apiInstance(baseURL)
+            .get(`/api/v2/bre-check/${global.LOANAPPLICATIONID}`)
+            .then(async response => {
+                // Handle the response data
+                if (global.DEBUG_MODE) console.log('CBResponseApiResponse::' + JSON.stringify(response.data),);
+                setLoading(false);
+                if (response.data.length <= 0) {
+                    getBreData();
+                } else {
+                    const newData = response.data.map(item => {
+                        const extraJson = { isSelected: false };
+                        return { ...item, ...extraJson };
+                    });
+                    setCBResponse(newData)
+                }
             })
             .catch(error => {
                 // Handle the error
@@ -113,14 +150,14 @@ const CBStatus = (props, { navigation }) => {
 
         var module = ''; var page = '';
 
-        module = 'CB_BRE_DCSN';
-        page = 'CB_CHK_BRE_DCSN';
+        module = 'BRE';
+        page = 'BRE_VIEW';
 
 
         const appDetails = {
             "loanApplicationId": global.LOANAPPLICATIONID,
             "loanWorkflowStage": "LN_APP_INITIATION",
-            "subStageCode": "CB_CHK",
+            "subStageCode": "BRE",
             "moduleCode": module,
             "pageCode": page,
             "status": "Completed"
@@ -133,9 +170,9 @@ const CBStatus = (props, { navigation }) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
-                global.COMPLETEDSUBSTAGE = 'LN_DEMGRP';
-                global.COMPLETEDMODULE = 'CB_BRE_DCSN';
-                global.COMPLETEDPAGE = 'CB_CHK_BRE_DCSN';
+                global.COMPLETEDSUBSTAGE = 'BRE';
+                global.COMPLETEDMODULE = 'BRE';
+                global.COMPLETEDPAGE = 'BRE_VIEW';
 
                 props.navigation.replace('LoanApplicationMain', { fromScreen: 'CBStatus' })
 
@@ -181,7 +218,7 @@ const CBStatus = (props, { navigation }) => {
                     {item.isSelected &&
 
                         <FlatList
-                            data={item.cbResultClientWise}
+                            data={item.loanElgResultClientWise}
                             renderItem={renderInnerItem}
                             keyExtractor={(item, index) => index.toString()}
                         />
@@ -236,20 +273,12 @@ const CBStatus = (props, { navigation }) => {
                         </View>
                     </TouchableOpacity>
                     <View style={{ width: '80%', height: 56, justifyContent: 'center' }}>
-                        <TextComp textVal={language[0][props.language].str_cbsd}
+                        <TextComp textVal={language[0][props.language].str_breview}
                             textStyle={{ color: Colors.darkblack, fontWeight: 400, fontSize: 18 }} />
                     </View>
                 </View>
             </View>
-            <View style={{ width: '100%', marginLeft: 21 }}>
-                <TextComp textVal={language[0][props.language].str_productId}
-                    textStyle={{ color: Colors.dimText, fontWeight: 400, fontSize: 16 }} />
-                <TextComp textVal={'PD01'}
-                    textStyle={{ color: Colors.darkblack, fontWeight: 400, fontSize: 16, marginTop: 5 }} />
-            </View>
-            <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center' }}>
-                <View style={{ width: '90%', height: .9, backgroundColor: Colors.line, marginTop: 5 }} />
-            </View>
+
 
             <View style={{ width: '100%', justifyContent: 'center', marginBottom: 110 }}>
                 <FlatList
@@ -285,7 +314,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => ({
     languageAction: (item) => dispatch(languageAction(item)),
 });
-export default connect(mapStateToProps, mapDispatchToProps)(CBStatus);
+export default connect(mapStateToProps, mapDispatchToProps)(BREView);
 
 
 const styles = StyleSheet.create({

@@ -27,9 +27,6 @@ import Common from '../../../Utils/Common';
 import ButtonViewComp from '../../../Components/ButtonViewComp';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import DedupeModal from '../../../Components/DedupeModal';
-import tbl_client from '../../../Database/Table/tbl_client';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
-
 import {
     CodeField,
     Cursor,
@@ -42,6 +39,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Button, Menu, Divider } from 'react-native-paper';
 import { useIsFocused } from '@react-navigation/native';
 import ErrorModal from '../../../Components/ErrorModal';
+import tbl_client from '../../../Database/Table/tbl_client';
 const CELL_COUNT = 3;
 const CELL_SIZE = 46;
 const CELL_BORDER_RADIUS = 8;
@@ -65,7 +63,7 @@ const animateCell = ({ hasValue, index, isFocused }) => {
     ]).start();
 };
 
-const OTPVerification = (props, { navigation }) => {
+const ConsentOTPVerification = (props, { navigation }) => {
     const [mobileOTP, setMobileOTP] = useState('');
     const [mobileNumber, setMobileNumber] = useState(props.route.params.mobileNumber);
     const [loading, setLoading] = useState(false);
@@ -82,6 +80,7 @@ const OTPVerification = (props, { navigation }) => {
     const challengeCodeRef = useRef(null);
     let Url = Common.CS_URL; // Initialize with your initial URL
     let goForRetry = true;
+    const [processModuleLength, setProcessModuleLength] = useState(global.FILTEREDPROCESSMODULE.length);
 
     const [menuvisible, setMenuVisible] = React.useState(false);
     const [instance, setInstance] = React.useState('LIV');
@@ -154,10 +153,6 @@ const OTPVerification = (props, { navigation }) => {
     };
 
     useEffect(() => {
-        props.navigation
-            .getParent()
-            ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
-
         const timer = setInterval(() => {
             if (timeLeft > 0) {
                 setTimeLeft(timeLeft - 1);
@@ -168,23 +163,10 @@ const OTPVerification = (props, { navigation }) => {
         }, 1000); // Update every second (1000 milliseconds)
 
         return () => {
-            clearInterval(timer);
-            props.navigation
-                .getParent()
-                ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
-            // Clean up the timer when the component unmounts
+            clearInterval(timer); // Clean up the timer when the component unmounts
         };
     }, [props.navigation, timeLeft]);
 
-    useFocusEffect(
-        React.useCallback(() => {
-
-            return () => {
-                console.log('Screen is blurred');
-
-            };
-        }, [props.navigation]),
-    );
 
 
     const generateOTP = () => {
@@ -250,19 +232,13 @@ const OTPVerification = (props, { navigation }) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log('MobileOTPVerifyApiResponse::' + JSON.stringify(response.data),);
 
-                //sendDataBack();
-                // alert(JSON.stringify(response.data))
                 if (response.data.statusCode === 202) {
                     setApiError(response.data.message);
                     setErrorModalVisible(true)
                     setMobileOTP('');
-                    setTimeLeft(0);
                 } else if (response.status === 200) {
-                    // await tbl_client.updateIsMobileVerified('1', global.LOANAPPLICATIONID, global.CLIENTTYPE)
-                    sendDataBack();
+                    updateLoanStatus();
                 }
-
-
                 setLoading(false);
 
 
@@ -280,9 +256,70 @@ const OTPVerification = (props, { navigation }) => {
 
     };
 
+    const updateLoanStatus = () => {
+
+        var module = ''; var page = '';
+
+        if (global.CLIENTTYPE == 'APPL') {
+            module = 'DOC_UPLD';
+            page = 'DOC_UPLD_APPLCNT';
+        } else if (global.CLIENTTYPE == 'CO-APPL') {
+            module = 'DOC_UPLD';
+            page = 'DOC_UPLD_COAPPLCNT';
+        } else if (global.CLIENTTYPE == 'GRNTR') {
+            module = 'DOC_UPLD';
+            page = 'DOC_UPLD_GRNTR';
+        }
+
+        const appDetails = {
+            "loanApplicationId": global.LOANAPPLICATIONID,
+            "loanWorkflowStage": "LN_APP_INITIATION",
+            "subStageCode": "LN_DEMGRP",
+            "moduleCode": module,
+            "pageCode": page,
+            "status": "Completed"
+        }
+        const baseURL = '8901';
+        setLoading(true);
+        apiInstancelocal(baseURL)
+            .post(`/api/v2/loan-application-status/updateStatus`, appDetails)
+            .then(async response => {
+                // Handle the response data
+
+                if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
+                setLoading(false);
+
+                if (global.CLIENTTYPE == 'APPL') {
+                    global.COMPLETEDMODULE = 'DOC_UPLD';
+                    global.COMPLETEDPAGE = 'DOC_UPLD_APPLCNT';
+                } else if (global.CLIENTTYPE == 'CO-APPL') {
+                    global.COMPLETEDMODULE = 'DOC_UPLD';
+                    global.COMPLETEDPAGE = 'DOC_UPLD_COAPPLCNT';
+                } else if (global.CLIENTTYPE == 'GRNTR') {
+                    global.COMPLETEDMODULE = 'DOC_UPLD';
+                    global.COMPLETEDPAGE = 'DOC_UPLD_GRNTR';
+                }
+
+                global.COMPLETEDSUBSTAGE = 'BRE';
+                sendDataBack();
+
+            })
+            .catch(error => {
+                // Handle the error
+                if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
+                setLoading(false);
+                if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
+
+    };
+
     const sendDataBack = () => {
-        global.isMobileVerified = '1';
-        props.navigation.goBack();
+        props.navigation.replace('LoanApplicationMain', {
+            fromScreen: 'ConsentOTP',
+        });
     };
 
     const closeErrorModal = () => {
@@ -302,7 +339,7 @@ const OTPVerification = (props, { navigation }) => {
             <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
             <View style={{ width: '100%', height: 56, alignItems: 'center', justifyContent: 'center', }}>
 
-                <HeadComp textval={language[0][props.language].str_mobileotpverification} props={props} onGoBack={onGoBack} />
+                <HeadComp textval={language[0][props.language].str_consentotpverify} props={props} onGoBack={onGoBack} />
 
             </View>
 
@@ -373,7 +410,7 @@ const mapDispatchToProps = (dispatch) => ({
 });
 
 
-export default connect(mapStateToProps, mapDispatchToProps)(OTPVerification);
+export default connect(mapStateToProps, mapDispatchToProps)(ConsentOTPVerification);
 
 const { width, height } = Dimensions.get('window');
 

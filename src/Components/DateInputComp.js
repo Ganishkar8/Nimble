@@ -30,24 +30,24 @@ const DateInputComp = ({ textValue, textStyle, Disable, type, ComponentName, ref
     };
 
     const changeSelectedDate = (event, selectedDate) => {
-        const currentDate = selectedDate || mydate;
-        console.log("SelectedDate::" + currentDate)
-        const date = new Date(currentDate);
-        setDate(date)
         setShow(false);
+        if (event.type == 'set') {
+            const currentDate = selectedDate || mydate;
+            console.log("SelectedDate::" + currentDate)
+            const date = new Date(currentDate);
+            setDate(date)
+            // Get day, month, and year components from the Date object
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Note: Months are 0-indexed, so we add 1.
+            const year = date.getFullYear();
 
-        // Get day, month, and year components from the Date object
-        const day = date.getDate().toString().padStart(2, '0');
-        const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Note: Months are 0-indexed, so we add 1.
-        const year = date.getFullYear();
-
-        // Create the formatted date string
-        const formattedDate = `${day}-${month}-${year}`;
-        console.log("FormattedDate::" + formattedDate)
-        console.log("Event::" + JSON.stringify(event))
-        setDatee(formattedDate);
-        handleClick(ComponentName, formattedDate);
-
+            // Create the formatted date string
+            const formattedDate = `${day}-${month}-${year}`;
+            console.log("FormattedDate::" + formattedDate)
+            console.log("Event::" + JSON.stringify(event))
+            setDatee(formattedDate);
+            handleClick(ComponentName, formattedDate);
+        }
     };
     const setValue = txt => {
         handleTextChange(txt)
@@ -102,8 +102,8 @@ const DateInputComp = ({ textValue, textStyle, Disable, type, ComponentName, ref
                     is24Hour={true}
                     display="default"
                     onChange={changeSelectedDate}
-                    maximumDate={minDate}
-                    minimumDate={maxDate}
+                    maximumDate={maxDate}
+                    minimumDate={minDate ? minDate : new Date(1900, 0, 1)}
 
                 />
             )}

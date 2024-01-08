@@ -56,7 +56,7 @@ const LeadManagement = (props, { navigation, route }) => {
         { name: 'Filter', isSelected: false, id: 1 },
         { name: 'Sort by', isSelected: false, id: 2 },
         { name: 'Pending', isSelected: false, id: 3 },
-        { name: "Today's Lead", isSelected: false, id: 4 }
+        { name: "Today's Application", isSelected: false, id: 4 }
     ]
     const mainFilterDataArr = [
 
@@ -115,6 +115,7 @@ const LeadManagement = (props, { navigation, route }) => {
 
     useEffect(() => {
         //getPendingData()
+
         if (props.route.params.fromScreen == "LeadCompletion") {
             // showBottomSheet();
         }
@@ -201,8 +202,8 @@ const LeadManagement = (props, { navigation, route }) => {
         await Promise.all(promises);
 
         // alert(JSON.stringify(data))
-        setFilteredData(data.slice().reverse())
-        setPendingData(data.slice().reverse())
+        setFilteredData(data.slice())
+        setPendingData(data.slice())
         setRefreshing(false)
     }
 
@@ -344,8 +345,8 @@ const LeadManagement = (props, { navigation, route }) => {
             .then((response) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(response.data));
-                setPendingData(response.data.slice().reverse())
-                setFilteredData(response.data.slice().reverse())
+                setPendingData(response.data.slice())
+                setFilteredData(response.data.slice())
                 setLoading(false)
                 setRefreshing(false)
                 if (response.data.length > 0) {
@@ -746,8 +747,8 @@ const LeadManagement = (props, { navigation, route }) => {
                     const itemData = item.customerName
                         ? item.customerName.toUpperCase()
                         : '';
-                    const itemDataID = item.leadId
-                        ? item.leadId.toString()
+                    const itemDataID = item.loanApplicationNumber
+                        ? item.loanApplicationNumber.toString()
                         : '';
                     const regex = /^[0-9]+$/;
                     //let textData = ''
@@ -1101,7 +1102,8 @@ const LeadManagement = (props, { navigation, route }) => {
                         global.LOANAPPLICATIONID = '';
                         global.COMPLETEDMODULE = '';
                         global.COMPLETEDPAGE = '';
-                        props.navigation.navigate('ConsentScreen');
+                        global.COMPLETEDSUBSTAGE = '';
+                        props.navigation.navigate('ConsentScreen', { leadData: [] });
                     }}
                 />
             }

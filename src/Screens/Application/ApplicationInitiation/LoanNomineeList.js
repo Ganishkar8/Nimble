@@ -91,6 +91,10 @@ const LoanNomineeList = (props, { navigation }) => {
 
         var bg = '';
 
+        if (global.USERTYPEID == 1163) {
+            bg = 'GREY';
+        }
+
         return (
             <View style={{ marginLeft: 10, marginRight: 10 }}>
                 <View>
@@ -240,10 +244,10 @@ const LoanNomineeList = (props, { navigation }) => {
 
     const buttonNext = () => {
 
-        // if (validate()) {
-        //     showBottomSheet();
-        //     return;
-        // }
+        if (global.USERTYPEID == 1163) {
+            onGoBack();
+            return;
+        }
         updateLoanStatus();
 
     }
@@ -252,7 +256,7 @@ const LoanNomineeList = (props, { navigation }) => {
 
         var module = ''; var page = '';
 
-        module = 'NMNE_DTLS';
+        module = 'LN_PRDT';
         page = 'NMN_DTLS';
 
         const appDetails = {
@@ -273,7 +277,7 @@ const LoanNomineeList = (props, { navigation }) => {
                 if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
 
-                global.COMPLETEDMODULE = 'NMNE_DTLS';
+                global.COMPLETEDMODULE = 'LN_PRDT';
                 global.COMPLETEDPAGE = 'NMN_DTLS';
 
 
@@ -346,24 +350,25 @@ const LoanNomineeList = (props, { navigation }) => {
 
             <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
                 <View style={{ width: '90%', marginTop: 3 }}>
-                    <ProgressComp progressvalue={1} textvalue="6 of 6" />
+                    <ProgressComp progressvalue={1} textvalue="2 of 2" />
                 </View>
             </View>
 
-            <TouchableOpacity activeOpacity={8} onPress={() => handleClick('new')}>
-                <View style={{ marginBottom: 10 }}>
-                    <IconButtonViewComp
-                        icon={'+'}
-                        textValue={language[0][
-                            props.language
-                        ].str_nomineeDetails.toUpperCase()}
-                        textStyle={{ color: Colors.skyBlue, fontSize: 13, fontWeight: 500 }}
-                        viewStyle={Commonstyles.buttonView}
-                        innerStyle={Commonstyles.buttonViewBorderStyle}
-                    //handleClick={() => handleClick('new')}
-                    />
-                </View>
-            </TouchableOpacity>
+            {nomineeDetails.length <= 0 &&
+                <TouchableOpacity activeOpacity={8} onPress={() => handleClick('new')}>
+                    <View style={{ marginBottom: 10 }}>
+                        <IconButtonViewComp
+                            icon={'+'}
+                            textValue={language[0][
+                                props.language
+                            ].str_nomineeDetails.toUpperCase()}
+                            textStyle={{ color: Colors.skyBlue, fontSize: 13, fontWeight: 500 }}
+                            viewStyle={Commonstyles.buttonView}
+                            innerStyle={Commonstyles.buttonViewBorderStyle}
+                        //handleClick={() => handleClick('new')}
+                        />
+                    </View>
+                </TouchableOpacity>}
 
             <FlatList
                 data={nomineeDetails}
@@ -373,13 +378,13 @@ const LoanNomineeList = (props, { navigation }) => {
             />
 
 
-            <ButtonViewComp
+            {nomineeDetails.length > 0 && <ButtonViewComp
                 textValue={language[0][props.language].str_submit.toUpperCase()}
                 textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
                 viewStyle={[Commonstyles.buttonView, { marginBottom: 20 }]}
                 innerStyle={Commonstyles.buttonViewInnerStyle}
                 handleClick={buttonNext}
-            />
+            />}
 
 
 

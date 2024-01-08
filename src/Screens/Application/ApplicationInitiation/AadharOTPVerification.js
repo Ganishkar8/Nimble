@@ -47,6 +47,8 @@ import ErrorModal from '../../../Components/ErrorModal';
 import AadharSuccessModal from '../../../Components/AadharSuccessModal';
 import tbl_client from '../../../Database/Table/tbl_client';
 import tbl_clientaddressinfo from '../../../Database/Table/tbl_clientaddressinfo';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+
 const CELL_COUNT = 3;
 const CELL_SIZE = 46;
 const CELL_BORDER_RADIUS = 8;
@@ -73,7 +75,7 @@ const animateCell = ({ hasValue, index, isFocused }) => {
 
 const AadharOTPVerification = (props, { navigation }) => {
     const [mobileOTP, setMobileOTP] = useState('');
-    const [aadharNumber, setaadharNumber] = useState(props.route.params.aadharNumber);
+    const [aadharNumber, setaadharNumber] = useState('');
     const [loading, setLoading] = useState(false);
     const [isManualKYC, setIsManualKYC] = useState(false);
     const [Visible, setVisible] = useState(false);
@@ -170,6 +172,9 @@ const AadharOTPVerification = (props, { navigation }) => {
     };
 
     useEffect(() => {
+        props.navigation
+            .getParent()
+            ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const timer = setInterval(() => {
             if (timeLeft > 0) {
                 setTimeLeft(timeLeft - 1);
@@ -181,16 +186,27 @@ const AadharOTPVerification = (props, { navigation }) => {
 
         return () => {
             clearInterval(timer); // Clean up the timer when the component unmounts
+            props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
         };
     }, [props.navigation, timeLeft, isScreenVisible]);
 
+    useFocusEffect(
+        React.useCallback(() => {
+
+            setaadharNumber(props.route.params.aadharNumber);
+
+            return () => {
+
+            };
+        }, []),
+    );
 
 
     const generateAadharOTP = () => {
 
         const appDetails =
         {
-            "clientId": 0,
+            "clientId": global.CLIENTID,
             "aadharNumber": aadharNumber,
             "createdBy": global.USERID
         }
@@ -204,6 +220,9 @@ const AadharOTPVerification = (props, { navigation }) => {
 
                 if (response.status == 200) {
                     setTimeLeft(60)
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
                 }
 
                 setLoading(false);
@@ -249,7 +268,8 @@ const AadharOTPVerification = (props, { navigation }) => {
                     insertData(response.data.aadharResultDetails);
 
                 } else {
-                    alert(response.data.statusCode)
+                    setApiError(response.data.statusMessage);
+                    setErrorModalVisible(true)
                 }
 
             })
@@ -339,7 +359,7 @@ const AadharOTPVerification = (props, { navigation }) => {
         }
     };
 
-    const updateLoanStatus = () => {
+    const updateLoanStatus = (value) => {
 
         var module = ''; var page = '';
 
@@ -380,7 +400,14 @@ const AadharOTPVerification = (props, { navigation }) => {
                     global.COMPLETEDMODULE = 'PRF_SHRT_GRNTR';
                     global.COMPLETEDPAGE = 'PRF_SHRT_GRNTR_BSC_DTLS';
                 }
-                setNavAlertVisible(true)
+                if (value == "0") {
+                    setIsManualKYC(false);
+                    setMobileOTP('');
+                    props.navigation.replace('ProfileShortKYCVerificationStatus', { 'isAadharVerified': '0' });
+                } else {
+                    setNavAlertVisible(true)
+                }
+
             })
             .catch(error => {
                 // Handle the error
@@ -407,9 +434,9 @@ const AadharOTPVerification = (props, { navigation }) => {
         var dob = Common.convertDateFormat(data.dob);
         var gender = data.gender;
         var fatherName = '';
-        if ('fatherName' in data) {
+        if ('fatherName' in data && data.fatherName !== null) {
             fatherName = data.fatherName;
-        } else if ('relativeName' in data) {
+        } else if ('relativeName' in data && data.relativeName !== null) {
             fatherName = data.relativeName;
         }
         //var fatherName = data.fatherName ? data.fatherName : data.relativeName ? data.relativeName : '';
@@ -428,8 +455,8 @@ const AadharOTPVerification = (props, { navigation }) => {
             global.CLIENTID,
             global.CLIENTTYPE,
             "P",
-            aadhaarResponse.houseNumber + " " + aadhaarResponse.street,
-            aadhaarResponse.vtcName + " " + aadhaarResponse.location,
+            aadhaarResponse.address,
+            '',
             landmark,
             aadhaarResponse.pinCode,
             "",
@@ -460,14 +487,15 @@ const AadharOTPVerification = (props, { navigation }) => {
                 if (global.DEBUG_MODE) console.error('Error Inserting Address detail:', error);
             });
         global.isAadharVerified = "1";
-        updateLoanStatus();
+        updateLoanStatus("1");
 
     }
     const proceedClick = (value) => {
         if (value === 'proceed') {
             setNavAlertVisible(false)
-            setMobileOTP('')
-            props.navigation.navigate('ProfileShortKYCVerificationStatus');
+            setIsManualKYC(false);
+            setMobileOTP('');
+            props.navigation.replace('ProfileShortKYCVerificationStatus');
         }
     }
 
@@ -478,7 +506,8 @@ const AadharOTPVerification = (props, { navigation }) => {
     const manualKYC = () => {
         if (isManualKYC) {
             global.isAadharVerified = "0";
-            props.navigation.navigate('ProfileShortKYCVerificationStatus', { 'isAadharVerified': '0' });
+            updateLoanStatus("0");
+
         } else {
             if (mobileOTP.length < 6) {
                 setApiError('Please Enter OTP');

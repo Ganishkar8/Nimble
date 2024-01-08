@@ -3,7 +3,7 @@ import databaseInstance from '../DatabaseInstance';
 
 const tableName = 'tbl_client';
 
-const insertClient = (id, loanApplicationId, clientTypeId, relationTypeId, titleId, firstName, middleName, lastName, dateOfBirth, age, fatherName, spouseName, casteId, religionId, motherTongueId, educationQualificationId, genderId, maritalStatusId, mobileNumber, email, isKycManual, kycTypeId1,
+const insertClient = (id, loanApplicationId, clientTypeId, leadID, relationTypeId, titleId, firstName, middleName, lastName, dateOfBirth, age, fatherName, spouseName, casteId, religionId, motherTongueId, educationQualificationId, genderId, maritalStatusId, mobileNumber, email, isKycManual, kycTypeId1,
     kycIdValue1,
     expiryDate1,
     kycTypeId2,
@@ -41,8 +41,8 @@ const insertClient = (id, loanApplicationId, clientTypeId, relationTypeId, title
     return new Promise((resolve, reject) => {
         db.transaction(tx => {
             tx.executeSql(
-                `INSERT OR REPLACE INTO ${tableName} (id,loanApplicationId, clientTypeId, relationTypeId, titleId,firstName, middleName,lastName,dateOfBirth,age,fatherName,spouseName,casteId,religionId,motherTongueId,educationQualificationId,genderId,maritalStatusId,mobileNumber,email,isKycManual,kycTypeId1,kycIdValue1,expiryDate1,kycTypeId2,kycIdValue2,expiryDate2,kycTypeId3,kycIdValue3,expiryDate3,kycTypeId4,kycIdValue4,expiryDate4,isMsme,isAadharNumberVerified,isPanVerified,udyamRegistrationNumber,isUdyamRegistrationNumberVerified,isMobileNumberVerified,isEmailVerified,dedupeCheck,isDedupePassed,dmsId,image,geoCode,isActive,clientCreationDate,createdBy,createdDate,modifiedBy,modifiedDate,supervisedBy,supervisedDate,lmsClientId,lmsCustomerTypeId) VALUES (?, ?, ?, ?, ?, ?,?,?,?,?,?,?, ?, ?, ?, ?, ?,?,?,?,?,?,?, ?, ?, ?, ?, ?,?,?,?,?,?,?, ?, ?, ?, ?, ?,?,?,?,?,?,?, ?, ?, ?, ?, ?,?,?,?,?,?)`,
-                [id, loanApplicationId, clientTypeId, relationTypeId, titleId, firstName, middleName, lastName, dateOfBirth, age, fatherName, spouseName, casteId, religionId, motherTongueId, educationQualificationId, genderId, maritalStatusId, mobileNumber, email, isKycManual, kycTypeId1, kycIdValue1, expiryDate1, kycTypeId2, kycIdValue2, expiryDate2, kycTypeId3, kycIdValue3, expiryDate3, kycTypeId4, kycIdValue4, expiryDate4, isMsme, isAadharNumberVerified, isPanVerified, udyamRegistrationNumber, isUdyamRegistrationNumberVerified, isMobileNumberVerified, isEmailVerified, dedupeCheck, isDedupePassed, dmsId, image, geoCode, isActive, clientCreationDate, createdBy, createdDate, modifiedBy, modifiedDate, supervisedBy, supervisedDate, lmsClientId, lmsCustomerTypeId],
+                `INSERT OR REPLACE INTO ${tableName} (id,loanApplicationId, clientTypeId,leadID, relationTypeId, titleId,firstName, middleName,lastName,dateOfBirth,age,fatherName,spouseName,casteId,religionId,motherTongueId,educationQualificationId,genderId,maritalStatusId,mobileNumber,email,isKycManual,kycTypeId1,kycIdValue1,expiryDate1,kycTypeId2,kycIdValue2,expiryDate2,kycTypeId3,kycIdValue3,expiryDate3,kycTypeId4,kycIdValue4,expiryDate4,isMsme,isAadharNumberVerified,isPanVerified,udyamRegistrationNumber,isUdyamRegistrationNumberVerified,isMobileNumberVerified,isEmailVerified,dedupeCheck,isDedupePassed,dmsId,image,geoCode,isActive,clientCreationDate,createdBy,createdDate,modifiedBy,modifiedDate,supervisedBy,supervisedDate,lmsClientId,lmsCustomerTypeId) VALUES (?, ?, ?, ?, ?, ?,?,?,?,?,?,?, ?, ?, ?, ?, ?,?,?,?,?,?,?, ?, ?, ?, ?, ?,?,?,?,?,?,?, ?, ?, ?, ?, ?,?,?,?,?,?,?, ?, ?, ?, ?, ?,?,?,?,?,?,?)`,
+                [id, loanApplicationId, clientTypeId, leadID, relationTypeId, titleId, firstName, middleName, lastName, dateOfBirth, age, fatherName, spouseName, casteId, religionId, motherTongueId, educationQualificationId, genderId, maritalStatusId, mobileNumber, email, isKycManual, kycTypeId1, kycIdValue1, expiryDate1, kycTypeId2, kycIdValue2, expiryDate2, kycTypeId3, kycIdValue3, expiryDate3, kycTypeId4, kycIdValue4, expiryDate4, isMsme, isAadharNumberVerified, isPanVerified, udyamRegistrationNumber, isUdyamRegistrationNumberVerified, isMobileNumberVerified, isEmailVerified, dedupeCheck, isDedupePassed, dmsId, image, geoCode, isActive, clientCreationDate, createdBy, createdDate, modifiedBy, modifiedDate, supervisedBy, supervisedDate, lmsClientId, lmsCustomerTypeId],
                 (_, result) => {
                     //alert(JSON.stringify(result))
                     resolve(result);
@@ -94,6 +94,27 @@ const updatePersonalDetails = (title, firstName, middleName, lastName, dob, age,
     });
 }
 
+
+const updateIsMobileVerified = (mobileVerify, loanApplicationId, clientTypeId) => {
+
+    const db = databaseInstance.getInstance();
+
+    return new Promise((resolve, reject) => {
+        db.transaction(tx => {
+            tx.executeSql(
+                `UPDATE ${tableName} SET isMobileNumberVerified = ? WHERE loanApplicationId = ? AND clientTypeId = ?`,
+                [mobileVerify, loanApplicationId, clientTypeId],
+                (_, result) => {
+                    resolve(result);
+                },
+                error => {
+                    reject(error);
+                },
+            );
+        });
+    });
+}
+
 const updateKYCManual = (kycmanual, loanApplicationId, clientTypeId) => {
     const db = databaseInstance.getInstance();
 
@@ -113,13 +134,39 @@ const updateKYCManual = (kycmanual, loanApplicationId, clientTypeId) => {
     });
 }
 
+const getAllClientID = (id) => {
+    const db = databaseInstance.getInstance();
+
+    return new Promise((resolve, reject) => {
+        db.transaction(tx => {
+            tx.executeSql(
+                `SELECT id,loanApplicationId,clientTypeId,mobileNumber,email,isKycManual,kycTypeId1,kycIdValue1,expiryDate1,kycTypeId2,kycIdValue2,expiryDate2,kycTypeId3,kycIdValue3,expiryDate3,kycTypeId4,kycIdValue4,expiryDate4,isMsme,udyamRegistrationNumber FROM ${tableName} WHERE loanApplicationId = ?`,
+                [id],
+                (_, result) => {
+                    const rows = result.rows;
+                    const clientData = [];
+
+                    for (let i = 0; i < rows.length; i++) {
+                        clientData.push(rows.item(i));
+                    }
+
+                    resolve(clientData);
+                },
+                error => {
+                    reject(error);
+                },
+            );
+        });
+    });
+};
+
 const getClientBasedOnID = (id, clientType) => {
     const db = databaseInstance.getInstance();
 
     return new Promise((resolve, reject) => {
         db.transaction(tx => {
             tx.executeSql(
-                `SELECT id,loanApplicationId,clientTypeId, relationTypeId, titleId,firstName, middleName,lastName,dateOfBirth,age,fatherName,spouseName,casteId,religionId,motherTongueId,educationQualificationId,genderId,maritalStatusId,mobileNumber,email,isKycManual,kycTypeId1,kycIdValue1,expiryDate1,kycTypeId2,kycIdValue2,expiryDate2,kycTypeId3,kycIdValue3,expiryDate3,kycTypeId4,kycIdValue4,expiryDate4,isMsme,isAadharNumberVerified,isPanVerified,udyamRegistrationNumber,isUdyamRegistrationNumberVerified,isMobileNumberVerified,isEmailVerified,dedupeCheck,isDedupePassed,dmsId,image,geoCode,lmsClientId,lmsCustomerTypeId FROM ${tableName} WHERE loanApplicationId = ? AND clientTypeId=?`,
+                `SELECT id,loanApplicationId,clientTypeId,leadID, relationTypeId, titleId,firstName, middleName,lastName,dateOfBirth,age,fatherName,spouseName,casteId,religionId,motherTongueId,educationQualificationId,genderId,maritalStatusId,mobileNumber,email,isKycManual,kycTypeId1,kycIdValue1,expiryDate1,kycTypeId2,kycIdValue2,expiryDate2,kycTypeId3,kycIdValue3,expiryDate3,kycTypeId4,kycIdValue4,expiryDate4,isMsme,isAadharNumberVerified,isPanVerified,udyamRegistrationNumber,isUdyamRegistrationNumberVerified,isMobileNumberVerified,isEmailVerified,dedupeCheck,isDedupePassed,dmsId,image,geoCode,lmsClientId,lmsCustomerTypeId FROM ${tableName} WHERE loanApplicationId = ? AND clientTypeId=?`,
                 [id, clientType],
                 (_, result) => {
                     const rows = result.rows;
@@ -187,5 +234,7 @@ export default {
     updateAadharData,
     updatePersonalDetails,
     getOnlyClientBasedOnID,
-    updateKYCManual
+    updateKYCManual,
+    getAllClientID,
+    updateIsMobileVerified
 };

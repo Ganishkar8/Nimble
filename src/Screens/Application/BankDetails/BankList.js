@@ -39,7 +39,7 @@ import tbl_loanaddressinfo from '../../../Database/Table/tbl_loanaddressinfo';
 const BankList = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
     const [bankDetails, setBankDetails] = useState([]);
-    const [addressID, setAddressID] = useState('');
+    const [bankID, setBankID] = useState('');
     const isScreenVisible = useIsFocused();
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const [apiError, setApiError] = useState('');
@@ -203,25 +203,25 @@ const BankList = (props, { navigation }) => {
         } else if (value === 'new') {
             props.navigation.navigate('BankDetailsScreen', { bankType: 'new' })
         } else if (value === 'delete') {
-            //setAddressID(data.id);
-            //setDeleteModalVisible(true);
-            deletedata(data.client_id)
+            setBankID(data.id);
+            setDeleteModalVisible(true);
+            //deletedata(data.client_id)
         }
     }
 
 
-    const deleteAddressData = () => {
+    const deleteBankData = () => {
 
         const baseURL = '8901';
         setLoading(true);
         apiInstancelocal(baseURL)
-            .delete(`/api/v2/profile-short/address-details/${addressID}`)
+            .delete(`/api/v2/loan-demographics/BankDetail/${bankID}`)
             .then(async response => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log('DeleteAddressResponse::' + JSON.stringify(response.data),);
 
                 setLoading(false);
-                deletedata(addressID);
+                deletedata(bankID);
             })
             .catch(error => {
                 // Handle the error
@@ -238,11 +238,11 @@ const BankList = (props, { navigation }) => {
     const deletedata = async (clientType) => {
 
         const deletePromises = [
-            tbl_bankdetails.deleteBankDataBasedOnLoanIDAndType('123', clientType)
+            tbl_bankdetails.deleteBankDataBasedOnLoanIDAndType(global.LOANAPPLICATIONID, clientType)
         ];
         await Promise.all(deletePromises);
 
-        const newArray = bankDetails.filter(item => item.loanApplicationId !== '123');
+        const newArray = bankDetails.filter(item => item.loanApplicationId !== global.LOANAPPLICATIONID);
         setBankDetails(newArray);
         setRefreshFlatList(!refreshFlatlist);
 
@@ -255,6 +255,10 @@ const BankList = (props, { navigation }) => {
         //     showBottomSheet();
         //     return;
         // }
+        if (global.USERTYPEID == 1163) {
+            props.navigation.replace('LoanApplicationMain', { fromScreen: 'BankList' });
+            return;
+        }
         updateLoanStatus();
 
     }
@@ -298,7 +302,6 @@ const BankList = (props, { navigation }) => {
                     global.COMPLETEDMODULE = 'LN_DMGP_COAPLCT';
                     global.COMPLETEDPAGE = 'DMGRC_COAPPL_BNK_DTLS';
                 } else if (global.CLIENTTYPE == 'GRNTR') {
-                    global.COMPLETEDSUBSTAGE = 'BRE';
                     global.COMPLETEDMODULE = 'LN_DMGP_GRNTR';
                     global.COMPLETEDPAGE = 'DMGRC_GRNTR_BNK_DTLS';
                 }
@@ -388,7 +391,7 @@ const BankList = (props, { navigation }) => {
 
     const onDeleteClick = () => {
         setDeleteModalVisible(false);
-        deleteAddressData();
+        deleteBankData();
     };
 
     return (
@@ -459,41 +462,18 @@ const BankList = (props, { navigation }) => {
                 data={bankDetails}
                 renderItem={FlatView}
                 extraData={refreshFlatlist}
-                keyExtractor={item => item.loanApplicationId}
+                keyExtractor={(item, index) => index.toString()}
             />
 
 
-            {bankDetails.length > 0 && global.USERTYPEID == 1164 && <ButtonViewComp
+            {/* {bankDetails.length > 0 && */}<ButtonViewComp
                 textValue={language[0][props.language].str_submit.toUpperCase()}
                 textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
                 viewStyle={[Commonstyles.buttonView, { marginBottom: 20 }]}
                 innerStyle={Commonstyles.buttonViewInnerStyle}
                 handleClick={buttonNext}
             />
-            }
-
-            <View style={{ flexDirection: 'row' }}>
-
-                {kycManual == '1' && global.USERTYPEID == 1163 && <ButtonViewComp
-                    textValue={language[0][props.language].str_approve.toUpperCase()}
-                    textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
-                    viewStyle={[Commonstyles.buttonView, { width: '50%', marginBottom: 20 }]}
-                    innerStyle={Commonstyles.buttonViewInnerStyle}
-                    handleClick={() => approveManualKYC('Approved')}
-                />
-                }
-
-                {kycManual == '1' && global.USERTYPEID == 1163 && <ButtonViewComp
-                    textValue={language[0][props.language].str_reject.toUpperCase()}
-                    textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
-                    viewStyle={[Commonstyles.buttonView, { width: '50%', marginBottom: 20 }]}
-                    innerStyle={Commonstyles.buttonViewInnerStyle}
-                    handleClick={() => { approveManualKYC('Rejected') }}
-                />
-                }
-
-            </View>
-
+            {/* } */}
 
 
         </SafeAreaView>

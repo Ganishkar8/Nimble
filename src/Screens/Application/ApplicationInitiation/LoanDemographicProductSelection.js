@@ -68,6 +68,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
     const [custCatgVisible, setCustCatgVisible] = useState(true);
     const [custCatgDisable, setCustCatgDisable] = useState(false);
     const [custCatData, setCustCatData] = useState([]);
+    const [repayscheduleData, setRepayScheduleData] = useState([]);
     const [errMsg, setErrMsg] = useState('');
     const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
     const showBottomSheet = () => setBottomErrorSheetVisible(true);
@@ -79,28 +80,8 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
     const showChargeModal = () => setChargeModalVisible(true);
     const hideChargeModal = () => setChargeModalVisible(false);
 
-    const chargeData = [
-        {
-            "id": 6,
-            "charge": "KOTAK",
-            "chargeDescription": "KOTAK Insurance Fee",
-            "chargeAmount": 0.0,
-            "taxAmount": 0.0,
-            "cessAmount": 0.0,
-            "paymentType": "L",
-            "remarks": "Applicant Fee :0.00 Co Applicant 0.00",
-            "taxId": null,
-            "isChargeIncludeTax": null,
-            "taxPercentage": null,
-            "finalChargeAmount": 0.0,
-            "chargeAmountTreatment": null,
-            "isActive": null,
-            "createdBy": null,
-            "createdDate": null,
-            "modifiedBy": null,
-            "modifiedDate": null
-        }
-    ]
+    const [chargeData, setChargeData] = useState([]);
+    const [loanProductLinkData, setLoanProductLinkData] = useState(global.LEADTRACKERDATA.applicantLoanProductLink);
 
     //loanType - dropdown
     const [relationTypeMan, setRelationTypeMan] = useState(false); //Manditory or not
@@ -206,6 +187,28 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
     const [interestRateDisable, setInterestRateDisable] = useState(false);
     const interestRateRef = useRef(null);
 
+    const [emiAmount, setEmiAmount] = useState('');
+    const [emiAmountCaption, setEmiAmountCaption] = useState("EMI AMOUNT");
+    const [emiAmountMan, setEmiAmountMan] = useState(false);
+    const [emiAmountVisible, setEmiAmountVisible] = useState(true);
+    const [emiAmountDisable, setEmiAmountDisable] = useState(false);
+    const emiAmountRef = useRef(null);
+
+    const [monthlyEmiDate, setMonthlyEmiDate] = useState('');
+    const [monthlyEmiDateCaption, setMonthlyEmiDateCaption] = useState("MONTHLY EMI DATE");
+    const [monthlyEmiDateMan, setMonthlyEmiDateMan] = useState(false);
+    const [monthlyEmiDateVisible, setMonthlyEmiDateVisible] = useState(true);
+    const [monthlyEmiDateDisable, setMonthlyEmiDateDisable] = useState(false);
+    const monthlyEmiDateRef = useRef(null);
+
+    const [installmentStartDate, setInstallmentStartDateDate] = useState('');
+    const [installmentStartDateCaption, setInstallmentStartDateDateCaption] = useState('INSTALMENT START DATE');
+    const [installmentStartDateMan, setInstallmentStartDateDateMan] = useState(false);
+    const [installmentStartDateVisible, setInstallmentStartDateDateVisible] = useState(true);
+    const [installmentStartDateDisable, setInstallmentStartDateDateDisable] = useState(false);
+    const installmentStartDateRef = useRef(null);
+
+
     const [totalCharges, setTotalCharges] = useState('');
     const [totalChargesCaption, setTotalChargesCaption] = useState("TOTAL CHARGES");
     const [totalChargesMan, setTotalChargesMan] = useState(false);
@@ -228,6 +231,11 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
     const [minLoanAmount, setMinLoanAmount] = useState(0);
     const [maxLoanAmount, setMaxLoanAmount] = useState(0);
 
+    const [minLoanTenure, setMinLoanTenure] = useState(0);
+    const [maxLoanTenure, setMaxLoanTenure] = useState(0);
+    const [pageId, setPageId] = useState(global.CURRENTPAGEID);
+
+
     const [onlyView, setOnlyView] = useState(false);
 
     useEffect(() => {
@@ -237,9 +245,9 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
 
 
-        // if (isDedupeDone) {
-        //     fieldsDisable();
-        // }
+        if (global.USERTYPEID == 1163) {
+            fieldsDisable();
+        }
 
 
         return () => {
@@ -275,42 +283,86 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
     );
 
     const getApplicantData = () => {
-        setLoading(true);
 
-        tbl_loanApplication.getLoanAppBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
-            .then(data => {
-                if (global.DEBUG_MODE) console.log('Loan Data:', data);
-                if (data !== undefined && data.length > 0) {
-                    // setLeadID('');
-                    setLoanTypeLabel(data[0].loan_type)
-                    setLoanProductLabel(data[0].product)
-                    // setProductTypeLabel(data[0].product)
-                    // setCustCatgLabel(data[0].customer_category)
-                    // setCustomerSubCategoryLabel(data[0].customer_subcategory)
-                    // setWorkflowIDLabel(parseInt(data[0].workflow_id))
-                    callLoanAmount(parseInt(data[0].workflow_id));
-                    // setLoanAmount(data[0].loan_amount)
-                    setLoanPurposeLabel(data[0].loan_purpose);
-                    getProductID(data[0].loan_type)
-                    setLoading(false)
-                    // setClientTypeLabel(data[0].customer_type);
-                    // getWorkFlowID(data[0].loan_type, data[0].product, data[0].customer_category)
-                } else {
-                    setLoading(false)
-                }
 
-            })
-            .catch(error => {
-                setLoading(false)
-                if (global.DEBUG_MODE) console.error('Error fetching Loan details:', error);
-            });
+
+        if (loanProductLinkData.length > 0) {
+
+            setLoanTypeLabel(loanProductLinkData[0].loanType)
+            getProductID(loanProductLinkData[0].loanType)
+            setLoanProductLabel(loanProductLinkData[0].loanProduct)
+            setLoanPurposeCatgLabel(loanProductLinkData[0].loanPurposeCategory)
+            setLoanPurposeLabel(loanProductLinkData[0].loanPurpose)
+            setLoanAmount(loanProductLinkData[0].loanAmount.toString())
+            setLoanTenure(loanProductLinkData[0].loanTenure.toString())
+            setRepaymentModeLabel(loanProductLinkData[0].repaymentMode)
+            setLoanRepaymentFreqLabel(loanProductLinkData[0].loanRepaymentFrequency)
+            setInsuranceCoverageLabel(loanProductLinkData[0].insuranceCoverage)
+            setEmiAmount(loanProductLinkData[0].emiAmount.toString())
+            setMonthlyEmiDate(loanProductLinkData[0].monthlyEmiDate)
+            // setDisbursementDate(loanProductLinkData.loanType)
+            setDisbursementModeLabel(loanProductLinkData[0].disbursementMode)
+            setTotalCharges(loanProductLinkData[0].totalCharges.toString())
+            setRepayScheduleData(loanProductLinkData[0].loanRepaymentSchedules);
+            setChargeData(loanProductLinkData[0].loanProductChargeDetails);
+            // setInterestRate(loanProductLinkData.loanType)
+
+        } else {
+            setLoading(true);
+            tbl_loanApplication.getLoanAppBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
+                .then(data => {
+                    if (global.DEBUG_MODE) console.log('Loan Data:', data);
+                    if (data !== undefined && data.length > 0) {
+                        // setLeadID('');
+                        setLoanTypeLabel(data[0].loan_type)
+                        setLoanProductLabel(data[0].product)
+                        setLoanPurposeLabel(data[0].loan_purpose);
+                        // setProductTypeLabel(data[0].product)
+                        // setCustCatgLabel(data[0].customer_category)
+                        // setCustomerSubCategoryLabel(data[0].customer_subcategory)
+                        // setWorkflowIDLabel(parseInt(data[0].workflow_id))
+                        callLoanAmount(parseInt(data[0].workflow_id));
+                        callLoanTenure(data[0].product)
+                        // setLoanAmount(data[0].loan_amount)
+                        setLoanPurposeLabel(data[0].loan_purpose);
+                        getProductID(data[0].loan_type)
+                        setLoading(false)
+                        // setClientTypeLabel(data[0].customer_type);
+                        // getWorkFlowID(data[0].loan_type, data[0].product, data[0].customer_category)
+                    } else {
+                        setLoading(false)
+                    }
+
+                })
+                .catch(error => {
+                    setLoading(false)
+                    if (global.DEBUG_MODE) console.error('Error fetching Loan details:', error);
+                });
+        }
+
+
 
 
 
     }
 
     const fieldsDisable = () => {
-
+        setLoanTypeDisable(true);
+        setLoanProductDisable(true);
+        setLoanPurposeCatgDisable(true);
+        setLoanPurposeDisable(true);
+        setLoanAmountDisable(true);
+        setLoanTenureDisable(true);
+        setRepaymentModeDisable(true);
+        setLoanRepaymentFreqDisable(true);
+        setInsuranceCoverageDisable(true);
+        setDisbursementDateDisable(true);
+        setDisbursementModeDisable(true);
+        setInterestRateDisable(true);
+        setEmiAmountDisable(true);
+        setMonthlyEmiDateDisable(true);
+        setInstallmentStartDateDateDisable(true);
+        setTotalChargesDisable(true);
     }
 
     const getSystemCodeDetail = async () => {
@@ -369,10 +421,20 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
         }
     }
 
+    const callLoanTenure = (productID) => {
+
+        const filteredProductIDData = props.mobilecodedetail.t_product.filter((data) => data.ProductID === productID);
+
+        const IntRateMenuID = filteredProductIDData[0].IntRateMenuID;
+        const filteredIntRateMenuData = props.mobilecodedetail.t_InterestRateMenuDetail.filter((data) => data.RateMenuID === IntRateMenuID);
+
+
+    }
+
 
     const makeSystemMandatoryFields = async () => {
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ln_type' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ln_type' && data.pageId === pageId).map((value, index) => {
             setLoanTypeCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -389,7 +451,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_loanproduct' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_pd_id' && data.pageId === pageId).map((value, index) => {
             setLoanProductCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -406,7 +468,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_lnpurpscatg' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ln_prps_cat' && data.pageId === pageId).map((value, index) => {
             setLoanPurposeCatgCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -423,7 +485,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_lnpurps' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ln_prps' && data.pageId === pageId).map((value, index) => {
             setLoanPurposeCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -440,7 +502,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_loanAmount' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_ln_amt' && data.pageId === pageId).map((value, index) => {
             setLoanAmountCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -457,7 +519,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_loantenure' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_ln_tnr' && data.pageId === pageId).map((value, index) => {
             setLoanTenureCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -474,7 +536,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_repayMode' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_rpy_md' && data.pageId === pageId).map((value, index) => {
             setRepaymentModeCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -491,7 +553,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_loanrepayfreq' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ln_rpy_frq' && data.pageId === pageId).map((value, index) => {
             setLoanRepaymentFreqCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -508,7 +570,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_inscov' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ins_crg' && data.pageId === pageId).map((value, index) => {
             setInsuranceCoverageCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -525,7 +587,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_disbdate' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_disb_dt' && data.pageId === pageId).map((value, index) => {
             setDisbursementDateCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -542,7 +604,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_disbmode' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_disb_md' && data.pageId === pageId).map((value, index) => {
             setDisbursementModeCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -559,7 +621,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_interestrate' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_int_rt' && data.pageId === pageId).map((value, index) => {
             setInterestRateCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -579,17 +641,15 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
     };
 
 
-    const callRepaySchedule = () => {
+    const callRepaySchedule = (disbursementDate) => {
 
-        if (onlyView) {
-            props.navigation.replace('ProfileShortKYCVerificationStatus');
-            return;
-        }
-
+        // if (onlyView) {
+        //     props.navigation.replace('ProfileShortKYCVerificationStatus');
+        //     return;
+        // } 
         if (validate()) {
             showBottomSheet();
         } else {
-
             var appDetails = {
                 "loanType": loanTypeLabel,
                 "loanProduct": loanProductLabel,
@@ -601,33 +661,39 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                 "disbursementMode": disbursementModeLabel,
                 "repaymentMode": repaymentModeLabel,
                 "loanRepaymentFrequency": loanrepaymentFreqLabel,
-                "installmentStartDate": "2023-12-01",
+                "installmentStartDate": "2024-01-15",
                 "disbursementDate": Common.convertYearDateFormat(disbursementDate),
                 "insuranceCoverage": insuranceCoverageLabel,
                 "userId": global.USERID,
                 "branchID": props.profiledetail.userPersonalDetailsDto.branchId,
-                "term": 24,
-                "noOfInstallment": 24,
+                "term": loanTenure,
+                "noOfInstallment": loanTenure,
                 "gracePeriod": 0,
                 "loanApplicationId": global.LOANAPPLICATIONID
             }
 
-
             const baseURL = '8901';
             setLoading(true);
             apiInstancelocal(baseURL)
-                .put(`/api/v2/loan-application/applicant-loan-product-link`, appDetails)
+                .post(`/api/v2/loan-application/applicant-loan-product-link`, appDetails)
                 .then(async response => {
                     // Handle the response data
 
                     if (global.DEBUG_MODE) console.log('RepaymentScheduleApiResponse::' + JSON.stringify(response.data),);
 
                     setLoading(false);
+                    setRepayScheduleData(response.data.loanRepaymentSchedules);
+                    setChargeData(response.data.loanProductChargeDetails);
+                    setEmiAmount(response.data.emiAmount.toString())
+                    setMonthlyEmiDate(response.data.monthlyEmiDate)
+                    setTotalCharges(response.data.totalCharges.toString())
+                    setInstallmentStartDateDate(response.data.installmentStartDate)
                     //await insertData();
 
                 })
                 .catch(error => {
                     // Handle the error
+
                     if (global.DEBUG_MODE) console.log('Error' + JSON.stringify(error));
                     setLoading(false);
                     if (error.response.data != null) {
@@ -640,9 +706,18 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
 
     const updateLoanStatus = () => {
 
+        if (global.USERTYPEID == 1163) {
+            props.navigation.replace('LoanNomineeList');
+            return;
+        }
+
+        if (repayscheduleData.length <= 0) {
+            return;
+        }
+
         var module = ''; var page = '';
 
-        module = 'LN_PRDT_SLCTN';
+        module = 'LN_PRDT';
         page = 'LN_PRDT_SLCTN';
 
 
@@ -662,7 +737,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
-                global.COMPLETEDMODULE = 'LN_PRDT_SLCTN';
+                global.COMPLETEDMODULE = 'LN_PRDT';
                 global.COMPLETEDPAGE = 'LN_PRDT_SLCTN';
 
                 props.navigation.replace('LoanNomineeList');
@@ -756,27 +831,27 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
             }
         }
 
-        if (LoanAmountMan && LoanAmountVisible) {
-            if (LoanAmount.length <= 0) {
-                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + LoanAmountCaption + '\n';
-                i++;
-                flag = true;
-            } else if (!isMultipleOf5000(LoanAmount)) {
-                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + LoanAmountCaption + ' ' + language[0][props.language].str_mulfive + '\n';
-                i++;
-                flag = true;
-            } else if (ProductTypeLabel != '') {
-                if (LoanAmount < minLoanAmount) {
-                    errorMessage = errorMessage + i + ')' + ' ' + LoanAmountCaption + ' ' + language[0][props.language].str_cannotlessthan + ' ' + minLoanAmount + '\n';
-                    i++;
-                    flag = true;
-                } else if (LoanAmount > maxLoanAmount) {
-                    errorMessage = errorMessage + i + ')' + ' ' + LoanAmountCaption + ' ' + language[0][props.language].str_cannotgreaterthan + ' ' + maxLoanAmount + '\n';
-                    i++;
-                    flag = true;
-                }
-            }
-        }
+        // if (LoanAmountMan && LoanAmountVisible) {
+        //     if (LoanAmount.length <= 0) {
+        //         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + LoanAmountCaption + '\n';
+        //         i++;
+        //         flag = true;
+        //     } else if (!isMultipleOf5000(LoanAmount)) {
+        //         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + LoanAmountCaption + ' ' + language[0][props.language].str_mulfive + '\n';
+        //         i++;
+        //         flag = true;
+        //     } else if (ProductTypeLabel != '') {
+        //         if (LoanAmount < minLoanAmount) {
+        //             errorMessage = errorMessage + i + ')' + ' ' + LoanAmountCaption + ' ' + language[0][props.language].str_cannotlessthan + ' ' + minLoanAmount + '\n';
+        //             i++;
+        //             flag = true;
+        //         } else if (LoanAmount > maxLoanAmount) {
+        //             errorMessage = errorMessage + i + ')' + ' ' + LoanAmountCaption + ' ' + language[0][props.language].str_cannotgreaterthan + ' ' + maxLoanAmount + '\n';
+        //             i++;
+        //             flag = true;
+        //         }
+        //     }
+        // }
 
         if (loanTenureMan && loanTenureVisible) {
             if (loanTenure.length <= 0) {
@@ -831,21 +906,6 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
             }
         }
 
-        if (disbursementDateMan && disbursementDateVisible) {
-            if (disbursementDate.length <= 0) {
-                errorMessage =
-                    errorMessage +
-                    i +
-                    ')' +
-                    ' ' +
-                    language[0][props.language].str_plsselect +
-                    disbursementDateCaption +
-                    '\n';
-                i++;
-                flag = true;
-            }
-        }
-
         if (disbursementModeMan && disbursementModeVisible) {
             if (disbursementModeLabel.length <= 0) {
                 errorMessage =
@@ -886,7 +946,11 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
         } else if (componentName === 'LoanTenure') {
             setLoanTenure(textValue);
         } else if (componentName === 'DisbursementDate') {
+            // alert(textValue)
             setDisbursementDate(textValue);
+            callRepaySchedule(textValue);
+
+
         } else if (componentName === 'InterestRate') {
             setInterestRate(textValue);
         }
@@ -955,14 +1019,33 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                     justifyContent: 'center',
                 }}>
                 <HeadComp
-                    textval={language[0][props.language].str_profileshort}
+                    textval={language[0][props.language].str_lnproductselection}
                     props={props}
                     onGoBack={onGoBack}
                 />
             </View>
             <ChildHeadComp
-                textval={global.CLIENTTYPE == 'APPL' ? language[0][props.language].str_applicantdetails : global.CLIENTTYPE == 'CO-APPL' ? language[0][props.language].str_coapplicantdetails : language[0][props.language].str_guarantordetails}
+                textval={language[0][props.language].str_lnproductselectioncharges}
             />
+
+
+
+            <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
+                <View style={{ width: '90%', marginTop: 3 }}>
+                    {/* <TextComp
+                                textStyle={{
+                                    color: Colors.mediumgrey,
+                                    fontSize: 15,
+                                    fontFamily: 'Poppins-Medium'
+                                }}
+                                textVal={
+                                    language[0][props.language].str_basicdetails
+                                }></TextComp> */}
+
+                    <ProgressComp progressvalue={0.5} textvalue="1 of 2" />
+                </View>
+            </View>
+
 
             <ScrollView
                 style={styles.scrollView}
@@ -978,23 +1061,6 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                         textError={language[0][props.language].str_error}
                         textClose={language[0][props.language].str_ok}
                     />
-
-
-                    <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
-                        <View style={{ width: '90%', marginTop: 3 }}>
-                            <TextComp
-                                textStyle={{
-                                    color: Colors.mediumgrey,
-                                    fontSize: 15,
-                                    fontFamily: 'Poppins-Medium'
-                                }}
-                                textVal={
-                                    language[0][props.language].str_basicdetails
-                                }></TextComp>
-
-                            <ProgressComp progressvalue={0.25} textvalue="1 of 4" />
-                        </View>
-                    </View>
 
                     {loanTypeVisible && (
                         <View
@@ -1213,37 +1279,6 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                         </View>
                     )}
 
-                    {disbursementDateVisible && (
-                        <View
-                            style={{
-                                width: '100%',
-                                marginTop: 19,
-                                paddingHorizontal: 0,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                            }}>
-                            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
-                                <TextComp
-                                    textVal={disbursementDateCaption}
-                                    textStyle={Commonstyles.inputtextStyle}
-                                    Visible={disbursementDateMan}
-                                />
-                            </View>
-
-                            <View style={{ width: '100%', alignItems: 'center' }}>
-                                <DateInputComp textStyle={[Commonstyles.inputtextStyle, { width: '90%' }]} ComponentName="DisbursementDate"
-                                    textValue={disbursementDate}
-                                    type="numeric"
-                                    handleClick={handleClick}
-                                    Disable={disbursementDateDisable}
-                                    reference={disbursementDateRef}
-                                    minDate={new Date()}
-                                    handleReference={handleReference} />
-                            </View>
-
-                        </View>
-                    )}
-
                     {disbursementModeVisible && (
                         <View
                             style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
@@ -1297,6 +1332,68 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                         </View>
                     )}
 
+                    {disbursementDateVisible && (
+                        <View
+                            style={{
+                                width: '100%',
+                                marginTop: 19,
+                                paddingHorizontal: 0,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}>
+                            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                                <TextComp
+                                    textVal={disbursementDateCaption}
+                                    textStyle={Commonstyles.inputtextStyle}
+                                    Visible={disbursementDateMan}
+                                />
+                            </View>
+
+                            <View style={{ width: '100%', alignItems: 'center' }}>
+                                <DateInputComp textStyle={[Commonstyles.inputtextStyle, { width: '90%' }]} ComponentName="DisbursementDate"
+                                    textValue={disbursementDate}
+                                    type="numeric"
+                                    handleClick={handleClick}
+                                    Disable={disbursementDateDisable}
+                                    reference={disbursementDateRef}
+                                    minDate={new Date()}
+                                    handleReference={handleReference} />
+                            </View>
+
+                        </View>
+                    )}
+
+                    {emiAmountVisible && (
+                        <View
+                            style={{
+                                width: '100%',
+                                marginTop: 19,
+                                paddingHorizontal: 0,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}>
+                            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                                <TextComp
+                                    textVal={emiAmountCaption}
+                                    textStyle={Commonstyles.inputtextStyle}
+                                    Visible={emiAmountMan}
+                                />
+                            </View>
+
+                            <TextInputComp
+                                textValue={emiAmount}
+                                textStyle={Commonstyles.textinputtextStyle}
+                                type="numeric"
+                                Disable={emiAmountDisable}
+                                ComponentName="emiAmount"
+                                reference={emiAmountRef}
+                                returnKey="next"
+                                handleClick={handleClick}
+                                handleReference={handleReference}
+                            />
+                        </View>
+                    )}
+
                 </View>
 
                 <View
@@ -1308,7 +1405,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                         marginTop: 16
                     }}>
 
-                    <TouchableOpacity onPress={() => { props.navigation.navigate('RepaymentSchedule') }} activeOpacity={0.8} style={{
+                    <TouchableOpacity onPress={() => { props.navigation.navigate('RepaymentSchedule', { scheduledata: repayscheduleData }) }} activeOpacity={0.8} style={{
                         width: '90%',
                         height: 40,
                         flexDirection: 'row',
@@ -1323,6 +1420,68 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
 
                 </View>
 
+
+                {monthlyEmiDateVisible && (
+                    <View
+                        style={{
+                            width: '100%',
+                            marginTop: 19,
+                            paddingHorizontal: 0,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}>
+                        <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                            <TextComp
+                                textVal={monthlyEmiDateCaption}
+                                textStyle={Commonstyles.inputtextStyle}
+                                Visible={monthlyEmiDateMan}
+                            />
+                        </View>
+
+                        <TextInputComp
+                            textValue={monthlyEmiDate}
+                            textStyle={Commonstyles.textinputtextStyle}
+                            type="numeric"
+                            Disable={monthlyEmiDateDisable}
+                            ComponentName="MonthlyEmiDate"
+                            reference={monthlyEmiDateRef}
+                            returnKey="next"
+                            handleClick={handleClick}
+                            handleReference={handleReference}
+                        />
+                    </View>
+                )}
+
+                {installmentStartDateVisible && (
+                    <View
+                        style={{
+                            width: '100%',
+                            marginTop: 19,
+                            paddingHorizontal: 0,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}>
+                        <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                            <TextComp
+                                textVal={installmentStartDateCaption}
+                                textStyle={Commonstyles.inputtextStyle}
+                                Visible={installmentStartDateMan}
+                            />
+                        </View>
+
+                        <View style={{ width: '100%', alignItems: 'center' }}>
+                            <DateInputComp textStyle={[Commonstyles.inputtextStyle, { width: '90%' }]} ComponentName="DisbursementDate"
+                                textValue={installmentStartDate}
+                                type="numeric"
+                                handleClick={handleClick}
+                                Disable={installmentStartDateDisable}
+                                reference={installmentStartDateRef}
+                                minDate={new Date()}
+                                handleReference={handleReference} />
+                        </View>
+
+                    </View>
+                )}
 
 
                 <View style={{
@@ -1375,7 +1534,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                     textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
                     viewStyle={Commonstyles.buttonView}
                     innerStyle={Commonstyles.buttonViewInnerStyle}
-                    handleClick={callRepaySchedule}
+                    handleClick={updateLoanStatus}
                 />
             </ScrollView>
         </SafeAreaView>

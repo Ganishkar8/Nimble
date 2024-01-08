@@ -41,6 +41,15 @@ import LoanNomineeList from '../Screens/Application/ApplicationInitiation/LoanNo
 import LoanNomineeDetails from '../Screens/Application/ApplicationInitiation/LoanNomineeDetails';
 import RepaymentSchedule from '../Screens/Application/ApplicationInitiation/RepaymentSchedule';
 import LoanDocumentUpload from '../Screens/Application/ApplicationInitiation/LoanDocumentUpload';
+import CBPreview from '../Screens/Application/ApplicationInitiation/CBPreview';
+import BREView from '../Screens/Application/ApplicationInitiation/BREView';
+import FinalConsentScreen from '../Screens/LoanApplication/FinalConsentScreen';
+import ConsentOTPVerification from '../Screens/Application/ApplicationInitiation/ConsentOTPVerification';
+import PdMainScreen from '../Screens/PD/PdMainScreen';
+import PdQuestionarire from '../Screens/PD/PdQuestionarire';
+import PDReferenceCheck from '../Screens/PD/PDReferenceCheck';
+import PDItems from '../Screens/PD/PDItems';
+import PdTravelDetails from '../Screens/PD/PdTravelDetails';
 
 const Stack = createNativeStackNavigator();
 
@@ -114,8 +123,35 @@ export default HomeStack = () => {
       />
 
       <Stack.Screen
+        name="FinalConsentScreen"
+        component={FinalConsentScreen}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
         name="PreviewImage"
         component={PreviewImage}
+        options={{ headerShown: false }}
+
+      />
+
+      <Stack.Screen
+        name="CBPreview"
+        component={CBPreview}
+        options={{ headerShown: false }}
+
+      />
+
+      <Stack.Screen
+        name="BREView"
+        component={BREView}
+        options={{ headerShown: false }}
+
+      />
+
+      <Stack.Screen
+        name="ConsentOTPVerification"
+        component={ConsentOTPVerification}
         options={{ headerShown: false }}
 
       />
@@ -284,6 +320,36 @@ export default HomeStack = () => {
       <Stack.Screen
         name="LoanDocumentUpload"
         component={LoanDocumentUpload}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="PdMainScreen"
+        component={PdMainScreen}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="PdQuestionarire"
+        component={PdQuestionarire}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="PDReferenceCheck"
+        component={PDReferenceCheck}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="PDItems"
+        component={PDItems}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="PdTravelDetails"
+        component={PdTravelDetails}
         options={{ headerShown: false, tabBarVisible: false }}
       />
 

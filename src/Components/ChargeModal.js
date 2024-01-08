@@ -39,9 +39,9 @@ const ChargeModal = ({ isVisible, onClose, data }) => {
                                     <View key={item.key} style={[styles.item, { alignItems: 'center' }]}>
                                         <Text style={{ width: 120, marginLeft: 15, textAlign: 'center', color: Colors.mediumgrey, fontSize: 12, fontFamily: 'Poppins-Medium' }}>{item.chargeDescription}</Text>
                                         <Text style={{ width: 120, marginLeft: 15, textAlign: 'center', color: Colors.mediumgrey, fontSize: 12, fontFamily: 'Poppins-Medium' }}>{item.chargeAmount}</Text>
-                                        <Text style={{ width: 120, marginLeft: 15, textAlign: 'center', color: Colors.mediumgrey, fontSize: 12, fontFamily: 'Poppins-Medium' }}>{item.chargeAmount}</Text>
-                                        <Text style={{ width: 120, marginLeft: 15, textAlign: 'center', color: Colors.mediumgrey, fontSize: 12, fontFamily: 'Poppins-Medium' }}>{item.chargeAmount}</Text>
-                                        <Text style={{ width: 120, marginLeft: 15, textAlign: 'center', color: Colors.mediumgrey, fontSize: 12, fontFamily: 'Poppins-Medium' }}>{item.chargeAmount}</Text>
+                                        <Text style={{ width: 120, marginLeft: 15, textAlign: 'center', color: Colors.mediumgrey, fontSize: 12, fontFamily: 'Poppins-Medium' }}>{item.taxAmount}</Text>
+                                        <Text style={{ width: 120, marginLeft: 15, textAlign: 'center', color: Colors.mediumgrey, fontSize: 12, fontFamily: 'Poppins-Medium' }}>{item.finalChargeAmount}</Text>
+                                        <Text style={{ width: 120, marginLeft: 15, textAlign: 'center', color: Colors.mediumgrey, fontSize: 12, fontFamily: 'Poppins-Medium' }}>{item.chargeAmountTreatment}</Text>
                                     </View>
                                 ))}
                             </View>

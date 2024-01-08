@@ -14,7 +14,15 @@ const StatusComp = ({ props, statusData, filterClick, reload }) => {
 
     useEffect(() => {
         if (statusData) {
-            setStatusFilterData(statusData)
+            if (global.USERTYPEID == 1163) {
+                const filteredStatusData = statusData
+                    .filter(data => data.id !== 'DRAFT')
+                setStatusFilterData(filteredStatusData);
+
+            } else {
+                setStatusFilterData(statusData)
+            }
+
         }
     }, [statusData]);
 

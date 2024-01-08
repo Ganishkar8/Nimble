@@ -197,6 +197,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       .getParent()
       ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
+
     getClientData();
 
     if (global.isAadharVerified == '1') {
@@ -218,8 +219,8 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       setHideRetake(true);
       setHideDelete(true);
     } else {
-      setHideRetake(true);
-      setHideDelete(true);
+      setHideRetake(false);
+      setHideDelete(false);
     }
 
     return () => {
@@ -248,10 +249,12 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   }
 
   const getClientID = () => {
+
     tbl_client.getOnlyClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
       .then(data => {
         if (global.DEBUG_MODE) console.log('Applicant Data:', data);
         if (data !== undefined && data.length > 0) {
+
           getKYCManualDetails(data[0].id);
           global.isAadharVerified = data[0].isAadharNumberVerified;
           if (data[0].isAadharNumberVerified == 1) {
@@ -424,7 +427,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
           JSON.stringify(position.coords.latitude);
 
         hideLocationBottomSheet();
-        props.navigation.replace('ProfileShortApplicantDetails')
+        navigatetoPersonal();
 
       },
       (error) => {
@@ -453,7 +456,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       setKycSourceData(dataArray);
       setKycSourceVisible(true);
       setKycTypeDisable(false);
-      setkycIDDisable(false);
+      setkycIDDisable(true);
     }
 
     getID1data();
@@ -472,13 +475,13 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     if (bankUserCodeDetail) {
       bankUserCodeDetail.forEach((data) => {
         if (data.ID === 'IndIdentitySettingID') {
-          if (id1.length > 0 && id2.length > 0 && id3.length > 0 && id4.length > 0) {
-            if (id1 == data.subCodeId || id2 == data.subCodeId || id3 == data.subCodeId || id4 == data.subCodeId) {
-              dataArray.push({ 'subCodeId': data.subCodeId, Description: data.Description });
-            }
-          } else {
+          // if (id1.length > 0 && id2.length > 0 && id3.length > 0 && id4.length > 0) {
+          if (id1 == data.subCodeId || id2 == data.subCodeId || id3 == data.subCodeId || id4 == data.subCodeId) {
             dataArray.push({ 'subCodeId': data.subCodeId, Description: data.Description });
           }
+          // } else {
+          //   dataArray.push({ 'subCodeId': data.subCodeId, Description: data.Description });
+          // }
 
         }
       });
@@ -674,6 +677,16 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     } else if (componentName == 'KycTypePicker') {
       setKycTypeLabel(label);
       setKycTypeIndex(index);
+      if (label == KycType1Label) {
+        setkycID(kycID1)
+      } else if (label == KycType2Label) {
+        setkycID(kycID2)
+      } else if (label == KycType3Label) {
+        setkycID(kycID3)
+      } else if (label == KycType4Label) {
+        setkycID(kycID4)
+      }
+
     } else if (componentName == 'KycType1Picker') {
       setKycType1Label(label);
       setKycType1Index(index);
@@ -803,10 +816,23 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     }
   }
 
+  const navigatetoPersonal = async () => {
+    var page = '';
+    if (global.CLIENTTYPE == 'APPL') {
+      page = 'PRF_SHRT_APLCT_PRSNL_DTLS';
+    } else if (global.CLIENTTYPE == 'CO-APPL') {
+      page = 'PRF_SHRT_COAPLCT_PRSNL_DTLS';
+    } else if (global.CLIENTTYPE == 'GRNTR') {
+      page = 'PRF_SHRT_GRNTR_PRSNL_DTLS';
+    }
+    await Common.getPageID(global.FILTEREDPROCESSMODULE, page)
+    props.navigation.replace('ProfileShortApplicantDetails')
+  }
+
   const uploadImage = async () => {
 
     if (onlyView) {
-      props.navigation.replace('ProfileShortApplicantDetails')
+      navigatetoPersonal();
       return;
     }
 
@@ -932,7 +958,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       "kycType": KycTypeLabel,
       "kycValue": kycID,
       "kycExpiryDate": "",
-      "kycDMSId": parseInt(id),
+      "kycDmsId": parseInt(id),
       "createdBy": global.USERID,
     }]
 

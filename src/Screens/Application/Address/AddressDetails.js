@@ -20,6 +20,8 @@ import apiInstancelocal from '../../../Utils/apiInstancelocal';
 import ErrorModal from '../../../Components/ErrorModal';
 import tbl_client from '../../../Database/Table/tbl_client';
 import apiInstance from '../../../Utils/apiInstance';
+import CheckBoxComp from '../../../Components/CheckBoxComp';
+import { it } from 'react-native-paper-dates';
 
 const AddressDetails = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -49,14 +51,19 @@ const AddressDetails = (props, { navigation }) => {
   const [addressTypeLabel, setAddressTypeLabel] = useState('');
   const [addressTypeIndex, setAddressTypeIndex] = useState('');
   const [addressTypeCaption, setAddressTypeCaption] = useState('ADDRESS TYPE');
-  const [addressTypeMan, setAddressTypeMan] = useState(true);
+  const [addressTypeMan, setAddressTypeMan] = useState(false);
   const [addressTypeVisible, setAddressTypeVisible] = useState(true);
   const [addressTypeDisable, setAddressTypeDisable] = useState(false);
   const [addressTypeData, setaddressTypeData] = useState([]);
 
+  const [sameAsPermVisible, setsameAsPermVisible] = useState(false);
+  const [sameAsPerm, setsameAsPerm] = useState(false);
+  const [sameAsPermCaption, setsameAsPermCaption] = useState('Is Same As Permanent?');
+  const [sameAsPermDisable, setsameAsPermDisable] = useState(false);
+
   const [addressLine1, setAddressLine1] = useState('');
   const [addressLine1Caption, setAddressLine1Caption] = useState('ADDRESS LINE 1');
-  const [addressLine1Man, setAddressLine1Man] = useState(true);
+  const [addressLine1Man, setAddressLine1Man] = useState(false);
   const [addressLine1Visible, setAddressLine1Visible] = useState(true);
   const [addressLine1Disable, setAddressLine1Disable] = useState(false);
 
@@ -74,58 +81,58 @@ const AddressDetails = (props, { navigation }) => {
 
   const [pincode, setPincode] = useState('');
   const [pincodeCaption, setPincodeCaption] = useState('PINCODE');
-  const [pincodeMan, setPincodeMan] = useState(true);
+  const [pincodeMan, setPincodeMan] = useState(false);
   const [pincodeVisible, setPincodeVisible] = useState(true);
   const [pincodeDisable, setPincodeDisable] = useState(false);
 
   const [city, setCity] = useState('');
   const [cityCaption, setCityCaption] = useState('CITY/VILLAGE');
-  const [cityMan, setCityMan] = useState(true);
+  const [cityMan, setCityMan] = useState(false);
   const [cityVisible, setCityVisible] = useState(true);
   const [cityDisable, setCityDisable] = useState(false);
 
   const [district, setDistrict] = useState('');
   const [districtCaption, setDistrictCaption] = useState('DISTRICT');
-  const [districtMan, setDistrictMan] = useState(true);
+  const [districtMan, setDistrictMan] = useState(false);
   const [districtVisible, setDistrictVisible] = useState(true);
   const [districtDisable, setDistrictDisable] = useState(false);
 
   const [state, setState] = useState('');
   const [stateCaption, setStateCaption] = useState('STATE');
-  const [stateMan, setStateMan] = useState(true);
+  const [stateMan, setStateMan] = useState(false);
   const [stateVisible, setStateVisible] = useState(true);
   const [stateDisable, setStateDisable] = useState(false);
 
   const [country, setCountry] = useState('');
   const [countryCaption, setCountryCaption] = useState('COUNTRY');
-  const [countryMan, setCountryMan] = useState(true);
+  const [countryMan, setCountryMan] = useState(false);
   const [countryVisible, setCountryVisible] = useState(true);
   const [countryDisable, setCountryDisable] = useState(false);
 
   const [geoClassificationLabel, setGeoClassificationLabel] = useState('');
   const [geoClassificationIndex, setGeoClassificationIndex] = useState('');
   const [geoClassificationCaption, setGeoClassificationCaption] = useState('GEO CLASSIFICATION');
-  const [geoClassificationMan, setGeoClassificationMan] = useState(true);
+  const [geoClassificationMan, setGeoClassificationMan] = useState(false);
   const [geoClassificationVisible, setGeoClassificationVisible] = useState(true);
   const [geoClassificationDisable, setGeoClassificationDisable] = useState(false);
   const [geoClassificationData, setGeoClassificationData] = useState([]);
 
   const [yearsAtResidence, setYearsAtResidence] = useState('');
   const [yearsAtResidenceCaption, setYearsAtResidenceCaption] = useState('YEARS AT RESIDENCE');
-  const [yearsAtResidenceMan, setYearsAtResidenceMan] = useState(true);
+  const [yearsAtResidenceMan, setYearsAtResidenceMan] = useState(false);
   const [yearsAtResidenceVisible, setYearsAtResidenceVisible] = useState(true);
   const [yearsAtResidenceDisable, setYearsAtResidenceDisable] = useState(false);
 
   const [yearsAtCity, setYearsAtCity] = useState('');
   const [yearsAtCityCaption, setYearsAtCityCaption] = useState('YEARS IN CURRENT CITY/TOWN');
-  const [yearsAtCityMan, setYearsAtCityMan] = useState(true);
+  const [yearsAtCityMan, setYearsAtCityMan] = useState(false);
   const [yearsAtCityVisible, setYearsAtCityVisible] = useState(true);
   const [yearsAtCityDisable, setYearsAtCityDisable] = useState(false);
 
   const [addressOwnerTypeLabel, setAddressOwnerTypeLabel] = useState('');
   const [addressOwnerTypeIndex, setAddressOwnerTypeIndex] = useState('');
   const [addressOwnerTypeCaption, setAddressOwnerTypeCaption] = useState('ADDRESS OWNERSHIP TYPE');
-  const [addressOwnerTypeMan, setAddressOwnerTypeMan] = useState(true);
+  const [addressOwnerTypeMan, setAddressOwnerTypeMan] = useState(false);
   const [addressOwnerTypeVisible, setAddressOwnerTypeVisible] = useState(true);
   const [addressOwnerTypeDisable, setAddressOwnerTypeDisable] = useState(false);
   const [addressOwnerTypeData, setAddressOwnerTypeData] = useState([]);
@@ -133,20 +140,20 @@ const AddressDetails = (props, { navigation }) => {
   const [ownerDetailsLabel, setOwnerDetailsLabel] = useState('');
   const [ownerDetailsIndex, setOwnerDetailsIndex] = useState('');
   const [ownerDetailsCaption, setOwnerDetailsCaption] = useState('OWNER DETAILS');
-  const [ownerDetailsMan, setOwnerDetailsMan] = useState(true);
+  const [ownerDetailsMan, setOwnerDetailsMan] = useState(false);
   const [ownerDetailsVisible, setOwnerDetailsVisible] = useState(true);
   const [ownerDetailsDisable, setOwnerDetailsDisable] = useState(false);
   const [ownerDetailsData, setOwnerDetailsData] = useState([]);
 
   const [ownerName, setOwnerName] = useState('');
   const [ownerNameCaption, setOwnerNameCaption] = useState('OWNER NAME');
-  const [ownerNameMan, setOwnerNameMan] = useState(true);
-  const [ownerNameVisible, setOwnerNameVisible] = useState(true);
+  const [ownerNameMan, setOwnerNameMan] = useState(false);
+  const [ownerNameVisible, setOwnerNameVisible] = useState(false);
   const [ownerNameDisable, setOwnerNameDisable] = useState(false);
 
   const [systemCodeDetail, setSystemCodeDetail] = useState(props.mobilecodedetail.leadSystemCodeDto);
   const [userCodeDetail, setUserCodeDetail] = useState(props.mobilecodedetail.leadUserCodeDto);
-  const [systemMandatoryField, setSystemMandatoryField] = useState(props.mobilecodedetail.leadSystemMandatoryFieldDto);
+  const [systemMandatoryField, setSystemMandatoryField] = useState(props.mobilecodedetail.processSystemMandatoryFields);
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [apiError, setApiError] = useState('');
 
@@ -158,15 +165,17 @@ const AddressDetails = (props, { navigation }) => {
   const [kycManual, setKYCManual] = useState('0');
 
   const [pincodeResponse, setPincodeResponse] = useState('');
+  const [permAddressAvailable, setPermAddressAvailable] = useState(false);
+  const [pageId, setPageId] = useState(global.CURRENTPAGEID);
+
 
   useEffect(() => {
     props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
     getSystemCodeDetail()
+    getAddressData();
     makeSystemMandatoryFields();
     getExistingData();
-    alert(isKYC)
-
 
     return () => {
       props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
@@ -224,6 +233,40 @@ const AddressDetails = (props, { navigation }) => {
 
   }
 
+  const fieldsEnable = () => {
+
+    setAddressTypeDisable(false);
+    setAddressLine1Disable(false);
+    setAddressLine2Disable(false);
+    setLandmarkDisable(false);
+    setPincodeDisable(false);
+    setCityDisable(false);
+    setDistrictDisable(false);
+    setStateDisable(false)
+    setCountryDisable(false)
+    setGeoClassificationDisable(false);
+    setYearsAtResidenceDisable(false);
+    setYearsAtCityDisable(false);
+    setAddressOwnerTypeDisable(false);
+    setOwnerDetailsDisable(false);
+    setOwnerNameDisable(false);
+    setAddressLine1('')
+    setAddressLine2('')
+    setLandmark('')
+    setPincode('')
+    setCity('')
+    setDistrict('')
+    setState('')
+    setCountry('')
+    setYearsAtResidence('')
+    setOwnerName('')
+    setYearsAtCity('')
+    setGeoClassificationLabel('')
+    setAddressOwnerTypeLabel('')
+    setOwnerDetailsLabel('')
+
+  }
+
   const getExistingAddressData = (loanAppId, id) => {
     tbl_clientaddressinfo.getAllAddressDetailsForLoanIDAndID(loanAppId, id.toString())
       .then(data => {
@@ -244,13 +287,79 @@ const AddressDetails = (props, { navigation }) => {
           setYearsAtCity(data[0].years_in_current_city_or_town)
           //spinner
           setAddressTypeLabel(data[0].address_type)
+          if (data[0].address_type == 'P') {
+            setGeoClassificationVisible(false);
+            setGeoClassificationMan(false);
+            setYearsAtResidenceVisible(false);
+            setYearsAtResidenceMan(false);
+            setYearsAtCityVisible(false);
+            setYearsAtResidenceMan(false);
+          }
           setGeoClassificationLabel(data[0].geo_classification)
           setAddressOwnerTypeLabel(data[0].address_ownership)
           setOwnerDetailsLabel(data[0].owner_details)
+          if (data[0].owner_details == 'OD-OTH' || data[0].owner_details == 'OD-RLT') {
+            setOwnerNameDisable(false);
+            setOwnerNameMan(true);
+            setOwnerNameVisible(true);
+          } else {
+            setOwnerNameDisable(true);
+            setOwnerNameMan(false);
+            setOwnerNameVisible(false);
+            setOwnerName('')
+          }
           if (data[0].isKyc === "1") {
             disableAadharFields(data)
           }
           setIsKYC(data[0].isKyc);
+          setLoading(false)
+        }
+
+      })
+      .catch(error => {
+        if (global.DEBUG_MODE) console.error('Error fetching bank details:', error);
+        setLoading(false)
+      });
+  }
+
+  const getPermanentAddressData = () => {
+    tbl_clientaddressinfo.getPermanentAddress(global.LOANAPPLICATIONID, global.CLIENTTYPE)
+      .then(data => {
+        if (global.DEBUG_MODE) console.log('Address Detail:', data);
+
+        if (data !== undefined && data.length > 0) {
+          setAddressLine1(data[0].address_line_1)
+          setAddressLine2(data[0].address_line_2)
+          setLandmark(data[0].landmark)
+          setPincode(data[0].pincode)
+          setCity(data[0].city)
+          setDistrict(data[0].district)
+          setState(data[0].state)
+          setCountry(data[0].country)
+          setYearsAtResidence(data[0].years_at_residence)
+          setOwnerName(data[0].owner_name)
+          setYearsAtCity(data[0].years_in_current_city_or_town)
+          setGeoClassificationLabel(data[0].geo_classification)
+          setAddressOwnerTypeLabel(data[0].address_ownership)
+          setOwnerDetailsLabel(data[0].owner_details)
+
+          if (data[0].owner_details == 'OD-OTH' || data[0].owner_details == 'OD-RLT') {
+            setOwnerNameDisable(false);
+            setOwnerNameMan(true);
+            setOwnerNameVisible(true);
+          } else {
+            setOwnerNameDisable(true);
+            setOwnerNameMan(false);
+            setOwnerNameVisible(false);
+            setOwnerName('')
+          }
+          fieldsDisable();
+          setGeoClassificationDisable(false);
+          setYearsAtResidenceDisable(false);
+          setYearsAtCityDisable(false);
+          setAddressTypeDisable(false);
+          setsameAsPermDisable(false);
+          setIsKYC('0');
           setLoading(false)
         }
 
@@ -277,9 +386,6 @@ const AddressDetails = (props, { navigation }) => {
 
   const getSystemCodeDetail = () => {
 
-    const filterAddressTypeData = userCodeDetail.filter((data) => data.masterId === 'ADDRESS_TYPE');
-    setaddressTypeData(filterAddressTypeData)
-
     const filterOwnershipTypeData = userCodeDetail.filter((data) => data.masterId === 'ADDRESS_OWNERSHIP_TYPE');
     setAddressOwnerTypeData(filterOwnershipTypeData)
 
@@ -291,152 +397,283 @@ const AddressDetails = (props, { navigation }) => {
 
   }
 
+  const getAddressData = async () => {
+
+    var availAddresssType = [];
+
+    await tbl_clientaddressinfo.getAllAddressDetailsForLoanID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
+      .then(data => {
+        if (global.DEBUG_MODE) console.log('Address Detail:', data);
+        if (data !== undefined && data.length > 0) {
+          data.forEach(item => {
+            if (item.address_type == 'P') {
+              setPermAddressAvailable(true)
+            }
+            availAddresssType.push(item.address_type)
+          });
+
+        }
+      })
+      .catch(error => {
+        if (global.DEBUG_MODE) console.error('Error fetching Address details:', error);
+      });
+
+
+    const filterAddressTypeData = userCodeDetail.filter((data) => data.masterId === 'PRF_SHORT_ADDRESS_TYPE');
+    if (isNew === 'new') {
+      const uniqueFilterAddressTypeData = filterAddressTypeData.filter(data => !availAddresssType.includes(data.subCodeId));
+      setaddressTypeData(uniqueFilterAddressTypeData)
+    } else {
+      setaddressTypeData(filterAddressTypeData)
+    }
+
+
+
+
+  }
+
   const makeSystemMandatoryFields = () => {
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_addresstype' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_addr_address_type' && data.pageId === pageId).map((value, index) => {
 
-      if (value.mandatory) {
+      if (value.isMandatory) {
         setAddressTypeMan(true);
       }
-      if (value.hide) {
+      if (value.isHide) {
         setAddressTypeVisible(false);
       }
-      if (value.disable) {
+      if (value.isDisable) {
         setAddressTypeDisable(true);
       }
-      if (value.captionChange) {
-        setAddressTypeCaption(value[0].fieldCaptionChange)
+      if (value.isCaptionChange) {
+        setAddressTypeCaption(value.fieldCaptionChange)
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addressline1' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_address_line_1' && data.pageId === pageId).map((value, index) => {
 
-      if (value.mandatory) {
+      if (value.isMandatory) {
         setAddressLine1Man(true);
       }
-      if (value.hide) {
+      if (value.isHide) {
         setAddressLine1Visible(false);
       }
-      if (value.disable) {
+      if (value.isDisable) {
         setAddressLine1Disable(true);
       }
-      if (value.captionChange) {
-        setAddressLine1Caption(value[0].fieldCaptionChange)
+      if (value.isCaptionChange) {
+        setAddressLine1Caption(value.fieldCaptionChange)
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addressline2' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_address_line_2' && data.pageId === pageId).map((value, index) => {
 
-      if (value.mandatory) {
+      if (value.isMandatory) {
         setAddressLine2Man(true);
       }
-      if (value.hide) {
+      if (value.isHide) {
         setAddressLine2Visible(false);
       }
-      if (value.disable) {
+      if (value.isDisable) {
         setAddressLine2Disable(true);
       }
-      if (value.captionChange) {
-        setAddressLine2Caption(value[0].fieldCaptionChange)
+      if (value.isCaptionChange) {
+        setAddressLine2Caption(value.fieldCaptionChange)
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_landmark' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_landmark' && data.pageId === pageId).map((value, index) => {
 
-      if (value.mandatory) {
+      if (value.isMandatory) {
         setLandmarkMan(true);
       }
-      if (value.hide) {
+      if (value.isHide) {
         setLandmarkVisible(false);
       }
-      if (value.disable) {
+      if (value.isDisable) {
         setLandmarkDisable(true);
       }
-      if (value.captionChange) {
-        setLandmarkCaption(value[0].fieldCaptionChange)
+      if (value.isCaptionChange) {
+        setLandmarkCaption(value.fieldCaptionChange)
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_pincode' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_pincode' && data.pageId === pageId).map((value, index) => {
 
-      if (value.mandatory) {
+      if (value.isMandatory) {
         setPincodeMan(true);
       }
-      if (value.hide) {
+      if (value.isHide) {
         setPincodeVisible(false);
       }
-      if (value.disable) {
+      if (value.isDisable) {
         setPincodeDisable(true);
       }
-      if (value.captionChange) {
-        setPincodeCaption(value[0].fieldCaptionChange)
+      if (value.isCaptionChange) {
+        setPincodeCaption(value.fieldCaptionChange)
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_city' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_city/village' && data.pageId === pageId).map((value, index) => {
 
-      if (value.mandatory) {
+      if (value.isMandatory) {
         setCityMan(true);
       }
-      if (value.hide) {
+      if (value.isHide) {
         setCityVisible(false);
       }
-      if (value.disable) {
+      if (value.isDisable) {
         setCityDisable(true);
       }
-      if (value.captionChange) {
-        setCityCaption(value[0].fieldCaptionChange)
+      if (value.isCaptionChange) {
+        setCityCaption(value.fieldCaptionChange)
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_district' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_disrtict' && data.pageId === pageId).map((value, index) => {
 
-      if (value.mandatory) {
+      if (value.isMandatory) {
         setDistrictMan(true);
       }
-      if (value.hide) {
+      if (value.isHide) {
         setDistrictVisible(false);
       }
-      if (value.disable) {
+      if (value.isDisable) {
         setDistrictDisable(true);
       }
-      if (value.captionChange) {
-        setDistrictCaption(value[0].fieldCaptionChange)
+      if (value.isCaptionChange) {
+        setDistrictCaption(value.fieldCaptionChange)
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_state' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_state' && data.pageId === pageId).map((value, index) => {
 
-      if (value.mandatory) {
+      if (value.isMandatory) {
         setStateMan(true)
       }
-      if (value.hide) {
+      if (value.isHide) {
         setStateVisible(false)
       }
-      if (value.disable) {
+      if (value.isDisable) {
         setStateDisable(true)
       }
-      if (value.captionChange) {
-        setStateCaption(value[0].fieldCaptionChange)
+      if (value.isCaptionChange) {
+        setStateCaption(value.fieldCaptionChange)
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_country' && data.pageId === 1).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_country' && data.pageId === pageId).map((value, index) => {
 
-      if (value.mandatory) {
+      if (value.isMandatory) {
         setCountryMan(true)
       }
-      if (value.hide) {
+      if (value.isHide) {
         setCountryVisible(false)
       }
-      if (value.disable) {
+      if (value.isDisable) {
         setCountryDisable(true)
       }
-      if (value.captionChange) {
-        setCountryCaption(value[0].fieldCaptionChange)
+      if (value.isCaptionChange) {
+        setCountryCaption(value.fieldCaptionChange)
       }
     });
 
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_addr_geo-classification' && data.pageId === pageId).map((value, index) => {
+
+      if (value.isMandatory) {
+        setGeoClassificationMan(true)
+      }
+      if (value.isHide) {
+        setGeoClassificationVisible(false)
+      }
+      if (value.isDisable) {
+        setGeoClassificationDisable(true)
+      }
+      if (value.isCaptionChange) {
+        setGeoClassificationCaption(value.fieldCaptionChange)
+      }
+    });
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_years at residence' && data.pageId === pageId).map((value, index) => {
+
+      if (value.isMandatory) {
+        setYearsAtResidenceMan(true)
+      }
+      if (value.isHide) {
+        setYearsAtResidenceVisible(false)
+      }
+      if (value.isDisable) {
+        setYearsAtResidenceDisable(true)
+      }
+      if (value.isCaptionChange) {
+        setYearsAtResidenceCaption(value.fieldCaptionChange)
+      }
+    });
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_years in current city/town' && data.pageId === pageId).map((value, index) => {
+
+      if (value.isMandatory) {
+        setYearsAtCityMan(true)
+      }
+      if (value.isHide) {
+        setYearsAtCityVisible(false)
+      }
+      if (value.isDisable) {
+        setYearsAtCityDisable(true)
+      }
+      if (value.isCaptionChange) {
+        setYearsAtCityCaption(value.fieldCaptionChange)
+      }
+    });
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_addr_address ownership type' && data.pageId === pageId).map((value, index) => {
+
+      if (value.isMandatory) {
+        setAddressOwnerTypeMan(true)
+      }
+      if (value.isHide) {
+        setAddressOwnerTypeVisible(false)
+      }
+      if (value.isDisable) {
+        setAddressOwnerTypeDisable(true)
+      }
+      if (value.isCaptionChange) {
+        setAddressOwnerTypeCaption(value.fieldCaptionChange)
+      }
+    });
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_addr_owner_details' && data.pageId === pageId).map((value, index) => {
+
+      if (value.isMandatory) {
+        setOwnerDetailsMan(true)
+      }
+      if (value.isHide) {
+        setOwnerDetailsVisible(false)
+      }
+      if (value.isDisable) {
+        setOwnerDetailsDisable(true)
+      }
+      if (value.isCaptionChange) {
+        setOwnerDetailsCaption(value.fieldCaptionChange)
+      }
+    });
+
+    // systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_owner name' && data.pageId === pageId).map((value, index) => {
+
+    //   if (value.isMandatory) {
+    //     setOwnerNameMan(true)
+    //   }
+    //   if (value.isHide) {
+    //     setOwnerNameVisible(false)
+    //   }
+    //   if (value.isDisable) {
+    //     setOwnerNameDisable(true)
+    //   }
+    //   if (value.isCaptionChange) {
+    //     setOwnerNameCaption(value.fieldCaptionChange)
+    //   }
+    // });
 
 
   }
@@ -483,7 +720,11 @@ const AddressDetails = (props, { navigation }) => {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + pincodeCaption + '\n';
         i++;
         flag = true;
-      } else if (pincode.length < 6) {
+      }
+    }
+
+    if (pincode.length > 0) {
+      if (pincode.length < 6) {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + "Valid " + pincodeCaption + '\n';
         i++;
         flag = true;
@@ -634,6 +875,10 @@ const AddressDetails = (props, { navigation }) => {
           if (global.DEBUG_MODE) console.log('PostAddressResponse::' + JSON.stringify(response.data),);
 
           setLoading(false);
+          const deletePromises = [
+            tbl_clientaddressinfo.deleteDataBasedOnType(global.LOANAPPLICATIONID, global.CLIENTTYPE, addressTypeLabel)
+          ];
+          await Promise.all(deletePromises);
           insertData(response.data[0].id)
         })
         .catch(error => {
@@ -689,8 +934,15 @@ const AddressDetails = (props, { navigation }) => {
         .put(`api/v2/profile-short/address-details/${addressID}`, appDetails)
         .then(async response => {
           // Handle the response data
-          if (global.DEBUG_MODE) console.log('UpdateAddressResponse::' + JSON.stringify(response.data),);
-          insertData(addressID)
+          if (global.DEBUG_MODE) console.log('UpdateAddressResponse::' + JSON.stringify(response.data));
+
+          try {
+            insertData(addressID)
+          } catch (error) {
+
+            if (global.DEBUG_MODE) console.error('InsertAddressError:', error.message);
+
+          }
           setLoading(false);
         })
         .catch(error => {
@@ -747,23 +999,23 @@ const AddressDetails = (props, { navigation }) => {
       id,
       global.CLIENTID,
       global.CLIENTTYPE,
-      addressTypeLabel.trim(),
-      addressLine1.trim(),
-      addressLine2.trim(),
-      landmark.trim(),
-      pincode.trim(),
-      city.trim(),
-      district.trim(),
-      state.trim(),
-      country.trim(),
+      addressTypeLabel,
+      addressLine1,
+      addressLine2,
+      landmark,
+      pincode,
+      city,
+      district,
+      state,
+      country,
       "",
       "",
-      addressOwnerTypeLabel.trim(),
-      ownerDetailsLabel.trim(),
-      ownerName.trim(),
-      geoClassificationLabel.trim(),
-      yearsAtResidence.trim(),
-      yearsAtCity.trim(),
+      addressOwnerTypeLabel,
+      ownerDetailsLabel,
+      ownerName,
+      geoClassificationLabel,
+      yearsAtResidence,
+      yearsAtCity,
       "true",
       global.USERID,
       new Date(),
@@ -794,6 +1046,26 @@ const AddressDetails = (props, { navigation }) => {
     if (componentName === 'AddressTypePicker') {
       setAddressTypeLabel(label);
       setAddressTypeIndex(index);
+      if (label == 'C') {
+        if (permAddressAvailable) {
+          setsameAsPermVisible(true);
+        }
+        setGeoClassificationVisible(true);
+        setYearsAtResidenceVisible(true);
+        setYearsAtCityVisible(true);
+        makeSystemMandatoryFields();
+      } else if (label == 'P') {
+        setGeoClassificationVisible(false);
+        setGeoClassificationLabel('');
+        setsameAsPermVisible(false);
+        setGeoClassificationMan(false);
+        setYearsAtResidenceVisible(false);
+        setYearsAtResidenceMan(false);
+        setYearsAtResidence('');
+        setYearsAtCityVisible(false);
+        setYearsAtResidenceMan(false);
+        setYearsAtCity('')
+      }
     } else if (componentName === 'GeoClassificationPicker') {
       setGeoClassificationLabel(label);
       setGeoClassificationIndex(index);
@@ -803,6 +1075,16 @@ const AddressDetails = (props, { navigation }) => {
     } else if (componentName === 'OwnerDetailsPicker') {
       setOwnerDetailsLabel(label);
       setOwnerDetailsIndex(index);
+      if (label == 'OD-OTH' || label == 'OD-RLT') {
+        setOwnerNameDisable(false);
+        setOwnerNameMan(true);
+        setOwnerNameVisible(true);
+      } else {
+        setOwnerNameDisable(true);
+        setOwnerNameMan(false);
+        setOwnerNameVisible(false);
+        setOwnerName('')
+      }
     }
 
   }
@@ -810,19 +1092,19 @@ const AddressDetails = (props, { navigation }) => {
   const handleClick = (componentName, textValue) => {
 
     if (componentName === 'addressLine1') {
-      if (textValue.length > 0) {
-        if (Common.isValidText(textValue))
-          setAddressLine1(textValue)
-      } else {
-        setAddressLine1(textValue)
-      }
+      // if (textValue.length > 0) {
+      //   if (Common.isValidText(textValue))
+      //     setAddressLine1(textValue)
+      // } else {
+      setAddressLine1(textValue)
+      // }
     } else if (componentName === 'addressLine2') {
-      if (textValue.length > 0) {
-        if (Common.isValidText(textValue))
-          setAddressLine2(textValue)
-      } else {
-        setAddressLine2(textValue)
-      }
+      // if (textValue.length > 0) {
+      //   if (Common.isValidText(textValue))
+      //     setAddressLine2(textValue)
+      // } else {
+      setAddressLine2(textValue)
+      //}
     } else if (componentName === 'landmark') {
       if (textValue.length > 0) {
         if (Common.isValidText(textValue))
@@ -833,6 +1115,14 @@ const AddressDetails = (props, { navigation }) => {
     } else if (componentName === 'pincode') {
       if (textValue.length == 6) {
         getPinCode(textValue)
+      } else {
+        setPincodeResponse('');
+        setDistrict('');
+        setState('');
+        setCountry('');
+        setDistrictDisable(false)
+        setStateDisable(false);
+        setCountryDisable(false);
       }
       setPincode(textValue)
     } else if (componentName === 'city') {
@@ -840,7 +1130,7 @@ const AddressDetails = (props, { navigation }) => {
         if (Common.isValidText(textValue))
           setCity(textValue)
       } else {
-        setPincode(textValue)
+        setCity(textValue)
       }
     } else if (componentName === 'district') {
       if (textValue.length > 0) {
@@ -881,6 +1171,13 @@ const AddressDetails = (props, { navigation }) => {
           setOwnerName(textValue)
       } else {
         setOwnerName(textValue)
+      }
+    } else if (componentName === 'sameAsPerm') {
+      setsameAsPerm(textValue)
+      if (textValue == true) {
+        getPermanentAddressData();
+      } else {
+        fieldsEnable();
       }
     }
 
@@ -931,18 +1228,33 @@ const AddressDetails = (props, { navigation }) => {
           <PickerComp textLabel={addressTypeLabel} pickerStyle={Commonstyles.picker} Disable={addressTypeDisable} pickerdata={addressTypeData} componentName='AddressTypePicker' handlePickerClick={handlePickerClick} />
         </View>}
 
+        {sameAsPermVisible &&
+          <View
+            style={{ flexDirection: 'row', alignItems: 'center', marginTop: 19 }}>
+            <CheckBoxComp
+              textValue={sameAsPerm}
+              Disable={sameAsPermDisable}
+              ComponentName="sameAsPerm"
+              returnKey="next"
+              handleClick={handleClick}
+              Visible={false}
+              textCaption={sameAsPermCaption}
+            />
+          </View>
+        }
+
         {addressLine1Visible && <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
           <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
             <TextComp textVal={addressLine1Caption} textStyle={Commonstyles.inputtextStyle} Visible={addressLine1Man} />
           </View>
-          <TextInputComp textValue={addressLine1} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={addressLine1Disable} ComponentName='addressLine1' reference={addressLine1Ref} returnKey="next" handleClick={handleClick} handleReference={handleReference} length={30} />
+          <TextInputComp textValue={addressLine1} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={addressLine1Disable} ComponentName='addressLine1' reference={addressLine1Ref} returnKey="next" handleClick={handleClick} handleReference={handleReference} length={160} />
         </View>}
 
         {addressLine2Visible && <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
           <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
             <TextComp textVal={addressLine2Caption} textStyle={Commonstyles.inputtextStyle} Visible={addressLine2Man} />
           </View>
-          <TextInputComp textValue={addressLine2} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={addressLine2Disable} ComponentName='addressLine2' reference={addressLine2Ref} returnKey="next" handleClick={handleClick} handleReference={handleReference} length={30} />
+          <TextInputComp textValue={addressLine2} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={addressLine2Disable} ComponentName='addressLine2' reference={addressLine2Ref} returnKey="next" handleClick={handleClick} handleReference={handleReference} length={150} />
         </View>}
 
         {landmarkVisible && <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>

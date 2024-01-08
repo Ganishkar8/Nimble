@@ -53,6 +53,32 @@ const getAllAddressDetailsForLoanID = (loanApplicationId, client_type) => {
     });
 };
 
+const getPermanentAddress = (loanApplicationId, client_type) => {
+    const db = databaseInstance.getInstance();
+
+    return new Promise((resolve, reject) => {
+        db.transaction(tx => {
+            tx.executeSql(
+                `SELECT * FROM ${tableName} WHERE loanApplicationId = ? AND client_type = ? AND address_type=?`,
+                [loanApplicationId, client_type, 'P'],
+                (_, result) => {
+                    const rows = result.rows;
+                    const addressDetails = [];
+
+                    for (let i = 0; i < rows.length; i++) {
+                        addressDetails.push(rows.item(i));
+                    }
+
+                    resolve(addressDetails);
+                },
+                error => {
+                    reject(error);
+                }
+            );
+        });
+    });
+};
+
 const getAllAddressDetailsForLoanIDAndID = (loanApplicationId, id) => {
     const db = databaseInstance.getInstance();
 
@@ -119,6 +145,19 @@ const deleteDataBasedOnLoanIDAndID = (loanApplicationId, id) => {
     });
 };
 
+const deleteDataBasedOnType = (loanApplicationId, clentType, addresstype) => {
+    const db = databaseInstance.getInstance();
+    db.transaction((tx) => {
+        tx.executeSql(`DELETE FROM ${tableName} WHERE loanApplicationId = ? AND client_type = ? AND address_type=?`,
+            [loanApplicationId, clentType, addresstype],
+            (tx, results) => {
+                console.log('Rows affected:', results.rowsAffected);
+            }, (error) => {
+                console.error('Error executing SQL:', error);
+            });
+    });
+};
+
 const deleteAllAddress = () => {
     const db = databaseInstance.getInstance();
     db.transaction((tx) => {
@@ -138,5 +177,7 @@ export default {
     getAllAddressDetailsForLoanIDAndID,
     deleteDataBasedOnLoanIDAndID,
     getAllAddressDetails,
-    deleteAllAddress
+    getPermanentAddress,
+    deleteAllAddress,
+    deleteDataBasedOnType
 };

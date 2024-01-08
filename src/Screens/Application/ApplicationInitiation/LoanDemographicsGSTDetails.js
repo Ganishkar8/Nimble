@@ -56,7 +56,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
   const [refreshNotAvailableGSTFlatlist, setRefreshNotAvailableGSTFlatList] = useState(false);
   const [notAvailableGSTData, setNotAvailableGSTData] = useState([]);
 
-  const [selectedValue, setSelectedValue] = useState('Available');
+  const [selectedValue, setSelectedValue] = useState('NotAvailable');
   const [selectedValue1, setSelectedValue1] = useState(false);
   const [AvailableCaption, setAvailableCaption] = useState('Available');
   const [NotAvailableCaption, setNotAvailableCaption] =
@@ -99,12 +99,17 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
   const [systemMandatoryField, setSystemMandatoryField] = useState(props.mobilecodedetail.processSystemMandatoryFields);
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [apiError, setApiError] = useState('');
+  const [gstData, setGstData] = useState(global.LEADTRACKERDATA.applicantSalesDetail);
+  const [pageId, setPageId] = useState(global.CURRENTPAGEID);
+
 
   useEffect(() => {
     props.navigation
       .getParent()
       ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     getSystemCodeDetail();
+    getData();
+    makeSystemMandatoryFields();
 
 
     return () =>
@@ -113,20 +118,95 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
         ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
   }, [props.navigation]);
 
-  const updateDataInArray = (idToUpdate, updatedProperties) => {
-    const updatedData = [...data];
+  const getData = () => {
 
-    const dataIndex = updatedData.findIndex(item => item.id === idToUpdate);
+    if (gstData != undefined) {
+      if (gstData.isAvailable) {
+        setSelectedValue('Available')
+        const newObject = gstData.applicantGstInfos.map(item => ({
+          isActive: item.isActive,
+          isSelect: true, // Add your default value for isSelect
+          gstLabel: 'GST IN',
+          gstNumber: item.gstNumber,
+          gstUserName: item.gstUserName,
+          isConsented: item.isConsented,
+        }));
 
-    if (dataIndex !== -1) {
-      updatedData[dataIndex] = {
-        ...updatedData[dataIndex],
-        ...updatedProperties,
-      };
-      setdata(updatedData);
+        setAvailableGSTData(newObject)
+      } else {
+        setSelectedValue('NotAvailable')
+        setCaptureReasonLabel(gstData.captureReason);
+        setTimeFrameLabel(gstData.timeFrame);
+        if (gstData.timeFrame == 'MNTL') {
+          const mappedArray = gstData.applicantSalesInfos.map(item => ({
+            month: item.month,
+            shortMonth: new Date(item.createdDate).toLocaleString('default', { month: 'short' }),
+            year: item.year.toString(),
+            salesAmount: item.sales.toString(),
+            purchaseAmount: item.purchase.toString(),
+          }));
+          const totalSalesAmount = mappedArray.reduce((total, item) => total + parseInt(item.salesAmount), 0);
+          const totalPurchaseAmount = mappedArray.reduce((total, item) => total + parseInt(item.purchaseAmount), 0);
+          setTotalSales(totalSalesAmount);
+          setTotalPurchases(totalPurchaseAmount);
+          setMonthsData(mappedArray);
+        } else {
+          const mappedArray = gstData.applicantSalesInfos.map(item => ({
+            year: item.year.toString(),
+            salesAmount: item.sales.toString(),
+            purchaseAmount: item.purchase.toString(),
+          }));
+          const totalSalesAmount = mappedArray.reduce((total, item) => total + parseInt(item.salesAmount), 0);
+          const totalPurchaseAmount = mappedArray.reduce((total, item) => total + parseInt(item.purchaseAmount), 0);
+          setTotalYearSales(totalSalesAmount);
+          setTotalYearPurchases(totalPurchaseAmount);
+          setYearsData(mappedArray);
+        }
+        //console.log(mappedArray);
+      }
+
     }
-    console.log('data:', updatedData);
+
+
+
   };
+
+  const makeSystemMandatoryFields = () => {
+
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_cpt_rsn' && data.pageId === pageId).map((value, index) => {
+
+      if (value.mandatory) {
+        setCaptureReasonMan(true);
+      }
+      if (value.hide) {
+        setCaptureReasonVisible(false);
+      }
+      if (value.disable) {
+        setCaptureReasonDisable(true);
+      }
+      if (value.captionChange) {
+        setCaptureReasonCaption(value[0].fieldCaptionChange)
+      }
+    });
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_tm_frm' && data.pageId === pageId).map((value, index) => {
+
+      if (value.mandatory) {
+        setTimeFrameMan(true);
+      }
+      if (value.hide) {
+        setTimeFrameVisible(false);
+      }
+      if (value.disable) {
+        setTimeFrameDisable(true);
+      }
+      if (value.captionChange) {
+        setTimeFrameCaption(value[0].fieldCaptionChange)
+      }
+    });
+
+  }
 
   const getSystemCodeDetail = async () => {
     let dataArray = [];
@@ -392,6 +472,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
                 keyboardType={'email-address'}
                 multiline={false}
                 maxLength={25}
+                editable={global.USERTYPEID == 1164 ? true : false}
                 autoCapitalize="characters"
                 style={{ color: Colors.black, overflow: 'scroll' }}
                 returnKeyType={'done'}
@@ -457,6 +538,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
               placeholderTextColor={Colors.lightgrey}
               keyboardType={'numeric'}
               multiline={false}
+              editable={global.USERTYPEID == 1164 ? true : false}
               maxLength={25}
               style={{ width: 70, color: Colors.black, overflow: 'scroll' }}
               returnKeyType={'done'}
@@ -477,6 +559,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
               placeholderTextColor={Colors.lightgrey}
               keyboardType={'numeric'}
               multiline={false}
+              editable={global.USERTYPEID == 1164 ? true : false}
               maxLength={25}
               style={{ width: 70, color: Colors.black, overflow: 'scroll' }}
               returnKeyType={'done'}
@@ -532,6 +615,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
               keyboardType={'numeric'}
               multiline={false}
               maxLength={25}
+              editable={global.USERTYPEID == 1164 ? true : false}
               style={{ width: 70, color: Colors.black, overflow: 'scroll' }}
               returnKeyType={'done'}
 
@@ -552,6 +636,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
               keyboardType={'numeric'}
               multiline={false}
               maxLength={25}
+              editable={global.USERTYPEID == 1164 ? true : false}
               style={{ width: 70, color: Colors.black, overflow: 'scroll' }}
               returnKeyType={'done'}
 
@@ -718,7 +803,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
           global.COMPLETEDMODULE = 'LN_DMGP_APLCT';
           global.COMPLETEDPAGE = 'DMGRC_APPL_GST_DTLS';
         }
-        props.navigation.replace('LoanDemographicsFinancialDetails');
+        navigatetoFinancial();
       })
       .catch(error => {
         // Handle the error
@@ -733,8 +818,20 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
 
   };
 
-  const buttonNext = () => {
+  const navigatetoFinancial = async () => {
 
+    var page = '';
+    page = 'DMGRC_APPL_FNCL_DTLS';
+
+    await Common.getPageID(global.FILTEREDPROCESSMODULE, page)
+    props.navigation.replace('LoanDemographicsFinancialDetails');
+  }
+
+  const buttonNext = () => {
+    if (global.USERTYPEID == 1163) {
+      navigatetoFinancial();
+      return;
+    }
     postGSTDetailData();
 
   }
@@ -831,6 +928,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
                 status={selectedValue === 'Available' ? 'checked' : 'unchecked'}
                 onPress={() => setSelectedValue('Available')}
                 color="#007BFF"
+                disabled={global.USERTYPEID == 1164 ? false : true}
               />
               <Text style={{
                 color: Colors.mediumgrey,
@@ -853,6 +951,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
                 status={selectedValue === 'NotAvailable' ? 'checked' : 'unchecked'}
                 onPress={() => setSelectedValue('NotAvailable')}
                 color="#007BFF"
+                disabled={global.USERTYPEID == 1164 ? false : true}
               />
               <Text style={{
                 color: Colors.mediumgrey,
@@ -884,15 +983,17 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
                   flexDirection: 'row',
                   justifyContent: 'flex-end',
                 }}>
-                <TouchableOpacity onPress={() => AddGST()}>
-                  <Text
-                    style={{
-                      color: Colors.darkblue,
-                      fontFamily: 'Poppins-Medium'
-                    }}>
-                    + Add Another GST IN
-                  </Text>
-                </TouchableOpacity>
+                {global.USERTYPEID == 1164 &&
+                  <TouchableOpacity onPress={() => AddGST()}>
+                    <Text
+                      style={{
+                        color: Colors.darkblue,
+                        fontFamily: 'Poppins-Medium'
+                      }}>
+                      + Add Another GST IN
+                    </Text>
+                  </TouchableOpacity>
+                }
               </View>
             </View>
           }

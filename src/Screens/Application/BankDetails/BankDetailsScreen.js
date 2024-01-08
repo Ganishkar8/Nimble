@@ -146,6 +146,7 @@ const BankDetailsScreen = (props, { navigation }) => {
 
     const [hideRetake, setHideRetake] = useState(false);
     const [hideDelete, setHideDelete] = useState(false);
+    const [pageId, setPageId] = useState(global.CURRENTPAGEID);
 
 
     useEffect(() => {
@@ -154,7 +155,11 @@ const BankDetailsScreen = (props, { navigation }) => {
         getSystemCodeDetail()
         makeSystemMandatoryFields();
         getExistingData()
+        alert(pageId)
 
+        if (global.USERTYPEID == 1163) {
+            fieldsDisable();
+        }
 
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
@@ -176,6 +181,18 @@ const BankDetailsScreen = (props, { navigation }) => {
 
     const fieldsDisable = () => {
 
+        setAccountTypeDisable(true);
+        setAccountHolderNameDisable(true);
+        setIfscCodeDisable(true);
+        setBankNameDisable(true);
+        setBranchNameDisable(true);
+        setAccountNumberDisable(true);
+        setConfirmAccountNumberDisable(true);
+        setBankLinkedMobNoDisable(true);
+        setUpiIDDisable(true);
+        setAccountToUseDisable(true);
+        setHideRetake(true)
+        setHideDelete(true);
 
     }
 
@@ -193,7 +210,14 @@ const BankDetailsScreen = (props, { navigation }) => {
                 setConfirmAccountNumber(data[0].account_number)
                 setBankLinkedMobNo(data[0].mobile_number)
                 setUpiID(data[0].upi_id)
+                setAccountToUseLabel(data[0].accountUsedFor)
                 setLoading(false)
+                if (data[0].dmsId !== undefined) {
+                    if (data[0].dmsId.length > 0) {
+                        getImage(data[0].dmsId);
+                    }
+                    setDocID(data[0].dmsId);
+                }
             })
             .catch(error => {
                 if (global.DEBUG_MODE) console.error('Error fetching Bank details:', error);
@@ -201,6 +225,43 @@ const BankDetailsScreen = (props, { navigation }) => {
             });
     }
 
+    const getImage = (dmsID) => {
+
+        Common.getNetworkConnection().then(value => {
+            if (value.isConnected == true) {
+                setLoading(true)
+                const baseURL = '8094'
+                apiInstance(baseURL).get(`/api/documents/document/${parseInt(dmsID)}`)
+                    .then(async (response) => {
+                        // Handle the response data
+                        console.log("GetPhotoApiResponse::" + JSON.stringify(response.data));
+                        setFileName(response.data.fileName)
+                        setVisible(false)
+                        setImageUri('data:image/png;base64,' + response.data.base64Content)
+                        // props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
+                        setLoading(false)
+
+                    })
+                    .catch((error) => {
+                        // Handle the error
+                        setLoading(false)
+                        if (global.DEBUG_MODE) console.log("GetPhotoApiResponse::" + JSON.stringify(error.response.data));
+                        if (error.response.data != null) {
+                            setApiError(error.response.data.message);
+                            setErrorModalVisible(true)
+                        } else if (error.response.httpStatusCode == 500) {
+                            setApiError(error.response.message);
+                            setErrorModalVisible(true)
+                        }
+                    });
+            } else {
+                setApiError(language[0][props.language].str_errinternetimage);
+                setErrorModalVisible(true)
+
+            }
+
+        })
+    }
 
     const getSystemCodeDetail = () => {
 
@@ -215,12 +276,12 @@ const BankDetailsScreen = (props, { navigation }) => {
 
     const makeSystemMandatoryFields = () => {
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_accounttype' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_act_typ' && data.pageId === pageId).map((value, index) => {
 
             setAccountTypeCaption(value.fieldName)
 
             if (value.mandatory) {
-                setAccountTypeVisible(true);
+                setAccountTypeMan(true);
             }
             if (value.hide) {
                 setAccountTypeVisible(false);
@@ -233,7 +294,7 @@ const BankDetailsScreen = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_accountholdername' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_act_hldr_nm_bk' && data.pageId === pageId).map((value, index) => {
 
             setAccountHolderNameCaption(value.fieldName)
 
@@ -252,7 +313,7 @@ const BankDetailsScreen = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_ifsccode' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_ifsc' && data.pageId === pageId).map((value, index) => {
 
             setIfscCodeCaption(value.fieldName)
 
@@ -270,7 +331,7 @@ const BankDetailsScreen = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_bankName' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_bank' && data.pageId === pageId).map((value, index) => {
 
             setBankNameCaption(value.fieldName)
 
@@ -288,7 +349,7 @@ const BankDetailsScreen = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_branchName' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_brnch' && data.pageId === pageId).map((value, index) => {
 
             setBranchNameCaption(value.fieldName)
 
@@ -306,7 +367,7 @@ const BankDetailsScreen = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_accountNum' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_acct_nmb' && data.pageId === pageId).map((value, index) => {
 
             setAccountNumberCaption(value.fieldName)
 
@@ -324,7 +385,7 @@ const BankDetailsScreen = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_confirmaccountNum' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_cf_acct_nmb' && data.pageId === pageId).map((value, index) => {
 
             setConfirmAccountNumberCaption(value.fieldName)
 
@@ -342,7 +403,7 @@ const BankDetailsScreen = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_banklinkMobNo' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_bk_lnk_nmb' && data.pageId === pageId).map((value, index) => {
 
             setBankLinkedMobNoCaption(value.fieldName)
 
@@ -360,7 +421,7 @@ const BankDetailsScreen = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_upiid' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_upi' && data.pageId === pageId).map((value, index) => {
 
             setUpiIDCaption(value.fieldName)
 
@@ -378,7 +439,7 @@ const BankDetailsScreen = (props, { navigation }) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_accountusedfor' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_acct_usd' && data.pageId === pageId).map((value, index) => {
 
             setAccountToUseCaption(value.fieldName)
 
@@ -518,10 +579,8 @@ const BankDetailsScreen = (props, { navigation }) => {
     const bankSubmit = () => {
 
         if (global.USERTYPEID == 1163) {
-            if (!(kycManual == '1')) {
-                props.navigation.replace('BankList')
-                return;
-            }
+            props.navigation.replace('BankList')
+            return;
         }
 
         Common.getNetworkConnection().then(value => {
@@ -702,23 +761,7 @@ const BankDetailsScreen = (props, { navigation }) => {
     };
 
     const insertData = (id, dmsId) => {
-        tbl_bankdetails.insertBankDetails(
-            id,
-            global.LOANAPPLICATIONID,
-            global.CLIENTID,
-            global.CLIENTTYPE,
-            accountTypeLabel.trim(),
-            accountHolderName.trim(),
-            ifscCode.trim(),
-            bankName.trim(),
-            branchName.trim(),
-            accountNumber.trim(),
-            bankLinkedMobNo.trim(),
-            upiID.trim(),
-            dmsId,
-            accountToUseLabel,
-            "",
-        )
+        tbl_bankdetails.insertBankDetails(id, global.LOANAPPLICATIONID, global.CLIENTID, global.CLIENTTYPE, accountTypeLabel.trim(), accountHolderName.trim(), ifscCode.trim(), bankName.trim(), branchName.trim(), accountNumber.trim(), bankLinkedMobNo.trim(), upiID.trim(), dmsId, accountToUseLabel, "")
             .then(result => {
                 if (global.DEBUG_MODE) console.log('Inserted Bank detail:', result);
                 props.navigation.replace('BankList')

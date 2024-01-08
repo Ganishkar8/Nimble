@@ -47,7 +47,7 @@ const PdMainScreen = (props, { navigation }) => {
     };
 
     const onGoBack = () => {
-
+        props.navigation.goBack();
     }
 
     return (
@@ -358,11 +358,11 @@ const PdMainScreen = (props, { navigation }) => {
 
                 </View>
             </ScrollView>
-            <View style={{ width: '100%', alignItems: 'center', marginTop: '3%', justifyContent: 'center',marginBottom : 5 }}>
+            <View style={{ width: '100%', alignItems: 'center', marginTop: '3%', justifyContent: 'center', marginBottom: 5 }}>
                 <View style={{ width: '90%', flexDirection: 'row', justifyContent: 'space-between' }}>
                     <View style={{
                         width: '45%', height: 45, backgroundColor: Colors.darkblue,
-                        alignItems: 'center', borderRadius: 25,justifyContent : 'center'
+                        alignItems: 'center', borderRadius: 25, justifyContent: 'center'
                     }}>
                         <TextComp
                             textStyle={{
@@ -374,7 +374,7 @@ const PdMainScreen = (props, { navigation }) => {
                     </View>
                     <View style={{
                         width: '45%', height: 45, backgroundColor: Colors.darkblue,
-                        alignItems: 'center', borderRadius: 25,justifyContent : 'center'
+                        alignItems: 'center', borderRadius: 25, justifyContent: 'center'
                     }}>
                         <TextComp
                             textStyle={{

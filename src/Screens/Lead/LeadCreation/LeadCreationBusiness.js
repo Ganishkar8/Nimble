@@ -140,7 +140,7 @@ const LeadCreationBusiness = (props, { navigation }) => {
 
     const getSystemCodeDetail = () => {
 
-        const filteredIndustryTypeData = userCodeDetail.filter((data) => data.masterId === 'INDUSTRY_TYPE').sort((a, b) => a.Description.localeCompare(b.Description));
+        const filteredIndustryTypeData = userCodeDetail.filter((data) => data.masterId === 'INDUSTRY_LINE').sort((a, b) => a.Description.localeCompare(b.Description));
         setIndustryTypeData(filteredIndustryTypeData);
 
     }

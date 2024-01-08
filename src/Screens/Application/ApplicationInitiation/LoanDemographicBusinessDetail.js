@@ -75,6 +75,15 @@ const LoanDemographicBusinessDetail = (props) => {
     const [CustomerSubCategoryLabel, setCustomerSubCategoryLabel] = useState('');
     const [CustomerSubCategoryIndex, setCustomerSubCategoryIndex] = useState('');
 
+    const [genderCaption, setGenderCaption] = useState('GENDER');
+    const [genderMan, setGenderMan] = useState(false);
+    const [genderVisible, setGenderVisible] = useState(true);
+    const [genderDisable, setGenderDisable] = useState(false);
+    const [genderLabel, setGenderLabel] = useState('');
+    const [genderIndex, setGenderIndex] = useState('');
+    const [genderData, setGenderData] = useState([]);
+
+
     const [entShopName, setEntShopName] = useState('');
     const [entShopNameMan, setEntShopNameMan] = useState(false);
     const [entShopNameVisible, setEntShopNameVisible] = useState(true);
@@ -281,9 +290,9 @@ const LoanDemographicBusinessDetail = (props) => {
     const [onlyView, setOnlyView] = useState(false);
     const [hideRetake, setHideRetake] = useState(false);
     const [hideDelete, setHideDelete] = useState(false);
+    const [pageId, setPageId] = useState(global.CURRENTPAGEID);
 
     const [businessDetailAvailable, setBusinessDetailAvailable] = useState(false);
-
 
     const monthArray = [
         { subCodeId: 0, Description: '0' },
@@ -308,7 +317,6 @@ const LoanDemographicBusinessDetail = (props) => {
             ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
 
-
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
             backHandler.remove();
@@ -329,10 +337,12 @@ const LoanDemographicBusinessDetail = (props) => {
             getApplicantData();
 
 
-
-            // if (global.USERTYPEID == 1163) {
-            //     setOnlyView(true);
-            // }
+            if (global.USERTYPEID == 1163) {
+                setOnlyView(true);
+                setHideDelete(true);
+                setHideRetake(true);
+                fieldsDisable();
+            }
 
 
             return () => {
@@ -343,24 +353,111 @@ const LoanDemographicBusinessDetail = (props) => {
 
     const getApplicantData = () => {
 
+        tbl_loanbusinessDetail.getBusinessDetailsBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE, global.CLIENTID)
+            .then(value => {
+                if (global.DEBUG_MODE) console.log('Business Data:', value);
+                if (value !== undefined && value.length > 0) {
+                    setCustomerSubCategoryLabel(value[0].customerSubCatg)
+                    setEntShopName(value[0].enterpriseShopName)
+                    setUrmNumber(value[0].udyamRegNum)
+                    setDOR('') //dateofReg
+                    setDOI('') //dateofIncorp
+                    setDOBC('') //dateofBusiness
+                    setYear(value[0].year)
+                    setMonthLabel(parseInt(value[0].month))
+                    setIndustryTypeLabel(value[0].industryType)
+                    setIndustryLineLabel(value[0].industryLine)
+                    setCompanyTypeLabel(value[0].companyType)
+                    setEnterpriseTypeLabel(value[0].enterpriseType)
+                    setBusinessLocationLabel(value[0].businessLocation)
+                    setNoofEmployee(value[0].noofEmployees)
+                    setOperatingDays(value[0].operatingdays) //operatingtiming
+                    setBookKeepStatusLabel(value[0].bookKeepingStatus)
+                    setHomeBasedBusinessLabel(value[0].homeBasedBusiness)
+                    setACTMLabel(value[0].custTransMode)
+                    setTimeByPromoter(value[0].operatingtiming)
+                    setNPMRate(value[0].npmRate)
+                    setPurchaseFrequencyLabel(value[0].purchaseFrequency)
+                    setTypePurchaseLabel(value[0].typeofPurchase)
+                    setSalesFrequencyLabel(value[0].salesFrequency)
+                    if (value[0].dmsId !== undefined) {
+                        if (value[0].dmsId.length > 0) {
+                            getImage(value[0].dmsId);
+                        }
+                        setDocID(value[0].dmsId);
+                    }
+                }
 
-        // tbl_familydetails.getFamilyDetailsOnID(global.LOANAPPLICATIONID, 'APPL', familyID)
-        //     .then(data => {
-        //         if (global.DEBUG_MODE) console.log('Family Data:', data);
-        //         if (data !== undefined && data.length > 0) {
-
-        //         }
-
-        //     })
-        //     .catch(error => {
-        //         if (global.DEBUG_MODE) console.error('Error fetching Family details:', error);
-        //     });
+            })
+            .catch(error => {
+                if (global.DEBUG_MODE) console.error('Error fetching Business details:', error);
+            });
 
 
     }
 
-    const fieldsDisable = () => {
+    const getImage = (dmsID) => {
 
+        Common.getNetworkConnection().then(value => {
+            if (value.isConnected == true) {
+                setLoading(true)
+                const baseURL = '8094'
+                apiInstance(baseURL).get(`/api/documents/document/${parseInt(dmsID)}`)
+                    .then(async (response) => {
+                        // Handle the response data
+                        console.log("GetPhotoApiResponse::" + JSON.stringify(response.data));
+                        setFileName(response.data.fileName)
+                        setVisible(false)
+                        setImageUri('data:image/png;base64,' + response.data.base64Content)
+                        // props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
+                        setLoading(false)
+
+                    })
+                    .catch((error) => {
+                        // Handle the error
+                        setLoading(false)
+                        if (global.DEBUG_MODE) console.log("GetPhotoApiResponse::" + JSON.stringify(error.response.data));
+                        if (error.response.data != null) {
+                            setApiError(error.response.data.message);
+                            setErrorModalVisible(true)
+                        } else if (error.response.httpStatusCode == 500) {
+                            setApiError(error.response.message);
+                            setErrorModalVisible(true)
+                        }
+                    });
+            } else {
+                setApiError(language[0][props.language].str_errinternetimage);
+                setErrorModalVisible(true)
+
+            }
+
+        })
+    }
+
+    const fieldsDisable = () => {
+        setCustomerSubCategoryDisable(true);
+        setEntShopNameDisable(true);
+        setUrmNumberDisable(true);
+        setDORDisable(true);
+        setDOIDisable(true);
+        setDOBCDisable(true);
+        setYearDisable(true);
+        setMonthsDisable(true);
+        setIndustryTypeDisable(true);
+        setIndustryLineDisable(true);
+        setCompanyTypeDisable(true);
+        setEnterpriseTypeDisable(true);
+        setBusinessLocationDisable(true);
+        setNoofEmployeeDisable(true);
+        setOperatingDaysDisable(true);
+        setBookKeepStatusDisable(true);
+        setHomeBasedBusinessDisable(true);
+        setACTMDisable(true);
+        setTimeByPromoterDisable(true);
+        setNPMRateDisable(true);
+        setPurchaseFrequencyDisable(true);
+        setTypePurchaseDisable(true);
+        setSalesFrequencyDisable(true);
     }
 
     const checkPermissions = async () => {
@@ -469,7 +566,7 @@ const LoanDemographicBusinessDetail = (props) => {
     const makeSystemMandatoryFields = async () => {
 
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_custsubcategory' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_cust_subcat' && data.pageId === pageId).map((value, index) => {
             setGenderCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -486,7 +583,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_enterpriseShop' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_shp_name' && data.pageId === pageId).map((value, index) => {
             setEntShopNameCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -504,7 +601,7 @@ const LoanDemographicBusinessDetail = (props) => {
         });
 
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_urmNumber' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_udyam_registration_number' && data.pageId === pageId).map((value, index) => {
             setUrmNumberCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -521,7 +618,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_dor' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_dt_of_reg' && data.pageId === pageId).map((value, index) => {
             setDORCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -538,7 +635,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_doi' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_dt_of_inct' && data.pageId === pageId).map((value, index) => {
             setDOICaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -555,7 +652,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_dobc' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_dt_of_bsn_cmn' && data.pageId === pageId).map((value, index) => {
             setDOBCCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -572,7 +669,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_year' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_year' && data.pageId === pageId).map((value, index) => {
             setYearCaption(value.fieldName)
             if (value.mandatory) {
                 setYearMan(true);
@@ -588,7 +685,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_months' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_mnths' && data.pageId === pageId).map((value, index) => {
             setMonthsCaption(value.fieldName)
             if (value.mandatory) {
                 setMonthsMan(true);
@@ -604,7 +701,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_industryType' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ind_typ' && data.pageId === pageId).map((value, index) => {
             setIndustryTypeCaption(value.fieldName)
             if (value.mandatory) {
                 setIndustryTypeMan(true);
@@ -620,7 +717,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_industryLine' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ind_lin' && data.pageId === pageId).map((value, index) => {
             setIndustryLineCaption(value.fieldName)
             if (value.mandatory) {
                 setIndustryLineMan(true);
@@ -636,7 +733,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_companyType' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_cmp_typ' && data.pageId === pageId).map((value, index) => {
             setCompanyTypeCaption(value.fieldName)
             if (value.mandatory) {
                 setCompanyTypeMan(true);
@@ -652,7 +749,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_enterpriseType' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ent_typ' && data.pageId === pageId).map((value, index) => {
             setEnterpriseTypeCaption(value.fieldName)
             if (value.mandatory) {
                 setEnterpriseTypeMan(true);
@@ -668,7 +765,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_yearsatpresent' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsn_prms' && data.pageId === pageId).map((value, index) => {
             setYearAtPresentCaption(value.fieldName)
             if (value.mandatory) {
                 setYearAtPresentMan(true);
@@ -684,7 +781,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_businesslocation' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_bsn_lcn_vilg' && data.pageId === pageId).map((value, index) => {
             setBusinessLocationCaption(value.fieldName)
             if (value.mandatory) {
                 setBusinessLocationMan(true);
@@ -700,7 +797,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_noofemployee' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_no_empl' && data.pageId === pageId).map((value, index) => {
             setNoofEmployeeCaption(value.fieldName)
             if (value.mandatory) {
                 setNoofEmployeeMan(true);
@@ -716,7 +813,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_operatingdays' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_op_dy_wk' && data.pageId === pageId).map((value, index) => {
             setOperatingDaysCaption(value.fieldName)
             if (value.mandatory) {
                 setOperatingDaysMan(true);
@@ -732,7 +829,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_operatingtiming' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_op_tmng_dy' && data.pageId === pageId).map((value, index) => {
             setOperatingTimingsCaption(value.fieldName)
             if (value.mandatory) {
                 setOperatingDaysMan(true);
@@ -748,7 +845,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_bookkeepstatus' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_bk_kp_sts' && data.pageId === pageId).map((value, index) => {
             setBookKeepStatusCaption(value.fieldName)
             if (value.mandatory) {
                 setBookKeepStatusMan(true);
@@ -764,7 +861,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_homebasedbusiness' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_hm_bsd_bsn' && data.pageId === pageId).map((value, index) => {
             setHomeBasedBusinessCaption(value.fieldName)
             if (value.mandatory) {
                 setHomeBasedBusinessMan(true);
@@ -780,7 +877,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_custtranmode' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ctmr_trns_md' && data.pageId === pageId).map((value, index) => {
             setACTMCaption(value.fieldName)
             if (value.mandatory) {
                 setACTMMan(true);
@@ -796,7 +893,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_timespent' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_tm_spt_bsn_dy' && data.pageId === pageId).map((value, index) => {
             setTimeByPromoterCaption(value.fieldName)
             if (value.mandatory) {
                 setTimeByPromoterMan(true);
@@ -812,7 +909,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_npmrate' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_npm_rt_bsn' && data.pageId === pageId).map((value, index) => {
             setNPMRateCaption(value.fieldName)
             if (value.mandatory) {
                 setNPMRateMan(true);
@@ -828,7 +925,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_purchasefreq' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prchs_frq' && data.pageId === pageId).map((value, index) => {
             setPurchaseFrequencyCaption(value.fieldName)
             if (value.mandatory) {
                 setPurchaseFrequencyMan(true);
@@ -844,7 +941,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_typepurchase' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_tp_prc_fct' && data.pageId === pageId).map((value, index) => {
             setTypePurchaseCaption(value.fieldName)
             if (value.mandatory) {
                 setTypePurchaseMan(true);
@@ -860,7 +957,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_salesFreq' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_sls_frq' && data.pageId === pageId).map((value, index) => {
             setSalesFrequencyCaption(value.fieldName)
             if (value.mandatory) {
                 setSalesFrequencyMan(true);
@@ -880,10 +977,10 @@ const LoanDemographicBusinessDetail = (props) => {
 
     const callBusinessDetails = () => {
 
-        // if (onlyView) {
-        //     props.navigation.replace('FamilyDetailList');
-        //     return;
-        // }
+        if (onlyView) {
+            navigatetoBusinessAddress();
+            return;
+        }
         if (validate()) {
             showBottomSheet();
         } else {
@@ -1119,7 +1216,7 @@ const LoanDemographicBusinessDetail = (props) => {
                     global.COMPLETEDMODULE = 'LN_DMGP_GRNTR';
                     global.COMPLETEDPAGE = 'DMGRC_GRNTR_BSN_DTLS';
                 }
-                props.navigation.replace('LoanAddressList');
+                navigatetoBusinessAddress();
             })
             .catch(error => {
                 // Handle the error
@@ -1134,10 +1231,23 @@ const LoanDemographicBusinessDetail = (props) => {
 
     };
 
+    const navigatetoBusinessAddress = async () => {
+        var page = '';
+        if (global.CLIENTTYPE == 'APPL') {
+            page = 'DMGRC_APPL_BSN_ADDR_DTLS';
+        } else if (global.CLIENTTYPE == 'CO-APPL') {
+            page = 'DMGRC_COAPPL_BSN_ADDR_DTLS';
+        } else if (global.CLIENTTYPE == 'GRNTR') {
+            page = 'DMGRC_GRNTR_BSN_ADDR_DTLS';
+        }
+        await Common.getPageID(global.FILTEREDPROCESSMODULE, page)
+        props.navigation.replace('LoanAddressList')
+    }
+
 
     const insertData = async (id, imageID) => {
 
-        await tbl_loanbusinessDetail.insertBusinessDetail(global.LOANAPPLICATIONID, id, global.CLIENTID, 'APPL', CustomerSubCategoryLabel, entShopName, urmNumber, DOI, DOR, DOBC, year, monthLabel, industryTypeLabel, industryLineLabel, companyTypeLabel, enterpriseTypeLabel, businessLocationLabel, noofEmployee, operatingDays, operatingTimings, bookKeepStatusLabel, homeBasedBussinessLabel, actmLabel, timeByPromoter, npmRate, purchaseFrequencyLabel, typePurchaseLabel, salesFrequencyLabel, imageID);
+        await tbl_loanbusinessDetail.insertBusinessDetail(global.LOANAPPLICATIONID, id, global.CLIENTID, global.CLIENTTYPE, CustomerSubCategoryLabel, entShopName, urmNumber, DOI, DOR, DOBC, year, monthLabel, industryTypeLabel, industryLineLabel, companyTypeLabel, enterpriseTypeLabel, businessLocationLabel, noofEmployee, operatingDays, operatingTimings, bookKeepStatusLabel, homeBasedBussinessLabel, actmLabel, timeByPromoter, npmRate, purchaseFrequencyLabel, typePurchaseLabel, salesFrequencyLabel, imageID);
 
         updateLoanStatus();
 
@@ -1224,7 +1334,7 @@ const LoanDemographicBusinessDetail = (props) => {
         }
 
         if (DOBCMan && DOBCVisible) {
-            if (DOR.length <= 0) {
+            if (DOBC.length <= 0) {
                 errorMessage =
                     errorMessage +
                     i +
@@ -1421,6 +1531,8 @@ const LoanDemographicBusinessDetail = (props) => {
             setTimeByPromoter(textValue);
         } else if (componentName === 'NPMRate') {
             setNPMRate(textValue);
+        } else if (componentName === 'year') {
+            setYear(textValue);
         }
     };
 
@@ -1583,7 +1695,7 @@ const LoanDemographicBusinessDetail = (props) => {
     };
 
     const onGoBack = () => {
-        props.navigation.goBack();
+        props.navigation.replace('LoanApplicationMain', { fromScreen: 'BusinessDetail' });
     }
 
     return (
@@ -1802,7 +1914,7 @@ const LoanDemographicBusinessDetail = (props) => {
                                     handleClick={handleClick}
                                     Disable={DORDisable}
                                     reference={DORRef}
-                                    minDate={new Date()}
+                                    maxDate={new Date()}
                                     handleReference={handleReference} />
                             </View>
 
@@ -1833,7 +1945,7 @@ const LoanDemographicBusinessDetail = (props) => {
                                     handleClick={handleClick}
                                     Disable={DOIDisable}
                                     reference={DOIRef}
-                                    minDate={new Date()}
+                                    maxDate={new Date()}
                                     handleReference={handleReference} />
                             </View>
 
@@ -1864,7 +1976,7 @@ const LoanDemographicBusinessDetail = (props) => {
                                     handleClick={handleClick}
                                     Disable={DOBCDisable}
                                     reference={DOBCRef}
-                                    minDate={new Date()}
+                                    maxDate={new Date()}
                                     handleReference={handleReference} />
                             </View>
 

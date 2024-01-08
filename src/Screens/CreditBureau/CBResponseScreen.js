@@ -29,32 +29,23 @@ import ButtonViewComp from '../../Components/ButtonViewComp';
 import apiInstance from '../../Utils/apiInstance';
 import Commonstyles from '../../Utils/Commonstyles';
 import Common from '../../Utils/Common';
-
-const data = [
-
-    {
-        name: 'Profile Short', id: 1, isSelected: true
-    },
-    {
-        name: 'CB Check', id: 2, isSelected: false
-    },
-    { name: 'Loan', id: 3, isSelected: false },
-    { name: 'BRE', id: 4, isSelected: false }
-]
+import Loading from '../../Components/Loading';
 
 const CBResponseScreen = (props, { navigation }) => {
 
-    const [cbResponse, setCBResponse] = useState(data);
+    const [cbResponse, setCBResponse] = useState([]);
     const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
     const isScreenVisible = useIsFocused();
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const [apiError, setApiError] = useState('');
+    const [htmlContent, setHtmlContent] = useState('');
     const [loading, setLoading] = useState(false);
 
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
+        getcbData();
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
             backHandler.remove();
@@ -67,12 +58,74 @@ const CBResponseScreen = (props, { navigation }) => {
     };
 
     const onGoBack = () => {
-        props.navigation.goBack();
+        props.navigation.replace('LoanApplicationMain', { fromScreen: 'CBResponse' })
     }
 
     const toggleBottomNavigationView = () => {
         //Toggling the visibility state of the bottom sheet
         setBottomSheetVisible(!bottomSheetVisible);
+    };
+
+    const showPreView = (content) => {
+        setHtmlContent(content);
+        setBottomSheetVisible(!bottomSheetVisible);
+    }
+
+    const getcbData = () => {
+
+        const baseURL = '8901';
+        setLoading(true);
+        apiInstance(baseURL)
+            .get(`/api/v2/getCb/${global.LOANAPPLICATIONID}`)
+            .then(async response => {
+                // Handle the response data
+                if (global.DEBUG_MODE) console.log('CBResponseApiResponse::' + JSON.stringify(response.data),);
+                setLoading(false);
+
+                if (response.data.length <= 0) {
+                    getcbCheckData();
+                } else {
+                    setCBResponse(response.data)
+                }
+            })
+            .catch(error => {
+                // Handle the error
+                if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
+                setLoading(false);
+                if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
+
+    };
+
+    const getcbCheckData = () => {
+
+        const baseURL = '8901';
+        setLoading(true);
+        apiInstance(baseURL)
+            .get(`/api/v2/cb-check/${global.LOANAPPLICATIONID}`)
+            .then(async response => {
+                // Handle the response data
+                if (global.DEBUG_MODE) console.log('CBCheckApiResponse::' + JSON.stringify(response.data),);
+                setLoading(false);
+                if (response.data.length <= 0) {
+                    getcbData();
+                } else {
+                    setCBResponse(response.data)
+                }
+            })
+            .catch(error => {
+                // Handle the error
+                if (global.DEBUG_MODE) console.log('CBCheckApiResponse' + JSON.stringify(error.response));
+                setLoading(false);
+                if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
+
     };
 
     const updateLoanStatus = () => {
@@ -140,9 +193,9 @@ const CBResponseScreen = (props, { navigation }) => {
 
                     <View style={{ width: '100%', flexDirection: 'row', marginTop: 13 }}>
                         <View style={{ width: '89%', flexDirection: 'row', alignItems: 'center' }}>
-                            <Text style={{ color: Colors.black, fontSize: 14, fontWeight: '100', marginLeft: 20 }}>Applicant</Text>
+                            <Text style={{ color: Colors.black, fontSize: 14, fontWeight: '100', marginLeft: 20 }}>{item.clientType == 'APPL' ? 'Applicant' : item.clientType == 'CO-APPL' ? 'Co-Applicant' : 'Guarantor'}</Text>
                         </View>
-                        <TouchableOpacity onPress={toggleBottomNavigationView}
+                        <TouchableOpacity onPress={() => { showPreView(item.cbResponseHtml) }}
                             style={{ width: '15%', flexDirection: 'row' }}>
                             <View >
                                 <Entypo name='dots-three-vertical' size={20} color={Colors.skyBlue} />
@@ -156,7 +209,7 @@ const CBResponseScreen = (props, { navigation }) => {
                             <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_accholdername}</Text>
                         </View>
                         <View style={{ width: '50%' }}>
-                            <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  Ganishkar</Text>
+                            <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {item.clientName}</Text>
                         </View>
                     </View>
                     <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
@@ -164,7 +217,7 @@ const CBResponseScreen = (props, { navigation }) => {
                             <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_cb}</Text>
                         </View>
                         <View style={{ width: '50%' }}>
-                            <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  152</Text>
+                            <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  High Mark</Text>
                         </View>
                     </View>
                     <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
@@ -172,7 +225,7 @@ const CBResponseScreen = (props, { navigation }) => {
                             <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_dt}</Text>
                         </View>
                         <View style={{ width: '50%' }}>
-                            <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  Hot</Text>
+                            <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  31-07-2023,12:30 PM</Text>
                         </View>
                     </View>
                     <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
@@ -188,13 +241,13 @@ const CBResponseScreen = (props, { navigation }) => {
                             <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_cbsd}</Text>
                         </View>
                         <View style={{ width: '50%' }}>
-                            <View style={styles.pendingbackground}>
+                            <View style={styles.approvedbackground}>
                                 <Text style={{ color: Colors.black, fontSize: 14, fontWeight: '100' }}>Pass</Text>
                             </View>
                         </View>
                     </View>
 
-                    <View style={{ width: '100%', height: 5, backgroundColor: Colors.pendingBorder, marginTop: 13, borderBottomLeftRadius: 8, borderBottomRightRadius: 8 }} />
+                    <View style={{ width: '100%', height: 5, backgroundColor: Colors.approvedBorder, marginTop: 13, borderBottomLeftRadius: 8, borderBottomRightRadius: 8 }} />
 
 
                 </View>
@@ -205,7 +258,8 @@ const CBResponseScreen = (props, { navigation }) => {
 
     return (
 
-        <View style={{ flex: 1, backgroundColor: Colors.approvedBg }}>
+        <View style={{ flex: 1, backgroundColor: '#F3F6F8' }}>
+            {loading ? <Loading /> : null}
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
             <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
             <View style={{ width: '96%', height: 50, alignItems: 'center' }}>
@@ -248,7 +302,7 @@ const CBResponseScreen = (props, { navigation }) => {
                     </View>
                     <View style={{ height: 1, width: '100%', backgroundColor: Colors.line }} />
 
-                    <TouchableOpacity onPress={() => alert('hi')}>
+                    <TouchableOpacity onPress={() => { props.navigation.navigate('CBPreview', { htmlcontent: htmlContent }) }}>
                         <View style={{ width: '100%', flexDirection: 'row', marginTop: 10 }}>
                             <View style={{ padding: 15 }}>
                                 <FontAwesome name='arrows' size={20} color={Colors.skyBlue} />

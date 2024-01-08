@@ -119,6 +119,8 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
   const [systemMandatoryField, setSystemMandatoryField] = useState(props.mobilecodedetail.processSystemMandatoryFields);
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [apiError, setApiError] = useState('');
+  const [pageId, setPageId] = useState(global.CURRENTPAGEID);
+
 
   useEffect(() => {
     props.navigation
@@ -127,6 +129,11 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
     makeSystemMandatoryFields();
     getSystemCodeDetail();
     getSavedData()
+
+    if (global.USERTYPEID == 1163) {
+      setEarningFrequencyDisable(true);
+      setEarningTypeDisable(true);
+    }
 
     return () =>
       props.navigation
@@ -146,11 +153,35 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
   }
 
   const getSavedData = () => {
+
+
+
+    try {
+      const filteredClients = global.LEADTRACKERDATA.clientDetail.filter((client) => client.clientType === global.CLIENTTYPE);
+
+      if (filteredClients.length > 0) {
+        if (filteredClients[0].clientFinancialDetail != undefined) {
+          setEarningFrequencyLabel(filteredClients[0].clientFinancialDetail.earningFrequency)
+          setEarningTypeLabel(filteredClients[0].clientFinancialDetail.earningType)
+        }
+      }
+    }
+    catch (err) {
+
+    }
+
+    let totalExpenses = 0, totalOtherexpense = 0, totalIncome = 0, totalotherIncome = 0;
     tbl_finexpdetails.getFinExpDetails(global.LOANAPPLICATIONID,
       global.CLIENTID,
       global.CLIENTTYPE, 'BUSINESS_INCOME').then(data => {
         if (global.DEBUG_MODE) console.log('BUSINESS_INCOME Detail:', JSON.stringify(data));
-        setIncomeList(data)
+        const newData = data.map(item => {
+          const extraJson = { colorCode: 'Green' };
+          totalIncome += parseInt(item.Amount);
+          return { ...item, ...extraJson };
+        });
+        setIncomeList(newData)
+        setTotalBusineesIncome(totalIncome)
       })
       .catch(error => {
         if (global.DEBUG_MODE) console.error('Error fetching BUSINESS_INCOME details:', error);
@@ -159,7 +190,14 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
       global.CLIENTID,
       global.CLIENTTYPE, 'OTHER_SOURCE_INCOME').then(data => {
         if (global.DEBUG_MODE) console.log('OTHER_SOURCE_INCOME Detail:', JSON.stringify(data));
-        setotherIncomeList(data)
+        const newData = data.map(item => {
+          const extraJson = { colorCode: 'Green' };
+          totalotherIncome += parseInt(item.Amount);
+          return { ...item, ...extraJson };
+        });
+
+        setOtherTotalIncome(totalotherIncome);
+        setotherIncomeList(newData)
       })
       .catch(error => {
         if (global.DEBUG_MODE) console.error('Error fetching OTHER_SOURCE_INCOME details:', error);
@@ -168,7 +206,13 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
       global.CLIENTID,
       global.CLIENTTYPE, 'BUSINESS_EXPENSES').then(data => {
         if (global.DEBUG_MODE) console.log('BUSINESS_EXPENSES Detail:', JSON.stringify(data));
-        setExpenseList(data)
+        const newData = data.map(item => {
+          const extraJson = { colorCode: 'Red' };
+          totalExpenses += parseInt(item.Amount);
+          return { ...item, ...extraJson };
+        });
+        setTotalBusineesExpenses(totalExpenses)
+        setExpenseList(newData);
       })
       .catch(error => {
         if (global.DEBUG_MODE) console.error('Error fetching BUSINESS_EXPENSES details:', error);
@@ -177,21 +221,27 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
       global.CLIENTID,
       global.CLIENTTYPE, 'OTHER_SOURCE_EXPENSES').then(data => {
         if (global.DEBUG_MODE) console.log('OTHER_SOURCE_EXPENSES Detail:', JSON.stringify(data));
-        setotherExpenseList(data)
+        const newData = data.map(item => {
+          const extraJson = { colorCode: 'Red' };
+          totalOtherexpense += parseInt(item.Amount);
+          return { ...item, ...extraJson };
+        });
+        setOtherTotalExpense(totalOtherexpense)
+        setotherExpenseList(newData)
       })
       .catch(error => {
         if (global.DEBUG_MODE) console.error('Error fetching OTHER_SOURCE_EXPENSES details:', error);
       });
 
-    tbl_finexpdetails.getFinExpDetailsAll(global.LOANAPPLICATIONID,
-      global.CLIENTID,
-      global.CLIENTTYPE).then(data => {
-        if (global.DEBUG_MODE) console.log('All Detail:', JSON.stringify(data));
-        setotherExpenseList(data)
-      })
-      .catch(error => {
-        if (global.DEBUG_MODE) console.error('Error fetching OTHER_SOURCE_EXPENSES details:', error);
-      });
+    // tbl_finexpdetails.getFinExpDetailsAll(global.LOANAPPLICATIONID,
+    //   global.CLIENTID,
+    //   global.CLIENTTYPE).then(data => {
+    //     if (global.DEBUG_MODE) console.log('All Detail:', JSON.stringify(data));
+    //     setotherExpenseList(data)
+    //   })
+    //   .catch(error => {
+    //     if (global.DEBUG_MODE) console.error('Error fetching OTHER_SOURCE_EXPENSES details:', error);
+    //   });
   }
 
 
@@ -199,7 +249,41 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
     props.navigation.replace('LoanApplicationMain', { fromScreen: 'LoanFinancialDetail' })
   }
 
-  const makeSystemMandatoryFields = () => { };
+  const makeSystemMandatoryFields = () => {
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ern_typ' && data.pageId === pageId).map((value, index) => {
+
+      if (value.mandatory) {
+        setEarningTypeMan(true);
+      }
+      if (value.hide) {
+        setEarningTypeVisible(false);
+      }
+      if (value.disable) {
+        setEarningTypeDisable(true);
+      }
+      if (value.captionChange) {
+        setEarningTypeCaption(value[0].fieldCaptionChange)
+      }
+    });
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ern_frq' && data.pageId === pageId).map((value, index) => {
+
+      if (value.mandatory) {
+        setEarningFrequencyMan(true);
+      }
+      if (value.hide) {
+        setEarningFrequencyVisible(false);
+      }
+      if (value.disable) {
+        setEarningFrequencyDisable(true);
+      }
+      if (value.captionChange) {
+        setEarningFrequencyCaption(value[0].fieldCaptionChange)
+      }
+    });
+
+  };
 
   const validate = () => {
     var flag = false;
@@ -381,13 +465,14 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
 
           </View>
 
-          <View>
-            <MaterialCommunityIcons
-              name="delete"
-              size={20}
-              onPress={() => { deleteIncomeList(item) }}
-              color="#F76464"></MaterialCommunityIcons>
-          </View>
+          {global.USERTYPEID == 1164 &&
+            <View>
+              <MaterialCommunityIcons
+                name="delete"
+                size={20}
+                onPress={() => { deleteIncomeList(item) }}
+                color="#F76464"></MaterialCommunityIcons>
+            </View>}
 
         </View>
 
@@ -397,6 +482,11 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
   }
 
   const callFinancialData = () => {
+
+    if (global.USERTYPEID == 1163) {
+      navigatetoBank();
+      return;
+    }
 
     postFinancialData();
 
@@ -479,6 +569,19 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
     }
   }
 
+  const navigatetoBank = async () => {
+    var page = '';
+    if (global.CLIENTTYPE == 'APPL') {
+      page = 'DMGRC_APPL_BNK_DTLS';
+    } else if (global.CLIENTTYPE == 'CO-APPL') {
+      page = 'DMGRC_COAPPL_BNK_DTLS';
+    } else if (global.CLIENTTYPE == 'GRNTR') {
+      page = 'DMGRC_GRNTR_BNK_DTLS';
+    }
+    await Common.getPageID(global.FILTEREDPROCESSMODULE, page)
+    props.navigation.replace('BankList');
+  }
+
   const updateLoanStatus = () => {
 
     var module = ''; var page = '';
@@ -520,7 +623,7 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
           global.COMPLETEDMODULE = 'LN_DMGP_GRNTR';
           global.COMPLETEDPAGE = 'DMGRC_GRNTR_FNCL_DTLS';
         }
-        props.navigation.replace('BankList');
+        navigatetoBank();
       })
       .catch(error => {
         // Handle the error
@@ -702,24 +805,26 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
             />
           </View>
 
+          {global.USERTYPEID == 1164 &&
+            <View
+              style={{
+                marginTop: 25,
+                width: '90%',
+                flexDirection: 'row',
+                justifyContent: 'flex-end',
+              }}>
 
-          <View
-            style={{
-              marginTop: 25,
-              width: '90%',
-              flexDirection: 'row',
-              justifyContent: 'flex-end',
-            }}>
-            <TouchableOpacity onPress={() => showIncomeSheet('Income')}>
-              <Text
-                style={{
-                  color: Colors.darkblue,
-                  fontFamily: 'Poppins-Medium'
-                }}>
-                + Add Income
-              </Text>
-            </TouchableOpacity>
-          </View>
+              <TouchableOpacity onPress={() => showIncomeSheet('Income')}>
+                <Text
+                  style={{
+                    color: Colors.darkblue,
+                    fontFamily: 'Poppins-Medium'
+                  }}>
+                  + Add Income
+                </Text>
+              </TouchableOpacity>
+
+            </View>}
 
           {incomeList.length > 0 &&
             <View style={{ width: '100%', marginTop: '3%', alignItems: 'center' }}>
@@ -769,24 +874,25 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
             />
           </View>
 
-          <View
-            style={{
-              marginTop: 25,
-              width: '90%',
-              flexDirection: 'row',
-              justifyContent: 'flex-end',
-            }}>
-            <TouchableOpacity onPress={() => showIncomeSheet('OtherIncome')}>
-              <Text
-                style={{
-                  color: Colors.darkblue,
-                  fontFamily: 'Poppins-Medium'
-                }}>
-                + Add Other Income
-              </Text>
-            </TouchableOpacity>
-          </View>
-
+          {global.USERTYPEID == 1164 &&
+            <View
+              style={{
+                marginTop: 25,
+                width: '90%',
+                flexDirection: 'row',
+                justifyContent: 'flex-end',
+              }}>
+              <TouchableOpacity onPress={() => showIncomeSheet('OtherIncome')}>
+                <Text
+                  style={{
+                    color: Colors.darkblue,
+                    fontFamily: 'Poppins-Medium'
+                  }}>
+                  + Add Other Income
+                </Text>
+              </TouchableOpacity>
+            </View>
+          }
           {otherIncomeList.length > 0 &&
             <View style={{ width: '100%', marginTop: '3%', alignItems: 'center' }}>
               <View style={{ width: '90%', marginTop: 10 }}>
@@ -876,24 +982,24 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
             />
           </View>
 
-
-          <View
-            style={{
-              marginTop: 25,
-              width: '90%',
-              flexDirection: 'row',
-              justifyContent: 'flex-end',
-            }}>
-            <TouchableOpacity onPress={() => showIncomeSheet('Expenses')}>
-              <Text
-                style={{
-                  color: Colors.darkblue,
-                  fontFamily: 'Poppins-Medium'
-                }}>
-                + Add Expenses
-              </Text>
-            </TouchableOpacity>
-          </View>
+          {global.USERTYPEID == 1164 &&
+            <View
+              style={{
+                marginTop: 25,
+                width: '90%',
+                flexDirection: 'row',
+                justifyContent: 'flex-end',
+              }}>
+              <TouchableOpacity onPress={() => showIncomeSheet('Expenses')}>
+                <Text
+                  style={{
+                    color: Colors.darkblue,
+                    fontFamily: 'Poppins-Medium'
+                  }}>
+                  + Add Expenses
+                </Text>
+              </TouchableOpacity>
+            </View>}
 
           {expenseList.length > 0 &&
             <View style={{ width: '100%', marginTop: '3%', alignItems: 'center' }}>
@@ -944,23 +1050,24 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
             />
           </View>
 
-          <View
-            style={{
-              marginTop: 25,
-              width: '90%',
-              flexDirection: 'row',
-              justifyContent: 'flex-end',
-            }}>
-            <TouchableOpacity onPress={() => showIncomeSheet('OtherExpense')}>
-              <Text
-                style={{
-                  color: Colors.darkblue,
-                  fontFamily: 'Poppins-Medium'
-                }}>
-                + Add Other Expenses
-              </Text>
-            </TouchableOpacity>
-          </View>
+          {global.USERTYPEID == 1164 &&
+            <View
+              style={{
+                marginTop: 25,
+                width: '90%',
+                flexDirection: 'row',
+                justifyContent: 'flex-end',
+              }}>
+              <TouchableOpacity onPress={() => showIncomeSheet('OtherExpense')}>
+                <Text
+                  style={{
+                    color: Colors.darkblue,
+                    fontFamily: 'Poppins-Medium'
+                  }}>
+                  + Add Other Expenses
+                </Text>
+              </TouchableOpacity>
+            </View>}
 
           {otherExpenseList.length > 0 &&
             <View style={{ width: '100%', marginTop: '3%', alignItems: 'center' }}>

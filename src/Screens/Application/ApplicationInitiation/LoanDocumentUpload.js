@@ -79,125 +79,18 @@ const LoanDocumentUpload = (props, { navigation }) => {
     const [imageFile, setImageFile] = useState([]);
     const [hideRetake, setHideRetake] = useState(false);
     const [hideDelete, setHideDelete] = useState(false);
+    const [processModuleLength, setProcessModuleLength] = useState(global.FILTEREDPROCESSMODULE.length);
 
-    const iData = [
-        {
-            "maxSizeAccepted": 5,
-            "sizeCompressionRequiredForImages": true,
-            "compressionPercentage": 20,
-            "genericMasterDtoList": [
-                {
-                    "id": 1140,
-                    "genericName": "Aadhaar Card",
-                    "genericType": "LOAN_DOCUMENT_TYPE",
-                    "subCode": "AADHAAR_CARD",
-                    "isDocumentMandatory": true,
-                    "documentformatAccepted": [
-                        {
-                            "isActive": true,
-                            "id": 185,
-                            "subCodeId": "PDF",
-                            "label": "PDF",
-                            "displayOrder": 0,
-                            "isDefault": 0
-                        },
-                        {
-                            "isActive": true,
-                            "id": 187,
-                            "subCodeId": "JPG/JPEG",
-                            "label": "JPG/JPEG",
-                            "displayOrder": 2,
-                            "isDefault": 2
-                        }
-                    ],
-                    "parentId": 442,
-                    "documentCategoryName": "INDIVIDUAL KYC DOCUMENTS",
-                    "documentCategoryCode": "INDIVIDUAL_KYC_DOCUMENTS",
-                    "workflowStageId": 504
-                },
-                {
-                    "id": 1095,
-                    "genericName": "Income Tax Return (ITR) ",
-                    "genericType": "LOAN_DOCUMENT_TYPE",
-                    "subCode": "INCOME_TAX_RETURN_ITR_LAST_TWO_YEARS",
-                    "isDocumentMandatory": false,
-                    "documentformatAccepted": [
-                        {
-                            "isActive": true,
-                            "id": 185,
-                            "subCodeId": "PDF",
-                            "label": "PDF",
-                            "displayOrder": 0,
-                            "isDefault": 0
-                        },
-                        {
-                            "isActive": true,
-                            "id": 187,
-                            "subCodeId": "JPG/JPEG",
-                            "label": "JPG/JPEG",
-                            "displayOrder": 2,
-                            "isDefault": 2
-                        },
-                        {
-                            "isActive": true,
-                            "id": 188,
-                            "subCodeId": "DOC",
-                            "label": "DOC",
-                            "displayOrder": 3,
-                            "isDefault": 3
-                        },
-                        {
-                            "isActive": true,
-                            "id": 335,
-                            "subCodeId": "XLS",
-                            "label": "XLS",
-                            "displayOrder": 0,
-                            "isDefault": 0
-                        }
-                    ],
-                    "parentId": 446,
-                    "documentCategoryName": "INDIVIDUAL FINANCIAL DOCUMENT",
-                    "documentCategoryCode": "INDIVIDUAL_FINANCIAL_DOCUMENT",
-                    "workflowStageId": 504
-                }
-            ]
-        }
-    ]
 
-    const [documentList, setDocumentList] = useState(iData[0].genericMasterDtoList);
+
+    const [documentList, setDocumentList] = useState([]);
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
 
-        //getDocuments();
+        getDocuments();
         //alert(JSON.stringify(iData[0].genericMasterDtoList))
-        const organizedData = documentList.reduce((acc, installment) => {
-            const code = installment.documentCategoryCode;
-
-            // Check if the year is already present in the accumulator
-            const existingCode = acc.find(item => item.documentCategoryCode === code);
-
-            if (existingCode) {
-                // If the year exists, push the installment to its data array
-                const extraJSON = { dmsID: '', isImagePresent: false };
-                existingCode.data.push({
-                    ...installment, ...extraJSON
-                });
-            } else {
-                // If the year does not exist, create a new entry with the year and data array
-                const extraJSON = { dmsID: '', isImagePresent: false };
-                acc.push({
-                    code,
-                    dataNew: [{ ...installment, ...extraJSON }],
-                    isSelected: false
-                });
-            }
-
-            return acc;
-        }, []);
-        console.log("OrganizedData::" + JSON.stringify(organizedData))
-        setDocumentList(organizedData)
 
 
 
@@ -212,8 +105,9 @@ const LoanDocumentUpload = (props, { navigation }) => {
         return true; // Prevent default back button behavior
     };
 
-    const pickDocument = (data) => {
-
+    const pickDocument = (item) => {
+        setphotoOptionvisible(true)
+        setCurrentPhotoItem(item)
     }
 
     const previewImage = () => {
@@ -284,24 +178,32 @@ const LoanDocumentUpload = (props, { navigation }) => {
     const FlatView = ({ item }) => {
 
         return (
-            <View style={{ marginLeft: 10, marginRight: 10 }}>
+            <View style={{ width: '100%' }}>
                 <View
                     style={{
-                        width: '100%',
+                        width: '94%',
                         alignItems: 'center',
                     }}>
                     <View
                         style={{
-                            width: '90%',
+                            width: '95%',
                             flexDirection: 'row',
                             alignItems: 'center',
                             marginTop: 20,
                         }}>
                         <TouchableOpacity style={{ width: '20%', }}
-                            onPress={() => pickDocument(item)} activeOpacity={5}>
-                            <View >
-                                <ImageComp imageSrc={require('../../../Images/profile_user.png')} imageStylee={{ width: 30, height: 30 }} />
-                            </View>
+                            onPress={() => pickDocument(item)} activeOpacity={0.8}>
+                            {item.dmsID.length > 0 ?
+                                <View style={{ width: 40, height: 40, backgroundColor: '#DBDBDB', borderRadius: 10, justifyContent: 'center', alignItems: 'center' }}>
+                                    <ImageComp imageSrc={require('../../../Images/cloudcomputing.png')} imageStylee={{ width: 28, height: 22 }} />
+                                </View>
+
+                                : <View style={{ width: 40, height: 40, backgroundColor: '#DBDBDB', borderRadius: 10, justifyContent: 'center', alignItems: 'center' }}>
+                                    <ImageComp imageSrc={require('../../../Images/cloudcomputing.png')} imageStylee={{ width: 28, height: 22 }} />
+                                </View>
+                            }
+
+
                         </TouchableOpacity>
 
 
@@ -311,16 +213,20 @@ const LoanDocumentUpload = (props, { navigation }) => {
                             </Text>
                         </View>
                         <View style={{ width: '10%', }}>
-                            {item.isDocumentMandatory ?
-                                <MaterialIcons name='verified' size={20} color={Colors.green} /> :
-                                <Octicons name='unverified' size={20} color={Colors.red} />}
+                            {item.dmsID.length > 0 &&
+                                <MaterialIcons name='verified' size={20} color={Colors.green} />}
+                            {/* // : <Octicons name='unverified' size={20} color={Colors.red} />} */}
 
                         </View>
 
                         <TouchableOpacity style={{ width: '10%', }}
-                            onPress={() => showImageBottomSheet(item)} activeOpacity={0.8}>
+                            onPress={() => {
+                                if (item.dmsID.length > 0) {
+                                    showImageBottomSheet(item)
+                                }
+                            }} activeOpacity={0.8}>
                             <View >
-                                <Entypo name='dots-three-vertical' size={20} color={Colors.black} />
+                                <Entypo name='dots-three-vertical' size={20} color={item.dmsID.length > 0 ? Colors.darkblue : Colors.black} />
                             </View>
                         </TouchableOpacity>
                     </View>
@@ -525,7 +431,14 @@ const LoanDocumentUpload = (props, { navigation }) => {
 
     const updateDmsID = () => {
         const appDetailsFinal = []
-
+        var worksubstage = '';
+        if (global.CLIENTTYPE == 'APPL') {
+            worksubstage = 'DOC_UPLD_APPLCNT'
+        } else if (global.CLIENTTYPE == 'CO-APPL') {
+            worksubstage = 'DOC_UPLD_COAPPLCNT'
+        } else if (global.CLIENTTYPE == 'GRNTR') {
+            worksubstage = 'DOC_UPLD_GRNTR'
+        }
         documentList.map((item) => {
             const newDataArray = [...item.dataNew];
             for (let i = 0; i < newDataArray.length; i++) {
@@ -533,8 +446,8 @@ const LoanDocumentUpload = (props, { navigation }) => {
                     const appDetails = {
                         "isActive": true,
                         "loanApplicationId": 331,
-                        "clientId": 262,
-                        "clientType": "GRNTR",
+                        "clientId": global.CLIENTID,
+                        "clientType": global.CLIENTTYPE,
                         "dmsId": parseInt(newDataArray[i].dmsID),
                         "documentType": newDataArray[i].genericType,
                         "documentName": newDataArray[i].documentCategoryName,
@@ -542,7 +455,7 @@ const LoanDocumentUpload = (props, { navigation }) => {
                         "passwordRequired": false,
                         "documentCategory": newDataArray[i].documentCategoryCode,
                         "workflowStageId": "LN_APP_INITIATION",
-                        "workflowSubStageId": "DOC_UPLD_GRNTR"
+                        "workflowSubStageId": worksubstage
                     }
                     appDetailsFinal.push(appDetails)
                 }
@@ -553,7 +466,7 @@ const LoanDocumentUpload = (props, { navigation }) => {
         console.log('FinalResult::' + JSON.stringify(appDetailsFinal))
 
 
-        const baseURL = '';
+        const baseURL = '8901';
         setLoading(true);
         apiInstancelocal(baseURL)
             .post(`/api/v2/applicant-document-detail`, appDetailsFinal)
@@ -562,7 +475,25 @@ const LoanDocumentUpload = (props, { navigation }) => {
 
                 if (global.DEBUG_MODE) console.log('UpdateDMSIDResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
+                if (processModuleLength == 1) {
 
+                } else if (processModuleLength == 2) {
+                    if (global.CLIENTTYPE == 'APPL') {
+                        updateLoanStatus();
+                    } else if (global.CLIENTTYPE == 'CO-APPL') {
+                        props.navigation.replace('FinalConsentScreen');
+                    } else if (global.CLIENTTYPE == 'GRNTR') {
+                        props.navigation.replace('FinalConsentScreen');
+                    }
+                } else if (processModuleLength == 3) {
+                    if (global.CLIENTTYPE == 'APPL') {
+                        updateLoanStatus();
+                    } else if (global.CLIENTTYPE == 'CO-APPL') {
+                        updateLoanStatus();
+                    } else if (global.CLIENTTYPE == 'GRNTR') {
+                        props.navigation.replace('FinalConsentScreen');
+                    }
+                }
 
             })
             .catch(error => {
@@ -581,8 +512,16 @@ const LoanDocumentUpload = (props, { navigation }) => {
 
         var module = ''; var page = '';
 
-        module = 'NMNE_DTLS';
-        page = 'NMN_DTLS';
+        if (global.CLIENTTYPE == 'APPL') {
+            module = 'DOC_UPLD';
+            page = 'DOC_UPLD_APPLCNT';
+        } else if (global.CLIENTTYPE == 'CO-APPL') {
+            module = 'DOC_UPLD';
+            page = 'DOC_UPLD_COAPPLCNT';
+        } else if (global.CLIENTTYPE == 'GRNTR') {
+            module = 'DOC_UPLD';
+            page = 'DOC_UPLD_GRNTR';
+        }
 
         const appDetails = {
             "loanApplicationId": global.LOANAPPLICATIONID,
@@ -602,11 +541,22 @@ const LoanDocumentUpload = (props, { navigation }) => {
                 if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
 
-                global.COMPLETEDMODULE = 'NMNE_DTLS';
-                global.COMPLETEDPAGE = 'NMN_DTLS';
+                if (global.CLIENTTYPE == 'APPL') {
+                    global.COMPLETEDMODULE = 'DOC_UPLD';
+                    global.COMPLETEDPAGE = 'DOC_UPLD_APPLCNT';
+                    props.navigation.replace('LoanApplicationMain', { fromScreen: 'BankList' });
+                } else if (global.CLIENTTYPE == 'CO-APPL') {
+                    global.COMPLETEDMODULE = 'DOC_UPLD';
+                    global.COMPLETEDPAGE = 'DOC_UPLD_COAPPLCNT';
+                    props.navigation.replace('LoanApplicationMain', { fromScreen: 'BankList' });
+                } else if (global.CLIENTTYPE == 'GRNTR') {
+                    global.COMPLETEDSUBSTAGE = 'BRE';
+                    global.COMPLETEDMODULE = 'DOC_UPLD';
+                    global.COMPLETEDPAGE = 'DOC_UPLD_GRNTR';
+                    props.navigation.replace('FinalConsentScreen');
+                }
 
 
-                props.navigation.replace('LoanApplicationMain', { fromScreen: 'BankList' });
 
 
             })
@@ -626,8 +576,8 @@ const LoanDocumentUpload = (props, { navigation }) => {
 
 
         const appDetails = {
-            "loanApplicationId": '331',
-            "clientType": 'APPL',
+            "loanApplicationId": global.LOANAPPLICATIONID,
+            "clientType": global.CLIENTTYPE,
             "workflowStage": "LN_APP_INITIATION"
         }
         const baseURL = '8096';
@@ -639,7 +589,33 @@ const LoanDocumentUpload = (props, { navigation }) => {
 
                 if (global.DEBUG_MODE) console.log('DocumentApiResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
-                setDocumentList(response.data);
+                const organizedData = response.data[0].genericMasterDtoList.reduce((acc, installment) => {
+                    const code = installment.documentCategoryCode;
+
+                    // Check if the year is already present in the accumulator
+                    const existingCode = acc.find(item => item.documentCategoryCode === code);
+
+                    if (existingCode) {
+                        // If the year exists, push the installment to its data array
+                        const extraJSON = { dmsID: '', isImagePresent: false };
+                        existingCode.data.push({
+                            ...installment, ...extraJSON
+                        });
+                    } else {
+                        // If the year does not exist, create a new entry with the year and data array
+                        const extraJSON = { dmsID: '', isImagePresent: false };
+                        acc.push({
+                            code,
+                            dataNew: [{ ...installment, ...extraJSON }],
+                            isSelected: false
+                        });
+                    }
+
+                    return acc;
+                }, []);
+                console.log("OrganizedData::" + JSON.stringify(organizedData))
+
+                setDocumentList(organizedData);
 
             })
             .catch(error => {
@@ -745,14 +721,18 @@ const LoanDocumentUpload = (props, { navigation }) => {
                     justifyContent: 'center',
                 }}>
                 <HeadComp
-                    textval={language[0][props.language].str_loannomineedtls}
+                    textval={language[0][props.language].str_lndocupload}
                     props={props}
                     onGoBack={onGoBack}
                 />
             </View>
 
             <ChildHeadComp
-                textval={language[0][props.language].str_nomineeDetails}
+                textval={global.CLIENTTYPE == 'APPL'
+                    ? language[0][props.language].str_applicant
+                    : global.CLIENTTYPE == 'CO-APPL'
+                        ? language[0][props.language].str_coapplicant
+                        : language[0][props.language].str_guarantor}
             />
 
 

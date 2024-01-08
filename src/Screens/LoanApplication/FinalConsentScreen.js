@@ -29,26 +29,24 @@ import ErrorModal from '../../Components/ErrorModal';
 import { language } from '../../Utils/LanguageString';
 import Common from '../../Utils/Common';
 import tbl_client from '../../Database/Table/tbl_client';
-import tbl_loanApplication from '../../Database/Table/tbl_loanApplication';
 
-const ConsentScreen = (props, { navigation }) => {
+
+const FinalConsentScreen = (props, { navigation }) => {
 
     const [loading, setLoading] = useState(false);
     const screenWidth = Dimensions.get('window').width;
     const screenHeight = Dimensions.get('window').height;
-    const [userName, setUserName] = useState('');
+    const [mobileNumber, setMobileNumber] = useState('');
     const isScreenVisible = useIsFocused();
 
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const [apiError, setApiError] = useState('');
-    const [leadData, setLeadData] = useState(props.route.params.leadData[0]);
-    const [profileDetail, setProfileDetail] = useState(props.profiledetail.userPersonalDetailsDto);
 
     useEffect(() => {
 
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
-
+        getMobileNumber();
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
             backHandler.remove();
@@ -60,177 +58,66 @@ const ConsentScreen = (props, { navigation }) => {
         return true; // Prevent default back button behavior
     };
 
-    const insertLeadData = async (loanID, tempNum) => {
-        let leadData = props.route.params.leadData[0]
-
-        await tbl_client.insertClient(
-            '',
-            loanID,
-            'APPL',
-            '',
-            leadData.id,
-            leadData.leadCreationBasicDetails.title,
-            leadData.leadCreationBasicDetails.firstName + ' ' + leadData.leadCreationBasicDetails.middleName + ' ' + leadData.leadCreationBasicDetails.lastName,
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            leadData.leadCreationBasicDetails.gender,
-            '',
-            leadData.leadCreationBasicDetails.mobileNumber,
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '0',
-            '0',
-            '0',
-            '',
-            '',
-            '',
-            '',
-            '1',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-        );
-
-        await tbl_loanApplication.insertLoanApplication(
-            loanID,
-            'APPL',
-            tempNum,
-            tempNum,
-            profileDetail.branchId,
-            leadData.id,
-            leadData.leadCreationBasicDetails.customerCategory,
-            '',
-            '',
-            leadData.leadCreationLoanDetails.loanType,
-            leadData.leadCreationLoanDetails.loanPurpose,
-            leadData.leadCreationLoanDetails.loanProduct,
-            leadData.leadCreationLoanDetails.loanAmount,
-            '',
-            '',
-            'true',
-            'true',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-        );
-
-        props.navigation.replace('LoanApplicationMain', { fromScreen: 'ConsentScreen' })
-
+    const getMobileNumber = async () => {
+        await tbl_client
+            .getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
+            .then(data => {
+                if (global.DEBUG_MODE) console.log('Applicant Data:', data);
+                if (data !== undefined && data.length > 0) {
+                    setMobileNumber(data[0].mobileNumber);
+                }
+            })
+            .catch(error => {
+                if (global.DEBUG_MODE)
+                    console.error('Error fetching Applicant details:', error);
+            });
     }
 
-    const callTempID = () => {
-        Common.getNetworkConnection().then(value => {
-            if (value.isConnected == true) {
-                createTempID();
-            } else {
-                setApiError(language[0][props.language].str_errinternet);
-                setErrorModalVisible(true)
-                //alert(language[0][props.language].str_errinternet)
-            }
-
-        })
-    }
-
-    const createTempID = () => {
-
-        const appDetails = {
-            "createdBy": global.USERID,
-            "consent": true,
+    const nextScreen = (value) => {
+        if (value == 'Agree') {
+            generateOTP();
+        } else {
+            props.navigation.goBack()
         }
 
-        const baseURL = '8901'
-        setLoading(true)
-        apiInstance(baseURL).post(`api/v2/profile-short/loan-creation`, appDetails)
-            .then(async (response) => {
+    }
+
+    const generateOTP = () => {
+
+        const appDetails = {
+            "loanApplicationId": global.LOANAPPLICATIONID,
+            "clientId": global.CLIENTID,
+            "generatedFor": `91${mobileNumber}`,
+            "userId": global.USERID,
+            "process": "Profile Short motp",
+            "userType": global.USERTYPEID,
+            "otpType": "23"
+        }
+        const baseURL = '8908';
+        setLoading(true);
+        apiInstance(baseURL)
+            .post('/api/v1/otp/send-otp', appDetails)
+            .then(async response => {
                 // Handle the response data
-                if (global.DEBUG_MODE) console.log("TempIDCreationApiResponse::" + JSON.stringify(response));
+                if (global.DEBUG_MODE) console.log('MobileOTPApiResponse::' + JSON.stringify(response.data),);
+
                 if (response.status == 200) {
-                    if (response.data != null) {
-                        if (global.DEBUG_MODE) console.log("TempIDCreationApiResponse::" + JSON.stringify(response.data));
-                        global.TEMPAPPID = response.data.tempNumber;
-                        global.LOANAPPLICATIONID = response.data.id;
-
-                        if (props.route.params.leadData.length > 0) {
-                            insertLeadData(response.data.id, response.data.tempNumber);
-                        } else {
-                            props.navigation.replace('LoanApplicationMain', { fromScreen: 'ConsentScreen' })
-                        }
-
-                    } else {
-                        setApiError('Not a Valid Response from Api');
-                        setErrorModalVisible(true)
-                    }
+                    props.navigation.navigate('ConsentOTPVerification', { mobileNumber: mobileNumber })
                 }
-                setLoading(false)
-
+                setLoading(false);
 
             })
-            .catch((error) => {
-                setLoading(false)
-                if (global.DEBUG_MODE) console.log("TempIDCreationApiResponse::" + JSON.stringify(error.response));
-                //props.navigation.replace('LoanApplicationMain')
-                //global.TEMPAPPID = '1115153454';
+            .catch(error => {
+                // Handle the error
+                if (global.DEBUG_MODE) console.log('MobileOTPApiResponse::::' + JSON.stringify(error.response));
+                setLoading(false);
                 if (error.response.data != null) {
                     setApiError(error.response.data.message);
                     setErrorModalVisible(true)
                 }
             });
 
-
-
-    }
-
-    const nextScreen = (value) => {
-        if (value == 'Agree') {
-            createTempID();
-        } else {
-            props.navigation.goBack()
-        }
-
-    }
+    };
 
     const closeErrorModal = () => {
         setErrorModalVisible(false);
@@ -332,16 +219,14 @@ const styles = StyleSheet.create({
     },
 });
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
     const { language } = state.languageReducer;
-    const { profileDetails } = state.profileReducer;
-    const { mobileCodeDetails } = state.mobilecodeReducer;
+    const { profiledetail } = state.profileReducer;
     return {
         language: language,
-        profiledetail: profileDetails,
-        mobilecodedetail: mobileCodeDetails,
-    };
-};
+        profiledetail: profiledetail,
+    }
+}
 
 const mapDispatchToProps = (dispatch) => ({
     languageAction: (item) => dispatch(languageAction(item)),
@@ -349,5 +234,5 @@ const mapDispatchToProps = (dispatch) => ({
 });
 
 
-export default connect(mapStateToProps, mapDispatchToProps)(ConsentScreen);
+export default connect(mapStateToProps, mapDispatchToProps)(FinalConsentScreen);
 

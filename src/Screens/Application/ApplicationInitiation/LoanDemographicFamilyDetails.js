@@ -228,6 +228,7 @@ const LoanDemographicFamilyDetails = (props) => {
 
 
     const [aadharNumber, setAadharNumber] = useState('');
+    const [pageId, setPageId] = useState(global.CURRENTPAGEID);
 
     const [dedupeModalVisible, setDedupeModalVisible] = useState(false);
     const [isDedupeDone, setIsDedupeDone] = useState(false);
@@ -267,7 +268,6 @@ const LoanDemographicFamilyDetails = (props) => {
         setFamilyDetailAvailable(true);
         setFamilyID(data[0].id)
         setRelationTypeLabel(data[0].relationTypeId);
-        setRelationTypeDisable(true);
         setTitleLabel(data[0].titleId);
         setName(data[0].firstName);
         setGenderLabel(data[0].genderId);
@@ -297,6 +297,7 @@ const LoanDemographicFamilyDetails = (props) => {
 
             if (global.USERTYPEID == 1163) {
                 setOnlyView(true);
+                fieldsDisable();
             }
 
 
@@ -338,19 +339,24 @@ const LoanDemographicFamilyDetails = (props) => {
             });
 
 
+
+
     }
 
     const fieldsDisable = () => {
-
+        setRelationTypeDisable(true);
         setTitleDisable(true);
         setNameDisable(true);
         setGenderDisable(true);
+        setDOBDisable(true);
+        setAgeDisable(true);
+        setMobileNumberDisable(true);
         setKycType1Disable(true);
         setKycType2Disable(true);
         setKycType3Disable(true);
         setKycType4Disable(true);
-        setMobileNumberDisable(true);
-        setRelationTypeDisable(true);
+        setRelationStatuswithCOAPPDisable(true);
+        setRelationStatuswithGRNTRDisable(true);
     }
 
     const getSystemCodeDetail = async () => {
@@ -560,7 +566,7 @@ const LoanDemographicFamilyDetails = (props) => {
 
     const makeSystemMandatoryFields = async () => {
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_relationType' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_rlt_type' && data.pageId === pageId).map((value, index) => {
             setRelationTypeCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -577,7 +583,7 @@ const LoanDemographicFamilyDetails = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_relationTypecoapp' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_rlt_typeco' && data.pageId === pageId).map((value, index) => {
             setRelationStatuswithCOAPPCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -594,7 +600,7 @@ const LoanDemographicFamilyDetails = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_relationTypegrntr' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_rlt_typegrntr' && data.pageId === pageId).map((value, index) => {
             setRelationStatuswithGRNTRCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -611,7 +617,7 @@ const LoanDemographicFamilyDetails = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_gender' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_gender' && data.pageId === pageId).map((value, index) => {
             setGenderCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -629,7 +635,7 @@ const LoanDemographicFamilyDetails = (props) => {
         });
 
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_title' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_title' && data.pageId === pageId).map((value, index) => {
             setTitleCaption(value.fieldName)
             if (value.mandatory) {
                 setTitleMan(true);
@@ -645,7 +651,7 @@ const LoanDemographicFamilyDetails = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_name' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_name' && data.pageId === pageId).map((value, index) => {
             setNameCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -662,7 +668,7 @@ const LoanDemographicFamilyDetails = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_mbl_no' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_mbl_no' && data.pageId === pageId).map((value, index) => {
             setMobileNumberCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -679,7 +685,7 @@ const LoanDemographicFamilyDetails = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_dob' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_date_of_birth' && data.pageId === pageId).map((value, index) => {
             setDOBCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -696,7 +702,7 @@ const LoanDemographicFamilyDetails = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_age' && data.pageId === 1).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_age' && data.pageId === pageId).map((value, index) => {
             setAgeCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -740,6 +746,7 @@ const LoanDemographicFamilyDetails = (props) => {
                     "dateOfBirth": DOB.length > 0 ? Common.convertYearDateFormat(DOB) : '',
                     "age": Age,
                     "mobileNumber": mobileNumber,
+                    "gender": genderLabel,
                     "kycTypeId1": KycType1Label,
                     "kycIdValue1": kycID1,
                     "kycType1ExpiryDate": expiryDate1.length > 0 ? Common.convertYearDateFormat(expiryDate1) : '',
@@ -795,6 +802,7 @@ const LoanDemographicFamilyDetails = (props) => {
                 "name": Name,
                 "dateOfBirth": DOB.length > 0 ? Common.convertYearDateFormat(DOB) : '',
                 "age": Age,
+                "gender": genderLabel,
                 "mobileNumber": mobileNumber,
                 "kycTypeId1": KycType1Label,
                 "kycIdValue1": kycID1,
@@ -870,7 +878,7 @@ const LoanDemographicFamilyDetails = (props) => {
                     global.COMPLETEDMODULE = 'LN_DMGP_APLCT';
                     global.COMPLETEDPAGE = 'DMGRC_APPL_FMLY_DTLS';
                 }
-                props.navigation.replace('FamilyDetailList');
+
             })
             .catch(error => {
                 // Handle the error
@@ -889,8 +897,8 @@ const LoanDemographicFamilyDetails = (props) => {
     const insertData = async (id) => {
 
         await tbl_familydetails.insertFamilyDetails(id, global.LOANAPPLICATIONID, 'APPL', relationTypeLabel, titleLabel, Name, '', '', DOB, Age, genderLabel, mobileNumber, KycType1Label, kycID1, expiryDate1, KycType2Label, kycID2, expiryDate2, KycType3Label, kycID3, expiryDate3, KycType4Label, kycID4, expiryDate4, '0', relationStatuswithCOAPPLabel, relationStatuswithGRNTRLabel);
-
-        updateLoanStatus();
+        props.navigation.replace('FamilyDetailList');
+        // updateLoanStatus();
 
     }
 
@@ -1139,6 +1147,57 @@ const LoanDemographicFamilyDetails = (props) => {
             }
         }
 
+        if (KycType2Label == '007') {
+            if (kycID2.length > 0) {
+                if (!Common.isValidPAN(kycID2)) {
+                    errorMessage =
+                        errorMessage +
+                        i +
+                        ')' +
+                        ' ' +
+                        language[0][props.language].str_plsenter +
+                        'Valid PAN' +
+                        '\n';
+                    i++;
+                    flag = true;
+                }
+            }
+        }
+
+        if (KycType3Label == '007') {
+            if (kycID3.length > 0) {
+                if (!Common.isValidPAN(kycID3)) {
+                    errorMessage =
+                        errorMessage +
+                        i +
+                        ')' +
+                        ' ' +
+                        language[0][props.language].str_plsenter +
+                        'Valid PAN' +
+                        '\n';
+                    i++;
+                    flag = true;
+                }
+            }
+        }
+
+        if (KycType4Label == '007') {
+            if (kycID4.length > 0) {
+                if (!Common.isValidPAN(kycID4)) {
+                    errorMessage =
+                        errorMessage +
+                        i +
+                        ')' +
+                        ' ' +
+                        language[0][props.language].str_plsenter +
+                        'Valid PAN' +
+                        '\n';
+                    i++;
+                    flag = true;
+                }
+            }
+        }
+
         if (relationStatuswithCOAPPMan && relationStatuswithCOAPPVisible) {
             if (relationStatuswithCOAPPLabel.length <= 0) {
                 errorMessage =
@@ -1166,6 +1225,22 @@ const LoanDemographicFamilyDetails = (props) => {
                     '\n';
                 i++;
                 flag = true;
+            }
+        }
+
+        if (titleVisible && genderVisible) {
+            if (titleLabel === 'MR') {
+                if (genderLabel == 'F') {
+                    errorMessage = errorMessage + i + ')' + ' ' + titleCaption + ' AND ' + genderCaption + ' Not matching' + '\n';
+                    i++;
+                    flag = true;
+                }
+            } else if (titleLabel === 'MRS' || titleLabel === 'MISS') {
+                if (genderLabel == 'M') {
+                    errorMessage = errorMessage + i + ')' + ' ' + titleCaption + ' AND ' + genderCaption + ' Not matching' + '\n';
+                    i++;
+                    flag = true;
+                }
             }
         }
 
@@ -1246,6 +1321,7 @@ const LoanDemographicFamilyDetails = (props) => {
         if (componentName == 'KycType1Picker') {
             setKycType1Label(label);
             setKycType1Index(index);
+            setkycID1('');
             if (label == '001') {
                 setkycNumberTypeID1('numeric')
             } else {
@@ -1260,6 +1336,7 @@ const LoanDemographicFamilyDetails = (props) => {
         } else if (componentName == 'KycType2Picker') {
             setKycType2Label(label);
             setKycType2Index(index);
+            setkycID2('');
             if (label == '001') {
                 setkycNumberTypeID2('numeric')
             } else {
@@ -1274,6 +1351,7 @@ const LoanDemographicFamilyDetails = (props) => {
         } else if (componentName == 'KycType3Picker') {
             setKycType3Label(label);
             setKycType3Index(index);
+            setkycID3('');
             if (label == '001') {
                 setkycNumberTypeID3('numeric')
             } else {
@@ -1288,6 +1366,7 @@ const LoanDemographicFamilyDetails = (props) => {
         } else if (componentName == 'KycType4Picker') {
             setKycType4Label(label);
             setKycType4Index(index);
+            setkycID4('');
             if (label == '001') {
                 setkycNumberTypeID4('numeric')
             } else {
@@ -1488,7 +1567,7 @@ const LoanDemographicFamilyDetails = (props) => {
                                     handleClick={handleClick}
                                     Disable={DOBDisable}
                                     reference={DOBRef}
-                                    minDate={new Date()}
+                                    maxDate={new Date()}
                                     handleReference={handleReference} />
                             </View>
                             {/* <TextInputComp

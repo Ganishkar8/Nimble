@@ -91,22 +91,23 @@ const deleteAllLeadCreationLoanDetails = async () => {
     }
 };
 
-const deleteLeadCreationLoanDetailsBasedOnID = async () => {
-    try {
+const deleteLeadCreationLoanDetailsBasedOnID = async (leadid) => {
+    const db = databaseInstance.getInstance();
 
-        const db = databaseInstance.getInstance();  // Execute the DELETE query
-
-        const query = `DELETE FROM ${tableName} WHERE lead_id = ?`;
-
-        const [rowsAffected] = await db.executeSql(query);
-
-        console.log(`${rowsAffected} records deleted`);
-
-
-
-    } catch (error) {
-        console.error('Error deleting records:', error);
-    }
+    return new Promise((resolve, reject) => {
+        db.transaction(tx => {
+            tx.executeSql(
+                `DELETE FROM ${tableName} WHERE lead_id = ?`,
+                [leadid],
+                (_, result) => {
+                    resolve('record Deleted');
+                },
+                error => {
+                    reject(error);
+                }
+            );
+        });
+    });
 };
 
 export default {
