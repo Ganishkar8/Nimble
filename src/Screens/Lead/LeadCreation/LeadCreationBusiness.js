@@ -39,7 +39,6 @@ import tbl_SystemCodeDetails from '../../../Database/Table/tbl_SystemCodeDetails
 import tbl_SystemMandatoryFields from '../../../Database/Table/tbl_SystemMandatoryFields';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Modal from 'react-native-modal';
-import apiInstance from '../../../Utils/apiInstance';
 import PickerComp from '../../../Components/PickerComp';
 import TextInputComp from '../../../Components/TextInputComp';
 import Common from '../../../Utils/Common';
