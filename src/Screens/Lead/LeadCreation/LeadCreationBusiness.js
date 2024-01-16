@@ -39,7 +39,7 @@ import tbl_SystemCodeDetails from '../../../Database/Table/tbl_SystemCodeDetails
 import tbl_SystemMandatoryFields from '../../../Database/Table/tbl_SystemMandatoryFields';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Modal from 'react-native-modal';
-import apiInstancelocal from '../../../Utils/apiInstancelocal';
+import apiInstance from '../../../Utils/apiInstance';
 import PickerComp from '../../../Components/PickerComp';
 import TextInputComp from '../../../Components/TextInputComp';
 import Common from '../../../Utils/Common';
@@ -268,18 +268,36 @@ const LeadCreationBusiness = (props, { navigation }) => {
                 "businessVintageMonth": monthLabel
             }
         }
-        const baseURL = '8901'
+        const baseURL = global.PORT1
         setLoading(true)
-        apiInstancelocal(baseURL).put(`/api/v1/lead-creation-initiation/${global.leadID}`, appDetails)
+        apiInstance(baseURL).put(`/api/v1/lead-creation-initiation/${global.leadID}`, appDetails)
             .then(async (response) => {
                 if (global.DEBUG_MODE) console.log("LeadCreationBusinessApiResponse::" + JSON.stringify(response.data));
                 setLoading(false)
-                props.navigation.navigate('LeadCreationLoan', { leadData: [] })
+                if (response.status == 200) {
+                    props.navigation.navigate('LeadCreationLoan', { leadData: [] })
+                }
+                else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
             })
             .catch((error) => {
                 setLoading(false)
                 if (global.DEBUG_MODE) console.log("LeadCreationBusinessApiResponse::" + JSON.stringify(error.response.data));
-                if (error.response.data != null) {
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
                     setApiError(error.response.data.message);
                     setErrorModalVisible(true)
                 }

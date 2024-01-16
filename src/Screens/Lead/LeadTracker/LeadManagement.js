@@ -330,7 +330,7 @@ const LeadManagement = (props, { navigation, route }) => {
 
     const getPendingData = (status, leadType, from, to, operator, ageing, agentName, sort) => {
 
-        const baseURL = '8901'
+        const baseURL = global.PORT1
         setLoading(true)
         var url = '';
 
@@ -346,7 +346,8 @@ const LeadManagement = (props, { navigation, route }) => {
                 "agentName": agentName,
                 "sort": sort
             }
-        } else {
+        }
+        else {
             url = 'lead-creation-cart/allCondition';
             var appDetails = {
                 "status": status,
@@ -366,10 +367,20 @@ const LeadManagement = (props, { navigation, route }) => {
                 setFilteredData(response.data.slice().reverse())
                 setLoading(false)
                 setRefreshing(false)
-                if (response.data.length > 0) {
-                    setNoRecord(false)
-                } else {
-                    setNoRecord(true)
+
+                if (response.status == 200) {
+                    if (response.data.length > 0) {
+                        setNoRecord(false)
+                    } else {
+                        setNoRecord(true)
+                    }
+                }
+                else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
                 }
                 // const decodedToken = jwtDecode(response.data.jwtToken);
                 // console.log("LoginJWTDecode::" + JSON.stringify(decodedToken));
@@ -378,7 +389,16 @@ const LeadManagement = (props, { navigation, route }) => {
                 // Handle the error
                 setLoading(false)
                 if (global.DEBUG_MODE) console.log("TrackerApiResponse::" + JSON.stringify(error.response.data));
-                if (error.response.data != null) {
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
                     setApiError(error.response.data.message);
                     setErrorModalVisible(true)
                 }
@@ -397,7 +417,7 @@ const LeadManagement = (props, { navigation, route }) => {
 
     const getLeadByID = (leadID) => {
 
-        const baseURL = '8901'
+        const baseURL = global.PORT1
         setLoading(true)
 
         apiInstance(baseURL).get(`api/v1/lead-creation-initiation/getByLeadId/${leadID}`)
@@ -405,14 +425,32 @@ const LeadManagement = (props, { navigation, route }) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(response.data));
                 setLoading(false)
-                insertLead(response.data)
 
+                if (response.status == 200) {
+                    insertLead(response.data)
+                }
+                else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
             })
             .catch((error) => {
                 // Handle the error
                 setLoading(false)
                 if (global.DEBUG_MODE) console.log("getByLead::" + JSON.stringify(error.response.data));
-                if (error.response.data != null) {
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
                     setApiError(error.response.data.message);
                     setErrorModalVisible(true)
                 }
@@ -606,22 +644,38 @@ const LeadManagement = (props, { navigation, route }) => {
 
     const callAgentNameApi = () => {
         setLoading(true);
-        apiInstancelocal('8901').get(`api/v1/dropdown/{supervisorId}?supervisorId=${global.USERID}`)
+        apiInstance(global.PORT1).get(`api/v1/dropdown/{supervisorId}?supervisorId=${global.USERID}`)
             .then(async (response) => {
 
                 setLoading(false);
-                var data = [];
-                for (var i = 0; i < response.data.length; i++) {
-                    data.push({ Description: response.data[i], subCodeId: response.data[i] })
+                if (response.status == 200) {
+                    var data = [];
+                    for (var i = 0; i < response.data.length; i++) {
+                        data.push({ Description: response.data[i], subCodeId: response.data[i] })
+                    }
+                    setAgentData(data)
+                } else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
                 }
-
-                setAgentData(data)
 
             })
             .catch((error) => {
                 setLoading(false)
                 if (global.DEBUG_MODE) console.log("AgentNameApi::" + JSON.stringify(error.response.data));
-                if (error.response.data != null) {
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
                     setApiError(error.response.data.message);
                     setErrorModalVisible(true)
                 }

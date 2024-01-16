@@ -42,7 +42,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Modal from 'react-native-modal';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import Geolocation from 'react-native-geolocation-service';
-import apiInstancelocal from '../../../Utils/apiInstancelocal';
+import apiInstance from '../../../Utils/apiInstance';
 import PickerComp from '../../../Components/PickerComp';
 import TextInputComp from '../../../Components/TextInputComp';
 import tbl_lead_creation_loan_details from '../../../Database/Table/tbl_lead_creation_loan_details';
@@ -334,29 +334,47 @@ const LeadCreationLoan = (props, { navigation }) => {
                 "loanProduct": productIdLabel
             }
         }
-        const baseURL = '8901'
+        const baseURL = global.PORT1
         setLoading(true)
-        apiInstancelocal(baseURL).put(`/api/v1/lead-creation-initiation/${global.leadID}`, appDetails)
+        apiInstance(baseURL).put(`/api/v1/lead-creation-initiation/${global.leadID}`, appDetails)
             .then(async (response) => {
-                if (global.DEBUG_MODE) console.log("LeadCreationLoanApiResponse::" + JSON.stringify(response.data));
-                checkPermissions().then(res => {
-                    if (res == true) {
-                        getOneTimeLocation();
-                        setLoading(false)
-                    } else {
-                        setLoading(false)
-                        setApiError('Permission Not Granted');
-                        setErrorModalVisible(true)
-                    }
-                });
+                if (response.status == 200) {
+                    if (global.DEBUG_MODE) console.log("LeadCreationLoanApiResponse::" + JSON.stringify(response.data));
+                    checkPermissions().then(res => {
+                        if (res == true) {
+                            getOneTimeLocation();
+                            setLoading(false)
+                        } else {
+                            setLoading(false)
+                            setApiError('Permission Not Granted');
+                            setErrorModalVisible(true)
+                        }
+                    });
+                } else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
             })
             .catch((error) => {
                 setLoading(false)
                 if (global.DEBUG_MODE) console.log("LeadCreationLoanApiResponse::" + JSON.stringify(error.response.data));
-                if (error.response.data != null) {
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
                     setApiError(error.response.data.message);
                     setErrorModalVisible(true)
                 }
+
             });
 
     }
@@ -409,7 +427,7 @@ const LeadCreationLoan = (props, { navigation }) => {
 
         // const baseURL = '8083'
         // setLoading(true)
-        // apiInstancelocal(baseURL).get(`/api/v1/Product-Loan/productId=${productID}`)
+        // apiInstance(baseURL).get(`/api/v1/Product-Loan/productId=${productID}`)
         //     .then(async (response) => {
         //         setLoading(false);
         //         if (response.data.minLoanAmount.length > 0) {
@@ -433,58 +451,144 @@ const LeadCreationLoan = (props, { navigation }) => {
 
     const callPickerApi = () => {
 
-        const baseURL = '8082'
+        const baseURL = global.PORT4
         setLoading(true)
         var loantyperesponse = false; var productidresponse = false; var loanpurposeresponse = false; var leadtyperesponse = false;
-        apiInstancelocal(baseURL).get('/api/v1/generic-master/type?size=100&type=LNTP')
+        apiInstance(baseURL).get('/api/v1/generic-master/type?size=100&type=LNTP')
             .then(async (response) => {
-                loantyperesponse = true;
-                if (loantyperesponse && productidresponse && loanpurposeresponse && leadtyperesponse) {
-                    setLoading(false);
+                if (response.status == 200) {
+                    loantyperesponse = true;
+                    if (loantyperesponse && productidresponse && loanpurposeresponse && leadtyperesponse) {
+                        setLoading(false);
+                    }
+                    setLoanTypeData(response.data.content)
                 }
-                setLoanTypeData(response.data.content)
+                else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
             })
             .catch((error) => {
                 if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
                 setLoading(false)
-                alert(error);
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
             });
-        apiInstancelocal(baseURL).get('/api/v1/generic-master/type?size=100&type=PD')
+        apiInstance(baseURL).get('/api/v1/generic-master/type?size=100&type=PD')
             .then(async (response) => {
-                productidresponse = true;
-                if (loantyperesponse && productidresponse && loanpurposeresponse && leadtyperesponse) {
-                    setLoading(false);
+                if (response.status == 200) {
+                    productidresponse = true;
+                    if (loantyperesponse && productidresponse && loanpurposeresponse && leadtyperesponse) {
+                        setLoading(false);
+                    }
+                    setProductIdData(response.data.content)
                 }
-                setProductIdData(response.data.content)
+                else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
             })
             .catch((error) => {
                 if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
                 setLoading(false)
-                alert(error);
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
             });
-        apiInstancelocal(baseURL).get('/api/v1/system-code/master/LEAD_TYPE')
+        apiInstance(baseURL).get('/api/v1/system-code/master/LEAD_TYPE')
             .then(async (response) => {
-                leadtyperesponse = true;
-                if (loantyperesponse && productidresponse && loanpurposeresponse && leadtyperesponse) {
-                    setLoading(false);
+                if (response.status == 200) {
+                    leadtyperesponse = true;
+                    if (loantyperesponse && productidresponse && loanpurposeresponse && leadtyperesponse) {
+                        setLoading(false);
+                    }
+                    setLeadTypeData(response.data)
                 }
-                setLeadTypeData(response.data)
+                else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
             })
             .catch((error) => {
                 if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
                 setLoading(false)
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
             });
-        apiInstancelocal(baseURL).get('/api/v1/system-code/master/LNPS')
+        apiInstance(baseURL).get('/api/v1/system-code/master/LNPS')
             .then(async (response) => {
-                loanpurposeresponse = true;
-                if (loantyperesponse && productidresponse && loanpurposeresponse && leadtyperesponse) {
-                    setLoading(false);
+                if (response.status == 200) {
+                    loanpurposeresponse = true;
+                    if (loantyperesponse && productidresponse && loanpurposeresponse && leadtyperesponse) {
+                        setLoading(false);
+                    }
+                    setLoanPurposeData(response.data)
                 }
-                setLoanPurposeData(response.data)
+                else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
             })
             .catch((error) => {
                 if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
                 setLoading(false)
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
             });
 
 

@@ -221,6 +221,7 @@ const AadharOTPVerification = (props, { navigation }) => {
 
                 if (response.status == 200) {
                     setTimeLeft(60)
+                    setMobileOTP('')
                 } else if (response.data.statusCode === 202) {
                     setApiError(response.data.message);
                     setErrorModalVisible(true);
@@ -268,6 +269,9 @@ const AadharOTPVerification = (props, { navigation }) => {
                     //getImage(response.data.aadharResultDetails.docDmsId);
                     insertData(response.data);
 
+                }if (response.data.statusCode == 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true)
                 } else {
                     setApiError(response.data.statusMessage);
                     setErrorModalVisible(true)

@@ -84,9 +84,9 @@ const LoanDemographicBusinessDetail = (props) => {
     const [genderData, setGenderData] = useState([]);
 
 
-    const [entShopName, setEntShopName] = useState('');
     const [entShopNameMan, setEntShopNameMan] = useState(false);
     const [entShopNameVisible, setEntShopNameVisible] = useState(true);
+    const [entShopName, setEntShopName] = useState('');
     const [entShopNameDisable, setEntShopNameDisable] = useState(false);
     const [entShopNameCaption, setEntShopNameCaption] = useState('ENTERPRISE/SHOP NAME',);
     const entShopNameRef = useRef(null);
@@ -199,6 +199,7 @@ const LoanDemographicBusinessDetail = (props) => {
     const [operatingTimingsMan, setOperatingTimingsMan] = useState(false);
     const [operatingTimingsVisible, setOperatingTimingsVisible] = useState(true);
     const [operatingTimingsDisable, setOperatingTimingsDisable] = useState(false);
+    const operatingTimingsRef = useRef(null);
 
     const [bookKeepStatusLabel, setBookKeepStatusLabel] = useState('');
     const [bookKeepStatusData, setBookKeepStatusData] = useState([]);
@@ -523,9 +524,9 @@ const LoanDemographicBusinessDetail = (props) => {
 
     const getSystemCodeDetail = async () => {
 
-        const filteredCustomerSubCategoryData = userCodeDetail.filter((data) => data.ID === 'BusinessLineID').sort((a, b) => a.Description.localeCompare(b.Description));;
+        const filteredCustomerSubCategoryData = leaduserCodeDetail.filter((data) => data.masterId === 'CUSTOMER_SUBCATEGORY').sort((a, b) => a.Description.localeCompare(b.Description));;
         setCustomerSubCategoryData(filteredCustomerSubCategoryData);
-
+        
         const filteredIndustryTypeData = leaduserCodeDetail.filter((data) => data.masterId === 'INDUSTRY_TYPE').sort((a, b) => a.Description.localeCompare(b.Description));;
         setIndustryTypeData(filteredIndustryTypeData);
 
@@ -567,19 +568,19 @@ const LoanDemographicBusinessDetail = (props) => {
 
 
         systemMandatoryField.filter((data) => data.fieldUiid === 'sp_cust_subcat' && data.pageId === pageId).map((value, index) => {
-            setGenderCaption(value.fieldName)
+            setCustomerSubCategoryCaption(value.fieldName)
 
             if (value.isMandatory) {
-                setGenderMan(true);
+                setCustomerSubCategoryMan(true);
             }
             if (value.isHide) {
-                setGenderVisible(false);
+                setCustomerSubCategoryVisible(false);
             }
             if (value.isDisable) {
-                setGenderDisable(true);
+                setCustomerSubCategoryDisable(true);
             }
             if (value.isCaptionChange) {
-                setGenderCaption(value[0].fieldCaptionChange)
+                setCustomerSubCategoryCaption(value.fieldCaptionChange)
             }
         });
 
@@ -596,7 +597,7 @@ const LoanDemographicBusinessDetail = (props) => {
                 setEntShopNameDisable(true);
             }
             if (value.isCaptionChange) {
-                setEntShopNameCaption(value[0].fieldCaptionChange)
+                setEntShopNameCaption(value.fieldCaptionChange)
             }
         });
 
@@ -764,6 +765,24 @@ const LoanDemographicBusinessDetail = (props) => {
                 setEnterpriseTypeCaption(value[0].fieldCaptionChange)
             }
         });
+
+
+        systemMandatoryField.filter((data) => data.operatingTimings === 'et_op_tmng_dy' && data.pageId === pageId).map((value, index) => {
+            setOperatingTimings(value.fieldName)
+            if (value.mandatory) {
+                setOperatingTimings(true);
+            }
+            if (value.hide) {
+                setOperatingTimingsVisible(false);
+            }
+            if (value.disable) {
+                setOperatingTimingsDisable(false);
+            }
+            if (value.captionChange) {
+                setOperatingTimingsCaption(value.fieldCaptionChange)
+            }
+        });
+
 
         systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsn_prms' && data.pageId === pageId).map((value, index) => {
             setYearAtPresentCaption(value.fieldName)
@@ -1035,6 +1054,26 @@ const LoanDemographicBusinessDetail = (props) => {
 
     const postBusinessDetails = (imageID) => {
 
+        var dor='',doi='',dobc='';
+
+        if (DOR != undefined && DOR != null) {
+            if (DOR.length > 0) {
+              dor = Common.convertYearDateFormat(DOR)
+            }
+          }
+
+          if (DOI != undefined && DOI != null) {
+            if (DOI.length > 0) {
+              doi = Common.convertYearDateFormat(DOI)
+            }
+          }
+
+          if (DOBC != undefined && DOBC != null) {
+            if (DOBC.length > 0) {
+              dobc = Common.convertYearDateFormat(DOBC)
+            }
+          }
+
         if (validate()) {
 
         } else {
@@ -1044,9 +1083,9 @@ const LoanDemographicBusinessDetail = (props) => {
                 "customerSubcategory": CustomerSubCategoryLabel,
                 "enterpriseShopName": entShopName,
                 "udyamRegistrationNumber": urmNumber,
-                "dateOfRegistration": Common.convertYearDateFormat(DOR),
-                "dateOfIncorporation": Common.convertYearDateFormat(DOI),
-                "dateOfBusinessCommencement": Common.convertYearDateFormat(DOBC),
+                "dateOfRegistration": dor,
+                "dateOfIncorporation": doi,
+                "dateOfBusinessCommencement": dobc,
                 "businessVintageYears": year,
                 "businessVintageMonths": monthLabel,
                 "industryType": industryTypeLabel,
@@ -1057,7 +1096,7 @@ const LoanDemographicBusinessDetail = (props) => {
                 "businessLocationVillage": businessLocationLabel,
                 "noOfEmployees": noofEmployee,
                 "operatingDaysInAWeek": operatingDays,
-                "operatingTimesInADay": 0,
+                "operatingTimesInADay": operatingTimings,
                 "bookKeepingStatus": bookKeepStatusLabel,
                 "homeBasedBusiness": homeBasedBussinessLabel,
                 "applicantCustomerTransactionMode": actmLabel,
@@ -1089,7 +1128,6 @@ const LoanDemographicBusinessDetail = (props) => {
 
                     setLoading(false);
                     await insertData(response.data.id, imageID);
-
 
                 })
                 .catch(error => {
@@ -1527,7 +1565,9 @@ const LoanDemographicBusinessDetail = (props) => {
             setNoofEmployee(textValue);
         } else if (componentName === 'OperatingDays') {
             setOperatingDays(textValue);
-        } else if (componentName === 'TimeByPromoter') {
+        } else if (componentName === 'OperatingTimings') {
+            setOperatingTimings(textValue)
+        }else if (componentName === 'TimeByPromoter') {
             setTimeByPromoter(textValue);
         } else if (componentName === 'NPMRate') {
             setNPMRate(textValue);
@@ -2218,6 +2258,36 @@ const LoanDemographicBusinessDetail = (props) => {
                                 Disable={operatingDaysDisable}
                                 ComponentName="OperatingDays"
                                 reference={operatingDaysRef}
+                                returnKey="next"
+                                handleClick={handleClick}
+                                handleReference={handleReference}
+                            />
+                        </View>
+                    )}
+                    {operatingTimingsVisible && (
+                        <View
+                            style={{
+                                width: '100%',
+                                marginTop: 19,
+                                paddingHorizontal: 0,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}>
+                            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                                <TextComp
+                                    textVal={operatingTimingsCaption}
+                                    textStyle={Commonstyles.inputtextStyle}
+                                    Visible={operatingTimingsMan}
+                                />
+                            </View>
+
+                            <TextInputComp
+                                textValue={operatingTimings}
+                                textStyle={Commonstyles.textinputtextStyle}
+                                type="numeric"
+                                Disable={operatingTimingsDisable}
+                                ComponentName="OperatingTimings"
+                                reference={operatingTimingsRef}
                                 returnKey="next"
                                 handleClick={handleClick}
                                 handleReference={handleReference}

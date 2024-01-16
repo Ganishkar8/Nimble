@@ -313,21 +313,39 @@ const LeadCreationBasic = (props, { navigation, route }) => {
 
             "leadCreationDms": {}
         }
-        const baseURL = '8901'
+        const baseURL = global.PORT1
         setLoading(true)
-        apiInstancelocal(baseURL).post('/api/v1/lead-creation-initiation', appDetails)
+        apiInstance(baseURL).post('/api/v1/lead-creation-initiation', appDetails)
             .then(async (response) => {
-                if (global.DEBUG_MODE) console.log("LeadCreationBasicApiResponse::" + JSON.stringify(response.data));
-                global.leadID = response.data.id;
-                global.leadNumber = response.data.leadNumber;
-                global.LEADTYPE = 'DRAFT';
-                insertLead(response.data, true)
+                if (response.status == 200) {
+                    if (global.DEBUG_MODE) console.log("LeadCreationBasicApiResponse::" + JSON.stringify(response.data));
+                    global.leadID = response.data.id;
+                    global.leadNumber = response.data.leadNumber;
+                    global.LEADTYPE = 'DRAFT';
+                    insertLead(response.data, true)
+                } else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
                 setLoading(false)
+
             })
             .catch((error) => {
                 setLoading(false)
                 if (global.DEBUG_MODE) console.log("LeadCreationBasicApiResponse::" + JSON.stringify(error.response.data));
-                if (error.response.data != null) {
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
                     setApiError(error.response.data.message);
                     setErrorModalVisible(true)
                 }
@@ -349,9 +367,9 @@ const LeadCreationBasic = (props, { navigation, route }) => {
                 "gender": genderLabel
             }
         }
-        const baseURL = '8901'
+        const baseURL = global.PORT1
         setLoading(true)
-        apiInstancelocal(baseURL).put(`/api/v1/lead-creation-initiation/${global.leadID}`, appDetails)
+        apiInstance(baseURL).put(`/api/v1/lead-creation-initiation/${global.leadID}`, appDetails)
             .then(async (response) => {
                 // Handle the response data
                 console.log("LeadCreationBasicApiResponse::" + JSON.stringify(response.data));

@@ -25,7 +25,7 @@ import tbl_SystemCodeDetails from '../../../Database/Table/tbl_SystemCodeDetails
 import PickerComp from '../../../Components/PickerComp';
 import TextInputComp from '../../../Components/TextInputComp';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
-import apiInstancelocal from '../../../Utils/apiInstancelocal';
+import apiInstance from '../../../Utils/apiInstance';
 import ErrorModal from '../../../Components/ErrorModal';
 
 
@@ -142,7 +142,7 @@ const LeadApproval = (props, { navigation, route }) => {
         // const baseURL = '8082'
         // setLoading(true)
 
-        // apiInstancelocal(baseURL).get('/api/v1/system-code/master/LEAD_STATUS')
+        // apiInstance(baseURL).get('/api/v1/system-code/master/LEAD_STATUS')
         //     .then(async (response) => {
 
         //         setLoading(false);
@@ -184,20 +184,44 @@ const LeadApproval = (props, { navigation, route }) => {
             "comments": approverComment,
             "userId": global.USERID
         }
-        const baseURL = '8901'
+        const baseURL = global.PORT1
         setLoading(true)
         // alert(props.route.params.leadData.id)
-        apiInstancelocal(baseURL).post(`/api/v1/lead-Approved/ByBm/${props.route.params.leadData.id}`, appDetails)
+        apiInstance(baseURL).post(`/api/v1/lead-Approved/ByBm/${props.route.params.leadData.id}`, appDetails)
             .then(async (response) => {
                 // Handle the response data
                 setLoading(false)
-                props.navigation.navigate('LeadManagement', { fromScreen: 'LeadApproval' })
+                if (response.status == 200) {
+                    props.navigation.navigate('LeadManagement', { fromScreen: 'LeadApproval' })
+                }
+                else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
+
 
             })
             .catch((error) => {
                 // Handle the error
                 setLoading(false)
-                alert(JSON.stringify(error.response));
+                if (global.DEBUG_MODE) console.log("LeadLog::" + JSON.stringify(error.response.data));
+
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
             });
     }
 

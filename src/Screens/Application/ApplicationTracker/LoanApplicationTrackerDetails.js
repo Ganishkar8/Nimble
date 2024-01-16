@@ -69,22 +69,40 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
 
     const getLoanAppIdDetails = () => {
 
-        const baseURL = '8901'
+        const baseURL = global.PORT1
         setLoading(true)
         let loanAppIDNew = listData.loanApplicationId
 
         apiInstance(baseURL).get(`/api/v2/profile-short/${loanAppIDNew}`)
             .then((response) => {
                 // Handle the response data
-                if (global.DEBUG_MODE) console.log("LoanAppDetails::" + JSON.stringify(response.data));
-                global.LEADTRACKERDATA = response.data;
-                insertData(response.data);
+                if (response.status == 200) {
+                    if (global.DEBUG_MODE) console.log("LoanAppDetails::" + JSON.stringify(response.data));
+                    global.LEADTRACKERDATA = response.data;
+                    insertData(response.data);
+                }
+                else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
             })
             .catch((error) => {
                 // Handle the error
                 setLoading(false)
                 if (global.DEBUG_MODE) console.log("LoanAppDetailsError::" + JSON.stringify(error.response.data));
-                if (error.response.data != null) {
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
                     setApiError(error.response.data.message);
                     setErrorModalVisible(true)
                 }
