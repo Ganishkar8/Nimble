@@ -242,7 +242,7 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
             if (client.kycType4ExpiryDate && client.kycType4ExpiryDate != undefined) {
                 exp4 = Common.convertDateFormat(client.kycType4ExpiryDate);
             }
-            await tbl_familydetails.insertFamilyDetails(client.id, loanApplicationID, 'APPL', client.relationshipWithApplicant, 'MR', client.name, '', '', dob, client.age, 'MALE', client.mobileNumber, client.kycTypeId1, client.kycIdValue1, exp1, client.kycTypeId2, client.kycIdValue2, exp2, client.kycTypeId3, client.kycIdValue3, exp3, client.kycTypeId4, client.kycIdValue4, exp4, '0', client.relationshipWithCoApplicant, client.relationshipWithGuarantor);
+            await tbl_familydetails.insertFamilyDetails(client.id, loanApplicationID, 'APPL', client.relationshipWithApplicant, client.title, client.name, '', '', dob, client.age, client.gender, client.mobileNumber, client.kycTypeId1, client.kycIdValue1, exp1, client.kycTypeId2, client.kycIdValue2, exp2, client.kycTypeId3, client.kycIdValue3, exp3, client.kycTypeId4, client.kycIdValue4, exp4, '0', client.relationshipWithCoApplicant, client.relationshipWithGuarantor);
 
         });
 

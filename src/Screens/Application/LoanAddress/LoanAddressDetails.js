@@ -16,10 +16,9 @@ import PickerComp from '../../../Components/PickerComp';
 import TextInputComp from '../../../Components/TextInputComp';
 import Common from '../../../Utils/Common';
 import tbl_loanaddressinfo from '../../../Database/Table/tbl_loanaddressinfo';
-import apiInstancelocal from '../../../Utils/apiInstancelocal';
+import apiInstance from '../../../Utils/apiInstance';
 import ErrorModal from '../../../Components/ErrorModal';
 import tbl_client from '../../../Database/Table/tbl_client';
-import apiInstance from '../../../Utils/apiInstance';
 
 const LoanAddressDetails = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
@@ -235,6 +234,11 @@ const LoanAddressDetails = (props, { navigation }) => {
                 setEmail(data[0].email_id)
                 //spinner
                 setAddressTypeLabel(data[0].address_type)
+                if (data[0].address_type == 'ROA' || data[0].address_type == 'OPA') {
+                    setAddressOwnerTypeVisible(false);
+                    setOwnerDetailsVisible(false);
+                    setOwnerNameVisible(false)
+                }
                 if (global.DEBUG_MODE) console.log("LoanAddressType::" + data[0].address_type)
                 setAddressOwnerTypeLabel(data[0].address_ownership)
                 setOwnerDetailsLabel(data[0].owner_details)
@@ -594,6 +598,21 @@ const LoanAddressDetails = (props, { navigation }) => {
             }
         }
 
+        if (mobileNo.length > 0) {
+            if (!Common.isValidPhoneNumber(mobileNo)) {
+                errorMessage =
+                    errorMessage +
+                    i +
+                    ')' +
+                    ' ' +
+                    language[0][props.language].str_plsentervalid +
+                    mobileNoCaption +
+                    '\n';
+                i++;
+                flag = true;
+            }
+        }
+
         if (emailMan && emailVisible) {
             if (email.length <= 0) {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + emailCaption + '\n';
@@ -601,6 +620,7 @@ const LoanAddressDetails = (props, { navigation }) => {
                 flag = true;
             }
         }
+
 
         if (email.length > 0) {
             if (!Common.isValidEmail(email)) {
@@ -693,7 +713,7 @@ const LoanAddressDetails = (props, { navigation }) => {
             }]
             const baseURL = '8901';
             setLoading(true);
-            apiInstancelocal(baseURL)
+            apiInstance(baseURL)
                 .post(`api/v2/profile-short/address-details/${global.CLIENTID}`, appDetails)
                 .then(async response => {
                     // Handle the response data
@@ -749,12 +769,14 @@ const LoanAddressDetails = (props, { navigation }) => {
             }
             const baseURL = '8901';
             setLoading(true);
-            apiInstancelocal(baseURL)
+            apiInstance(baseURL)
                 .put(`api/v2/profile-short/address-details/${addressID}`, appDetails)
                 .then(async response => {
                     // Handle the response data
                     if (global.DEBUG_MODE) console.log('UpdateAddressResponse::' + JSON.stringify(response.data),);
+
                     insertData(addressID)
+
                     setLoading(false);
                 })
                 .catch(error => {
@@ -842,6 +864,15 @@ const LoanAddressDetails = (props, { navigation }) => {
         if (componentName === 'AddressTypePicker') {
             setAddressTypeLabel(label);
             setAddressTypeIndex(index);
+            if (label == 'ROA' || label == 'OPA') {
+                setAddressOwnerTypeVisible(false);
+                setOwnerDetailsVisible(false);
+                setOwnerNameVisible(false)
+            } else {
+                setAddressOwnerTypeVisible(true);
+                setOwnerDetailsVisible(true);
+                setOwnerNameVisible(true)
+            }
         } else if (componentName === 'AddressOwnershipPicker') {
             setAddressOwnerTypeLabel(label);
             setAddressOwnerTypeIndex(index);
@@ -1038,7 +1069,7 @@ const LoanAddressDetails = (props, { navigation }) => {
                     <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
                         <TextComp textVal={mobileNoCaption} textStyle={Commonstyles.inputtextStyle} Visible={mobileNoMan} />
                     </View>
-                    <TextInputComp textValue={mobileNo} textStyle={Commonstyles.textinputtextStyle} type='number-pad' Disable={mobileNoDisable} ComponentName='mobile' reference={mobileRef} returnKey="next" handleClick={handleClick} handleReference={handleReference} length={30} />
+                    <TextInputComp textValue={mobileNo} textStyle={Commonstyles.textinputtextStyle} type='number-pad' Disable={mobileNoDisable} ComponentName='mobile' reference={mobileRef} returnKey="next" handleClick={handleClick} handleReference={handleReference} length={10} />
                 </View>}
 
                 {emailVisible && <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>

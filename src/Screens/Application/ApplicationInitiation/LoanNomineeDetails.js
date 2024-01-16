@@ -119,7 +119,7 @@ const LoanNomineeDetails = (props, { navigation }) => {
     const [nomineePerecentCaption, setNomineePercentCaption] = useState('NOMINEE PERCENTAGE');
     const [nomineePerecentMan, setNomineePercentMan] = useState(false);
     const [nomineePerecentVisible, setNomineePercentVisible] = useState(true);
-    const [nomineePerecentDisable, setNomineePercentDisable] = useState(false);
+    const [nomineePerecentDisable, setNomineePercentDisable] = useState(true);
     const nomineePerecentRef = useRef(null);
 
     const [nomineeAccountNumber, setNomineeAccountNumber] = useState('');
@@ -774,6 +774,21 @@ const LoanNomineeDetails = (props, { navigation }) => {
             }
         }
 
+        if (nomineeifscCode.length > 0) {
+            if (nomineeifscCode.length !== 11) {
+                errorMessage =
+                    errorMessage +
+                    i +
+                    ')' +
+                    ' ' +
+                    language[0][props.language].str_plsenter + ' Valid ' +
+                    nomineeifscCodeCaption +
+                    '\n';
+                i++;
+                flag = true;
+            }
+        }
+
         if (nomineeBankNameMan && nomineeBankNameVisible) {
             if (nomineeBankName.length <= 0) {
                 errorMessage =
@@ -1223,6 +1238,7 @@ const LoanNomineeDetails = (props, { navigation }) => {
                             reference={fullNameRef}
                             returnKey="next"
                             handleClick={handleClick}
+                            length={50}
                             handleReference={handleReference}
                         />
                     </View>
@@ -1435,6 +1451,7 @@ const LoanNomineeDetails = (props, { navigation }) => {
                             reference={nomineeAccountNumberRef}
                             returnKey="next"
                             handleClick={handleClick}
+                            length={20}
                             handleReference={handleReference}
                         />
                     </View>
@@ -1465,6 +1482,7 @@ const LoanNomineeDetails = (props, { navigation }) => {
                             ComponentName="nomineeIfsccode"
                             reference={nomineeifscCodeRef}
                             returnKey="next"
+                            length={11}
                             handleClick={handleClick}
                             handleReference={handleReference}
                         />

@@ -547,7 +547,6 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           setEmail(data[0].email);
           setURNumber(data[0].udyamRegistrationNumber);
           setchkMsme(data[0].isMsme == true);
-          alert(data[0].dedupeCheck)
           if (data[0].dedupeCheck == '1' || data[0].dedupeCheck == true) {
             setIsDedupeDone(true);
             global.isDedupeDone = '1';
