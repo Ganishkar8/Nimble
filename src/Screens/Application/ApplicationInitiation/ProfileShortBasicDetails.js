@@ -687,8 +687,8 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       .sort((a, b) => a.Description.localeCompare(b.Description));
     setCustCatData(filteredCustomerCategoryData);
 
-    const filteredCustomerSubCategoryData = userCodeDetail
-      .filter(data => data.ID === 'BusinessLineID')
+    const filteredCustomerSubCategoryData = leaduserCodeDetail
+      .filter(data => data.masterId === 'CUSTOMER_SUBCATEGORY')
       .sort((a, b) => a.Description.localeCompare(b.Description));
     setCustomerSubCategoryData(filteredCustomerSubCategoryData);
 

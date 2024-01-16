@@ -20,6 +20,7 @@ import MyStatusBar from '../../Components/MyStatusBar';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import Foundation from 'react-native-vector-icons/Foundation';
 import Colors from '../../Utils/Colors';
 import TextComp from '../../Components/TextComp';
 import { BottomSheet } from 'react-native-btr';
@@ -40,11 +41,16 @@ const CBResponseScreen = (props, { navigation }) => {
     const [apiError, setApiError] = useState('');
     const [htmlContent, setHtmlContent] = useState('');
     const [loading, setLoading] = useState(false);
+    const [cbResponseStatus, setCbResponseStatus] = useState('');
 
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
+        const filterCbCheck = global.LEADTRACKERDATA.loanApplicationStatusDtos[0].subStageLog.filter((data) => data.subStageCode === 'CB_CHK');
+        const filterCbResponse = filterCbCheck[0].moduleLog.filter((data) => data.moduleCode === 'CB_RSPNS')
+        setCbResponseStatus(filterCbResponse[0].moduleStatus);
+        alert(JSON.stringify(filterCbResponse[0].moduleStatus))
         getcbData();
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
@@ -270,8 +276,15 @@ const CBResponseScreen = (props, { navigation }) => {
             {loading ? <Loading /> : null}
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
             <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
-            <View style={{ width: '96%', height: 50, alignItems: 'center' }}>
-                <HeadComp textval={language[0][props.language].str_cbresponseheader} props={props} onGoBack={onGoBack} />
+            <View style={{ width: '96%', height: 50, alignItems: 'center', flexDirection: 'row' }}>
+                <View style={{ width: '92%' }}>
+                    <HeadComp textval={language[0][props.language].str_cbresponseheader} props={props} onGoBack={onGoBack} />
+                </View>
+                <TouchableOpacity onPress={getcbData} style={{ width: '8%' }} activeOpacity={0.8}>
+                    <View >
+                        <Ionicons name='refresh-outline' size={25} color={Colors.red} />
+                    </View>
+                </TouchableOpacity>
             </View>
 
             <View style={{ width: '100%', justifyContent: 'center', marginBottom: 110 }}>
