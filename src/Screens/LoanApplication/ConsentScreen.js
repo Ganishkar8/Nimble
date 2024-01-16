@@ -181,12 +181,13 @@ const ConsentScreen = (props, { navigation }) => {
             "consent": true,
         }
 
-        const baseURL = '8901'
+        const baseURL = global.PORT1
         setLoading(true)
         apiInstance(baseURL).post(`api/v2/profile-short/loan-creation`, appDetails)
             .then(async (response) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log("TempIDCreationApiResponse::" + JSON.stringify(response));
+                setLoading(false)
                 if (response.status == 200) {
                     if (response.data != null) {
                         if (global.DEBUG_MODE) console.log("TempIDCreationApiResponse::" + JSON.stringify(response.data));
@@ -203,8 +204,14 @@ const ConsentScreen = (props, { navigation }) => {
                         setApiError('Not a Valid Response from Api');
                         setErrorModalVisible(true)
                     }
+                } else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
                 }
-                setLoading(false)
+
 
 
             })
@@ -213,7 +220,16 @@ const ConsentScreen = (props, { navigation }) => {
                 if (global.DEBUG_MODE) console.log("TempIDCreationApiResponse::" + JSON.stringify(error.response));
                 //props.navigation.replace('LoanApplicationMain')
                 //global.TEMPAPPID = '1115153454';
-                if (error.response.data != null) {
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
                     setApiError(error.response.data.message);
                     setErrorModalVisible(true)
                 }

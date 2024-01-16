@@ -24,7 +24,8 @@ import IconButtonViewComp from '../../../Components/IconButtonViewComp';
 import tbl_clientaddressinfo from '../../../Database/Table/tbl_clientaddressinfo';
 import tbl_UserCodeDetails from '../../../Database/Table/tbl_UserCodeDetails';
 import { useIsFocused } from '@react-navigation/native';
-import apiInstancelocal from '../../../Utils/apiInstancelocal';
+// import apiInstance from '../../../Utils/apiInstance';
+import apiInstance from '../../../Utils/apiInstance';
 import ErrorModal from '../../../Components/ErrorModal';
 import TextComp from '../../../Components/TextComp';
 import Common from '../../../Utils/Common';
@@ -262,22 +263,39 @@ const AddressMainList = (props, { navigation }) => {
 
   const deleteAddressData = () => {
 
-    const baseURL = '8901';
+    const baseURL = global.PORT1;
     setLoading(true);
-    apiInstancelocal(baseURL)
+    apiInstance(baseURL)
       .delete(`/api/v2/profile-short/address-details/${addressID}`)
       .then(async response => {
         // Handle the response data
         if (global.DEBUG_MODE) console.log('DeleteAddressResponse::' + JSON.stringify(response.data),);
 
         setLoading(false);
-        deletedata(addressID);
+        if (response.status == 200) {
+          deletedata(addressID);
+        } else if (response.data.statusCode === 201) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        } else if (response.data.statusCode === 202) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        }
       })
       .catch(error => {
         // Handle the error
         if (global.DEBUG_MODE) console.log('DeleteAddressResponse' + JSON.stringify(error.response));
         setLoading(false);
-        if (error.response.data != null) {
+        if (error.response.status == 404) {
+          setApiError(Common.error404);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 400) {
+          setApiError(Common.error400);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 500) {
+          setApiError(Common.error500);
+          setErrorModalVisible(true)
+        } else if (error.response.data != null) {
           setApiError(error.response.data.message);
           setErrorModalVisible(true)
         }
@@ -356,57 +374,66 @@ const AddressMainList = (props, { navigation }) => {
       "pageCode": page,
       "status": "Completed"
     }
-    const baseURL = '8901';
+    const baseURL = global.PORT1;
     setLoading(true);
-    apiInstancelocal(baseURL)
+    apiInstance(baseURL)
       .post(`/api/v2/loan-application-status/updateStatus`, appDetails)
       .then(async response => {
         // Handle the response data
 
         if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
         setLoading(false);
-        if (global.CLIENTTYPE == 'APPL') {
-          global.COMPLETEDMODULE = 'PRF_SHRT_APLCT';
-          global.COMPLETEDPAGE = 'PRF_SHRT_APLCT_ADDRS_DTLS';
-        } else if (global.CLIENTTYPE == 'CO-APPL') {
-          global.COMPLETEDMODULE = 'PRF_SHRT_COAPLCT';
-          global.COMPLETEDPAGE = 'PRF_SHRT_COAPLCT_ADDRS_DTLS';
-        } else if (global.CLIENTTYPE == 'GRNTR') {
-          global.COMPLETEDMODULE = 'PRF_SHRT_GRNTR';
-          global.COMPLETEDPAGE = 'PRF_SHRT_GRNTR_ADDRS_DTLS';
-        }
-        global.isDedupeDone = '0';
-        global.isMobileVerified = '0';
-        global.CLIENTID = '';
-        global.isAadharVerified = '0';
-        if (processModuleLength == 1) {
-          if (!IsManualKYCAvailable) {
-            global.COMPLETEDSUBSTAGE = 'CB_CHK';
-          }
-        } else if (processModuleLength == 2) {
+        if (response.status == 200) {
           if (global.CLIENTTYPE == 'APPL') {
+            global.COMPLETEDMODULE = 'PRF_SHRT_APLCT';
+            global.COMPLETEDPAGE = 'PRF_SHRT_APLCT_ADDRS_DTLS';
           } else if (global.CLIENTTYPE == 'CO-APPL') {
+            global.COMPLETEDMODULE = 'PRF_SHRT_COAPLCT';
+            global.COMPLETEDPAGE = 'PRF_SHRT_COAPLCT_ADDRS_DTLS';
+          } else if (global.CLIENTTYPE == 'GRNTR') {
+            global.COMPLETEDMODULE = 'PRF_SHRT_GRNTR';
+            global.COMPLETEDPAGE = 'PRF_SHRT_GRNTR_ADDRS_DTLS';
+          }
+          global.isDedupeDone = '0';
+          global.isMobileVerified = '0';
+          global.CLIENTID = '';
+          global.isAadharVerified = '0';
+          if (processModuleLength == 1) {
             if (!IsManualKYCAvailable) {
               global.COMPLETEDSUBSTAGE = 'CB_CHK';
             }
-          } else if (global.CLIENTTYPE == 'GRNTR') {
-            if (!IsManualKYCAvailable) {
-              global.COMPLETEDSUBSTAGE = 'CB_CHK';
+          } else if (processModuleLength == 2) {
+            if (global.CLIENTTYPE == 'APPL') {
+            } else if (global.CLIENTTYPE == 'CO-APPL') {
+              if (!IsManualKYCAvailable) {
+                global.COMPLETEDSUBSTAGE = 'CB_CHK';
+              }
+            } else if (global.CLIENTTYPE == 'GRNTR') {
+              if (!IsManualKYCAvailable) {
+                global.COMPLETEDSUBSTAGE = 'CB_CHK';
+              }
+            }
+          } else if (processModuleLength == 3) {
+            if (global.CLIENTTYPE == 'APPL') {
+
+            } else if (global.CLIENTTYPE == 'CO-APPL') {
+
+            } else if (global.CLIENTTYPE == 'GRNTR') {
+              if (!IsManualKYCAvailable) {
+                global.COMPLETEDSUBSTAGE = 'CB_CHK';
+              }
             }
           }
-        } else if (processModuleLength == 3) {
-          if (global.CLIENTTYPE == 'APPL') {
 
-          } else if (global.CLIENTTYPE == 'CO-APPL') {
-
-          } else if (global.CLIENTTYPE == 'GRNTR') {
-            if (!IsManualKYCAvailable) {
-              global.COMPLETEDSUBSTAGE = 'CB_CHK';
-            }
-          }
+          props.navigation.replace('LoanApplicationMain', { fromScreen: 'AddressDetail' });
         }
-
-        props.navigation.replace('LoanApplicationMain', { fromScreen: 'AddressDetail' });
+        else if (response.data.statusCode === 201) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        } else if (response.data.statusCode === 202) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        }
 
 
       })
@@ -414,7 +441,16 @@ const AddressMainList = (props, { navigation }) => {
         // Handle the error
         if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
         setLoading(false);
-        if (error.response.data != null) {
+        if (error.response.status == 404) {
+          setApiError(Common.error404);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 400) {
+          setApiError(Common.error400);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 500) {
+          setApiError(Common.error500);
+          setErrorModalVisible(true)
+        } else if (error.response.data != null) {
           setApiError(error.response.data.message);
           setErrorModalVisible(true)
         }
@@ -435,20 +471,28 @@ const AddressMainList = (props, { navigation }) => {
       "manualKycStatus": status,
       "manualKycApprovedBy": global.USERNAME
     }
-    const baseURL = '8901';
+    const baseURL = global.PORT1;
     setLoading(true);
-    apiInstancelocal(baseURL)
+    apiInstance(baseURL)
       .put(`api/v2/profile-short/manualKyc/${global.CLIENTID}`, appDetails)
       .then(async response => {
         // Handle the response data
         if (global.DEBUG_MODE) console.log('ApproveKYCApiResponse::' + JSON.stringify(response.data),);
         setLoading(false);
-        if (status === 'Rejected') {
-          updateFinalLoanStatus();
-        } else {
-          props.navigation.replace('LoanApplicationMain', { fromScreen: 'AddressDetail' });
+        if (response.status == 200) {
+          if (status === 'Rejected') {
+            updateFinalLoanStatus();
+          } else {
+            props.navigation.replace('LoanApplicationMain', { fromScreen: 'AddressDetail' });
+          }
         }
-
+        else if (response.data.statusCode === 201) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        } else if (response.data.statusCode === 202) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        }
 
 
       })
@@ -456,7 +500,16 @@ const AddressMainList = (props, { navigation }) => {
         // Handle the error
         if (global.DEBUG_MODE) console.log('ApproveKYCApiResponse' + JSON.stringify(error.response));
         setLoading(false);
-        if (error.response.data != null) {
+        if (error.response.status == 404) {
+          setApiError(Common.error404);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 400) {
+          setApiError(Common.error400);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 500) {
+          setApiError(Common.error500);
+          setErrorModalVisible(true)
+        } else if (error.response.data != null) {
           setApiError(error.response.data.message);
           setErrorModalVisible(true)
         }
@@ -487,23 +540,39 @@ const AddressMainList = (props, { navigation }) => {
       "pageCode": null,
       "status": "Rejected"
     }
-    const baseURL = '8901';
+    const baseURL = global.PORT1;
     setLoading(true);
-    apiInstancelocal(baseURL)
+    apiInstance(baseURL)
       .post(`/api/v2/loan-application-status/updateStatus`, appDetails)
       .then(async response => {
         // Handle the response data
 
         if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
-
-        props.navigation.navigate('LoanApplicationTracker', { fromScreen: 'AddressMainList' })
-
+        if (response.status == 200) {
+          props.navigation.navigate('LoanApplicationTracker', { fromScreen: 'AddressMainList' })
+        }
+        else if (response.data.statusCode === 201) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        } else if (response.data.statusCode === 202) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        }
       })
       .catch(error => {
         // Handle the error
         if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
         setLoading(false);
-        if (error.response.data != null) {
+        if (error.response.status == 404) {
+          setApiError(Common.error404);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 400) {
+          setApiError(Common.error400);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 500) {
+          setApiError(Common.error500);
+          setErrorModalVisible(true)
+        } else if (error.response.data != null) {
           setApiError(error.response.data.message);
           setErrorModalVisible(true)
         }

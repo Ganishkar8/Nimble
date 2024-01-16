@@ -11,7 +11,6 @@ import {
   BackHandler,
 } from 'react-native';
 import apiInstance from '../../../Utils/apiInstance';
-import apiInstancelocal from '../../../Utils/apiInstancelocal';
 import Colors from '../../../Utils/Colors';
 import MyStatusBar from '../../../Components/MyStatusBar';
 import Loading from '../../../Components/Loading';
@@ -1420,9 +1419,9 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
         appDetails.clientDetail[0].id = global.CLIENTID;
       }
 
-      const baseURL = '8901';
+      const baseURL = global.PORT1;
       setLoading(true);
-      apiInstancelocal(baseURL)
+      apiInstance(baseURL)
         .put(
           `api/v2/profile-short/basic-details/${global.LOANAPPLICATIONID}`,
           appDetails,
@@ -1434,38 +1433,45 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
             console.log(
               'LeadCreationBasicApiResponse::' + JSON.stringify(response.data),
             );
-
-          if (response.data.statusCode === 202) {
-            setApiError(response.data.message);
-            setErrorModalVisible(true)
-            setLoading(false);
-          } else if (response.status === 200) {
-            if (global.CLIENTTYPE == 'APPL') {
-              global.CLIENTID = response.data.clientDetail[0].id;
-            } else {
-              global.CLIENTID = response.data[0].id;
-            }
-            setLoading(false);
-            await insertData();
-
-            if (global.isDedupeDone == '1') {
+          if (response.status == 200) {
+            if (response.data.statusCode === 202) {
+              setApiError(response.data.message);
+              setErrorModalVisible(true)
+              setLoading(false);
+            } else if (response.status === 200) {
               if (global.CLIENTTYPE == 'APPL') {
-                generateLoanAppNum();
+                global.CLIENTID = response.data.clientDetail[0].id;
               } else {
-                if (
-                  KycType1Label == '001' ||
-                  KycType2Label == '001' ||
-                  KycType3Label == '001' ||
-                  KycType4Label == '001'
-                ) {
-                  generateAadharOTP();
-                } else {
-                  updateLoanStatus();
-                }
+                global.CLIENTID = response.data[0].id;
               }
-            } else {
-              internalDedupeCheck();
+              setLoading(false);
+              await insertData();
+
+              if (global.isDedupeDone == '1') {
+                if (global.CLIENTTYPE == 'APPL') {
+                  generateLoanAppNum();
+                } else {
+                  if (
+                    KycType1Label == '001' ||
+                    KycType2Label == '001' ||
+                    KycType3Label == '001' ||
+                    KycType4Label == '001'
+                  ) {
+                    generateAadharOTP();
+                  } else {
+                    updateLoanStatus();
+                  }
+                }
+              } else {
+                internalDedupeCheck();
+              }
             }
+          } else if (response.data.statusCode === 201) {
+            setApiError(response.data.message);
+            setErrorModalVisible(true);
+          } else if (response.data.statusCode === 202) {
+            setApiError(response.data.message);
+            setErrorModalVisible(true);
           }
 
         })
@@ -1473,9 +1479,18 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           // Handle the error
           if (global.DEBUG_MODE) console.log('Error' + JSON.stringify(error));
           setLoading(false);
-          if (error.response.data != null) {
+          if (error.response.status == 404) {
+            setApiError(Common.error404);
+            setErrorModalVisible(true)
+          } else if (error.response.status == 400) {
+            setApiError(Common.error400);
+            setErrorModalVisible(true)
+          } else if (error.response.status == 500) {
+            setApiError(Common.error500);
+            setErrorModalVisible(true)
+          } else if (error.response.data != null) {
             setApiError(error.response.data.message);
-            setErrorModalVisible(true);
+            setErrorModalVisible(true)
           }
         });
     }
@@ -1489,28 +1504,37 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
         loanApplicationId: global.LOANAPPLICATIONID,
         lmsClientId: null,
       };
-      const baseURL = '8901';
+      const baseURL = global.PORT1;
       setLoading(true);
-      apiInstancelocal(baseURL)
+      apiInstance(baseURL)
         .post(`/api/v2/profile-short/generateLoanApplicationNumber`, appDetails)
         .then(async response => {
           // Handle the response data
-          if (global.DEBUG_MODE)
-            console.log(
-              'GenerateLoanAppNumBasicApiResponse::' +
-              JSON.stringify(response.data),
-            );
-          global.TEMPAPPID = response.data.loanApplicationNumber;
-          setLoading(false);
-          if (
-            KycType1Label == '001' ||
-            KycType2Label == '001' ||
-            KycType3Label == '001' ||
-            KycType4Label == '001'
-          ) {
-            generateAadharOTP();
-          } else {
-            updateLoanStatus();
+          if (response.status == 200) {
+            if (global.DEBUG_MODE)
+              console.log(
+                'GenerateLoanAppNumBasicApiResponse::' +
+                JSON.stringify(response.data),
+              );
+            global.TEMPAPPID = response.data.loanApplicationNumber;
+            setLoading(false);
+            if (
+              KycType1Label == '001' ||
+              KycType2Label == '001' ||
+              KycType3Label == '001' ||
+              KycType4Label == '001'
+            ) {
+              generateAadharOTP();
+            } else {
+              updateLoanStatus();
+            }
+          }
+          else if (response.data.statusCode === 201) {
+            setApiError(response.data.message);
+            setErrorModalVisible(true);
+          } else if (response.data.statusCode === 202) {
+            setApiError(response.data.message);
+            setErrorModalVisible(true);
           }
         })
         .catch(error => {
@@ -1521,9 +1545,18 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
               JSON.stringify(error.response),
             );
           setLoading(false);
-          if (error.response.data != null) {
+          if (error.response.status == 404) {
+            setApiError(Common.error404);
+            setErrorModalVisible(true)
+          } else if (error.response.status == 400) {
+            setApiError(Common.error400);
+            setErrorModalVisible(true)
+          } else if (error.response.status == 500) {
+            setApiError(Common.error500);
+            setErrorModalVisible(true)
+          } else if (error.response.data != null) {
             setApiError(error.response.data.message);
-            setErrorModalVisible(true);
+            setErrorModalVisible(true)
           }
         });
     }
@@ -1552,9 +1585,9 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       pageCode: page,
       status: 'Completed',
     };
-    const baseURL = '8901';
+    const baseURL = global.PORT1;
     setLoading(true);
-    apiInstancelocal(baseURL)
+    apiInstance(baseURL)
       .post(`/api/v2/loan-application-status/updateStatus`, appDetails)
       .then(async response => {
         // Handle the response data
@@ -1563,17 +1596,26 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
             'UpdateStatusApiResponse::' + JSON.stringify(response.data),
           );
         setLoading(false);
-        if (global.CLIENTTYPE == 'APPL') {
-          global.COMPLETEDMODULE = 'PRF_SHRT_APLCT';
-          global.COMPLETEDPAGE = 'PRF_SHRT_APLCT_BSC_DTLS';
-        } else if (global.CLIENTTYPE == 'CO-APPL') {
-          global.COMPLETEDMODULE = 'PRF_SHRT_COAPLCT';
-          global.COMPLETEDPAGE = 'PRF_SHRT_COAPLCT_BSC_DTLS';
-        } else if (global.CLIENTTYPE == 'GRNTR') {
-          global.COMPLETEDMODULE = 'PRF_SHRT_GRNTR';
-          global.COMPLETEDPAGE = 'PRF_SHRT_GRNTR_BSC_DTLS';
+        if (response.status == 200) {
+          if (global.CLIENTTYPE == 'APPL') {
+            global.COMPLETEDMODULE = 'PRF_SHRT_APLCT';
+            global.COMPLETEDPAGE = 'PRF_SHRT_APLCT_BSC_DTLS';
+          } else if (global.CLIENTTYPE == 'CO-APPL') {
+            global.COMPLETEDMODULE = 'PRF_SHRT_COAPLCT';
+            global.COMPLETEDPAGE = 'PRF_SHRT_COAPLCT_BSC_DTLS';
+          } else if (global.CLIENTTYPE == 'GRNTR') {
+            global.COMPLETEDMODULE = 'PRF_SHRT_GRNTR';
+            global.COMPLETEDPAGE = 'PRF_SHRT_GRNTR_BSC_DTLS';
+          }
+          props.navigation.replace('ProfileShortKYCVerificationStatus');
         }
-        props.navigation.replace('ProfileShortKYCVerificationStatus');
+        else if (response.data.statusCode === 201) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        } else if (response.data.statusCode === 202) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        }
       })
       .catch(error => {
         // Handle the error
@@ -1583,9 +1625,18 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           );
         setLoading(false);
 
-        if (error.response.data != null) {
+        if (error.response.status == 404) {
+          setApiError(Common.error404);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 400) {
+          setApiError(Common.error400);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 500) {
+          setApiError(Common.error500);
+          setErrorModalVisible(true)
+        } else if (error.response.data != null) {
           setApiError(error.response.data.message);
-          setErrorModalVisible(true);
+          setErrorModalVisible(true)
         }
       });
   };
@@ -1596,9 +1647,9 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       loanApplicationId: global.LOANAPPLICATIONID,
       createdBy: global.USERID,
     };
-    const baseURL = '8901';
+    const baseURL = global.PORT1;
     setLoading(true);
-    apiInstancelocal(baseURL)
+    apiInstance(baseURL)
       .post(`/api/v2/loan-application-status/createWorkFlow`, appDetails)
       .then(async response => {
         // Handle the response data
@@ -1607,15 +1658,23 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
             'CreateWorkFlowApiResponse::' + JSON.stringify(response.data),
           );
         setLoading(false);
-        if (
-          KycType1Label == '001' ||
-          KycType2Label == '001' ||
-          KycType3Label == '001' ||
-          KycType4Label == '001'
-        ) {
-          generateAadharOTP();
-        } else {
-          updateLoanStatus();
+        if (response.status == 200) {
+          if (
+            KycType1Label == '001' ||
+            KycType2Label == '001' ||
+            KycType3Label == '001' ||
+            KycType4Label == '001'
+          ) {
+            generateAadharOTP();
+          } else {
+            updateLoanStatus();
+          }
+        } else if (response.data.statusCode === 201) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        } else if (response.data.statusCode === 202) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
         }
       })
       .catch(error => {
@@ -1625,9 +1684,18 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
             'CreateWorkFlowApiResponse' + JSON.stringify(error.response),
           );
         setLoading(false);
-        if (error.response.data != null) {
+        if (error.response.status == 404) {
+          setApiError(Common.error404);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 400) {
+          setApiError(Common.error400);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 500) {
+          setApiError(Common.error500);
+          setErrorModalVisible(true)
+        } else if (error.response.data != null) {
           setApiError(error.response.data.message);
-          setErrorModalVisible(true);
+          setErrorModalVisible(true)
         }
       });
   };
@@ -1660,9 +1728,9 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
         ID4CaptionID: kycID4,
         MobileNo: mobileNumber,
       };
-      const baseURL = '8901';
+      const baseURL = global.PORT1;
       setLoading(true);
-      apiInstancelocal(baseURL)
+      apiInstance(baseURL)
         .post(
           `/api/v2/profile-short/internal-dedupe-check/${global.USERID}/loanApplicationId/${global.LOANAPPLICATIONID}`,
           appDetails,
@@ -1672,38 +1740,55 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           if (global.DEBUG_MODE)
             console.log('DedupeApiResponse::' + JSON.stringify(response.data));
           //await tbl_client.deleteAllClient();
-          if (response.data.clientExistingDetails == null) {
-            setClientTypeLabel('NEW');
-            setClientTypeVisible(true);
-            if (global.CLIENTTYPE == 'APPL') {
-              setErrorModalVisible(true);
-              setApiError('No Result Found');
+          if (response.status == 200) {
+            if (response.data.clientExistingDetails == null) {
+              setClientTypeLabel('NEW');
+              setClientTypeVisible(true);
+              if (global.CLIENTTYPE == 'APPL') {
+                setErrorModalVisible(true);
+                setApiError('No Result Found');
+              } else {
+                setErrorModalVisible1(true);
+                setApiError('No Result Found');
+              }
             } else {
-              setErrorModalVisible1(true);
-              setApiError('No Result Found');
+              props.dedupeAction(response.data);
+              setDedupeModalVisible(true);
+              setClientTypeLabel('EXISTING');
+              setClientTypeVisible(true);
             }
-          } else {
-            props.dedupeAction(response.data);
-            setDedupeModalVisible(true);
-            setClientTypeLabel('EXISTING');
-            setClientTypeVisible(true);
-          }
 
-          global.isDedupeDone = '1';
-          setIsDedupeDone(true);
-          setClientTypeVisible(true);
-          setLoading(false);
-          // props.navigation.navigate('AadharOTPVerification', { aadharNumber: aadhar });
-          // generateAadharOTP();
+            global.isDedupeDone = '1';
+            setIsDedupeDone(true);
+            setClientTypeVisible(true);
+            setLoading(false);
+            // props.navigation.navigate('AadharOTPVerification', { aadharNumber: aadhar });
+            // generateAadharOTP();
+          } else if (response.data.statusCode === 201) {
+            setApiError(response.data.message);
+            setErrorModalVisible(true);
+          } else if (response.data.statusCode === 202) {
+            setApiError(response.data.message);
+            setErrorModalVisible(true);
+          }
         })
         .catch(error => {
           // Handle the error
           if (global.DEBUG_MODE)
             console.log('DedupeApiResponse' + JSON.stringify(error));
           setLoading(false);
-          if (error.response.data != null) {
+          if (error.response.status == 404) {
+            setApiError(Common.error404);
+            setErrorModalVisible(true)
+          } else if (error.response.status == 400) {
+            setApiError(Common.error400);
+            setErrorModalVisible(true)
+          } else if (error.response.status == 500) {
+            setApiError(Common.error500);
+            setErrorModalVisible(true)
+          } else if (error.response.data != null) {
             setApiError(error.response.data.message);
-            setErrorModalVisible(true);
+            setErrorModalVisible(true)
           }
         });
     }
@@ -1815,9 +1900,9 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       userType: global.USERTYPEID,
       otpType: '23',
     };
-    const baseURL = '8908';
+    const baseURL = global.PORT3;
     setLoading(true);
-    apiInstancelocal(baseURL)
+    apiInstance(baseURL)
       .post('/api/v1/otp/send-otp', appDetails)
       .then(async response => {
         // Handle the response data
@@ -1829,6 +1914,12 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
             mobileNumber: mobileNumber,
             fromSCreen: 'ApplicantProfileShort',
           });
+        } else if (response.data.statusCode === 201) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        } else if (response.data.statusCode === 202) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
         }
 
         setLoading(false);
@@ -1840,9 +1931,18 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
             'MobileOTPApiResponse::::' + JSON.stringify(error.response),
           );
         setLoading(false);
-        if (error.response.data != null) {
+        if (error.response.status == 404) {
+          setApiError(Common.error404);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 400) {
+          setApiError(Common.error400);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 500) {
+          setApiError(Common.error500);
+          setErrorModalVisible(true)
+        } else if (error.response.data != null) {
           setApiError(error.response.data.message);
-          setErrorModalVisible(true);
+          setErrorModalVisible(true)
         }
       });
   };
@@ -1853,25 +1953,32 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       aadharNumber: aadhar,
       createdBy: global.USERID,
     };
-    const baseURL = '8901';
+    const baseURL = global.PORT1;
     setLoading(true);
-    apiInstancelocal(baseURL)
+    apiInstance(baseURL)
       .post('/api/v2/aadharOtp/generate/otp', appDetails)
       .then(async response => {
         // Handle the response data
         if (global.DEBUG_MODE)
           console.log('AadharOTPApiResponse::' + JSON.stringify(response.data));
-
         if (response.status == 200) {
-          props.navigation.navigate('AadharOTPVerification', {
-            aadharNumber: aadhar,
-          });
+          if (response.status == 200) {
+            props.navigation.navigate('AadharOTPVerification', {
+              aadharNumber: aadhar,
+            });
+          } else if (response.data.statusCode === 202) {
+            setApiError(response.data.message);
+            setErrorModalVisible(true);
+            props.navigation.navigate('AadharOTPVerification', {
+              aadharNumber: aadhar,
+            });
+          }
+        } else if (response.data.statusCode === 201) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
         } else if (response.data.statusCode === 202) {
           setApiError(response.data.message);
           setErrorModalVisible(true);
-          props.navigation.navigate('AadharOTPVerification', {
-            aadharNumber: aadhar,
-          });
         }
 
         setLoading(false);
@@ -1883,9 +1990,22 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
             'MobileOTPApiResponse::::' + JSON.stringify(error.response),
           );
         setLoading(false);
-        if (error.response.data != null) {
-          setApiError(error.response.data.message);
+
+        if (error.response.status == 404) {
+          setApiError(Common.error404);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 400) {
+          setApiError(Common.error400);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 500) {
+          setApiError(Common.error500);
           setErrorModalVisible(true);
+          props.navigation.navigate('AadharOTPVerification', {
+            aadharNumber: aadhar,
+          });
+        } else if (error.response.data != null) {
+          setApiError(error.response.data.message);
+          setErrorModalVisible(true)
           props.navigation.navigate('AadharOTPVerification', {
             aadharNumber: aadhar,
           });
@@ -2360,17 +2480,6 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           '\n';
         i++;
         flag = true;
-      } else if (!Common.isValidPhoneNumber(mobileNumber)) {
-        errorMessage =
-          errorMessage +
-          i +
-          ')' +
-          ' ' +
-          language[0][props.language].str_plsentervalid +
-          mobileNumberCaption +
-          '\n';
-        i++;
-        flag = true;
       } else if (isMobileVerified == '0') {
         errorMessage =
           errorMessage +
@@ -2378,6 +2487,21 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           ')' +
           ' ' +
           language[0][props.language].str_plsverify +
+          mobileNumberCaption +
+          '\n';
+        i++;
+        flag = true;
+      }
+    }
+
+    if (mobileNumber.length > 0) {
+      if (!Common.isValidPhoneNumber(mobileNumber)) {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          language[0][props.language].str_plsentervalid +
           mobileNumberCaption +
           '\n';
         i++;
