@@ -11,7 +11,7 @@ import {
   BackHandler, PermissionsAndroid
 } from 'react-native';
 import apiInstance from '../../../Utils/apiInstance';
-import apiInstancelocal from '../../../Utils/apiInstancelocal';
+// import apiInstance from '../../../Utils/apiInstance';
 import Colors from '../../../Utils/Colors';
 import MyStatusBar from '../../../Components/MyStatusBar';
 import Loading from '../../../Components/Loading';
@@ -740,15 +740,24 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
     Common.getNetworkConnection().then(value => {
       if (value.isConnected == true) {
         setLoading(true)
-        const baseURL = '8094'
+        const baseURL = global.PORT2
         apiInstance(baseURL).get(`/api/documents/document/${parseInt(dmsID)}`)
           .then(async (response) => {
             // Handle the response data
             console.log("GetPhotoApiResponse::" + JSON.stringify(response.data));
-            setFileName(response.data.fileName)
-            setVisible(false)
-            setImageUri('data:image/png;base64,' + response.data.base64Content)
-            // props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
+            if (response.status == 200) {
+              setFileName(response.data.fileName)
+              setVisible(false)
+              setImageUri('data:image/png;base64,' + response.data.base64Content)
+              // props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
+            }
+            else if (response.data.statusCode === 201) {
+              setApiError(response.data.message);
+              setErrorModalVisible(true);
+            } else if (response.data.statusCode === 202) {
+              setApiError(response.data.message);
+              setErrorModalVisible(true);
+            }
             setLoading(false)
 
           })
@@ -756,11 +765,17 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
             // Handle the error
             setLoading(false)
             if (global.DEBUG_MODE) console.log("GetPhotoApiResponse::" + JSON.stringify(error.response.data));
-            if (error.response.data != null) {
-              setApiError(error.response.data.message);
+            if (error.response.status == 404) {
+              setApiError(Common.error404);
               setErrorModalVisible(true)
-            } else if (error.response.httpStatusCode == 500) {
-              setApiError(error.response.message);
+            } else if (error.response.status == 400) {
+              setApiError(Common.error400);
+              setErrorModalVisible(true)
+            } else if (error.response.status == 500) {
+              setApiError(Common.error500);
+              setErrorModalVisible(true)
+            } else if (error.response.data != null) {
+              setApiError(error.response.data.message);
               setErrorModalVisible(true)
             }
           });
@@ -874,9 +889,9 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
         "geoCode": currentLatitude + "," + currentLongitude,
         "kycManual": manualKYC,
       }
-      const baseURL = '8901';
+      const baseURL = global.PORT1;
       setLoading(true);
-      apiInstancelocal(baseURL)
+      apiInstance(baseURL)
         .put(`/api/v2/profile-short/personal-details/${global.CLIENTID}`, appDetails)
         .then(async response => {
           // Handle the response data
@@ -884,17 +899,34 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
           await tbl_client.updatePersonalDetails(TitleLabel, firstName, middleName, lastName, DOB, Age, GenderLabel, FatherName, SpouseName, CasteLabel, ReligionLabel, MotherTongueLabel, EADLabel, gpslatlon, id, global.LOANAPPLICATIONID);
 
           setLoading(false);
-          if (global.USERTYPEID == 1163) {
-            navigatetoAddress();
-          } else {
-            updateLoanStatus();
+          if (response.status == 200) {
+            if (global.USERTYPEID == 1163) {
+              navigatetoAddress();
+            } else {
+              updateLoanStatus();
+            }
           }
-
+          else if (response.data.statusCode === 201) {
+            setApiError(response.data.message);
+            setErrorModalVisible(true);
+          } else if (response.data.statusCode === 202) {
+            setApiError(response.data.message);
+            setErrorModalVisible(true);
+          }
         })
         .catch(error => {
           // Handle the error
           setLoading(false);
-          if (error.response.data != null) {
+          if (error.response.status == 404) {
+            setApiError(Common.error404);
+            setErrorModalVisible(true)
+          } else if (error.response.status == 400) {
+            setApiError(Common.error400);
+            setErrorModalVisible(true)
+          } else if (error.response.status == 500) {
+            setApiError(Common.error500);
+            setErrorModalVisible(true)
+          } else if (error.response.data != null) {
             setApiError(error.response.data.message);
             setErrorModalVisible(true)
           }
@@ -938,32 +970,48 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       "pageCode": page,
       "status": "Completed"
     }
-    const baseURL = '8901';
+    const baseURL = global.PORT1;
     setLoading(true);
-    apiInstancelocal(baseURL)
+    apiInstance(baseURL)
       .post(`/api/v2/loan-application-status/updateStatus`, appDetails)
       .then(async response => {
         // Handle the response data
         if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
         setLoading(false);
-        if (global.CLIENTTYPE == 'APPL') {
-          global.COMPLETEDMODULE = 'PRF_SHRT_APLCT';
-          global.COMPLETEDPAGE = 'PRF_SHRT_APLCT_PRSNL_DTLS';
-        } else if (global.CLIENTTYPE == 'CO-APPL') {
-          global.COMPLETEDMODULE = 'PRF_SHRT_COAPLCT';
-          global.COMPLETEDPAGE = 'PRF_SHRT_COAPLCT_PRSNL_DTLS';
-        } else if (global.CLIENTTYPE == 'GRNTR') {
-          global.COMPLETEDMODULE = 'PRF_SHRT_GRNTR';
-          global.COMPLETEDPAGE = 'PRF_SHRT_GRNTR_PRSNL_DTLS';
+        if (response.status == 200) {
+          if (global.CLIENTTYPE == 'APPL') {
+            global.COMPLETEDMODULE = 'PRF_SHRT_APLCT';
+            global.COMPLETEDPAGE = 'PRF_SHRT_APLCT_PRSNL_DTLS';
+          } else if (global.CLIENTTYPE == 'CO-APPL') {
+            global.COMPLETEDMODULE = 'PRF_SHRT_COAPLCT';
+            global.COMPLETEDPAGE = 'PRF_SHRT_COAPLCT_PRSNL_DTLS';
+          } else if (global.CLIENTTYPE == 'GRNTR') {
+            global.COMPLETEDMODULE = 'PRF_SHRT_GRNTR';
+            global.COMPLETEDPAGE = 'PRF_SHRT_GRNTR_PRSNL_DTLS';
+          }
+          navigatetoAddress();
+        } else if (response.data.statusCode === 201) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        } else if (response.data.statusCode === 202) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
         }
-        navigatetoAddress();
-
       })
       .catch(error => {
         // Handle the error
         if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
         setLoading(false);
-        if (error.response.data != null) {
+        if (error.response.status == 404) {
+          setApiError(Common.error404);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 400) {
+          setApiError(Common.error400);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 500) {
+          setApiError(Common.error500);
+          setErrorModalVisible(true)
+        } else if (error.response.data != null) {
           setApiError(error.response.data.message);
           setErrorModalVisible(true)
         }

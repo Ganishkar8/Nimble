@@ -11,7 +11,7 @@ import {
   Platform, PermissionsAndroid, BackHandler
 } from 'react-native';
 import apiInstance from '../../../Utils/apiInstance';
-import apiInstancelocal from '../../../Utils/apiInstancelocal';
+// import apiInstance from '../../../Utils/apiInstance';
 import Colors from '../../../Utils/Colors';
 import MyStatusBar from '../../../Components/MyStatusBar';
 import Loading from '../../../Components/Loading';
@@ -278,26 +278,41 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     Common.getNetworkConnection().then(value => {
       if (value.isConnected == true) {
         setLoading(true)
-        const baseURL = '8094'
+        const baseURL = global.PORT2
         apiInstance(baseURL).get(`/api/documents/document/${parseInt(dmsID)}`)
           .then(async (response) => {
             // Handle the response data
             console.log("GetPhotoApiResponse::" + JSON.stringify(response.data));
-            setFileName(response.data.fileName)
-            setImageUri('data:image/png;base64,' + response.data.base64Content)
+
             // props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
             setLoading(false)
+            if (response.status == 200) {
+              setFileName(response.data.fileName)
+              setImageUri('data:image/png;base64,' + response.data.base64Content)
+            } else if (response.data.statusCode === 201) {
+              setApiError(response.data.message);
+              setErrorModalVisible(true);
+            } else if (response.data.statusCode === 202) {
+              setApiError(response.data.message);
+              setErrorModalVisible(true);
+            }
 
           })
           .catch((error) => {
             // Handle the error
             setLoading(false)
             if (global.DEBUG_MODE) console.log("GetPhotoApiResponse::" + JSON.stringify(error.response.data));
-            if (error.response.data != null) {
-              setApiError(error.response.data.message);
+            if (error.response.status == 404) {
+              setApiError(Common.error404);
               setErrorModalVisible(true)
-            } else if (error.response.httpStatusCode == 500) {
-              setApiError(error.response.message);
+            } else if (error.response.status == 400) {
+              setApiError(Common.error400);
+              setErrorModalVisible(true)
+            } else if (error.response.status == 500) {
+              setApiError(Common.error500);
+              setErrorModalVisible(true)
+            } else if (error.response.data != null) {
+              setApiError(error.response.data.message);
               setErrorModalVisible(true)
             }
           });
@@ -312,25 +327,43 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
   const getKYCManualDetails = (id) => {
 
-    const baseURL = '8901'
+    const baseURL = global.PORT1
     setLoading(true)
 
     apiInstance(baseURL).get(`/api/v2/profile-short/manualKyc/${id}`)
       .then((response) => {
         // Handle the response data
+
         if (global.DEBUG_MODE) console.log("ManualKYCDetails::" + JSON.stringify(response.data));
         setLoading(false)
-        if (response.data.kycDmsId != null && response.data.kycDmsId.length > 0) {
-          getImage(response.data.kycDmsId);
+        if (response.status == 200) {
+          if (response.data.kycDmsId != null && response.data.kycDmsId.length > 0) {
+            getImage(response.data.kycDmsId);
+          }
+          setKycTypeLabel(response.data.kycType)
+          setkycID(response.data.kycValue)
+        } else if (response.data.statusCode === 201) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        } else if (response.data.statusCode === 202) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
         }
-        setKycTypeLabel(response.data.kycType)
-        setkycID(response.data.kycValue)
       })
       .catch((error) => {
         // Handle the error
         setLoading(false)
         if (global.DEBUG_MODE) console.log("ManualKYCDetailsError::" + JSON.stringify(error.response.data));
-        if (error.response.data != null) {
+        if (error.response.status == 404) {
+          setApiError(Common.error404);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 400) {
+          setApiError(Common.error400);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 500) {
+          setApiError(Common.error500);
+          setErrorModalVisible(true)
+        } else if (error.response.data != null) {
           setApiError(error.response.data.message);
           setErrorModalVisible(true)
         }
@@ -604,40 +637,58 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       "pageCode": page,
       "status": "Completed"
     }
-    const baseURL = '8901';
+    const baseURL = global.PORT1;
     setLoading(true);
-    apiInstancelocal(baseURL)
+    apiInstance(baseURL)
       .post(`/api/v2/loan-application-status/updateStatus`, appDetails)
       .then(async response => {
         // Handle the response data
         if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
         setLoading(false);
-        if (global.CLIENTTYPE == 'APPL') {
-          global.COMPLETEDMODULE = 'PRF_SHRT_APLCT';
-          global.COMPLETEDPAGE = 'PRF_SHRT_APLCT_VRF_STATUS';
-        } else if (global.CLIENTTYPE == 'CO-APPL') {
-          global.COMPLETEDMODULE = 'PRF_SHRT_COAPLCT';
-          global.COMPLETEDPAGE = 'PRF_SHRT_COAPLCT_VRF_STATUS';
-        } else if (global.CLIENTTYPE == 'GRNTR') {
-          global.COMPLETEDMODULE = 'PRF_SHRT_GRNTR';
-          global.COMPLETEDPAGE = 'PRF_SHRT_GRNTR_VRF_STATUS';
-        }
-        checkPermissions().then(res => {
-          if (res == true) {
-            getOneTimeLocation();
-            setLoading(false)
-          } else {
-            setLoading(false)
-            setApiError('Permission Not Granted');
-            setErrorModalVisible(true)
+        if (response.status == 200) {
+          if (global.CLIENTTYPE == 'APPL') {
+            global.COMPLETEDMODULE = 'PRF_SHRT_APLCT';
+            global.COMPLETEDPAGE = 'PRF_SHRT_APLCT_VRF_STATUS';
+          } else if (global.CLIENTTYPE == 'CO-APPL') {
+            global.COMPLETEDMODULE = 'PRF_SHRT_COAPLCT';
+            global.COMPLETEDPAGE = 'PRF_SHRT_COAPLCT_VRF_STATUS';
+          } else if (global.CLIENTTYPE == 'GRNTR') {
+            global.COMPLETEDMODULE = 'PRF_SHRT_GRNTR';
+            global.COMPLETEDPAGE = 'PRF_SHRT_GRNTR_VRF_STATUS';
           }
-        });
+          checkPermissions().then(res => {
+            if (res == true) {
+              getOneTimeLocation();
+              setLoading(false)
+            } else {
+              setLoading(false)
+              setApiError('Permission Not Granted');
+              setErrorModalVisible(true)
+            }
+
+          });
+        } else if (response.data.statusCode === 201) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        } else if (response.data.statusCode === 202) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        }
       })
       .catch(error => {
         // Handle the error
         if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
         setLoading(false);
-        if (error.response.data != null) {
+        if (error.response.status == 404) {
+          setApiError(Common.error404);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 400) {
+          setApiError(Common.error400);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 500) {
+          setApiError(Common.error500);
+          setErrorModalVisible(true)
+        } else if (error.response.data != null) {
           setApiError(error.response.data.message);
           setErrorModalVisible(true)
         }
@@ -962,22 +1013,39 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       "createdBy": global.USERID,
     }]
 
-    const baseURL = '8901'
-    apiInstancelocal(baseURL).post(`/api/v2/profile-short/manualKyc/${global.CLIENTID}`, appDetails)
+    const baseURL = global.PORT1
+    apiInstance(baseURL).post(`/api/v2/profile-short/manualKyc/${global.CLIENTID}`, appDetails)
       .then(async (response) => {
         // Handle the response data
-
-        if (global.DEBUG_MODE) console.log("ManualKYCApiResponse::" + JSON.stringify(response.data));
-        tbl_client.updateKYCManual("1", global.LOANAPPLICATIONID, global.CLIENTTYPE)
-        buttonNext();
         setLoading(false)
+        if (response.status == 200) {
+          if (global.DEBUG_MODE) console.log("ManualKYCApiResponse::" + JSON.stringify(response.data));
+          tbl_client.updateKYCManual("1", global.LOANAPPLICATIONID, global.CLIENTTYPE)
+          buttonNext();
+        } else if (response.data.statusCode === 201) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        } else if (response.data.statusCode === 202) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        }
+
 
       })
       .catch((error) => {
         // Handle the error
         if (global.DEBUG_MODE) console.log("ManualKYCApiResponse:::" + JSON.stringify(error.response))
         setLoading(false)
-        if (error.response.data != null) {
+        if (error.response.status == 404) {
+          setApiError(Common.error404);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 400) {
+          setApiError(Common.error400);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 500) {
+          setApiError(Common.error500);
+          setErrorModalVisible(true)
+        } else if (error.response.data != null) {
           setApiError(error.response.data.message);
           setErrorModalVisible(true)
         }

@@ -16,7 +16,6 @@ import PickerComp from '../../../Components/PickerComp';
 import TextInputComp from '../../../Components/TextInputComp';
 import Common from '../../../Utils/Common';
 import tbl_clientaddressinfo from '../../../Database/Table/tbl_clientaddressinfo';
-import apiInstancelocal from '../../../Utils/apiInstancelocal';
 import ErrorModal from '../../../Components/ErrorModal';
 import tbl_client from '../../../Database/Table/tbl_client';
 import apiInstance from '../../../Utils/apiInstance';
@@ -866,26 +865,43 @@ const AddressDetails = (props, { navigation }) => {
         "yearsInCurrentCityOrTown": parseInt(yearsAtCity),
         "supervisedDate": new Date()
       }]
-      const baseURL = '8901';
+      const baseURL = global.PORT1;
       setLoading(true);
-      apiInstancelocal(baseURL)
+      apiInstance(baseURL)
         .post(`api/v2/profile-short/address-details/${global.CLIENTID}`, appDetails)
         .then(async response => {
           // Handle the response data
           if (global.DEBUG_MODE) console.log('PostAddressResponse::' + JSON.stringify(response.data),);
 
           setLoading(false);
-          const deletePromises = [
-            tbl_clientaddressinfo.deleteDataBasedOnType(global.LOANAPPLICATIONID, global.CLIENTTYPE, addressTypeLabel)
-          ];
-          await Promise.all(deletePromises);
-          insertData(response.data[0].id)
+          if (response.status == 200) {
+            const deletePromises = [
+              tbl_clientaddressinfo.deleteDataBasedOnType(global.LOANAPPLICATIONID, global.CLIENTTYPE, addressTypeLabel)
+            ];
+            await Promise.all(deletePromises);
+            insertData(response.data[0].id)
+          } else if (response.data.statusCode === 201) {
+            setApiError(response.data.message);
+            setErrorModalVisible(true);
+          } else if (response.data.statusCode === 202) {
+            setApiError(response.data.message);
+            setErrorModalVisible(true);
+          }
         })
         .catch(error => {
           // Handle the error
           if (global.DEBUG_MODE) console.log('PostAddressError' + JSON.stringify(error.response));
           setLoading(false);
-          if (error.response.data != null) {
+          if (error.response.status == 404) {
+            setApiError(Common.error404);
+            setErrorModalVisible(true)
+          } else if (error.response.status == 400) {
+            setApiError(Common.error400);
+            setErrorModalVisible(true)
+          } else if (error.response.status == 500) {
+            setApiError(Common.error500);
+            setErrorModalVisible(true)
+          } else if (error.response.data != null) {
             setApiError(error.response.data.message);
             setErrorModalVisible(true)
           }
@@ -928,28 +944,45 @@ const AddressDetails = (props, { navigation }) => {
         "yearsInCurrentCityOrTown": parseInt(yearsAtCity),
         "supervisedDate": new Date()
       }
-      const baseURL = '8901';
+      const baseURL = global.PORT1;
       setLoading(true);
-      apiInstancelocal(baseURL)
+      apiInstance(baseURL)
         .put(`api/v2/profile-short/address-details/${addressID}`, appDetails)
         .then(async response => {
           // Handle the response data
           if (global.DEBUG_MODE) console.log('UpdateAddressResponse::' + JSON.stringify(response.data));
-
-          try {
-            insertData(addressID)
-          } catch (error) {
-
-            if (global.DEBUG_MODE) console.error('InsertAddressError:', error.message);
-
-          }
           setLoading(false);
+          if (response.status == 200) {
+            try {
+              insertData(addressID)
+            } catch (error) {
+
+              if (global.DEBUG_MODE) console.error('InsertAddressError:', error.message);
+
+            }
+          } else if (response.data.statusCode === 201) {
+            setApiError(response.data.message);
+            setErrorModalVisible(true);
+          } else if (response.data.statusCode === 202) {
+            setApiError(response.data.message);
+            setErrorModalVisible(true);
+          }
+
         })
         .catch(error => {
           // Handle the error
           if (global.DEBUG_MODE) console.log('UpdateAddressError' + JSON.stringify(error.response));
           setLoading(false);
-          if (error.response.data != null) {
+          if (error.response.status == 404) {
+            setApiError(Common.error404);
+            setErrorModalVisible(true)
+          } else if (error.response.status == 400) {
+            setApiError(Common.error400);
+            setErrorModalVisible(true)
+          } else if (error.response.status == 500) {
+            setApiError(Common.error500);
+            setErrorModalVisible(true)
+          } else if (error.response.data != null) {
             setApiError(error.response.data.message);
             setErrorModalVisible(true)
           }
@@ -961,7 +994,7 @@ const AddressDetails = (props, { navigation }) => {
 
   const getPinCode = (pincode) => {
 
-    const baseURL = '8082';
+    const baseURL = global.PORT4;
     setLoading(true);
     apiInstance(baseURL)
       .get(`api/v1/pincode/new/${pincode}`)
@@ -970,22 +1003,37 @@ const AddressDetails = (props, { navigation }) => {
         if (global.DEBUG_MODE) console.log('PincodeApiResponse::' + JSON.stringify(response.data),);
 
         setLoading(false);
-
-        setPincodeResponse(response.data);
-        setDistrict(response.data.city.name);
-        setState(response.data.city.state.name);
-        setCountry(response.data.city.state.country.name);
-        setDistrictDisable(true)
-        setStateDisable(true);
-        setCountryDisable(true);
-
+        if (response.status == 200) {
+          setPincodeResponse(response.data);
+          setDistrict(response.data.city.name);
+          setState(response.data.city.state.name);
+          setCountry(response.data.city.state.country.name);
+          setDistrictDisable(true)
+          setStateDisable(true);
+          setCountryDisable(true);
+        } else if (response.data.statusCode === 201) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        } else if (response.data.statusCode === 202) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        }
 
       })
       .catch(error => {
         // Handle the error
         if (global.DEBUG_MODE) console.log('PincodeApiError' + JSON.stringify(error.response));
         setLoading(false);
-        if (error.response.data != null) {
+        if (error.response.status == 404) {
+          setApiError(Common.error404);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 400) {
+          setApiError(Common.error400);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 500) {
+          setApiError(Common.error500);
+          setErrorModalVisible(true)
+        } else if (error.response.data != null) {
           setApiError(error.response.data.message);
           setErrorModalVisible(true)
         }
