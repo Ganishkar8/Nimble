@@ -38,6 +38,7 @@ const apiInstance = (baseURL, authToken) => {
         },
         (error) => {
             // Handle request error
+            if (global.DEBUG_MODE) console.log('RequestError::' + JSON.stringify(error))
             return Promise.reject(error);
         }
     );
@@ -60,6 +61,7 @@ const apiInstance = (baseURL, authToken) => {
         },
         (error) => {
             // Handle response error
+            if (global.DEBUG_MODE) console.log('ResponseError::' + JSON.stringify(error))
             return Promise.reject(error);
         }
     );

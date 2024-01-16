@@ -113,19 +113,22 @@ const LeadDetails = (props, { navigation, route }) => {
     }
 
     const getLeadData = () => {
-        const baseURL = '8901'
+        const baseURL = global.PORT1
         setLoading(true)
         apiInstance(baseURL).get(`api/v1/lead-creation-initiation/getByLeadId/${props.route.params.leadData.id}`)
             .then((response) => {
-                // Handle the response data
+
+                setLoading(false)
                 if (response.status == 200) {
                     if (global.DEBUG_MODE) console.log("LeadDetailsApiResponse::" + JSON.stringify(response.data));
                     setLeadData(response.data)
-                } else {
-                    setApiError('Server Error!!');
-                    setErrorModalVisible(true)
+                } else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
                 }
-                setLoading(false)
                 // const decodedToken = jwtDecode(response.data.jwtToken);
                 // console.log("LoginJWTDecode::" + JSON.stringify(decodedToken));
             })
@@ -133,7 +136,16 @@ const LeadDetails = (props, { navigation, route }) => {
                 // Handle the error
                 setLoading(false)
                 if (global.DEBUG_MODE) console.log('LeadDetailsApiResponse::::' + JSON.stringify(error.response));
-                if (error.response.data != null) {
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
                     setApiError(error.response.data.message);
                     setErrorModalVisible(true)
                 }

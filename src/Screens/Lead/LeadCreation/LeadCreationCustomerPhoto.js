@@ -50,7 +50,7 @@ import ImagePicker, { ImageOrVideo } from 'react-native-image-crop-picker';
 import { tr } from 'react-native-paper-dates';
 import Modal from 'react-native-modal';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import apiInstancelocal from '../../../Utils/apiInstancelocal';
+import apiInstance from '../../../Utils/apiInstance';
 import axios from 'axios';
 import tbl_lead_image from '../../../Database/Table/tbl_lead_image';
 import tbl_lead_creation_dms from '../../../Database/Table/tbl_lead_creation_dms';
@@ -173,27 +173,41 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
     Common.getNetworkConnection().then(value => {
       if (value.isConnected == true) {
         setLoading(true)
-        const baseURL = '8094'
+        const baseURL = global.PORT2
         apiInstance(baseURL).get(`/api/documents/document/${dmsID}`)
           .then(async (response) => {
-            // Handle the response data
-            console.log("FinalLeadCreationApiResponse::" + JSON.stringify(response.data));
-            setFileName(response.data.fileName)
-            setVisible(false)
-            setImageUri('data:image/png;base64,' + response.data.base64Content)
-            // props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
             setLoading(false)
+            // Handle the response data
+            if (response.status == 200) {
+              console.log("FinalLeadCreationApiResponse::" + JSON.stringify(response.data));
+              setFileName(response.data.fileName)
+              setVisible(false)
+              setImageUri('data:image/png;base64,' + response.data.base64Content)
+              // props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
+            } else if (response.data.statusCode === 201) {
+              setApiError(response.data.message);
+              setErrorModalVisible(true);
+            } else if (response.data.statusCode === 202) {
+              setApiError(response.data.message);
+              setErrorModalVisible(true);
+            }
 
           })
           .catch((error) => {
             // Handle the error
             if (global.DEBUG_MODE) console.log("FinalLeadCreationApiResponse::" + JSON.stringify(error.response.data));
             setLoading(false)
-            if (error.response.data != null) {
-              setApiError(error.response.data.message);
+            if (error.response.status == 404) {
+              setApiError(Common.error404);
               setErrorModalVisible(true)
-            } else if (error.response.httpStatusCode == 500) {
-              setApiError(error.response.message);
+            } else if (error.response.status == 400) {
+              setApiError(Common.error400);
+              setErrorModalVisible(true)
+            } else if (error.response.status == 500) {
+              setApiError(Common.error500);
+              setErrorModalVisible(true)
+            } else if (error.response.data != null) {
+              setApiError(error.response.data.message);
               setErrorModalVisible(true)
             }
           });
@@ -286,32 +300,49 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
       }
     }
 
-    const baseURL = '8901'
-    apiInstancelocal(baseURL).put(`/api/v1/lead-creation-initiation/${global.leadID}`, appDetails)
+    const baseURL = global.PORT1
+
+    apiInstance(baseURL).put(`/api/v1/lead-creation-initiation/${global.leadID}`, appDetails)
       .then(async (response) => {
         // Handle the response data
 
         if (global.DEBUG_MODE) console.log("FinalLeadCreationApiResponse::" + JSON.stringify(response.data));
-
-        const deletePromises = [
-          tbl_lead_creation_lead_details.deleteLeadCreationLeadDetailsBasedOnID(global.leadID),
-          tbl_lead_creation_basic_details.deleteLeadCreationBasicDetailsBasedOnID(global.leadID),
-          tbl_lead_creation_business_details.deleteLeadCreationBusinessDetailsBasedOnID(global.leadID),
-          tbl_lead_creation_loan_details.deleteLeadCreationLoanDetailsBasedOnID(global.leadID),
-          tbl_lead_creation_dms.deleteLeadCreationDmsDetailsBasedOnID(global.leadID),
-          tbl_lead_image.deleteLeadImageDetailsBasedOnID(global.leadID),
-        ];
-        await Promise.all(deletePromises);
-        setLoading(false)
-        props.navigation.replace('LeadManagement', { fromScreen: 'LeadCompletion' })
-
+        if (response.status == 200) {
+          const deletePromises = [
+            tbl_lead_creation_lead_details.deleteLeadCreationLeadDetailsBasedOnID(global.leadID),
+            tbl_lead_creation_basic_details.deleteLeadCreationBasicDetailsBasedOnID(global.leadID),
+            tbl_lead_creation_business_details.deleteLeadCreationBusinessDetailsBasedOnID(global.leadID),
+            tbl_lead_creation_loan_details.deleteLeadCreationLoanDetailsBasedOnID(global.leadID),
+            tbl_lead_creation_dms.deleteLeadCreationDmsDetailsBasedOnID(global.leadID),
+            tbl_lead_image.deleteLeadImageDetailsBasedOnID(global.leadID),
+          ];
+          await Promise.all(deletePromises);
+          setLoading(false)
+          props.navigation.replace('LeadManagement', { fromScreen: 'LeadCompletion' })
+        }
+        else if (response.data.statusCode === 201) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        } else if (response.data.statusCode === 202) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        }
 
       })
       .catch((error) => {
         // Handle the error
         if (global.DEBUG_MODE) console.log("FinalLeadCreationApiResponse:::" + JSON.stringify(error.response))
         setLoading(false)
-        if (error.response.data != null) {
+        if (error.response.status == 404) {
+          setApiError(Common.error404);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 400) {
+          setApiError(Common.error400);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 500) {
+          setApiError(Common.error500);
+          setErrorModalVisible(true)
+        } else if (error.response.data != null) {
           setApiError(error.response.data.message);
           setErrorModalVisible(true)
         }

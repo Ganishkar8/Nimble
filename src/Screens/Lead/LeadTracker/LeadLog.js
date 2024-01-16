@@ -134,54 +134,63 @@ const LeadLog = (props, { navigation }) => {
 
     const leadLogApi = () => {
 
-        const baseURL = '8901'
+        const baseURL = global.PORT1
         setLoading(true)
         // alert(props.route.params.leadData.id)
         apiInstance(baseURL).post(`/api/v1/lead-log/${global.leadNumber}`)
             .then(async (response) => {
                 // Handle the response data
                 setLoading(false)
-                if (response.data.length > 1) {
-                    var data = [];
-                    for (var i = 0; i < response.data.length; i++) {
+                if (response.status == 200) {
+                    if (response.data.length > 1) {
+                        var data = [];
+                        for (var i = 0; i < response.data.length; i++) {
+                            data.push({
+                                "id": "1",
+                                "date": response.data[i].date,
+                                "time": response.data[i].time,
+                                "userId": response.data[i].userId,
+                                "userName": response.data[i].userName,
+                                "reassignfrom": "",
+                                "reassignto": "",
+                                "reassignby": ""
+                            })
+                        }
+                        setCurrentPosition(response.data.length - 1)
+                        getReAssignApi(data);
+                    } else {
+                        var data = [];
                         data.push({
                             "id": "1",
-                            "date": response.data[i].date,
-                            "time": response.data[i].time,
-                            "userId": response.data[i].userId,
-                            "userName": response.data[i].userName,
+                            "date": response.data[0].date,
+                            "time": response.data[0].time,
+                            "userId": response.data[0].userId,
+                            "userName": response.data[0].userName,
                             "reassignfrom": "",
                             "reassignto": "",
                             "reassignby": ""
                         })
-                    }
-                    setCurrentPosition(response.data.length - 1)
-                    getReAssignApi(data);
-                } else {
-                    var data = [];
-                    data.push({
-                        "id": "1",
-                        "date": response.data[0].date,
-                        "time": response.data[0].time,
-                        "userId": response.data[0].userId,
-                        "userName": response.data[0].userName,
-                        "reassignfrom": "",
-                        "reassignto": "",
-                        "reassignby": ""
-                    })
-                    data.push({
-                        "id": "1",
-                        "date": "",
-                        "time": "",
-                        "userId": "",
-                        "userName": "",
-                        "reassignfrom": "",
-                        "reassignto": "",
-                        "reassignby": ""
+                        data.push({
+                            "id": "1",
+                            "date": "",
+                            "time": "",
+                            "userId": "",
+                            "userName": "",
+                            "reassignfrom": "",
+                            "reassignto": "",
+                            "reassignby": ""
 
-                    })
-                    setLogTotalData(data);
-                    setCurrentPosition(0)
+                        })
+                        setLogTotalData(data);
+                        setCurrentPosition(0)
+                    }
+                }
+                else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
                 }
 
             })
@@ -189,7 +198,17 @@ const LeadLog = (props, { navigation }) => {
                 // Handle the error
                 setLoading(false)
                 if (global.DEBUG_MODE) console.log("LeadLog::" + JSON.stringify(error.response.data));
-                if (error.response.data != null) {
+
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
                     setApiError(error.response.data.message);
                     setErrorModalVisible(true)
                 }
