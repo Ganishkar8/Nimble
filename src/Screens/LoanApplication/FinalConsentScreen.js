@@ -60,7 +60,7 @@ const FinalConsentScreen = (props, { navigation }) => {
 
     const getMobileNumber = async () => {
         await tbl_client
-            .getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
+            .getClientBasedOnID(global.LOANAPPLICATIONID, 'APPL')
             .then(data => {
                 if (global.DEBUG_MODE) console.log('Applicant Data:', data);
                 if (data !== undefined && data.length > 0) {
@@ -77,7 +77,7 @@ const FinalConsentScreen = (props, { navigation }) => {
         if (value == 'Agree') {
             finalConsent();
         } else {
-            props.navigation.replace('LoanApplicationMain', { fromScreen: 'BankList' });
+            props.navigation.goBack();
         }
 
     }

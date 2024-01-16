@@ -803,6 +803,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                 global.COMPLETEDMODULE = 'LN_PRDT';
                 global.COMPLETEDPAGE = 'LN_PRDT_SLCTN';
 
+                await Common.getPageID(global.FILTEREDPROCESSMODULE, 'NMN_DTLS')
                 props.navigation.replace('LoanNomineeList');
             })
             .catch(error => {
@@ -1288,6 +1289,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                                 reference={loanTenureRef}
                                 returnKey="next"
                                 handleClick={handleClick}
+                                length={3}
                                 handleReference={handleReference}
                             />
                         </View>
@@ -1407,6 +1409,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                                 reference={interestRateRef}
                                 returnKey="next"
                                 handleClick={handleClick}
+                                length={2}
                                 handleReference={handleReference}
                             />
                         </View>

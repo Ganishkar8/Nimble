@@ -766,7 +766,7 @@ const LoanDemographicFamilyDetails = (props) => {
                 }
             ]
 
-            const baseURL = '8901';
+            const baseURL = global.PORT1;
             setLoading(true);
             apiInstance(baseURL)
                 .post(`/api/v2/loan-demographics/${global.LOANAPPLICATIONID}/familyDetails`, appDetails)
@@ -774,9 +774,16 @@ const LoanDemographicFamilyDetails = (props) => {
                     // Handle the response data
 
                     if (global.DEBUG_MODE) console.log('PostFamilyDetailApiResponse::' + JSON.stringify(response.data),);
-
                     setLoading(false);
-                    await insertData(response.data[0].id);
+                    if (response.status == 200) {
+                        await insertData(response.data[0].id);
+                    } else if (response.data.statusCode === 201) {
+                        setApiError(response.data.message);
+                        setErrorModalVisible(true);
+                    } else if (response.data.statusCode === 202) {
+                        setApiError(response.data.message);
+                        setErrorModalVisible(true);
+                    }
 
 
                 })
@@ -784,7 +791,16 @@ const LoanDemographicFamilyDetails = (props) => {
                     // Handle the error
                     if (global.DEBUG_MODE) console.log('PostFamilyDetailApiResponse' + JSON.stringify(error));
                     setLoading(false);
-                    if (error.response.data != null) {
+                    if (error.response.status == 404) {
+                        setApiError(Common.error404);
+                        setErrorModalVisible(true)
+                    } else if (error.response.status == 400) {
+                        setApiError(Common.error400);
+                        setErrorModalVisible(true)
+                    } else if (error.response.status == 500) {
+                        setApiError(Common.error500);
+                        setErrorModalVisible(true)
+                    } else if (error.response.data != null) {
                         setApiError(error.response.data.message);
                         setErrorModalVisible(true)
                     }
@@ -802,6 +818,7 @@ const LoanDemographicFamilyDetails = (props) => {
                 "name": Name,
                 "dateOfBirth": DOB.length > 0 ? Common.convertYearDateFormat(DOB) : '',
                 "age": Age,
+                "title": titleLabel,
                 "gender": genderLabel,
                 "mobileNumber": mobileNumber,
                 "kycTypeId1": KycType1Label,
@@ -822,7 +839,7 @@ const LoanDemographicFamilyDetails = (props) => {
                 "loanApplicationId": global.LOANAPPLICATIONID,
             }
 
-            const baseURL = '8901';
+            const baseURL = global.PORT1;
             setLoading(true);
             apiInstance(baseURL)
                 .put(`/api/v2/loan-demographics/familyDetails/${familyID}`, appDetails)
@@ -830,9 +847,16 @@ const LoanDemographicFamilyDetails = (props) => {
                     // Handle the response data
 
                     if (global.DEBUG_MODE) console.log('UpdateFamilyApiResponse::' + JSON.stringify(response.data),);
-
                     setLoading(false);
-                    await insertData(familyID);
+                    if (response.status == 200) {
+                        await insertData(familyID);
+                    } else if (response.data.statusCode === 201) {
+                        setApiError(response.data.message);
+                        setErrorModalVisible(true);
+                    } else if (response.data.statusCode === 202) {
+                        setApiError(response.data.message);
+                        setErrorModalVisible(true);
+                    }
 
 
                 })
@@ -840,59 +864,22 @@ const LoanDemographicFamilyDetails = (props) => {
                     // Handle the error
                     if (global.DEBUG_MODE) console.log('UpdateFamilyApiResponse' + JSON.stringify(error));
                     setLoading(false);
-                    if (error.response.data != null) {
+                    if (error.response.status == 404) {
+                        setApiError(Common.error404);
+                        setErrorModalVisible(true)
+                    } else if (error.response.status == 400) {
+                        setApiError(Common.error400);
+                        setErrorModalVisible(true)
+                    } else if (error.response.status == 500) {
+                        setApiError(Common.error500);
+                        setErrorModalVisible(true)
+                    } else if (error.response.data != null) {
                         setApiError(error.response.data.message);
                         setErrorModalVisible(true)
                     }
                 });
         }
     };
-
-
-    const updateLoanStatus = () => {
-
-        var module = ''; var page = '';
-
-        if (global.CLIENTTYPE == 'APPL') {
-            module = 'LN_DMGP_APLCT';
-            page = 'DMGRC_APPL_FMLY_DTLS';
-        }
-
-        const appDetails = {
-            "loanApplicationId": global.LOANAPPLICATIONID,
-            "loanWorkflowStage": "LN_APP_INITIATION",
-            "subStageCode": "LN_DEMGRP",
-            "moduleCode": module,
-            "pageCode": page,
-            "status": "Completed"
-        }
-        const baseURL = '8901';
-        setLoading(true);
-        apiInstancelocal(baseURL)
-            .post(`/api/v2/loan-application-status/updateStatus`, appDetails)
-            .then(async response => {
-                // Handle the response data
-                if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
-                setLoading(false);
-                if (global.CLIENTTYPE == 'APPL') {
-                    global.COMPLETEDMODULE = 'LN_DMGP_APLCT';
-                    global.COMPLETEDPAGE = 'DMGRC_APPL_FMLY_DTLS';
-                }
-
-            })
-            .catch(error => {
-                // Handle the error
-                if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
-                setLoading(false);
-
-                if (error.response.data != null) {
-                    setApiError(error.response.data.message);
-                    setErrorModalVisible(true)
-                }
-            });
-
-    };
-
 
     const insertData = async (id) => {
 
@@ -1040,7 +1027,11 @@ const LoanDemographicFamilyDetails = (props) => {
                     '\n';
                 i++;
                 flag = true;
-            } else if (!Common.isValidPhoneNumber(mobileNumber)) {
+            }
+        }
+
+        if (mobileNumber.length > 0) {
+            if (!Common.isValidPhoneNumber(mobileNumber)) {
                 errorMessage =
                     errorMessage +
                     i +
@@ -1052,7 +1043,6 @@ const LoanDemographicFamilyDetails = (props) => {
                 i++;
                 flag = true;
             }
-
         }
 
         if (KycType1Man && KycType1Visible) {
@@ -1641,6 +1631,7 @@ const LoanDemographicFamilyDetails = (props) => {
                                 ComponentName="mobileNumber"
                                 reference={mobileNumberRef}
                                 returnKey="next"
+                                length={10}
                                 handleClick={handleClick}
                                 handleReference={handleReference}
                             />

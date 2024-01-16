@@ -77,11 +77,11 @@ const getAllBankDetails = () => {
     });
 };
 
-const deleteBankDataBasedOnLoanIDAndType = (loanApplicationId, client_type) => {
+const deleteBankDataBasedOnLoanIDAndType = (loanApplicationId, client_type, id) => {
     const db = databaseInstance.getInstance();
     db.transaction((tx) => {
-        tx.executeSql(`DELETE FROM ${tableName} WHERE loanApplicationId = ? AND client_type = ?`,
-            [loanApplicationId, client_type],
+        tx.executeSql(`DELETE FROM ${tableName} WHERE loanApplicationId = ? AND client_type = ? AND id = ?`,
+            [loanApplicationId, client_type, id],
             (tx, results) => {
                 console.log('Rows affected:', results.rowsAffected);
             }, (error) => {

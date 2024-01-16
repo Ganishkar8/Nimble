@@ -235,14 +235,14 @@ const BankList = (props, { navigation }) => {
 
     };
 
-    const deletedata = async (clientType) => {
+    const deletedata = async (bankID) => {
 
         const deletePromises = [
-            tbl_bankdetails.deleteBankDataBasedOnLoanIDAndType(global.LOANAPPLICATIONID, clientType)
+            tbl_bankdetails.deleteBankDataBasedOnLoanIDAndType(global.LOANAPPLICATIONID, global.CLIENTTYPE, bankID)
         ];
         await Promise.all(deletePromises);
 
-        const newArray = bankDetails.filter(item => item.loanApplicationId !== global.LOANAPPLICATIONID);
+        const newArray = bankDetails.filter(item => item.id !== bankID);
         setBankDetails(newArray);
         setRefreshFlatList(!refreshFlatlist);
 

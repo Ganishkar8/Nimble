@@ -155,7 +155,6 @@ const BankDetailsScreen = (props, { navigation }) => {
         getSystemCodeDetail()
         makeSystemMandatoryFields();
         getExistingData()
-        alert(pageId)
 
         if (global.USERTYPEID == 1163) {
             fieldsDisable();
@@ -212,7 +211,7 @@ const BankDetailsScreen = (props, { navigation }) => {
                 setUpiID(data[0].upi_id)
                 setAccountToUseLabel(data[0].accountUsedFor)
                 setLoading(false)
-                if (data[0].dmsId !== undefined) {
+                if (data[0].dmsId !== undefined && data[0].dmsId !== null) {
                     if (data[0].dmsId.length > 0) {
                         getImage(data[0].dmsId);
                     }
@@ -230,15 +229,23 @@ const BankDetailsScreen = (props, { navigation }) => {
         Common.getNetworkConnection().then(value => {
             if (value.isConnected == true) {
                 setLoading(true)
-                const baseURL = '8094'
+                const baseURL = global.PORT2;
                 apiInstance(baseURL).get(`/api/documents/document/${parseInt(dmsID)}`)
                     .then(async (response) => {
                         // Handle the response data
-                        console.log("GetPhotoApiResponse::" + JSON.stringify(response.data));
-                        setFileName(response.data.fileName)
-                        setVisible(false)
-                        setImageUri('data:image/png;base64,' + response.data.base64Content)
-                        // props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
+                        if (Common.DEBUG_MODE) console.log("GetPhotoApiResponse::" + JSON.stringify(response.data));
+                        if (response.status == 200) {
+                            setFileName(response.data.fileName)
+                            setVisible(false)
+                            setImageUri('data:image/png;base64,' + response.data.base64Content)
+                            // props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
+                        } else if (response.data.statusCode === 201) {
+                            setApiError(response.data.message);
+                            setErrorModalVisible(true);
+                        } else if (response.data.statusCode === 202) {
+                            setApiError(response.data.message);
+                            setErrorModalVisible(true);
+                        }
                         setLoading(false)
 
                     })
@@ -246,11 +253,17 @@ const BankDetailsScreen = (props, { navigation }) => {
                         // Handle the error
                         setLoading(false)
                         if (global.DEBUG_MODE) console.log("GetPhotoApiResponse::" + JSON.stringify(error.response.data));
-                        if (error.response.data != null) {
-                            setApiError(error.response.data.message);
+                        if (error.response.status == 404) {
+                            setApiError(Common.error404);
                             setErrorModalVisible(true)
-                        } else if (error.response.httpStatusCode == 500) {
-                            setApiError(error.response.message);
+                        } else if (error.response.status == 400) {
+                            setApiError(Common.error400);
+                            setErrorModalVisible(true)
+                        } else if (error.response.status == 500) {
+                            setApiError(Common.error500);
+                            setErrorModalVisible(true)
+                        } else if (error.response.data != null) {
+                            setApiError(error.response.data.message);
                             setErrorModalVisible(true)
                         }
                     });
@@ -488,6 +501,14 @@ const BankDetailsScreen = (props, { navigation }) => {
             }
         }
 
+        if (ifscCode.length > 0) {
+            if (ifscCode.length !== 11) {
+                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + ' Valid ' + ifscCodeCaption + '\n';
+                i++;
+                flag = true;
+            }
+        }
+
         if (bankNameMan && bankNameVisible) {
             if (bankName.length <= 0) {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + bankNameCaption + '\n';
@@ -531,6 +552,21 @@ const BankDetailsScreen = (props, { navigation }) => {
         if (bankLinkedMobNoMan && bankLinkedMobNoVisible) {
             if (bankLinkedMobNo.length <= 0) {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + bankLinkedMobNoCaption + '\n';
+                i++;
+                flag = true;
+            }
+        }
+
+        if (bankLinkedMobNo.length > 0) {
+            if (!Common.isValidPhoneNumber(bankLinkedMobNo)) {
+                errorMessage =
+                    errorMessage +
+                    i +
+                    ')' +
+                    ' ' +
+                    language[0][props.language].str_plsentervalid +
+                    bankLinkedMobNoCaption +
+                    '\n';
                 i++;
                 flag = true;
             }
@@ -585,7 +621,12 @@ const BankDetailsScreen = (props, { navigation }) => {
 
         Common.getNetworkConnection().then(value => {
             if (value.isConnected == true) {
-                updateImage();
+                if (validateData()) {
+                    showBottomSheet()
+                } else {
+                    updateImage();
+                }
+
             } else {
                 setApiError(language[0][props.language].str_errinternet);
                 setErrorModalVisible(true)
@@ -664,22 +705,38 @@ const BankDetailsScreen = (props, { navigation }) => {
                     "createdBy": global.USERID,
                 }
             ]
-            const baseURL = '8901';
+            const baseURL = global.PORT1;
             setLoading(true);
-            apiInstancelocal(baseURL)
+            apiInstance(baseURL)
                 .post(`/api/v2/loan-demographics/${global.CLIENTID}/BankDetail`, appDetails)
                 .then(async response => {
                     // Handle the response data
                     if (global.DEBUG_MODE) console.log('PostBankResponse::' + JSON.stringify(response.data),);
-
                     setLoading(false);
-                    insertData(response.data[0].id)
+                    if (response.status == 200) {
+                        insertData(response.data[0].id, dmsID)
+                    } else if (response.data.statusCode === 201) {
+                        setApiError(response.data.message);
+                        setErrorModalVisible(true);
+                    } else if (response.data.statusCode === 202) {
+                        setApiError(response.data.message);
+                        setErrorModalVisible(true);
+                    }
                 })
                 .catch(error => {
                     // Handle the error
                     if (global.DEBUG_MODE) console.log('PostBankResponse' + JSON.stringify(error.response));
                     setLoading(false);
-                    if (error.response.data != null) {
+                    if (error.response.status == 404) {
+                        setApiError(Common.error404);
+                        setErrorModalVisible(true)
+                    } else if (error.response.status == 400) {
+                        setApiError(Common.error400);
+                        setErrorModalVisible(true)
+                    } else if (error.response.status == 500) {
+                        setApiError(Common.error500);
+                        setErrorModalVisible(true)
+                    } else if (error.response.data != null) {
                         setApiError(error.response.data.message);
                         setErrorModalVisible(true)
                     }
@@ -711,19 +768,36 @@ const BankDetailsScreen = (props, { navigation }) => {
             }
             const baseURL = '8901';
             setLoading(true);
-            apiInstancelocal(baseURL)
+            apiInstance(baseURL)
                 .put(`/api/v2/loan-demographics/BankDetail/${bankID}`, appDetails)
                 .then(async response => {
                     // Handle the response data
                     if (global.DEBUG_MODE) console.log('UpdateBankResponse::' + JSON.stringify(response.data),);
-                    insertData(bankID)
+                    if (response.status == 200) {
+                        insertData(bankID, dmsID)
+                    } else if (response.data.statusCode === 201) {
+                        setApiError(response.data.message);
+                        setErrorModalVisible(true);
+                    } else if (response.data.statusCode === 202) {
+                        setApiError(response.data.message);
+                        setErrorModalVisible(true);
+                    }
                     setLoading(false);
                 })
                 .catch(error => {
                     // Handle the error
                     if (global.DEBUG_MODE) console.log('UpdateBankResponse' + JSON.stringify(error.response));
                     setLoading(false);
-                    if (error.response.data != null) {
+                    if (error.response.status == 404) {
+                        setApiError(Common.error404);
+                        setErrorModalVisible(true)
+                    } else if (error.response.status == 400) {
+                        setApiError(Common.error400);
+                        setErrorModalVisible(true)
+                    } else if (error.response.status == 500) {
+                        setApiError(Common.error500);
+                        setErrorModalVisible(true)
+                    } else if (error.response.data != null) {
                         setApiError(error.response.data.message);
                         setErrorModalVisible(true)
                     }
@@ -737,22 +811,39 @@ const BankDetailsScreen = (props, { navigation }) => {
         let IFSC = '';
         IFSC = ifsc.toUpperCase()
 
-        const baseURL = '8082';
+        const baseURL = global.PORT4;
         setLoading(true);
         apiInstance(baseURL)
             .get(`api/v1/ifsc-config/getByIfsc/${IFSC}`)
             .then(async response => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log('IFSCApiResponse::' + JSON.stringify(response.data));
-                setBankName(response.data.bankName)
-                setBranchName(response.data.branchName)
+                if (response.status == 200) {
+                    setBankName(response.data.bankName)
+                    setBranchName(response.data.branchName)
+                } else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
                 setLoading(false);
             })
             .catch(error => {
                 // Handle the error
                 if (global.DEBUG_MODE) console.log('IFSCApiError' + JSON.stringify(error.response));
                 setLoading(false);
-                if (error.response.data != null) {
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
                     setApiError(error.response.data.message);
                     setErrorModalVisible(true)
                 }
@@ -1067,7 +1158,7 @@ const BankDetailsScreen = (props, { navigation }) => {
                     <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
                         <TextComp textVal={ifscCodeCaption} textStyle={Commonstyles.inputtextStyle} Visible={ifscCodeMan} />
                     </View>
-                    <TextInputComp textValue={ifscCode} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={ifscCodeDisable} ComponentName='ifsccode' reference={ifscCodeRef} returnKey="done" handleClick={handleClick} handleReference={handleReference} length={30} />
+                    <TextInputComp textValue={ifscCode} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={ifscCodeDisable} ComponentName='ifsccode' reference={ifscCodeRef} returnKey="done" handleClick={handleClick} handleReference={handleReference} length={11} />
                 </View>}
 
                 {bankNameVisible && <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>

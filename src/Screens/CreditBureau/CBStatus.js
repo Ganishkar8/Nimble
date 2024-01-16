@@ -40,11 +40,17 @@ const CBStatus = (props, { navigation }) => {
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const [apiError, setApiError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [cbResponseStatus, setCbResponseStatus] = useState('');
+
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
         getcbData();
+        const filterCbCheck = global.LEADTRACKERDATA.loanApplicationStatusDtos[0].subStageLog.filter((data) => data.subStageCode === 'CB_CHK');
+        const filterCbResponse = filterCbCheck[0].moduleLog.filter((data) => data.moduleCode === 'CB_BRE_DCSN')
+        setCbResponseStatus(filterCbResponse[0].moduleStatus);
+
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
             backHandler.remove();
@@ -83,7 +89,7 @@ const CBStatus = (props, { navigation }) => {
 
     const getcbData = () => {
 
-        const baseURL = '8901';
+        const baseURL = global.PORT1;
         setLoading(true);
         apiInstance(baseURL)
             .get(`/api/v2/getCb/${global.LOANAPPLICATIONID}`)
@@ -91,17 +97,35 @@ const CBStatus = (props, { navigation }) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log('CBResponseApiResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
-                const newData = response.data.map(item => {
-                    const extraJson = { isSelected: false };
-                    return { ...item, ...extraJson };
-                });
-                setCBResponse(newData)
+                if (response.status == 200) {
+                    const newData = response.data.map(item => {
+                        const extraJson = { isSelected: false };
+                        return { ...item, ...extraJson };
+                    });
+                    setCBResponse(newData)
+                } else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
+
             })
             .catch(error => {
                 // Handle the error
                 if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
                 setLoading(false);
-                if (error.response.data != null) {
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
                     setApiError(error.response.data.message);
                     setErrorModalVisible(true)
                 }
@@ -133,18 +157,35 @@ const CBStatus = (props, { navigation }) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
-                global.COMPLETEDSUBSTAGE = 'LN_DEMGRP';
-                global.COMPLETEDMODULE = 'CB_BRE_DCSN';
-                global.COMPLETEDPAGE = 'CB_CHK_BRE_DCSN';
 
-                props.navigation.replace('LoanApplicationMain', { fromScreen: 'CBStatus' })
+                if (response.status == 200) {
+                    global.COMPLETEDSUBSTAGE = 'LN_DEMGRP';
+                    global.COMPLETEDMODULE = 'CB_BRE_DCSN';
+                    global.COMPLETEDPAGE = 'CB_CHK_BRE_DCSN';
+                    props.navigation.replace('LoanApplicationMain', { fromScreen: 'CBStatus' })
+                } else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
 
             })
             .catch(error => {
                 // Handle the error
                 if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
                 setLoading(false);
-                if (error.response.data != null) {
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
                     setApiError(error.response.data.message);
                     setErrorModalVisible(true)
                 }
@@ -260,15 +301,17 @@ const CBStatus = (props, { navigation }) => {
                     keyExtractor={(item, index) => index.toString()}
                 />
             </View>
-            <View style={styles.fab}>
-                <ButtonViewComp
-                    textValue={language[0][props.language].str_next.toUpperCase()}
-                    textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
-                    viewStyle={Commonstyles.buttonView}
-                    innerStyle={Commonstyles.buttonViewInnerStyle}
-                    handleClick={updateLoanStatus}
-                />
-            </View>
+            {cbResponseStatus == 'Inprogress' &&
+                <View style={styles.fab}>
+                    <ButtonViewComp
+                        textValue={language[0][props.language].str_next.toUpperCase()}
+                        textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
+                        viewStyle={Commonstyles.buttonView}
+                        innerStyle={Commonstyles.buttonViewInnerStyle}
+                        handleClick={updateLoanStatus}
+                    />
+                </View>
+            }
         </View>
 
     );

@@ -11,7 +11,6 @@ import {
     BackHandler, PermissionsAndroid
 } from 'react-native';
 import apiInstance from '../../../Utils/apiInstance';
-import apiInstancelocal from '../../../Utils/apiInstancelocal';
 import Colors from '../../../Utils/Colors';
 import MyStatusBar from '../../../Components/MyStatusBar';
 import Loading from '../../../Components/Loading';
@@ -352,15 +351,42 @@ const LoanDemographicBusinessDetail = (props) => {
         }, [])
     );
 
-    const getApplicantData = () => {
+    const getApplicantData = async () => {
 
-        tbl_loanbusinessDetail.getBusinessDetailsBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE, global.CLIENTID)
+        var businessAvailable = false, UrNumberAvailable = false;
+
+        await tbl_client
+            .getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
+            .then(data => {
+                if (global.DEBUG_MODE) console.log('Applicant Data:', data);
+                if (data !== undefined && data.length > 0) {
+                    if (data[0].udyamRegistrationNumber !== undefined && data[0].udyamRegistrationNumber !== null)
+                        if (data[0].udyamRegistrationNumber.length > 0) {
+                            setUrmNumber(data[0].udyamRegistrationNumber);
+                            setUrmNumberDisable(true);
+                            UrNumberAvailable = true;
+                        }
+
+                }
+            })
+            .catch(error => {
+                setLoading(false);
+                if (global.DEBUG_MODE)
+                    console.error('Error fetching Applicant details:', error);
+            });
+
+        await tbl_loanbusinessDetail.getBusinessDetailsBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE, global.CLIENTID)
             .then(value => {
                 if (global.DEBUG_MODE) console.log('Business Data:', value);
                 if (value !== undefined && value.length > 0) {
+                    businessAvailable = true;
                     setCustomerSubCategoryLabel(value[0].customerSubCatg)
+                    setCustomerSubCategoryDisable(true);
                     setEntShopName(value[0].enterpriseShopName)
                     setUrmNumber(value[0].udyamRegNum)
+                    if (UrNumberAvailable) {
+                        setUrmNumberDisable(true)
+                    }
                     setDOR(value[0].dateofReg) //dateofReg
                     setDOI(value[0].dateofIncorp) //dateofIncorp
                     setDOBC(value[0].dateofBusiness) //dateofBusiness
@@ -394,6 +420,24 @@ const LoanDemographicBusinessDetail = (props) => {
                 if (global.DEBUG_MODE) console.error('Error fetching Business details:', error);
             });
 
+        if (!businessAvailable) {
+            tbl_loanApplication
+                .getLoanAppBasedOnID(global.LOANAPPLICATIONID, 'APPL')
+                .then(data => {
+                    if (global.DEBUG_MODE) console.log('Applicant Data:', data);
+                    if (data !== undefined && data.length > 0) {
+                        setCustomerSubCategoryLabel(data[0].customer_subcategory);
+                        setCustomerSubCategoryDisable(true);
+                        setLoading(false);
+                    }
+                })
+                .catch(error => {
+                    setLoading(false);
+                    if (global.DEBUG_MODE)
+                        console.error('Error fetching Applicant details:', error);
+                });
+
+        }
 
     }
 
@@ -402,14 +446,23 @@ const LoanDemographicBusinessDetail = (props) => {
         Common.getNetworkConnection().then(value => {
             if (value.isConnected == true) {
                 setLoading(true)
-                const baseURL = '8094'
+                const baseURL = global.PORT2
                 apiInstance(baseURL).get(`/api/documents/document/${parseInt(dmsID)}`)
                     .then(async (response) => {
                         // Handle the response data
-                        console.log("GetPhotoApiResponse::" + JSON.stringify(response.data));
-                        setFileName(response.data.fileName)
-                        setVisible(false)
-                        setImageUri('data:image/png;base64,' + response.data.base64Content)
+                        if (Common.DEBUG_MODE) console.log("GetPhotoApiResponse::" + JSON.stringify(response.data));
+
+                        if (response.status == 200) {
+                            setFileName(response.data.fileName)
+                            setVisible(false)
+                            setImageUri('data:image/png;base64,' + response.data.base64Content)
+                        } else if (response.data.statusCode === 201) {
+                            setApiError(response.data.message);
+                            setErrorModalVisible(true);
+                        } else if (response.data.statusCode === 202) {
+                            setApiError(response.data.message);
+                            setErrorModalVisible(true);
+                        }
                         // props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
                         setLoading(false)
 
@@ -418,11 +471,17 @@ const LoanDemographicBusinessDetail = (props) => {
                         // Handle the error
                         setLoading(false)
                         if (global.DEBUG_MODE) console.log("GetPhotoApiResponse::" + JSON.stringify(error.response.data));
-                        if (error.response.data != null) {
-                            setApiError(error.response.data.message);
+                        if (error.response.status == 404) {
+                            setApiError(Common.error404);
                             setErrorModalVisible(true)
-                        } else if (error.response.httpStatusCode == 500) {
-                            setApiError(error.response.message);
+                        } else if (error.response.status == 400) {
+                            setApiError(Common.error400);
+                            setErrorModalVisible(true)
+                        } else if (error.response.status == 500) {
+                            setApiError(Common.error500);
+                            setErrorModalVisible(true)
+                        } else if (error.response.data != null) {
+                            setApiError(error.response.data.message);
                             setErrorModalVisible(true)
                         }
                     });
@@ -526,7 +585,7 @@ const LoanDemographicBusinessDetail = (props) => {
 
         const filteredCustomerSubCategoryData = leaduserCodeDetail.filter((data) => data.masterId === 'CUSTOMER_SUBCATEGORY').sort((a, b) => a.Description.localeCompare(b.Description));;
         setCustomerSubCategoryData(filteredCustomerSubCategoryData);
-        
+
         const filteredIndustryTypeData = leaduserCodeDetail.filter((data) => data.masterId === 'INDUSTRY_TYPE').sort((a, b) => a.Description.localeCompare(b.Description));;
         setIndustryTypeData(filteredIndustryTypeData);
 
@@ -1054,25 +1113,25 @@ const LoanDemographicBusinessDetail = (props) => {
 
     const postBusinessDetails = (imageID) => {
 
-        var dor='',doi='',dobc='';
+        var dor = '', doi = '', dobc = '';
 
         if (DOR != undefined && DOR != null) {
             if (DOR.length > 0) {
-              dor = Common.convertYearDateFormat(DOR)
+                dor = Common.convertYearDateFormat(DOR)
             }
-          }
+        }
 
-          if (DOI != undefined && DOI != null) {
+        if (DOI != undefined && DOI != null) {
             if (DOI.length > 0) {
-              doi = Common.convertYearDateFormat(DOI)
+                doi = Common.convertYearDateFormat(DOI)
             }
-          }
+        }
 
-          if (DOBC != undefined && DOBC != null) {
+        if (DOBC != undefined && DOBC != null) {
             if (DOBC.length > 0) {
-              dobc = Common.convertYearDateFormat(DOBC)
+                dobc = Common.convertYearDateFormat(DOBC)
             }
-          }
+        }
 
         if (validate()) {
 
@@ -1117,7 +1176,7 @@ const LoanDemographicBusinessDetail = (props) => {
                 ]
             }
 
-            const baseURL = '8901';
+            const baseURL = global.PORT1;
             setLoading(true);
             apiInstance(baseURL)
                 .post(`/api/v2/loan-demographics/${global.CLIENTID}/businessDetails`, appDetails)
@@ -1127,14 +1186,31 @@ const LoanDemographicBusinessDetail = (props) => {
                     if (global.DEBUG_MODE) console.log('PostBusinessDetailApiResponse::' + JSON.stringify(response.data),);
 
                     setLoading(false);
-                    await insertData(response.data.id, imageID);
+                    if (response.status == 200) {
+                        await insertData(response.data.id, imageID);
+                    } else if (response.data.statusCode === 201) {
+                        setApiError(response.data.message);
+                        setErrorModalVisible(true);
+                    } else if (response.data.statusCode === 202) {
+                        setApiError(response.data.message);
+                        setErrorModalVisible(true);
+                    }
 
                 })
                 .catch(error => {
                     // Handle the error
                     if (global.DEBUG_MODE) console.log('PostBusinessDetailApiResponse' + JSON.stringify(error));
                     setLoading(false);
-                    if (error.response.data != null) {
+                    if (error.response.status == 404) {
+                        setApiError(Common.error404);
+                        setErrorModalVisible(true)
+                    } else if (error.response.status == 400) {
+                        setApiError(Common.error400);
+                        setErrorModalVisible(true)
+                    } else if (error.response.status == 500) {
+                        setApiError(Common.error500);
+                        setErrorModalVisible(true)
+                    } else if (error.response.data != null) {
                         setApiError(error.response.data.message);
                         setErrorModalVisible(true)
                     }
@@ -1186,7 +1262,7 @@ const LoanDemographicBusinessDetail = (props) => {
                 ]
             }
 
-            const baseURL = '8901';
+            const baseURL = global.PORT1;
             setLoading(true);
             apiInstance(baseURL)
                 .put(`/api/v2/loan-demographics/familyDetails/${familyID}`, appDetails)
@@ -1196,7 +1272,15 @@ const LoanDemographicBusinessDetail = (props) => {
                     if (global.DEBUG_MODE) console.log('UpdateBusinessApiResponse::' + JSON.stringify(response.data),);
 
                     setLoading(false);
-                    await insertData(familyID);
+                    if (response.status == 200) {
+                        await insertData(familyID);
+                    } else if (response.data.statusCode === 201) {
+                        setApiError(response.data.message);
+                        setErrorModalVisible(true);
+                    } else if (response.data.statusCode === 202) {
+                        setApiError(response.data.message);
+                        setErrorModalVisible(true);
+                    }
 
 
                 })
@@ -1204,7 +1288,16 @@ const LoanDemographicBusinessDetail = (props) => {
                     // Handle the error
                     if (global.DEBUG_MODE) console.log('UpdateBusinessApiResponse' + JSON.stringify(error));
                     setLoading(false);
-                    if (error.response.data != null) {
+                    if (error.response.status == 404) {
+                        setApiError(Common.error404);
+                        setErrorModalVisible(true)
+                    } else if (error.response.status == 400) {
+                        setApiError(Common.error400);
+                        setErrorModalVisible(true)
+                    } else if (error.response.status == 500) {
+                        setApiError(Common.error500);
+                        setErrorModalVisible(true)
+                    } else if (error.response.data != null) {
                         setApiError(error.response.data.message);
                         setErrorModalVisible(true)
                     }
@@ -1236,32 +1329,49 @@ const LoanDemographicBusinessDetail = (props) => {
             "pageCode": page,
             "status": "Completed"
         }
-        const baseURL = '8901';
+        const baseURL = global.PORT1;
         setLoading(true);
-        apiInstancelocal(baseURL)
+        apiInstance(baseURL)
             .post(`/api/v2/loan-application-status/updateStatus`, appDetails)
             .then(async response => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
-                if (global.CLIENTTYPE == 'APPL') {
-                    global.COMPLETEDMODULE = 'LN_DMGP_APLCT';
-                    global.COMPLETEDPAGE = 'DMGRC_APPL_BSN_DTLS';
-                } else if (global.CLIENTTYPE == 'CO-APPL') {
-                    global.COMPLETEDMODULE = 'LN_DMGP_COAPLCT';
-                    global.COMPLETEDPAGE = 'DMGRC_COAPPL_BSN_DTLS';
-                } else if (global.CLIENTTYPE == 'GRNTR') {
-                    global.COMPLETEDMODULE = 'LN_DMGP_GRNTR';
-                    global.COMPLETEDPAGE = 'DMGRC_GRNTR_BSN_DTLS';
+                if (response.status == 200) {
+                    if (global.CLIENTTYPE == 'APPL') {
+                        global.COMPLETEDMODULE = 'LN_DMGP_APLCT';
+                        global.COMPLETEDPAGE = 'DMGRC_APPL_BSN_DTLS';
+                    } else if (global.CLIENTTYPE == 'CO-APPL') {
+                        global.COMPLETEDMODULE = 'LN_DMGP_COAPLCT';
+                        global.COMPLETEDPAGE = 'DMGRC_COAPPL_BSN_DTLS';
+                    } else if (global.CLIENTTYPE == 'GRNTR') {
+                        global.COMPLETEDMODULE = 'LN_DMGP_GRNTR';
+                        global.COMPLETEDPAGE = 'DMGRC_GRNTR_BSN_DTLS';
+                    }
+                    navigatetoBusinessAddress();
+                } else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
                 }
-                navigatetoBusinessAddress();
             })
             .catch(error => {
                 // Handle the error
                 if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
                 setLoading(false);
 
-                if (error.response.data != null) {
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
                     setApiError(error.response.data.message);
                     setErrorModalVisible(true)
                 }
@@ -1567,7 +1677,7 @@ const LoanDemographicBusinessDetail = (props) => {
             setOperatingDays(textValue);
         } else if (componentName === 'OperatingTimings') {
             setOperatingTimings(textValue)
-        }else if (componentName === 'TimeByPromoter') {
+        } else if (componentName === 'TimeByPromoter') {
             setTimeByPromoter(textValue);
         } else if (componentName === 'NPMRate') {
             setNPMRate(textValue);

@@ -50,7 +50,7 @@ const CBResponseScreen = (props, { navigation }) => {
         const filterCbCheck = global.LEADTRACKERDATA.loanApplicationStatusDtos[0].subStageLog.filter((data) => data.subStageCode === 'CB_CHK');
         const filterCbResponse = filterCbCheck[0].moduleLog.filter((data) => data.moduleCode === 'CB_RSPNS')
         setCbResponseStatus(filterCbResponse[0].moduleStatus);
-        alert(JSON.stringify(filterCbResponse[0].moduleStatus))
+
         getcbData();
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
@@ -79,7 +79,7 @@ const CBResponseScreen = (props, { navigation }) => {
 
     const getcbData = () => {
 
-        const baseURL = '8901';
+        const baseURL = global.PORT1;;
         setLoading(true);
         apiInstance(baseURL)
             .get(`/api/v2/getCb/${global.LOANAPPLICATIONID}`)
@@ -87,18 +87,34 @@ const CBResponseScreen = (props, { navigation }) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log('CBResponseApiResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
-
-                if (response.data.length <= 0) {
-                    getcbCheckData();
-                } else {
-                    setCBResponse(response.data)
+                if (response.status == 200) {
+                    if (response.data.length <= 0) {
+                        getcbCheckData();
+                    } else {
+                        setCBResponse(response.data)
+                    }
+                } else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
                 }
             })
             .catch(error => {
                 // Handle the error
                 if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
                 setLoading(false);
-                if (error.response.data != null) {
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
                     setApiError(error.response.data.message);
                     setErrorModalVisible(true)
                 }
@@ -108,7 +124,7 @@ const CBResponseScreen = (props, { navigation }) => {
 
     const getcbCheckData = () => {
 
-        const baseURL = '8901';
+        const baseURL = global.PORT1;;
         setLoading(true);
         apiInstance(baseURL)
             .get(`/api/v2/cb-check/${global.LOANAPPLICATIONID}`)
@@ -116,20 +132,34 @@ const CBResponseScreen = (props, { navigation }) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log('CBCheckApiResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
-                if (response.data.length <= 0) {
-                    getcbData();
-                } else if (response.data.statusCode == 202) {
+                if (response.status == 200) {
+                    if (response.data.length <= 0) {
+                        getcbData();
+                    } else {
+                        setCBResponse(response.data)
+                    }
+                } else if (response.data.statusCode === 201) {
                     setApiError(response.data.message);
-                    setErrorModalVisible(true)
-                } else {
-                    setCBResponse(response.data)
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
                 }
             })
             .catch(error => {
                 // Handle the error
                 if (global.DEBUG_MODE) console.log('CBCheckApiResponse' + JSON.stringify(error.response));
                 setLoading(false);
-                if (error.response.data != null) {
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
                     setApiError(error.response.data.message);
                     setErrorModalVisible(true)
                 }
@@ -153,7 +183,7 @@ const CBResponseScreen = (props, { navigation }) => {
             "pageCode": page,
             "status": "Completed"
         }
-        const baseURL = '8901';
+        const baseURL = global.PORT1;;
         setLoading(true);
         apiInstance(baseURL)
             .post(`/api/v2/loan-application-status/updateStatus`, appDetails)
@@ -161,17 +191,34 @@ const CBResponseScreen = (props, { navigation }) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
-                global.COMPLETEDMODULE = 'CB_RSPNS';
-                global.COMPLETEDPAGE = 'CB_CHK_CB_RSPNS';
+                if (response.status == 200) {
+                    global.COMPLETEDMODULE = 'CB_RSPNS';
+                    global.COMPLETEDPAGE = 'CB_CHK_CB_RSPNS';
+                    props.navigation.replace('CBStatus')
+                } else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
 
-                props.navigation.replace('CBStatus')
 
             })
             .catch(error => {
                 // Handle the error
                 if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
                 setLoading(false);
-                if (error.response.data != null) {
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
                     setApiError(error.response.data.message);
                     setErrorModalVisible(true)
                 }
@@ -338,14 +385,15 @@ const CBResponseScreen = (props, { navigation }) => {
             </BottomSheet>
             <View style={styles.fab}>
 
-
-                <ButtonViewComp
-                    textValue={language[0][props.language].str_next.toUpperCase()}
-                    textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
-                    viewStyle={Commonstyles.buttonView}
-                    innerStyle={Commonstyles.buttonViewInnerStyle}
-                    handleClick={updateLoanStatus}
-                />
+                {cbResponseStatus == 'Inprogress' &&
+                    <ButtonViewComp
+                        textValue={language[0][props.language].str_next.toUpperCase()}
+                        textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
+                        viewStyle={Commonstyles.buttonView}
+                        innerStyle={Commonstyles.buttonViewInnerStyle}
+                        handleClick={updateLoanStatus}
+                    />
+                }
 
             </View>
         </View>

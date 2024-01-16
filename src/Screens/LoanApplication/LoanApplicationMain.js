@@ -156,12 +156,17 @@ const LoanApplicationMain = (props, { navigation }) => {
     const [isMounted, setIsMounted] = useState(true);
     const [workflowIDLabel, setWorkflowIDLabel] = useState('');
     const [buttonText, setButtonText] = useState('');
+    const [cbCheckStatus, setCbCheckStatus] = useState('');
+
 
     useEffect(() => {
 
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
         //getProcessSubStage();
+
+        const filterCbCheck = global.LEADTRACKERDATA.loanApplicationStatusDtos[0].subStageLog.filter((data) => data.subStageCode === 'CB_CHK');
+        setCbCheckStatus(filterCbCheck[0].subStageStatus)
 
 
         return () => {
@@ -876,11 +881,24 @@ const LoanApplicationMain = (props, { navigation }) => {
                     horizontal={true}
                     keyExtractor={(item, index) => index.toString()}
                     renderItem={({ item, index }) => {
+                        var gradientColors = '';
+                        if (item.subStageCode == 'CB_CHK' && cbCheckStatus == 'Rejected') {
+                            gradientColors = ['#FFC1C1', '#FF6565', '#FF4242'];
+                        } else {
+                            gradientColors = item.subStageCode === global.COMPLETEDSUBSTAGE
+                                ? ['#D2FF21', '#FAD420', '#FFCE20']
+                                : item.subDataIsCompleted
+                                    ? ['#8EF2CB', '#50C56F', '#3BB650']
+                                    : ['#ECECEC', '#DBDBDB', '#ECECEC'];
+                        }
+
+
+
                         return (
                             <TouchableOpacity activeOpacity={1} onPress={() => onClickMainList(item, item.id)}>
                                 <View>
                                     <View style={{ flexDirection: 'row' }}>
-                                        <LinearGradient colors={item.subStageCode == global.COMPLETEDSUBSTAGE ? (['#D2FF21', '#FAD420', '#FFCE20']) : item.subDataIsCompleted ? (['#8EF2CB', '#50C56F', '#3BB650']) : (['#ECECEC', '#DBDBDB', '#ECECEC'])} style={{
+                                        <LinearGradient colors={gradientColors} style={{
                                             width: 60, height: 60, backgroundColor: Colors.skyBlue, margin: 4, borderRadius: 30,
                                             alignItems: 'center', justifyContent: 'center'
                                         }}>

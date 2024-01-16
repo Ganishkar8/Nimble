@@ -11,7 +11,6 @@ import {
   FlatList
 } from 'react-native';
 import apiInstance from '../../../Utils/apiInstance';
-import apiInstancelocal from '../../../Utils/apiInstancelocal';
 import Colors from '../../../Utils/Colors';
 import MyStatusBar from '../../../Components/MyStatusBar';
 import Loading from '../../../Components/Loading';
@@ -545,22 +544,38 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
         "clientIncomeDetails": incomeOfObjects,
         "clientExpenseDetails": expenseOfObjects
       }
-      const baseURL = '8901';
+      const baseURL = global.PORT1;
       setLoading(true);
-      apiInstancelocal(baseURL)
+      apiInstance(baseURL)
         .post(`/api/v2/loan-demographics/${global.CLIENTID}/financialDetail`, appDetails)
         .then(async response => {
           // Handle the response data
           if (global.DEBUG_MODE) console.log('PostFinancialResponse::' + JSON.stringify(response.data),);
-
           setLoading(false);
-          insertData(mergedArray);
+          if (response.status == 200) {
+            insertData(mergedArray);
+          } else if (response.data.statusCode === 201) {
+            setApiError(response.data.message);
+            setErrorModalVisible(true);
+          } else if (response.data.statusCode === 202) {
+            setApiError(response.data.message);
+            setErrorModalVisible(true);
+          }
         })
         .catch(error => {
           // Handle the error
           if (global.DEBUG_MODE) console.log('PostFinancialError' + JSON.stringify(error.response));
           setLoading(false);
-          if (error.response.data != null) {
+          if (error.response.status == 404) {
+            setApiError(Common.error404);
+            setErrorModalVisible(true)
+          } else if (error.response.status == 400) {
+            setApiError(Common.error400);
+            setErrorModalVisible(true)
+          } else if (error.response.status == 500) {
+            setApiError(Common.error500);
+            setErrorModalVisible(true)
+          } else if (error.response.data != null) {
             setApiError(error.response.data.message);
             setErrorModalVisible(true)
           }
@@ -605,32 +620,49 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
       "pageCode": page,
       "status": "Completed"
     }
-    const baseURL = '8901';
+    const baseURL = global.PORT1;
     setLoading(true);
-    apiInstancelocal(baseURL)
+    apiInstance(baseURL)
       .post(`/api/v2/loan-application-status/updateStatus`, appDetails)
       .then(async response => {
         // Handle the response data
         if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
         setLoading(false);
-        if (global.CLIENTTYPE == 'APPL') {
-          global.COMPLETEDMODULE = 'LN_DMGP_APLCT';
-          global.COMPLETEDPAGE = 'DMGRC_APPL_FNCL_DTLS';
-        } else if (global.CLIENTTYPE == 'CO-APPL') {
-          global.COMPLETEDMODULE = 'LN_DMGP_COAPLCT';
-          global.COMPLETEDPAGE = 'DMGRC_COAPPL_FNCL_DTLS';
-        } else if (global.CLIENTTYPE == 'GRNTR') {
-          global.COMPLETEDMODULE = 'LN_DMGP_GRNTR';
-          global.COMPLETEDPAGE = 'DMGRC_GRNTR_FNCL_DTLS';
+        if (response.status == 200) {
+          if (global.CLIENTTYPE == 'APPL') {
+            global.COMPLETEDMODULE = 'LN_DMGP_APLCT';
+            global.COMPLETEDPAGE = 'DMGRC_APPL_FNCL_DTLS';
+          } else if (global.CLIENTTYPE == 'CO-APPL') {
+            global.COMPLETEDMODULE = 'LN_DMGP_COAPLCT';
+            global.COMPLETEDPAGE = 'DMGRC_COAPPL_FNCL_DTLS';
+          } else if (global.CLIENTTYPE == 'GRNTR') {
+            global.COMPLETEDMODULE = 'LN_DMGP_GRNTR';
+            global.COMPLETEDPAGE = 'DMGRC_GRNTR_FNCL_DTLS';
+          }
+          navigatetoBank();
+        } else if (response.data.statusCode === 201) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        } else if (response.data.statusCode === 202) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
         }
-        navigatetoBank();
       })
       .catch(error => {
         // Handle the error
         if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
         setLoading(false);
 
-        if (error.response.data != null) {
+        if (error.response.status == 404) {
+          setApiError(Common.error404);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 400) {
+          setApiError(Common.error400);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 500) {
+          setApiError(Common.error500);
+          setErrorModalVisible(true)
+        } else if (error.response.data != null) {
           setApiError(error.response.data.message);
           setErrorModalVisible(true)
         }

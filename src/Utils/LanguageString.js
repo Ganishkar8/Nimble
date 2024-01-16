@@ -188,6 +188,7 @@ export const language = [
       str_available: 'Available',
       str_notavailable: 'Not Available',
       str_addressdetail: 'Address Details',
+      str_baddressdetailappl: 'Business Address Details',
       str_baddressdetail: 'Business Address Details (Optional)',
       str_bankdetail: 'Bank Details (Optional)',
       str_addaddressbutton: 'Add Address',

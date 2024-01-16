@@ -24,7 +24,7 @@ import IconButtonViewComp from '../../../Components/IconButtonViewComp';
 import tbl_clientaddressinfo from '../../../Database/Table/tbl_clientaddressinfo';
 import tbl_UserCodeDetails from '../../../Database/Table/tbl_UserCodeDetails';
 import { useIsFocused } from '@react-navigation/native';
-import apiInstancelocal from '../../../Utils/apiInstancelocal';
+import apiInstance from '../../../Utils/apiInstance';
 import ErrorModal from '../../../Components/ErrorModal';
 import TextComp from '../../../Components/TextComp';
 import Common from '../../../Utils/Common';
@@ -244,22 +244,38 @@ const LoanAddressList = (props, { navigation }) => {
 
     const deleteAddressData = () => {
 
-        const baseURL = '8901';
+        const baseURL = global.PORT1;
         setLoading(true);
-        apiInstancelocal(baseURL)
+        apiInstance(baseURL)
             .delete(`/api/v2/profile-short/address-details/${addressID}`)
             .then(async response => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log('DeleteAddressResponse::' + JSON.stringify(response.data),);
-
                 setLoading(false);
-                deletedata(addressID);
+                if (response.status == 200) {
+                    deletedata(addressID);
+                } else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
             })
             .catch(error => {
                 // Handle the error
                 if (global.DEBUG_MODE) console.log('DeleteAddressResponse' + JSON.stringify(error.response));
                 setLoading(false);
-                if (error.response.data != null) {
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
                     setApiError(error.response.data.message);
                     setErrorModalVisible(true)
                 }
@@ -314,27 +330,34 @@ const LoanAddressList = (props, { navigation }) => {
             "pageCode": page,
             "status": "Completed"
         }
-        const baseURL = '8901';
+        const baseURL = global.PORT1;
         setLoading(true);
-        apiInstancelocal(baseURL)
+        apiInstance(baseURL)
             .post(`/api/v2/loan-application-status/updateStatus`, appDetails)
             .then(async response => {
                 // Handle the response data
 
                 if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
-                if (global.CLIENTTYPE == 'APPL') {
-                    global.COMPLETEDMODULE = 'LN_DMGP_APLCT';
-                    global.COMPLETEDPAGE = 'DMGRC_APPL_BSN_ADDR_DTLS';
-                } else if (global.CLIENTTYPE == 'CO-APPL') {
-                    global.COMPLETEDMODULE = 'LN_DMGP_COAPLCT';
-                    global.COMPLETEDPAGE = 'DMGRC_COAPPL_BSN_ADDR_DTLS';
-                } else if (global.CLIENTTYPE == 'GRNTR') {
-                    global.COMPLETEDMODULE = 'LN_DMGP_GRNTR';
-                    global.COMPLETEDPAGE = 'DMGRC_GRNTR_BSN_ADDR_DTLS';
+                if (response.status == 200) {
+                    if (global.CLIENTTYPE == 'APPL') {
+                        global.COMPLETEDMODULE = 'LN_DMGP_APLCT';
+                        global.COMPLETEDPAGE = 'DMGRC_APPL_BSN_ADDR_DTLS';
+                    } else if (global.CLIENTTYPE == 'CO-APPL') {
+                        global.COMPLETEDMODULE = 'LN_DMGP_COAPLCT';
+                        global.COMPLETEDPAGE = 'DMGRC_COAPPL_BSN_ADDR_DTLS';
+                    } else if (global.CLIENTTYPE == 'GRNTR') {
+                        global.COMPLETEDMODULE = 'LN_DMGP_GRNTR';
+                        global.COMPLETEDPAGE = 'DMGRC_GRNTR_BSN_ADDR_DTLS';
+                    }
+                    navigatetoGSTDetail();
+                } else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
                 }
-
-                navigatetoGSTDetail();
 
 
 
@@ -343,7 +366,16 @@ const LoanAddressList = (props, { navigation }) => {
                 // Handle the error
                 if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
                 setLoading(false);
-                if (error.response.data != null) {
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
                     setApiError(error.response.data.message);
                     setErrorModalVisible(true)
                 }
@@ -373,40 +405,6 @@ const LoanAddressList = (props, { navigation }) => {
             props.navigation.replace('LoanDemographicsFinancialDetails');
         }
     }
-
-    const approveManualKYC = (status) => {
-
-        const appDetails = {
-            "kycType": "001",
-            "kycValue": "123456789012",
-            "kycDmsId": 100,
-            "kycExpiryDate": null,
-            "manualKycStatus": status,
-            "manualKycApprovedBy": "Muthu"
-        }
-        const baseURL = '8901';
-        setLoading(true);
-        apiInstancelocal(baseURL)
-            .put(`api/v2/profile-short/manualKyc/${global.CLIENTID}`, appDetails)
-            .then(async response => {
-                // Handle the response data
-                if (global.DEBUG_MODE) console.log('ApproveKYCApiResponse::' + JSON.stringify(response.data),);
-                setLoading(false);
-                props.navigation.replace('LoanApplicationMain', { fromScreen: 'AddressDetail' });
-
-
-            })
-            .catch(error => {
-                // Handle the error
-                if (global.DEBUG_MODE) console.log('ApproveKYCApiResponse' + JSON.stringify(error.response));
-                setLoading(false);
-                if (error.response.data != null) {
-                    setApiError(error.response.data.message);
-                    setErrorModalVisible(true)
-                }
-            });
-
-    };
 
     const onGoBack = () => {
         props.navigation.replace('LoanApplicationMain', { fromScreen: 'AddressDetail' })
@@ -488,7 +486,7 @@ const LoanAddressList = (props, { navigation }) => {
                             fontFamily: 'Poppins-Medium'
                         }}
                         textVal={
-                            language[0][props.language].str_baddressdetail
+                            global.CLIENTTYPE == 'APPL' ? language[0][props.language].str_baddressdetailappl : language[0][props.language].str_baddressdetail
                         }></TextComp>
 
                     <ProgressComp progressvalue={0.60} textvalue="4 of 6" />
@@ -518,14 +516,23 @@ const LoanAddressList = (props, { navigation }) => {
             />
 
 
-            {/* {addressDetails.length > 0 && */}<ButtonViewComp
+            {addressDetails.length > 0 && global.CLIENTTYPE == 'APPL' && <ButtonViewComp
                 textValue={language[0][props.language].str_submit.toUpperCase()}
                 textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
                 viewStyle={[Commonstyles.buttonView, { marginBottom: 20 }]}
                 innerStyle={Commonstyles.buttonViewInnerStyle}
                 handleClick={buttonNext}
             />
-            {/* } */}
+            }
+
+            {global.CLIENTTYPE != 'APPL' && <ButtonViewComp
+                textValue={language[0][props.language].str_submit.toUpperCase()}
+                textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
+                viewStyle={[Commonstyles.buttonView, { marginBottom: 20 }]}
+                innerStyle={Commonstyles.buttonViewInnerStyle}
+                handleClick={buttonNext}
+            />
+            }
 
         </SafeAreaView>
     );

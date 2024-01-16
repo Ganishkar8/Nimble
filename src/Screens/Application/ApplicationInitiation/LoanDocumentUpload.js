@@ -92,7 +92,7 @@ const LoanDocumentUpload = (props, { navigation }) => {
 
         const filteredDocumentData = documentData.filter(item => item.clientType === global.CLIENTTYPE);
         setFilteredDocument(filteredDocumentData);
-        getDocuments();
+        getDocuments(filteredDocumentData);
 
         const filteredData = global.FILTEREDPROCESSMODULE.filter(item => item.moduleCode === "DOC_UPLD");
 
@@ -638,18 +638,25 @@ const LoanDocumentUpload = (props, { navigation }) => {
 
                     if (existingCodeIndex !== -1) {
                         // If the category exists, push the installment to its data array
-                        const filteredData = [];
+                        var filteredData = [];
                         if (filteredDocument !== '') {
-                            filteredDocument.filter(item => item.documentType === installment.subCode);
+                            filteredData = filteredDocument.filter(item => item.documentType === installment.subCode);
                         }
 
-                        if (filteredData.length > 0) {
-
-                            const extraJSON = { dmsID: filteredData[0].dmsId, isImagePresent: true, documentName: filteredData[0].documentName };
-                            acc[existingCodeIndex].dataNew.push({
-                                ...installment,
-                                ...extraJSON
-                            });
+                        if (filteredData != undefined && filteredData != null) {
+                            if (filteredData.length > 0) {
+                                const extraJSON = { dmsID: filteredData[0].dmsId, isImagePresent: true, documentName: filteredData[0].documentName };
+                                acc[existingCodeIndex].dataNew.push({
+                                    ...installment,
+                                    ...extraJSON
+                                });
+                            } else {
+                                const extraJSON = { dmsID: '', isImagePresent: false, documentName: '' };
+                                acc[existingCodeIndex].dataNew.push({
+                                    ...installment,
+                                    ...extraJSON
+                                });
+                            }
                         } else {
                             const extraJSON = { dmsID: '', isImagePresent: false, documentName: '' };
                             acc[existingCodeIndex].dataNew.push({
@@ -661,17 +668,27 @@ const LoanDocumentUpload = (props, { navigation }) => {
 
                     } else {
                         // If the category does not exist, create a new entry with the category and data array
-                        const filteredData = [];
+                        var filteredData = [];
                         if (filteredDocument !== '') {
-                            filteredDocument.filter(item => item.documentType === installment.subCode);
+                            filteredData = filteredDocument.filter(item => item.documentType === installment.subCode);
                         }
-                        if (filteredData.length > 0) {
-                            const extraJSON = { dmsID: filteredData[0].dmsId, isImagePresent: true, documentName: filteredData[0].documentName };
-                            acc.push({
-                                code,
-                                dataNew: [{ ...installment, ...extraJSON, documentName: '' }],
-                                isSelected: false
-                            });
+
+                        if (filteredData != undefined && filteredData != null) {
+                            if (filteredData.length > 0) {
+                                const extraJSON = { dmsID: filteredData[0].dmsId, isImagePresent: true, documentName: filteredData[0].documentName };
+                                acc.push({
+                                    code,
+                                    dataNew: [{ ...installment, ...extraJSON, documentName: '' }],
+                                    isSelected: false
+                                });
+                            } else {
+                                const extraJSON = { dmsID: '', isImagePresent: false };
+                                acc.push({
+                                    code,
+                                    dataNew: [{ ...installment, ...extraJSON }],
+                                    isSelected: false
+                                });
+                            }
                         } else {
                             const extraJSON = { dmsID: '', isImagePresent: false };
                             acc.push({
@@ -680,7 +697,6 @@ const LoanDocumentUpload = (props, { navigation }) => {
                                 isSelected: false
                             });
                         }
-
                     }
 
                     return acc;

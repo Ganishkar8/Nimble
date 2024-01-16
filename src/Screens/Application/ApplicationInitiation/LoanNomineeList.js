@@ -101,6 +101,7 @@ const LoanNomineeList = (props, { navigation }) => {
                     <Text style={{ fontSize: 14, fontFamily: 'Poppins-SemiBold', marginTop: 5, color: Colors.black }}>
                         {item.account_holder_name}
                     </Text>
+                    <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 12.5, color: Colors.black }}>Name : {item.fullName}</Text>
                     <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 12.5, color: Colors.black }}>Relationship status with Borrower : {`${Common.getSystemCodeDescription(props.mobilecodedetail.leadSystemCodeDto, 'RELATIONSHIP', item.relstatuswithBorrower)}`}</Text>
                     <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 12.5, color: Colors.black }}>Aadhar ID : {`${item.aadharId}`}</Text>
                     <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 12.5, color: Colors.black }}>Nominee Bank A/C No : {`${item.nomineeBankAccNo}`}</Text>
