@@ -16,7 +16,6 @@ import {
 import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import apiInstance from '../../../Utils/apiInstance';
 import Colors from '../../../Utils/Colors';
 import MyStatusBar from '../../../Components/MyStatusBar';
 import Loading from '../../../Components/Loading';

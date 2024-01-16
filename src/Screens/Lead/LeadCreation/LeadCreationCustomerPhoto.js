@@ -50,7 +50,6 @@ import ImagePicker, { ImageOrVideo } from 'react-native-image-crop-picker';
 import { tr } from 'react-native-paper-dates';
 import Modal from 'react-native-modal';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import apiInstance from '../../../Utils/apiInstance';
 import axios from 'axios';
 import tbl_lead_image from '../../../Database/Table/tbl_lead_image';
 import tbl_lead_creation_dms from '../../../Database/Table/tbl_lead_creation_dms';

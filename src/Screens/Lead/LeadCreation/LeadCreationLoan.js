@@ -42,7 +42,6 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Modal from 'react-native-modal';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import Geolocation from 'react-native-geolocation-service';
-import apiInstance from '../../../Utils/apiInstance';
 import PickerComp from '../../../Components/PickerComp';
 import TextInputComp from '../../../Components/TextInputComp';
 import tbl_lead_creation_loan_details from '../../../Database/Table/tbl_lead_creation_loan_details';
