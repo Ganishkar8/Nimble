@@ -1,10 +1,20 @@
-import React from 'react';
+import React, { useEffect, useState, forwardRef } from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet, FlatList, ScrollView } from 'react-native';
 import Colors from '../Utils/Colors';
 import ImageComp from './ImageComp';
 import TextComp from './TextComp';
 
 const ChargeModal = ({ isVisible, onClose, data }) => {
+
+    const [totalFinalChargeAmount, setTotalFinalChargeAmount] = React.useState(0);
+
+    useEffect(() => {
+
+        const totalFinalChargeAmount = data.reduce((sum, item) => parseFloat(sum) + parseFloat(item.finalChargeAmount), 0);
+
+        setTotalFinalChargeAmount(totalFinalChargeAmount.toString());
+    }, [data]);
+
     return (
         <Modal
             visible={isVisible}
@@ -18,7 +28,7 @@ const ChargeModal = ({ isVisible, onClose, data }) => {
                     <View style={{ width: '85%', alignSelf: 'center', flexDirection: 'row' }}>
 
                         <View style={{ width: '65%', marginTop: 15, marginBottom: 15 }}>
-                            <Text style={{ color: Colors.mediumgrey, fontSize: 12.5, fontFamily: 'Poppins-Medium' }}>Total Charges</Text>
+                            <Text style={{ color: Colors.darkblack, fontSize: 12.5, fontFamily: 'Poppins-Bold' }}>Total Charges</Text>
                         </View>
 
 
@@ -41,17 +51,24 @@ const ChargeModal = ({ isVisible, onClose, data }) => {
                                         <Text style={{ width: 120, marginLeft: 15, textAlign: 'center', color: Colors.mediumgrey, fontSize: 12, fontFamily: 'Poppins-Medium' }}>{item.chargeAmount}</Text>
                                         <Text style={{ width: 120, marginLeft: 15, textAlign: 'center', color: Colors.mediumgrey, fontSize: 12, fontFamily: 'Poppins-Medium' }}>{item.taxAmount}</Text>
                                         <Text style={{ width: 120, marginLeft: 15, textAlign: 'center', color: Colors.mediumgrey, fontSize: 12, fontFamily: 'Poppins-Medium' }}>{item.finalChargeAmount}</Text>
-                                        <Text style={{ width: 120, marginLeft: 15, textAlign: 'center', color: Colors.mediumgrey, fontSize: 12, fontFamily: 'Poppins-Medium' }}>{item.chargeAmountTreatment}</Text>
+                                        <Text style={{ width: 120, marginLeft: 15, textAlign: 'center', color: Colors.mediumgrey, fontSize: 12, fontFamily: 'Poppins-Medium' }}>{item.paymentType}</Text>
                                     </View>
                                 ))}
                             </View>
 
                             <View style={{ width: '100%', alignSelf: 'center', minHeight: 40, flexDirection: 'row', backgroundColor: '#EDF7FF', marginTop: 5, alignItems: 'center', justifyContent: 'center' }}>
 
-                                <View style={{ width: '65%', textAlign: 'center', }}>
+                                {/* <View style={{ width: '65%', textAlign: 'center', }}>
                                     <Text style={{ color: Colors.darkblack, fontSize: 12.5, fontFamily: 'Poppins-Bold' }}>Total</Text>
-                                </View>
+                                </View> */}
 
+                                <View style={[styles.item, { alignItems: 'center' }]}>
+                                    <Text style={{ width: 120, marginLeft: 15, textAlign: 'center', color: Colors.darkblack, fontSize: 12, fontFamily: 'Poppins-Bold' }}>Total</Text>
+                                    <Text style={{ width: 120, marginLeft: 15, textAlign: 'center', color: Colors.mediumgrey, fontSize: 12, fontFamily: 'Poppins-Medium' }}></Text>
+                                    <Text style={{ width: 120, marginLeft: 15, textAlign: 'center', color: Colors.mediumgrey, fontSize: 12, fontFamily: 'Poppins-Medium' }}></Text>
+                                    <Text style={{ width: 120, marginLeft: 15, textAlign: 'center', color: Colors.darkblack, fontSize: 12, fontFamily: 'Poppins-Bold' }}>{totalFinalChargeAmount}</Text>
+                                    <Text style={{ width: 120, marginLeft: 15, textAlign: 'center', color: Colors.mediumgrey, fontSize: 12, fontFamily: 'Poppins-Medium' }}></Text>
+                                </View>
 
 
                             </View>
@@ -87,7 +104,7 @@ const styles = StyleSheet.create({
         alignItems: 'flex-end', justifyContent: 'flex-end'
     },
     container: {
-        flexDirection: 'row',
+        flexDirection: 'column',
     },
     item: {
         minHeight: 40,

@@ -75,10 +75,51 @@ const FinalConsentScreen = (props, { navigation }) => {
 
     const nextScreen = (value) => {
         if (value == 'Agree') {
-            generateOTP();
+            finalConsent();
         } else {
-            props.navigation.goBack()
+            props.navigation.replace('LoanApplicationMain', { fromScreen: 'BankList' });
         }
+
+    }
+
+    const finalConsent = () => {
+
+        const appDetails = {
+            "finalConsent": true
+        }
+
+        const baseURL = '8901'
+        setLoading(true)
+        apiInstance(baseURL).put(`api/v2/profile-short/basic-details/${global.LOANAPPLICATIONID}`, appDetails)
+            .then(async (response) => {
+                // Handle the response data
+                if (global.DEBUG_MODE) console.log("FinalConsentApiResponse::" + JSON.stringify(response));
+                if (response.status == 200) {
+                    if (response.data != null) {
+                        if (global.DEBUG_MODE) console.log("FinalConsentApiResponse::" + JSON.stringify(response.data));
+                        generateOTP();
+
+                    } else {
+                        setApiError('Not a Valid Response from Api');
+                        setErrorModalVisible(true)
+                    }
+                }
+                setLoading(false)
+
+
+            })
+            .catch((error) => {
+                setLoading(false)
+                if (global.DEBUG_MODE) console.log("TempIDCreationApiResponse::" + JSON.stringify(error.response));
+                //props.navigation.replace('LoanApplicationMain')
+                //global.TEMPAPPID = '1115153454';
+                if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
+
+
 
     }
 

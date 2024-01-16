@@ -171,6 +171,7 @@ const AadharOTPVerification = (props, { navigation }) => {
         );
     };
 
+
     useEffect(() => {
         props.navigation
             .getParent()
@@ -235,7 +236,7 @@ const AadharOTPVerification = (props, { navigation }) => {
                 if (global.DEBUG_MODE) console.log('AadharOTPApiResponse::::' + JSON.stringify(error.response));
                 setLoading(false);
                 if (error.response.data != null) {
-                    setApiError(error.response.data.message);
+                    setApiError('Service Unavailable');
                     setErrorModalVisible(true)
                 }
             });
@@ -259,13 +260,13 @@ const AadharOTPVerification = (props, { navigation }) => {
                 if (global.DEBUG_MODE) console.log('AadharOTPVerifyApiResponseVerify::' + JSON.stringify(response.data));
                 if (global.DEBUG_MODE) console.log('AadharOTPVerifyApiResponseStatus::' + JSON.stringify(response.data.statusCode));
                 setLoading(false);
-                if (response.data.statusCode === 101) {
+                if (response.status == 200) {
                     //alert(JSON.stringify(response.data.aadharResultDetails))
                     //setAadhaarResponse(response.data.aadharResultDetails)
                     global.isAadharVerified = "1";
-                    setpdfDmsID(response.data.aadharResultDetails.docDmsId)
-                    getImage(response.data.aadharResultDetails.docDmsId);
-                    insertData(response.data.aadharResultDetails);
+                    //setpdfDmsID(response.data.aadharResultDetails.docDmsId)
+                    //getImage(response.data.aadharResultDetails.docDmsId);
+                    insertData(response.data);
 
                 } else {
                     setApiError(response.data.statusMessage);
@@ -422,70 +423,73 @@ const AadharOTPVerification = (props, { navigation }) => {
     };
 
     const insertData = async (aadhaarResponse) => {
-        let landmark = ""
-        if (aadhaarResponse.landmark === null) {
-            landmark = ""
-        } else {
-            landmark = aadhaarResponse.landmark
+        // let landmark = ""
+        // if (aadhaarResponse.landmark === null) {
+        //     landmark = ""
+        // } else {
+        //     landmark = aadhaarResponse.landmark
+        // }
+        // const data = aadhaarResponse;
+
+        // var name = data.name;
+        // var dob = Common.convertDateFormat(data.dob);
+        // var gender = data.gender;
+        // var fatherName = '';
+        // if ('fatherName' in data && data.fatherName !== null) {
+        //     fatherName = data.fatherName;
+        // } else if ('relativeName' in data && data.relativeName !== null) {
+        //     fatherName = data.relativeName;
+        // }
+        // //var fatherName = data.fatherName ? data.fatherName : data.relativeName ? data.relativeName : '';
+        // var spouseName = data.spouseName;
+        // var image = data.imgDmsId;
+        // var dmsId = data.docDmsId;
+        // var age = Common.calculateAge(dob);
+
+        await tbl_client.updateAadharData(aadhaarResponse.firstName, Common.convertDateFormat(aadhaarResponse.dateOfBirth), aadhaarResponse.age, aadhaarResponse.gender, aadhaarResponse.fatherName, aadhaarResponse.spouseName, '', '', global.LOANAPPLICATIONID, global.CLIENTTYPE);
+
+        // if (global.DEBUG_MODE) console.log('Gender::' + JSON.stringify(gender));
+        // if (global.DEBUG_MODE) console.log('FatherName::' + JSON.stringify(fatherName));
+        if (aadhaarResponse.clientAddress.length > 0) {
+            await tbl_clientaddressinfo.insertClientAddress(
+                global.LOANAPPLICATIONID,
+                "",
+                global.CLIENTID,
+                global.CLIENTTYPE,
+                aadhaarResponse.clientAddress[0].addressType,
+                aadhaarResponse.clientAddress[0].addressLine1,
+                aadhaarResponse.clientAddress[0].addressLine2,
+                aadhaarResponse.clientAddress[0].landmark,
+                aadhaarResponse.clientAddress[0].pincode,
+                aadhaarResponse.clientAddress[0].city,
+                aadhaarResponse.clientAddress[0].district,
+                aadhaarResponse.clientAddress[0].state,
+                aadhaarResponse.clientAddress[0].country,
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "true",
+                global.USERID,
+                new Date(),
+                global.USERID,
+                new Date(),
+                global.USERID,
+                new Date(),
+                "1"
+            )
+                .then(result => {
+                    if (global.DEBUG_MODE) console.log('Inserted Address detail:', result);
+                })
+                .catch(error => {
+                    if (global.DEBUG_MODE) console.error('Error Inserting Address detail:', error);
+                });
         }
-        const data = aadhaarResponse;
 
-        var name = data.name;
-        var dob = Common.convertDateFormat(data.dob);
-        var gender = data.gender;
-        var fatherName = '';
-        if ('fatherName' in data && data.fatherName !== null) {
-            fatherName = data.fatherName;
-        } else if ('relativeName' in data && data.relativeName !== null) {
-            fatherName = data.relativeName;
-        }
-        //var fatherName = data.fatherName ? data.fatherName : data.relativeName ? data.relativeName : '';
-        var spouseName = data.spouseName;
-        var image = data.imgDmsId;
-        var dmsId = data.docDmsId;
-        var age = Common.calculateAge(dob);
-
-        await tbl_client.updateAadharData(name, dob, age, gender, fatherName, spouseName, '', '', global.LOANAPPLICATIONID, global.CLIENTTYPE);
-
-        if (global.DEBUG_MODE) console.log('Gender::' + JSON.stringify(gender));
-        if (global.DEBUG_MODE) console.log('FatherName::' + JSON.stringify(fatherName));
-        await tbl_clientaddressinfo.insertClientAddress(
-            global.LOANAPPLICATIONID,
-            "",
-            global.CLIENTID,
-            global.CLIENTTYPE,
-            "P",
-            aadhaarResponse.address,
-            '',
-            landmark,
-            aadhaarResponse.pinCode,
-            "",
-            aadhaarResponse.district,
-            aadhaarResponse.state,
-            aadhaarResponse.country,
-            "",
-            "",
-            "",
-            "",
-            aadhaarResponse.name,
-            "",
-            "",
-            "",
-            "true",
-            global.USERID,
-            new Date(),
-            global.USERID,
-            new Date(),
-            global.USERID,
-            new Date(),
-            "1"
-        )
-            .then(result => {
-                if (global.DEBUG_MODE) console.log('Inserted Address detail:', result);
-            })
-            .catch(error => {
-                if (global.DEBUG_MODE) console.error('Error Inserting Address detail:', error);
-            });
         global.isAadharVerified = "1";
         updateLoanStatus("1");
 

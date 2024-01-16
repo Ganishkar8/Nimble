@@ -136,8 +136,6 @@ const PDTracker = (props, { navigation, route }) => {
                 if (value.isConnected == true) {
                     getPendingData(null, null, null, null, null, null, null, null);
                     //getDraftData();
-                } else {
-                    getDraftData();
                 }
 
             })
@@ -340,7 +338,7 @@ const PDTracker = (props, { navigation, route }) => {
             "sort": sort
         }
 
-        apiInstance(baseURL).post(`/api/v2/loan-tracker-status`, appDetails)
+        apiInstance(baseURL).post(`/api/v2/pdTracker`, appDetails)
             .then((response) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(response.data));
@@ -643,7 +641,11 @@ const PDTracker = (props, { navigation, route }) => {
             <View>
                 <TouchableOpacity onPress={() => {
                     global.LOANSTATUS = item.status.toUpperCase();
-                    props.navigation.navigate('LoanApplicationTrackerDetails', { leadData: item })
+                    global.LOANAPPLICATIONID = item.loanApplicationId;
+                    global.LOANAPPLICATIONNUM = item.loanApplicationNumber;
+                    global.SUBSTAGE = item.subStage;
+
+                    props.navigation.navigate('PDTrackerDetails', { leadData: item })
                 }} activeOpacity={0.9}>
                     <View style={{
                         width: '92%', margin: 13, backgroundColor: 'white',
@@ -853,7 +855,7 @@ const PDTracker = (props, { navigation, route }) => {
                         </View>
                     </TouchableOpacity>
                     <View style={{ width: '90%', height: 56, justifyContent: 'center', marginLeft: 5 }}>
-                        <Text style={{ fontSize: 18, color: '#000', fontFamily: 'Poppins-Medium', marginTop: 3 }}>{language[0][props.language].str_laonapptracker}</Text>
+                        <Text style={{ fontSize: 18, color: '#000', fontFamily: 'Poppins-Medium', marginTop: 3 }}>{language[0][props.language].str_loanpdtracker}</Text>
                     </View>
                 </View>
 
@@ -1087,25 +1089,6 @@ const PDTracker = (props, { navigation, route }) => {
                 </View>
             </BottomSheet>
 
-            {global.USERTYPEID == '1164' &&
-                <FAB
-                    icon="plus"
-                    color={Colors.white}
-                    style={styles.fab}
-                    label='Create New Application'
-                    onPress={() => {
-                        global.isDedupeDone = '0';
-                        global.isMobileVerified = '0';
-                        global.CLIENTID = '';
-                        global.isAadharVerified = '';
-                        global.LOANAPPLICATIONID = '';
-                        global.COMPLETEDMODULE = '';
-                        global.COMPLETEDPAGE = '';
-                        global.COMPLETEDSUBSTAGE = '';
-                        props.navigation.navigate('ConsentScreen', { leadData: [] });
-                    }}
-                />
-            }
 
         </View>
     );

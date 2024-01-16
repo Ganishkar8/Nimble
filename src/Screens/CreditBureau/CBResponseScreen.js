@@ -112,6 +112,9 @@ const CBResponseScreen = (props, { navigation }) => {
                 setLoading(false);
                 if (response.data.length <= 0) {
                     getcbData();
+                } else if (response.data.statusCode == 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true)
                 } else {
                     setCBResponse(response.data)
                 }
@@ -178,6 +181,11 @@ const CBResponseScreen = (props, { navigation }) => {
 
     const listView = ({ item }) => {
 
+        const date = new Date(item.requestTime);
+
+        const formattedDate = `${date.getDate()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()},${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')} ${date.getHours() >= 12 ? 'PM' : 'AM'}`;
+
+
         return (
             <View>
                 <View style={{
@@ -217,7 +225,7 @@ const CBResponseScreen = (props, { navigation }) => {
                             <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_cb}</Text>
                         </View>
                         <View style={{ width: '50%' }}>
-                            <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  High Mark</Text>
+                            <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {item.cbVendor}</Text>
                         </View>
                     </View>
                     <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
@@ -225,7 +233,7 @@ const CBResponseScreen = (props, { navigation }) => {
                             <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_dt}</Text>
                         </View>
                         <View style={{ width: '50%' }}>
-                            <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  31-07-2023,12:30 PM</Text>
+                            <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {formattedDate}</Text>
                         </View>
                     </View>
                     <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
@@ -233,7 +241,7 @@ const CBResponseScreen = (props, { navigation }) => {
                             <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_cbs}</Text>
                         </View>
                         <View style={{ width: '50%' }}>
-                            <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  15-09-2023</Text>
+                            <Text style={{ color: Colors.black, fontSize: 13, fontWeight: '400' }}>:  {item.cbScore}</Text>
                         </View>
                     </View>
                     <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
@@ -241,13 +249,13 @@ const CBResponseScreen = (props, { navigation }) => {
                             <Text style={{ color: Colors.dimText, fontSize: 13, fontWeight: '400', marginLeft: 20 }}>{language[0][props.language].str_cbsd}</Text>
                         </View>
                         <View style={{ width: '50%' }}>
-                            <View style={styles.approvedbackground}>
-                                <Text style={{ color: Colors.black, fontSize: 14, fontWeight: '100' }}>Pass</Text>
+                            <View style={item.cdBreDecision == 'Pass' ? styles.approvedbackground : item.cdBreDecision == 'Deviation' ? styles.pendingbackground : styles.rejectedbackground}>
+                                <Text style={{ color: Colors.black, fontSize: 14, fontWeight: '100' }}>{item.cdBreDecision}</Text>
                             </View>
                         </View>
                     </View>
 
-                    <View style={{ width: '100%', height: 5, backgroundColor: Colors.approvedBorder, marginTop: 13, borderBottomLeftRadius: 8, borderBottomRightRadius: 8 }} />
+                    <View style={{ width: '100%', height: 5, backgroundColor: item.cdBreDecision == 'Pass' ? Colors.approvedBorder : item.cdBreDecision == 'Deviation' ? Colors.pendingBorder : Colors.rejectedBorder, marginTop: 13, borderBottomLeftRadius: 8, borderBottomRightRadius: 8 }} />
 
 
                 </View>
@@ -374,6 +382,9 @@ const styles = StyleSheet.create({
     },
     approvedbackground: {
         width: 115, borderColor: Colors.approvedBorder, backgroundColor: Colors.approvedBg, alignItems: 'center', padding: 3, borderRadius: 15, borderWidth: 1
+    },
+    rejectedbackground: {
+        width: 90, borderColor: Colors.rejectedBorder, backgroundColor: Colors.rejectedBg, alignItems: 'center', padding: 3, borderRadius: 15, borderWidth: 1, marginRight: 10
     },
     bottomNavigationView: {
         backgroundColor: '#fff',

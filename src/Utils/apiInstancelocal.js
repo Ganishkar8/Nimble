@@ -47,8 +47,8 @@ const apiInstancelocal = baseURL => {
     async (response) => {
 
       if (global.DEBUG_MODE) {
-        console.log("ResponseData:", response);
-        writeToFile(`Response Data Data: ${JSON.stringify(response)}\n\n`);
+        console.log("ResponseData:", response.data);
+        writeToFile(`Response Data Data: ${JSON.stringify(response.data)}\n\n`);
       }
       return response;
 

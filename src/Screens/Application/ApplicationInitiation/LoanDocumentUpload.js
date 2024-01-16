@@ -79,8 +79,9 @@ const LoanDocumentUpload = (props, { navigation }) => {
     const [imageFile, setImageFile] = useState([]);
     const [hideRetake, setHideRetake] = useState(false);
     const [hideDelete, setHideDelete] = useState(false);
-    const [processModuleLength, setProcessModuleLength] = useState(global.FILTEREDPROCESSMODULE.length);
-
+    const [processModuleLength, setProcessModuleLength] = useState(0);
+    const [documentData, setDocumentData] = useState(global.LEADTRACKERDATA.applicantDocumentDetail);
+    const [filteredDocument, setFilteredDocument] = useState(global.LEADTRACKERDATA.applicantDocumentDetail);
 
 
     const [documentList, setDocumentList] = useState([]);
@@ -89,16 +90,30 @@ const LoanDocumentUpload = (props, { navigation }) => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
 
+        const filteredDocumentData = documentData.filter(item => item.clientType === global.CLIENTTYPE);
+        setFilteredDocument(filteredDocumentData);
         getDocuments();
-        //alert(JSON.stringify(iData[0].genericMasterDtoList))
 
+        const filteredData = global.FILTEREDPROCESSMODULE.filter(item => item.moduleCode === "DOC_UPLD");
+
+        setProcessModuleLength(filteredData[0].nestedSubData.length);
 
 
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
             backHandler.remove();
         }
-    }, [props.navigation, isScreenVisible]);
+    }, [props.navigation]);
+
+    useEffect(() => {
+        props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
+
+        return () => {
+            props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
+            backHandler.remove();
+        }
+    }, [isScreenVisible]);
 
     const handleBackButton = () => {
         onGoBack();
@@ -134,6 +149,7 @@ const LoanDocumentUpload = (props, { navigation }) => {
             setFileType('');
             setImageFile('');
             setDeleteVisible(false);
+            deletedata()
             hideImageBottomSheet();
         }
     }
@@ -193,8 +209,8 @@ const LoanDocumentUpload = (props, { navigation }) => {
                         }}>
                         <TouchableOpacity style={{ width: '20%', }}
                             onPress={() => pickDocument(item)} activeOpacity={0.8}>
-                            {item.dmsID.length > 0 ?
-                                <View style={{ width: 40, height: 40, backgroundColor: '#DBDBDB', borderRadius: 10, justifyContent: 'center', alignItems: 'center' }}>
+                            {item.dmsID.toString().length > 0 ?
+                                <View style={{ width: 40, height: 40, backgroundColor: '#33AD3E99', borderRadius: 10, justifyContent: 'center', alignItems: 'center' }}>
                                     <ImageComp imageSrc={require('../../../Images/cloudcomputing.png')} imageStylee={{ width: 28, height: 22 }} />
                                 </View>
 
@@ -209,11 +225,11 @@ const LoanDocumentUpload = (props, { navigation }) => {
 
                         <View style={{ width: '68%', }}>
                             <Text style={{ color: Colors.dimmText, textAlign: 'left', fontFamily: 'PoppinsRegular' }}>
-                                {item.genericName}
+                                {item.genericName}{item.isDocumentMandatory && <Text style={{ color: 'red' }}>*</Text>}
                             </Text>
                         </View>
                         <View style={{ width: '10%', }}>
-                            {item.dmsID.length > 0 &&
+                            {item.dmsID.toString().length > 0 &&
                                 <MaterialIcons name='verified' size={20} color={Colors.green} />}
                             {/* // : <Octicons name='unverified' size={20} color={Colors.red} />} */}
 
@@ -221,12 +237,12 @@ const LoanDocumentUpload = (props, { navigation }) => {
 
                         <TouchableOpacity style={{ width: '10%', }}
                             onPress={() => {
-                                if (item.dmsID.length > 0) {
+                                if (item.dmsID.toString().length > 0) {
                                     showImageBottomSheet(item)
                                 }
                             }} activeOpacity={0.8}>
                             <View >
-                                <Entypo name='dots-three-vertical' size={20} color={item.dmsID.length > 0 ? Colors.darkblue : Colors.black} />
+                                <Entypo name='dots-three-vertical' size={20} color={item.dmsID.toString().length > 0 ? Colors.darkblue : Colors.black} />
                             </View>
                         </TouchableOpacity>
                     </View>
@@ -271,8 +287,6 @@ const LoanDocumentUpload = (props, { navigation }) => {
 
         hidephotoBottomSheet();
         ImagePicker.openPicker({
-            width: 300,
-            height: 400,
             cropping: true,
         }).then(image => {
             setImageFile(image);
@@ -353,6 +367,7 @@ const LoanDocumentUpload = (props, { navigation }) => {
         const updatedObject = { ...currentPhotoItem };
         updatedObject.dmsID = dmsID;
         updatedObject.isImagePresent = true
+        updatedObject.documentName = fileName;
         setCurrentPhotoItem(updatedObject)
         console.log("UpdatedObject::" + JSON.stringify(updatedObject))
         const updatedArray = documentList.map((item) => {
@@ -395,7 +410,33 @@ const LoanDocumentUpload = (props, { navigation }) => {
     };
 
     const deletedata = async (id) => {
-
+        const updatedObject = { ...currentPhotoItem };
+        updatedObject.dmsID = '';
+        updatedObject.isImagePresent = false
+        setCurrentPhotoItem(updatedObject)
+        if (Common.DEBUG_MODE) console.log("UpdatedObject::" + JSON.stringify(updatedObject))
+        const updatedArray = documentList.map((item) => {
+            // Find the object with the specified id
+            //console.log("CodeName::"+JSON.stringify(item.code))
+            //console.log("UpdatedObjectName::"+JSON.stringify(updatedObject.documentCategoryName))
+            if (item.code === updatedObject.documentCategoryCode) {
+                const newDataArray = [...item.dataNew];
+                if (Common.DEBUG_MODE) console.log("NewdataArray::" + JSON.stringify(item.dataNew))
+                if (Common.DEBUG_MODE) console.log('FirstArray::' + JSON.stringify(newDataArray))
+                for (let i = 0; i < newDataArray.length; i++) {
+                    if (newDataArray[i].id === updatedObject.id) {
+                        newDataArray[i] = updatedObject
+                    }
+                }
+                // Create a new object with the updated name property
+                return { ...item, dataNew: newDataArray };
+            }
+            // If the id doesn't match, return the original object
+            return item;
+        });
+        if (Common.DEBUG_MODE) console.log("UpdatedArray::" + JSON.stringify(updatedArray))
+        setDocumentList(updatedArray)
+        setRefreshFlatList(true)
     }
 
 
@@ -445,12 +486,12 @@ const LoanDocumentUpload = (props, { navigation }) => {
                 if (newDataArray[i].isImagePresent) {
                     const appDetails = {
                         "isActive": true,
-                        "loanApplicationId": 331,
+                        "loanApplicationId": global.LOANAPPLICATIONID,
                         "clientId": global.CLIENTID,
                         "clientType": global.CLIENTTYPE,
                         "dmsId": parseInt(newDataArray[i].dmsID),
-                        "documentType": newDataArray[i].genericType,
-                        "documentName": newDataArray[i].documentCategoryName,
+                        "documentType": newDataArray[i].subCode,
+                        "documentName": newDataArray[i].documentName,
                         "wfStgwiseDocLinkId": newDataArray[i].id,
                         "passwordRequired": false,
                         "documentCategory": newDataArray[i].documentCategoryCode,
@@ -475,15 +516,16 @@ const LoanDocumentUpload = (props, { navigation }) => {
 
                 if (global.DEBUG_MODE) console.log('UpdateDMSIDResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
+
                 if (processModuleLength == 1) {
 
                 } else if (processModuleLength == 2) {
                     if (global.CLIENTTYPE == 'APPL') {
                         updateLoanStatus();
                     } else if (global.CLIENTTYPE == 'CO-APPL') {
-                        props.navigation.replace('FinalConsentScreen');
+                        props.navigation.navigate('FinalConsentScreen');
                     } else if (global.CLIENTTYPE == 'GRNTR') {
-                        props.navigation.replace('FinalConsentScreen');
+                        props.navigation.navigate('FinalConsentScreen');
                     }
                 } else if (processModuleLength == 3) {
                     if (global.CLIENTTYPE == 'APPL') {
@@ -491,7 +533,7 @@ const LoanDocumentUpload = (props, { navigation }) => {
                     } else if (global.CLIENTTYPE == 'CO-APPL') {
                         updateLoanStatus();
                     } else if (global.CLIENTTYPE == 'GRNTR') {
-                        props.navigation.replace('FinalConsentScreen');
+                        props.navigation.navigate('FinalConsentScreen');
                     }
                 }
 
@@ -553,7 +595,7 @@ const LoanDocumentUpload = (props, { navigation }) => {
                     global.COMPLETEDSUBSTAGE = 'BRE';
                     global.COMPLETEDMODULE = 'DOC_UPLD';
                     global.COMPLETEDPAGE = 'DOC_UPLD_GRNTR';
-                    props.navigation.replace('FinalConsentScreen');
+                    props.navigation.navigate('FinalConsentScreen');
                 }
 
 
@@ -591,30 +633,61 @@ const LoanDocumentUpload = (props, { navigation }) => {
                 setLoading(false);
                 const organizedData = response.data[0].genericMasterDtoList.reduce((acc, installment) => {
                     const code = installment.documentCategoryCode;
+                    // Check if the category is already present in the accumulator
+                    const existingCodeIndex = acc.findIndex(item => item.code === code);
 
-                    // Check if the year is already present in the accumulator
-                    const existingCode = acc.find(item => item.documentCategoryCode === code);
+                    if (existingCodeIndex !== -1) {
+                        // If the category exists, push the installment to its data array
+                        const filteredData = [];
+                        if (filteredDocument !== '') {
+                            filteredDocument.filter(item => item.documentType === installment.subCode);
+                        }
 
-                    if (existingCode) {
-                        // If the year exists, push the installment to its data array
-                        const extraJSON = { dmsID: '', isImagePresent: false };
-                        existingCode.data.push({
-                            ...installment, ...extraJSON
-                        });
+                        if (filteredData.length > 0) {
+
+                            const extraJSON = { dmsID: filteredData[0].dmsId, isImagePresent: true, documentName: filteredData[0].documentName };
+                            acc[existingCodeIndex].dataNew.push({
+                                ...installment,
+                                ...extraJSON
+                            });
+                        } else {
+                            const extraJSON = { dmsID: '', isImagePresent: false, documentName: '' };
+                            acc[existingCodeIndex].dataNew.push({
+                                ...installment,
+                                ...extraJSON
+                            });
+                        }
+
+
                     } else {
-                        // If the year does not exist, create a new entry with the year and data array
-                        const extraJSON = { dmsID: '', isImagePresent: false };
-                        acc.push({
-                            code,
-                            dataNew: [{ ...installment, ...extraJSON }],
-                            isSelected: false
-                        });
+                        // If the category does not exist, create a new entry with the category and data array
+                        const filteredData = [];
+                        if (filteredDocument !== '') {
+                            filteredDocument.filter(item => item.documentType === installment.subCode);
+                        }
+                        if (filteredData.length > 0) {
+                            const extraJSON = { dmsID: filteredData[0].dmsId, isImagePresent: true, documentName: filteredData[0].documentName };
+                            acc.push({
+                                code,
+                                dataNew: [{ ...installment, ...extraJSON, documentName: '' }],
+                                isSelected: false
+                            });
+                        } else {
+                            const extraJSON = { dmsID: '', isImagePresent: false };
+                            acc.push({
+                                code,
+                                dataNew: [{ ...installment, ...extraJSON }],
+                                isSelected: false
+                            });
+                        }
+
                     }
 
                     return acc;
                 }, []);
-                console.log("OrganizedData::" + JSON.stringify(organizedData))
 
+                console.log("OrganizedData::", JSON.stringify(organizedData));
+                setRefreshFlatList(!refreshFlatlist)
                 setDocumentList(organizedData);
 
             })

@@ -217,7 +217,7 @@ const CBStatus = (props, { navigation }) => {
                     <Text style={{ color: Colors.dimblack, fontSize: 13, marginLeft: 20 }}>{item.label}</Text>
                 </View>
                 <View style={{ width: '30%' }}>
-                    <Text style={{ color: Colors.green, fontSize: 13, fontWeight: '400' }}>{item.result}</Text>
+                    <Text style={{ color: item.result == 'Pass' ? Colors.green : item.result == 'Deviation' ? Colors.pendingBorder : Colors.red, fontSize: 13, fontWeight: '400' }}>{item.result}</Text>
                 </View>
             </View>
         </View>
@@ -241,7 +241,7 @@ const CBStatus = (props, { navigation }) => {
                     </View>
                 </View>
             </View>
-            <View style={{ width: '100%', marginLeft: 21 }}>
+            {/* <View style={{ width: '100%', marginLeft: 21 }}>
                 <TextComp textVal={language[0][props.language].str_productId}
                     textStyle={{ color: Colors.dimText, fontWeight: 400, fontSize: 16 }} />
                 <TextComp textVal={'PD01'}
@@ -249,7 +249,7 @@ const CBStatus = (props, { navigation }) => {
             </View>
             <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center' }}>
                 <View style={{ width: '90%', height: .9, backgroundColor: Colors.line, marginTop: 5 }} />
-            </View>
+            </View> */}
 
             <View style={{ width: '100%', justifyContent: 'center', marginBottom: 110 }}>
                 <FlatList
