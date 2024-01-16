@@ -204,7 +204,7 @@ const PDReferenceCheck = (props, { navigation }) => {
     };
 
     const onGoBack = () => {
-
+        props.navigation.goBack();
     }
 
     const checkPermissions = async () => {

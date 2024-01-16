@@ -9,7 +9,7 @@ import {
     SafeAreaView,
     FlatList, TouchableOpacity, BackHandler
 } from 'react-native';
-import { React, useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import MyStatusBar from '../../Components/MyStatusBar';
 import HeadComp from '../../Components/HeadComp';
 import { connect } from 'react-redux';
@@ -25,11 +25,20 @@ import { useIsFocused } from '@react-navigation/native';
 import TextComp from '../../Components/TextComp';
 import ImageComp from '../../Components/ImageComp';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import Common from '../../Utils/Common';
+import apiInstance from '../../Utils/apiInstance';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { addPdDetails, deleteTravelDetails } from '../../Utils/redux/actions/PersonalDiscussionAction';
+
 
 const PdMainScreen = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
     const [showAllData, setShowAllData] = useState(false);
     const isScreenVisible = useIsFocused();
+    const [listData, setListData] = useState(props.route.params.PDData)
+    const [clientData, setClientData] = useState([]);
+    const [errorModalVisible, setErrorModalVisible] = useState(false);
+    const [apiError, setApiError] = useState('');
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
@@ -41,6 +50,18 @@ const PdMainScreen = (props, { navigation }) => {
         }
     }, [props.navigation, isScreenVisible]);
 
+    useFocusEffect(
+        React.useCallback(() => {
+
+            getClientData();
+
+            return () => {
+                console.log('Screen is blurred');
+            };
+        }, [])
+    );
+
+
     const handleBackButton = () => {
         onGoBack();
         return true; // Prevent default back button behavior
@@ -48,6 +69,108 @@ const PdMainScreen = (props, { navigation }) => {
 
     const onGoBack = () => {
         props.navigation.goBack();
+    }
+
+    const getClientData = () => {
+
+        const baseURL = '8901'
+        setLoading(true)
+
+        apiInstance(baseURL).post(`api/v1/pd/PDMaster/findByLoanApplicationId?loanAppId=${global.LOANAPPLICATIONID}`)
+            .then((response) => {
+                // Handle the response data
+                if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(response.data));
+                setLoading(false)
+                setClientData(response.data)
+
+            })
+            .catch((error) => {
+                // Handle the error
+                setLoading(false)
+                if (global.DEBUG_MODE) console.log("getByLead::" + JSON.stringify(error.response.data));
+                if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
+    }
+
+
+    const getClientWisePDData = (item) => {
+
+        const baseURL = '8901'
+        setLoading(true)
+
+        apiInstance(baseURL).post(`/api/v1/pd/PDMaster/findByClientId?clintId=${item.clientId}&userId=${global.USERID}&pdLevel=PD_1`)
+            .then((response) => {
+                // Handle the response data ${item.clientId}
+                if (global.DEBUG_MODE) console.log("PDDataApi::" + JSON.stringify(response.data));
+                setLoading(false)
+                if (!Common.isEmptyObject(response.data)) {
+                    response.data.loanApplicationId = global.LOANAPPLICATIONID;
+                    props.deleteTravelDetails(global.LOANAPPLICATIONID)
+                    props.addPdDetails(response.data);
+                }
+                props.navigation.navigate('PDItems', { clientType: item.clientType });
+
+            })
+            .catch((error) => {
+                // Handle the error
+                setLoading(false)
+                if (global.DEBUG_MODE) console.log("PDDataApiError::" + JSON.stringify(error.response.data));
+                if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
+    }
+
+    const listView = ({ item }) => {
+
+        var bg = ''; clientTypeName = ''
+        if (item.clientType == 'APPL') {
+            bg = Colors.dimPink
+            clientTypeName = 'Applicant';
+        } else if (item.clientType == 'CO-APPL') {
+            bg = Colors.dimblue
+            clientTypeName = 'Co-Applicant';
+        } else if (item.clientType == 'GRNTR') {
+            bg = Colors.dimSkyBlue
+            clientTypeName = 'Guarantor';
+        }
+
+        return (
+            <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: 15 }}>
+
+                <TouchableOpacity activeOpacity={0.8} onPress={() => {
+                    global.CLIENTTYPE = item.clientType;
+                    global.CLIENTID = item.clientId;
+                    getClientWisePDData(item);
+
+                }} style={{
+                    width: '90%', height: 120, borderColor: '#BBBBBB4D', borderWidth: 1, borderRadius: 10,
+                    alignItems: 'center', justifyContent: 'center'
+                }}>
+                    <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+                        <View style={{ width: 50, height: 50, backgroundColor: bg, borderRadius: 25, justifyContent: 'center', alignItems: 'center' }}>
+                            <ImageComp imageSrc={require('../../Images/applicantimage.png')} imageStylee={{ width: 30, height: 30, resizeMode: 'contain' }} />
+                        </View>
+
+                        <TextComp
+                            textStyle={{
+                                color: Colors.mediumgrey,
+                                fontSize: 15,
+                                fontFamily: 'Poppins-Medium'
+                            }}
+                            textVal={
+                                clientTypeName
+                            }></TextComp>
+                    </View>
+                </TouchableOpacity>
+
+            </View>
+
+        )
     }
 
     return (
@@ -74,112 +197,61 @@ const PdMainScreen = (props, { navigation }) => {
                 <View style={{ width: '90%', marginTop: 3 }}>
                     <TextComp
                         textStyle={{
-                            color: Colors.mediumgrey,
+                            color: Colors.darkblack,
                             fontSize: 15,
                             fontFamily: 'Poppins-Medium'
                         }}
                         textVal={
-                            'Personal Details Level 2'
-                        }></TextComp>
-                </View>
-            </View>
-            <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: 15 }}>
-                {/* app */}
-                <View style={{
-                    width: '90%', height: 100, borderColor: Colors.dimText, borderWidth: 1, borderRadius: 10,
-                    alignItems: 'center', justifyContent: 'center'
-                }}>
-                    <View style={{ width: 50, height: 50, backgroundColor: Colors.dimPink, borderRadius: 25, justifyContent: 'center', alignItems: 'center' }}>
-                        <ImageComp imageSrc={require('../../Images/applicantimage.png')} imageStylee={{ width: 30, height: 30, resizeMode: 'contain' }} />
-                    </View>
-
-                    <TextComp
-                        textStyle={{
-                            color: Colors.mediumgrey,
-                            fontSize: 15,
-                            fontFamily: 'Poppins-Medium'
-                        }}
-                        textVal={
-                            language[0][props.language].str_app
-                        }></TextComp>
-                </View>
-
-                {/* coapp */}
-                <View style={{
-                    width: '90%', height: 100, borderColor: Colors.dimText, borderWidth: 1, borderRadius: 10,
-                    alignItems: 'center', justifyContent: 'center', marginTop: 10
-                }}>
-                    <View style={{ width: 50, height: 50, backgroundColor: Colors.dimblue, borderRadius: 25, justifyContent: 'center', alignItems: 'center' }}>
-                        <ImageComp imageSrc={require('../../Images/applicantimage.png')} imageStylee={{ width: 30, height: 30, resizeMode: 'contain' }} />
-                    </View>
-
-                    <TextComp
-                        textStyle={{
-                            color: Colors.mediumgrey,
-                            fontSize: 15,
-                            fontFamily: 'Poppins-Medium'
-                        }}
-                        textVal={
-                            language[0][props.language].str_capp
-                        }></TextComp>
-                </View>
-
-                {/* guarator */}
-                <View style={{
-                    width: '90%', height: 100, borderColor: Colors.dimText, borderWidth: 1, borderRadius: 10,
-                    alignItems: 'center', justifyContent: 'center', marginTop: 10
-                }}>
-                    <View style={{ width: 50, height: 50, backgroundColor: Colors.dimSkyBlue, borderRadius: 25, justifyContent: 'center', alignItems: 'center' }}>
-                        <ImageComp imageSrc={require('../../Images/applicantimage.png')} imageStylee={{ width: 30, height: 30, resizeMode: 'contain' }} />
-                    </View>
-
-                    <TextComp
-                        textStyle={{
-                            color: Colors.mediumgrey,
-                            fontSize: 15,
-                            fontFamily: 'Poppins-Medium'
-                        }}
-                        textVal={
-                            language[0][props.language].str_g
+                            listData.subStageName
                         }></TextComp>
                 </View>
             </View>
 
+            <View>
+                <FlatList
+                    data={clientData}
+                    renderItem={listView}
+                    showsVerticalScrollIndicator={false}
+                    keyExtractor={(item, index) => index.toString()} />
+
+            </View>
+
+            <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
+                <View
+                    style={{
+                        width: '90%',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginTop: 20,
+                    }}>
+
+                    <View style={{ width: '90%', marginLeft: 15 }}>
+                        <Text style={{ color: Colors.dimmText, textAlign: 'left', fontFamily: 'PoppinsRegular' }}>
+                            {language[0][props.language].str_loandetails}
+                        </Text>
+                    </View>
+                    <TouchableOpacity style={{ width: '10%' }}
+                        activeOpacity={8} onPress={() => {
+                            if (showAllData) {
+                                setShowAllData(false)
+                            } else {
+                                setShowAllData(true)
+                            }
+                        }}>
+                        <View >
+                            {showAllData ?
+                                <AntDesign name='up' size={20} color={Colors.black} /> :
+                                <AntDesign name='down' size={20} color={Colors.black} />
+                            }
+
+                        </View>
+                    </TouchableOpacity>
+                </View>
+            </View>
             <ScrollView showsVerticalScrollIndicator={false}>
                 <View>
-                    <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
-                        <View
-                            style={{
-                                width: '90%',
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                marginTop: 20,
-                            }}>
 
-                            <View style={{ width: '90%', marginLeft: 15 }}>
-                                <Text style={{ color: Colors.dimmText, textAlign: 'left', fontFamily: 'PoppinsRegular' }}>
-                                    {language[0][props.language].str_loandetails}
-                                </Text>
-                            </View>
-                            <TouchableOpacity style={{ width: '10%' }}
-                                activeOpacity={8} onPress={() => {
-                                    if (showAllData) {
-                                        setShowAllData(false)
-                                    } else {
-                                        setShowAllData(true)
-                                    }
-                                }}>
-                                <View >
-                                    {showAllData ?
-                                        <AntDesign name='up' size={20} color={Colors.black} /> :
-                                        <AntDesign name='down' size={20} color={Colors.black} />
-                                    }
-
-                                </View>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
                     {showAllData ?
                         <View>
                             <View style={{ width: '100%', marginTop: 20, marginLeft: 23 }}>
@@ -197,7 +269,7 @@ const PdMainScreen = (props, { navigation }) => {
                                         fontFamily: 'Poppins-Medium'
                                     }}
                                     textVal={
-                                        'Buisness'
+                                        listData.customerCategory
                                     } />
                             </View>
 
@@ -217,7 +289,7 @@ const PdMainScreen = (props, { navigation }) => {
                                         fontFamily: 'Poppins-Medium'
                                     }}
                                     textVal={
-                                        'Buisness'
+                                        listData.customerType
                                     } />
                             </View>
 
@@ -236,7 +308,7 @@ const PdMainScreen = (props, { navigation }) => {
                                         fontFamily: 'Poppins-Medium'
                                     }}
                                     textVal={
-                                        'Buisness'
+                                        listData.amount.toString()
                                     } />
                             </View>
 
@@ -255,7 +327,7 @@ const PdMainScreen = (props, { navigation }) => {
                                         fontFamily: 'Poppins-Medium'
                                     }}
                                     textVal={
-                                        'Buisness'
+                                        listData.loanType
                                     } />
                             </View>
 
@@ -274,7 +346,7 @@ const PdMainScreen = (props, { navigation }) => {
                                         fontFamily: 'Poppins-Medium'
                                     }}
                                     textVal={
-                                        'Buisness'
+                                        listData.product
                                     } />
                             </View>
 
@@ -293,7 +365,7 @@ const PdMainScreen = (props, { navigation }) => {
                                         fontFamily: 'Poppins-Medium'
                                     }}
                                     textVal={
-                                        'Buisness'
+                                        listData.loanApplicationNumber
                                     } />
                             </View>
 
@@ -312,7 +384,7 @@ const PdMainScreen = (props, { navigation }) => {
                                         fontFamily: 'Poppins-Medium'
                                     }}
                                     textVal={
-                                        'Buisness'
+                                        Common.formatDate(listData.creationDate)
                                     } />
                             </View>
 
@@ -331,7 +403,7 @@ const PdMainScreen = (props, { navigation }) => {
                                         fontFamily: 'Poppins-Medium'
                                     }}
                                     textVal={
-                                        'Buisness'
+                                        listData.loanPurpose
                                     } />
                             </View>
 
@@ -350,7 +422,7 @@ const PdMainScreen = (props, { navigation }) => {
                                         fontFamily: 'Poppins-Medium'
                                     }}
                                     textVal={
-                                        'Buisness'
+                                        listData.workFlowName
                                     } />
                             </View>
                         </View>
@@ -358,7 +430,7 @@ const PdMainScreen = (props, { navigation }) => {
 
                 </View>
             </ScrollView>
-            <View style={{ width: '100%', alignItems: 'center', marginTop: '3%', justifyContent: 'center', marginBottom: 5 }}>
+            {/* <View style={{ width: '100%', alignItems: 'center', marginTop: '3%', justifyContent: 'center', marginBottom: 5 }}>
                 <View style={{ width: '90%', flexDirection: 'row', justifyContent: 'space-between' }}>
                     <View style={{
                         width: '45%', height: 45, backgroundColor: Colors.darkblue,
@@ -385,7 +457,7 @@ const PdMainScreen = (props, { navigation }) => {
                             textVal={language[0][props.language].str_reject}></TextComp>
                     </View>
                 </View>
-            </View>
+            </View> */}
 
 
         </SafeAreaView >
@@ -396,15 +468,19 @@ const mapStateToProps = state => {
     const { language } = state.languageReducer;
     const { profileDetails } = state.profileReducer;
     const { mobileCodeDetails } = state.mobilecodeReducer;
+    const { pdDetails } = state.personalDiscussionReducer;
     return {
         language: language,
         profiledetail: profileDetails,
+        pdDetail: pdDetails,
         mobilecodedetail: mobileCodeDetails
     }
 };
 
 const mapDispatchToProps = dispatch => ({
     languageAction: item => dispatch(languageAction(item)),
+    addPdDetails: item => dispatch(addPdDetails(item)),
+    deleteTravelDetails: item => dispatch(deleteTravelDetails(item)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(PdMainScreen);

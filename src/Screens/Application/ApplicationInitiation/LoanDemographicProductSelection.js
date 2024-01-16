@@ -216,6 +216,27 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
     const [totalChargesDisable, setTotalChargesDisable] = useState(false);
     const totalChargesRef = useRef(null);
 
+    const [appInsuranceAmount, setAppInsuranceAmount] = useState('');
+    const [appInsuranceAmountCaption, setAppInsuranceAmountCaption] = useState("APPLICANT INSURANCE AMOUNT");
+    const [appInsuranceAmountMan, setAppInsuranceAmountMan] = useState(false);
+    const [appInsuranceAmountVisible, setAppInsuranceAmountVisible] = useState(true);
+    const [appInsuranceAmountDisable, setAppInsuranceAmountDisable] = useState(true);
+    const appInsuranceAmountRef = useRef(null);
+
+    const [coappInsuranceAmount, setCoAppInsuranceAmount] = useState('');
+    const [coappInsuranceAmountCaption, setCoAppInsuranceAmountCaption] = useState("COAPPLICANT INSURANCE AMOUNT");
+    const [coappInsuranceAmountMan, setCoAppInsuranceAmountMan] = useState(false);
+    const [coappInsuranceAmountVisible, setCoAppInsuranceAmountVisible] = useState(true);
+    const [coappInsuranceAmountDisable, setCoAppInsuranceAmountDisable] = useState(true);
+    const coAppInsuranceAmountRef = useRef(null);
+
+    const [apprxDisbAmount, setApprxDisbAmount] = useState('');
+    const [apprxDisbAmountCaption, setApprxDisbAmountCaption] = useState("APPROXIMATE DISBURSEMENT AMOUNT");
+    const [apprxDisbAmountMan, setApprxDisbAmountMan] = useState(false);
+    const [apprxDisbAmountVisible, setApprxDisbAmountVisible] = useState(true);
+    const [apprxDisbAmountDisable, setApprxDisbAmountDisable] = useState(true);
+    const apprxDisbAmountRef = useRef(null);
+
 
     const [leadsystemCodeDetail, setLeadSystemCodeDetail] = useState(props.mobilecodedetail.leadSystemCodeDto);
     const [systemCodeDetail, setSystemCodeDetail] = useState(props.mobilecodedetail.t_SystemCodeDetail);
@@ -285,9 +306,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
     const getApplicantData = () => {
 
 
-
         if (loanProductLinkData.length > 0) {
-
             setLoanTypeLabel(loanProductLinkData[0].loanType)
             getProductID(loanProductLinkData[0].loanType)
             setLoanProductLabel(loanProductLinkData[0].loanProduct)
@@ -300,45 +319,52 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
             setInsuranceCoverageLabel(loanProductLinkData[0].insuranceCoverage)
             setEmiAmount(loanProductLinkData[0].emiAmount.toString())
             setMonthlyEmiDate(loanProductLinkData[0].monthlyEmiDate)
-            // setDisbursementDate(loanProductLinkData.loanType)
+            setDisbursementDate(Common.convertDateFormat(loanProductLinkData[0].disbursementDate))
             setDisbursementModeLabel(loanProductLinkData[0].disbursementMode)
             setTotalCharges(loanProductLinkData[0].totalCharges.toString())
             setRepayScheduleData(loanProductLinkData[0].loanRepaymentSchedules);
             setChargeData(loanProductLinkData[0].loanProductChargeDetails);
-            // setInterestRate(loanProductLinkData.loanType)
+            setInterestRate(loanProductLinkData[0].interestRate.toString())
+            setInstallmentStartDateDate(Common.convertDateFormat(loanProductLinkData[0].installmentStartDate))
+            callLoanTenure(loanProductLinkData[0].loanProduct, loanProductLinkData[0].loanAmount.toString(), loanProductLinkData[0].loanTenure.toString())
+            setAppInsuranceAmount(loanProductLinkData[0].applicantInsuranceAmount.toString())
+            setCoAppInsuranceAmount(loanProductLinkData[0].coApplicantInsuranceAmount.toString())
+            setApprxDisbAmount(loanProductLinkData[0].approximateDisbursementAmount.toString())
+            if (loanProductLinkData[0].insuranceCoverage == 'SNG') {
+                setCoAppInsuranceAmountVisible(false);
+            } else {
+                setCoAppInsuranceAmountVisible(true);
+            }
+        }
 
-        } else {
-            setLoading(true);
-            tbl_loanApplication.getLoanAppBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
-                .then(data => {
-                    if (global.DEBUG_MODE) console.log('Loan Data:', data);
-                    if (data !== undefined && data.length > 0) {
-                        // setLeadID('');
+        // else {
+        setLoading(true);
+        tbl_loanApplication.getLoanAppBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
+            .then(data => {
+                if (global.DEBUG_MODE) console.log('Loan Data:', data);
+                if (data !== undefined && data.length > 0) {
+                    if (loanProductLinkData.length <= 0) {
                         setLoanTypeLabel(data[0].loan_type)
                         setLoanProductLabel(data[0].product)
                         setLoanPurposeLabel(data[0].loan_purpose);
-                        // setProductTypeLabel(data[0].product)
-                        // setCustCatgLabel(data[0].customer_category)
-                        // setCustomerSubCategoryLabel(data[0].customer_subcategory)
-                        // setWorkflowIDLabel(parseInt(data[0].workflow_id))
-                        callLoanAmount(parseInt(data[0].workflow_id));
-                        callLoanTenure(data[0].product)
-                        // setLoanAmount(data[0].loan_amount)
+                        callLoanTenure(data[0].product, data[0].loan_amount, '')
+                        setLoanAmount(data[0].loan_amount)
                         setLoanPurposeLabel(data[0].loan_purpose);
-                        getProductID(data[0].loan_type)
-                        setLoading(false)
-                        // setClientTypeLabel(data[0].customer_type);
-                        // getWorkFlowID(data[0].loan_type, data[0].product, data[0].customer_category)
-                    } else {
-                        setLoading(false)
+                        getProductID(data[0].loan_type, parseInt(data[0].workflow_id))
                     }
-
-                })
-                .catch(error => {
+                    callLoanAmount(parseInt(data[0].workflow_id));
                     setLoading(false)
-                    if (global.DEBUG_MODE) console.error('Error fetching Loan details:', error);
-                });
-        }
+
+                } else {
+                    setLoading(false)
+                }
+
+            })
+            .catch(error => {
+                setLoading(false)
+                if (global.DEBUG_MODE) console.error('Error fetching Loan details:', error);
+            });
+        //  }
 
 
 
@@ -394,7 +420,9 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
         let dataArray = [];
         if (props.mobilecodedetail && props.mobilecodedetail.t_ProductLoan) {
             props.mobilecodedetail.t_ProductLoan.forEach((data) => {
+
                 if (data.NatureOfProductId === loanType) {
+
                     if (props.mobilecodedetail.t_product) {
                         props.mobilecodedetail.t_product.forEach((data1) => {
                             if (data1.ProductID === data.ProductID) {
@@ -421,13 +449,45 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
         }
     }
 
-    const callLoanTenure = (productID) => {
+    const callLoanTenure = (productID, loanAmount, loanTenure) => {
 
         const filteredProductIDData = props.mobilecodedetail.t_product.filter((data) => data.ProductID === productID);
 
         const IntRateMenuID = filteredProductIDData[0].IntRateMenuID;
-        const filteredIntRateMenuData = props.mobilecodedetail.t_InterestRateMenuDetail.filter((data) => data.RateMenuID === IntRateMenuID);
+        // const filteredIntRateMenuData = props.mobilecodedetail.t_InterestRateMenuDetail.filter((data) => data.RateMenuID === IntRateMenuID);
 
+        const filteredIntRateMenuData = props.mobilecodedetail.t_InterestRateMenuDetail.filter(item =>
+            item.RateMenuID === IntRateMenuID &&
+            loanAmount >= item.AmountSlabFrom &&
+            loanAmount <= item.AmountSlabTo &&
+            loanTenure >= item.TermFrom &&
+            loanTenure <= item.TermTo
+        );
+
+        if (filteredIntRateMenuData) {
+            if (filteredIntRateMenuData.length > 0) {
+                setInterestRate(filteredIntRateMenuData[0].EffectiveRate.toString())
+            } else {
+                setInterestRate('')
+            }
+        } else {
+            setInterestRate('')
+        }
+        console.log("Filtered Data::", JSON.stringify(filteredIntRateMenuData));
+        // alert(JSON.stringify(filteredIntRateMenuData[0].EffectiveRate))
+
+        if (props.mobilecodedetail && props.mobilecodedetail.t_ProductLoan) {
+            props.mobilecodedetail.t_ProductLoan.forEach((data) => {
+
+                if (data.ProductID === productID) {
+
+                    setLoanRepaymentFreqLabel(data.InstallmentFrequencyID)
+                    setMinLoanTenure(data.MinLoanTerm);
+                    setMaxLoanTenure(data.MaxLoanTerm);
+
+                }
+            });
+        }
 
     }
 
@@ -661,7 +721,6 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                 "disbursementMode": disbursementModeLabel,
                 "repaymentMode": repaymentModeLabel,
                 "loanRepaymentFrequency": loanrepaymentFreqLabel,
-                "installmentStartDate": "2024-01-15",
                 "disbursementDate": Common.convertYearDateFormat(disbursementDate),
                 "insuranceCoverage": insuranceCoverageLabel,
                 "userId": global.USERID,
@@ -669,7 +728,8 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                 "term": loanTenure,
                 "noOfInstallment": loanTenure,
                 "gracePeriod": 0,
-                "loanApplicationId": global.LOANAPPLICATIONID
+                "loanApplicationId": global.LOANAPPLICATIONID,
+                "createdBy": global.USERID
             }
 
             const baseURL = '8901';
@@ -688,6 +748,9 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                     setMonthlyEmiDate(response.data.monthlyEmiDate)
                     setTotalCharges(response.data.totalCharges.toString())
                     setInstallmentStartDateDate(response.data.installmentStartDate)
+                    setAppInsuranceAmount(response.data.applicantInsuranceAmount.toString())
+                    setCoAppInsuranceAmount(response.data.coApplicantInsuranceAmount.toString())
+                    setApprxDisbAmount(response.data.approximateDisbursementAmount.toString())
                     //await insertData();
 
                 })
@@ -831,31 +894,39 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
             }
         }
 
-        // if (LoanAmountMan && LoanAmountVisible) {
-        //     if (LoanAmount.length <= 0) {
-        //         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + LoanAmountCaption + '\n';
-        //         i++;
-        //         flag = true;
-        //     } else if (!isMultipleOf5000(LoanAmount)) {
-        //         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + LoanAmountCaption + ' ' + language[0][props.language].str_mulfive + '\n';
-        //         i++;
-        //         flag = true;
-        //     } else if (ProductTypeLabel != '') {
-        //         if (LoanAmount < minLoanAmount) {
-        //             errorMessage = errorMessage + i + ')' + ' ' + LoanAmountCaption + ' ' + language[0][props.language].str_cannotlessthan + ' ' + minLoanAmount + '\n';
-        //             i++;
-        //             flag = true;
-        //         } else if (LoanAmount > maxLoanAmount) {
-        //             errorMessage = errorMessage + i + ')' + ' ' + LoanAmountCaption + ' ' + language[0][props.language].str_cannotgreaterthan + ' ' + maxLoanAmount + '\n';
-        //             i++;
-        //             flag = true;
-        //         }
-        //     }
-        // }
+        if (LoanAmountMan && LoanAmountVisible) {
+            if (LoanAmount.length <= 0) {
+                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + LoanAmountCaption + '\n';
+                i++;
+                flag = true;
+            } else if (!isMultipleOf5000(LoanAmount)) {
+                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + LoanAmountCaption + ' ' + language[0][props.language].str_mulfive + '\n';
+                i++;
+                flag = true;
+            } else if (loanProductLabel != '') {
+                if (LoanAmount < minLoanAmount) {
+                    errorMessage = errorMessage + i + ')' + ' ' + LoanAmountCaption + ' ' + language[0][props.language].str_cannotlessthan + ' ' + minLoanAmount + '\n';
+                    i++;
+                    flag = true;
+                } else if (LoanAmount > maxLoanAmount) {
+                    errorMessage = errorMessage + i + ')' + ' ' + LoanAmountCaption + ' ' + language[0][props.language].str_cannotgreaterthan + ' ' + maxLoanAmount + '\n';
+                    i++;
+                    flag = true;
+                }
+            }
+        }
 
         if (loanTenureMan && loanTenureVisible) {
             if (loanTenure.length <= 0) {
-                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + LoanAmountCaption + '\n';
+                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + loanTenureCaption + '\n';
+                i++;
+                flag = true;
+            } else if (loanTenure < minLoanTenure) {
+                errorMessage = errorMessage + i + ')' + ' ' + loanTenureCaption + ' ' + language[0][props.language].str_cannotlessthan + ' ' + minLoanTenure + '\n';
+                i++;
+                flag = true;
+            } else if (loanTenure > maxLoanTenure) {
+                errorMessage = errorMessage + i + ')' + ' ' + loanTenureCaption + ' ' + language[0][props.language].str_cannotgreaterthan + ' ' + maxLoanTenure + '\n';
                 i++;
                 flag = true;
             }
@@ -943,8 +1014,10 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
     const handleClick = (componentName, textValue) => {
         if (componentName === 'LoanAmount') {
             setLoanAmount(textValue);
+            callLoanTenure(loanProductLabel, textValue, loanTenure)
         } else if (componentName === 'LoanTenure') {
             setLoanTenure(textValue);
+            callLoanTenure(loanProductLabel, LoanAmount, textValue)
         } else if (componentName === 'DisbursementDate') {
             // alert(textValue)
             setDisbursementDate(textValue);
@@ -976,6 +1049,11 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
             setLoanRepaymentFreqLabel(label);
             setLoanRepaymentFreqIndex(index);
         } else if (componentName === 'InsuranceCoveragePicker') {
+            if (label == 'SNG') {
+                setCoAppInsuranceAmountVisible(false)
+            } else {
+                setCoAppInsuranceAmountVisible(true)
+            }
             setInsuranceCoverageLabel(label);
             setInsuranceCoverageIndex(index);
         } else if (componentName === 'DisbursementModePicker') {
@@ -1106,6 +1184,28 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                         </View>
                     )}
 
+                    {LoanPurposeVisible && (
+                        <View
+                            style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+                            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                                <TextComp
+                                    textVal={LoanPurposeCaption}
+                                    textStyle={Commonstyles.inputtextStyle}
+                                    Visible={LoanPurposeMan}
+                                />
+                            </View>
+
+                            <PickerComp
+                                textLabel={LoanPurposeLabel}
+                                pickerStyle={Commonstyles.picker}
+                                Disable={LoanPurposeDisable}
+                                pickerdata={LoanPurposeData}
+                                componentName="LoanPurposePicker"
+                                handlePickerClick={handlePickerClick}
+                            />
+                        </View>
+                    )}
+
                     {loanPurposeCatgVisible && (
                         <View
                             style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
@@ -1129,27 +1229,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                     )}
 
 
-                    {LoanPurposeVisible && (
-                        <View
-                            style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
-                            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
-                                <TextComp
-                                    textVal={LoanPurposeCaption}
-                                    textStyle={Commonstyles.inputtextStyle}
-                                    Visible={LoanPurposeMan}
-                                />
-                            </View>
 
-                            <PickerComp
-                                textLabel={LoanPurposeLabel}
-                                pickerStyle={Commonstyles.picker}
-                                Disable={LoanPurposeDisable}
-                                pickerdata={LoanPurposeData}
-                                componentName="LoanPurposePicker"
-                                handlePickerClick={handlePickerClick}
-                            />
-                        </View>
-                    )}
 
                     {LoanAmountVisible && (
                         <View
@@ -1526,6 +1606,99 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
 
 
                 </View>
+
+                {appInsuranceAmountVisible && (
+                    <View
+                        style={{
+                            width: '100%',
+                            marginTop: 19,
+                            paddingHorizontal: 0,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}>
+                        <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                            <TextComp
+                                textVal={appInsuranceAmountCaption}
+                                textStyle={Commonstyles.inputtextStyle}
+                                Visible={appInsuranceAmountMan}
+                            />
+                        </View>
+
+                        <TextInputComp
+                            textValue={appInsuranceAmount}
+                            textStyle={Commonstyles.textinputtextStyle}
+                            type="numeric"
+                            Disable={appInsuranceAmountDisable}
+                            ComponentName="appInsuranceAmount"
+                            reference={appInsuranceAmountRef}
+                            returnKey="next"
+                            handleClick={handleClick}
+                            handleReference={handleReference}
+                        />
+                    </View>
+                )}
+
+                {coappInsuranceAmountVisible && (
+                    <View
+                        style={{
+                            width: '100%',
+                            marginTop: 19,
+                            paddingHorizontal: 0,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}>
+                        <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                            <TextComp
+                                textVal={coappInsuranceAmountCaption}
+                                textStyle={Commonstyles.inputtextStyle}
+                                Visible={coappInsuranceAmountMan}
+                            />
+                        </View>
+
+                        <TextInputComp
+                            textValue={coappInsuranceAmount}
+                            textStyle={Commonstyles.textinputtextStyle}
+                            type="numeric"
+                            Disable={coappInsuranceAmountDisable}
+                            ComponentName="coappInsuranceAmount"
+                            reference={coAppInsuranceAmountRef}
+                            returnKey="next"
+                            handleClick={handleClick}
+                            handleReference={handleReference}
+                        />
+                    </View>
+                )}
+
+                {apprxDisbAmountVisible && (
+                    <View
+                        style={{
+                            width: '100%',
+                            marginTop: 19,
+                            paddingHorizontal: 0,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}>
+                        <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                            <TextComp
+                                textVal={apprxDisbAmountCaption}
+                                textStyle={Commonstyles.inputtextStyle}
+                                Visible={apprxDisbAmountMan}
+                            />
+                        </View>
+
+                        <TextInputComp
+                            textValue={apprxDisbAmount}
+                            textStyle={Commonstyles.textinputtextStyle}
+                            type="numeric"
+                            Disable={apprxDisbAmountDisable}
+                            ComponentName="apprxDisbursementAmount"
+                            reference={apprxDisbAmountRef}
+                            returnKey="next"
+                            handleClick={handleClick}
+                            handleReference={handleReference}
+                        />
+                    </View>
+                )}
 
                 <ChargeModal isVisible={chargeModalVisible} onClose={hideChargeModal} data={chargeData}></ChargeModal>
 

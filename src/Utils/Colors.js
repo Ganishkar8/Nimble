@@ -31,4 +31,13 @@ export default {
     dimPink: '#E8B05033',
     dimblue: '#0294FF33',
     dimSkyBlue: '#BBBBBB4D',
+    dimTravel: '#F5F5E5',
+    dimQuestion: '#E3DBD4',
+    dimNonGst: '#E6F5FF',
+    dimPhysical: '#D7F0DB',
+    dimDocument: '#E3DBD4',
+    dimFinancial: '#F5F5E6',
+    dimHouse: '#D7F0DB',
+    dimBusiness: '#A7B2B9',
+    dimPersonal: '#FFE5E5',
 }

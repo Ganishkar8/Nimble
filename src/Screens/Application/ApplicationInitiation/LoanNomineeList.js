@@ -198,27 +198,28 @@ const LoanNomineeList = (props, { navigation }) => {
         } else if (value === 'new') {
             props.navigation.navigate('LoanNomineeDetails', { bankType: 'new' })
         } else if (value === 'delete') {
-            deletedata(data.id)
+            setNomineeID(data.id)
+            setDeleteModalVisible(true);
         }
     }
 
 
-    const deleteAddressData = () => {
+    const deleteNomineeData = () => {
 
         const baseURL = '8901';
         setLoading(true);
         apiInstancelocal(baseURL)
-            .delete(`/api/v2/profile-short/address-details/${nomineeID}`)
+            .delete(`/api/v2/loan-demographics/nomineeDetail/${nomineeID}`)
             .then(async response => {
                 // Handle the response data
-                if (global.DEBUG_MODE) console.log('DeleteAddressResponse::' + JSON.stringify(response.data),);
+                if (global.DEBUG_MODE) console.log('DeleteNomineeResponse::' + JSON.stringify(response.data),);
 
                 setLoading(false);
                 deletedata(nomineeID);
             })
             .catch(error => {
                 // Handle the error
-                if (global.DEBUG_MODE) console.log('DeleteAddressResponse' + JSON.stringify(error.response));
+                if (global.DEBUG_MODE) console.log('DeleteNomineeResponse' + JSON.stringify(error.response));
                 setLoading(false);
                 if (error.response.data != null) {
                     setApiError(error.response.data.message);
@@ -312,7 +313,7 @@ const LoanNomineeList = (props, { navigation }) => {
 
     const onDeleteClick = () => {
         setDeleteModalVisible(false);
-        deleteAddressData();
+        deleteNomineeData();
     };
 
     return (

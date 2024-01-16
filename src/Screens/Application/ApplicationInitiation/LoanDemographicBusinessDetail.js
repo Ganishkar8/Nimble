@@ -360,9 +360,9 @@ const LoanDemographicBusinessDetail = (props) => {
                     setCustomerSubCategoryLabel(value[0].customerSubCatg)
                     setEntShopName(value[0].enterpriseShopName)
                     setUrmNumber(value[0].udyamRegNum)
-                    setDOR('') //dateofReg
-                    setDOI('') //dateofIncorp
-                    setDOBC('') //dateofBusiness
+                    setDOR(value[0].dateofReg) //dateofReg
+                    setDOI(value[0].dateofIncorp) //dateofIncorp
+                    setDOBC(value[0].dateofBusiness) //dateofBusiness
                     setYear(value[0].year)
                     setMonthLabel(parseInt(value[0].month))
                     setIndustryTypeLabel(value[0].industryType)
@@ -1044,9 +1044,9 @@ const LoanDemographicBusinessDetail = (props) => {
                 "customerSubcategory": CustomerSubCategoryLabel,
                 "enterpriseShopName": entShopName,
                 "udyamRegistrationNumber": urmNumber,
-                "dateOfRegistration": "2023-12-06T04:04:55.892Z",
-                "dateOfIncorporation": "2023-12-06T04:04:55.892Z",
-                "dateOfBusinessCommencement": "2023-12-06T04:04:55.892Z",
+                "dateOfRegistration": Common.convertYearDateFormat(DOR),
+                "dateOfIncorporation": Common.convertYearDateFormat(DOI),
+                "dateOfBusinessCommencement": Common.convertYearDateFormat(DOBC),
                 "businessVintageYears": year,
                 "businessVintageMonths": monthLabel,
                 "industryType": industryTypeLabel,

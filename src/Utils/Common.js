@@ -347,8 +347,12 @@ export async function getPageID(processModuleData, pageCode) {
   });
 }
 
+export function isEmptyObject(obj) {
+  return Object.keys(obj).length === 0;
+};
+
 export default {
   isValidPhoneNumber, isEmailValid, isValidText, convertDateFormat, isDateGreaterThan, isValidAlphaText, showErrorAlert, getSystemCodeDescription,
   numberRegex, CS_URL, CS_URL1, integerPattern, formatDate, getCodeDescription, formatTime, hasOnlyOneKey, getCurrentDateTime, getNetworkConnection,
-  isValidPin, isValidPAN, validateVerhoeff, isValidEmail, calculateAge, convertYearDateFormat, getPageID, getClientID
+  isValidPin, isValidPAN, validateVerhoeff, isValidEmail, calculateAge, convertYearDateFormat, getPageID, getClientID, isEmptyObject
 };

@@ -9,7 +9,7 @@ import {
     SafeAreaView,
     FlatList, TouchableOpacity, BackHandler
 } from 'react-native';
-import { React, useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import MyStatusBar from '../../Components/MyStatusBar';
 import HeadComp from '../../Components/HeadComp';
 import { connect } from 'react-redux';
@@ -25,12 +25,18 @@ import { useIsFocused } from '@react-navigation/native';
 import TextComp from '../../Components/TextComp';
 import ImageComp from '../../Components/ImageComp';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import apiInstance from '../../Utils/apiInstance';
+
 
 const PDItems = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
-    const [pdDetails, setPdDetails] = useState([{'id':'1'},{'id':'2'}]);
+    const [pdDetails, setPdDetails] = useState([]);
     const [refreshFlatlist, setRefreshFlatList] = useState(false);
     const isScreenVisible = useIsFocused();
+    const [errorModalVisible, setErrorModalVisible] = useState(false);
+    const [apiError, setApiError] = useState('');
+
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
@@ -42,36 +48,139 @@ const PDItems = (props, { navigation }) => {
         }
     }, [props.navigation, isScreenVisible]);
 
+
+    useFocusEffect(
+        React.useCallback(() => {
+
+            getClientData();
+
+            return () => {
+                console.log('Screen is blurred');
+            };
+        }, [])
+    );
+
+    const getClientData = () => {
+
+        const baseURL = '8901'
+        setLoading(true)
+
+        apiInstance(baseURL).post(`api/v1/pd/PDMaster/findByPdSubcode/PD_1`) //${global.SUBSTAGE}
+            .then((response) => {
+                // Handle the response data
+
+                if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(response.data));
+                setLoading(false)
+                const filteredData = response.data[0].pdSubstages
+                    .filter(data => data.clientType === props.route.params.clientType)
+                    .sort((a, b) => a.displayOrder - b.displayOrder);
+
+                setPdDetails(filteredData[0].pdModules)
+
+            })
+            .catch((error) => {
+                // Handle the error
+                setLoading(false)
+                if (global.DEBUG_MODE) console.log("ResponseDataApiError::" + JSON.stringify(error.response.data));
+                if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
+    }
+
+
     const handleBackButton = () => {
         onGoBack();
         return true; // Prevent default back button behavior
     };
 
     const onGoBack = () => {
-
+        props.navigation.goBack();
     }
 
     const FlatView = ({ item }) => {
-        return (
-            <View style={{ width: '50%',alignItems : 'center' }}>
-                <View style={{
-                    width: '90%', height: 100, borderColor: Colors.dimText, borderWidth: 1, borderRadius: 10,
-                    alignItems: 'center', justifyContent: 'center'
-                }}>
-                    <View style={{ width: 50, height: 50, backgroundColor: Colors.dimPink, borderRadius: 25, justifyContent: 'center', alignItems: 'center' }}>
-                        <ImageComp imageSrc={require('../../Images/applicantimage.png')} imageStylee={{ width: 30, height: 30, resizeMode: 'contain' }} />
-                    </View>
 
-                    <TextComp
-                        textStyle={{
-                            color: Colors.mediumgrey,
-                            fontSize: 15,
-                            fontFamily: 'Poppins-Medium'
-                        }}
-                        textVal={
-                            language[0][props.language].str_app
-                        } />
-                </View>
+
+        var bg = ''; imagePath = '';
+        if (item.moduleCode == 'TR_DTLS_APPL') {
+            bg = Colors.dimTravel;
+            imagePath = require('../../Images/travel.png');
+        } else if (item.moduleCode == 'QU_RFR_CHCK_APPL') {
+            bg = Colors.dimblue;
+            imagePath = require('../../Images/order.png');
+        } else if (item.moduleCode == 'NON_GST_CST_APPL') {
+            bg = Colors.dimSkyBlue;
+            imagePath = require('../../Images/bill.png');
+        } else if (item.moduleCode == 'PH_DOC_VRF_APPL') {
+            bg = Colors.dimPhysical;
+            imagePath = require('../../Images/document.png');
+        } else if (item.moduleCode == 'DOC_UPL_APPL') {
+            bg = Colors.dimDocument;
+            imagePath = require('../../Images/upload.png');
+        } else if (item.moduleCode == 'FN_DTLS_VRF_APPL') {
+            bg = Colors.dimFinancial;
+            imagePath = require('../../Images/financial.png');
+        } else if (item.moduleCode == 'HS_VT_APPL') {
+            bg = Colors.dimHouse;
+            imagePath = require('../../Images/home.png');
+        } else if (item.moduleCode == 'BSN_VT_APPL') {
+            bg = Colors.dimBusiness;
+            imagePath = require('../../Images/bill.png');
+        } else if (item.moduleCode == 'PD_FD_BK_APPL') {
+            bg = Colors.dimPersonal;
+            imagePath = require('../../Images/feedback.png');
+        }
+        else {
+            imagePath = require('../../Images/applicantimage.png');
+        }
+
+        return (
+            <View style={{ width: '50%', alignItems: 'center' }}>
+                <TouchableOpacity style={{
+                    width: '90%', height: 140, marginTop: 15, borderColor: '#BBBBBB4D', borderWidth: 1, borderRadius: 10,
+                    alignItems: 'center', justifyContent: 'center'
+                }} activeOpacity={0.8} onPress={() => {
+                    if (item.moduleCode == 'TR_DTLS_APPL') {
+                        props.navigation.navigate('PdTravelDetails')
+                    } else if (item.moduleCode == 'QU_RFR_CHCK_APPL') {
+
+                    } else if (item.moduleCode == 'NON_GST_CST_APPL') {
+
+                    } else if (item.moduleCode == 'PH_DOC_VRF_APPL') {
+
+                    } else if (item.moduleCode == 'DOC_UPL_APPL') {
+
+                    } else if (item.moduleCode == 'FN_DTLS_VRF_APPL') {
+
+                    } else if (item.moduleCode == 'HS_VT_APPL') {
+
+                    } else if (item.moduleCode == 'BSN_VT_APPL') {
+
+                    } else if (item.moduleCode == 'PD_FD_BK_APPL') {
+
+                    }
+                }}>
+                    <View style={{
+                        alignItems: 'center', justifyContent: 'center'
+                    }}>
+                        <View style={{ width: 50, height: 50, backgroundColor: bg, borderRadius: 25, justifyContent: 'center', alignItems: 'center' }}>
+                            <ImageComp imageSrc={imagePath} imageStylee={{ width: 30, height: 30, resizeMode: 'contain' }} />
+                        </View>
+
+                        <TextComp
+                            textStyle={{
+                                color: Colors.mediumgrey,
+                                fontSize: 12,
+                                marginTop: 5,
+                                textAlign: 'center',
+                                fontFamily: 'Poppins-Medium'
+                            }}
+                            textVal={
+                                item.moduleDescription
+                            } />
+                    </View>
+                </TouchableOpacity>
             </View>
         )
 
@@ -95,7 +204,7 @@ const PDItems = (props, { navigation }) => {
                 />
             </View>
 
-            <View style={{width: '100%', marginTop: 15 }}>
+            <View style={{ width: '100%', marginTop: 15, marginBottom: 70 }}>
                 <FlatList
                     data={pdDetails}
                     renderItem={FlatView}

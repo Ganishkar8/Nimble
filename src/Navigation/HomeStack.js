@@ -50,6 +50,8 @@ import PdQuestionarire from '../Screens/PD/PdQuestionarire';
 import PDReferenceCheck from '../Screens/PD/PDReferenceCheck';
 import PDItems from '../Screens/PD/PDItems';
 import PdTravelDetails from '../Screens/PD/PdTravelDetails';
+import PDTracker from '../Screens/PD/Tracker/PDTracker';
+import PDTrackerDetails from '../Screens/PD/Tracker/PDTrackerDetails';
 
 const Stack = createNativeStackNavigator();
 
@@ -350,6 +352,16 @@ export default HomeStack = () => {
       <Stack.Screen
         name="PdTravelDetails"
         component={PdTravelDetails}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+      <Stack.Screen
+        name="PDTracker"
+        component={PDTracker}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+      <Stack.Screen
+        name="PDTrackerDetails"
+        component={PDTrackerDetails}
         options={{ headerShown: false, tabBarVisible: false }}
       />
 

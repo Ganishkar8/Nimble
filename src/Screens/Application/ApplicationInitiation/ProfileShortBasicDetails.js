@@ -548,6 +548,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           setEmail(data[0].email);
           setURNumber(data[0].udyamRegistrationNumber);
           setchkMsme(data[0].isMsme == true);
+          alert(data[0].dedupeCheck)
           if (data[0].dedupeCheck == '1' || data[0].dedupeCheck == true) {
             setIsDedupeDone(true);
             global.isDedupeDone = '1';
@@ -1868,6 +1869,9 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
         } else if (response.data.statusCode === 202) {
           setApiError(response.data.message);
           setErrorModalVisible(true);
+          props.navigation.navigate('AadharOTPVerification', {
+            aadharNumber: aadhar,
+          });
         }
 
         setLoading(false);
@@ -1882,6 +1886,9 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
         if (error.response.data != null) {
           setApiError(error.response.data.message);
           setErrorModalVisible(true);
+          props.navigation.navigate('AadharOTPVerification', {
+            aadharNumber: aadhar,
+          });
         }
       });
   };

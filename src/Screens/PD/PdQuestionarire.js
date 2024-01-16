@@ -60,7 +60,7 @@ const PdQuestionarire = (props, { navigation }) => {
     };
 
     const onGoBack = () => {
-
+        props.navigation.goBack();
     }
     const addItem = () => {
         const newData = [...pdData];
@@ -89,8 +89,8 @@ const PdQuestionarire = (props, { navigation }) => {
         setRefreshFlatList(!refreshFlatlist)
     }
 
-    const submitQuestionare = () =>{
-        console.log('QuestionFinalData::'+JSON.stringify(pdData))
+    const submitQuestionare = () => {
+        console.log('QuestionFinalData::' + JSON.stringify(pdData))
     }
 
 

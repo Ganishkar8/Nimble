@@ -427,8 +427,6 @@ const AddressMainList = (props, { navigation }) => {
     const filteredKYCData = global.LEADTRACKERDATA.clientDetail
       .filter(data => data.clientType === global.CLIENTTYPE)
 
-    alert(JSON.stringify(filteredKYCData))
-    return;
     const appDetails = {
       "kycType": filteredKYCData[0].clientManualKycLink[0].kycType,
       "kycValue": filteredKYCData[0].clientManualKycLink[0].kycValue,
