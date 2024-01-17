@@ -806,6 +806,7 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
             <ModalContainer
               visible={incomeModalVisible}
               closeModal={hideIncomeSheet}
+              modalstyle={styles.modalContent}
               contentComponent={<BusinessIncome addIncome={addIncome} onCloseIncome={hideIncomeSheet} incomeList={incomeList} otherIncomeList={otherIncomeList} componentName={componentName} />} // Pass your custom component here
             />
 
@@ -1209,14 +1210,17 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     margin: 0,
   },
-  modalContent: {
-    backgroundColor: 'white',
-    padding: 16,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
   checkbox: {
     alignSelf: 'center',
+  },
+  modalContent: {
+    width: '90%',  // Set width to 90% of the screen width
+    aspectRatio: 1,
+    backgroundColor: 'white',
+    padding: 10,
+    margin: 10,
+    borderRadius: 20,
+    alignItems: 'center',
   },
 });
 const mapStateToProps = (state) => {

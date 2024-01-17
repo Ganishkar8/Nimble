@@ -617,6 +617,7 @@ const PdTravelDetails = (props, { navigation }) => {
                     <ModalContainer
                         visible={officerModalVisible}
                         closeModal={hideOfficerSheet}
+                        modalstyle={styles.modalContent}
                         contentComponent={
                             <SafeAreaView style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
                                 <ScrollView
@@ -987,6 +988,15 @@ const styles = StyleSheet.create({
         bottom: 12,
         width: '100%',
 
+    },
+    modalContent: {
+        width: '90%',  // Set width to 90% of the screen width
+        aspectRatio: 1,
+        backgroundColor: 'white',
+        padding: 10,
+        margin: 10,
+        borderRadius: 20,
+        alignItems: 'center',
     },
 
 });

@@ -1,11 +1,11 @@
 import React from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
-const ModalContainer = ({ visible, closeModal, contentComponent }) => {
+const ModalContainer = ({ visible, closeModal, contentComponent, modalstyle }) => {
     return (
         <Modal visible={visible} transparent animationType="slide" onRequestClose={closeModal}>
             <View style={styles.modalContainer}>
-                <View style={styles.modalContent}>
+                <View style={modalstyle}>
                     {/* Render the content component */}
                     {contentComponent}
 
@@ -23,7 +23,8 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.5)', // semi-transparent background
     },
     modalContent: {
-        flex: 0.4,
+        width: '90%',  // Set width to 90% of the screen width
+        aspectRatio: 1,
         backgroundColor: 'white',
         padding: 10,
         margin: 10,
