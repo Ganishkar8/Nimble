@@ -165,8 +165,10 @@ const LoanApplicationMain = (props, { navigation }) => {
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
         //getProcessSubStage();
 
-        const filterCbCheck = global.LEADTRACKERDATA.loanApplicationStatusDtos[0].subStageLog.filter((data) => data.subStageCode === 'CB_CHK');
-        setCbCheckStatus(filterCbCheck[0].subStageStatus)
+        if (global.LEADTRACKERDATA.length > 0) {
+            const filterCbCheck = global.LEADTRACKERDATA.loanApplicationStatusDtos[0].subStageLog.filter((data) => data.subStageCode === 'CB_CHK');
+            setCbCheckStatus(filterCbCheck[0].subStageStatus)
+        }
 
 
         return () => {

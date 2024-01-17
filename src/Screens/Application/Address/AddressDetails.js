@@ -707,7 +707,13 @@ const AddressDetails = (props, { navigation }) => {
     }
 
     if (landmarkMan && landmarkVisible) {
-      if (landmark.length <= 0) {
+      if (landmark !== undefined && landmark !== null) {
+        if (landmark.length <= 0) {
+          errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + landmarkCaption + '\n';
+          i++;
+          flag = true;
+        }
+      } else {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + landmarkCaption + '\n';
         i++;
         flag = true;
