@@ -74,7 +74,7 @@ const PDItems = (props, { navigation }) => {
                 const filteredData = response.data[0].pdSubstages
                     .filter(data => data.clientType === props.route.params.clientType)
                     .sort((a, b) => a.displayOrder - b.displayOrder);
-
+                global.PDSTAGES = response.data;
                 setPdDetails(filteredData[0].pdModules)
 
             })
@@ -144,7 +144,7 @@ const PDItems = (props, { navigation }) => {
                     if (item.moduleCode == 'TR_DTLS_APPL') {
                         props.navigation.navigate('PdTravelDetails')
                     } else if (item.moduleCode == 'QU_RFR_CHCK_APPL') {
-
+                        props.navigation.navigate('PdQuestionSubStage')
                     } else if (item.moduleCode == 'NON_GST_CST_APPL') {
 
                     } else if (item.moduleCode == 'PH_DOC_VRF_APPL') {
@@ -152,7 +152,7 @@ const PDItems = (props, { navigation }) => {
                     } else if (item.moduleCode == 'DOC_UPL_APPL') {
 
                     } else if (item.moduleCode == 'FN_DTLS_VRF_APPL') {
-
+                        props.navigation.navigate('PDFinancialVerification')
                     } else if (item.moduleCode == 'HS_VT_APPL') {
 
                     } else if (item.moduleCode == 'BSN_VT_APPL') {

@@ -28,6 +28,8 @@ import ImageComp from '../../Components/ImageComp';
 import Entypo from 'react-native-vector-icons/Entypo';
 import { Picker } from '@react-native-picker/picker';
 import ButtonViewComp from '../../Components/ButtonViewComp';
+import ModalContainer from '../../Components/ModalContainer';
+import TextInputComp from '../../Components/TextInputComp';
 const PdQuestionarire = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
     const [remarks, setRemarks] = useState('');
@@ -94,48 +96,19 @@ const PdQuestionarire = (props, { navigation }) => {
     }
 
 
+    const handleClick = (componentName, textValue) => {
+        if (componentName === 'remarks') {
+            setRemarks(textValue);
+        }
+    }
+
 
     const FlatView = ({ item }) => {
         let rem = item.remarks
 
         return (
             <View style={{ width: '100%', alignItems: 'center' }}>
-                <Modal
-                    visible={remarksModalVisible}
-                    transparent={false}
-                    animationType="slide"
-                    onRequestClose={hideRemarksSheet}>
 
-
-                    <View style={{ width: '100%', backgroundColor: Colors.white }}>
-
-                        <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
-
-                            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
-                                <TextComp textVal={'Remarks'} textStyle={Commonstyles.inputtextStyle} Visible={true} />
-                            </View>
-
-                            <TextInput
-                                onChangeText={txt => { setRemarks(txt) }}
-                                placeholder={''}
-                                editable={true}
-                                contextMenuHidden={true}
-                                placeholderTextColor={Colors.lightgrey}
-                                secureTextEntry={false}
-                                keyboardType={'email-address'}
-                                multiline={true}
-                                maxLength={100}
-                                style={[Commonstyles.textinputtextStyle, { color: Colors.black, overflow: 'scroll' }]}
-                                returnKeyType={'done'}
-                            />
-                        </View>
-
-                        <View style={{ alignItems: 'flex-end', marginTop: 25 }}>
-                            <ButtonViewComp textValue={language[0][props.language].str_add.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} viewStyle={[Commonstyles.buttonView, { width: 100, height: 20 }]} innerStyle={[Commonstyles.buttonViewInnerStyle, { height: 35 }]} handleClick={() => addItem(item)} />
-                        </View>
-
-                    </View>
-                </Modal>
                 <View style={{ width: '93%', marginLeft: 20, marginTop: 20 }}>
                     <Text style={{ fontSize: 15, color: Colors.darkblack, fontFamily: 'PoppinsRegular', marginTop: 3 }}>
                         1. Brief About Your Business Product / Service, Business Vintage And Target Customers?
@@ -225,20 +198,55 @@ const PdQuestionarire = (props, { navigation }) => {
                     {language[0][props.language].str_basic_details_optional}
                 </Text>
             </View>
+            <View style={{ flex: 1 }}>
 
-            <FlatList
-                data={pdData}
-                renderItem={FlatView}
-                extraData={refreshFlatlist}
-                keyExtractor={item => item.id}
-            />
-            <ButtonViewComp
-                textValue={language[0][props.language].str_submit.toUpperCase()}
-                textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500, marginBottom: 5 }}
-                viewStyle={Commonstyles.buttonView}
-                innerStyle={Commonstyles.buttonViewInnerStyle}
-                handleClick={submitQuestionare}
-            />
+                <ModalContainer
+                    visible={remarksModalVisible}
+                    closeModal={hideRemarksSheet}
+                    modalstyle={styles.modalContent}
+                    contentComponent={
+                        <View style={[styles.parentView, { backgroundColor: Colors.lightwhite, width: '90%' }]}>
+                            <ScrollView
+                                style={styles.scrollView}
+                                contentContainerStyle={styles.contentContainer}
+                                showsVerticalScrollIndicator={false}
+                                keyboardShouldPersistTaps="handled">
+                                <View style={{ flex: 1 }}>
+
+                                    <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
+
+                                        <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
+                                            <TextComp textVal={'Remarks'} textStyle={Commonstyles.inputtextStyle} Visible={true} />
+                                        </View>
+
+                                        <TextInputComp textValue={remarks} textStyle={[Commonstyles.textinputtextStyle, { maxHeight: 100 }]} type='email-address' Disable={false} ComponentName='remarks' returnKey="done" handleClick={handleClick} length={10} multilines={true} />
+
+                                    </View>
+
+                                    <View style={{ alignItems: 'flex-end', marginTop: 25 }}>
+                                        <ButtonViewComp textValue={language[0][props.language].str_add.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} viewStyle={[Commonstyles.buttonView, { width: 100, height: 20 }]} innerStyle={[Commonstyles.buttonViewInnerStyle, { height: 35 }]} handleClick={() => addItem(item)} />
+                                    </View>
+
+                                </View>
+                            </ScrollView>
+                        </View>
+                    } />
+
+                <FlatList
+                    data={pdData}
+                    renderItem={FlatView}
+                    extraData={refreshFlatlist}
+                    keyExtractor={item => item.id}
+                />
+
+                <ButtonViewComp
+                    textValue={language[0][props.language].str_submit.toUpperCase()}
+                    textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500, marginBottom: 5 }}
+                    viewStyle={Commonstyles.buttonView}
+                    innerStyle={Commonstyles.buttonViewInnerStyle}
+                    handleClick={submitQuestionare}
+                />
+            </View>
         </SafeAreaView >
     );
 };
@@ -259,3 +267,104 @@ const mapDispatchToProps = dispatch => ({
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(PdQuestionarire);
+
+const styles = StyleSheet.create({
+
+    container: {
+        flex: 1,
+        backgroundColor: '#f5f8fa',
+        alignItems: 'center'
+    },
+    parentView: {
+        flex: 1,
+    },
+    scrollView: {
+        flex: 1,
+    },
+    contentContainer: {
+
+        paddingBottom: 50,
+        flexGrow: 1
+    },
+    headerView: {
+        width: ('100%'),
+        paddingVertical: 15,
+        backgroundColor: 'white',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    viewStyle: {
+        alignItems: 'center',
+        paddingHorizontal: 20, marginLeft: 9, marginRight: 4,
+        borderColor: '#e3e3e3',
+        marginBottom: 4,
+        marginStart: 12,
+        paddingVertical: 7,
+        borderWidth: 1,
+        borderRadius: 8,
+    },
+    bottomNavigationView: {
+        backgroundColor: '#fff',
+        width: '100%',
+        height: 400,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+    },
+
+    textColor: {
+        color: '#000',
+        fontSize: 14,
+        fontWeight: '400'
+    },
+    viewStyleFilter: {
+        alignItems: 'center', justifyContent: 'center',
+    },
+    viewStyleStatusData: {
+        alignItems: 'center'
+    },
+    picker: {
+        height: 50,
+        width: '85%',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        textAlign: 'center'
+    },
+    pendingbackground: {
+        width: 90, borderColor: Colors.pendingBorder, backgroundColor: Colors.pendingBg, alignItems: 'center', padding: 3, borderRadius: 15, borderWidth: 1
+    },
+    approvedbackground: {
+        width: 90, borderColor: Colors.approvedBorder, backgroundColor: Colors.approvedBg, alignItems: 'center', padding: 3, borderRadius: 15, borderWidth: 1
+    },
+    line: {
+        backgroundColor: '#f1f1f1', // Change the color as needed
+        height: 1,
+        width: '90%', marginLeft: '5%',
+        marginTop: '5%', alignItems: 'center'         // Adjust the height as needed
+    },
+    disableBg: {
+        width: '88%', height: 50, backgroundColor: Colors.disableBg,
+        borderRadius: 45, alignItems: 'center', justifyContent: 'center'
+    },
+    enableBg: {
+        width: '88%', height: 50, backgroundColor: Colors.enableBg,
+        borderRadius: 45, alignItems: 'center', justifyContent: 'center'
+    }, fab: {
+        position: 'absolute',
+        margin: 0,
+        right: 0,
+        bottom: 12,
+        width: '100%',
+
+    },
+    modalContent: {
+        width: '90%',  // Set width to 90% of the screen width
+        aspectRatio: 1.5,
+        backgroundColor: 'white',
+        padding: 10,
+        margin: 10,
+        borderRadius: 20,
+        alignItems: 'center',
+    },
+
+});

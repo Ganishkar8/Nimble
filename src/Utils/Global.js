@@ -38,6 +38,7 @@ global.LEADTRACKERDATA = [];
 global.CURRENTPAGEID = '';
 global.SUBSTAGE = '';
 global.FILTEREDPROCESSMODULE = [];
+global.PDSTAGES = [];
 global.PORT1 = '8901';
 global.PORT2 = '8094';
 global.PORT3 = '8908';

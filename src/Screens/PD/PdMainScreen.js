@@ -101,7 +101,7 @@ const PdMainScreen = (props, { navigation }) => {
         const baseURL = '8901'
         setLoading(true)
 
-        apiInstance(baseURL).post(`/api/v1/pd/PDMaster/findByClientId?clintId=${item.clientId}&userId=${global.USERID}&pdLevel=PD_1`)
+        apiInstance(baseURL).post(`/api/v1/pd/PDMaster/findByClientId?clintId=${item.clientId}&userId=${global.USERID}&pdLevel=${global.SUBSTAGE}`)
             .then((response) => {
                 // Handle the response data ${item.clientId}
                 if (global.DEBUG_MODE) console.log("PDDataApi::" + JSON.stringify(response.data));
