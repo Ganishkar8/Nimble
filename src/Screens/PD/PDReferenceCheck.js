@@ -355,8 +355,6 @@ const PDReferenceCheck = (props, { navigation }) => {
 
         hidephotoBottomSheet();
         ImagePicker.openPicker({
-            width: 300,
-            height: 400,
             cropping: true,
         }).then(image => {
             setImageFile(image);
