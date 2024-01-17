@@ -183,7 +183,7 @@ const CBResponseScreen = (props, { navigation }) => {
             "pageCode": page,
             "status": "Completed"
         }
-        const baseURL = global.PORT1;;
+        const baseURL = global.PORT1;
         setLoading(true);
         apiInstance(baseURL)
             .post(`/api/v2/loan-application-status/updateStatus`, appDetails)

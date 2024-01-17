@@ -269,7 +269,7 @@ const AadharOTPVerification = (props, { navigation }) => {
                     //getImage(response.data.aadharResultDetails.docDmsId);
                     insertData(response.data);
 
-                }if (response.data.statusCode == 202) {
+                } if (response.data.statusCode == 202) {
                     setApiError(response.data.message);
                     setErrorModalVisible(true)
                 } else {
@@ -457,7 +457,7 @@ const AadharOTPVerification = (props, { navigation }) => {
         if (aadhaarResponse.clientAddress.length > 0) {
             await tbl_clientaddressinfo.insertClientAddress(
                 global.LOANAPPLICATIONID,
-                "",
+                aadhaarResponse.clientAddress[0].id,
                 global.CLIENTID,
                 global.CLIENTTYPE,
                 aadhaarResponse.clientAddress[0].addressType,
