@@ -1432,38 +1432,32 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
             console.log(
               'LeadCreationBasicApiResponse::' + JSON.stringify(response.data),
             );
-          if (response.status == 200) {
-            if (response.data.statusCode === 202) {
-              setApiError(response.data.message);
-              setErrorModalVisible(true)
-              setLoading(false);
-            } else if (response.status === 200) {
-              if (global.CLIENTTYPE == 'APPL') {
-                global.CLIENTID = response.data.clientDetail[0].id;
-              } else {
-                global.CLIENTID = response.data[0].id;
-              }
-              setLoading(false);
-              await insertData();
+          setLoading(false);
+          if (response.status === 200) {
+            if (global.CLIENTTYPE == 'APPL') {
+              global.CLIENTID = response.data.clientDetail[0].id;
+            } else {
+              global.CLIENTID = response.data[0].id;
+            }
+            await insertData();
 
-              if (global.isDedupeDone == '1') {
-                if (global.CLIENTTYPE == 'APPL') {
-                  generateLoanAppNum();
-                } else {
-                  if (
-                    KycType1Label == '001' ||
-                    KycType2Label == '001' ||
-                    KycType3Label == '001' ||
-                    KycType4Label == '001'
-                  ) {
-                    generateAadharOTP();
-                  } else {
-                    updateLoanStatus();
-                  }
-                }
+            if (global.isDedupeDone == '1') {
+              if (global.CLIENTTYPE == 'APPL') {
+                generateLoanAppNum();
               } else {
-                internalDedupeCheck();
+                if (
+                  KycType1Label == '001' ||
+                  KycType2Label == '001' ||
+                  KycType3Label == '001' ||
+                  KycType4Label == '001'
+                ) {
+                  generateAadharOTP();
+                } else {
+                  updateLoanStatus();
+                }
               }
+            } else {
+              internalDedupeCheck();
             }
           } else if (response.data.statusCode === 201) {
             setApiError(response.data.message);

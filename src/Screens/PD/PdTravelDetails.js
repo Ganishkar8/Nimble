@@ -38,6 +38,7 @@ import apiInstance from '../../Utils/apiInstance';
 import ErrorModal from '../../Components/ErrorModal';
 import ErrorMessageModal from '../../Components/ErrorMessageModal';
 import { addTravelDetails, updateTravelDetails, deleteTravelDetails, deleteOfficerTravelDetails } from '../../Utils/redux/actions/PersonalDiscussionAction';
+import { updatePDModule, updatePDSubStage, updatePDSubModule, updatePDPage } from '../../Utils/redux/actions/PDAction';
 
 
 const PdTravelDetails = (props, { navigation }) => {
@@ -424,15 +425,33 @@ const PdTravelDetails = (props, { navigation }) => {
                 // Handle the response data ${item.clientId}
                 if (global.DEBUG_MODE) console.log("PDTravelDetailsApi::" + JSON.stringify(response.data));
                 setLoading(false)
-
-                props.addTravelDetails(global.LOANAPPLICATIONID, 'pdTravelDetailsDto', response.data)
-                props.navigation.goBack()
+                if (response.status == 200) {
+                    props.updatePDModule('PD_APPL', 'TR_DTLS_APPL');
+                    props.addTravelDetails(global.LOANAPPLICATIONID, 'pdTravelDetailsDto', response.data)
+                    props.navigation.goBack()
+                }
+                else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
             })
             .catch((error) => {
                 // Handle the error
                 setLoading(false)
                 if (global.DEBUG_MODE) console.log("PDDataApiError::" + JSON.stringify(error.response.data));
-                if (error.response.data != null) {
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
                     setApiError(error.response.data.message);
                     setErrorModalVisible(true)
                 }
@@ -495,15 +514,35 @@ const PdTravelDetails = (props, { navigation }) => {
                 // Handle the response data ${item.clientId}
                 if (global.DEBUG_MODE) console.log("PDTravelDetailsApi::" + JSON.stringify(response.data));
                 setLoading(false)
-
-                props.addTravelDetails(global.LOANAPPLICATIONID, 'pdTravelDetailsDto', response.data)
-                props.navigation.goBack()
+                if (response.status == 200) {
+                    props.updatePDModule('PD_APPL', 'TR_DTLS_APPL');
+                    props.updatePDSubModule('PD_APPL', 'TR_DTLS_APPL', 'TR_DTLS_APPL');
+                    props.updatePDPage('PD_APPL', 'TR_DTLS_APPL', 'TR_DTLS_APPL', 'PG_TR_DTLS_APPL');
+                    props.addTravelDetails(global.LOANAPPLICATIONID, 'pdTravelDetailsDto', response.data)
+                    props.navigation.replace('PDItems', { clientType: global.CLIENTTYPE });
+                }
+                else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
             })
             .catch((error) => {
                 // Handle the error
                 setLoading(false)
                 if (global.DEBUG_MODE) console.log("PDDataApiError::" + JSON.stringify(error.response.data));
-                if (error.response.data != null) {
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
                     setApiError(error.response.data.message);
                     setErrorModalVisible(true)
                 }
@@ -883,11 +922,13 @@ const mapStateToProps = state => {
     const { profileDetails } = state.profileReducer;
     const { mobileCodeDetails } = state.mobilecodeReducer;
     const { pdDetails } = state.personalDiscussionReducer;
+    const { pdSubStages } = state.pdStagesReducer;
     return {
         language: language,
         profiledetail: profileDetails,
         pdDetail: pdDetails,
-        mobilecodedetail: mobileCodeDetails
+        mobilecodedetail: mobileCodeDetails,
+        pdSubStage: pdSubStages
     }
 };
 
@@ -897,6 +938,10 @@ const mapDispatchToProps = dispatch => ({
     updateTravelDetails: (loanApplicationId, key, travelDetails) => dispatch(updateTravelDetails(loanApplicationId, key, travelDetails)),
     deleteTravelDetails: (item) => dispatch(deleteTravelDetails(item)),
     deleteOfficerTravelDetails: (loanApplicationId, index) => dispatch(deleteOfficerTravelDetails(loanApplicationId, index)),
+    updatePDSubStage: item => dispatch(updatePDSubStage(item)),
+    updatePDModule: (subStage, module) => dispatch(updatePDModule(subStage, module)),
+    updatePDSubModule: (subStage, module, subModule) => dispatch(updatePDSubModule(subStage, module, subModule)),
+    updatePDPage: (subStage, module, subModule, page) => dispatch(updatePDPage(subStage, module, subModule, page)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(PdTravelDetails);

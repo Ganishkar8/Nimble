@@ -42,6 +42,7 @@ const PdQuestionarire = (props, { navigation }) => {
     const [remarksModalVisible, setRemarksModalVisible] = useState(false);
     const showRemarksSheet = (item) => {
         setRemarksModalVisible(true)
+        setRemarks(item.remarks)
         setTempItem(item)
     };
     const hideRemarksSheet = () => setRemarksModalVisible(false);
@@ -138,11 +139,14 @@ const PdQuestionarire = (props, { navigation }) => {
                         }
                     </Picker>
                     <View style={{ width: '91%', height: 1, backgroundColor: Colors.dimText, marginLeft: 15 }} />
-                    <View style={{ width: '91%', height: 100, backgroundColor: '#F5F8FA', marginLeft: 15, marginTop: 5 }}>
-                        <Text style={{ fontSize: 15, color: Colors.black, fontFamily: 'PoppinsRegular', marginTop: 3, padding: 10 }}>
-                            {item.remarks}
-                        </Text>
-                    </View>
+                    {item.remarks &&
+                        <View style={{ width: '91%', height: 100, backgroundColor: '#F5F8FA', marginLeft: 15, marginTop: 5 }}>
+                            <Text style={{ fontSize: 15, color: Colors.black, fontFamily: 'PoppinsRegular', marginTop: 3, padding: 10 }}>
+                                {item.remarks}
+                            </Text>
+                        </View>
+                    }
+
                     <View style={{ alignItems: 'flex-end', marginTop: 25 }}>
                         <View
                             style={{
