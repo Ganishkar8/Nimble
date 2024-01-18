@@ -423,6 +423,86 @@ const PDReferenceCheck = (props, { navigation }) => {
 
     }
 
+    // const getClientData = async () => {
+
+    //     await tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE).then(value => {
+    //       if (global.DEBUG_MODE) console.log('ApplicantData::' + JSON.stringify(value));
+    //       if (value !== undefined && value.length > 0) {
+    //         setTitleLabel(value[0]?.titleId ?? '');
+    //         setFirstName(value[0]?.firstName ?? '');
+    //         setMiddleName(value[0]?.middleName ?? '');
+    //         setLastName(value[0]?.lastName ?? '');
+    //         setGenderLabel(value[0]?.genderId ?? '');
+    //         setDOB(value[0]?.dateOfBirth ?? '');
+    //         setAge(value[0]?.age ?? '');
+    //         setFatherName(value[0]?.fatherName ?? '');
+    //         setSpouseName(value[0]?.spouseName ?? '');
+    //         //value[0].titleId !== undefined ? setTitleLabel(value[0].titleId) : setTitleLabel('');
+    //         //value[0].firstName !== undefined ? setFirstName(value[0].firstName) : setFirstName('');
+    //         //value[0].middleName !== undefined ? setMiddleName(value[0].middleName) : setMiddleName('');
+    //         //value[0].lastName !== undefined ? setLastName(value[0].lastName) : setLastName('');
+    //         //value[0].genderId !== undefined ? setGenderLabel(value[0].genderId) : setGenderLabel('');
+    //         // value[0].dateOfBirth !== undefined ? setDOB(value[0].dateOfBirth) : setDOB('');
+    //         //value[0].age !== undefined ? setAge(value[0].age) : setAge('');
+    //         //value[0].fatherName !== undefined ? setFatherName(value[0].fatherName) : setFatherName('');
+    //         //value[0].spouseName !== undefined ? setSpouseName(value[0].spouseName) : setSpouseName('');
+    //         setCasteLabel(value[0]?.casteId ?? '');
+    //         setReligionLabel(value[0]?.religionId ?? '');
+    //         setMotherTongueLabel(value[0]?.motherTongueId ?? '');
+    //         setEADLabel(value[0]?.educationQualificationId ?? '');
+    //         setKYCManual(value[0]?.isKycManual ?? '');
+    //         // value[0].casteId !== undefined ? setCasteLabel(value[0].casteId) : setCasteLabel('');
+    //         //value[0].religionId !== undefined ? setReligionLabel(value[0].religionId) : setReligionLabel('');
+    //         //value[0].motherTongueId !== undefined ? setMotherTongueLabel(value[0].motherTongueId) : setMotherTongueLabel('');
+    //         //value[0].educationQualificationId !== undefined ? setEADLabel(value[0].educationQualificationId) : setEADLabel('');
+    //         //value[0].isKycManual !== undefined ? setKYCManual(value[0].isKycManual) : setKYCManual('');
+
+    //         var aadharverify = false;
+    //         if (value[0].isAadharNumberVerified !== undefined && value[0].isAadharNumberVerified !== null) {
+    //           if (value[0].isAadharNumberVerified == 1) {
+    //             setIsAadharVerified(true);
+    //             aadharverify = true;
+    //           } else {
+    //             setIsAadharVerified(false);
+    //             aadharverify = false;
+    //           }
+    //         }
+
+    //         if (global.USERTYPEID == 1163) {
+    //           if (value[0].isKycManual == '1') {
+    //             setHideDelete(true);
+    //             setHideRetake(true);
+    //           } else {
+    //             fieldsDisable();
+    //             setHideDelete(true);
+    //             setHideRetake(true);
+    //           }
+    //         }
+
+    //         disableAadharFields(aadharverify, value[0].fatherName, value[0].spouseName);
+    //         if (value[0].dmsId !== undefined && value[0].dmsId !== null) {
+    //           if (value[0].dmsId.length > 0) {
+    //             getImage(value[0].dmsId);
+    //           }
+    //           setDocID(value[0].dmsId);
+    //         }
+
+    //         if (value[0].geoCode !== undefined && value[0].geoCode !== null) {
+    //           if (value[0].geoCode.length > 0) {
+    //             const [latitude, longitude] = value[0].geoCode.split(',');
+    //             setCurrentLongitude(parseFloat(longitude));
+    //             setCurrentLatitude(parseFloat(latitude));
+    //             zoomToMarker();
+    //             setGPSLatLon(value[0].geoCode)
+    //           }
+    //         }
+
+    //       }
+    //     })
+
+
+    // }
+
     const handleBackButton = () => {
         onGoBack();
         return true; // Prevent default back button behavior
@@ -932,6 +1012,51 @@ const PDReferenceCheck = (props, { navigation }) => {
     }
 
     const handleReference = (componentName) => {
+        // if(componentName == 'name')
+        // {
+        //     nameRef.current.focus();
+        // }
+        // else if (componentName == 'contactNumber')
+        // {
+        //     contactNumberRef.current.focus();
+        // }
+        // else if (componentName == 'kycID')
+        // {
+        //     kycIDRef.current.focus();
+        // }
+        // else if (componentName == 'fwa')
+        // {
+        //     fwaRef.current.focus();
+        // }
+        // else if (componentName == 'addressLine1')
+        // {
+        //     addressLine1Ref.current.focus();
+        // }
+        // else if (componentName == 'addressLine2')
+        // {
+        //     addressLine2Ref.current.focus();
+        // }
+        // else if (componentName == 'landmark')
+        // {
+        //     landmarkRef.current.focus();
+        // }
+        // else if (componentName == 'pincode')
+        // {
+        //     pincodeRef.current.focus();
+        // }
+        // else if (componentName == 'city')
+        // {
+        //     cityRef.current.focus();
+        // }
+        // else if (componentName == 'district')
+        // {
+        //     districtRef.current.focus();
+        // }
+        // else if (componentName == 'state')
+        // {
+        //     stateRef.current.focus();
+        // }
+
     }
 
     const getPinCode = (pincode) => {

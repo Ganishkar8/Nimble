@@ -337,8 +337,9 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
         if (global.DEBUG_MODE) console.log("ManualKYCDetails::" + JSON.stringify(response.data));
         setLoading(false)
         if (response.status == 200) {
-          if (response.data.kycDmsId != null && response.data.kycDmsId.length > 0) {
-            getImage(response.data.kycDmsId);
+          if (response.data.kycDmsId != null && response.data.kycDmsId != undefined) {
+            if (response.data.kycDmsId.toString().length > 0)
+              getImage(response.data.kycDmsId);
           }
           setKycTypeLabel(response.data.kycType)
           setkycID(response.data.kycValue)

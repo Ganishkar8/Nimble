@@ -301,7 +301,7 @@ const CBStatus = (props, { navigation }) => {
                     keyExtractor={(item, index) => index.toString()}
                 />
             </View>
-            {cbResponseStatus == 'Inprogress' &&
+            {props.route.params.pageStatus === 'InProgress' &&
                 <View style={styles.fab}>
                     <ButtonViewComp
                         textValue={language[0][props.language].str_next.toUpperCase()}

@@ -34,6 +34,7 @@ import DeleteConfirmModel from '../../../Components/DeleteConfirmModel';
 import tbl_client from '../../../Database/Table/tbl_client';
 import tbl_loanApplication from '../../../Database/Table/tbl_loanApplication';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
+import { check } from 'react-native-permissions';
 
 const AddressMainList = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -97,19 +98,39 @@ const AddressMainList = (props, { navigation }) => {
         if (global.DEBUG_MODE) console.error('Error fetching Applicant details:', error);
       });
 
-    tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE).then(value => {
-      if (value !== undefined && value.length > 0) {
-
-        setKYCManual(value[0].isKycManual)
-
-        if (global.USERTYPEID == 1163) {
-          if (!(value[0].isKycManual == '1')) {
-
+    if (global.USERTYPEID == 1163) {
+      if (global.LEADTRACKERDATA) {
+        const filterClient = global.LEADTRACKERDATA.clientDetail.filter((data) => data.clientType === global.CLIENTTYPE);
+        if (filterClient[0].clientManualKycLink.length > 0) {
+          if (filterClient[0].clientManualKycLink[0].manualKycStatus !== null && filterClient[0].clientManualKycLink[0].manualKycStatus) {
+            setKYCManual('0');
+          } else {
+            setKYCManual('1');
           }
+        } else {
+          setKYCManual('0');
         }
-
+        //alert(JSON.stringify(filterClient[0].clientManualKycLink))
+      } else {
+        setKYCManual('0')
       }
-    })
+    }
+
+
+
+    // tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE).then(value => {
+    //   if (value !== undefined && value.length > 0) {
+
+    //     setKYCManual(value[0].isKycManual)
+
+    //     if (global.USERTYPEID == 1163) {
+    //       if (!(value[0].isKycManual == '1')) {
+
+    //       }
+    //     }
+
+    //   }
+    // })
 
     tbl_clientaddressinfo.getAllAddressDetailsForLoanID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
       .then(data => {
@@ -458,6 +479,41 @@ const AddressMainList = (props, { navigation }) => {
 
   };
 
+  const updatetrackerStatus = (status) => {
+    const clientTypeToUpdate = global.CLIENTTYPE;
+
+    // Find the client in the clientDetail array
+    const clientToUpdate = global.LEADTRACKERDATA.clientDetail.find(
+      (data) => data.clientType === clientTypeToUpdate
+    );
+
+    // Update manualKycStatus if the client is found
+    if (clientToUpdate) {
+      const manualKycLink = clientToUpdate.clientManualKycLink;
+
+      // Assuming manualKycLink is an array and you want to update the first element
+      if (manualKycLink && manualKycLink.length > 0) {
+        manualKycLink[0].manualKycStatus = status;
+      }
+    }
+
+    // Alert the updated manualKycStatus
+    const updatedManualKycStatus = global.LEADTRACKERDATA.clientDetail
+      .find((data) => data.clientType === clientTypeToUpdate)
+      ?.clientManualKycLink?.[0]?.manualKycStatus;
+
+    const checkManualKycStatus = global.LEADTRACKERDATA.clientDetail
+      ?.every((data) => data.clientManualKycLink?.every(link => link.manualKycStatus === 'Approved'))
+      ? '1'
+      : '0';
+
+    if (checkManualKycStatus == '1') {
+      global.COMPLETEDSUBSTAGE = 'CB_CHK';
+    }
+
+    props.navigation.replace('LoanApplicationMain', { fromScreen: 'AddressDetail' });
+  }
+
   const approveManualKYC = (status) => {
 
     const filteredKYCData = global.LEADTRACKERDATA.clientDetail
@@ -483,7 +539,7 @@ const AddressMainList = (props, { navigation }) => {
           if (status === 'Rejected') {
             updateFinalLoanStatus();
           } else {
-            props.navigation.replace('LoanApplicationMain', { fromScreen: 'AddressDetail' });
+            updatetrackerStatus(status)
           }
         }
         else if (response.data.statusCode === 201) {

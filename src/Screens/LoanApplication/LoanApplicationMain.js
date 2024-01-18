@@ -29,6 +29,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import tbl_loanApplication from '../../Database/Table/tbl_loanApplication';
 import tbl_client from '../../Database/Table/tbl_client';
 import Common from '../../Utils/Common';
+import apiInstance from '../../Utils/apiInstance';
 
 
 const data = [
@@ -157,6 +158,9 @@ const LoanApplicationMain = (props, { navigation }) => {
     const [workflowIDLabel, setWorkflowIDLabel] = useState('');
     const [buttonText, setButtonText] = useState('');
     const [cbCheckStatus, setCbCheckStatus] = useState('');
+    const [cbBreCheckStatus, setBreCbCheckStatus] = useState('');
+    const [currentStage, setCurrentStage] = useState('');
+    const [loading, setLoading] = useState(false);
 
 
     useEffect(() => {
@@ -164,11 +168,6 @@ const LoanApplicationMain = (props, { navigation }) => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
         //getProcessSubStage();
-
-        if (global.LEADTRACKERDATA.length > 0) {
-            const filterCbCheck = global.LEADTRACKERDATA.loanApplicationStatusDtos[0].subStageLog.filter((data) => data.subStageCode === 'CB_CHK');
-            setCbCheckStatus(filterCbCheck[0].subStageStatus)
-        }
 
 
         return () => {
@@ -188,12 +187,64 @@ const LoanApplicationMain = (props, { navigation }) => {
             if (props.route.params.fromScreen == 'ConsentScreen') {
                 showLeadBottomSheet();
             }
+            getCurrentStatus();
             getWorkFlowID();
             return () => {
                 console.log('Screen is blurred');
             };
         }, [])
     );
+
+
+    const getCurrentStatus = () => {
+
+        const baseURL = global.PORT1;;
+        setLoading(true);
+        apiInstance(baseURL)
+            .get(`api/v2/current-status/${global.LOANAPPLICATIONID}`)
+            .then(async response => {
+                // Handle the response data
+                if (global.DEBUG_MODE) console.log('CBCheckApiResponse::' + JSON.stringify(response.data),);
+                setLoading(false);
+                if (response.status == 200) {
+
+                    const filterLNAPP = response.data.loanApplicationStatus.filter((data) => data.loanWorkflowStage === 'LN_APP_INITIATION');
+                    const filterSubStage = filterLNAPP[0].subStageLog.filter((data) => data.subStageCode === 'CB_CHK');
+                    const filtermodule = filterSubStage[0].moduleLog.filter((data) => data.moduleCode === 'CB_BRE_DCSN');
+                    const filterPage = filtermodule[0].pageLog.filter((data) => data.pageCode === 'CB_CHK_BRE_DCSN');
+                    if (filterPage) {
+                        setBreCbCheckStatus(filterPage[0].pageStatus);
+                    }
+                    setCbCheckStatus(filterSubStage[0].subStageStatus)
+
+                } else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
+            })
+            .catch(error => {
+                // Handle the error
+                if (global.DEBUG_MODE) console.log('CBCheckApiResponse' + JSON.stringify(error.response));
+                setLoading(false);
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
+
+    };
 
     const getWorkFlowID = () => {
         tbl_loanApplication.getLoanAppWorkFlowID(global.LOANAPPLICATIONID, 'APPL')
@@ -229,8 +280,11 @@ const LoanApplicationMain = (props, { navigation }) => {
         var stageId = 1;
         let subStageOrder = 0;
         if (substage.length <= 0) {
-            substage = 'PRF_SHRT'
+            substage = 'PRF_SHRT';
+            setCurrentStage('PRF_SHRT')
             global.COMPLETEDSUBSTAGE = 'PRF_SHRT';
+        } else {
+            setCurrentStage(substage)
         }
 
         const filteredProcessSubStage = processSubStage.filter((data) => {
@@ -359,7 +413,7 @@ const LoanApplicationMain = (props, { navigation }) => {
                     props.navigation.navigate('CBResponseScreen');
                 } else if (currentPage.pageCode == 'CB_CHK_BRE_DCSN') {
                     global.CURRENTPAGEID = currentPage.pageId;
-                    props.navigation.navigate('CBStatus');
+                    props.navigation.navigate('CBStatus', { pageStatus: cbBreCheckStatus });
                 } else if (currentPage.pageCode == 'DMGRC_APPL_FMLY_DTLS') {
                     global.CLIENTTYPE = 'APPL';
                     global.CURRENTPAGEID = currentPage.pageId;
@@ -493,6 +547,7 @@ const LoanApplicationMain = (props, { navigation }) => {
 
     const onClickMainList = (item, substageId) => {
 
+        setCurrentStage(item.subStageCode);
         if (global.COMPLETEDSUBSTAGE == 'PRF_SHRT') {
             if (item.subStageCode == 'CB_CHK') {
                 return;
@@ -727,7 +782,7 @@ const LoanApplicationMain = (props, { navigation }) => {
                 props.navigation.replace('CBResponseScreen');
             } else if (item.pageCode == 'CB_CHK_BRE_DCSN') {
                 if (isConditionMet) {
-                    props.navigation.replace('CBStatus');
+                    props.navigation.replace('CBStatus', { pageStatus: cbBreCheckStatus });
                 }
             } else if (item.pageCode == 'DOC_UPLD_APPLCNT') {
                 global.CLIENTTYPE = 'APPL';
@@ -767,7 +822,7 @@ const LoanApplicationMain = (props, { navigation }) => {
                 props.navigation.replace('CBResponseScreen');
             } else if (item.pageCode == 'CB_CHK_BRE_DCSN') {
                 if (isConditionMet) {
-                    props.navigation.replace('CBStatus');
+                    props.navigation.replace('CBStatus', { pageStatus: cbBreCheckStatus });
                 }
 
             }
@@ -1019,7 +1074,18 @@ const LoanApplicationMain = (props, { navigation }) => {
                     }}
                 />
 
-                {global.USERTYPEID == 1164 && <ButtonViewComp textValue={buttonText} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} viewStyle={[Commonstyles.buttonView, { marginBottom: 10 }]} innerStyle={Commonstyles.buttonViewInnerStyle} handleClick={nextScreen} />}
+                {
+                    global.USERTYPEID === 1164 &&
+                    (currentStage !== 'CB_CHK' && (cbCheckStatus !== 'Rejected' || cbCheckStatus !== 'Completed')) && (
+                        <ButtonViewComp
+                            textValue={buttonText}
+                            textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
+                            viewStyle={[Commonstyles.buttonView, { marginBottom: 10 }]}
+                            innerStyle={Commonstyles.buttonViewInnerStyle}
+                            handleClick={nextScreen}
+                        />
+                    )
+                }
             </View>
             {/* </ScrollView> */}
 
