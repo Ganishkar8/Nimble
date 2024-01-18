@@ -29,6 +29,7 @@ import Common from '../../Utils/Common';
 import apiInstance from '../../Utils/apiInstance';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { addPdDetails, deleteTravelDetails } from '../../Utils/redux/actions/PersonalDiscussionAction';
+import { addPDStages } from '../../Utils/redux/actions/PDAction';
 
 
 const PdMainScreen = (props, { navigation }) => {
@@ -76,25 +77,127 @@ const PdMainScreen = (props, { navigation }) => {
         const baseURL = '8901'
         setLoading(true)
 
+
         apiInstance(baseURL).post(`api/v1/pd/PDMaster/findByLoanApplicationId?loanAppId=${global.LOANAPPLICATIONID}`)
             .then((response) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(response.data));
-                setLoading(false)
-                setClientData(response.data)
+
+                if (response.status == 200) {
+                    setClientData(response.data)
+                    getClientSubStageData(response.data);
+                }
+                else if (response.data.statusCode === 201) {
+                    setLoading(false)
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setLoading(false)
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
 
             })
             .catch((error) => {
                 // Handle the error
                 setLoading(false)
-                if (global.DEBUG_MODE) console.log("getByLead::" + JSON.stringify(error.response.data));
-                if (error.response.data != null) {
+                if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(error.response.data));
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
                     setApiError(error.response.data.message);
                     setErrorModalVisible(true)
                 }
             });
     }
 
+
+    const getClientSubStageData = (clientData) => {
+
+        const baseURL = '8901'
+        setLoading(true)
+
+        const appDetails = {
+            "wfId": props.route.params.PDData.wfId,
+            "createdBy": global.USERID,
+            "loanApplicationId": global.LOANAPPLICATIONID,
+            "subcode": "PD_1" //props.route.params.PDData.subStage
+        }
+
+        apiInstance(baseURL).post(`api/v2/PD/Update/PD_WORKFLOW/createWorkFlow`, appDetails)
+            .then((response) => {
+                // Handle the response data
+                if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(response.data));
+
+                if (response.status == 200) {
+
+                    // setClientData(response.data.personalDiscussionSubStageLogs)
+
+                    response.data[0].personalDiscussionSubStageLogs.forEach((data) => {
+
+                        clientData.forEach((data1) => {
+                            var clientType = '';
+                            if (data1.clientType == 'APPL') {
+                                clientType = 'PD_APPL'
+                            } else if (data1.clientType == 'CO-APPL') {
+                                clientType = 'PD_CO_APPL'
+                            } else if (data1.clientType == 'GRNTR') {
+                                clientType = 'PD_GRNTR'
+                            }
+                            if (clientType === data.subStageCode) {
+                                var nestedSubDataIsCompleted = false;
+                                if (data.subStageStatus == 'Completed') {
+                                    nestedSubDataIsCompleted = true;
+                                } else {
+                                    nestedSubDataIsCompleted = false;
+                                }
+                                data1.nestedSubDataIsCompleted = nestedSubDataIsCompleted;
+                                data1.status = data.subStageStatus
+                            }
+                        });
+
+                    });
+                    props.addPDStages(response.data);
+                    setLoading(false)
+                }
+                else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                    setLoading(false)
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                    setLoading(false)
+                }
+
+
+            })
+            .catch((error) => {
+                // Handle the error
+                setLoading(false)
+                if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(error.response.data));
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
+    }
 
     const getClientWisePDData = (item) => {
 
@@ -105,20 +208,47 @@ const PdMainScreen = (props, { navigation }) => {
             .then((response) => {
                 // Handle the response data ${item.clientId}
                 if (global.DEBUG_MODE) console.log("PDDataApi::" + JSON.stringify(response.data));
-                setLoading(false)
-                if (!Common.isEmptyObject(response.data)) {
-                    response.data.loanApplicationId = global.LOANAPPLICATIONID;
-                    props.deleteTravelDetails(global.LOANAPPLICATIONID)
-                    props.addPdDetails(response.data);
+
+                if (response.status == 200) {
+                    if (!Common.isEmptyObject(response.data)) {
+                        response.data.loanApplicationId = global.LOANAPPLICATIONID;
+                        props.deleteTravelDetails(global.LOANAPPLICATIONID)
+                        props.addPdDetails(response.data);
+                        setLoading(false)
+                        props.navigation.navigate('PDItems', { clientType: item.clientType });
+                    } else {
+                        setLoading(false)
+                        props.navigation.navigate('PDItems', { clientType: item.clientType });
+                    }
                 }
-                props.navigation.navigate('PDItems', { clientType: item.clientType });
+                else if (response.data.statusCode === 201) {
+                    setLoading(false)
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                    setLoading(false)
+                } else if (response.data.statusCode === 202) {
+                    setLoading(false)
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                    setLoading(false)
+                }
+
 
             })
             .catch((error) => {
                 // Handle the error
                 setLoading(false)
                 if (global.DEBUG_MODE) console.log("PDDataApiError::" + JSON.stringify(error.response.data));
-                if (error.response.data != null) {
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
                     setApiError(error.response.data.message);
                     setErrorModalVisible(true)
                 }
@@ -481,6 +611,7 @@ const mapDispatchToProps = dispatch => ({
     languageAction: item => dispatch(languageAction(item)),
     addPdDetails: item => dispatch(addPdDetails(item)),
     deleteTravelDetails: item => dispatch(deleteTravelDetails(item)),
+    addPDStages: item => dispatch(addPDStages(item)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(PdMainScreen);

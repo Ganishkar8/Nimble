@@ -27,7 +27,8 @@ import ImageComp from '../../Components/ImageComp';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import apiInstance from '../../Utils/apiInstance';
-
+import { updatePDSubStage, updatePDModule, updatePDSubModule, updatePDPage } from '../../Utils/redux/actions/PDAction';
+import Common from '../../Utils/Common';
 
 const PDItems = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
@@ -42,6 +43,11 @@ const PDItems = (props, { navigation }) => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
 
+        //props.updatePDSubStage('PD_APPL');
+        //props.updatePDModule('PD_APPL', 'TR_DTLS_APPL');
+        //props.updatePDSubModule('PD_APPL', 'TR_DTLS_APPL', 'TR_DTLS_APPL');
+        //props.updatePDPage('PD_APPL', 'TR_DTLS_APPL', 'TR_DTLS_APPL', 'PG_TR_DTLS_APPL');
+        //alert(JSON.stringify(props.pdSubStage))
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
             backHandler.remove();
@@ -52,10 +58,16 @@ const PDItems = (props, { navigation }) => {
     useFocusEffect(
         React.useCallback(() => {
 
-            getClientData();
+            if (Common.DEBUG_MODE) console.log('Screen Available');
+
+            const filteredData = props.pdSubStage[0].personalDiscussionSubStageLogs
+                .filter(data => data.subStageCode === 'PD_APPL')
+            setPdDetails(filteredData[0].personalDiscussionModuleLogs)
+            setRefreshFlatList(!refreshFlatlist)
+
 
             return () => {
-                console.log('Screen is blurred');
+                if (Common.DEBUG_MODE) console.log('Screen is blurred');
             };
         }, [])
     );
@@ -88,7 +100,6 @@ const PDItems = (props, { navigation }) => {
                 }
             });
     }
-
 
     const handleBackButton = () => {
         onGoBack();
@@ -137,12 +148,16 @@ const PDItems = (props, { navigation }) => {
 
         return (
             <View style={{ width: '50%', alignItems: 'center' }}>
+
+
+
                 <TouchableOpacity style={{
                     width: '90%', height: 140, marginTop: 15, borderColor: '#BBBBBB4D', borderWidth: 1, borderRadius: 10,
                     alignItems: 'center', justifyContent: 'center'
                 }} activeOpacity={0.8} onPress={() => {
                     if (item.moduleCode == 'TR_DTLS_APPL') {
-                        props.navigation.navigate('PdTravelDetails')
+                        //alert(JSON.stringify(item))
+                        props.navigation.replace('PdTravelDetails')
                     } else if (item.moduleCode == 'QU_RFR_CHCK_APPL') {
                         props.navigation.navigate('PdQuestionSubStage')
                     } else if (item.moduleCode == 'NON_GST_CST_APPL') {
@@ -162,8 +177,13 @@ const PDItems = (props, { navigation }) => {
                     }
                 }}>
                     <View style={{
-                        alignItems: 'center', justifyContent: 'center'
+                        width: '100%', alignItems: 'center', justifyContent: 'center'
                     }}>
+                        {item.moduleStatus === 'Completed' &&
+                            <View style={{ position: 'absolute', top: -15, bottom: 0, right: 10, alignSelf: 'flex-end' }}>
+                                <AntDesign name="checkcircle" size={18} color={Colors.green} />
+                            </View>
+                        }
                         <View style={{ width: 50, height: 50, backgroundColor: bg, borderRadius: 25, justifyContent: 'center', alignItems: 'center' }}>
                             <ImageComp imageSrc={imagePath} imageStylee={{ width: 30, height: 30, resizeMode: 'contain' }} />
                         </View>
@@ -223,15 +243,21 @@ const mapStateToProps = state => {
     const { language } = state.languageReducer;
     const { profileDetails } = state.profileReducer;
     const { mobileCodeDetails } = state.mobilecodeReducer;
+    const { pdSubStages } = state.pdStagesReducer;
     return {
         language: language,
         profiledetail: profileDetails,
-        mobilecodedetail: mobileCodeDetails
+        mobilecodedetail: mobileCodeDetails,
+        pdSubStage: pdSubStages
     }
 };
 
 const mapDispatchToProps = dispatch => ({
     languageAction: item => dispatch(languageAction(item)),
+    updatePDSubStage: item => dispatch(updatePDSubStage(item)),
+    updatePDModule: (subStage, module) => dispatch(updatePDModule(subStage, module)),
+    updatePDSubModule: (subStage, module, subModule) => dispatch(updatePDSubModule(subStage, module, subModule)),
+    updatePDPage: (subStage, module, subModule, page) => dispatch(updatePDPage(subStage, module, subModule, page)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(PDItems);
