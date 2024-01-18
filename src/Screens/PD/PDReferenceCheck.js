@@ -41,11 +41,17 @@ import ImagePicker, { ImageOrVideo } from 'react-native-image-crop-picker';
 import MapView, { Marker } from 'react-native-maps';
 import Geolocation from 'react-native-geolocation-service';
 import ErrorModal from '../../Components/ErrorModal';
+import ErrorMessageModal from '../../Components/ErrorMessageModal';
+import SystemMandatoryField from '../../Components/SystemMandatoryField';
+
 const PDReferenceCheck = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
     const [remarks, setRemarks] = useState('');
     const [pdData, setPdData] = useState([{ id: '1', remarks: '', reason: '' }, { id: '2', remarks: '', reason: '' }]);
     const isScreenVisible = useIsFocused();
+    const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
+    const showBottomSheet = () => setBottomErrorSheetVisible(true);
+    const hideBottomSheet = () => setBottomErrorSheetVisible(false);
 
     const [
         currentLongitude,
@@ -96,47 +102,47 @@ const PDReferenceCheck = (props, { navigation }) => {
 
     const [name, setName] = useState('');
     const [nameCaption, setNameCaption] = useState('NAME');
-    const [nameMan, setNameMan] = useState(true);
+    const [nameMan, setNameMan] = useState(false);
     const [nameVisible, setNameVisible] = useState(true);
     const [nameDisable, setNameDisable] = useState(false);
 
     const [contactNumber, setContactNumber] = useState('');
     const [contactNumberCaption, setContactNumberCaption] = useState('CONTACT NUMBER');
-    const [contactNumberMan, setContactNumberMan] = useState(true);
+    const [contactNumberMan, setContactNumberMan] = useState(false);
     const [contactNumberVisible, setContactNumberVisible] = useState(true);
     const [contactNumberDisable, setContactNumberDisable] = useState(false);
 
     const [kycTypeLabel, setKycTypeLabel] = useState('');
     const [kycTypeIndex, setKycTypeIndex] = useState('');
     const [kycTypeCaption, setKycTypeCaption] = useState('KYC TYPE');
-    const [kycTypeMan, setKycTypeMan] = useState(true);
+    const [kycTypeMan, setKycTypeMan] = useState(false);
     const [kycTypeVisible, setKycTypeVisible] = useState(true);
     const [kycTypeDisable, setKycTypeDisable] = useState(false);
     const [kycTypeData, setKycTypeData] = useState([]);
 
     const [kycID, setKycID] = useState('');
     const [kycIDCaption, setKycIDCaption] = useState('KYC ID');
-    const [kycIDMan, setKycIDMan] = useState(true);
+    const [kycIDMan, setKycIDMan] = useState(false);
     const [kycIDVisible, setKycIDVisible] = useState(true);
     const [kycIDDisable, setKycIDDisable] = useState(false);
 
     const [referenceTypeLabel, setReferenceTypeLabel] = useState('');
     const [referenceTypeIndex, setReferenceTypeIndex] = useState('');
     const [referenceTypeCaption, setReferenceTypeCaption] = useState('REFERENCE TYPE');
-    const [referenceTypeMan, setReferenceTypeMan] = useState(true);
+    const [referenceTypeMan, setReferenceTypeMan] = useState(false);
     const [referenceTypeVisible, setReferenceTypeVisible] = useState(true);
     const [referenceTypeDisable, setReferenceTypeDisable] = useState(false);
     const [referenceTypeData, setReferenceTypeData] = useState([]);
 
     const [fwa, setFwa] = useState('');
-    const [fwaCaption, seFwaCaption] = useState('FAMILIARITY WITH APPLICANT (YEAR)');
-    const [fwaMan, setFwaMan] = useState(true);
+    const [fwaCaption, setFwaCaption] = useState('FAMILIARITY WITH APPLICANT (YEAR)');
+    const [fwaMan, setFwaMan] = useState(false);
     const [fwaVisible, setFwaVisible] = useState(true);
     const [fwaDisable, setFwaDisable] = useState(false);
 
     const [addressLine1, setAddressLine1] = useState('');
     const [addressLine1Caption, setAddressLine1Caption] = useState('ADDRESS LINE 1');
-    const [addressLine1Man, setAddressLine1Man] = useState(true);
+    const [addressLine1Man, setAddressLine1Man] = useState(false);
     const [addressLine1Visible, setAddressLine1Visible] = useState(true);
     const [addressLine1Disable, setAddressLine1Disable] = useState(false);
 
@@ -154,49 +160,268 @@ const PDReferenceCheck = (props, { navigation }) => {
 
     const [pincode, setPincode] = useState('');
     const [pincodeCaption, setPincodeCaption] = useState('PINCODE');
-    const [pincodeMan, setPincodeMan] = useState(true);
+    const [pincodeMan, setPincodeMan] = useState(false);
     const [pincodeVisible, setPincodeVisible] = useState(true);
     const [pincodeDisable, setPincodeDisable] = useState(false);
 
     const [city, setCity] = useState('');
     const [cityCaption, setCityCaption] = useState('CITY/VILLAGE');
-    const [cityMan, setCityMan] = useState(true);
+    const [cityMan, setCityMan] = useState(false);
     const [cityVisible, setCityVisible] = useState(true);
     const [cityDisable, setCityDisable] = useState(false);
 
     const [district, setDistrict] = useState('');
     const [districtCaption, setDistrictCaption] = useState('DISTRICT');
-    const [districtMan, setDistrictMan] = useState(true);
+    const [districtMan, setDistrictMan] = useState(false);
     const [districtVisible, setDistrictVisible] = useState(true);
     const [districtDisable, setDistrictDisable] = useState(false);
 
     const [state, setState] = useState('');
     const [stateCaption, setStateCaption] = useState('STATE');
-    const [stateMan, setStateMan] = useState(true);
+    const [stateMan, setStateMan] = useState(false);
     const [stateVisible, setStateVisible] = useState(true);
     const [stateDisable, setStateDisable] = useState(false);
 
     const [remarksLabel, setRemarksLabel] = useState('');
     const [remarksIndex, setRemarksIndex] = useState('');
     const [remarksCaption, setRemarksCaption] = useState('REMARKS');
-    const [remarksMan, setRemarksMan] = useState(true);
+    const [remarksMan, setRemarksMan] = useState(false);
     const [remarksVisible, setRemarksVisible] = useState(true);
     const [remarksDisable, setRemarksDisable] = useState(false);
     const [remarksData, setRemarksData] = useState([]);
     const [bankUserCodeDetail, setBankUserCodeDetail] = useState(props.mobilecodedetail.t_BankUserCode);
     const [leaduserCodeDetail, setLeadUserCodeDetail] = useState(props.mobilecodedetail.leadUserCodeDto);
     const [errMsg, setErrMsg] = useState('');
+    const [pageId, setPageId] = useState(global.CURRENTPAGEID);
+    const [systemMandatoryField, setSystemMandatoryField] = useState(
+        props.mobilecodedetail.processSystemMandatoryFields,
+    );
+
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
         getSystemCodeDetail();
-
+        makeSystemMandatoryFields();
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
             backHandler.remove();
         }
     }, [props.navigation, isScreenVisible]);
+
+    const makeSystemMandatoryFields = () => {
+
+        systemMandatoryField
+            .filter(data => data.fieldUiid === 'et_name' && data.pageId === pageId)
+            .map((value, index) => {
+                setNameCaption(value.fieldName);
+
+                if (value.isMandatory) {
+                    setNameMan(true);
+                }
+                if (value.isHide) {
+                    setNameVisible(false);
+                }
+                if (value.isDisable) {
+                    setNameDisable(true);
+                }
+                if (value.isCaptionChange) {
+                    setNameCaption(value.fieldCaptionChange);
+                }
+            });
+
+        systemMandatoryField
+            .filter(data => data.fieldUiid === 'et_contantName' && data.pageId === pageId)
+            .map((value, index) => {
+                setContactNumberCaption(value.fieldName);
+
+                if (value.isMandatory) {
+                    setContactNumberMan(true);
+                }
+                if (value.isHide) {
+                    setContactNumberVisible(false);
+                }
+                if (value.isDisable) {
+                    setContactNumberDisable(true);
+                }
+                if (value.isCaptionChange) {
+                    setContactNumberCaption(value.fieldCaptionChange);
+                }
+            });
+
+        systemMandatoryField
+            .filter(data => data.fieldUiid === 'sp_kycType' && data.pageId === pageId)
+            .map((value, index) => {
+                setKycTypeCaption(value.fieldName);
+
+                if (value.isMandatory) {
+                    setKycTypeMan(true);
+                }
+                if (value.isHide) {
+                    setKycTypeVisible(false);
+                }
+                if (value.isDisable) {
+                    setKycTypeDisable(true);
+                }
+                if (value.isCaptionChange) {
+                    setKycTypeCaption(value.fieldCaptionChange);
+                }
+            });
+
+        systemMandatoryField
+            .filter(data => data.fieldUiid === 'et_kycID' && data.pageId === pageId)
+            .map((value, index) => {
+                setKycIDCaption(value.fieldName);
+
+                if (value.isMandatory) {
+                    setKycIDMan(true);
+                }
+                if (value.isHide) {
+                    setKycIDVisible(false);
+                }
+                if (value.isDisable) {
+                    setKycIDDisable(true);
+                }
+                if (value.isCaptionChange) {
+                    setKycIDCaption(value.fieldCaptionChange);
+                }
+            });
+
+        systemMandatoryField
+            .filter(data => data.fieldUiid === 'sp_referenceType' && data.pageId === pageId)
+            .map((value, index) => {
+                setReferenceTypeCaption(value.fieldName);
+
+                if (value.isMandatory) {
+                    setReferenceTypeMan(true);
+                }
+                if (value.isHide) {
+                    setReferenceTypeVisible(false);
+                }
+                if (value.isDisable) {
+                    setReferenceTypeDisable(true);
+                }
+                if (value.isCaptionChange) {
+                    setReferenceTypeCaption(value.fieldCaptionChange);
+                }
+            });
+
+        systemMandatoryField
+            .filter(data => data.fieldUiid === 'et_FWA' && data.pageId === pageId)
+            .map((value, index) => {
+                setFwaCaption(value.fieldName);
+
+                if (value.isMandatory) {
+                    setFwaMan(true);
+                }
+                if (value.isHide) {
+                    setFwaVisible(false);
+                }
+                if (value.isDisable) {
+                    setFwaDisable(true);
+                }
+                if (value.isCaptionChange) {
+                    setFwaCaption(value.fieldCaptionChange);
+                }
+            });
+
+        systemMandatoryField
+            .filter(data => data.fieldUiid === 'et_addressline1' && data.pageId === pageId)
+            .map((value, index) => {
+                setAddressLine1Caption(value.fieldName);
+
+                if (value.isMandatory) {
+                    setAddressLine1Man(true);
+                }
+                if (value.isHide) {
+                    setAddressLine1Visible(false);
+                }
+                if (value.isDisable) {
+                    setAddressLine1Disable(true);
+                }
+                if (value.isCaptionChange) {
+                    setAddressLine1Caption(value.fieldCaptionChange);
+                }
+            });
+
+        systemMandatoryField
+            .filter(data => data.fieldUiid === 'et_pincode' && data.pageId === pageId)
+            .map((value, index) => {
+                setPincodeCaption(value.fieldName);
+
+                if (value.isMandatory) {
+                    setPincodeMan(true);
+                }
+                if (value.isHide) {
+                    setPincodeVisible(false);
+                }
+                if (value.isDisable) {
+                    setPincodeDisable(true);
+                }
+                if (value.isCaptionChange) {
+                    setPincodeCaption(value.fieldCaptionChange);
+                }
+            });
+
+        systemMandatoryField
+            .filter(data => data.fieldUiid === 'et_city/village' && data.pageId === pageId)
+            .map((value, index) => {
+                setCityCaption(value.fieldName);
+
+                if (value.isMandatory) {
+                    setCityMan(true);
+                }
+                if (value.isHide) {
+                    setCityVisible(false);
+                }
+                if (value.isDisable) {
+                    setCityDisable(true);
+                }
+                if (value.isCaptionChange) {
+                    setCityCaption(value.fieldCaptionChange);
+                }
+            });
+
+        systemMandatoryField
+            .filter(data => data.fieldUiid === 'et_district' && data.pageId === pageId)
+            .map((value, index) => {
+                setDistrictCaption(value.fieldName);
+
+                if (value.isMandatory) {
+                    setDistrictMan(true);
+                }
+                if (value.isHide) {
+                    setDistrictVisible(false);
+                }
+                if (value.isDisable) {
+                    setDistrictDisable(true);
+                }
+                if (value.isCaptionChange) {
+                    setDistrictCaption(value.fieldCaptionChange);
+                }
+            });
+
+        systemMandatoryField
+            .filter(data => data.fieldUiid === 'sp_remarks' && data.pageId === pageId)
+            .map((value, index) => {
+                setRemarksCaption(value.fieldName);
+
+                if (value.isMandatory) {
+                    setRemarksMan(true);
+                }
+                if (value.isHide) {
+                    setRemarksVisible(false);
+                }
+                if (value.isDisable) {
+                    setRemarksDisable(true);
+                }
+                if (value.isCaptionChange) {
+                    setRemarksCaption(value.fieldCaptionChange);
+                }
+            });
+
+
+    }
 
     const handleBackButton = () => {
         onGoBack();
@@ -325,6 +550,7 @@ const PDReferenceCheck = (props, { navigation }) => {
     const pickImage = () => {
         // setVisible(false)
 
+
         hidephotoBottomSheet();
         ImagePicker.openCamera({
             cropping: true,
@@ -443,7 +669,7 @@ const PDReferenceCheck = (props, { navigation }) => {
     const submitQuestionare = () => {
         //console.log('QuestionFinalData::' + JSON.stringify(pdData))
         if (validateData()) {
-            alert(errMsg)
+            showBottomSheet();
         }
     }
 
@@ -452,8 +678,103 @@ const PDReferenceCheck = (props, { navigation }) => {
         var i = 1;
         var errorMessage = '';
 
+        if (nameMan && nameVisible) {
+            if (name !== undefined && name !== null) {
+                if (name.length <= 0) {
+                    errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + nameCaption + '\n';
+                    i++;
+                    flag = true;
+                }
+            } else {
+                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + nameCaption + '\n';
+                i++;
+                flag = true;
+            }
+        }
+
+        if (contactNumberMan && contactNumberVisible) {
+            if (contactNumber !== undefined && contactNumber !== null) {
+                if (contactNumber.length <= 0 || contactNumber.length > 10) {
+                    errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + contactNumberCaption + '\n';
+                    i++;
+                    flag = true;
+                }
+            } else {
+                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + contactNumberCaption + '\n';
+                i++;
+                flag = true;
+            }
+        }
+
+
+        if (kycTypeMan && kycTypeVisible) {
+            if (kycTypeLabel !== undefined && kycTypeLabel !== null) {
+                if (kycTypeLabel.length <= 0) {
+                    errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + kycTypeCaption + '\n';
+                    i++;
+                    flag = true;
+                }
+            } else {
+                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + kycTypeCaption + '\n';
+                i++;
+                flag = true;
+            }
+        }
+
+        if (fwaMan && fwaVisible) {
+            if (fwa !== undefined && fwa !== null) {
+                if (fwa.length <= 0) {
+                    errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + fwaCaption + '\n';
+                    i++;
+                    flag = true;
+                }
+            } else {
+                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + fwaCaption + '\n';
+                i++;
+                flag = true;
+            }
+        }
+
+        if (referenceTypeMan && referenceTypeVisible) {
+            if (referenceTypeLabel !== undefined && referenceTypeLabel !== null) {
+                if (referenceTypeLabel.length <= 0) {
+                    errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + referenceTypeCaption + '\n';
+                    i++;
+                    flag = true;
+                }
+            } else {
+                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + referenceTypeCaption + '\n';
+                i++;
+                flag = true;
+            }
+        }
+
+
+
+
+        // if (remarksMan && rema) {
+        //     if (name !== undefined && name !== null) {
+        //         if (name.length <= 0) {
+        //             errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + nameCaption + '\n';
+        //             i++;
+        //             flag = true;
+        //         }
+        //     } else {
+        //         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + nameCaption + '\n';
+        //         i++;
+        //         flag = true;
+        //     }
+        // }
+
+
         if (addressLine1Man && addressLine1Visible) {
-            if (addressLine1.length <= 0) {
+            if (addressLine1 !== undefined && addressLine1 !== null) {
+                if (addressLine1.length <= 0) {
+                    errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + addressLine1Caption + '\n';
+                    i++;
+                    flag = true;
+                }
+            } else {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + addressLine1Caption + '\n';
                 i++;
                 flag = true;
@@ -477,12 +798,18 @@ const PDReferenceCheck = (props, { navigation }) => {
         }
 
         if (pincodeMan && pincodeVisible) {
-            if (pincode.length <= 0) {
+            if (pincode !== undefined && pincode !== null) {
+                if (pincode.length <= 0) {
+                    errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + pincodeCaption + '\n';
+                    i++;
+                    flag = true;
+                } else if (pincode.length < 6) {
+                    errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + "Valid " + pincodeCaption + '\n';
+                    i++;
+                    flag = true;
+                }
+            } else {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + pincodeCaption + '\n';
-                i++;
-                flag = true;
-            } else if (pincode.length < 6) {
-                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + "Valid " + pincodeCaption + '\n';
                 i++;
                 flag = true;
             }
@@ -646,7 +973,13 @@ const PDReferenceCheck = (props, { navigation }) => {
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
             <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
             <ImageBottomPreview bottomSheetVisible={bottomSheetVisible} previewImage={previewImage} hideBottomSheet={hideImageBottomSheet} reTakePhoto={reTakePhoto} fileName={fileName} detailHide={true} deleteVisible={deleteVisible} deletePhoto={deletePhoto} onDeleteorCancel={onDeleteorCancel} hideDelete={hideDelete} hideRetake={hideRetake} />
-
+            <ErrorMessageModal
+                isVisible={bottomErrorSheetVisible}
+                hideBottomSheet={hideBottomSheet}
+                errMsg={errMsg}
+                textError={language[0][props.language].str_error}
+                textClose={language[0][props.language].str_ok}
+            />
             <Modal
                 isVisible={photoOptionvisible}
                 onBackdropPress={hidephotoBottomSheet}
