@@ -11,7 +11,7 @@ import {
     TextInput,
     Image
 } from 'react-native';
-import { React, useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import MyStatusBar from '../../Components/MyStatusBar';
 import HeadComp from '../../Components/HeadComp';
 import { connect } from 'react-redux';
@@ -29,6 +29,9 @@ import ImageComp from '../../Components/ImageComp';
 import Entypo from 'react-native-vector-icons/Entypo';
 import { Picker } from '@react-native-picker/picker';
 import ButtonViewComp from '../../Components/ButtonViewComp';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import Common from '../../Utils/Common';
+
 const PdQuestionSubStage = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
     const [remarks, setRemarks] = useState('');
@@ -39,24 +42,46 @@ const PdQuestionSubStage = (props, { navigation }) => {
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
-        const filteredData = global.PDSTAGES[0].pdSubstages
-            .filter(data => data.clientType === global.CLIENTTYPE)
-            .sort((a, b) => a.displayOrder - b.displayOrder);
+        // const filteredData = global.PDSTAGES[0].pdSubstages
+        //     .filter(data => data.clientType === global.CLIENTTYPE)
+        //     .sort((a, b) => a.displayOrder - b.displayOrder);
 
-        const filterSubData = filteredData[0].pdModules.filter(data => data.moduleCode === 'QU_RFR_CHCK_APPL')
-            .sort((a, b) => a.displayOrder - b.displayOrder);
+        // const filterSubData = filteredData[0].pdModules.filter(data => data.moduleCode === 'QU_RFR_CHCK_APPL')
+        //     .sort((a, b) => a.displayOrder - b.displayOrder);
 
-        setPdData(filterSubData[0].pdSubModules)
+        // setPdData(filterSubData[0].pdSubModules)
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
             backHandler.remove();
         }
     }, [props.navigation, isScreenVisible]);
 
+
+    useFocusEffect(
+        React.useCallback(() => {
+
+            if (Common.DEBUG_MODE) console.log('Screen Available');
+
+            const filteredData = props.pdSubStage[0].personalDiscussionSubStageLogs
+                .filter(data => data.subStageCode === 'PD_APPL')
+
+            const filteredModule = filteredData[0].personalDiscussionModuleLogs
+                .filter(data => data.moduleCode === 'QU_RFR_CHCK_APPL')
+
+            setPdData(filteredModule[0].personalDiscussionSubModuleLogs)
+            //  alert(JSON.stringify(filteredModule))
+
+            return () => {
+                if (Common.DEBUG_MODE) console.log('Screen is blurred');
+            };
+        }, [])
+    );
+
     const handleBackButton = () => {
         onGoBack();
         return true; // Prevent default back button behavior
     };
+
 
     const onGoBack = () => {
         props.navigation.goBack();
@@ -151,10 +176,12 @@ const mapStateToProps = state => {
     const { language } = state.languageReducer;
     const { profileDetails } = state.profileReducer;
     const { mobileCodeDetails } = state.mobilecodeReducer;
+    const { pdSubStages } = state.pdStagesReducer;
     return {
         language: language,
         profiledetail: profileDetails,
-        mobilecodedetail: mobileCodeDetails
+        mobilecodedetail: mobileCodeDetails,
+        pdSubStage: pdSubStages
     }
 };
 

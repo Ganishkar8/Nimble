@@ -63,6 +63,84 @@ const pdStagesReducer = (state = initialState, action) => {
                 }),
             };
 
+
+        case UPDATEPDSUBMODULE:
+            return {
+                pdSubStages: state.pdSubStages.map((item) => {
+                    return {
+                        ...item,
+                        personalDiscussionSubStageLogs: item.personalDiscussionSubStageLogs.map((item1) => {
+                            if (item1.subStageCode === action.payload.subStage) {
+                                return {
+                                    ...item1,
+                                    personalDiscussionModuleLogs: item1.personalDiscussionModuleLogs.map((item2) => {
+                                        if (item2.moduleCode === action.payload.module) {
+                                            return {
+                                                ...item2,
+                                                personalDiscussionSubModuleLogs: item2.personalDiscussionSubModuleLogs.map((item3) => {
+                                                    if (item3.subModuleCode === action.payload.submodule) {
+                                                        return {
+                                                            ...item3,
+                                                            subModuleStatus: 'Completed'
+                                                        };
+                                                    }
+                                                    return item3;
+                                                })
+                                            };
+                                        }
+                                        return item2;
+                                    })
+                                };
+                            }
+                            return item1;
+                        })
+                    };
+                }),
+            };
+
+        case UPDATEPDPAGE:
+            return {
+                pdSubStages: state.pdSubStages.map((item) => {
+                    return {
+                        ...item,
+                        personalDiscussionSubStageLogs: item.personalDiscussionSubStageLogs.map((item1) => {
+                            if (item1.subStageCode === action.payload.subStage) {
+                                return {
+                                    ...item1,
+                                    personalDiscussionModuleLogs: item1.personalDiscussionModuleLogs.map((item2) => {
+                                        if (item2.moduleCode === action.payload.module) {
+                                            return {
+                                                ...item2,
+                                                personalDiscussionSubModuleLogs: item2.personalDiscussionSubModuleLogs.map((item3) => {
+                                                    if (item3.subModuleCode === action.payload.submodule) {
+                                                        return {
+                                                            ...item3,
+                                                            personalDiscussionPageLogs: item3.personalDiscussionPageLogs.map((item4) => {
+                                                                if (item4.pageCode === action.payload.page) {
+                                                                    return {
+                                                                        ...item4,
+                                                                        pageStatus: 'Completed'
+                                                                    };
+                                                                }
+                                                                return item4;
+                                                            })
+                                                        };
+                                                    }
+                                                    return item3;
+                                                })
+                                            };
+                                        }
+                                        return item2;
+                                    })
+                                };
+                            }
+                            return item1;
+                        })
+                    };
+                }),
+            };
+
+
         default:
             return state;
     }
