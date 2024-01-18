@@ -91,6 +91,7 @@ const CBResponseScreen = (props, { navigation }) => {
                     if (response.data.length <= 0) {
                         getcbCheckData();
                     } else {
+                        //updateLoanStatus();
                         setCBResponse(response.data)
                     }
                 } else if (response.data.statusCode === 201) {
@@ -137,6 +138,7 @@ const CBResponseScreen = (props, { navigation }) => {
                         getcbData();
                     } else {
                         setCBResponse(response.data)
+                        //updateLoanStatus();
                     }
                 } else if (response.data.statusCode === 201) {
                     setApiError(response.data.message);
@@ -194,7 +196,7 @@ const CBResponseScreen = (props, { navigation }) => {
                 if (response.status == 200) {
                     global.COMPLETEDMODULE = 'CB_RSPNS';
                     global.COMPLETEDPAGE = 'CB_CHK_CB_RSPNS';
-                    props.navigation.replace('CBStatus')
+                    //props.navigation.replace('CBStatus')
                 } else if (response.data.statusCode === 201) {
                     setApiError(response.data.message);
                     setErrorModalVisible(true);
@@ -383,7 +385,7 @@ const CBResponseScreen = (props, { navigation }) => {
                     </TouchableOpacity>
                 </View>
             </BottomSheet>
-            <View style={styles.fab}>
+            {/* <View style={styles.fab}>
 
                 {cbResponseStatus == 'Inprogress' &&
                     <ButtonViewComp
@@ -395,7 +397,7 @@ const CBResponseScreen = (props, { navigation }) => {
                     />
                 }
 
-            </View>
+            </View> */}
         </View>
 
     );
