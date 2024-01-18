@@ -27,7 +27,7 @@ import ImageComp from '../../Components/ImageComp';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import apiInstance from '../../Utils/apiInstance';
-
+import { updatePDSubStage, updatePDModule } from '../../Utils/redux/actions/PDAction';
 
 const PDItems = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
@@ -42,6 +42,10 @@ const PDItems = (props, { navigation }) => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
 
+        //props.updatePDSubStage('PD_APPL');
+        // props.updatePDModule('PD_APPL', 'TR_DTLS_APPL');
+        alert(JSON.stringify(props.pdSubStage))
+
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
             backHandler.remove();
@@ -52,7 +56,9 @@ const PDItems = (props, { navigation }) => {
     useFocusEffect(
         React.useCallback(() => {
 
-            getClientData();
+            const filteredData = props.pdSubStage[0].personalDiscussionSubStageLogs
+                .filter(data => data.subStageCode === 'PD_APPL')
+            setPdDetails(filteredData[0].personalDiscussionModuleLogs)
 
             return () => {
                 console.log('Screen is blurred');
@@ -88,7 +94,6 @@ const PDItems = (props, { navigation }) => {
                 }
             });
     }
-
 
     const handleBackButton = () => {
         onGoBack();
@@ -142,7 +147,8 @@ const PDItems = (props, { navigation }) => {
                     alignItems: 'center', justifyContent: 'center'
                 }} activeOpacity={0.8} onPress={() => {
                     if (item.moduleCode == 'TR_DTLS_APPL') {
-                        props.navigation.navigate('PdTravelDetails')
+                        alert(JSON.stringify(item))
+                        //props.navigation.navigate('PdTravelDetails')
                     } else if (item.moduleCode == 'QU_RFR_CHCK_APPL') {
                         props.navigation.navigate('PdQuestionSubStage')
                     } else if (item.moduleCode == 'NON_GST_CST_APPL') {
@@ -223,15 +229,19 @@ const mapStateToProps = state => {
     const { language } = state.languageReducer;
     const { profileDetails } = state.profileReducer;
     const { mobileCodeDetails } = state.mobilecodeReducer;
+    const { pdSubStages } = state.pdStagesReducer;
     return {
         language: language,
         profiledetail: profileDetails,
-        mobilecodedetail: mobileCodeDetails
+        mobilecodedetail: mobileCodeDetails,
+        pdSubStage: pdSubStages
     }
 };
 
 const mapDispatchToProps = dispatch => ({
     languageAction: item => dispatch(languageAction(item)),
+    updatePDSubStage: item => dispatch(updatePDSubStage(item)),
+    updatePDModule: (subStage, module) => dispatch(updatePDModule(subStage, module)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(PDItems);
