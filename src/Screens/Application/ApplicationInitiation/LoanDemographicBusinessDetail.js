@@ -625,7 +625,6 @@ const LoanDemographicBusinessDetail = (props) => {
 
     const makeSystemMandatoryFields = async () => {
 
-
         systemMandatoryField.filter((data) => data.fieldUiid === 'sp_cust_subcat' && data.pageId === pageId).map((value, index) => {
             setCustomerSubCategoryCaption(value.fieldName)
 

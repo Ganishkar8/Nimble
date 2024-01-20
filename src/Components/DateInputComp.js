@@ -45,7 +45,7 @@ const DateInputComp = ({ textValue, textStyle, Disable, type, ComponentName, ref
             const formattedDate = `${day}-${month}-${year}`;
             console.log("FormattedDate::" + formattedDate)
             console.log("Event::" + JSON.stringify(event))
-            setDatee(formattedDate);
+            //setDatee(formattedDate);
             handleClick(ComponentName, formattedDate);
         }
     };
