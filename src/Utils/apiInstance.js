@@ -38,7 +38,10 @@ const apiInstance = (baseURL, authToken) => {
         },
         (error) => {
             // Handle request error
-            if (global.DEBUG_MODE) console.log('RequestError::' + JSON.stringify(error))
+            if (global.DEBUG_MODE) {
+                console.log('RequestError::' + JSON.stringify(error))
+                writeToFile(`RequestError: ${JSON.stringify(error)}\n\n`);
+            }
             return Promise.reject(error);
         }
     );
@@ -61,7 +64,10 @@ const apiInstance = (baseURL, authToken) => {
         },
         (error) => {
             // Handle response error
-            if (global.DEBUG_MODE) console.log('ResponseError::' + JSON.stringify(error))
+            if (global.DEBUG_MODE) {
+                console.log('ResponseError::' + JSON.stringify(error))
+                writeToFile(`ResponseError: ${JSON.stringify(error)}\n\n`);
+            }
             return Promise.reject(error);
         }
     );

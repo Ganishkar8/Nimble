@@ -84,7 +84,7 @@ const PdMainScreen = (props, { navigation }) => {
                 if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(response.data));
 
                 if (response.status == 200) {
-                    setClientData(response.data)
+                    //setClientData(response.data)
                     getClientSubStageData(response.data);
                 }
                 else if (response.data.statusCode === 201) {
@@ -125,10 +125,9 @@ const PdMainScreen = (props, { navigation }) => {
         setLoading(true)
 
         const appDetails = {
-            "wfId": props.route.params.PDData.wfId,
             "createdBy": global.USERID,
             "loanApplicationId": global.LOANAPPLICATIONID,
-            "subcode": "PD_1" //props.route.params.PDData.subStage
+            "subCode": global.PDSTAGE //props.route.params.PDData.subStage
         }
 
         apiInstance(baseURL).post(`api/v2/PD/Update/PD_WORKFLOW/createWorkFlow`, appDetails)
@@ -139,10 +138,8 @@ const PdMainScreen = (props, { navigation }) => {
                 if (response.status == 200) {
 
                     // setClientData(response.data.personalDiscussionSubStageLogs)
-
                     response.data[0].personalDiscussionSubStageLogs.forEach((data) => {
-
-                        clientData.forEach((data1) => {
+                        clientData = clientData.map((data1) => {
                             var clientType = '';
                             if (data1.clientType == 'APPL') {
                                 clientType = 'PD_APPL'
@@ -152,18 +149,15 @@ const PdMainScreen = (props, { navigation }) => {
                                 clientType = 'PD_GRNTR'
                             }
                             if (clientType === data.subStageCode) {
-                                var nestedSubDataIsCompleted = false;
-                                if (data.subStageStatus == 'Completed') {
-                                    nestedSubDataIsCompleted = true;
-                                } else {
-                                    nestedSubDataIsCompleted = false;
-                                }
-                                data1.nestedSubDataIsCompleted = nestedSubDataIsCompleted;
-                                data1.status = data.subStageStatus
+                                return {
+                                    ...data1,
+                                    subStageStatus: data.subStageStatus
+                                };
                             }
+                            return data1;
                         });
-
                     });
+                    setClientData(clientData);
                     props.addPDStages(response.data);
                     setLoading(false)
                 }
@@ -204,7 +198,7 @@ const PdMainScreen = (props, { navigation }) => {
         const baseURL = '8901'
         setLoading(true)
 
-        apiInstance(baseURL).post(`/api/v1/pd/PDMaster/findByClientId?clintId=${item.clientId}&userId=${global.USERID}&pdLevel=${global.SUBSTAGE}`)
+        apiInstance(baseURL).post(`/api/v1/pd/PDMaster/findByClientId?clintId=${item.clientId}&userId=${global.USERID}&pdLevel=${global.PDSTAGE}`)
             .then((response) => {
                 // Handle the response data ${item.clientId}
                 if (global.DEBUG_MODE) console.log("PDDataApi::" + JSON.stringify(response.data));
@@ -238,7 +232,7 @@ const PdMainScreen = (props, { navigation }) => {
             .catch((error) => {
                 // Handle the error
                 setLoading(false)
-                if (global.DEBUG_MODE) console.log("PDDataApiError::" + JSON.stringify(error.response.data));
+
                 if (error.response.status == 404) {
                     setApiError(Common.error404);
                     setErrorModalVisible(true)
@@ -252,6 +246,7 @@ const PdMainScreen = (props, { navigation }) => {
                     setApiError(error.response.data.message);
                     setErrorModalVisible(true)
                 }
+                if (global.DEBUG_MODE) console.log("PDDataApiError::" + JSON.stringify(error.response.data));
             });
     }
 
@@ -275,12 +270,25 @@ const PdMainScreen = (props, { navigation }) => {
                 <TouchableOpacity activeOpacity={0.8} onPress={() => {
                     global.CLIENTTYPE = item.clientType;
                     global.CLIENTID = item.clientId;
+                    if (item.clientType == 'APPL') {
+                        global.PDSUBSTAGE = 'PD_APPL';
+                    } else if (item.clientType == 'CO-APPL') {
+                        global.PDSUBSTAGE = 'PD_CO_APPL';
+                    } else if (item.clientType == 'GRNTR') {
+                        global.PDSUBSTAGE = 'PD_GRNTR';
+                    }
                     getClientWisePDData(item);
+                    // getClientSubStageData()
 
                 }} style={{
                     width: '90%', height: 120, borderColor: '#BBBBBB4D', borderWidth: 1, borderRadius: 10,
                     alignItems: 'center', justifyContent: 'center'
                 }}>
+                    {item.subStageStatus === 'Completed' &&
+                        <View style={{ position: 'absolute', top: 10, bottom: 0, right: 10, alignSelf: 'flex-end' }}>
+                            <AntDesign name="checkcircle" size={18} color={Colors.green} />
+                        </View>
+                    }
                     <View style={{ alignItems: 'center', justifyContent: 'center' }}>
                         <View style={{ width: 50, height: 50, backgroundColor: bg, borderRadius: 25, justifyContent: 'center', alignItems: 'center' }}>
                             <ImageComp imageSrc={require('../../Images/applicantimage.png')} imageStylee={{ width: 30, height: 30, resizeMode: 'contain' }} />
