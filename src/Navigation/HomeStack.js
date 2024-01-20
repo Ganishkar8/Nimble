@@ -54,7 +54,7 @@ import PDTracker from '../Screens/PD/Tracker/PDTracker';
 import PDTrackerDetails from '../Screens/PD/Tracker/PDTrackerDetails';
 import PdQuestionSubStage from '../Screens/PD/PdQuestionSubStage';
 import PDFinancialVerification from '../Screens/PD/PDFinancialVerification';
-
+import PDReferenceCheckList from '../Screens/PD/PDReferenceCheckList';
 const Stack = createNativeStackNavigator();
 
 export default HomeStack = () => {
@@ -376,6 +376,12 @@ export default HomeStack = () => {
       <Stack.Screen
         name="PDFinancialVerification"
         component={PDFinancialVerification}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="PDReferenceCheckList"
+        component={PDReferenceCheckList}
         options={{ headerShown: false, tabBarVisible: false }}
       />
 

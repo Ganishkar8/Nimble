@@ -412,7 +412,7 @@ const PdTravelDetails = (props, { navigation }) => {
             "modeOfTravel": modeOfTravelLabel,
             "dateOfTravel": dateoftravel,
             "clientType": global.CLIENTTYPE,
-            "pdLevel": global.SUBSTAGE,
+            "pdLevel": global.PDSTAGE,
             "distanceTravelled": distanceTravelled,
             "pdaccompanyingOfficerDomains": appDetailsFinal
         }
@@ -501,7 +501,7 @@ const PdTravelDetails = (props, { navigation }) => {
             "modeOfTravel": modeOfTravelLabel,
             "dateOfTravel": dateoftravel,
             "clientType": global.CLIENTTYPE,
-            "pdLevel": global.SUBSTAGE,
+            "pdLevel": global.PDSTAGE,
             "distanceTravelled": distanceTravelled,
             "pdaccompanyingOfficerDomains": appDetailsFinal
         }

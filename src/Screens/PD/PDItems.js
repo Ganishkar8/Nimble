@@ -61,7 +61,7 @@ const PDItems = (props, { navigation }) => {
             if (Common.DEBUG_MODE) console.log('Screen Available');
 
             const filteredData = props.pdSubStage[0].personalDiscussionSubStageLogs
-                .filter(data => data.subStageCode === 'PD_APPL')
+                .filter(data => data.subStageCode === global.PDSUBSTAGE)
             setPdDetails(filteredData[0].personalDiscussionModuleLogs)
             setRefreshFlatList(!refreshFlatlist)
 
@@ -77,7 +77,7 @@ const PDItems = (props, { navigation }) => {
         const baseURL = '8901'
         setLoading(true)
 
-        apiInstance(baseURL).post(`api/v1/pd/PDMaster/findByPdSubcode/PD_1`) //${global.SUBSTAGE}
+        apiInstance(baseURL).post(`api/v1/pd/PDMaster/findByPdSubcode/${global.PDSTAGE}`) //${global.PDSTAGE}
             .then((response) => {
                 // Handle the response data
 
@@ -114,31 +114,31 @@ const PDItems = (props, { navigation }) => {
 
 
         var bg = ''; imagePath = '';
-        if (item.moduleCode == 'TR_DTLS_APPL') {
+        if (item.moduleCode == 'TR_DTLS_APPL' || item.moduleCode == 'TR_DTLS_CO_APPL' || item.moduleCode == 'TR_DTLS_GRNTR') {
             bg = Colors.dimTravel;
             imagePath = require('../../Images/travel.png');
-        } else if (item.moduleCode == 'QU_RFR_CHCK_APPL') {
+        } else if (item.moduleCode == 'QU_RFR_CHCK_APPL' || item.moduleCode == 'QU_RFR_CHCK_CO_APPL' || item.moduleCode == 'QU_RFR_CHCK_GRNTR') {
             bg = Colors.dimblue;
             imagePath = require('../../Images/order.png');
         } else if (item.moduleCode == 'NON_GST_CST_APPL') {
             bg = Colors.dimSkyBlue;
             imagePath = require('../../Images/bill.png');
-        } else if (item.moduleCode == 'PH_DOC_VRF_APPL') {
+        } else if (item.moduleCode == 'PH_DOC_VRF_APPL' || item.moduleCode == 'PH_DOC_VRF_CO_APPL' || item.moduleCode == 'PH_DOC_VRF_GRNTR') {
             bg = Colors.dimPhysical;
             imagePath = require('../../Images/document.png');
-        } else if (item.moduleCode == 'DOC_UPL_APPL') {
+        } else if (item.moduleCode == 'DOC_UPL_APPL' || item.moduleCode == 'DOC_UPL_CO_APPL' || item.moduleCode == 'DOC_UPL_GRNTR') {
             bg = Colors.dimDocument;
             imagePath = require('../../Images/upload.png');
-        } else if (item.moduleCode == 'FN_DTLS_VRF_APPL') {
+        } else if (item.moduleCode == 'FN_DTLS_VRF_APPL' || item.moduleCode == 'FN_DTLS_VRF_CO_APPL' || item.moduleCode == 'FN_DTLS_VRF_GRNTR') {
             bg = Colors.dimFinancial;
             imagePath = require('../../Images/financial.png');
-        } else if (item.moduleCode == 'HS_VT_APPL') {
+        } else if (item.moduleCode == 'HS_VT_APPL' || item.moduleCode == 'HS_VT_CO_APPLHo' || item.moduleCode == 'HS_VT_GRNTRHo') {
             bg = Colors.dimHouse;
             imagePath = require('../../Images/home.png');
-        } else if (item.moduleCode == 'BSN_VT_APPL') {
+        } else if (item.moduleCode == 'BSN_VT_APPL' || item.moduleCode == 'BSN_VT_CO_APPLB' || item.moduleCode == 'BSN_VT_GRNTRB') {
             bg = Colors.dimBusiness;
             imagePath = require('../../Images/bill.png');
-        } else if (item.moduleCode == 'PD_FD_BK_APPL') {
+        } else if (item.moduleCode == 'PD_FD_BK_APPL' || item.moduleCode == 'PD_FD_BK_CO_APPL' || item.moduleCode == 'PD_FD_BK_GRNTR') {
             bg = Colors.dimPersonal;
             imagePath = require('../../Images/feedback.png');
         }
@@ -155,25 +155,27 @@ const PDItems = (props, { navigation }) => {
                     width: '90%', height: 140, marginTop: 15, borderColor: '#BBBBBB4D', borderWidth: 1, borderRadius: 10,
                     alignItems: 'center', justifyContent: 'center'
                 }} activeOpacity={0.8} onPress={() => {
-                    if (item.moduleCode == 'TR_DTLS_APPL') {
+                    if (item.moduleCode == 'TR_DTLS_APPL' || item.moduleCode == 'TR_DTLS_CO_APPL' || item.moduleCode == 'TR_DTLS_GRNTR') {
+                        global.PDMODULE = item.moduleCode;
                         //alert(JSON.stringify(item))
                         props.navigation.replace('PdTravelDetails')
-                    } else if (item.moduleCode == 'QU_RFR_CHCK_APPL') {
+                    } else if (item.moduleCode == 'QU_RFR_CHCK_APPL' || item.moduleCode == 'QU_RFR_CHCK_CO_APPL' || item.moduleCode == 'QU_RFR_CHCK_GRNTR') {
+                        global.PDMODULE = item.moduleCode;
                         props.navigation.navigate('PdQuestionSubStage')
                     } else if (item.moduleCode == 'NON_GST_CST_APPL') {
-
-                    } else if (item.moduleCode == 'PH_DOC_VRF_APPL') {
-
-                    } else if (item.moduleCode == 'DOC_UPL_APPL') {
-
-                    } else if (item.moduleCode == 'FN_DTLS_VRF_APPL') {
+                        global.PDMODULE = item.moduleCode;
+                    } else if (item.moduleCode == 'PH_DOC_VRF_APPL' || item.moduleCode == 'PH_DOC_VRF_CO_APPL' || item.moduleCode == 'PH_DOC_VRF_GRNTR') {
+                        global.PDMODULE = item.moduleCode;
+                    } else if (item.moduleCode == 'DOC_UPL_APPL' || item.moduleCode == 'DOC_UPL_CO_APPL' || item.moduleCode == 'DOC_UPL_GRNTR') {
+                        global.PDMODULE = item.moduleCode;
+                    } else if (item.moduleCode == 'FN_DTLS_VRF_APPL' || item.moduleCode == 'FN_DTLS_VRF_CO_APPL' || item.moduleCode == 'FN_DTLS_VRF_GRNTR') {
                         props.navigation.navigate('PDFinancialVerification')
-                    } else if (item.moduleCode == 'HS_VT_APPL') {
-
-                    } else if (item.moduleCode == 'BSN_VT_APPL') {
-
-                    } else if (item.moduleCode == 'PD_FD_BK_APPL') {
-
+                    } else if (item.moduleCode == 'HS_VT_APPL' || item.moduleCode == 'HS_VT_CO_APPLHo' || item.moduleCode == 'HS_VT_GRNTRHo') {
+                        global.PDMODULE = item.moduleCode;
+                    } else if (item.moduleCode == 'BSN_VT_APPL' || item.moduleCode == 'BSN_VT_CO_APPLB' || item.moduleCode == 'BSN_VT_GRNTRB') {
+                        global.PDMODULE = item.moduleCode;
+                    } else if (item.moduleCode == 'PD_FD_BK_APPL' || item.moduleCode == 'PD_FD_BK_CO_APPL' || item.moduleCode == 'PD_FD_BK_GRNTR') {
+                        global.PDMODULE = item.moduleCode;
                     }
                 }}>
                     <View style={{

@@ -42,7 +42,6 @@ import MapView, { Marker } from 'react-native-maps';
 import Geolocation from 'react-native-geolocation-service';
 import ErrorModal from '../../Components/ErrorModal';
 import ErrorMessageModal from '../../Components/ErrorMessageModal';
-import SystemMandatoryField from '../../Components/SystemMandatoryField';
 
 const PDReferenceCheck = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
@@ -68,7 +67,7 @@ const PDReferenceCheck = (props, { navigation }) => {
 
     const [gpslatlon, setGPSLatLon] = useState('');
     const mapRef = useRef(null);
-    const [visible, setVisible] = useState(false);
+    const [visible, setVisible] = useState(true);
     const [photoOptionvisible, setphotoOptionvisible] = useState(false);
     const showphotoBottomSheet = () => setphotoOptionvisible(true);
     const hidephotoBottomSheet = () => setphotoOptionvisible(false);
@@ -192,7 +191,7 @@ const PDReferenceCheck = (props, { navigation }) => {
     const [bankUserCodeDetail, setBankUserCodeDetail] = useState(props.mobilecodedetail.t_BankUserCode);
     const [leaduserCodeDetail, setLeadUserCodeDetail] = useState(props.mobilecodedetail.leadUserCodeDto);
     const [errMsg, setErrMsg] = useState('');
-    const [pageId, setPageId] = useState(global.CURRENTPAGEID);
+    const [pageId, setPageId] = useState(props.route.params.pageId);
     const [systemMandatoryField, setSystemMandatoryField] = useState(
         props.mobilecodedetail.processSystemMandatoryFields,
     );
@@ -203,11 +202,16 @@ const PDReferenceCheck = (props, { navigation }) => {
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
         getSystemCodeDetail();
         makeSystemMandatoryFields();
+        getlocationPermission();
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
             backHandler.remove();
         }
     }, [props.navigation, isScreenVisible]);
+
+    useEffect(() => {
+        zoomToMarker();
+    }, [gpslatlon]);
 
     const makeSystemMandatoryFields = () => {
 
@@ -638,7 +642,7 @@ const PDReferenceCheck = (props, { navigation }) => {
             setImageFile(image)
 
             const lastDotIndex = image.path.lastIndexOf('.');
-            var imageName = 'Photo' + '_' + global.CLIENTID;
+            var imageName = 'Photo' + '_' + global.CLIENTID.toString();
             if (lastDotIndex !== -1) {
                 // Get the substring from the last dot to the end of the string
                 const fileExtension = image.path.substring(lastDotIndex);
@@ -666,7 +670,7 @@ const PDReferenceCheck = (props, { navigation }) => {
             setImageFile(image);
 
             const lastDotIndex = image.path.lastIndexOf('.');
-            var imageName = 'Photo' + '_' + global.leadID;
+            var imageName = 'Photo' + '_' + global.CLIENTID.toString();
             if (lastDotIndex !== -1) {
                 // Get the substring from the last dot to the end of the string
                 const fileExtension = image.path.substring(lastDotIndex);
@@ -721,7 +725,6 @@ const PDReferenceCheck = (props, { navigation }) => {
                 setGPSLatLon(prevCount => currentLatitude + ',' + currentLongitude);
             },
             error => {
-                alert(error.message)
                 setLocationStatus(error.message);
                 console.log(error);
             },
@@ -738,8 +741,11 @@ const PDReferenceCheck = (props, { navigation }) => {
             const idData = bankUserCodeDetail.filter((data) => data.ID === 'IndIdentitySettingID').sort((a, b) => a.Description.localeCompare(b.Description));;
             setKycTypeData(idData);
         }
-        const filteredReferenceData = leaduserCodeDetail.filter((data) => data.masterId === 'REFERENCETYPE').sort((a, b) => a.Description.localeCompare(b.Description));;
+        const filteredReferenceData = leaduserCodeDetail.filter((data) => data.masterId === 'REFERENCE_TYPE').sort((a, b) => a.Description.localeCompare(b.Description));;
         setReferenceTypeData(filteredReferenceData);
+
+        const filteredRemarksData = leaduserCodeDetail.filter((data) => data.masterId === 'PD_REMARKS').sort((a, b) => a.Description.localeCompare(b.Description));;
+        setRemarksData(filteredRemarksData);
     }
 
     const closeErrorModal = () => {
@@ -1311,9 +1317,8 @@ const PDReferenceCheck = (props, { navigation }) => {
                             paddingHorizontal: 0,
                             borderRadius: 10,
                             backgroundColor: '#e2e2e2',
-                        }} >
-                            {/* onPress={() => { props.navigation.navigate('PreviewImage', { imageName: fileName, imageUri: imageUri }) }} */}
-
+                        }}
+                            onPress={() => { props.navigation.navigate('PreviewImage', { imageName: fileName, imageUri: imageUri }) }}>
 
                             <View style={{ width: '100%', height: 170 }}>
                                 <Image
@@ -1451,11 +1456,10 @@ const PDReferenceCheck = (props, { navigation }) => {
                 </View>
             </ScrollView>
 
-
             <ButtonViewComp
                 textValue={language[0][props.language].str_submit.toUpperCase()}
                 textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500, marginBottom: 5 }}
-                viewStyle={Commonstyles.buttonView}
+                viewStyle={[Commonstyles.buttonView, { marginBottom: 10 }]}
                 innerStyle={Commonstyles.buttonViewInnerStyle}
                 handleClick={submitQuestionare}
             />

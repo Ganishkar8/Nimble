@@ -30,14 +30,37 @@ import { Picker } from '@react-native-picker/picker';
 import ButtonViewComp from '../../Components/ButtonViewComp';
 import ModalContainer from '../../Components/ModalContainer';
 import TextInputComp from '../../Components/TextInputComp';
+import apiInstance from '../../Utils/apiInstance';
+import ErrorModal from '../../Components/ErrorModal';
+import Common from '../../Utils/Common';
+import { updatePDSubStage, updatePDModule, updatePDSubModule, updatePDPage } from '../../Utils/redux/actions/PDAction';
+
+
 const PdQuestionarire = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
     const [remarks, setRemarks] = useState('');
-    const [pdData, setPdData] = useState([{ id: '1', remarks: '', reason: '' }, { id: '2', remarks: '', reason: '' }]);
+    const [pdQuestions, setPdQuestions] = useState([]);
     const [refreshFlatlist, setRefreshFlatList] = useState(false);
     const isScreenVisible = useIsFocused();
-    const [spinnerList, setSpinnerList] = useState([{ 'subCodeId': 'S', 'Description': 'Statisfactory' }, { 'subCodeId': 'NS', 'Description': 'Non-Statisfactory' }]);
+    const [spinnerList, setSpinnerList] = useState([]);
     const [tempItem, setTempItem] = useState([]);
+    const [currentPageId, setCurrentPageId] = useState(props.route.params.pageId);
+    const [currentPageCode, setCurrentPageCode] = useState(props.route.params.pageCode);
+    const [parentQuestionId, setParentQuestionId] = useState(0);
+    const [errorModalVisible, setErrorModalVisible] = useState(false);
+    const [apiError, setApiError] = useState('');
+    const [leadsystemCodeDetail, setLeadSystemCodeDetail] = useState(
+        props.mobilecodedetail.leadSystemCodeDto,
+    );
+    const [systemCodeDetail, setSystemCodeDetail] = useState(
+        props.mobilecodedetail.t_SystemCodeDetail,
+    );
+    const [leaduserCodeDetail, setLeadUserCodeDetail] = useState(
+        props.mobilecodedetail.leadUserCodeDto,
+    );
+    const [userCodeDetail, setUserCodeDetail] = useState(
+        props.mobilecodedetail.t_UserCodeDetail,
+    );
 
     const [remarksModalVisible, setRemarksModalVisible] = useState(false);
     const showRemarksSheet = (item) => {
@@ -50,7 +73,8 @@ const PdQuestionarire = (props, { navigation }) => {
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
-
+        getSystemCodeDetail();
+        getQuestions();
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
             backHandler.remove();
@@ -65,35 +89,246 @@ const PdQuestionarire = (props, { navigation }) => {
     const onGoBack = () => {
         props.navigation.goBack();
     }
+
+    const getSystemCodeDetail = async () => {
+
+        const filteredResponseData = leaduserCodeDetail
+            .filter(data => data.masterId === 'PD_RESPONSE')
+            .sort((a, b) => a.displayOrder - b.displayOrder);
+
+        setSpinnerList(filteredResponseData);
+
+    };
+
+    const getQuestions = () => {
+
+        const baseURL = global.PORT1;
+        setLoading(true)
+
+        const appDetails = {
+            "clientId": global.CLIENTID,
+            "userId": global.USERID,
+            "pageId": currentPageId,
+            "date": new Date()
+        }
+
+        apiInstance(baseURL).post(`api/v1/pd/PdQAcheck/findbyClientId`, appDetails)
+            .then((response) => {
+                // Handle the response data
+                if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(response.data));
+
+                if (response.status == 200) {
+                    if (response.data.pdQAcheckDto) {
+                        setParentQuestionId(response.data.pdQAcheckDto.id)
+                    }
+                    setPdQuestions(response.data.quationAnswers)
+                    setLoading(false)
+                }
+                else if (response.data.statusCode === 201) {
+                    setLoading(false)
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setLoading(false)
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
+
+            })
+            .catch((error) => {
+                // Handle the error
+                setLoading(false)
+                if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(error.response.data));
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
+    }
+
+    const getAllStatus = () => {
+        const filteredModule = props.pdSubStage[0].personalDiscussionSubStageLogs
+            .filter(data => data.subStageCode === global.PDSUBSTAGE)[0]
+            .personalDiscussionModuleLogs
+            .filter(data => data.moduleCode === global.PDMODULE)[0]
+
+        if (filteredModule) {
+
+            // Use the every function to check if all mandatory submodules are completed
+            const allMandatorySubmodulesCompleted = filteredModule.personalDiscussionSubModuleLogs.every(subModule => {
+                return subModule.isMandatory && subModule.subModuleStatus === 'Completed' && subModule.subModuleCode !== global.PDSUBMODULE;
+            });
+
+            if (allMandatorySubmodulesCompleted) {
+                if (Common.DEBUG_MODE) console.log('All mandatory submodules are completed.');
+                //props.updatePDSubStage(global.PDSUBSTAGE);
+                props.updatePDModule(global.PDSUBSTAGE, global.PDMODULE);
+                props.updatePDSubModule(global.PDSUBSTAGE, global.PDMODULE, global.PDSUBMODULE);
+                props.updatePDPage(global.PDSUBSTAGE, global.PDMODULE, global.PDSUBMODULE, currentPageCode);
+                props.navigation.replace('PdQuestionSubStage')
+            } else {
+                if (Common.DEBUG_MODE) console.log('Not all mandatory submodules are completed.');
+                props.updatePDSubModule(global.PDSUBSTAGE, global.PDMODULE, global.PDSUBMODULE);
+                props.updatePDPage(global.PDSUBSTAGE, global.PDMODULE, global.PDSUBMODULE, currentPageCode);
+                props.navigation.replace('PdQuestionSubStage')
+            }
+        } else {
+            if (Common.DEBUG_MODE) console.log('Module not found.');
+        }
+
+
+
+    }
+
+    const postQuestions = () => {
+
+        const baseURL = global.PORT1;
+        setLoading(true)
+
+        const appDetails = {
+            "createdBy": global.USERID,
+            "createdDate": new Date(),
+            "id": parentQuestionId,
+            "clientType": global.CLIENTTYPE,
+            "pdLevel": global.PDSTAGE,
+            "quationAnswers": pdQuestions,
+            "personalDiscussionQARefference": []
+        }
+
+        apiInstance(baseURL).post(`api/v1/pd/PdQAcheck/loan-application-number/${global.LOANAPPLICATIONNUM}/clientId/${global.CLIENTID}`, appDetails)
+            .then((response) => {
+                // Handle the response data
+                if (global.DEBUG_MODE) console.log("PostQuestionApi::" + JSON.stringify(response));
+
+                if (response.status == 200 || response.status == 201) {
+                    updatePdStatus();
+                }
+                else if (response.data.statusCode === 201) {
+                    setLoading(false)
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setLoading(false)
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
+
+            })
+            .catch((error) => {
+                // Handle the error
+                setLoading(false)
+                if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(error.response.data));
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
+    }
+
+    const updatePdStatus = () => {
+
+        const appDetails = {
+            "loanApplicationId": global.LOANAPPLICATIONID,
+            "loanWorkflowStage": global.PDSTAGE,
+            "subStageCode": global.PDSUBSTAGE,
+            "moduleCode": global.PDMODULE,
+            "subModule": global.PDSUBMODULE,
+            "pageCode": currentPageCode,
+            "status": "Completed",
+            "userId": global.USERID
+        };
+
+        const baseURL = global.PORT1;
+        setLoading(true);
+        apiInstance(baseURL)
+            .post(`/api/v2/PD/Update/PD_WORKFLOW/updateStatus`, appDetails)
+            .then(async response => {
+                // Handle the response data
+                if (global.DEBUG_MODE) console.log('UpdatePDStatusApiResponse::' + JSON.stringify(response.data),);
+                setLoading(false);
+                if (response.status == 200) {
+                    getAllStatus();
+                }
+                else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
+            })
+            .catch(error => {
+                // Handle the error
+                if (global.DEBUG_MODE)
+                    console.log(
+                        'UpdateStatusApiResponse' + JSON.stringify(error.response),
+                    );
+                setLoading(false);
+
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
+    };
+
     const addItem = () => {
-        const newData = [...pdData];
+        const newData = [...pdQuestions];
         for (let i = 0; i < newData.length; i++) {
-            if (newData[i].id === tempItem.id) {
+            if (newData[i].pdQuestionId === tempItem.pdQuestionId) {
                 newData[i] = { ...newData[i], remarks: remarks };
             }
         }
-        setPdData(newData);
+        setPdQuestions(newData);
         console.log("UpdatedValueText::" + JSON.stringify(newData))
         setRefreshFlatList(!refreshFlatlist)
         hideRemarksSheet()
     }
     const setSelectedValue = (itemValue, item) => {
 
-        //const itemIndex = pdData.findIndex((item) => item.id === itemId);
+        //const itemIndex = pdQuestions.findIndex((item) => item.id === itemId);
 
-        const newData = [...pdData];
+        const newData = [...pdQuestions];
         for (let i = 0; i < newData.length; i++) {
-            if (newData[i].id === item.id) {
-                newData[i] = { ...newData[i], reason: itemValue };
+            if (newData[i].pdQuestionId === item.pdQuestionId) {
+                newData[i] = { ...newData[i], satisfactionLevel: itemValue };
             }
         }
-        setPdData(newData);
+        setPdQuestions(newData);
         console.log("UpdatedValue::" + JSON.stringify(newData))
         setRefreshFlatList(!refreshFlatlist)
     }
 
     const submitQuestionare = () => {
-        console.log('QuestionFinalData::' + JSON.stringify(pdData))
+        console.log('QuestionFinalData::' + JSON.stringify(pdQuestions))
+        postQuestions();
     }
 
 
@@ -103,24 +338,30 @@ const PdQuestionarire = (props, { navigation }) => {
         }
     }
 
+    const closeErrorModal = () => {
+        setErrorModalVisible(false);
+    };
 
-    const FlatView = ({ item }) => {
+    const FlatView = ({ item, index }) => {
         let rem = item.remarks
 
         return (
-            <View style={{ width: '100%', alignItems: 'center' }}>
+            <View style={{ width: '93%', alignItems: 'center' }}>
 
-                <View style={{ width: '93%', marginLeft: 20, marginTop: 20 }}>
-                    <Text style={{ fontSize: 15, color: Colors.darkblack, fontFamily: 'PoppinsRegular', marginTop: 3 }}>
-                        1. Brief About Your Business Product / Service, Business Vintage And Target Customers?
-                    </Text>
+                <View style={{ width: '100%', marginLeft: 20, marginTop: 20 }}>
+                    <View style={{ width: '92%', alignSelf: 'center' }}>
+                        <Text style={{ fontSize: 15, color: Colors.darkblack, fontFamily: 'PoppinsRegular', marginTop: 3 }}>
+                            {index + 1}. {item.quation}
+                        </Text>
 
-                    <Text style={{ fontSize: 15, color: Colors.lightgrey, fontFamily: 'Poppins-Medium', marginTop: 3 }}>
-                        {language[0][props.language].str_remarks}
-                    </Text>
+                        {/* <Text style={{ fontSize: 10, color: Colors.lightgrey, fontFamily: 'Poppins-Medium', marginTop: 3 }}>
+                            {language[0][props.language].str_responses}
+                        </Text> */}
+
+                    </View>
+
                     <Picker
-                        selectedValue={item.reason}
-                        style={[Commonstyles.picker, { color: Colors.black }]}
+                        selectedValue={item.satisfactionLevel}
                         enabled={true}
                         mode='dropdown'
                         dropdownIconColor={Colors.black}
@@ -139,15 +380,24 @@ const PdQuestionarire = (props, { navigation }) => {
                         }
                     </Picker>
                     <View style={{ width: '91%', height: 1, backgroundColor: Colors.dimText, marginLeft: 15 }} />
+
                     {item.remarks &&
-                        <View style={{ width: '91%', height: 100, backgroundColor: '#F5F8FA', marginLeft: 15, marginTop: 5 }}>
-                            <Text style={{ fontSize: 15, color: Colors.black, fontFamily: 'PoppinsRegular', marginTop: 3, padding: 10 }}>
-                                {item.remarks}
+
+                        <View style={{ width: '91%', alignSelf: 'center', marginTop: 5 }}>
+                            <Text style={{ fontSize: 13, color: Colors.lightgrey, fontFamily: 'Poppins-Medium', marginTop: 3 }}>
+                                {language[0][props.language].str_remarks}
                             </Text>
+                            <View style={{ width: '100%', height: 100, backgroundColor: '#F5F8FA', marginTop: 5 }}>
+                                <Text style={{ fontSize: 15, color: Colors.black, fontFamily: 'PoppinsRegular', marginTop: 3, padding: 10 }}>
+                                    {item.remarks}
+                                </Text>
+                            </View>
                         </View>
+
+
                     }
 
-                    <View style={{ alignItems: 'flex-end', marginTop: 25 }}>
+                    <View style={{ alignItems: 'flex-end', marginTop: 15 }}>
                         <View
                             style={{
                                 marginTop: 10,
@@ -175,7 +425,7 @@ const PdQuestionarire = (props, { navigation }) => {
                         </View>
                     </View>
                 </View>
-                <View style={{ width: '90%', height: 0.5, backgroundColor: Colors.dimblue }} />
+                {/* <View style={{ width: '90%', height: 0.5, backgroundColor: Colors.dimblue }} /> */}
             </View>
         )
 
@@ -184,6 +434,12 @@ const PdQuestionarire = (props, { navigation }) => {
         <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
             {loading ? <Loading /> : null}
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
+            <ErrorModal
+                isVisible={errorModalVisible}
+                onClose={closeErrorModal}
+                textContent={apiError}
+                textClose={language[0][props.language].str_ok}
+            />
             <View
                 style={{
                     width: '100%',
@@ -199,7 +455,7 @@ const PdQuestionarire = (props, { navigation }) => {
             </View>
             <View style={{ width: '93%', flexDirection: 'row', marginLeft: 20 }}>
                 <Text style={{ fontSize: 15, color: Colors.lightgrey, fontFamily: 'Poppins-Medium', marginTop: 3 }}>
-                    {language[0][props.language].str_basic_details_optional}
+                    {props.route.params.pageDesc}
                 </Text>
             </View>
             <View style={{ flex: 1 }}>
@@ -223,12 +479,12 @@ const PdQuestionarire = (props, { navigation }) => {
                                             <TextComp textVal={'Remarks'} textStyle={Commonstyles.inputtextStyle} Visible={true} />
                                         </View>
 
-                                        <TextInputComp textValue={remarks} textStyle={[Commonstyles.textinputtextStyle, { maxHeight: 100 }]} type='email-address' Disable={false} ComponentName='remarks' returnKey="done" handleClick={handleClick} length={10} multilines={true} />
+                                        <TextInputComp textValue={remarks} textStyle={[Commonstyles.textinputtextStyle, { maxHeight: 100 }]} type='email-address' Disable={false} ComponentName='remarks' returnKey="done" handleClick={handleClick} length={150} multilines={true} />
 
                                     </View>
 
                                     <View style={{ alignItems: 'flex-end', marginTop: 25 }}>
-                                        <ButtonViewComp textValue={language[0][props.language].str_add.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} viewStyle={[Commonstyles.buttonView, { width: 100, height: 20 }]} innerStyle={[Commonstyles.buttonViewInnerStyle, { height: 35 }]} handleClick={() => addItem(item)} />
+                                        <ButtonViewComp textValue={language[0][props.language].str_add.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} viewStyle={[Commonstyles.buttonView, { width: 100, height: 20 }]} innerStyle={[Commonstyles.buttonViewInnerStyle, { height: 35 }]} handleClick={() => addItem()} />
                                     </View>
 
                                 </View>
@@ -237,16 +493,16 @@ const PdQuestionarire = (props, { navigation }) => {
                     } />
 
                 <FlatList
-                    data={pdData}
+                    data={pdQuestions}
                     renderItem={FlatView}
                     extraData={refreshFlatlist}
-                    keyExtractor={item => item.id}
+                    keyExtractor={(item, index) => index.toString()}
                 />
 
                 <ButtonViewComp
                     textValue={language[0][props.language].str_submit.toUpperCase()}
                     textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500, marginBottom: 5 }}
-                    viewStyle={Commonstyles.buttonView}
+                    viewStyle={[Commonstyles.buttonView, { marginBottom: 10 }]}
                     innerStyle={Commonstyles.buttonViewInnerStyle}
                     handleClick={submitQuestionare}
                 />
@@ -259,15 +515,21 @@ const mapStateToProps = state => {
     const { language } = state.languageReducer;
     const { profileDetails } = state.profileReducer;
     const { mobileCodeDetails } = state.mobilecodeReducer;
+    const { pdSubStages } = state.pdStagesReducer;
     return {
         language: language,
         profiledetail: profileDetails,
-        mobilecodedetail: mobileCodeDetails
+        mobilecodedetail: mobileCodeDetails,
+        pdSubStage: pdSubStages
     }
 };
 
 const mapDispatchToProps = dispatch => ({
     languageAction: item => dispatch(languageAction(item)),
+    updatePDSubStage: item => dispatch(updatePDSubStage(item)),
+    updatePDModule: (subStage, module) => dispatch(updatePDModule(subStage, module)),
+    updatePDSubModule: (subStage, module, subModule) => dispatch(updatePDSubModule(subStage, module, subModule)),
+    updatePDPage: (subStage, module, subModule, page) => dispatch(updatePDPage(subStage, module, subModule, page)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(PdQuestionarire);
