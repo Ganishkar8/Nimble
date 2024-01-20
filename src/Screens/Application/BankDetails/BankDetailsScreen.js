@@ -29,6 +29,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Modal from 'react-native-modal';
 import ImagePicker, { ImageOrVideo } from 'react-native-image-crop-picker';
+import { useIsFocused } from '@react-navigation/native';
 
 const BankDetailsScreen = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
@@ -37,6 +38,7 @@ const BankDetailsScreen = (props, { navigation }) => {
     const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
     const showBottomSheet = () => setBottomErrorSheetVisible(true);
     const hideBottomSheet = () => setBottomErrorSheetVisible(false);
+    const isScreenVisible = useIsFocused();
 
     const [errMsg, setErrMsg] = useState('');
     let errorCounter = 1;
@@ -119,7 +121,7 @@ const BankDetailsScreen = (props, { navigation }) => {
 
     const [systemCodeDetail, setSystemCodeDetail] = useState(props.mobilecodedetail.leadSystemCodeDto);
     const [userCodeDetail, setUserCodeDetail] = useState(props.mobilecodedetail.leadUserCodeDto);
-    const [systemMandatoryField, setSystemMandatoryField] = useState(props.mobilecodedetail.leadSystemMandatoryFieldDto);
+    const [systemMandatoryField, setSystemMandatoryField] = useState(props.mobilecodedetail.processSystemMandatoryFields);
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const [apiError, setApiError] = useState('');
 
@@ -150,8 +152,7 @@ const BankDetailsScreen = (props, { navigation }) => {
 
 
     useEffect(() => {
-        props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
-        const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
+
         getSystemCodeDetail()
         makeSystemMandatoryFields();
         getExistingData()
@@ -160,11 +161,17 @@ const BankDetailsScreen = (props, { navigation }) => {
             fieldsDisable();
         }
 
+    }, [props.navigation]);
+
+    useEffect(() => {
+        props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
+
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
             backHandler.remove();
         }
-    }, [props.navigation]);
+    }, [isScreenVisible]);
 
     const handleBackButton = () => {
         onGoBack();
@@ -293,35 +300,35 @@ const BankDetailsScreen = (props, { navigation }) => {
 
             setAccountTypeCaption(value.fieldName)
 
-            if (value.mandatory) {
+            if (value.isMandatory) {
                 setAccountTypeMan(true);
             }
-            if (value.hide) {
+            if (value.isHide) {
                 setAccountTypeVisible(false);
             }
-            if (value.disable) {
+            if (value.isDisable) {
                 setAccountTypeDisable(true);
             }
-            if (value.captionChange) {
+            if (value.isCaptionChange) {
                 setAccountTypeCaption(value.fieldCaptionChange)
             }
         });
-
+        // alert(JSON.stringify(pageId))
         systemMandatoryField.filter((data) => data.fieldUiid === 'et_act_hldr_nm_bk' && data.pageId === pageId).map((value, index) => {
 
             setAccountHolderNameCaption(value.fieldName)
 
 
-            if (value.mandatory) {
+            if (value.isMandatory) {
                 setAccountHolderNameMan(true);
             }
-            if (value.hide) {
+            if (value.isHide) {
                 setAccountHolderNameVisible(false);
             }
-            if (value.disable) {
+            if (value.isDisable) {
                 setAccountHolderNameDisable(true);
             }
-            if (value.captionChange) {
+            if (value.isCaptionChange) {
                 setAccountHolderNameCaption(value.fieldCaptionChange)
             }
         });
@@ -330,16 +337,16 @@ const BankDetailsScreen = (props, { navigation }) => {
 
             setIfscCodeCaption(value.fieldName)
 
-            if (value.mandatory) {
+            if (value.isMandatory) {
                 setIfscCodeMan(true);
             }
-            if (value.hide) {
+            if (value.isHide) {
                 setIfscCodeVisible(false);
             }
-            if (value.disable) {
+            if (value.isDisable) {
                 setIfscCodeDisable(true);
             }
-            if (value.captionChange) {
+            if (value.isCaptionChange) {
                 setIfscCodeCaption(value.fieldCaptionChange)
             }
         });
@@ -348,16 +355,16 @@ const BankDetailsScreen = (props, { navigation }) => {
 
             setBankNameCaption(value.fieldName)
 
-            if (value.mandatory) {
+            if (value.isMandatoryisMandatory) {
                 setBankNameMan(true);
             }
-            if (value.hide) {
+            if (value.isHide) {
                 setBankNameVisible(false);
             }
-            if (value.disable) {
+            if (value.isDisable) {
                 setBankNameDisable(true);
             }
-            if (value.captionChange) {
+            if (value.isCaptionChange) {
                 setBankNameCaption(value.fieldCaptionChange)
             }
         });
@@ -366,16 +373,16 @@ const BankDetailsScreen = (props, { navigation }) => {
 
             setBranchNameCaption(value.fieldName)
 
-            if (value.mandatory) {
+            if (value.isMandatory) {
                 setBranchNameMan(true);
             }
-            if (value.hide) {
+            if (value.isHide) {
                 setBranchNameVisible(false);
             }
-            if (value.disable) {
+            if (value.isDisable) {
                 setBranchNameDisable(true);
             }
-            if (value.captionChange) {
+            if (value.isCaptionChange) {
                 setBranchNameCaption(value.fieldCaptionChange)
             }
         });
@@ -384,16 +391,16 @@ const BankDetailsScreen = (props, { navigation }) => {
 
             setAccountNumberCaption(value.fieldName)
 
-            if (value.mandatory) {
+            if (value.isMandatory) {
                 setAccountNumberMan(true);
             }
-            if (value.hide) {
+            if (value.isHide) {
                 setAccountNumberVisible(false);
             }
-            if (value.disable) {
+            if (value.isDisable) {
                 setAccountNumberDisable(true);
             }
-            if (value.captionChange) {
+            if (value.isCaptionChange) {
                 setAccountNumberCaption(value.fieldCaptionChange)
             }
         });
@@ -402,16 +409,16 @@ const BankDetailsScreen = (props, { navigation }) => {
 
             setConfirmAccountNumberCaption(value.fieldName)
 
-            if (value.mandatory) {
+            if (value.isMandatory) {
                 setConfirmAccountNumberMan(true);
             }
-            if (value.hide) {
+            if (value.isHide) {
                 setConfirmAccountNumberVisible(false);
             }
-            if (value.disable) {
+            if (value.isDisable) {
                 setConfirmAccountNumberDisable(true);
             }
-            if (value.captionChange) {
+            if (value.isCaptionChange) {
                 setConfirmAccountNumberCaption(value.fieldCaptionChange)
             }
         });
@@ -420,16 +427,16 @@ const BankDetailsScreen = (props, { navigation }) => {
 
             setBankLinkedMobNoCaption(value.fieldName)
 
-            if (value.mandatory) {
+            if (value.isMandatory) {
                 setBankLinkedMobNoMan(true);
             }
-            if (value.hide) {
+            if (value.isHide) {
                 setBankLinkedMobNoVisible(false);
             }
-            if (value.disable) {
+            if (value.isDisable) {
                 setBankLinkedMobNoDisable(true);
             }
-            if (value.captionChange) {
+            if (value.isCaptionChange) {
                 setBankLinkedMobNoCaption(value.fieldCaptionChange)
             }
         });
@@ -438,16 +445,16 @@ const BankDetailsScreen = (props, { navigation }) => {
 
             setUpiIDCaption(value.fieldName)
 
-            if (value.mandatory) {
+            if (value.isMandatory) {
                 setUpiIDMan(true);
             }
-            if (value.hide) {
+            if (value.isHide) {
                 setUpiIDVisible(false);
             }
-            if (value.disable) {
+            if (value.isDisable) {
                 setUpiIDDisable(true);
             }
-            if (value.captionChange) {
+            if (value.isCaptionChange) {
                 setUpiIDCaption(value.fieldCaptionChange)
             }
         });
@@ -456,16 +463,16 @@ const BankDetailsScreen = (props, { navigation }) => {
 
             setAccountToUseCaption(value.fieldName)
 
-            if (value.mandatory) {
+            if (value.isMandatory) {
                 setAccountToUseMan(true);
             }
-            if (value.hide) {
+            if (value.isHide) {
                 setAccountToUseVisible(false);
             }
-            if (value.disable) {
+            if (value.isDisable) {
                 setAccountToUseDisable(true);
             }
-            if (value.captionChange) {
+            if (value.isCaptionChange) {
                 setAccountToUseCaption(value.fieldCaptionChange)
             }
         });
@@ -811,6 +818,7 @@ const BankDetailsScreen = (props, { navigation }) => {
         let IFSC = '';
         IFSC = ifsc.toUpperCase()
 
+
         const baseURL = global.PORT4;
         setLoading(true);
         apiInstance(baseURL)
@@ -879,7 +887,6 @@ const BankDetailsScreen = (props, { navigation }) => {
     };
 
     const pickImage = () => {
-        setVisible(false)
 
         hidephotoBottomSheet();
         ImagePicker.openCamera({
@@ -889,7 +896,9 @@ const BankDetailsScreen = (props, { navigation }) => {
 
             const lastDotIndex = image.path.lastIndexOf('.');
             var imageName = 'Photo' + '_' + global.leadID;
+
             if (lastDotIndex !== -1) {
+
                 // Get the substring from the last dot to the end of the string
                 const fileExtension = image.path.substring(lastDotIndex);
                 imageName = imageName + fileExtension;
@@ -906,7 +915,6 @@ const BankDetailsScreen = (props, { navigation }) => {
     };
 
     const selectImage = async () => {
-        setVisible(false)
 
         hidephotoBottomSheet();
         ImagePicker.openPicker({
@@ -986,11 +994,13 @@ const BankDetailsScreen = (props, { navigation }) => {
             }
         } else if (componentName === 'ifsccode') {
             if (textValue.length > 0) {
+                // textValue.toUpperCase();
                 setIfscCode(textValue)
                 if (textValue.length == 11) {
                     getIFSCCode(textValue)
                 }
             } else {
+                // textValue.toUpperCase();
                 setIfscCode(textValue)
             }
         } else if (componentName === 'bankname') {

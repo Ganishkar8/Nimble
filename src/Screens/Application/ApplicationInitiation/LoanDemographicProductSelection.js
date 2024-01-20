@@ -698,50 +698,167 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
             }
         });
 
+
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_emi_amt' && data.pageId === pageId).map((value, index) => {
+            setEmiAmountCaption(value.fieldName)
+
+            if (value.isMandatory) {
+                setEmiAmountMan(true);
+            }
+            if (value.isHide) {
+                setEmiAmountVisible(false);
+            }
+            if (value.isDisable) {
+                setEmiAmountDisable(true);
+            }
+            if (value.isCaptionChange) {
+                setEmiAmountCaption(value[0].fieldCaptionChange)
+            }
+        });
+
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_mtl_emi_dt' && data.pageId === pageId).map((value, index) => {
+            setMonthlyEmiDateCaption(value.fieldName)
+
+            if (value.isMandatory) {
+                setMonthlyEmiDateMan(true);
+            }
+            if (value.isHide) {
+                setMonthlyEmiDateVisible(false);
+            }
+            if (value.isDisable) {
+                setMonthlyEmiDateDisable(true);
+            }
+            if (value.isCaptionChange) {
+                setMonthlyEmiDateCaption(value[0].fieldCaptionChange)
+            }
+        });
+
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_inst_strt_dt' && data.pageId === pageId).map((value, index) => {
+            setInstallmentStartDateDateCaption(value.fieldName)
+
+            if (value.isMandatory) {
+                setInstallmentStartDateDateMan(true);
+            }
+            if (value.isHide) {
+                setInstallmentStartDateDateVisible(false);
+            }
+            if (value.isDisable) {
+                setInstallmentStartDateDateDisable(true);
+            }
+            if (value.isCaptionChange) {
+                setInstallmentStartDateDateCaption(value[0].fieldCaptionChange)
+            }
+        });
+
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_ttl_crgs' && data.pageId === pageId).map((value, index) => {
+            setTotalChargesCaption(value.fieldName)
+
+            if (value.isMandatory) {
+                setTotalChargesMan(true);
+            }
+            if (value.isHide) {
+                setTotalChargesVisible(false);
+            }
+            if (value.isDisable) {
+                setTotalChargesDisable(true);
+            }
+            if (value.isCaptionChange) {
+                setTotalChargesCaption(value[0].fieldCaptionChange)
+            }
+        });
+
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_appl_ins_amt' && data.pageId === pageId).map((value, index) => {
+            setAppInsuranceAmountCaption(value.fieldName)
+
+            if (value.isMandatory) {
+                setAppInsuranceAmountMan(true);
+            }
+            if (value.isHide) {
+                setAppInsuranceAmountVisible(false);
+            }
+            if (value.isDisable) {
+                setAppInsuranceAmountDisable(true);
+            }
+            if (value.isCaptionChange) {
+                setAppInsuranceAmountCaption(value[0].fieldCaptionChange)
+            }
+        });
+
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_coappl_ins_amt' && data.pageId === pageId).map((value, index) => {
+            setCoAppInsuranceAmountCaption(value.fieldName)
+
+            if (value.isMandatory) {
+                setCoAppInsuranceAmountMan(true);
+            }
+            if (value.isHide) {
+                setCoAppInsuranceAmountVisible(false);
+            }
+            if (value.isDisable) {
+                setCoAppInsuranceAmountDisable(true);
+            }
+            if (value.isCaptionChange) {
+                setCoAppInsuranceAmountCaption(value[0].fieldCaptionChange)
+            }
+        });
+
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_aprx_disb_amt' && data.pageId === pageId).map((value, index) => {
+            setApprxDisbAmountCaption(value.fieldName)
+
+            if (value.isMandatory) {
+                setApprxDisbAmountMan(true);
+            }
+            if (value.isHide) {
+                setApprxDisbAmountVisible(false);
+            }
+            if (value.isDisable) {
+                setApprxDisbAmountDisable(true);
+            }
+            if (value.isCaptionChange) {
+                setApprxDisbAmountCaption(value[0].fieldCaptionChange)
+            }
+        });
+
     };
 
 
-    const callRepaySchedule = (disbursementDate) => {
+    const callRepaySchedule = (disbursementDate, type) => {
 
-        // if (onlyView) {
-        //     props.navigation.replace('ProfileShortKYCVerificationStatus');
-        //     return;
-        // } 
-        if (validate()) {
-            showBottomSheet();
-        } else {
-            var appDetails = {
-                "loanType": loanTypeLabel,
-                "loanProduct": loanProductLabel,
-                "loanPurposeCategory": loanPurposeCatgLabel,
-                "loanPurpose": LoanPurposeLabel,
-                "loanAmount": LoanAmount,
-                "loanTenure": loanTenure,
-                "interestRate": interestRate,
-                "disbursementMode": disbursementModeLabel,
-                "repaymentMode": repaymentModeLabel,
-                "loanRepaymentFrequency": loanrepaymentFreqLabel,
-                "disbursementDate": Common.convertYearDateFormat(disbursementDate),
-                "insuranceCoverage": insuranceCoverageLabel,
-                "userId": global.USERID,
-                "branchID": props.profiledetail.userPersonalDetailsDto.branchId,
-                "term": loanTenure,
-                "noOfInstallment": loanTenure,
-                "gracePeriod": 0,
-                "loanApplicationId": global.LOANAPPLICATIONID,
-                "createdBy": global.USERID
-            }
+        var appDetails = {
+            "loanType": loanTypeLabel,
+            "loanProduct": loanProductLabel,
+            "loanPurposeCategory": loanPurposeCatgLabel,
+            "loanPurpose": LoanPurposeLabel,
+            "loanAmount": LoanAmount,
+            "loanTenure": loanTenure,
+            "interestRate": interestRate,
+            "disbursementMode": disbursementModeLabel,
+            "repaymentMode": repaymentModeLabel,
+            "loanRepaymentFrequency": loanrepaymentFreqLabel,
+            "disbursementDate": Common.convertYearDateFormat(disbursementDate),
+            "insuranceCoverage": insuranceCoverageLabel,
+            "userId": global.USERID,
+            "branchID": props.profiledetail.userPersonalDetailsDto.branchId,
+            "term": loanTenure,
+            "noOfInstallment": loanTenure,
+            "gracePeriod": 0,
+            "loanApplicationId": global.LOANAPPLICATIONID,
+            "createdBy": global.USERID
+        }
 
-            const baseURL = '8901';
-            setLoading(true);
-            apiInstancelocal(baseURL)
-                .post(`/api/v2/loan-application/applicant-loan-product-link`, appDetails)
-                .then(async response => {
-                    // Handle the response data
+        const baseURL = '8901';
+        setLoading(true);
+        apiInstancelocal(baseURL)
+            .post(`/api/v2/loan-application/applicant-loan-product-link`, appDetails)
+            .then(async response => {
+                // Handle the response data
 
-                    if (global.DEBUG_MODE) console.log('RepaymentScheduleApiResponse::' + JSON.stringify(response.data),);
+                if (global.DEBUG_MODE) console.log('RepaymentScheduleApiResponse::' + JSON.stringify(response.data),);
 
-                    setLoading(false);
+                setLoading(false);
+
+
+                //await insertData();
+                if (response.status === 200) {
                     setRepayScheduleData(response.data.loanRepaymentSchedules);
                     setChargeData(response.data.loanProductChargeDetails);
                     setEmiAmount(response.data.emiAmount.toString())
@@ -751,32 +868,58 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                     setAppInsuranceAmount(response.data.applicantInsuranceAmount.toString())
                     setCoAppInsuranceAmount(response.data.coApplicantInsuranceAmount.toString())
                     setApprxDisbAmount(response.data.approximateDisbursementAmount.toString())
-                    //await insertData();
-
-                })
-                .catch(error => {
-                    // Handle the error
-
-                    if (global.DEBUG_MODE) console.log('Error' + JSON.stringify(error));
-                    setLoading(false);
-                    if (error.response.data != null) {
-                        setApiError(error.response.data.message);
-                        setErrorModalVisible(true)
+                    if (type == 'Submit') {
+                        updateLoanStatus();
                     }
-                });
-        }
+                }
+                else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
+
+            })
+            .catch(error => {
+                // Handle the error
+
+                if (global.DEBUG_MODE) console.log('Error' + JSON.stringify(error));
+                setLoading(false);
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+
+            });
+
     };
 
-    const updateLoanStatus = () => {
+
+    const onSubmit = () => {
 
         if (global.USERTYPEID == 1163) {
             props.navigation.replace('LoanNomineeList');
             return;
         }
-
-        if (repayscheduleData.length <= 0) {
-            return;
+        if (validate('submit')) {
+            showBottomSheet();
+        } else {
+            callRepaySchedule(disbursementDate, 'Submit')
         }
+    }
+
+
+    const updateLoanStatus = () => {
 
         var module = ''; var page = '';
 
@@ -829,11 +972,12 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
 
     }
 
-    const validate = () => {
+    const validate = (type) => {
         var flag = false;
         var i = 1;
         var errorMessage = '';
 
+        // alert(JSON.stringify(type))
 
         if (loanTypeMan && loanTypeVisible) {
             if (loanTypeLabel.length <= 0) {
@@ -866,7 +1010,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
         }
 
         if (loanPurposeCatgMan && loanPurposeCatgVisible) {
-            if (loanPurposeCatgVisible.length <= 0) {
+            if (loanPurposeCatgLabel.length <= 0) {
                 errorMessage =
                     errorMessage +
                     i +
@@ -978,6 +1122,24 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
             }
         }
 
+        if (type === 'submit') {
+            if (disbursementDateMan && disbursementDateVisible) {
+
+                if (disbursementDate.length <= 0) {
+                    errorMessage =
+                        errorMessage +
+                        i +
+                        ')' +
+                        ' ' +
+                        language[0][props.language].str_plsselect +
+                        disbursementDateCaption +
+                        '\n';
+                    i++;
+                    flag = true;
+                }
+            }
+        }
+
         if (disbursementModeMan && disbursementModeVisible) {
             if (disbursementModeLabel.length <= 0) {
                 errorMessage =
@@ -1016,14 +1178,19 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
         if (componentName === 'LoanAmount') {
             setLoanAmount(textValue);
             callLoanTenure(loanProductLabel, textValue, loanTenure)
+            setDisbursementDate('');
         } else if (componentName === 'LoanTenure') {
             setLoanTenure(textValue);
             callLoanTenure(loanProductLabel, LoanAmount, textValue)
-        } else if (componentName === 'DisbursementDate') {
-            // alert(textValue)
-            setDisbursementDate(textValue);
-            callRepaySchedule(textValue);
+            setDisbursementDate('');
 
+        } else if (componentName === 'DisbursementDate') {
+            if (validate('date')) {
+                showBottomSheet();
+            } else {
+                setDisbursementDate(textValue);
+                callRepaySchedule(textValue, 'Date');
+            }
 
         } else if (componentName === 'InterestRate') {
             setInterestRate(textValue);
@@ -1436,7 +1603,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                                 <DateInputComp textStyle={[Commonstyles.inputtextStyle, { width: '90%' }]} ComponentName="DisbursementDate"
                                     textValue={disbursementDate}
                                     type="numeric"
-                                    handleClick={handleClick}
+                                    handleClick={[handleClick]}
                                     Disable={disbursementDateDisable}
                                     reference={disbursementDateRef}
                                     minDate={new Date()}
@@ -1710,7 +1877,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                     textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
                     viewStyle={Commonstyles.buttonView}
                     innerStyle={Commonstyles.buttonViewInnerStyle}
-                    handleClick={updateLoanStatus}
+                    handleClick={onSubmit}
                 />
             </ScrollView>
         </SafeAreaView>
