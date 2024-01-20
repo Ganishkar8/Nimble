@@ -252,32 +252,32 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
 
     systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ern_typ' && data.pageId === pageId).map((value, index) => {
 
-      if (value.mandatory) {
+      if (value.isMandatory) {
         setEarningTypeMan(true);
       }
-      if (value.hide) {
+      if (value.isHide) {
         setEarningTypeVisible(false);
       }
-      if (value.disable) {
+      if (value.isDisable) {
         setEarningTypeDisable(true);
       }
-      if (value.captionChange) {
+      if (value.isCaptionChange) {
         setEarningTypeCaption(value[0].fieldCaptionChange)
       }
     });
 
     systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ern_frq' && data.pageId === pageId).map((value, index) => {
 
-      if (value.mandatory) {
+      if (value.isMandatory) {
         setEarningFrequencyMan(true);
       }
-      if (value.hide) {
+      if (value.isHide) {
         setEarningFrequencyVisible(false);
       }
-      if (value.disable) {
+      if (value.isDisable) {
         setEarningFrequencyDisable(true);
       }
-      if (value.captionChange) {
+      if (value.isCaptionChange) {
         setEarningFrequencyCaption(value[0].fieldCaptionChange)
       }
     });
