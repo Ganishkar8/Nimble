@@ -432,7 +432,7 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
       setExpenseList(updatedIncomeList);
       setRefreshExpenseFlatList(!refreshExpenseFlatlist)
     } else if (data.usercode == 'OTHER_SOURCE_EXPENSES') {
-      const updatedIncomeList = expenseList.filter((item) => item.incomeLabel !== data.incomeLabel);
+      const updatedIncomeList = otherExpenseList.filter((item) => item.incomeLabel !== data.incomeLabel);
       const totalAmount = updatedIncomeList.reduce((sum, incomeItem) => sum + parseFloat(incomeItem.Amount), 0);
       setOtherTotalExpense(totalAmount)
       setotherExpenseList(updatedIncomeList);
