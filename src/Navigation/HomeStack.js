@@ -55,6 +55,14 @@ import PDTrackerDetails from '../Screens/PD/Tracker/PDTrackerDetails';
 import PdQuestionSubStage from '../Screens/PD/PdQuestionSubStage';
 import PDFinancialVerification from '../Screens/PD/PDFinancialVerification';
 import PDReferenceCheckList from '../Screens/PD/PDReferenceCheckList';
+import PDDocumentUpload from '../Screens/PD/PDDocumentUpload';
+import HouseDocumentUpload from '../Screens/PD/HouseDocumentUpload';
+import BusinessDocumentUpload from '../Screens/PD/BusinessDocumentUpload';
+import PDFinancialDetails from '../Screens/PD/PDFinancialDetails';
+import PDFeedback from '../Screens/PD/PDFeedback';
+import PDNonGSTDetail from '../Screens/PD/PDNonGSTDetail';
+import PDDocumentVerification from '../Screens/PD/PDDocumentVerification';
+
 const Stack = createNativeStackNavigator();
 
 export default HomeStack = () => {
@@ -382,6 +390,48 @@ export default HomeStack = () => {
       <Stack.Screen
         name="PDReferenceCheckList"
         component={PDReferenceCheckList}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="PDDocumentUpload"
+        component={PDDocumentUpload}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="HouseDocumentUpload"
+        component={HouseDocumentUpload}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="BusinessDocumentUpload"
+        component={BusinessDocumentUpload}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="PDFinancialDetails"
+        component={PDFinancialDetails}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="PDFeedback"
+        component={PDFeedback}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="PDNonGSTDetail"
+        component={PDNonGSTDetail}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="PDDocumentVerification"
+        component={PDDocumentVerification}
         options={{ headerShown: false, tabBarVisible: false }}
       />
 

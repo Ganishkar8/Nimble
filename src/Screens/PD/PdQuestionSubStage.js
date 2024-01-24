@@ -204,7 +204,7 @@ const PdQuestionSubStage = (props, { navigation }) => {
 
 
     const onGoBack = () => {
-        props.navigation.goBack();
+        props.navigation.replace('PDItems', { clientType: global.CLIENTTYPE });
     }
 
     const navigateToQuestion = (item) => {
@@ -216,15 +216,17 @@ const PdQuestionSubStage = (props, { navigation }) => {
 
         global.PDSUBMODULE = item.subModuleCode;
         if (item.subModuleCode == 'REFF_CHECK_APPL' || item.subModuleCode == 'REFF_CHECK_CO_APPL' || item.subModuleCode == 'REFF_CHECK_GRNTR') {
-            checkPermissions().then(res => {
-                if (res == true) {
-                    getOneTimeLocation(item);
-                } else {
-                    setApiError('Permission Not Granted');
-                    setErrorModalVisible(true)
-                }
+            // checkPermissions().then(res => {
+            //     if (res == true) {
+            //         getOneTimeLocation(item);
+            //     } else {
+            //         setApiError('Permission Not Granted');
+            //         setErrorModalVisible(true)
+            //     }
 
-            });
+            // });
+            props.navigation.replace('PDReferenceCheckList', { 'pageId': pageId, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan });
+
         } else {
             props.navigation.replace('PdQuestionarire', { 'pageId': pageId, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan });
         }

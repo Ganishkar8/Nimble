@@ -11,40 +11,37 @@ import {
 } from 'react-native';
 import Modal from 'react-native-modal';
 import { React, useState, useEffect } from 'react';
-import MyStatusBar from '../../../Components/MyStatusBar';
-import HeadComp from '../../../Components/HeadComp';
+import MyStatusBar from '../../Components/MyStatusBar';
+import HeadComp from '../../Components/HeadComp';
 import { connect } from 'react-redux';
-import { languageAction } from '../../../Utils/redux/actions/languageAction';
-import { language } from '../../../Utils/LanguageString';
-import Loading from '../../../Components/Loading';
-import ChildHeadComp from '../../../Components/ChildHeadComp';
-import ProgressComp from '../../../Components/ProgressComp';
-import Colors from '../../../Utils/Colors';
-import Commonstyles from '../../../Utils/Commonstyles';
-import IconButtonViewComp from '../../../Components/IconButtonViewComp';
-import tbl_clientaddressinfo from '../../../Database/Table/tbl_clientaddressinfo';
-import tbl_UserCodeDetails from '../../../Database/Table/tbl_UserCodeDetails';
+import { languageAction } from '../../Utils/redux/actions/languageAction';
+import { language } from '../../Utils/LanguageString';
+import Loading from '../../Components/Loading';
+import ChildHeadComp from '../../Components/ChildHeadComp';
+import Colors from '../../Utils/Colors';
+import Commonstyles from '../../Utils/Commonstyles';
 import { useIsFocused } from '@react-navigation/native';
-import apiInstancelocal from '../../../Utils/apiInstancelocal';
-import ErrorModal from '../../../Components/ErrorModal';
-import TextComp from '../../../Components/TextComp';
-import Common from '../../../Utils/Common';
-import ButtonViewComp from '../../../Components/ButtonViewComp';
-import DeleteConfirmModel from '../../../Components/DeleteConfirmModel';
-import ErrorMessageModal from '../../../Components/ErrorMessageModal';
-import tbl_loanaddressinfo from '../../../Database/Table/tbl_loanaddressinfo';
-import tbl_nomineeDetails from '../../../Database/Table/tbl_nomineeDetails';
+import apiInstancelocal from '../../Utils/apiInstancelocal';
+import ErrorModal from '../../Components/ErrorModal';
+import TextComp from '../../Components/TextComp';
+import Common from '../../Utils/Common';
+import ButtonViewComp from '../../Components/ButtonViewComp';
+import DeleteConfirmModel from '../../Components/DeleteConfirmModel';
+import ErrorMessageModal from '../../Components/ErrorMessageModal';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Octicons from 'react-native-vector-icons/Octicons';
-import ImageComp from '../../../Components/ImageComp';
-import ImageBottomPreview from '../../../Components/ImageBottomPreview';
+import ImageComp from '../../Components/ImageComp';
+import ImageBottomPreview from '../../Components/ImageBottomPreview';
 import ImagePicker, { ImageOrVideo } from 'react-native-image-crop-picker';
-import { tr } from 'react-native-paper-dates';
+import apiInstance from '../../Utils/apiInstance';
+import { updatePDModule, updatePDSubStage, updatePDSubModule, updatePDPage } from '../../Utils/redux/actions/PDAction';
 
-const LoanDocumentUpload = (props, { navigation }) => {
+
+
+const HouseDocumentUpload = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
     const [nomineeDetails, setNomineeDetails] = useState([]);
     const [nomineeID, setNomineeID] = useState('');
@@ -73,6 +70,7 @@ const LoanDocumentUpload = (props, { navigation }) => {
     const showImageBottomSheet = (item) => {
         setBottomSheetVisible(true)
         setCurrentPhotoItem(item)
+        setFileName(item.documentName);
     };
     const hideImageBottomSheet = () => setBottomSheetVisible(false);
     const [imageUri, setImageUri] = useState(null);
@@ -81,7 +79,14 @@ const LoanDocumentUpload = (props, { navigation }) => {
     const [hideDelete, setHideDelete] = useState(false);
     const [processModuleLength, setProcessModuleLength] = useState(0);
     const [documentData, setDocumentData] = useState(global.LEADTRACKERDATA.applicantDocumentDetail);
-    const [filteredDocument, setFilteredDocument] = useState(global.LEADTRACKERDATA.applicantDocumentDetail);
+    const [filteredDocument, setFilteredDocument] = useState([]);
+    const [currentPageId, setCurrentPageId] = useState(props.route.params.pageId);
+    const [currentPageCode, setCurrentPageCode] = useState(props.route.params.pageCode);
+    const [currentPageDesc, setCurrentPageDesc] = useState(props.route.params.pageDesc);
+    const [currentPageMan, setCurrentPageMan] = useState(props.route.params.pageMandatory);
+    const [parentDocId, setParentDocId] = useState(0);
+    const [currentItem, setCurrentItem] = useState([]);
+
 
     const [documentList, setDocumentList] = useState([]);
 
@@ -89,14 +94,11 @@ const LoanDocumentUpload = (props, { navigation }) => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
 
-        const filteredDocumentData = documentData.filter(item => item.clientType === global.CLIENTTYPE);
-        setFilteredDocument(filteredDocumentData);
-        getDocuments(filteredDocumentData);
-
-        const filteredData = global.FILTEREDPROCESSMODULE.filter(item => item.moduleCode === "DOC_UPLD");
-
-        setProcessModuleLength(filteredData[0].nestedSubData.length);
-
+        // const filteredDocumentData = documentData.filter(item => item.clientType === global.CLIENTTYPE);
+        // setFilteredDocument(filteredDocumentData);
+        //getDocuments(filteredDocumentData);
+        //getDocuments();
+        getAllDocuments();
 
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
@@ -148,7 +150,7 @@ const LoanDocumentUpload = (props, { navigation }) => {
             setFileType('');
             setImageFile('');
             setDeleteVisible(false);
-            deletedata()
+            deletedata(currentPhotoItem.id)
             hideImageBottomSheet();
         }
     }
@@ -175,9 +177,9 @@ const LoanDocumentUpload = (props, { navigation }) => {
                                 {item.code}
                             </Text>
                         </View>
-                        <View style={{ width: '10%', }}>
+                        {/* <View style={{ width: '10%', }}>
                             <AntDesign name='down' size={20} color={Colors.black} />
-                        </View>
+                        </View> */}
                     </View>
                     <FlatList
                         data={item.dataNew}
@@ -210,11 +212,11 @@ const LoanDocumentUpload = (props, { navigation }) => {
                             onPress={() => pickDocument(item)} activeOpacity={0.8}>
                             {item.dmsID.toString().length > 0 ?
                                 <View style={{ width: 40, height: 40, backgroundColor: '#33AD3E99', borderRadius: 10, justifyContent: 'center', alignItems: 'center' }}>
-                                    <ImageComp imageSrc={require('../../../Images/cloudcomputing.png')} imageStylee={{ width: 28, height: 22 }} />
+                                    <ImageComp imageSrc={require('../../Images/cloudcomputing.png')} imageStylee={{ width: 28, height: 22 }} />
                                 </View>
 
                                 : <View style={{ width: 40, height: 40, backgroundColor: '#DBDBDB', borderRadius: 10, justifyContent: 'center', alignItems: 'center' }}>
-                                    <ImageComp imageSrc={require('../../../Images/cloudcomputing.png')} imageStylee={{ width: 28, height: 22 }} />
+                                    <ImageComp imageSrc={require('../../Images/cloudcomputing.png')} imageStylee={{ width: 28, height: 22 }} />
                                 </View>
                             }
 
@@ -291,7 +293,7 @@ const LoanDocumentUpload = (props, { navigation }) => {
             setImageFile(image);
 
             const lastDotIndex = image.path.lastIndexOf('.');
-            var imageName = 'Photo' + '_' + global.LOANAPPLICATIONID;
+            var imageName = 'Photo' + '_' + global.CLIENTID;
             if (lastDotIndex !== -1) {
                 // Get the substring from the last dot to the end of the string
                 const fileExtension = image.path.substring(lastDotIndex);
@@ -302,10 +304,10 @@ const LoanDocumentUpload = (props, { navigation }) => {
             //alert(JSON.stringify(currentPhotoItem))
             updateImage(image.path, image.mime, imageName)
             //currentPhotoItem.map
-            // setFileType(image.mime)
-            // setFileName(imageName)
-            // setImageUri(image.path)
-            // setVisible(false)
+            setFileType(image.mime)
+            setFileName(imageName)
+            setImageUri(image.path)
+            setVisible(false)
             // setDeleteVisible(false)
         })
 
@@ -393,58 +395,6 @@ const LoanDocumentUpload = (props, { navigation }) => {
         setRefreshFlatList(true)
     }
 
-    const getImage = () => {
-
-        Common.getNetworkConnection().then(value => {
-            if (value.isConnected == true) {
-                setLoading(true)
-                const baseURL = global.PORT2
-                apiInstance(baseURL).get(`/api/documents/document/${currentPhotoItem.dmsID}`)
-                    .then(async (response) => {
-                        setLoading(false)
-                        // Handle the response data
-                        if (response.status == 200) {
-                            console.log("FinalLeadCreationApiResponse::" + JSON.stringify(response.data));
-                            setFileName(response.data.fileName)
-                            setImageUri('data:image/png;base64,' + response.data.base64Content)
-                            props.navigation.navigate('PreviewImage', { imageName: response.data.fileName, imageUri: 'data:image/png;base64,' + response.data.base64Content })
-                            // props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
-                        } else if (response.data.statusCode === 201) {
-                            setApiError(response.data.message);
-                            setErrorModalVisible(true);
-                        } else if (response.data.statusCode === 202) {
-                            setApiError(response.data.message);
-                            setErrorModalVisible(true);
-                        }
-
-                    })
-                    .catch((error) => {
-                        // Handle the error
-                        if (global.DEBUG_MODE) console.log("FinalLeadCreationApiResponse::" + JSON.stringify(error.response.data));
-                        setLoading(false)
-                        if (error.response.status == 404) {
-                            setApiError(Common.error404);
-                            setErrorModalVisible(true)
-                        } else if (error.response.status == 400) {
-                            setApiError(Common.error400);
-                            setErrorModalVisible(true)
-                        } else if (error.response.status == 500) {
-                            setApiError(Common.error500);
-                            setErrorModalVisible(true)
-                        } else if (error.response.data != null) {
-                            setApiError(error.response.data.message);
-                            setErrorModalVisible(true)
-                        }
-                    });
-            } else {
-                setApiError(language[0][props.language].str_errinternetimage);
-                setErrorModalVisible(true)
-
-            }
-
-        })
-    }
-
     const handleClick = (value, data) => {
         if (value === 'edit') {
             props.navigation.navigate('LoanNomineeDetails', { bankType: data })
@@ -509,8 +459,7 @@ const LoanDocumentUpload = (props, { navigation }) => {
         if (error.length > 0) {
             alert(error)
         } else {
-            //alert('h')
-            updateDmsID()
+            postDocuments();
         }
 
         // if (validate()) {
@@ -521,33 +470,218 @@ const LoanDocumentUpload = (props, { navigation }) => {
 
     }
 
-    const updateDmsID = () => {
-        const appDetailsFinal = []
-        var worksubstage = '';
-        if (global.CLIENTTYPE == 'APPL') {
-            worksubstage = 'DOC_UPLD_APPLCNT'
-        } else if (global.CLIENTTYPE == 'CO-APPL') {
-            worksubstage = 'DOC_UPLD_COAPPLCNT'
-        } else if (global.CLIENTTYPE == 'GRNTR') {
-            worksubstage = 'DOC_UPLD_GRNTR'
+
+    const getAllDocuments = () => {
+
+        const baseURL = global.PORT1;
+        setLoading(true)
+
+        const appDetails = {
+            "clientId": global.CLIENTID,
+            "userId": global.USERID,
+            "pageId": currentPageId,
+            "pdLevel": global.PDSTAGE,
+            "loanApplicationNumber": global.LOANAPPLICATIONNUM
         }
+
+
+        apiInstance(baseURL).post(`/api/v1/pd/PDHouseVisit`, appDetails)
+            .then((response) => {
+                // Handle the response data
+                if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(response.data));
+
+                if (response.status == 200) {
+                    if (response.data === '') {
+                        getDocuments([]);
+                    } else {
+                        setParentDocId(response.data.id);
+                        getDocuments([response.data]);
+                    }
+
+                }
+                else if (response.data.statusCode === 201) {
+                    setLoading(false)
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setLoading(false)
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
+
+            })
+            .catch((error) => {
+                // Handle the error
+                setLoading(false)
+                if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(error.response.data));
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
+    }
+
+    const getDocuments = (filteredDocument) => {
+        setLoading(false)
+        const documents = [{ "id": 1, "genericName": "House Visit Image", "genericType": "LOAN_DOCUMENT_TYPE", "subCode": "HOU_VIS_IMG", "isDocumentMandatory": true, "documentformatAccepted": [{ "isActive": true, "id": 185, "subCodeId": "PDF", "label": "PDF", "displayOrder": 0, "isDefault": 0 }, { "isActive": true, "id": 187, "subCodeId": "JPG/JPEG", "label": "JPG/JPEG", "displayOrder": 2, "isDefault": 2 }], "parentId": 442, "documentCategoryName": "CAPTURE HOUSE VISIT IMAGE", "documentCategoryCode": "CAPTURE HOUSE VISIT IMAGE", "workflowStageId": 504 },
+        { "id": 2, "genericName": "Selfie", "genericType": "LOAN_DOCUMENT_TYPE", "subCode": "SELFIE", "isDocumentMandatory": true, "documentformatAccepted": [{ "isActive": true, "id": 185, "subCodeId": "PDF", "label": "PDF", "displayOrder": 0, "isDefault": 0 }, { "isActive": true, "id": 187, "subCodeId": "JPG/JPEG", "label": "JPG/JPEG", "displayOrder": 2, "isDefault": 2 }], "parentId": 442, "documentCategoryName": "CAPTURE HOUSE VISIT IMAGE", "documentCategoryCode": "CAPTURE HOUSE VISIT IMAGE", "workflowStageId": 504 }]
+
+
+        const organizedData = documents.reduce((acc, installment) => {
+            const code = installment.documentCategoryCode;
+            // Check if the category is already present in the accumulator
+            const existingCodeIndex = acc.findIndex(item => item.code === code);
+
+            if (existingCodeIndex !== -1) {
+                // If the category exists, push the installment to its data array
+                var filteredData = [];
+                if (filteredDocument.length > 0) {
+                    filteredData = filteredDocument[0].pdHouseVisitChild.filter(item => item.documentType === installment.subCode);
+                }
+
+                if (filteredData != undefined && filteredData != null) {
+                    if (filteredData.length > 0) {
+                        const extraJSON = { dmsID: filteredData[0].dmsId, isImagePresent: true, documentName: filteredData[0].documentName, imageId: filteredData[0].id };
+                        acc[existingCodeIndex].dataNew.push({
+                            ...installment,
+                            ...extraJSON
+                        });
+                    } else {
+                        const extraJSON = { dmsID: '', isImagePresent: false, documentName: '', imageId: 0 };
+                        acc[existingCodeIndex].dataNew.push({
+                            ...installment,
+                            ...extraJSON
+                        });
+                    }
+                } else {
+                    const extraJSON = { dmsID: '', isImagePresent: false, documentName: '', imageId: 0 };
+                    acc[existingCodeIndex].dataNew.push({
+                        ...installment,
+                        ...extraJSON
+                    });
+                }
+
+
+            } else {
+                // If the category does not exist, create a new entry with the category and data array
+                var filteredData = [];
+                if (filteredDocument.length > 0) {
+                    filteredData = filteredDocument[0].pdHouseVisitChild.filter(item => item.documentType === installment.subCode);
+                }
+
+                if (filteredData != undefined && filteredData != null) {
+                    if (filteredData.length > 0) {
+                        const extraJSON = { dmsID: filteredData[0].dmsId, isImagePresent: true, documentName: filteredData[0].documentName, imageId: filteredData[0].id };
+                        acc.push({
+                            code,
+                            dataNew: [{ ...installment, ...extraJSON }],
+                            isSelected: false
+                        });
+                    } else {
+                        const extraJSON = { dmsID: '', isImagePresent: false, imageId: 0 };
+                        acc.push({
+                            code,
+                            dataNew: [{ ...installment, ...extraJSON }],
+                            isSelected: false
+                        });
+                    }
+                } else {
+                    const extraJSON = { dmsID: '', isImagePresent: false, imageId: 0 };
+                    acc.push({
+                        code,
+                        dataNew: [{ ...installment, ...extraJSON }],
+                        isSelected: false
+                    });
+                }
+            }
+
+            return acc;
+        }, []);
+
+        if (global.DEBUG_MODE) console.log("OrganizedData::", JSON.stringify(organizedData));
+        setRefreshFlatList(!refreshFlatlist)
+        setDocumentList(organizedData);
+
+
+
+    };
+
+    const getImage = () => {
+
+        Common.getNetworkConnection().then(value => {
+            if (value.isConnected == true) {
+                setLoading(true)
+                const baseURL = global.PORT2
+                apiInstance(baseURL).get(`/api/documents/document/${currentPhotoItem.dmsID}`)
+                    .then(async (response) => {
+                        setLoading(false)
+                        // Handle the response data
+                        if (response.status == 200) {
+                            console.log("FinalLeadCreationApiResponse::" + JSON.stringify(response.data));
+                            setFileName(response.data.fileName)
+                            setImageUri('data:image/png;base64,' + response.data.base64Content)
+                            props.navigation.navigate('PreviewImage', { imageName: response.data.fileName, imageUri: 'data:image/png;base64,' + response.data.base64Content })
+                            // props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
+                        } else if (response.data.statusCode === 201) {
+                            setApiError(response.data.message);
+                            setErrorModalVisible(true);
+                        } else if (response.data.statusCode === 202) {
+                            setApiError(response.data.message);
+                            setErrorModalVisible(true);
+                        }
+
+                    })
+                    .catch((error) => {
+                        // Handle the error
+                        if (global.DEBUG_MODE) console.log("FinalLeadCreationApiResponse::" + JSON.stringify(error.response.data));
+                        setLoading(false)
+                        if (error.response.status == 404) {
+                            setApiError(Common.error404);
+                            setErrorModalVisible(true)
+                        } else if (error.response.status == 400) {
+                            setApiError(Common.error400);
+                            setErrorModalVisible(true)
+                        } else if (error.response.status == 500) {
+                            setApiError(Common.error500);
+                            setErrorModalVisible(true)
+                        } else if (error.response.data != null) {
+                            setApiError(error.response.data.message);
+                            setErrorModalVisible(true)
+                        }
+                    });
+            } else {
+                setApiError(language[0][props.language].str_errinternetimage);
+                setErrorModalVisible(true)
+
+            }
+
+        })
+    }
+
+    const postDocuments = () => {
+        const appDetailsFinal = []
+
         documentList.map((item) => {
             const newDataArray = [...item.dataNew];
             for (let i = 0; i < newDataArray.length; i++) {
                 if (newDataArray[i].isImagePresent) {
                     const appDetails = {
-                        "isActive": true,
-                        "loanApplicationId": global.LOANAPPLICATIONID,
-                        "clientId": global.CLIENTID,
-                        "clientType": global.CLIENTTYPE,
+                        "createdBy": global.USERID,
+                        "id": newDataArray[i].imageId,
                         "dmsId": parseInt(newDataArray[i].dmsID),
                         "documentType": newDataArray[i].subCode,
                         "documentName": newDataArray[i].documentName,
-                        "wfStgwiseDocLinkId": newDataArray[i].id,
-                        "passwordRequired": false,
-                        "documentCategory": newDataArray[i].documentCategoryCode,
-                        "workflowStageId": "LN_APP_INITIATION",
-                        "workflowSubStageId": worksubstage
+                        "pageId": currentPageId,
+
                     }
                     appDetailsFinal.push(appDetails)
                 }
@@ -555,224 +689,144 @@ const LoanDocumentUpload = (props, { navigation }) => {
 
         });
 
-        console.log('FinalResult::' + JSON.stringify(appDetailsFinal))
-
-
-        const baseURL = '8901';
-        setLoading(true);
-        apiInstancelocal(baseURL)
-            .post(`/api/v2/applicant-document-detail`, appDetailsFinal)
-            .then(async response => {
-                // Handle the response data
-
-                if (global.DEBUG_MODE) console.log('UpdateDMSIDResponse::' + JSON.stringify(response.data),);
-                setLoading(false);
-
-                if (processModuleLength == 1) {
-
-                } else if (processModuleLength == 2) {
-                    if (global.CLIENTTYPE == 'APPL') {
-                        updateLoanStatus();
-                    } else if (global.CLIENTTYPE == 'CO-APPL') {
-                        props.navigation.navigate('FinalConsentScreen');
-                    } else if (global.CLIENTTYPE == 'GRNTR') {
-                        props.navigation.navigate('FinalConsentScreen');
-                    }
-                } else if (processModuleLength == 3) {
-                    if (global.CLIENTTYPE == 'APPL') {
-                        updateLoanStatus();
-                    } else if (global.CLIENTTYPE == 'CO-APPL') {
-                        updateLoanStatus();
-                    } else if (global.CLIENTTYPE == 'GRNTR') {
-                        props.navigation.navigate('FinalConsentScreen');
-                    }
-                }
-
-            })
-            .catch(error => {
-                // Handle the error
-                if (global.DEBUG_MODE) console.log('UpdateDMSIDResponseError' + JSON.stringify(error.response));
-                setLoading(false);
-                if (error.response.data != null) {
-                    setApiError(error.response.data.message);
-                    setErrorModalVisible(true)
-                }
-            });
-
-    };
-
-    const updateLoanStatus = () => {
-
-        var module = ''; var page = '';
-
-        if (global.CLIENTTYPE == 'APPL') {
-            module = 'DOC_UPLD';
-            page = 'DOC_UPLD_APPLCNT';
-        } else if (global.CLIENTTYPE == 'CO-APPL') {
-            module = 'DOC_UPLD';
-            page = 'DOC_UPLD_COAPPLCNT';
-        } else if (global.CLIENTTYPE == 'GRNTR') {
-            module = 'DOC_UPLD';
-            page = 'DOC_UPLD_GRNTR';
-        }
-
-        const appDetails = {
-            "loanApplicationId": global.LOANAPPLICATIONID,
-            "loanWorkflowStage": "LN_APP_INITIATION",
-            "subStageCode": "LN_DEMGRP",
-            "moduleCode": module,
-            "pageCode": page,
-            "status": "Completed"
-        }
-        const baseURL = '8901';
-        setLoading(true);
-        apiInstancelocal(baseURL)
-            .post(`/api/v2/loan-application-status/updateStatus`, appDetails)
-            .then(async response => {
-                // Handle the response data
-
-                if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
-                setLoading(false);
-
-                if (global.CLIENTTYPE == 'APPL') {
-                    global.COMPLETEDMODULE = 'DOC_UPLD';
-                    global.COMPLETEDPAGE = 'DOC_UPLD_APPLCNT';
-                    props.navigation.replace('LoanApplicationMain', { fromScreen: 'BankList' });
-                } else if (global.CLIENTTYPE == 'CO-APPL') {
-                    global.COMPLETEDMODULE = 'DOC_UPLD';
-                    global.COMPLETEDPAGE = 'DOC_UPLD_COAPPLCNT';
-                    props.navigation.replace('LoanApplicationMain', { fromScreen: 'BankList' });
-                } else if (global.CLIENTTYPE == 'GRNTR') {
-                    global.COMPLETEDSUBSTAGE = 'BRE';
-                    global.COMPLETEDMODULE = 'DOC_UPLD';
-                    global.COMPLETEDPAGE = 'DOC_UPLD_GRNTR';
-                    props.navigation.navigate('FinalConsentScreen');
-                }
-
-
-
-
-            })
-            .catch(error => {
-                // Handle the error
-                if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
-                setLoading(false);
-                if (error.response.data != null) {
-                    setApiError(error.response.data.message);
-                    setErrorModalVisible(true)
-                }
-            });
-
-    };
-
-    const getDocuments = () => {
 
 
         const appDetails = {
-            "loanApplicationId": global.LOANAPPLICATIONID,
+            "createdBy": global.USERID,
+            "id": parentDocId,
             "clientType": global.CLIENTTYPE,
-            "workflowStage": "LN_APP_INITIATION"
+            "pdLevel": global.PDSTAGE,
+            "pageId": currentPageId,
+            "pdHouseVisitChild": appDetailsFinal
         }
-        const baseURL = '8096';
-        setLoading(true);
-        apiInstancelocal(baseURL)
-            .post(`/api/v1/stagewise-document-check-configurations/stage-wise/documents`, appDetails)
-            .then(async response => {
-                // Handle the response data
 
-                if (global.DEBUG_MODE) console.log('DocumentApiResponse::' + JSON.stringify(response.data),);
-                setLoading(false);
-                const organizedData = response.data[0].genericMasterDtoList.reduce((acc, installment) => {
-                    const code = installment.documentCategoryCode;
-                    // Check if the category is already present in the accumulator
-                    const existingCodeIndex = acc.findIndex(item => item.code === code);
+        const baseURL = global.PORT1;
+        setLoading(true)
 
-                    if (existingCodeIndex !== -1) {
-                        // If the category exists, push the installment to its data array
-                        var filteredData = [];
-                        if (filteredDocument !== '') {
-                            filteredData = filteredDocument.filter(item => item.documentType === installment.subCode);
-                        }
+        apiInstance(baseURL).post(`/api/v1/pd/PDHouseVisit/loan-application-number/${global.LOANAPPLICATIONNUM}/clientId/${global.CLIENTID}`, appDetails)
+            .then((response) => {
+                // Handle the response data ${item.clientId}
+                if (global.DEBUG_MODE) console.log("PDDocumentUploadApi::" + JSON.stringify(response.data));
+                setLoading(false)
+                if (response.status == 200 || response.status == 201) {
 
-                        if (filteredData != undefined && filteredData != null) {
-                            if (filteredData.length > 0) {
-                                const extraJSON = { dmsID: filteredData[0].dmsId, isImagePresent: true, documentName: filteredData[0].documentName };
-                                acc[existingCodeIndex].dataNew.push({
-                                    ...installment,
-                                    ...extraJSON
-                                });
-                            } else {
-                                const extraJSON = { dmsID: '', isImagePresent: false, documentName: '' };
-                                acc[existingCodeIndex].dataNew.push({
-                                    ...installment,
-                                    ...extraJSON
-                                });
-                            }
-                        } else {
-                            const extraJSON = { dmsID: '', isImagePresent: false, documentName: '' };
-                            acc[existingCodeIndex].dataNew.push({
-                                ...installment,
-                                ...extraJSON
-                            });
-                        }
+                    updatePdStatus();
 
-
-                    } else {
-                        // If the category does not exist, create a new entry with the category and data array
-                        var filteredData = [];
-                        if (filteredDocument !== '') {
-                            filteredData = filteredDocument.filter(item => item.documentType === installment.subCode);
-                        }
-
-                        if (filteredData != undefined && filteredData != null) {
-                            if (filteredData.length > 0) {
-                                const extraJSON = { dmsID: filteredData[0].dmsId, isImagePresent: true, documentName: filteredData[0].documentName };
-                                acc.push({
-                                    code,
-                                    dataNew: [{ ...installment, ...extraJSON, documentName: '' }],
-                                    isSelected: false
-                                });
-                            } else {
-                                const extraJSON = { dmsID: '', isImagePresent: false };
-                                acc.push({
-                                    code,
-                                    dataNew: [{ ...installment, ...extraJSON }],
-                                    isSelected: false
-                                });
-                            }
-                        } else {
-                            const extraJSON = { dmsID: '', isImagePresent: false };
-                            acc.push({
-                                code,
-                                dataNew: [{ ...installment, ...extraJSON }],
-                                isSelected: false
-                            });
-                        }
-                    }
-
-                    return acc;
-                }, []);
-
-                console.log("OrganizedData::", JSON.stringify(organizedData));
-                setRefreshFlatList(!refreshFlatlist)
-                setDocumentList(organizedData);
-
+                }
+                else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
             })
-            .catch(error => {
+            .catch((error) => {
                 // Handle the error
-                if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
-                setLoading(false);
-                if (error.response.data != null) {
+                setLoading(false)
+                if (global.DEBUG_MODE) console.log("PDDataApiError::" + JSON.stringify(error.response.data));
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
                     setApiError(error.response.data.message);
                     setErrorModalVisible(true)
                 }
             });
 
+        //props.deleteTravelDetails(17)
+        //props.addTravelDetails(17, 'BusinessDetail1', businessDetails)
+        // props.updateTravelDetails(14, 'BusinessDetail', businessDetails.travelDetails)
+        //props.navigation.goBack();
+
+
+
+        if (Common.DEBUG_MODE) console.log("DateOfTravel::" + dateOfTravel + " " + " Mode Of Travel::" + modeOfTravelLabel + " " +
+            "Distance Travelled::" + distanceTravelled + " " + "Remarks::" + remarks)
+
+    }
+
+    const updatePdStatus = () => {
+
+        const appDetails = {
+            "loanApplicationId": global.LOANAPPLICATIONID,
+            "loanWorkflowStage": global.PDSTAGE,
+            "subStageCode": global.PDSUBSTAGE,
+            "moduleCode": global.PDMODULE,
+            "subModule": global.PDSUBMODULE,
+            "pageCode": currentPageCode,
+            "status": "Completed",
+            "userId": global.USERID
+        };
+
+        const baseURL = global.PORT1;
+        setLoading(true);
+        apiInstance(baseURL)
+            .post(`/api/v2/PD/Update/PD_WORKFLOW/updateStatus`, appDetails)
+            .then(async response => {
+                // Handle the response data
+                if (global.DEBUG_MODE) console.log('UpdatePDStatusApiResponse::' + JSON.stringify(response.data),);
+                setLoading(false);
+                if (response.status == 200) {
+                    getAllStatus();
+                }
+                else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
+            })
+            .catch(error => {
+                // Handle the error
+                if (global.DEBUG_MODE)
+                    console.log(
+                        'UpdateStatusApiResponse' + JSON.stringify(error.response),
+                    );
+                setLoading(false);
+
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
     };
 
+    const getAllStatus = () => {
+        const filteredModule = props.pdSubStage[0].personalDiscussionSubStageLogs
+            .filter(data => data.subStageCode === global.PDSUBSTAGE)[0]
+            .personalDiscussionModuleLogs
+            .filter(data => data.moduleCode === global.PDMODULE)[0]
+
+        if (filteredModule) {
+            props.updatePDModule(global.PDSUBSTAGE, global.PDMODULE);
+            props.updatePDSubModule(global.PDSUBSTAGE, global.PDMODULE, global.PDSUBMODULE);
+            props.updatePDPage(global.PDSUBSTAGE, global.PDMODULE, global.PDSUBMODULE, currentPageCode);
+            props.navigation.replace('PDItems', { clientType: global.CLIENTTYPE });
+        } else {
+            if (Common.DEBUG_MODE) console.log('Module not found.');
+        }
+
+    }
 
     const onGoBack = () => {
-        props.navigation.replace('LoanApplicationMain', { fromScreen: 'LoanNomineeList' })
+        props.navigation.replace('PDItems', { clientType: global.CLIENTTYPE });
     }
 
     const closeErrorModal = () => {
@@ -861,19 +915,39 @@ const LoanDocumentUpload = (props, { navigation }) => {
                     justifyContent: 'center',
                 }}>
                 <HeadComp
-                    textval={language[0][props.language].str_lndocupload}
+                    textval={language[0][props.language].str_pd}
                     props={props}
                     onGoBack={onGoBack}
                 />
             </View>
 
-            <ChildHeadComp
-                textval={global.CLIENTTYPE == 'APPL'
-                    ? language[0][props.language].str_applicant
-                    : global.CLIENTTYPE == 'CO-APPL'
-                        ? language[0][props.language].str_coapplicant
-                        : language[0][props.language].str_guarantor}
-            />
+            <View
+                style={{
+                    width: '100%',
+                    alignItems: 'center',
+                }}>
+                <View
+                    style={{
+                        width: '90%',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                    }}>
+                    <Image
+                        source={require('../../Images/orderblue.png')}
+                        style={{ width: 16, height: 20 }}
+                    />
+                    <Text
+                        style={{
+                            marginLeft: 10,
+                            fontSize: 14,
+                            fontFamily: 'Poppins-Medium',
+                            color: Colors.mediumgrey,
+                        }}>
+                        House Visit Image
+                    </Text>
+                </View>
+            </View>
+
 
 
 
@@ -940,15 +1014,23 @@ const mapStateToProps = state => {
     const { language } = state.languageReducer;
     const { profileDetails } = state.profileReducer;
     const { mobileCodeDetails } = state.mobilecodeReducer;
+    const { pdDetails } = state.personalDiscussionReducer;
+    const { pdSubStages } = state.pdStagesReducer;
     return {
         language: language,
         profiledetail: profileDetails,
-        mobilecodedetail: mobileCodeDetails
+        pdDetail: pdDetails,
+        mobilecodedetail: mobileCodeDetails,
+        pdSubStage: pdSubStages
     }
 };
 
 const mapDispatchToProps = dispatch => ({
     languageAction: item => dispatch(languageAction(item)),
+    updatePDSubStage: item => dispatch(updatePDSubStage(item)),
+    updatePDModule: (subStage, module) => dispatch(updatePDModule(subStage, module)),
+    updatePDSubModule: (subStage, module, subModule) => dispatch(updatePDSubModule(subStage, module, subModule)),
+    updatePDPage: (subStage, module, subModule, page) => dispatch(updatePDPage(subStage, module, subModule, page)),
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(LoanDocumentUpload);
+export default connect(mapStateToProps, mapDispatchToProps)(HouseDocumentUpload);

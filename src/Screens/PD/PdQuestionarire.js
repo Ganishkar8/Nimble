@@ -87,7 +87,7 @@ const PdQuestionarire = (props, { navigation }) => {
     };
 
     const onGoBack = () => {
-        props.navigation.goBack();
+        props.navigation.replace('PdQuestionSubStage');
     }
 
     const getSystemCodeDetail = async () => {
@@ -110,6 +110,62 @@ const PdQuestionarire = (props, { navigation }) => {
             "userId": global.USERID,
             "pageId": currentPageId,
             "date": new Date()
+        }
+
+        if (global.PDSTAGE == 'PD_2') {
+
+            if (currentPageCode == 'PG_BAS_DET_APPL') {
+                appDetails.previousPage = 2;
+            } else if (currentPageCode == 'PG_UND_BUSS_APPL') {
+                appDetails.previousPage = 3;
+            } else if (currentPageCode == 'PG_FIN_DET_APPL') {
+                appDetails.previousPage = 4;
+            } else if (currentPageCode == 'PG_CRE_WORTH_APPL') {
+                appDetails.previousPage = 5;
+            } else if (currentPageCode == 'PG_BAS_DET_CO_APPL') {
+                appDetails.previousPage = 15;
+            } else if (currentPageCode == 'PG_UND_BUSS_CO_APPL') {
+                appDetails.previousPage = 16;
+            } else if (currentPageCode == 'PG_FIN_DET_CO_APPL') {
+                appDetails.previousPage = 17;
+            } else if (currentPageCode == 'PG_CRE_WORTH_CO_APPL') {
+                appDetails.previousPage = 18;
+            } else if (currentPageCode == 'PG_BAS_DET_GRNTR') {
+                appDetails.previousPage = 27;
+            } else if (currentPageCode == 'PG_UND_BUSS_GRNTR') {
+                appDetails.previousPage = 28;
+            } else if (currentPageCode == 'PG_FIN_DET_GRNTR') {
+                appDetails.previousPage = 29;
+            } else if (currentPageCode == 'PG_CRE_WORTH_GRNTR') {
+                appDetails.previousPage = 30;
+            }
+
+        } else if (global.PDSTAGE == 'PD_3') {
+            if (currentPageCode == 'PG_BAS_DET_APPL') {
+                appDetails.previousPage = 39;
+            } else if (currentPageCode == 'PG_UND_BUSS_APPL') {
+                appDetails.previousPage = 40;
+            } else if (currentPageCode == 'PG_FIN_DET_APPL') {
+                appDetails.previousPage = 41;
+            } else if (currentPageCode == 'PG_CRE_WORTH_APPL') {
+                appDetails.previousPage = 42;
+            } else if (currentPageCode == 'PG_BAS_DET_CO_APPL') {
+                appDetails.previousPage = 52;
+            } else if (currentPageCode == 'PG_UND_BUSS_CO_APPL') {
+                appDetails.previousPage = 53;
+            } else if (currentPageCode == 'PG_FIN_DET_CO_APPL') {
+                appDetails.previousPage = 54;
+            } else if (currentPageCode == 'PG_CRE_WORTH_CO_APPL') {
+                appDetails.previousPage = 55;
+            } else if (currentPageCode == 'PG_BAS_DET_GRNTR') {
+                appDetails.previousPage = 64;
+            } else if (currentPageCode == 'PG_UND_BUSS_GRNTR') {
+                appDetails.previousPage = 65;
+            } else if (currentPageCode == 'PG_FIN_DET_GRNTR') {
+                appDetails.previousPage = 66;
+            } else if (currentPageCode == 'PG_CRE_WORTH_GRNTR') {
+                appDetails.previousPage = 67;
+            }
         }
 
         apiInstance(baseURL).post(`api/v1/pd/PdQAcheck/findbyClientId`, appDetails)
@@ -165,24 +221,29 @@ const PdQuestionarire = (props, { navigation }) => {
 
             // Use the every function to check if all mandatory submodules are completed
             const allMandatorySubmodulesCompleted = filteredModule.personalDiscussionSubModuleLogs.every(subModule => {
-                return subModule.isMandatory && subModule.subModuleStatus === 'Completed' && subModule.subModuleCode !== global.PDSUBMODULE;
+                const isPDSubmodule = subModule.subModuleCode === global.PDSUBMODULE.trim();
+                let result = true;
+                if (!isPDSubmodule) {
+                    result = !isPDSubmodule && subModule.isMandatory && subModule.subModuleStatus === 'Completed';
+                }
+                return result;
             });
 
             if (allMandatorySubmodulesCompleted) {
-                if (Common.DEBUG_MODE) console.log('All mandatory submodules are completed.');
+                if (global.DEBUG_MODE) console.log('All mandatory submodules are completed.');
                 //props.updatePDSubStage(global.PDSUBSTAGE);
                 props.updatePDModule(global.PDSUBSTAGE, global.PDMODULE);
                 props.updatePDSubModule(global.PDSUBSTAGE, global.PDMODULE, global.PDSUBMODULE);
                 props.updatePDPage(global.PDSUBSTAGE, global.PDMODULE, global.PDSUBMODULE, currentPageCode);
                 props.navigation.replace('PdQuestionSubStage')
             } else {
-                if (Common.DEBUG_MODE) console.log('Not all mandatory submodules are completed.');
+                if (global.DEBUG_MODE) console.log('Not all mandatory submodules are completed.');
                 props.updatePDSubModule(global.PDSUBSTAGE, global.PDMODULE, global.PDSUBMODULE);
                 props.updatePDPage(global.PDSUBSTAGE, global.PDMODULE, global.PDSUBMODULE, currentPageCode);
                 props.navigation.replace('PdQuestionSubStage')
             }
         } else {
-            if (Common.DEBUG_MODE) console.log('Module not found.');
+            if (global.DEBUG_MODE) console.log('Module not found.');
         }
 
 
