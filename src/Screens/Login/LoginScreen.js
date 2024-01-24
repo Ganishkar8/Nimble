@@ -148,8 +148,6 @@ const LoginScreen = (props, { navigation }) => {
             .catch((error) => {
                 // Handle the error
                 setLoading(false)
-                if (global.DEBUG_MODE) console.log("ResponseLoginApi::" + JSON.stringify(error.response.data));
-
                 if (error.response.status == 404) {
                     setApiError(Common.error404);
                     setErrorModalVisible(true)
@@ -163,6 +161,8 @@ const LoginScreen = (props, { navigation }) => {
                     setApiError(error.response.data.message);
                     setErrorModalVisible(true)
                 }
+                if (global.DEBUG_MODE) console.log("ResponseLoginApi::" + JSON.stringify(error.response.data));
+
             });
     }
 

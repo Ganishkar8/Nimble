@@ -98,6 +98,7 @@ const PDReferenceCheck = (props, { navigation }) => {
     const cityRef = useRef(null);
     const districtRef = useRef(null);
     const stateRef = useRef(null);
+    const commentsRef = useRef(null);
 
     const [name, setName] = useState('');
     const [nameCaption, setNameCaption] = useState('NAME');
@@ -188,6 +189,13 @@ const PDReferenceCheck = (props, { navigation }) => {
     const [remarksVisible, setRemarksVisible] = useState(true);
     const [remarksDisable, setRemarksDisable] = useState(false);
     const [remarksData, setRemarksData] = useState([]);
+
+    const [comments, setComments] = useState('');
+    const [commentsCaption, setCommentsCaption] = useState('COMMENTS');
+    const [commentsMan, setCommentsMan] = useState(false);
+    const [commentsVisible, setCommentsVisible] = useState(true);
+    const [commentsDisable, setCommentsDisable] = useState(false);
+
     const [bankUserCodeDetail, setBankUserCodeDetail] = useState(props.mobilecodedetail.t_BankUserCode);
     const [leaduserCodeDetail, setLeadUserCodeDetail] = useState(props.mobilecodedetail.leadUserCodeDto);
     const [errMsg, setErrMsg] = useState('');
@@ -195,6 +203,13 @@ const PDReferenceCheck = (props, { navigation }) => {
     const [systemMandatoryField, setSystemMandatoryField] = useState(
         props.mobilecodedetail.processSystemMandatoryFields,
     );
+    const [parentReferenceId, setParentReferenceId] = useState(0);
+    const [referenceId, setReferenceId] = useState(0);
+    const [currentPageId, setCurrentPageId] = useState(props.route.params.pageId);
+    const [currentPageCode, setCurrentPageCode] = useState(props.route.params.pageCode);
+    const [currentPageDesc, setCurrentPageDesc] = useState(props.route.params.pageDesc);
+    const [currentPageMan, setCurrentPageMan] = useState(props.route.params.pageMandatory);
+
 
 
     useEffect(() => {
@@ -202,7 +217,7 @@ const PDReferenceCheck = (props, { navigation }) => {
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
         getSystemCodeDetail();
         makeSystemMandatoryFields();
-        getlocationPermission();
+        getReferenceData();
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
             backHandler.remove();
@@ -214,7 +229,6 @@ const PDReferenceCheck = (props, { navigation }) => {
     }, [gpslatlon]);
 
     const makeSystemMandatoryFields = () => {
-        // alert(pageId)
 
         systemMandatoryField
             .filter(data => data.fieldUiid === 'et_name' && data.pageId === pageId)
@@ -428,85 +442,94 @@ const PDReferenceCheck = (props, { navigation }) => {
 
     }
 
-    // const getClientData = async () => {
+    const getReferenceData = () => {
 
-    //     await tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE).then(value => {
-    //       if (global.DEBUG_MODE) console.log('ApplicantData::' + JSON.stringify(value));
-    //       if (value !== undefined && value.length > 0) {
-    //         setTitleLabel(value[0]?.titleId ?? '');
-    //         setFirstName(value[0]?.firstName ?? '');
-    //         setMiddleName(value[0]?.middleName ?? '');
-    //         setLastName(value[0]?.lastName ?? '');
-    //         setGenderLabel(value[0]?.genderId ?? '');
-    //         setDOB(value[0]?.dateOfBirth ?? '');
-    //         setAge(value[0]?.age ?? '');
-    //         setFatherName(value[0]?.fatherName ?? '');
-    //         setSpouseName(value[0]?.spouseName ?? '');
-    //         //value[0].titleId !== undefined ? setTitleLabel(value[0].titleId) : setTitleLabel('');
-    //         //value[0].firstName !== undefined ? setFirstName(value[0].firstName) : setFirstName('');
-    //         //value[0].middleName !== undefined ? setMiddleName(value[0].middleName) : setMiddleName('');
-    //         //value[0].lastName !== undefined ? setLastName(value[0].lastName) : setLastName('');
-    //         //value[0].genderId !== undefined ? setGenderLabel(value[0].genderId) : setGenderLabel('');
-    //         // value[0].dateOfBirth !== undefined ? setDOB(value[0].dateOfBirth) : setDOB('');
-    //         //value[0].age !== undefined ? setAge(value[0].age) : setAge('');
-    //         //value[0].fatherName !== undefined ? setFatherName(value[0].fatherName) : setFatherName('');
-    //         //value[0].spouseName !== undefined ? setSpouseName(value[0].spouseName) : setSpouseName('');
-    //         setCasteLabel(value[0]?.casteId ?? '');
-    //         setReligionLabel(value[0]?.religionId ?? '');
-    //         setMotherTongueLabel(value[0]?.motherTongueId ?? '');
-    //         setEADLabel(value[0]?.educationQualificationId ?? '');
-    //         setKYCManual(value[0]?.isKycManual ?? '');
-    //         // value[0].casteId !== undefined ? setCasteLabel(value[0].casteId) : setCasteLabel('');
-    //         //value[0].religionId !== undefined ? setReligionLabel(value[0].religionId) : setReligionLabel('');
-    //         //value[0].motherTongueId !== undefined ? setMotherTongueLabel(value[0].motherTongueId) : setMotherTongueLabel('');
-    //         //value[0].educationQualificationId !== undefined ? setEADLabel(value[0].educationQualificationId) : setEADLabel('');
-    //         //value[0].isKycManual !== undefined ? setKYCManual(value[0].isKycManual) : setKYCManual('');
+        if (props.route.params.referenceDetail.length > 0) {
+            var detail = props.route.params.referenceDetail[0];
+            setReferenceId(detail.id);
+            setName(detail.name);
+            setContactNumber(detail.contactNo);
+            setKycTypeLabel(detail.kycType);
+            setKycID(detail.kycId);
+            setReferenceTypeLabel(detail.contactNo);
+            setFwa(detail.familarityWithApplicant.toString())
+            setAddressLine1(detail.addressLine1)
+            setAddressLine2(detail.addressLine2)
+            setLandmark(detail.landmark)
+            setPincode(detail.pinCode.toString())
+            setCity(detail.city)
+            setDistrict(detail.district)
+            setState(detail.state)
+            setRemarksLabel(detail.remark)
+            if (detail.dmsId !== undefined && detail.dmsId !== null) {
+                if (detail.dmsId.toString().length > 0) {
+                    getImage(detail.dmsId);
+                }
+                setDocID(detail.dmsId);
+            }
+            const latLng = detail.geoCodes;
+            const [latitude, longitude] = latLng.split(',');
+            setCurrentLongitude(parseFloat(longitude));
+            setCurrentLatitude(parseFloat(latitude));
+            setComments(detail.comments)
+            setGPSLatLon(prevCount => currentLatitude + ',' + currentLongitude);
 
-    //         var aadharverify = false;
-    //         if (value[0].isAadharNumberVerified !== undefined && value[0].isAadharNumberVerified !== null) {
-    //           if (value[0].isAadharNumberVerified == 1) {
-    //             setIsAadharVerified(true);
-    //             aadharverify = true;
-    //           } else {
-    //             setIsAadharVerified(false);
-    //             aadharverify = false;
-    //           }
-    //         }
+        } else {
+            getlocationPermission();
+        }
+    }
 
-    //         if (global.USERTYPEID == 1163) {
-    //           if (value[0].isKycManual == '1') {
-    //             setHideDelete(true);
-    //             setHideRetake(true);
-    //           } else {
-    //             fieldsDisable();
-    //             setHideDelete(true);
-    //             setHideRetake(true);
-    //           }
-    //         }
+    const getImage = (dmsID) => {
 
-    //         disableAadharFields(aadharverify, value[0].fatherName, value[0].spouseName);
-    //         if (value[0].dmsId !== undefined && value[0].dmsId !== null) {
-    //           if (value[0].dmsId.length > 0) {
-    //             getImage(value[0].dmsId);
-    //           }
-    //           setDocID(value[0].dmsId);
-    //         }
+        Common.getNetworkConnection().then(value => {
+            if (value.isConnected == true) {
+                setLoading(true)
+                const baseURL = global.PORT2;
+                apiInstance(baseURL).get(`/api/documents/document/${parseInt(dmsID)}`)
+                    .then(async (response) => {
+                        // Handle the response data
+                        if (Common.DEBUG_MODE) console.log("GetPhotoApiResponse::" + JSON.stringify(response.data));
+                        if (response.status == 200) {
+                            setFileName(response.data.fileName)
+                            setVisible(false)
+                            setImageUri('data:image/png;base64,' + response.data.base64Content)
+                            // props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
+                        } else if (response.data.statusCode === 201) {
+                            setApiError(response.data.message);
+                            setErrorModalVisible(true);
+                        } else if (response.data.statusCode === 202) {
+                            setApiError(response.data.message);
+                            setErrorModalVisible(true);
+                        }
+                        setLoading(false)
 
-    //         if (value[0].geoCode !== undefined && value[0].geoCode !== null) {
-    //           if (value[0].geoCode.length > 0) {
-    //             const [latitude, longitude] = value[0].geoCode.split(',');
-    //             setCurrentLongitude(parseFloat(longitude));
-    //             setCurrentLatitude(parseFloat(latitude));
-    //             zoomToMarker();
-    //             setGPSLatLon(value[0].geoCode)
-    //           }
-    //         }
+                    })
+                    .catch((error) => {
+                        // Handle the error
+                        setLoading(false)
+                        if (global.DEBUG_MODE) console.log("GetPhotoApiResponse::" + JSON.stringify(error.response.data));
+                        if (error.response.status == 404) {
+                            setApiError(Common.error404);
+                            setErrorModalVisible(true)
+                        } else if (error.response.status == 400) {
+                            setApiError(Common.error400);
+                            setErrorModalVisible(true)
+                        } else if (error.response.status == 500) {
+                            setApiError(Common.error500);
+                            setErrorModalVisible(true)
+                        } else if (error.response.data != null) {
+                            setApiError(error.response.data.message);
+                            setErrorModalVisible(true)
+                        }
+                    });
+            } else {
+                setApiError(language[0][props.language].str_errinternetimage);
+                setErrorModalVisible(true)
 
-    //       }
-    //     })
+            }
 
-
-    // }
+        })
+    }
 
     const handleBackButton = () => {
         onGoBack();
@@ -753,12 +776,10 @@ const PDReferenceCheck = (props, { navigation }) => {
         setErrorModalVisible(false);
     };
 
-    const submitQuestionare = () => {
-        console.log('QuestionFinalData::' + JSON.stringify(pdData))
-        if (validateData()) {
-            showBottomSheet();
-        }
-        console.log(name);
+    const submitReference = () => {
+        //console.log('QuestionFinalData::' + JSON.stringify(pdData))
+        updateImage();
+
     }
 
     const validateData = () => {
@@ -798,7 +819,7 @@ const PDReferenceCheck = (props, { navigation }) => {
         if (kycTypeMan && kycTypeVisible) {
             if (kycTypeLabel !== undefined && kycTypeLabel !== null) {
                 if (kycTypeLabel.length <= 0) {
-                    errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + kycTypeCaption + '\n';
+                    errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + kycTypeCaption + '\n';
                     i++;
                     flag = true;
                 }
@@ -826,12 +847,12 @@ const PDReferenceCheck = (props, { navigation }) => {
         if (referenceTypeMan && referenceTypeVisible) {
             if (referenceTypeLabel !== undefined && referenceTypeLabel !== null) {
                 if (referenceTypeLabel.length <= 0) {
-                    errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + referenceTypeCaption + '\n';
+                    errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + referenceTypeCaption + '\n';
                     i++;
                     flag = true;
                 }
             } else {
-                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + referenceTypeCaption + '\n';
+                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + referenceTypeCaption + '\n';
                 i++;
                 flag = true;
             }
@@ -840,19 +861,19 @@ const PDReferenceCheck = (props, { navigation }) => {
 
 
 
-        // if (remarksMan && rema) {
-        //     if (name !== undefined && name !== null) {
-        //         if (name.length <= 0) {
-        //             errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + nameCaption + '\n';
-        //             i++;
-        //             flag = true;
-        //         }
-        //     } else {
-        //         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + nameCaption + '\n';
-        //         i++;
-        //         flag = true;
-        //     }
-        // }
+        if (remarksMan && remarksVisible) {
+            if (remarks !== undefined && remarks !== null) {
+                if (remarks.length <= 0) {
+                    errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + remarksCaption + '\n';
+                    i++;
+                    flag = true;
+                }
+            } else {
+                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + remarksCaption + '\n';
+                i++;
+                flag = true;
+            }
+        }
 
 
         if (addressLine1Man && addressLine1Visible) {
@@ -926,9 +947,154 @@ const PDReferenceCheck = (props, { navigation }) => {
                 flag = true;
             }
         }
+
+        if (commentsMan && commentsVisible) {
+            if (comments.length <= 0) {
+                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + commentsCaption + '\n';
+                i++;
+                flag = true;
+            }
+        }
+
+        if (imageUri != undefined && imageUri != null) {
+            if (imageUri.length <= 0) {
+                errorMessage = errorMessage + i + ')' + ' Please Capture Photo' + '\n';
+                i++;
+                flag = true;
+            }
+        } else {
+            errorMessage = errorMessage + i + ')' + ' Please Capture Photo' + '\n';
+            i++;
+            flag = true;
+        }
+
         setErrMsg(errorMessage);
         return flag;
     };
+
+    const updateImage = async () => {
+        if (validateData()) {
+            showBottomSheet();
+            return;
+        }
+        if (imageUri) {
+            setLoading(true);
+            const formData = new FormData();
+            formData.append('file', {
+                uri: imageUri,
+                type: fileType,
+                name: fileName,
+            });
+
+            try {
+                const response = await fetch(global.BASEURL + '8094/api/documents', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    // Handle the response from Cloudinary
+                    setLoading(false)
+                    setDocID(data.docId);
+                    postReference(data.docId);
+
+                } else {
+                    setLoading(false)
+                    if (global.DEBUG_MODE) console.log('Upload failed:', response.status);
+                    setApiError(response.status);
+                    setErrorModalVisible(true)
+                }
+            } catch (error) {
+                setLoading(false)
+                if (global.DEBUG_MODE) console.log('Upload error:', error);
+                setApiError(error.response.data.message);
+                setErrorModalVisible(true)
+            } finally {
+                setLoading(false);
+            }
+        }
+    }
+
+    const postReference = (docID) => {
+
+        const baseURL = global.PORT1;
+        setLoading(true)
+
+        const appDetails = {
+            "createdBy": global.USERID,
+            "createdDate": new Date(),
+            "id": parentReferenceId,
+            "clientType": global.CLIENTTYPE,
+            "pdLevel": global.PDSTAGE,
+            "pageId": currentPageId,
+            "personalDiscussionQARefference": [{
+                "createdBy": global.USERID,
+                "createdDate": new Date(),
+                "id": referenceId,
+                "name": name,
+                "contactNo": contactNumber,
+                "kycType": kycTypeLabel,
+                "kycId": kycID,
+                "reffernceType": referenceTypeLabel,
+                "familarityWithApplicant": fwa,
+                "addressLine1": addressLine1,
+                "addressLine2": addressLine2,
+                "landmark": landmark,
+                "pinCode": pincode,
+                "city": city,
+                "subDistrict": "",
+                "district": district,
+                "state": state,
+                "remark": remarksLabel,
+                "dmsId": docID,
+                "imageName": fileName,
+                "geoCodes": currentLatitude + "," + currentLongitude,
+                "comments": comments,
+                "imageSize": ""
+            }]
+        }
+
+        apiInstance(baseURL).post(`/api/v1/pd/PdQAcheck/refference/loan-application-number/${global.LOANAPPLICATIONNUM}/clientId/${global.CLIENTID}`, appDetails)
+            .then((response) => {
+                // Handle the response data
+                if (global.DEBUG_MODE) console.log("PostQuestionApi::" + JSON.stringify(response));
+
+                if (response.status == 200 || response.status == 201) {
+                    onGoBack();
+                }
+                else if (response.data.statusCode === 201) {
+                    setLoading(false)
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setLoading(false)
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
+
+            })
+            .catch((error) => {
+                // Handle the error
+                setLoading(false)
+                if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(error.response.data));
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
+    }
 
     const handlePickerClick = (componentName, label, index) => {
         if (componentName === 'kycTypePicker') {
@@ -993,6 +1159,9 @@ const PDReferenceCheck = (props, { navigation }) => {
         } else if (componentName === 'pincode') {
             if (textValue.length == 6) {
                 getPinCode(textValue)
+            } else {
+                setDistrict('');
+                setState('');
             }
             setPincode(textValue)
         } else if (componentName === 'city') {
@@ -1015,6 +1184,13 @@ const PDReferenceCheck = (props, { navigation }) => {
                     setState(textValue)
             } else {
                 setState(textValue)
+            }
+        } else if (componentName === 'comments') {
+            if (textValue.length > 0) {
+                if (Common.isValidText(textValue))
+                    setComments(textValue)
+            } else {
+                setComments(textValue)
             }
         }
     }
@@ -1078,11 +1254,9 @@ const PDReferenceCheck = (props, { navigation }) => {
                 if (global.DEBUG_MODE) console.log('PincodeApiResponse::' + JSON.stringify(response.data),);
 
                 setLoading(false);
-
-                setPincodeResponse(response.data);
                 setDistrict(response.data.city.name);
                 setState(response.data.city.state.name);
-                setCountry(response.data.city.state.country.name);
+                //setCountry(response.data.city.state.country.name);
                 setDistrictDisable(true)
                 setStateDisable(true);
 
@@ -1456,6 +1630,14 @@ const PDReferenceCheck = (props, { navigation }) => {
                         </MapView>
                     </View>
                 </View>
+
+                {commentsVisible && <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
+                    <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
+                        <TextComp textVal={commentsCaption} textStyle={Commonstyles.inputtextStyle} Visible={commentsMan} />
+                    </View>
+                    <TextInputComp textValue={comments} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={commentsDisable} ComponentName='comments' reference={commentsRef} returnKey="next" handleClick={handleClick} handleReference={handleReference} length={100} />
+                </View>}
+
             </ScrollView>
 
             <ButtonViewComp
@@ -1463,7 +1645,7 @@ const PDReferenceCheck = (props, { navigation }) => {
                 textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500, marginBottom: 5 }}
                 viewStyle={[Commonstyles.buttonView, { marginBottom: 10 }]}
                 innerStyle={Commonstyles.buttonViewInnerStyle}
-                handleClick={submitQuestionare}
+                handleClick={submitReference}
             />
         </SafeAreaView >
     );

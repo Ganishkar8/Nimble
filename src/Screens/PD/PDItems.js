@@ -58,16 +58,26 @@ const PDItems = (props, { navigation }) => {
     useFocusEffect(
         React.useCallback(() => {
 
-            if (Common.DEBUG_MODE) console.log('Screen Available');
+            if (global.DEBUG_MODE) console.log('Screen Available');
 
             const filteredData = props.pdSubStage[0].personalDiscussionSubStageLogs
                 .filter(data => data.subStageCode === global.PDSUBSTAGE)
-            setPdDetails(filteredData[0].personalDiscussionModuleLogs)
+
+
+            if (global.PDTRACKERDATA) {
+                if (!global.PDTRACKERDATA.nonGst) {
+                    const updatedData = filteredData[0].personalDiscussionModuleLogs.filter((module) => module.moduleCode !== 'NON_GST_CST_APPL');
+                    setPdDetails(updatedData)
+                } else {
+                    setPdDetails(filteredData[0].personalDiscussionModuleLogs)
+                }
+            }
+
             setRefreshFlatList(!refreshFlatlist)
 
 
             return () => {
-                if (Common.DEBUG_MODE) console.log('Screen is blurred');
+                if (global.DEBUG_MODE) console.log('Screen is blurred');
             };
         }, [])
     );
@@ -155,27 +165,32 @@ const PDItems = (props, { navigation }) => {
                     width: '90%', height: 140, marginTop: 15, borderColor: '#BBBBBB4D', borderWidth: 1, borderRadius: 10,
                     alignItems: 'center', justifyContent: 'center'
                 }} activeOpacity={0.8} onPress={() => {
+
+                    var pageId = item.personalDiscussionSubModuleLogs[0].personalDiscussionPageLogs[0].id;
+                    var pageCode = item.personalDiscussionSubModuleLogs[0].personalDiscussionPageLogs[0].pageCode;
+                    var pageDesc = item.personalDiscussionSubModuleLogs[0].personalDiscussionPageLogs[0].pageDescription;
+                    var pageMan = item.personalDiscussionSubModuleLogs[0].personalDiscussionPageLogs[0].isMandatory;
+                    global.PDMODULE = item.moduleCode;
+                    global.PDSUBMODULE = item.personalDiscussionSubModuleLogs[0].subModuleCode;
+
                     if (item.moduleCode == 'TR_DTLS_APPL' || item.moduleCode == 'TR_DTLS_CO_APPL' || item.moduleCode == 'TR_DTLS_GRNTR') {
-                        global.PDMODULE = item.moduleCode;
-                        //alert(JSON.stringify(item))
-                        props.navigation.replace('PdTravelDetails')
+                        props.navigation.replace('PdTravelDetails', { 'pageId': pageId, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
                     } else if (item.moduleCode == 'QU_RFR_CHCK_APPL' || item.moduleCode == 'QU_RFR_CHCK_CO_APPL' || item.moduleCode == 'QU_RFR_CHCK_GRNTR') {
-                        global.PDMODULE = item.moduleCode;
-                        props.navigation.navigate('PdQuestionSubStage')
+                        props.navigation.navigate('PdQuestionSubStage');
                     } else if (item.moduleCode == 'NON_GST_CST_APPL') {
-                        global.PDMODULE = item.moduleCode;
+                        props.navigation.replace('PDNonGSTDetail', { 'pageId': pageId, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
                     } else if (item.moduleCode == 'PH_DOC_VRF_APPL' || item.moduleCode == 'PH_DOC_VRF_CO_APPL' || item.moduleCode == 'PH_DOC_VRF_GRNTR') {
-                        global.PDMODULE = item.moduleCode;
+                        props.navigation.replace('PDDocumentVerification', { 'pageId': pageId, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
                     } else if (item.moduleCode == 'DOC_UPL_APPL' || item.moduleCode == 'DOC_UPL_CO_APPL' || item.moduleCode == 'DOC_UPL_GRNTR') {
-                        global.PDMODULE = item.moduleCode;
+                        props.navigation.replace('PDDocumentUpload', { 'pageId': pageId, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
                     } else if (item.moduleCode == 'FN_DTLS_VRF_APPL' || item.moduleCode == 'FN_DTLS_VRF_CO_APPL' || item.moduleCode == 'FN_DTLS_VRF_GRNTR') {
-                        props.navigation.navigate('PDFinancialVerification')
+                        props.navigation.replace('PDFinancialDetails', { 'pageId': pageId, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
                     } else if (item.moduleCode == 'HS_VT_APPL' || item.moduleCode == 'HS_VT_CO_APPLHo' || item.moduleCode == 'HS_VT_GRNTRHo') {
-                        global.PDMODULE = item.moduleCode;
+                        props.navigation.replace('HouseDocumentUpload', { 'pageId': pageId, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
                     } else if (item.moduleCode == 'BSN_VT_APPL' || item.moduleCode == 'BSN_VT_CO_APPLB' || item.moduleCode == 'BSN_VT_GRNTRB') {
-                        global.PDMODULE = item.moduleCode;
+                        props.navigation.replace('BusinessDocumentUpload', { 'pageId': pageId, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
                     } else if (item.moduleCode == 'PD_FD_BK_APPL' || item.moduleCode == 'PD_FD_BK_CO_APPL' || item.moduleCode == 'PD_FD_BK_GRNTR') {
-                        global.PDMODULE = item.moduleCode;
+                        props.navigation.replace('PDFeedback', { 'pageId': pageId, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
                     }
                 }}>
                     <View style={{

@@ -643,9 +643,8 @@ const PDTracker = (props, { navigation, route }) => {
                     global.LOANSTATUS = item.status.toUpperCase();
                     global.LOANAPPLICATIONID = item.loanApplicationId;
                     global.LOANAPPLICATIONNUM = item.loanApplicationNumber;
-                    //global.PDSTAGE = item.subStage;
-                    global.PDSTAGE = 'PD_1';
-
+                    global.PDSTAGE = item.subStage;
+                    global.PDTRACKERDATA = item;
                     props.navigation.navigate('PDTrackerDetails', { leadData: item })
                 }} activeOpacity={0.9}>
                     <View style={{

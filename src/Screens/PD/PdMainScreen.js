@@ -30,6 +30,7 @@ import apiInstance from '../../Utils/apiInstance';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { addPdDetails, deleteTravelDetails } from '../../Utils/redux/actions/PersonalDiscussionAction';
 import { addPDStages } from '../../Utils/redux/actions/PDAction';
+import ButtonViewComp from '../../Components/ButtonViewComp';
 
 
 const PdMainScreen = (props, { navigation }) => {
@@ -40,6 +41,7 @@ const PdMainScreen = (props, { navigation }) => {
     const [clientData, setClientData] = useState([]);
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const [apiError, setApiError] = useState('');
+    const [allCompleted, setAllCompleted] = useState(false);
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
@@ -78,7 +80,7 @@ const PdMainScreen = (props, { navigation }) => {
         setLoading(true)
 
 
-        apiInstance(baseURL).post(`api/v1/pd/PDMaster/findByLoanApplicationId?loanAppId=${global.LOANAPPLICATIONID}`)
+        apiInstance(baseURL).post(`api/v1/pd/PDMaster/findByLoanApplicationId/${global.LOANAPPLICATIONID}`)
             .then((response) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(response.data));
@@ -121,7 +123,7 @@ const PdMainScreen = (props, { navigation }) => {
 
     const getClientSubStageData = (clientData) => {
 
-        const baseURL = '8901'
+        const baseURL = global.PORT1;
         setLoading(true)
 
         const appDetails = {
@@ -157,6 +159,13 @@ const PdMainScreen = (props, { navigation }) => {
                             return data1;
                         });
                     });
+                    const allSubStageCompleted = clientData.every((data1) => {
+                        // Check if subStageStatus is completed for each item in clientData
+                        return data1.subStageStatus === 'Completed';
+                    });
+                    if (allSubStageCompleted) {
+                        setAllCompleted(true);
+                    }
                     setClientData(clientData);
                     props.addPDStages(response.data);
                     setLoading(false)
@@ -198,7 +207,13 @@ const PdMainScreen = (props, { navigation }) => {
         const baseURL = '8901'
         setLoading(true)
 
-        apiInstance(baseURL).post(`/api/v1/pd/PDMaster/findByClientId?clintId=${item.clientId}&userId=${global.USERID}&pdLevel=${global.PDSTAGE}`)
+        const appDetails = {
+            "clintId": item.clientId,
+            "userId": global.USERID,
+            "pdLevel": global.PDSTAGE
+        }
+
+        apiInstance(baseURL).post(`/api/v1/pd/PDMaster/findByClientId?clintId`, appDetails)
             .then((response) => {
                 // Handle the response data ${item.clientId}
                 if (global.DEBUG_MODE) console.log("PDDataApi::" + JSON.stringify(response.data));
@@ -250,6 +265,64 @@ const PdMainScreen = (props, { navigation }) => {
             });
     }
 
+    const buttonNext = () => {
+        updateLoanStatus();
+    }
+
+    const updateLoanStatus = () => {
+
+        const appDetails = {
+            loanApplicationId: global.LOANAPPLICATIONID,
+            loanWorkflowStage: 'PD',
+            subStageCode: global.PDSTAGE,
+            status: 'Completed',
+        };
+        const baseURL = global.PORT1;
+        setLoading(true);
+        apiInstance(baseURL)
+            .post(`/api/v2/loan-application-status/updateStatus`, appDetails)
+            .then(async response => {
+                // Handle the response data
+                if (global.DEBUG_MODE)
+                    console.log(
+                        'UpdateStatusApiResponse::' + JSON.stringify(response.data),
+                    );
+                setLoading(false);
+                if (response.status == 200) {
+                    props.navigation.navigate('PDTracker', { fromScreen: 'PDMainscreen' })
+                }
+                else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
+            })
+            .catch(error => {
+                // Handle the error
+                if (global.DEBUG_MODE)
+                    console.log(
+                        'UpdateStatusApiResponse' + JSON.stringify(error.response),
+                    );
+                setLoading(false);
+
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
+    };
+
     const listView = ({ item }) => {
 
         var bg = ''; clientTypeName = ''
@@ -277,8 +350,9 @@ const PdMainScreen = (props, { navigation }) => {
                     } else if (item.clientType == 'GRNTR') {
                         global.PDSUBSTAGE = 'PD_GRNTR';
                     }
-                    getClientWisePDData(item);
+                    //getClientWisePDData(item);
                     // getClientSubStageData()
+                    props.navigation.navigate('PDItems', { clientType: item.clientType });
 
                 }} style={{
                     width: '90%', height: 120, borderColor: '#BBBBBB4D', borderWidth: 1, borderRadius: 10,
@@ -568,6 +642,17 @@ const PdMainScreen = (props, { navigation }) => {
 
                 </View>
             </ScrollView>
+
+            {!showAllData && allCompleted &&
+                <ButtonViewComp
+                    textValue={language[0][props.language].str_submit.toUpperCase()}
+                    textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
+                    viewStyle={[Commonstyles.buttonView, { marginBottom: 20 }]}
+                    innerStyle={Commonstyles.buttonViewInnerStyle}
+                    handleClick={buttonNext}
+                />
+            }
+
             {/* <View style={{ width: '100%', alignItems: 'center', marginTop: '3%', justifyContent: 'center', marginBottom: 5 }}>
                 <View style={{ width: '90%', flexDirection: 'row', justifyContent: 'space-between' }}>
                     <View style={{
