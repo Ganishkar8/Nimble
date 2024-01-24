@@ -214,6 +214,7 @@ const PDReferenceCheck = (props, { navigation }) => {
     }, [gpslatlon]);
 
     const makeSystemMandatoryFields = () => {
+        // alert(pageId)
 
         systemMandatoryField
             .filter(data => data.fieldUiid === 'et_name' && data.pageId === pageId)
@@ -753,10 +754,11 @@ const PDReferenceCheck = (props, { navigation }) => {
     };
 
     const submitQuestionare = () => {
-        //console.log('QuestionFinalData::' + JSON.stringify(pdData))
+        console.log('QuestionFinalData::' + JSON.stringify(pdData))
         if (validateData()) {
             showBottomSheet();
         }
+        console.log(name);
     }
 
     const validateData = () => {
