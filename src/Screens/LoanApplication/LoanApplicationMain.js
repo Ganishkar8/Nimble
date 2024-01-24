@@ -162,7 +162,8 @@ const LoanApplicationMain = (props, { navigation }) => {
     const [currentStage, setCurrentStage] = useState('');
     const [loading, setLoading] = useState(false);
     const [isLoanCompleted, setIsLoanCompleted] = useState(false);
-
+    const [errorModalVisible, setErrorModalVisible] = useState(false);
+    const [apiError, setApiError] = useState('');
 
     useEffect(() => {
 
@@ -229,15 +230,18 @@ const LoanApplicationMain = (props, { navigation }) => {
                 } else if (response.data.statusCode === 201) {
                     setApiError(response.data.message);
                     setErrorModalVisible(true);
+                    getWorkFlowID();
                 } else if (response.data.statusCode === 202) {
                     setApiError(response.data.message);
                     setErrorModalVisible(true);
+                    getWorkFlowID();
                 }
             })
             .catch(error => {
                 // Handle the error
                 if (global.DEBUG_MODE) console.log('CBCheckApiResponse' + JSON.stringify(error.response));
                 setLoading(false);
+                getWorkFlowID();
                 if (error.response.status == 404) {
                     setApiError(Common.error404);
                     setErrorModalVisible(true)
