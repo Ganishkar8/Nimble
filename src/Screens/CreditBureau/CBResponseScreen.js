@@ -385,19 +385,21 @@ const CBResponseScreen = (props, { navigation }) => {
                     </TouchableOpacity>
                 </View>
             </BottomSheet>
-            {/* <View style={styles.fab}>
 
-                {cbResponseStatus == 'Inprogress' &&
+            {/* {cbResponse.length > 0 &&
+                <View style={styles.fab}>
+
                     <ButtonViewComp
                         textValue={language[0][props.language].str_next.toUpperCase()}
                         textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
                         viewStyle={Commonstyles.buttonView}
                         innerStyle={Commonstyles.buttonViewInnerStyle}
-                        handleClick={updateLoanStatus}
+                        handleClick={() => { props.navigation.replace('CBStatus') }}
                     />
-                }
 
-            </View> */}
+
+                </View>
+            } */}
         </View>
 
     );
