@@ -64,6 +64,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const [KYC3, setKYC3] = useState(true);
   const [KYC4Caption, setKYC4Caption] = useState('KYC 4');
   const [KYC4, setKYC4] = useState(true);
+  const [kycDmsId, setkycDmsId] = useState(true);
 
   const [LoanApplicationID, setLoanApplicationID] = useState('');
   const [LoanApplicationIDCaption, setLoanApplicationIDCaption] = useState('Loan APPLICATION ID');
@@ -289,6 +290,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
             if (response.status == 200) {
               setFileName(response.data.fileName)
               setImageUri('data:image/png;base64,' + response.data.base64Content)
+              props.navigation.navigate('PreviewImage', { imageName: response.data.fileName, imageUri: 'data:image/png;base64,' + response.data.base64Content })
             } else if (response.data.statusCode === 201) {
               setApiError(response.data.message);
               setErrorModalVisible(true);
@@ -339,7 +341,15 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
         if (response.status == 200) {
           if (response.data.kycDmsId != null && response.data.kycDmsId != undefined) {
             if (response.data.kycDmsId.toString().length > 0)
-              getImage(response.data.kycDmsId);
+              setkycDmsId(response.data.kycDmsId)
+            if (imageUri != undefined && imageUri != null) {
+              if (imageUri.length > 0) {
+
+              } else {
+                getImage(response.data.kycDmsId);
+              }
+            }
+
           }
           setKycTypeLabel(response.data.kycType)
           setkycID(response.data.kycValue)
@@ -841,7 +851,15 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
   const previewImage = () => {
     hideImageBottomSheet();
-    props.navigation.navigate('PreviewImage', { imageName: fileName, imageUri: imageUri })
+
+    if (imageUri != undefined && imageUri != null) {
+      if (imageUri.length > 0) {
+        props.navigation.navigate('PreviewImage', { imageName: fileName, imageUri: imageUri })
+      } else {
+        getImage(kycDmsId);
+      }
+    }
+
   }
 
 
