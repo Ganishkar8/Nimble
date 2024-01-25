@@ -559,9 +559,7 @@ const LoanDemographicBusinessDetail = (props) => {
                         if (Common.DEBUG_MODE) console.log("GetPhotoApiResponse::" + JSON.stringify(response.data));
 
                         if (response.status == 200) {
-                            setFileName(response.data.fileName)
-                            setVisible(false)
-                            setImageUri('data:image/png;base64,' + response.data.base64Content)
+                            
                         } else if (response.data.statusCode === 201) {
                             setApiError(response.data.message);
                             setErrorModalVisible(true);
