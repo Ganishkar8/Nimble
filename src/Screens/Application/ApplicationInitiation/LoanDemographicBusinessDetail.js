@@ -360,13 +360,13 @@ const LoanDemographicBusinessDetail = (props) => {
             .then(data => {
                 if (global.DEBUG_MODE) console.log('Applicant Data:', data);
                 if (data !== undefined && data.length > 0) {
-                    if (data[0].udyamRegistrationNumber !== undefined && data[0].udyamRegistrationNumber !== null)
+                    if (data[0].udyamRegistrationNumber !== undefined && data[0].udyamRegistrationNumber !== null){
                         if (data[0].udyamRegistrationNumber.length > 0) {
                             setUrmNumber(data[0].udyamRegistrationNumber);
                             setUrmNumberDisable(true);
                             UrNumberAvailable = true;
                         }
-
+                    }
                 }
             })
             .catch(error => {
@@ -413,6 +413,8 @@ const LoanDemographicBusinessDetail = (props) => {
                         }
                         setDocID(value[0].dmsId);
                     }
+                }else{
+                    getudyamCheck();
                 }
 
             })
@@ -441,6 +443,158 @@ const LoanDemographicBusinessDetail = (props) => {
 
     }
 
+    const getBusinessData = async () => {
+
+        var businessAvailable = false, UrNumberAvailable = false;
+
+        await tbl_client
+            .getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
+            .then(data => {
+                if (global.DEBUG_MODE) console.log('Applicant Data:', data);
+                if (data !== undefined && data.length > 0) {
+                    if (data[0].udyamRegistrationNumber !== undefined && data[0].udyamRegistrationNumber !== null){
+                        if (data[0].udyamRegistrationNumber.length > 0) {
+                            setUrmNumber(data[0].udyamRegistrationNumber);
+                            setUrmNumberDisable(true);
+                            UrNumberAvailable = true;
+                        }
+                    }
+                }
+            })
+            .catch(error => {
+                setLoading(false);
+                if (global.DEBUG_MODE)
+                    console.error('Error fetching Applicant details:', error);
+            });
+
+        await tbl_loanbusinessDetail.getBusinessDetailsBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE, global.CLIENTID)
+            .then(value => {
+                if (global.DEBUG_MODE) console.log('Business Data:', value);
+                if (value !== undefined && value.length > 0) {
+                    businessAvailable = true;
+                    setCustomerSubCategoryLabel(value[0].customerSubCatg)
+                    setCustomerSubCategoryDisable(true);
+                    setEntShopName(value[0].enterpriseShopName)
+                    setUrmNumber(value[0].udyamRegNum)
+                    if (UrNumberAvailable) {
+                        setUrmNumberDisable(true)
+                    }
+                    setDOR(value[0].dateofReg) //dateofReg
+                    setDOI(value[0].dateofIncorp) //dateofIncorp
+                    setDOBC(value[0].dateofBusiness) //dateofBusiness
+                    setYear(value[0].year)
+                    setMonthLabel(parseInt(value[0].month))
+                    setIndustryTypeLabel(value[0].industryType)
+                    setIndustryLineLabel(value[0].industryLine)
+                    setCompanyTypeLabel(value[0].companyType)
+                    setEnterpriseTypeLabel(value[0].enterpriseType)
+                    setBusinessLocationLabel(value[0].businessLocation)
+                    setNoofEmployee(value[0].noofEmployees)
+                    setOperatingDays(value[0].operatingdays) //operatingtiming
+                    setBookKeepStatusLabel(value[0].bookKeepingStatus)
+                    setHomeBasedBusinessLabel(value[0].homeBasedBusiness)
+                    setACTMLabel(value[0].custTransMode)
+                    setTimeByPromoter(value[0].operatingtiming)
+                    setNPMRate(value[0].npmRate)
+                    setPurchaseFrequencyLabel(value[0].purchaseFrequency)
+                    setTypePurchaseLabel(value[0].typeofPurchase)
+                    setSalesFrequencyLabel(value[0].salesFrequency)
+                    if (value[0].dmsId !== undefined) {
+                        if (value[0].dmsId.length > 0) {
+                            getImage(value[0].dmsId);
+                        }
+                        setDocID(value[0].dmsId);
+                    }
+                }else{
+                    getudyamCheck();
+                }
+
+            })
+            .catch(error => {
+                if (global.DEBUG_MODE) console.error('Error fetching Business details:', error);
+            });
+
+        if (!businessAvailable) {
+            tbl_loanApplication
+                .getLoanAppBasedOnID(global.LOANAPPLICATIONID, 'APPL')
+                .then(data => {
+                    if (global.DEBUG_MODE) console.log('Applicant Data:', data);
+                    if (data !== undefined && data.length > 0) {
+                        setCustomerSubCategoryLabel(data[0].customer_subcategory);
+                        setCustomerSubCategoryDisable(true);
+                        setLoading(false);
+                    }
+                })
+                .catch(error => {
+                    setLoading(false);
+                    if (global.DEBUG_MODE)
+                        console.error('Error fetching Applicant details:', error);
+                });
+
+        }
+
+    }
+
+    const getudyamCheck = () => {
+
+
+        Common.getNetworkConnection().then(value => {
+            if (value.isConnected == true) {
+                setLoading(true)
+                const baseURL = global.PORT1
+                const appDetails = {
+                    "udyamNumber": urmNumber,
+                    "clientId": global.CLIENTID,
+                    "createdBy": global.USERID
+                }
+                apiInstance(baseURL).get(`/api/v2/udyamCheck`,appDetails)
+                    .then(async (response) => {
+                        // Handle the response data
+                        if (Common.DEBUG_MODE) console.log("GetUdyamCheckApiResponse::" + JSON.stringify(response.data));
+                            alert(JSON.stringify(response.data))
+
+                        if (response.status == 200) {
+                            setFileName(response.data.fileName)
+                            setVisible(false)
+                            setImageUri('data:image/png;base64,' + response.data.base64Content)
+                        } else if (response.data.statusCode === 201) {
+                            setApiError(response.data.message);
+                            setErrorModalVisible(true);
+                        } else if (response.data.statusCode === 202) {
+                            setApiError(response.data.message);
+                            setErrorModalVisible(true);
+                        }
+                        // props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
+                        setLoading(false)
+
+                    })
+                    .catch((error) => {
+                        // Handle the error
+                        setLoading(false)
+                        if (global.DEBUG_MODE) console.log("GetPhotoApiResponse::" + JSON.stringify(error.response.data));
+                        if (error.response.status == 404) {
+                            setApiError(Common.error404);
+                            setErrorModalVisible(true)
+                        } else if (error.response.status == 400) {
+                            setApiError(Common.error400);
+                            setErrorModalVisible(true)
+                        } else if (error.response.status == 500) {
+                            setApiError(Common.error500);
+                            setErrorModalVisible(true)
+                        } else if (error.response.data != null) {
+                            setApiError(error.response.data.message);
+                            setErrorModalVisible(true)
+                        }
+                    });
+            } else {
+                setApiError(language[0][props.language].str_errinternetimage);
+                setErrorModalVisible(true)
+
+            }
+
+        })
+    }
+
     const getImage = (dmsID) => {
 
         Common.getNetworkConnection().then(value => {
@@ -453,9 +607,7 @@ const LoanDemographicBusinessDetail = (props) => {
                         if (Common.DEBUG_MODE) console.log("GetPhotoApiResponse::" + JSON.stringify(response.data));
 
                         if (response.status == 200) {
-                            setFileName(response.data.fileName)
-                            setVisible(false)
-                            setImageUri('data:image/png;base64,' + response.data.base64Content)
+                            
                         } else if (response.data.statusCode === 201) {
                             setApiError(response.data.message);
                             setErrorModalVisible(true);
