@@ -401,8 +401,8 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
 
       if (global.USERTYPEID == 1163) {
         setOnlyView(true);
-        if (
-          global.LOANSTATUS == 'MANUAL KYC PENDING' ||
+        fieldsDisable();
+        if (global.LOANSTATUS == 'MANUAL KYC PENDING' ||
           global.LOANSTATUS == 'MANUAL KYC REJECTED'
         ) {
         }
@@ -2671,6 +2671,10 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     } else if (componentName === 'expiryDate1') {
       handleTextChange(componentName, textValue);
     } else if (componentName === 'expiryDate2') {
+      handleTextChange(componentName, textValue);
+    } else if (componentName === 'expiryDate3') {
+      handleTextChange(componentName, textValue);
+    } else if (componentName === 'expiryDate4') {
       handleTextChange(componentName, textValue);
     } else if (componentName === 'mobileNumber') {
       if (textValue.length > 0) {
