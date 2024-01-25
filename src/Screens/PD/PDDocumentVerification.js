@@ -317,7 +317,7 @@ const PDDocumentUpload = (props, { navigation }) => {
 
                         <View style={{ width: '68%', }}>
                             <Text style={{ color: Colors.dimmText, textAlign: 'left', fontFamily: 'PoppinsRegular' }}>
-                                {item.documentName}
+                                {item.documentType}
                             </Text>
                         </View>
                         <View style={{ width: '10%', }}>
