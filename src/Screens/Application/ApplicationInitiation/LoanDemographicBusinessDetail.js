@@ -353,19 +353,24 @@ const LoanDemographicBusinessDetail = (props) => {
 
     const getApplicantData = async () => {
 
-        var businessAvailable = false, UrNumberAvailable = false;
+        var UrNumberAvailable = false;
 
         await tbl_client
             .getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
             .then(data => {
                 if (global.DEBUG_MODE) console.log('Applicant Data:', data);
                 if (data !== undefined && data.length > 0) {
-                    if (data[0].udyamRegistrationNumber !== undefined && data[0].udyamRegistrationNumber !== null){
+                    if (data[0].udyamRegistrationNumber !== undefined && data[0].udyamRegistrationNumber !== null) {
                         if (data[0].udyamRegistrationNumber.length > 0) {
                             setUrmNumber(data[0].udyamRegistrationNumber);
                             setUrmNumberDisable(true);
                             UrNumberAvailable = true;
+                            getBusinessData(data[0].udyamRegistrationNumber);
+                        } else {
+                            getBusinessData("");
                         }
+                    } else {
+                        getBusinessData("");
                     }
                 }
             })
@@ -374,6 +379,13 @@ const LoanDemographicBusinessDetail = (props) => {
                 if (global.DEBUG_MODE)
                     console.error('Error fetching Applicant details:', error);
             });
+
+
+
+    }
+
+    const getBusinessData = async (udyamNum) => {
+        var businessAvailable = false;
 
         await tbl_loanbusinessDetail.getBusinessDetailsBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE, global.CLIENTID)
             .then(value => {
@@ -413,8 +425,11 @@ const LoanDemographicBusinessDetail = (props) => {
                         }
                         setDocID(value[0].dmsId);
                     }
-                }else{
-                    getudyamCheck();
+                } else {
+                    if (udyamNum) {
+                        getUdyamCheck(udyamNum);
+                    }
+
                 }
 
             })
@@ -423,140 +438,77 @@ const LoanDemographicBusinessDetail = (props) => {
             });
 
         if (!businessAvailable) {
-            tbl_loanApplication
-                .getLoanAppBasedOnID(global.LOANAPPLICATIONID, 'APPL')
-                .then(data => {
-                    if (global.DEBUG_MODE) console.log('Applicant Data:', data);
-                    if (data !== undefined && data.length > 0) {
-                        setCustomerSubCategoryLabel(data[0].customer_subcategory);
-                        setCustomerSubCategoryDisable(true);
+            if (global.CLIENTTYPE == 'APPL') {
+                tbl_loanApplication
+                    .getLoanAppBasedOnID(global.LOANAPPLICATIONID, 'APPL')
+                    .then(data => {
+                        if (global.DEBUG_MODE) console.log('Applicant Data:', data);
+                        if (data !== undefined && data.length > 0) {
+                            setCustomerSubCategoryLabel(data[0].customer_subcategory);
+                            setCustomerSubCategoryDisable(true);
+                            setLoading(false);
+                        }
+                    })
+                    .catch(error => {
                         setLoading(false);
-                    }
-                })
-                .catch(error => {
-                    setLoading(false);
-                    if (global.DEBUG_MODE)
-                        console.error('Error fetching Applicant details:', error);
-                });
+                        if (global.DEBUG_MODE)
+                            console.error('Error fetching Applicant details:', error);
+                    });
 
+            }
         }
-
     }
 
-    const getBusinessData = async () => {
-
-        var businessAvailable = false, UrNumberAvailable = false;
-
-        await tbl_client
-            .getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
-            .then(data => {
-                if (global.DEBUG_MODE) console.log('Applicant Data:', data);
-                if (data !== undefined && data.length > 0) {
-                    if (data[0].udyamRegistrationNumber !== undefined && data[0].udyamRegistrationNumber !== null){
-                        if (data[0].udyamRegistrationNumber.length > 0) {
-                            setUrmNumber(data[0].udyamRegistrationNumber);
-                            setUrmNumberDisable(true);
-                            UrNumberAvailable = true;
-                        }
-                    }
-                }
-            })
-            .catch(error => {
-                setLoading(false);
-                if (global.DEBUG_MODE)
-                    console.error('Error fetching Applicant details:', error);
-            });
-
-        await tbl_loanbusinessDetail.getBusinessDetailsBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE, global.CLIENTID)
-            .then(value => {
-                if (global.DEBUG_MODE) console.log('Business Data:', value);
-                if (value !== undefined && value.length > 0) {
-                    businessAvailable = true;
-                    setCustomerSubCategoryLabel(value[0].customerSubCatg)
-                    setCustomerSubCategoryDisable(true);
-                    setEntShopName(value[0].enterpriseShopName)
-                    setUrmNumber(value[0].udyamRegNum)
-                    if (UrNumberAvailable) {
-                        setUrmNumberDisable(true)
-                    }
-                    setDOR(value[0].dateofReg) //dateofReg
-                    setDOI(value[0].dateofIncorp) //dateofIncorp
-                    setDOBC(value[0].dateofBusiness) //dateofBusiness
-                    setYear(value[0].year)
-                    setMonthLabel(parseInt(value[0].month))
-                    setIndustryTypeLabel(value[0].industryType)
-                    setIndustryLineLabel(value[0].industryLine)
-                    setCompanyTypeLabel(value[0].companyType)
-                    setEnterpriseTypeLabel(value[0].enterpriseType)
-                    setBusinessLocationLabel(value[0].businessLocation)
-                    setNoofEmployee(value[0].noofEmployees)
-                    setOperatingDays(value[0].operatingdays) //operatingtiming
-                    setBookKeepStatusLabel(value[0].bookKeepingStatus)
-                    setHomeBasedBusinessLabel(value[0].homeBasedBusiness)
-                    setACTMLabel(value[0].custTransMode)
-                    setTimeByPromoter(value[0].operatingtiming)
-                    setNPMRate(value[0].npmRate)
-                    setPurchaseFrequencyLabel(value[0].purchaseFrequency)
-                    setTypePurchaseLabel(value[0].typeofPurchase)
-                    setSalesFrequencyLabel(value[0].salesFrequency)
-                    if (value[0].dmsId !== undefined) {
-                        if (value[0].dmsId.length > 0) {
-                            getImage(value[0].dmsId);
-                        }
-                        setDocID(value[0].dmsId);
-                    }
-                }else{
-                    getudyamCheck();
-                }
-
-            })
-            .catch(error => {
-                if (global.DEBUG_MODE) console.error('Error fetching Business details:', error);
-            });
-
-        if (!businessAvailable) {
-            tbl_loanApplication
-                .getLoanAppBasedOnID(global.LOANAPPLICATIONID, 'APPL')
-                .then(data => {
-                    if (global.DEBUG_MODE) console.log('Applicant Data:', data);
-                    if (data !== undefined && data.length > 0) {
-                        setCustomerSubCategoryLabel(data[0].customer_subcategory);
-                        setCustomerSubCategoryDisable(true);
-                        setLoading(false);
-                    }
-                })
-                .catch(error => {
-                    setLoading(false);
-                    if (global.DEBUG_MODE)
-                        console.error('Error fetching Applicant details:', error);
-                });
-
-        }
-
-    }
-
-    const getudyamCheck = () => {
-
+    const getUdyamCheck = (udyamNum) => {
 
         Common.getNetworkConnection().then(value => {
             if (value.isConnected == true) {
                 setLoading(true)
                 const baseURL = global.PORT1
-                const appDetails = {
-                    "udyamNumber": urmNumber,
+                const appDetails =
+                {
+                    "udyamNumber": udyamNum,
                     "clientId": global.CLIENTID,
                     "createdBy": global.USERID
                 }
-                apiInstance(baseURL).get(`/api/v2/udyamCheck`,appDetails)
+
+                apiInstance(baseURL).post(`/api/v2/udyamCheck`, appDetails)
                     .then(async (response) => {
                         // Handle the response data
-                        if (Common.DEBUG_MODE) console.log("GetUdyamCheckApiResponse::" + JSON.stringify(response.data));
-                            alert(JSON.stringify(response.data))
+                        if (global.DEBUG_MODE) console.log("GetUdyamCheckResponse::" + JSON.stringify(response.data));
 
                         if (response.status == 200) {
-                            setFileName(response.data.fileName)
-                            setVisible(false)
-                            setImageUri('data:image/png;base64,' + response.data.base64Content)
+
+                            if (response.data.clientBusinessDetailDto.enterpriseShopName) {
+                                setEntShopName(response.data.clientBusinessDetailDto.enterpriseShopName)
+                                setEntShopNameDisable(true)
+                            }
+                            if (response.data.clientBusinessDetailDto.dateOfRegistration) {
+                                setDOR(response.data.clientBusinessDetailDto.dateOfRegistration)
+                                setDORDisable(true)
+                            }
+                            if (response.data.clientBusinessDetailDto.dateOfIncorporation) {
+                                setDOI(response.data.clientBusinessDetailDto.dateOfIncorporation)
+                                setDOIDisable(true)
+                            }
+                            if (response.data.clientBusinessDetailDto.dateOfBusinessCommencement) {
+                                setDOBC(response.data.clientBusinessDetailDto.dateOfBusinessCommencement)
+                                setDOBCDisable(true)
+                            }
+                            if (response.data.clientBusinessDetailDto.businessVintageYears) {
+                                setYear(response.data.clientBusinessDetailDto.businessVintageYears.toString())
+                                setYearDisable(true)
+                            }
+                            if (response.data.clientBusinessDetailDto.businessVintageMonths) {
+                                setMonthLabel(response.data.clientBusinessDetailDto.businessVintageMonths)
+                                setMonthsDisable(true)
+                            }
+                            if (response.data.clientBusinessDetailDto.noOfEmployees) {
+                                setNoofEmployee(response.data.clientBusinessDetailDto.noOfEmployees.toString())
+                                setNoofEmployeeDisable(true)
+                            }
+
+
                         } else if (response.data.statusCode === 201) {
                             setApiError(response.data.message);
                             setErrorModalVisible(true);
