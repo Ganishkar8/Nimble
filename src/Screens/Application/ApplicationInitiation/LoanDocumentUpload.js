@@ -43,6 +43,7 @@ import ImageComp from '../../../Components/ImageComp';
 import ImageBottomPreview from '../../../Components/ImageBottomPreview';
 import ImagePicker, { ImageOrVideo } from 'react-native-image-crop-picker';
 import { tr } from 'react-native-paper-dates';
+import apiInstance from '../../../Utils/apiInstance';
 
 const LoanDocumentUpload = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
@@ -73,6 +74,7 @@ const LoanDocumentUpload = (props, { navigation }) => {
     const showImageBottomSheet = (item) => {
         setBottomSheetVisible(true)
         setCurrentPhotoItem(item)
+        setFileName(item.documentName)
     };
     const hideImageBottomSheet = () => setBottomSheetVisible(false);
     const [imageUri, setImageUri] = useState(null);
@@ -81,7 +83,7 @@ const LoanDocumentUpload = (props, { navigation }) => {
     const [hideDelete, setHideDelete] = useState(false);
     const [processModuleLength, setProcessModuleLength] = useState(0);
     const [documentData, setDocumentData] = useState(global.LEADTRACKERDATA.applicantDocumentDetail);
-    const [filteredDocument, setFilteredDocument] = useState(global.LEADTRACKERDATA.applicantDocumentDetail);
+    const [filteredDocument, setFilteredDocument] = useState([]);
 
     const [documentList, setDocumentList] = useState([]);
 
@@ -91,6 +93,7 @@ const LoanDocumentUpload = (props, { navigation }) => {
 
         const filteredDocumentData = documentData.filter(item => item.clientType === global.CLIENTTYPE);
         setFilteredDocument(filteredDocumentData);
+
         getDocuments(filteredDocumentData);
 
         const filteredData = global.FILTEREDPROCESSMODULE.filter(item => item.moduleCode === "DOC_UPLD");
@@ -291,7 +294,7 @@ const LoanDocumentUpload = (props, { navigation }) => {
             setImageFile(image);
 
             const lastDotIndex = image.path.lastIndexOf('.');
-            var imageName = 'Photo' + '_' + global.LOANAPPLICATIONID;
+            var imageName = 'Photo' + '_' + global.CLIENTID;
             if (lastDotIndex !== -1) {
                 // Get the substring from the last dot to the end of the string
                 const fileExtension = image.path.substring(lastDotIndex);

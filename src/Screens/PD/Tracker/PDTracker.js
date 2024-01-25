@@ -327,15 +327,15 @@ const PDTracker = (props, { navigation, route }) => {
         setLoading(true)
         const appDetails = {
             "userId": global.USERID,
-            "userTypeId": global.USERTYPEID,
-            "status": status,
-            "leadType": leadType,
-            "from": from,
-            "to": to,
-            "operator": operator,
-            "ageing": ageing,
-            "agentName": agentName,
-            "sort": sort
+            // "userTypeId": global.USERTYPEID,
+            // "status": status,
+            // "leadType": leadType,
+            // "from": from,
+            // "to": to,
+            // "operator": operator,
+            // "ageing": ageing,
+            // "agentName": agentName,
+            // "sort": sort
         }
 
         apiInstance(baseURL).post(`/api/v2/pdTracker`, appDetails)
