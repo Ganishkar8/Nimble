@@ -289,7 +289,7 @@ const PdMainScreen = (props, { navigation }) => {
                     );
                 setLoading(false);
                 if (response.status == 200) {
-                    props.navigation.navigate('PDTracker', { fromScreen: 'PDMainscreen' })
+                    props.navigation.replace('PDTracker', { fromScreen: 'PDMainscreen' })
                 }
                 else if (response.data.statusCode === 201) {
                     setApiError(response.data.message);
