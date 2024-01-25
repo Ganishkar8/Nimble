@@ -865,13 +865,13 @@ const LoanAddressDetails = (props, { navigation }) => {
             setAddressTypeLabel(label);
             setAddressTypeIndex(index);
             if (label == 'ROA' || label == 'OPA') {
-                setAddressOwnerTypeVisible(false);
-                setOwnerDetailsVisible(false);
-                setOwnerNameVisible(false)
-            } else {
                 setAddressOwnerTypeVisible(true);
                 setOwnerDetailsVisible(true);
                 setOwnerNameVisible(true)
+            } else {
+                setAddressOwnerTypeVisible(false);
+                setOwnerDetailsVisible(false);
+                setOwnerNameVisible(false)
             }
         } else if (componentName === 'AddressOwnershipPicker') {
             setAddressOwnerTypeLabel(label);

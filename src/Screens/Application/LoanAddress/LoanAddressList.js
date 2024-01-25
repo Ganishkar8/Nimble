@@ -36,6 +36,12 @@ import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import tbl_loanaddressinfo from '../../../Database/Table/tbl_loanaddressinfo';
 
 const LoanAddressList = (props, { navigation }) => {
+
+
+    const [urmNumber, setUrmNumber] = useState('');
+    // const [urmNumberDisable, setUrmNumberDisable] = useState(false);
+
+
     const [loading, setLoading] = useState(false);
     const [addressDetails, setAddressDetails] = useState([]);
     const [addressID, setAddressID] = useState('');
@@ -96,6 +102,20 @@ const LoanAddressList = (props, { navigation }) => {
         tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE).then(value => {
             if (value !== undefined && value.length > 0) {
 
+                if (value[0].udyamRegistrationNumber !== undefined && value[0].udyamRegistrationNumber !== null) {
+                    if (value[0].udyamRegistrationNumber.length > 0) {
+                        setUrmNumber(value[0].udyamRegistrationNumber);
+                        // setUrmNumberDisable(true);
+                        UrNumberAvailable = true;
+                        getAllLoanAddressData(value[0].udyamRegistrationNumber);
+
+                    } else {
+                        getAllLoanAddressData("")
+                    }
+                } else {
+                    getAllLoanAddressData("")
+                }
+
                 setKYCManual(value[0].isKycManual)
 
                 if (global.USERTYPEID == 1163) {
@@ -107,6 +127,12 @@ const LoanAddressList = (props, { navigation }) => {
             }
         })
 
+
+    }
+
+
+    const getAllLoanAddressData = (urmNumber) => {
+
         tbl_loanaddressinfo.getAllLoanAddressDetailsForLoanID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
             .then(data => {
                 if (global.DEBUG_MODE) console.log('Address Detail:', data);
@@ -116,12 +142,148 @@ const LoanAddressList = (props, { navigation }) => {
                     if (communicationAddress) {
                         setCommunicationAvailable(true);
                     }
+                    const RegisteredOfficeAddress = data.find(item => item.address_type === 'ROA');
+                    if (!RegisteredOfficeAddress) {
+                        //getUdyamRAOCheck(urmNumber);
+
+                    }
                     setRefreshFlatList(!refreshFlatlist)
+                } else {
+                    //getUdyamRAOCheck(urmNumber);
+
                 }
             })
             .catch(error => {
                 if (global.DEBUG_MODE) console.error('Error fetching bank details:', error);
             });
+
+    }
+
+    // const insertData = () => {
+    //     tbl_loanaddressinfo.insertLoanAddress(
+    //         global.LOANAPPLICATIONID,
+    //         "",
+    //         global.CLIENTID,
+    //         global.CLIENTTYPE,
+    //         "RAO",
+    //         addressLine1.trim(),
+    //         addressLine2.trim(),
+    //         landmark.trim(),
+    //         pincode.trim(),
+    //         city.trim(),
+    //         district.trim(),
+    //         state.trim(),
+    //         "",
+    //         mobileNo,
+    //         email,
+    //         "",
+    //         "",
+    //         "",
+    //         "true",
+    //         ""
+    //     )
+    //         .then(result => {
+    //             if (global.DEBUG_MODE) console.log('Inserted Loan Address detail:', result);
+    //             // props.navigation.replace('LoanAddressList')
+
+    //         })
+    //         .catch(error => {
+    //             if (global.DEBUG_MODE) console.error('Error Inserting Loan Address detail:', error);
+    //         });
+    // }
+
+    const getUdyamRAOCheck = (udyamNum) => {
+
+        Common.getNetworkConnection().then(value => {
+            if (value.isConnected == true) {
+                setLoading(true)
+                const baseURL = global.PORT1
+                const appDetails =
+                {
+                    "udyamNumber": udyamNum,
+                    "clientId": global.CLIENTID,
+                    "createdBy": global.USERID
+                }
+
+                const appDetailsRAO = [{
+                    "isActive": true,
+                    "createdBy": global.USERID,
+                    "createdDate": new Date(),
+                    "modifiedBy": global.USERID,
+                    "modifiedDate": new Date(),
+                    "supervisedBy": global.USERID,
+                    "addressType": addressTypeLabel,
+                    "addressLine1": addressLine1,
+                    "addressLine2": addressLine2,
+                    "landmark": landmark,
+                    "pincode": pincode,
+                    "city": city,
+                    "district": district,
+                    "state": state,
+                    "country": country,
+                    "mobileOrLandLineNumber": "",
+                    "emailId": "",
+                    "addressOwnership": addressOwnerTypeLabel,
+                    "ownerDetails": ownerDetailsLabel,
+                    "ownerName": ownerName,
+                    "geoClassification": '',
+                    "yearsAtResidence": '',
+                    "yearsInCurrentCityOrTown": '',
+                    "supervisedDate": new Date()
+                }]
+
+                apiInstance(baseURL).post(`/api/v2/udyamCheck`, appDetails, appDetailsRAO)
+                    .then(async (response) => {
+                        // Handle the response data
+                        if (global.DEBUG_MODE) console.log("GetUdyamCheckResponse::" + JSON.stringify(response.data));
+
+                        if (response.status == 200) {
+
+                            setLoading(false);
+
+                            alert(JSON.stringify(response.data))
+
+                            //insertData(response.data);
+
+                            alert("inserted")
+
+
+                        } else if (response.data.statusCode === 201) {
+                            setApiError(response.data.message);
+                            setErrorModalVisible(true);
+                        } else if (response.data.statusCode === 202) {
+                            setApiError(response.data.message);
+                            setErrorModalVisible(true);
+                        }
+                        // props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
+                        setLoading(false)
+
+                    })
+                    .catch((error) => {
+                        // Handle the error
+                        setLoading(false)
+                        if (global.DEBUG_MODE) console.log("GetPhotoApiResponse::" + JSON.stringify(error.response.data));
+                        if (error.response.status == 404) {
+                            setApiError(Common.error404);
+                            setErrorModalVisible(true)
+                        } else if (error.response.status == 400) {
+                            setApiError(Common.error400);
+                            setErrorModalVisible(true)
+                        } else if (error.response.status == 500) {
+                            setApiError(Common.error500);
+                            setErrorModalVisible(true)
+                        } else if (error.response.data != null) {
+                            setApiError(error.response.data.message);
+                            setErrorModalVisible(true)
+                        }
+                    });
+            } else {
+                setApiError(language[0][props.language].str_errinternetimage);
+                setErrorModalVisible(true)
+
+            }
+
+        })
     }
 
     const FlatView = ({ item }) => {

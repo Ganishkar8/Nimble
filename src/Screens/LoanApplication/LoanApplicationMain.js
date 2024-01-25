@@ -659,6 +659,7 @@ const LoanApplicationMain = (props, { navigation }) => {
                 subItem.pageCode === "CB_CHK_CB_RSPNS" && subItem.nestedSubDataIsCompleted
             )
         );
+
         if (global.USERTYPEID == 1163) {
 
             if (item.pageCode == 'PRF_SHRT_APLCT_BSC_DTLS') {
@@ -820,14 +821,14 @@ const LoanApplicationMain = (props, { navigation }) => {
                     props.navigation.replace('BankList');
                 }
             } else if (item.pageCode == 'CB_CHK_CB_RSPNS') {
-                if (isLoanCompleted) {
-                    props.navigation.replace('CBResponseScreen');
-                }
+
+                props.navigation.replace('CBResponseScreen');
+
             } else if (item.pageCode == 'CB_CHK_BRE_DCSN') {
                 if (isConditionMet) {
-                    if (isLoanCompleted) {
-                        props.navigation.replace('CBStatus', { pageStatus: cbBreCheckStatus });
-                    }
+
+                    props.navigation.replace('CBStatus', { pageStatus: cbBreCheckStatus });
+
                 }
             } else if (item.pageCode == 'DOC_UPLD_APPLCNT') {
                 if (isLoanCompleted) {
@@ -872,7 +873,7 @@ const LoanApplicationMain = (props, { navigation }) => {
 
         } else {
 
-            if (Common.DEBUG_MODE) console.log(JSON.stringify(isConditionMet))
+            if (global.DEBUG_MODE) console.log(JSON.stringify(isConditionMet))
             if (item.pageCode == 'CB_CHK_CB_RSPNS') {
                 props.navigation.replace('CBResponseScreen');
             } else if (item.pageCode == 'CB_CHK_BRE_DCSN') {
