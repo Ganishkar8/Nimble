@@ -266,15 +266,15 @@ const AadharOTPVerification = (props, { navigation }) => {
                     //setAadhaarResponse(response.data.aadharResultDetails)
                     global.isAadharVerified = "1";
                     //setpdfDmsID(response.data.aadharResultDetails.docDmsId)
-                    //getImage(response.data.aadharResultDetails.docDmsId);
+                    getImage(response.data.aadharDocDmsId);
                     insertData(response.data);
 
                 } if (response.data.statusCode == 202) {
                     setApiError(response.data.message);
                     setErrorModalVisible(true)
-                } else {
-                    setApiError(response.data.statusMessage);
-                    setErrorModalVisible(true)
+                } else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
                 }
 
             })

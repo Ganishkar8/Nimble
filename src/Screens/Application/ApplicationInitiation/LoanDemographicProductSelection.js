@@ -1603,7 +1603,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                                 <DateInputComp textStyle={[Commonstyles.inputtextStyle, { width: '90%' }]} ComponentName="DisbursementDate"
                                     textValue={disbursementDate}
                                     type="numeric"
-                                    handleClick={[handleClick]}
+                                    handleClick={handleClick}
                                     Disable={disbursementDateDisable}
                                     reference={disbursementDateRef}
                                     minDate={new Date()}

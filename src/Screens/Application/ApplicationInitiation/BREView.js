@@ -125,7 +125,7 @@ const BREView = (props, { navigation }) => {
                 if (global.DEBUG_MODE) console.log('CBResponseApiResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
                 if (response.data.length <= 0) {
-                    getBreData();
+                    //getBreData();
                 } else {
                     const newData = response.data.map(item => {
                         const extraJson = { isSelected: false };
