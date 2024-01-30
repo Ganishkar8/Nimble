@@ -39,6 +39,7 @@ const PdMainScreen = (props, { navigation }) => {
     const isScreenVisible = useIsFocused();
     const [listData, setListData] = useState(props.route.params.PDData)
     const [clientData, setClientData] = useState([]);
+    const [pdStageData, setPDStageData] = useState([]);
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const [apiError, setApiError] = useState('');
     const [allCompleted, setAllCompleted] = useState(false);
@@ -169,7 +170,9 @@ const PdMainScreen = (props, { navigation }) => {
                     }
                     setClientData(clientData);
                     props.addPDStages(response.data);
+
                     setPDStatusData(response.data)
+
                     setLoading(false)
                 }
                 else if (response.data.statusCode === 201) {
@@ -325,6 +328,7 @@ const PdMainScreen = (props, { navigation }) => {
             });
     };
 
+
     const getNonGSTStatus = () => {
         const filteredModule = psDtatusData[0].personalDiscussionSubStageLogs
             .filter(data => data.subStageCode === global.PDSUBSTAGE)[0]
@@ -342,6 +346,7 @@ const PdMainScreen = (props, { navigation }) => {
     }
 
     const updatePdStatus = () => {
+
 
         const appDetails = {
             "loanApplicationId": global.LOANAPPLICATIONID,
@@ -362,9 +367,10 @@ const PdMainScreen = (props, { navigation }) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log('UpdatePDStatusApiResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
+
                 if (response.status == 200) {
                     props.navigation.navigate('PDItems', { clientType: global.CLIENTTYPE });
-                }
+
                 else if (response.data.statusCode === 201) {
                     setApiError(response.data.message);
                     setErrorModalVisible(true);
@@ -415,6 +421,7 @@ const PdMainScreen = (props, { navigation }) => {
             <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: 15 }}>
 
                 <TouchableOpacity activeOpacity={0.8} onPress={() => {
+
                     global.CLIENTTYPE = item.clientType;
                     global.CLIENTID = item.clientId;
                     if (item.clientType == 'APPL') {
