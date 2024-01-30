@@ -197,6 +197,8 @@ const ConsentScreen = (props, { navigation }) => {
                         if (props.route.params.leadData.length > 0) {
                             insertLeadData(response.data.id, response.data.tempNumber);
                         } else {
+                            tbl_client.deleteBasedOnClientID(response.data.id);
+                            tbl_loanApplication.deleteLoanBasedOnID(response.data.id)
                             props.navigation.replace('LoanApplicationMain', { fromScreen: 'ConsentScreen' })
                         }
 

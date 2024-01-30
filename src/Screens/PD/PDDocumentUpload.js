@@ -376,7 +376,7 @@ const PDDocumentUpload = (props, { navigation }) => {
             });
 
             try {
-                const response = await fetch('http://192.168.1.120:8094/api/documents', {
+                const response = await fetch(global.BASEURL + '8094/api/documents', {
                     method: 'POST',
                     body: formData,
                     headers: {

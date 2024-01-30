@@ -336,7 +336,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       getID3data(workflowIDLabel);
       getID4data(workflowIDLabel);
     }
-  }, [KycType2Label, KycType3Label, KycType4Label, workflowIDLabel]);
+  }, [KycType1Label, KycType2Label, KycType3Label, KycType4Label, workflowIDLabel]);
 
   useEffect(() => {
     if (isDedupeDone) {
@@ -402,6 +402,8 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       if (global.USERTYPEID == 1163) {
         setOnlyView(true);
         fieldsDisable();
+        setWorkflowIDDisable(true);
+        setLoanAmountDisable(true);
         if (global.LOANSTATUS == 'MANUAL KYC PENDING' ||
           global.LOANSTATUS == 'MANUAL KYC REJECTED'
         ) {
@@ -546,7 +548,12 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           setMobileNumber(data[0].mobileNumber);
           setEmail(data[0].email);
           setURNumber(data[0].udyamRegistrationNumber);
-          setchkMsme(data[0].isMsme == true);
+
+          if (data[0].isMsme == '1' || data[0].isMsme == true) {
+            setchkMsme(true);
+            setURNumberVisible(true);
+          }
+
           if (data[0].dedupeCheck == '1' || data[0].dedupeCheck == true) {
             setIsDedupeDone(true);
             global.isDedupeDone = '1';
@@ -661,6 +668,10 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     setchkMsmeDisable(true);
     setURNumberDisable(true);
     setRelationTypeDisable(true);
+    setExpiry1DateDisable(true);
+    setExpiry2DateDisable(true);
+    setExpiry3DateDisable(true);
+    setExpiry4DateDisable(true);
   };
 
   const getSystemCodeDetail = async () => {
@@ -1813,16 +1824,16 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       '',
       KycType1Label,
       kycID1,
-      expiryDate1,
+      expiryDate1 ?? Common.convertYearDateFormat(expiryDate1),
       KycType2Label,
       kycID2,
-      expiryDate2,
+      expiryDate2 ?? Common.convertYearDateFormat(expiryDate2),
       KycType3Label,
       kycID3,
-      expiryDate3,
+      expiryDate3 ?? Common.convertYearDateFormat(expiryDate3),
       KycType4Label,
       kycID4,
-      expiryDate4,
+      expiryDate4 ?? Common.convertYearDateFormat(expiryDate4),
       chkMsme,
       '',
       '',
@@ -2629,6 +2640,210 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
     }
 
+    if (KycType1Label == '012') {
+      if (kycID1.length > 0) {
+        if (kycID1.length != 10) {
+          errorMessage =
+            errorMessage +
+            i +
+            ')' +
+            ' ' +
+            language[0][props.language].str_plsenter +
+            'Valid Voter ID' +
+            '\n';
+          i++;
+          flag = true;
+        }
+      }
+    }
+
+    if (KycType2Label == '012') {
+      if (kycID2.length > 0) {
+        if (kycID2.length != 10) {
+          errorMessage =
+            errorMessage +
+            i +
+            ')' +
+            ' ' +
+            language[0][props.language].str_plsenter +
+            'Valid Voter ID' +
+            '\n';
+          i++;
+          flag = true;
+        }
+      }
+    }
+
+    if (KycType3Label == '012') {
+      if (kycID3.length > 0) {
+        if (kycID3.length != 10) {
+          errorMessage =
+            errorMessage +
+            i +
+            ')' +
+            ' ' +
+            language[0][props.language].str_plsenter +
+            'Valid Voter ID' +
+            '\n';
+          i++;
+          flag = true;
+        }
+      }
+    }
+
+    if (KycType4Label == '012') {
+      if (kycID4.length > 0) {
+        if (kycID4.length != 10) {
+          errorMessage =
+            errorMessage +
+            i +
+            ')' +
+            ' ' +
+            language[0][props.language].str_plsenter +
+            'Valid Voter ID' +
+            '\n';
+          i++;
+          flag = true;
+        }
+      }
+    }
+
+    if (KycType1Label == '002') {
+      if (kycID1.length > 0) {
+        if (kycID1.length != 10) {
+          errorMessage =
+            errorMessage +
+            i +
+            ')' +
+            ' ' +
+            language[0][props.language].str_plsenter +
+            'Valid Driving License' +
+            '\n';
+          i++;
+          flag = true;
+        }
+      }
+    }
+
+    if (KycType2Label == '002') {
+      if (kycID2.length > 0) {
+        if (kycID2.length != 10) {
+          errorMessage =
+            errorMessage +
+            i +
+            ')' +
+            ' ' +
+            language[0][props.language].str_plsenter +
+            'Valid Driving License' +
+            '\n';
+          i++;
+          flag = true;
+        }
+      }
+    }
+
+    if (KycType3Label == '002') {
+      if (kycID3.length > 0) {
+        if (kycID3.length != 10) {
+          errorMessage =
+            errorMessage +
+            i +
+            ')' +
+            ' ' +
+            language[0][props.language].str_plsenter +
+            'Valid Driving License' +
+            '\n';
+          i++;
+          flag = true;
+        }
+      }
+    }
+
+    if (KycType4Label == '002') {
+      if (kycID4.length > 0) {
+        if (kycID4.length != 10) {
+          errorMessage =
+            errorMessage +
+            i +
+            ')' +
+            ' ' +
+            language[0][props.language].str_plsenter +
+            'Valid Driving License' +
+            '\n';
+          i++;
+          flag = true;
+        }
+      }
+    }
+
+    if (KycType1Label == '008') {
+      if (kycID1.length > 0) {
+        if (kycID1.length != 8) {
+          errorMessage =
+            errorMessage +
+            i +
+            ')' +
+            ' ' +
+            language[0][props.language].str_plsenter +
+            'Valid Passport' +
+            '\n';
+          i++;
+          flag = true;
+        }
+      }
+    }
+
+    if (KycType2Label == '008') {
+      if (kycID2.length > 0) {
+        if (kycID2.length != 8) {
+          errorMessage =
+            errorMessage +
+            i +
+            ')' +
+            ' ' +
+            language[0][props.language].str_plsenter +
+            'Valid Passport' +
+            '\n';
+          i++;
+          flag = true;
+        }
+      }
+    }
+
+    if (KycType3Label == '008') {
+      if (kycID3.length > 0) {
+        if (kycID3.length != 8) {
+          errorMessage =
+            errorMessage +
+            i +
+            ')' +
+            ' ' +
+            language[0][props.language].str_plsenter +
+            'Valid Passport' +
+            '\n';
+          i++;
+          flag = true;
+        }
+      }
+    }
+
+    if (KycType4Label == '008') {
+      if (kycID4.length > 0) {
+        if (kycID4.length != 8) {
+          errorMessage =
+            errorMessage +
+            i +
+            ')' +
+            ' ' +
+            language[0][props.language].str_plsenter +
+            'Valid Passport' +
+            '\n';
+          i++;
+          flag = true;
+        }
+      }
+    }
+
     setErrMsg(errorMessage);
     return flag;
   };
@@ -3428,6 +3643,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
                   ComponentName="expiryDate1"
                   textValue={expiryDate1}
                   type="numeric"
+                  Disable={expiryDate1Disable}
                   handleClick={handleClick}
                   handleReference={handleReference}
                   minDate={new Date()}
@@ -3523,6 +3739,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
                   ComponentName="expiryDate2"
                   textValue={expiryDate2}
                   type="numeric"
+                  Disable={expiryDate2Disable}
                   handleClick={handleClick}
                   handleReference={handleReference}
                   minDate={new Date()}
@@ -3618,6 +3835,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
                   ComponentName="expiryDate3"
                   textValue={expiryDate3}
                   type="numeric"
+                  Disable={expiryDate3Disable}
                   handleClick={handleClick}
                   handleReference={handleReference}
                   minDate={new Date()}
@@ -3713,6 +3931,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
                   ComponentName="expiryDate4"
                   textValue={expiryDate4}
                   type="numeric"
+                  Disable={expiryDate4Disable}
                   handleClick={handleClick}
                   handleReference={handleReference}
                   minDate={new Date()}

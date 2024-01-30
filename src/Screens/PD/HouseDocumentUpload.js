@@ -7,7 +7,7 @@ import {
     ScrollView,
     StyleSheet,
     SafeAreaView,
-    FlatList, TouchableOpacity, BackHandler, Image
+    FlatList, TouchableOpacity, BackHandler, Image, PermissionsAndroid
 } from 'react-native';
 import Modal from 'react-native-modal';
 import { React, useState, useEffect } from 'react';
@@ -38,7 +38,7 @@ import ImageBottomPreview from '../../Components/ImageBottomPreview';
 import ImagePicker, { ImageOrVideo } from 'react-native-image-crop-picker';
 import apiInstance from '../../Utils/apiInstance';
 import { updatePDModule, updatePDSubStage, updatePDSubModule, updatePDPage } from '../../Utils/redux/actions/PDAction';
-
+import Geolocation from 'react-native-geolocation-service';
 
 
 const HouseDocumentUpload = (props, { navigation }) => {
@@ -86,7 +86,18 @@ const HouseDocumentUpload = (props, { navigation }) => {
     const [currentPageMan, setCurrentPageMan] = useState(props.route.params.pageMandatory);
     const [parentDocId, setParentDocId] = useState(0);
     const [currentItem, setCurrentItem] = useState([]);
-
+    const [
+        currentLongitude,
+        setCurrentLongitude
+    ] = useState(0.0);
+    const [
+        currentLatitude,
+        setCurrentLatitude
+    ] = useState(0.0);
+    const [
+        locationStatus,
+        setLocationStatus
+    ] = useState('');
 
     const [documentList, setDocumentList] = useState([]);
 
@@ -98,6 +109,15 @@ const HouseDocumentUpload = (props, { navigation }) => {
         // setFilteredDocument(filteredDocumentData);
         //getDocuments(filteredDocumentData);
         //getDocuments();
+        checkPermissions().then(res => {
+            if (res == true) {
+                getOneTimeLocation();
+            } else {
+                setApiError('Permission Not Granted');
+                setErrorModalVisible(true)
+            }
+
+        });
         getAllDocuments();
 
         return () => {
@@ -154,6 +174,114 @@ const HouseDocumentUpload = (props, { navigation }) => {
             hideImageBottomSheet();
         }
     }
+
+    const checkPermissions = async () => {
+        const permissionsToRequest = [];
+
+        if (Platform.OS === 'android') {
+            // Camera permission
+            const cameraPermission = await PermissionsAndroid.check(
+                PermissionsAndroid.PERMISSIONS.CAMERA
+            );
+            if (cameraPermission !== PermissionsAndroid.RESULTS.GRANTED) {
+                permissionsToRequest.push(PermissionsAndroid.PERMISSIONS.CAMERA);
+            }
+
+            // Location permission
+            const locationPermission = await PermissionsAndroid.check(
+                PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+            );
+            if (locationPermission !== PermissionsAndroid.RESULTS.GRANTED) {
+                permissionsToRequest.push(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+            }
+
+            // Request all pending permissions
+            return requestPermissions(permissionsToRequest);
+        } else {
+            // For iOS and other platforms, use react-native-permissions
+            const cameraResult = await check(PERMISSIONS.IOS.CAMERA);
+            const locationResult = await check(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
+
+            const permissionsToRequest = [];
+
+            if (cameraResult !== RESULTS.GRANTED) {
+                permissionsToRequest.push(PERMISSIONS.IOS.CAMERA);
+            }
+
+            if (locationResult !== RESULTS.GRANTED) {
+                permissionsToRequest.push(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
+            }
+
+            // Request all pending permissions
+            request(permissionsToRequest);
+        }
+    };
+
+    const requestPermissions = async (permissions) => {
+        if (Platform.OS === 'android') {
+            try {
+                const grantedPermissions = await PermissionsAndroid.requestMultiple(permissions);
+                const allPermissionsGranted = Object.values(grantedPermissions).every(
+                    status => status === PermissionsAndroid.RESULTS.GRANTED
+                );
+
+                if (allPermissionsGranted) {
+                    // All permissions granted
+
+                } else {
+
+                    // Handle denied permissions
+                }
+                return allPermissionsGranted
+            } catch (error) {
+                console.error(error);
+            }
+        } else {
+            // For iOS and other platforms, use react-native-permissions
+            const results = await request(permissions);
+
+            if (results.every(result => result === RESULTS.GRANTED)) {
+                // All permissions granted
+            } else {
+                // Handle denied permissions
+            }
+        }
+    };
+
+    const getOneTimeLocation = () => {
+
+        Geolocation.getCurrentPosition(
+            //Will give you the current location
+            (position) => {
+
+
+
+                //getting the Longitude from the location json
+                const currentLongitude =
+                    JSON.stringify(position.coords.longitude);
+
+                //getting the Latitude from the location json
+                const currentLatitude =
+                    JSON.stringify(position.coords.latitude);
+
+                //Setting Longitude state
+                setCurrentLongitude(parseFloat(currentLongitude));
+
+                //Setting Longitude state
+                setCurrentLatitude(parseFloat(currentLatitude));
+
+            },
+            (error) => {
+
+                console.log(error)
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 30000,
+                maximumAge: 1000
+            },
+        );
+    };
 
     const MainData = ({ item }) => {
 
@@ -325,7 +453,7 @@ const HouseDocumentUpload = (props, { navigation }) => {
             });
 
             try {
-                const response = await fetch('http://192.168.1.120:8094/api/documents', {
+                const response = await fetch(global.BASEURL + '8094/api/documents', {
                     method: 'POST',
                     body: formData,
                     headers: {
@@ -681,6 +809,7 @@ const HouseDocumentUpload = (props, { navigation }) => {
                         "documentType": newDataArray[i].subCode,
                         "documentName": newDataArray[i].documentName,
                         "pageId": currentPageId,
+                        "geolocation": currentLatitude + "," + currentLongitude
 
                     }
                     appDetailsFinal.push(appDetails)

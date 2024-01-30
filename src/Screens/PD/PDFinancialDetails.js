@@ -8,7 +8,8 @@ import {
     Image,
     Text,
     TextInput,
-    FlatList
+    FlatList,
+    BackHandler
 } from 'react-native';
 import apiInstance from '../../Utils/apiInstance';
 import Colors from '../../Utils/Colors';
@@ -40,6 +41,7 @@ import { Item } from 'react-native-paper/lib/typescript/components/Drawer/Drawer
 import tbl_finexpdetails from '../../Database/Table/tbl_finexpdetails';
 import ErrorModal from '../../Components/ErrorModal';
 import { updatePDModule, updatePDSubStage, updatePDSubModule, updatePDPage } from '../../Utils/redux/actions/PDAction';
+import PDFinancialVerification from './PDFinancialVerification';
 
 const PDFinancialDetails = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
@@ -55,6 +57,13 @@ const PDFinancialDetails = (props, { navigation }) => {
         setIncomeModalVisible(true)
     };
     const hideIncomeSheet = () => setIncomeModalVisible(false);
+
+    const [financeModalVisible, setFinanceModalVisible] = useState(false);
+    const showFinanceSheet = () => {
+        setFinanceModalVisible(true)
+    };
+    const hideFinanceSheet = () => setFinanceModalVisible(false);
+
 
     const [incomeList, setIncomeList] = useState([]);
     const [totalBusineesIncome, setTotalBusineesIncome] = useState([]);
@@ -132,6 +141,8 @@ const PDFinancialDetails = (props, { navigation }) => {
         props.navigation
             .getParent()
             ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
+
         makeSystemMandatoryFields();
         getSystemCodeDetail();
         // getSavedData()
@@ -142,11 +153,18 @@ const PDFinancialDetails = (props, { navigation }) => {
             setEarningTypeDisable(true);
         }
 
-        return () =>
+        return () => {
             props.navigation
                 .getParent()
                 ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
+            backHandler.remove();
+        }
     }, [props.navigation]);
+
+    const handleBackButton = () => {
+        onGoBack();
+        return true; // Prevent default back button behavior
+    };
 
     const getSystemCodeDetail = () => {
 
@@ -871,6 +889,13 @@ const PDFinancialDetails = (props, { navigation }) => {
                             contentComponent={<BusinessIncome addIncome={addIncome} onCloseIncome={hideIncomeSheet} incomeList={incomeList} otherIncomeList={otherIncomeList} componentName={componentName} />} // Pass your custom component here
                         />
 
+                        <ModalContainer
+                            visible={financeModalVisible}
+                            closeModal={hideFinanceSheet}
+                            modalstyle={styles.modalContent1}
+                            contentComponent={<PDFinancialVerification pageId={currentPageId} pageCode={currentPageCode} pageDesc={currentPageDesc} pageMandatory={currentPageMan} />} // Pass your custom component here
+                        />
+
                     </View>
 
 
@@ -1211,6 +1236,15 @@ const PDFinancialDetails = (props, { navigation }) => {
 
                         </View>
                     }
+
+                    <ButtonViewComp
+                        textValue={language[0][props.language].str_viewprevData.toUpperCase()}
+                        textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
+                        viewStyle={Commonstyles.buttonView}
+                        innerStyle={Commonstyles.buttonViewInnerStyle}
+                        handleClick={showFinanceSheet}
+                    />
+
                     <ButtonViewComp
                         textValue={language[0][props.language].str_next.toUpperCase()}
                         textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
@@ -1276,6 +1310,15 @@ const styles = StyleSheet.create({
     modalContent: {
         width: '90%',  // Set width to 90% of the screen width
         aspectRatio: 1,
+        backgroundColor: 'white',
+        padding: 10,
+        margin: 10,
+        borderRadius: 20,
+        alignItems: 'center',
+    },
+    modalContent1: {
+        width: '90%',  // Set width to 90% of the screen width
+        aspectRatio: 0.5,
         backgroundColor: 'white',
         padding: 10,
         margin: 10,

@@ -42,6 +42,7 @@ const PdMainScreen = (props, { navigation }) => {
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const [apiError, setApiError] = useState('');
     const [allCompleted, setAllCompleted] = useState(false);
+    const [psDtatusData, setPDStatusData] = useState(false);
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
@@ -168,6 +169,7 @@ const PdMainScreen = (props, { navigation }) => {
                     }
                     setClientData(clientData);
                     props.addPDStages(response.data);
+                    setPDStatusData(response.data)
                     setLoading(false)
                 }
                 else if (response.data.statusCode === 201) {
@@ -323,6 +325,78 @@ const PdMainScreen = (props, { navigation }) => {
             });
     };
 
+    const getNonGSTStatus = () => {
+        const filteredModule = psDtatusData[0].personalDiscussionSubStageLogs
+            .filter(data => data.subStageCode === global.PDSUBSTAGE)[0]
+            .personalDiscussionModuleLogs
+            .filter(data => data.moduleCode === 'NON_GST_CST_APPL')[0]
+
+        if (filteredModule.moduleStatus.toUpperCase() !== 'COMPLETED') {
+            updatePdStatus();
+        } else {
+            props.navigation.navigate('PDItems', { clientType: global.CLIENTTYPE });
+        }
+
+        //alert(JSON.stringify(filteredModule.moduleStatus))
+
+    }
+
+    const updatePdStatus = () => {
+
+        const appDetails = {
+            "loanApplicationId": global.LOANAPPLICATIONID,
+            "loanWorkflowStage": global.PDSTAGE,
+            "subStageCode": global.PDSUBSTAGE,
+            "moduleCode": 'NON_GST_CST_APPL',
+            "subModule": 'NON_GST_CST_APPL',
+            "pageCode": 'PG_NON_GST_CST_APPL',
+            "status": "Completed",
+            "userId": global.USERID
+        };
+
+        const baseURL = global.PORT1;
+        setLoading(true);
+        apiInstance(baseURL)
+            .post(`/api/v2/PD/Update/PD_WORKFLOW/updateStatus`, appDetails)
+            .then(async response => {
+                // Handle the response data
+                if (global.DEBUG_MODE) console.log('UpdatePDStatusApiResponse::' + JSON.stringify(response.data),);
+                setLoading(false);
+                if (response.status == 200) {
+                    props.navigation.navigate('PDItems', { clientType: global.CLIENTTYPE });
+                }
+                else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
+            })
+            .catch(error => {
+                // Handle the error
+                if (global.DEBUG_MODE)
+                    console.log(
+                        'UpdateStatusApiResponse' + JSON.stringify(error.response),
+                    );
+                setLoading(false);
+
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
+    };
+
     const listView = ({ item }) => {
 
         var bg = ''; clientTypeName = ''
@@ -345,14 +419,23 @@ const PdMainScreen = (props, { navigation }) => {
                     global.CLIENTID = item.clientId;
                     if (item.clientType == 'APPL') {
                         global.PDSUBSTAGE = 'PD_APPL';
+                        if (global.PDTRACKERDATA.nonGst) {
+                            props.navigation.navigate('PDItems', { clientType: item.clientType });
+                        } else {
+                            getNonGSTStatus();
+                        }
                     } else if (item.clientType == 'CO-APPL') {
                         global.PDSUBSTAGE = 'PD_CO_APPL';
+                        props.navigation.navigate('PDItems', { clientType: item.clientType });
                     } else if (item.clientType == 'GRNTR') {
                         global.PDSUBSTAGE = 'PD_GRNTR';
+                        props.navigation.navigate('PDItems', { clientType: item.clientType });
                     }
+
+
                     //getClientWisePDData(item);
                     // getClientSubStageData()
-                    props.navigation.navigate('PDItems', { clientType: item.clientType });
+                    //props.navigation.navigate('PDItems', { clientType: item.clientType });
 
                 }} style={{
                     width: '90%', height: 120, borderColor: '#BBBBBB4D', borderWidth: 1, borderRadius: 10,

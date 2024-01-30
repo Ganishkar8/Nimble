@@ -212,6 +212,18 @@ const getOnlyClientBasedOnID = (id, clientType) => {
     });
 };
 
+const deleteBasedOnClientID = (id) => {
+    const db = databaseInstance.getInstance();
+    db.transaction((tx) => {
+        tx.executeSql(`DELETE FROM ${tableName} WHERE loanApplicationId = ?`,
+            [id],
+            (tx, results) => {
+                console.log('Rows affected:', results.rowsAffected);
+            }, (error) => {
+                console.error('Error executing SQL:', error);
+            });
+    });
+};
 
 const deleteAllClient = async () => {
     try {
@@ -236,5 +248,6 @@ export default {
     getOnlyClientBasedOnID,
     updateKYCManual,
     getAllClientID,
-    updateIsMobileVerified
+    updateIsMobileVerified,
+    deleteBasedOnClientID
 };

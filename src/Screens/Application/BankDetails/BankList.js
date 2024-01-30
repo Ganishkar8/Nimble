@@ -466,14 +466,14 @@ const BankList = (props, { navigation }) => {
             />
 
 
-            {/* {bankDetails.length > 0 && */}<ButtonViewComp
+            {bankDetails.length > 0 && <ButtonViewComp
                 textValue={language[0][props.language].str_submit.toUpperCase()}
                 textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
                 viewStyle={[Commonstyles.buttonView, { marginBottom: 20 }]}
                 innerStyle={Commonstyles.buttonViewInnerStyle}
                 handleClick={buttonNext}
             />
-            {/* } */}
+            }
 
 
         </SafeAreaView>

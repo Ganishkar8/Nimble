@@ -144,12 +144,12 @@ const LoanAddressList = (props, { navigation }) => {
                     }
                     const RegisteredOfficeAddress = data.find(item => item.address_type === 'ROA');
                     if (!RegisteredOfficeAddress) {
-                        //getUdyamRAOCheck(urmNumber);
+                        getUdyamRAOCheck(urmNumber);
 
                     }
                     setRefreshFlatList(!refreshFlatlist)
                 } else {
-                    //getUdyamRAOCheck(urmNumber);
+                    getUdyamRAOCheck(urmNumber);
 
                 }
             })
@@ -159,38 +159,38 @@ const LoanAddressList = (props, { navigation }) => {
 
     }
 
-    // const insertData = () => {
-    //     tbl_loanaddressinfo.insertLoanAddress(
-    //         global.LOANAPPLICATIONID,
-    //         "",
-    //         global.CLIENTID,
-    //         global.CLIENTTYPE,
-    //         "RAO",
-    //         addressLine1.trim(),
-    //         addressLine2.trim(),
-    //         landmark.trim(),
-    //         pincode.trim(),
-    //         city.trim(),
-    //         district.trim(),
-    //         state.trim(),
-    //         "",
-    //         mobileNo,
-    //         email,
-    //         "",
-    //         "",
-    //         "",
-    //         "true",
-    //         ""
-    //     )
-    //         .then(result => {
-    //             if (global.DEBUG_MODE) console.log('Inserted Loan Address detail:', result);
-    //             // props.navigation.replace('LoanAddressList')
+    const insertData = (data) => {
+        tbl_loanaddressinfo.insertLoanAddress(
+            global.LOANAPPLICATIONID,
+            "",
+            global.CLIENTID,
+            global.CLIENTTYPE,
+            "ROA",
+            data.clientAddressInfoDto.addressLine1,
+            data.clientAddressInfoDto.addressLine2,
+            data.clientAddressInfoDto.landmark,
+            data.clientAddressInfoDto.pincode,
+            data.clientAddressInfoDto.city,
+            data.clientAddressInfoDto.district,
+            data.clientAddressInfoDto.state,
+            "INDIA",
+            '',
+            data.clientAddressInfoDto.emailId,
+            "",
+            "",
+            "",
+            "true",
+            "1"
+        )
+            .then(result => {
+                if (global.DEBUG_MODE) console.log('Inserted Loan Address detail:', result);
+                getAddressData();
 
-    //         })
-    //         .catch(error => {
-    //             if (global.DEBUG_MODE) console.error('Error Inserting Loan Address detail:', error);
-    //         });
-    // }
+            })
+            .catch(error => {
+                if (global.DEBUG_MODE) console.error('Error Inserting Loan Address detail:', error);
+            });
+    }
 
     const getUdyamRAOCheck = (udyamNum) => {
 
@@ -205,34 +205,7 @@ const LoanAddressList = (props, { navigation }) => {
                     "createdBy": global.USERID
                 }
 
-                const appDetailsRAO = [{
-                    "isActive": true,
-                    "createdBy": global.USERID,
-                    "createdDate": new Date(),
-                    "modifiedBy": global.USERID,
-                    "modifiedDate": new Date(),
-                    "supervisedBy": global.USERID,
-                    "addressType": addressTypeLabel,
-                    "addressLine1": addressLine1,
-                    "addressLine2": addressLine2,
-                    "landmark": landmark,
-                    "pincode": pincode,
-                    "city": city,
-                    "district": district,
-                    "state": state,
-                    "country": country,
-                    "mobileOrLandLineNumber": "",
-                    "emailId": "",
-                    "addressOwnership": addressOwnerTypeLabel,
-                    "ownerDetails": ownerDetailsLabel,
-                    "ownerName": ownerName,
-                    "geoClassification": '',
-                    "yearsAtResidence": '',
-                    "yearsInCurrentCityOrTown": '',
-                    "supervisedDate": new Date()
-                }]
-
-                apiInstance(baseURL).post(`/api/v2/udyamCheck`, appDetails, appDetailsRAO)
+                apiInstance(baseURL).post(`/api/v2/udyamCheck`, appDetails)
                     .then(async (response) => {
                         // Handle the response data
                         if (global.DEBUG_MODE) console.log("GetUdyamCheckResponse::" + JSON.stringify(response.data));
@@ -241,11 +214,7 @@ const LoanAddressList = (props, { navigation }) => {
 
                             setLoading(false);
 
-                            alert(JSON.stringify(response.data))
-
-                            //insertData(response.data);
-
-                            alert("inserted")
+                            insertData(response.data);
 
 
                         } else if (response.data.statusCode === 201) {

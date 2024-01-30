@@ -146,48 +146,9 @@ const BREView = (props, { navigation }) => {
 
     };
 
-    const updateLoanStatus = () => {
-
-        var module = ''; var page = '';
-
-        module = 'BRE';
-        page = 'BRE_VIEW';
-
-
-        const appDetails = {
-            "loanApplicationId": global.LOANAPPLICATIONID,
-            "loanWorkflowStage": "LN_APP_INITIATION",
-            "subStageCode": "BRE",
-            "moduleCode": module,
-            "pageCode": page,
-            "status": "Completed"
-        }
-        const baseURL = '8901';
-        setLoading(true);
-        apiInstance(baseURL)
-            .post(`/api/v2/loan-application-status/updateStatus`, appDetails)
-            .then(async response => {
-                // Handle the response data
-                if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
-                setLoading(false);
-                global.COMPLETEDSUBSTAGE = 'BRE';
-                global.COMPLETEDMODULE = 'BRE';
-                global.COMPLETEDPAGE = 'BRE_VIEW';
-
-                props.navigation.replace('LoanApplicationMain', { fromScreen: 'CBStatus' })
-
-            })
-            .catch(error => {
-                // Handle the error
-                if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
-                setLoading(false);
-                if (error.response.data != null) {
-                    setApiError(error.response.data.message);
-                    setErrorModalVisible(true)
-                }
-            });
-
-    };
+    const submitBre = () => {
+        props.navigation.navigate('FinalConsentScreen');
+    }
 
     const closeErrorModal = () => {
         setErrorModalVisible(false);
@@ -290,13 +251,17 @@ const BREView = (props, { navigation }) => {
                 />
             </View>
             <View style={styles.fab}>
-                <ButtonViewComp
-                    textValue={language[0][props.language].str_next.toUpperCase()}
-                    textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
-                    viewStyle={Commonstyles.buttonView}
-                    innerStyle={Commonstyles.buttonViewInnerStyle}
-                    handleClick={updateLoanStatus}
-                />
+
+                {cbResponse.length > 0 &&
+                    <ButtonViewComp
+                        textValue={language[0][props.language].str_next.toUpperCase()}
+                        textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
+                        viewStyle={Commonstyles.buttonView}
+                        innerStyle={Commonstyles.buttonViewInnerStyle}
+                        handleClick={submitBre}
+                    />
+                }
+
             </View>
         </View>
 

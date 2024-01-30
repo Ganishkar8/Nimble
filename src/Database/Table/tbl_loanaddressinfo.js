@@ -117,6 +117,19 @@ const deleteLoanDataBasedOnLoanIDAndID = (loanApplicationId, id) => {
     });
 };
 
+const deleteLoanDataBasedOnAddressAndClient = (loanApplicationId, addresstype, client_type) => {
+    const db = databaseInstance.getInstance();
+    db.transaction((tx) => {
+        tx.executeSql(`DELETE FROM ${tableName} WHERE loanApplicationId = ? AND address_type = ? AND client_type = ?`,
+            [loanApplicationId, addresstype, client_type],
+            (tx, results) => {
+                console.log('Rows affected:', results.rowsAffected);
+            }, (error) => {
+                console.error('Error executing SQL:', error);
+            });
+    });
+};
+
 const deleteAllLoanAddress = () => {
     const db = databaseInstance.getInstance();
     db.transaction((tx) => {
@@ -136,5 +149,6 @@ export default {
     getAllLoanAddressDetailsForLoanIDAndID,
     deleteLoanDataBasedOnLoanIDAndID,
     getAllLoanAddressDetails,
-    deleteAllLoanAddress
+    deleteAllLoanAddress,
+    deleteLoanDataBasedOnAddressAndClient
 };
