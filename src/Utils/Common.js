@@ -10,6 +10,7 @@ const CS_URL1 = "https://mbsreg1.brnetsaas.com/MBSConnectREG/frmmbs.aspx";
 const error400 = "Bad Request.Please Contact System Administrator";
 const error500 = "Please Contact System Administrator";
 const error404 = "Method Not Found.Please Contact System Administrator";
+const errorNetwork = "Network Error";
 
 const isValidPhoneNumber = (phoneNumber) => {
   // Regular expression to validate a mobile number with a country code
@@ -357,5 +358,5 @@ export function isEmptyObject(obj) {
 export default {
   isValidPhoneNumber, isEmailValid, isValidText, convertDateFormat, isDateGreaterThan, isValidAlphaText, showErrorAlert, getSystemCodeDescription,
   numberRegex, CS_URL, CS_URL1, integerPattern, formatDate, getCodeDescription, formatTime, hasOnlyOneKey, getCurrentDateTime, getNetworkConnection,
-  isValidPin, isValidPAN, validateVerhoeff, isValidEmail, calculateAge, convertYearDateFormat, getPageID, getClientID, isEmptyObject,error400,error404,error500
+  isValidPin, isValidPAN, validateVerhoeff, isValidEmail, calculateAge, convertYearDateFormat, getPageID, getClientID, isEmptyObject, error400, error404, error500, errorNetwork
 };

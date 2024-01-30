@@ -431,7 +431,6 @@ const PdQuestionarire = (props, { navigation }) => {
                             setSelectedValue(itemValue, item)
                         }}>
                         {/* {componentName == 'productIdPicker' && */}
-                        <Picker.Item value='' label='Select' style={{ backgroundColor: '#fff', color: '#000', fontFamily: 'PoppinsRegular' }} />
 
                         {
                             spinnerList.map(item1 => {

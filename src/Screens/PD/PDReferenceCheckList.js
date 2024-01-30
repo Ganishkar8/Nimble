@@ -169,7 +169,7 @@ const PDReferenceCheckList = (props, { navigation }) => {
     }
 
     const getOneTimeLocation = () => {
-
+        showLocationBottomSheet(true);
 
         Geolocation.getCurrentPosition(
             //Will give you the current location

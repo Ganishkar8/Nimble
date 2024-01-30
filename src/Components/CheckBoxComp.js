@@ -3,8 +3,13 @@ import { Text, Image, View, StyleSheet } from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
 import Colors from '../Utils/Colors';
 
-const CheckBoxComp = ({ textCaption, ComponentName, textStyle, Visible, Disable, handleClick }) => {
+const CheckBoxComp = ({ textCaption, ComponentName, textStyle, Visible, Disable, handleClick, textValue }) => {
   const [isSelected, setSelection] = useState(false);
+
+  React.useEffect(() => {
+    //updateAgeData(formattedServerDatee, formattedServerDatee)
+    setSelection(textValue)
+  }, [textValue]);
 
   const valueChange = () => {
     setSelection(!isSelected);

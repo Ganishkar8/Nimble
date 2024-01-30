@@ -109,7 +109,10 @@ const LeadCreationBasic = (props, { navigation, route }) => {
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
         makeSystemMandatoryFields();
         //pickerData();
-        getData();
+        // alert(global.LEADTYPE)
+        setLeadType(global.LEADTYPE)
+        getData(global.LEADTYPE);
+
 
         //alert(JSON.stringify(props.mobilecodedetail))
 
@@ -403,7 +406,7 @@ const LeadCreationBasic = (props, { navigation, route }) => {
 
     }
 
-    const getData = () => {
+    const getData = (leadType) => {
 
         if (leadType == 'DRAFT') {
             //setLoading(true);

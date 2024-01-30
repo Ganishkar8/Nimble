@@ -39,6 +39,7 @@ import ImageComp from '../../Components/ImageComp';
 import { Item } from 'react-native-paper/lib/typescript/components/Drawer/Drawer';
 import tbl_finexpdetails from '../../Database/Table/tbl_finexpdetails';
 import ErrorModal from '../../Components/ErrorModal';
+import { updatePDModule, updatePDSubStage, updatePDSubModule, updatePDPage } from '../../Utils/redux/actions/PDAction';
 
 const PDFinancialVerification = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
@@ -117,27 +118,29 @@ const PDFinancialVerification = (props, { navigation }) => {
     const [systemMandatoryField, setSystemMandatoryField] = useState(props.mobilecodedetail.processSystemMandatoryFields);
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const [apiError, setApiError] = useState('');
-    const [pageId, setPageId] = useState(global.CURRENTPAGEID);
+
+    const [currentPageId, setCurrentPageId] = useState(props.pageId);
+    const [currentPageCode, setCurrentPageCode] = useState(props.pageCode);
+    const [currentPageDesc, setCurrentPageDesc] = useState(props.pageDesc);
+    const [currentPageMan, setCurrentPageMan] = useState(props.pageMandatory);
+    const [parentDocId, setParentDocId] = useState(0);
+    const [currentItem, setCurrentItem] = useState([]);
+    const [parentFinancialId, setParentFinancialId] = useState(0);
 
 
     useEffect(() => {
-        props.navigation
-            .getParent()
-            ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
+
         makeSystemMandatoryFields();
         getSystemCodeDetail();
-        getSavedData()
+        // getSavedData()
+        getFinancialData();
 
-        if (global.USERTYPEID == 1163) {
-            setEarningFrequencyDisable(true);
-            setEarningTypeDisable(true);
-        }
+        setEarningFrequencyDisable(true);
+        setEarningTypeDisable(true);
 
-        return () =>
-            props.navigation
-                .getParent()
-                ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
-    }, [props.navigation]);
+
+
+    }, []);
 
     const getSystemCodeDetail = () => {
 
@@ -150,133 +153,203 @@ const PDFinancialVerification = (props, { navigation }) => {
 
     }
 
-    const getSavedData = () => {
+    const getFinancialData = () => {
 
+        const baseURL = global.PORT1;
+        setLoading(true)
 
+        const appDetails = {
+            "clientId": global.CLIENTID,
+            "userId": global.USERID,
+            "pageId": currentPageId,
+            "pdLevel": global.PDSTAGE,
+            "loanApplicationNumber": global.LOANAPPLICATIONNUM
+        }
 
-        try {
-            const filteredClients = global.LEADTRACKERDATA.clientDetail.filter((client) => client.clientType === global.CLIENTTYPE);
+        if (global.PDSTAGE == 'PD_2') {
 
-            if (filteredClients.length > 0) {
-                if (filteredClients[0].clientFinancialDetail != undefined) {
-                    setEarningFrequencyLabel(filteredClients[0].clientFinancialDetail.earningFrequency)
-                    setEarningTypeLabel(filteredClients[0].clientFinancialDetail.earningType)
-                }
+            if (currentPageCode == 'PG_FN_DTLS_VRF_APPL') {
+                appDetails.previousPage = 10;
+            } else if (currentPageCode == 'PG_FN_DTLS_VRF_CO_APPL') {
+                appDetails.previousPage = 22;
+            } else if (currentPageCode == 'PG_FN_DTLS_VRF_GRNTR') {
+                appDetails.previousPage = 34;
+            }
+
+        } else if (global.PDSTAGE == 'PD_3') {
+            if (currentPageCode == 'PG_FN_DTLS_VRF_APPL') {
+                appDetails.previousPage = 47;
+            } else if (currentPageCode == 'PG_FN_DTLS_VRF_CO_APPL') {
+                appDetails.previousPage = 59;
+            } else if (currentPageCode == 'PG_FN_DTLS_VRF_GRNTR') {
+                appDetails.previousPage = 71;
             }
         }
-        catch (err) {
 
-        }
+        apiInstance(baseURL).post(`/api/v1/pd/PDFinancialDetailsVerification`, appDetails)
+            .then((response) => {
+                // Handle the response data
+                if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(response.data));
+
+                if (response.status == 200) {
+                    setLoading(false)
+                    if (response.data === '') {
+                        //getDocuments([]);
+                    } else {
+                        setParentFinancialId(response.data.id);
+                        getSavedData(response.data);
+                    }
+
+                }
+                else if (response.data.statusCode === 201) {
+                    setLoading(false)
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setLoading(false)
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
+
+            })
+            .catch((error) => {
+                // Handle the error
+                setLoading(false)
+                if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(error.response.data));
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
+    }
+
+    const getSavedData = (financialData) => {
+
+
+        setEarningFrequencyLabel(financialData.earningFrequency)
+        setEarningTypeLabel(financialData.earningType)
 
         let totalExpenses = 0, totalOtherexpense = 0, totalIncome = 0, totalotherIncome = 0;
-        tbl_finexpdetails.getFinExpDetails(global.LOANAPPLICATIONID,
-            global.CLIENTID,
-            global.CLIENTTYPE, 'BUSINESS_INCOME').then(data => {
-                if (global.DEBUG_MODE) console.log('BUSINESS_INCOME Detail:', JSON.stringify(data));
-                const newData = data.map(item => {
-                    const extraJson = { colorCode: 'Green' };
-                    totalIncome += parseInt(item.Amount);
-                    return { ...item, ...extraJson };
-                });
-                setIncomeList(newData)
-                setTotalBusineesIncome(totalIncome)
-            })
-            .catch(error => {
-                if (global.DEBUG_MODE) console.error('Error fetching BUSINESS_INCOME details:', error);
-            });
-        tbl_finexpdetails.getFinExpDetails(global.LOANAPPLICATIONID,
-            global.CLIENTID,
-            global.CLIENTTYPE, 'OTHER_SOURCE_INCOME').then(data => {
-                if (global.DEBUG_MODE) console.log('OTHER_SOURCE_INCOME Detail:', JSON.stringify(data));
-                const newData = data.map(item => {
-                    const extraJson = { colorCode: 'Green' };
-                    totalotherIncome += parseInt(item.Amount);
-                    return { ...item, ...extraJson };
-                });
 
-                setOtherTotalIncome(totalotherIncome);
-                setotherIncomeList(newData)
-            })
-            .catch(error => {
-                if (global.DEBUG_MODE) console.error('Error fetching OTHER_SOURCE_INCOME details:', error);
+        financialData.pdBusinessIncomes.forEach(income => {
+            income.Amount = income.incomeAmount;
+            delete income.incomeAmount;
+        });
+
+        financialData.pdBusinessIncomes.forEach(income => {
+            income.incomeLabel = income.incomeType;
+            delete income.incomeType;
+        });
+
+        financialData.pdBusinessExpens.forEach(expense => {
+            expense.Amount = expense.expenseAmount;
+            delete expense.expenseAmount;
+        });
+
+        financialData.pdBusinessExpens.forEach(expense => {
+            expense.incomeLabel = expense.expenseType;
+            delete expense.expenseType;
+        });
+
+        const filteredIncome = financialData.pdBusinessIncomes.filter(expense => expense.parentIncomeType === "BUSINESS_INCOME");
+
+        if (global.DEBUG_MODE) console.log('BUSINESS_INCOME Detail:', JSON.stringify(filteredIncome));
+        if (filteredIncome) {
+            const newData = filteredIncome.map(item => {
+                const extraJson = { colorCode: 'Green', usercode: 'BUSINESS_INCOME' };
+                totalIncome += parseInt(item.Amount);
+                return { ...item, ...extraJson };
             });
-        tbl_finexpdetails.getFinExpDetails(global.LOANAPPLICATIONID,
-            global.CLIENTID,
-            global.CLIENTTYPE, 'BUSINESS_EXPENSES').then(data => {
-                if (global.DEBUG_MODE) console.log('BUSINESS_EXPENSES Detail:', JSON.stringify(data));
-                const newData = data.map(item => {
-                    const extraJson = { colorCode: 'Red' };
-                    totalExpenses += parseInt(item.Amount);
-                    return { ...item, ...extraJson };
-                });
-                setTotalBusineesExpenses(totalExpenses)
-                setExpenseList(newData);
-            })
-            .catch(error => {
-                if (global.DEBUG_MODE) console.error('Error fetching BUSINESS_EXPENSES details:', error);
-            });
-        tbl_finexpdetails.getFinExpDetails(global.LOANAPPLICATIONID,
-            global.CLIENTID,
-            global.CLIENTTYPE, 'OTHER_SOURCE_EXPENSES').then(data => {
-                if (global.DEBUG_MODE) console.log('OTHER_SOURCE_EXPENSES Detail:', JSON.stringify(data));
-                const newData = data.map(item => {
-                    const extraJson = { colorCode: 'Red' };
-                    totalOtherexpense += parseInt(item.Amount);
-                    return { ...item, ...extraJson };
-                });
-                setOtherTotalExpense(totalOtherexpense)
-                setotherExpenseList(newData)
-            })
-            .catch(error => {
-                if (global.DEBUG_MODE) console.error('Error fetching OTHER_SOURCE_EXPENSES details:', error);
+            setIncomeList(newData)
+            setTotalBusineesIncome(totalIncome)
+        }
+
+        const filteredOtherIncome = financialData.pdBusinessIncomes.filter(expense => expense.parentIncomeType === "OTHER_SOURCE_INCOME");
+
+        if (global.DEBUG_MODE) console.log('OTHER_BUSINESS_EXPENSES Detail:', JSON.stringify(filteredOtherIncome));
+        if (filteredOtherIncome) {
+            const newData = filteredOtherIncome.map(item => {
+                const extraJson = { colorCode: 'Green', usercode: 'OTHER_SOURCE_INCOME' };
+                totalotherIncome += parseInt(item.Amount);
+                return { ...item, ...extraJson };
             });
 
-        // tbl_finexpdetails.getFinExpDetailsAll(global.LOANAPPLICATIONID,
-        //   global.CLIENTID,
-        //   global.CLIENTTYPE).then(data => {
-        //     if (global.DEBUG_MODE) console.log('All Detail:', JSON.stringify(data));
-        //     setotherExpenseList(data)
-        //   })
-        //   .catch(error => {
-        //     if (global.DEBUG_MODE) console.error('Error fetching OTHER_SOURCE_EXPENSES details:', error);
-        //   });
+            setOtherTotalIncome(totalotherIncome);
+            setotherIncomeList(newData)
+        }
+
+        const filteredExpenses = financialData.pdBusinessExpens.filter(expense => expense.parentExpenseType === "BUSINESS_EXPENSES");
+
+        if (global.DEBUG_MODE) console.log('BUSINESS_EXPENSES Detail:', JSON.stringify(filteredExpenses));
+        if (filteredExpenses) {
+            const newData = filteredExpenses.map(item => {
+                const extraJson = { colorCode: 'Red', usercode: 'BUSINESS_EXPENSES' };
+                totalExpenses += parseInt(item.Amount);
+                return { ...item, ...extraJson };
+            });
+            setTotalBusineesExpenses(totalExpenses)
+            setExpenseList(newData);
+        }
+
+        const filteredOtherExpenses = financialData.pdBusinessExpens.filter(expense => expense.parentExpenseType === "OTHER_SOURCE_EXPENSES");
+
+        if (global.DEBUG_MODE) console.log('OTHER_BUSINESS_EXPENSES Detail:', JSON.stringify(filteredOtherExpenses));
+        if (filteredOtherExpenses) {
+            const newData = filteredOtherExpenses.map(item => {
+                const extraJson = { colorCode: 'Red', usercode: 'OTHER_SOURCE_EXPENSES' };
+                totalOtherexpense += parseInt(item.Amount);
+                return { ...item, ...extraJson };
+            });
+            setOtherTotalExpense(totalOtherexpense)
+            setotherExpenseList(newData)
+        }
+
     }
 
 
     const onGoBack = () => {
-        props.navigation.goBack();
+        props.navigation.replace('PDItems', { clientType: global.CLIENTTYPE });
     }
 
     const makeSystemMandatoryFields = () => {
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ern_typ' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ern_typ' && data.pageId === currentPageId).map((value, index) => {
 
-            if (value.mandatory) {
+            if (value.isMandatory) {
                 setEarningTypeMan(true);
             }
-            if (value.hide) {
+            if (value.isHide) {
                 setEarningTypeVisible(false);
             }
-            if (value.disable) {
+            if (value.isDisable) {
                 setEarningTypeDisable(true);
             }
-            if (value.captionChange) {
+            if (value.isCaptionChange) {
                 setEarningTypeCaption(value[0].fieldCaptionChange)
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ern_frq' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ern_frq' && data.pageId === currentPageId).map((value, index) => {
 
-            if (value.mandatory) {
+            if (value.isMandatory) {
                 setEarningFrequencyMan(true);
             }
-            if (value.hide) {
+            if (value.isHide) {
                 setEarningFrequencyVisible(false);
             }
-            if (value.disable) {
+            if (value.isDisable) {
                 setEarningFrequencyDisable(true);
             }
-            if (value.captionChange) {
+            if (value.isCaptionChange) {
                 setEarningFrequencyCaption(value[0].fieldCaptionChange)
             }
         });
@@ -364,6 +437,7 @@ const PDFinancialVerification = (props, { navigation }) => {
                 Amount: incomeAmount,
                 usercode: 'BUSINESS_INCOME',
                 colorCode: 'Green',
+                id: 0
             };
             newDataArray.push(newObject);
 
@@ -379,6 +453,7 @@ const PDFinancialVerification = (props, { navigation }) => {
                 Amount: incomeAmount,
                 usercode: 'OTHER_SOURCE_INCOME',
                 colorCode: 'Green',
+                id: 0
             };
             newDataArray.push(newObject);
             const totalAmount = newDataArray.reduce((sum, incomeItem) => sum + parseFloat(incomeItem.Amount), 0);
@@ -391,6 +466,7 @@ const PDFinancialVerification = (props, { navigation }) => {
                 Amount: incomeAmount,
                 usercode: 'BUSINESS_EXPENSES',
                 colorCode: 'Red',
+                id: 0
             };
             newDataArray.push(newObject);
             const totalAmount = newDataArray.reduce((sum, incomeItem) => sum + parseFloat(incomeItem.Amount), 0);
@@ -403,6 +479,7 @@ const PDFinancialVerification = (props, { navigation }) => {
                 Amount: incomeAmount,
                 usercode: 'OTHER_SOURCE_EXPENSES',
                 colorCode: 'Red',
+                id: 0
             };
             newDataArray.push(newObject);
             const totalAmount = newDataArray.reduce((sum, incomeItem) => sum + parseFloat(incomeItem.Amount), 0);
@@ -431,7 +508,7 @@ const PDFinancialVerification = (props, { navigation }) => {
             setExpenseList(updatedIncomeList);
             setRefreshExpenseFlatList(!refreshExpenseFlatlist)
         } else if (data.usercode == 'OTHER_SOURCE_EXPENSES') {
-            const updatedIncomeList = expenseList.filter((item) => item.incomeLabel !== data.incomeLabel);
+            const updatedIncomeList = otherExpenseList.filter((item) => item.incomeLabel !== data.incomeLabel);
             const totalAmount = updatedIncomeList.reduce((sum, incomeItem) => sum + parseFloat(incomeItem.Amount), 0);
             setOtherTotalExpense(totalAmount)
             setotherExpenseList(updatedIncomeList);
@@ -463,15 +540,6 @@ const PDFinancialVerification = (props, { navigation }) => {
 
                     </View>
 
-                    {global.USERTYPEID == 1164 &&
-                        <View>
-                            <MaterialCommunityIcons
-                                name="delete"
-                                size={20}
-                                onPress={() => { deleteIncomeList(item) }}
-                                color="#F76464"></MaterialCommunityIcons>
-                        </View>}
-
                 </View>
 
             </View >
@@ -481,11 +549,10 @@ const PDFinancialVerification = (props, { navigation }) => {
 
     const callFinancialData = () => {
 
-        if (global.USERTYPEID == 1163) {
-            navigatetoBank();
-            return;
-        }
-
+        // if (global.USERTYPEID == 1163) {
+        //     navigatetoBank();
+        //     return;
+        // }
         postFinancialData();
 
     }
@@ -519,7 +586,7 @@ const PDFinancialVerification = (props, { navigation }) => {
             const expenseOfObjects = [];
             for (let i = 0; i < mergedExpenseArray.length; i++) {
                 expenseOfObjects.push({
-                    "expensesType": mergedExpenseArray[i].incomeLabel,
+                    "expenseType": mergedExpenseArray[i].incomeLabel,
                     "expenseAmount": parseInt(mergedExpenseArray[i].Amount),
                     "parentExpenseType": mergedExpenseArray[i].usercode,
                 })
@@ -530,6 +597,9 @@ const PDFinancialVerification = (props, { navigation }) => {
             console.log('ExpenseOfObjects::', expenseOfObjects);
 
             const appDetails = {
+                "id": parentFinancialId,
+                "clientType": "string",
+                "pdLevel": "string",
                 "earningType": earningTypeLabel,
                 "earningFrequency": earningFrequencyLabel,
                 "totalBusinessIncome": parseInt(totalBusineesIncome),
@@ -540,19 +610,20 @@ const PDFinancialVerification = (props, { navigation }) => {
                 "totalAvgMonthlyExpense": parseInt(totalBusineesExpenses) + parseInt(totalOtherExpense),
                 "createdBy": global.USERID,
                 "createdDate": new Date(),
-                "clientIncomeDetails": incomeOfObjects,
-                "clientExpenseDetails": expenseOfObjects
+                "pdBusinessIncomes": incomeOfObjects,
+                "pdBusinessExpens": expenseOfObjects,
+                "pageId": currentPageId,
             }
             const baseURL = global.PORT1;
             setLoading(true);
             apiInstance(baseURL)
-                .post(`/api/v2/loan-demographics/${global.CLIENTID}/financialDetail`, appDetails)
+                .post(`/api/v1/pd/PDFinancialDetailsVerification/loan-application-number/${global.LOANAPPLICATIONNUM}/clientId/${global.CLIENTID}`, appDetails)
                 .then(async response => {
                     // Handle the response data
                     if (global.DEBUG_MODE) console.log('PostFinancialResponse::' + JSON.stringify(response.data),);
                     setLoading(false);
-                    if (response.status == 200) {
-                        insertData(mergedArray);
+                    if (response.status == 200 || response.status == 201) {
+                        updatePdStatus();
                     } else if (response.data.statusCode === 201) {
                         setApiError(response.data.message);
                         setErrorModalVisible(true);
@@ -583,63 +654,31 @@ const PDFinancialVerification = (props, { navigation }) => {
         }
     }
 
-    const navigatetoBank = async () => {
-        var page = '';
-        if (global.CLIENTTYPE == 'APPL') {
-            page = 'DMGRC_APPL_BNK_DTLS';
-        } else if (global.CLIENTTYPE == 'CO-APPL') {
-            page = 'DMGRC_COAPPL_BNK_DTLS';
-        } else if (global.CLIENTTYPE == 'GRNTR') {
-            page = 'DMGRC_GRNTR_BNK_DTLS';
-        }
-        await Common.getPageID(global.FILTEREDPROCESSMODULE, page)
-        props.navigation.replace('BankList');
-    }
-
-    const updateLoanStatus = () => {
-
-        var module = ''; var page = '';
-
-        if (global.CLIENTTYPE == 'APPL') {
-            module = 'LN_DMGP_APLCT';
-            page = 'DMGRC_APPL_FNCL_DTLS';
-        } else if (global.CLIENTTYPE == 'CO-APPL') {
-            module = 'LN_DMGP_COAPLCT';
-            page = 'DMGRC_COAPPL_FNCL_DTLS';
-        } else if (global.CLIENTTYPE == 'GRNTR') {
-            module = 'LN_DMGP_GRNTR';
-            page = 'DMGRC_GRNTR_FNCL_DTLS';
-        }
+    const updatePdStatus = () => {
 
         const appDetails = {
             "loanApplicationId": global.LOANAPPLICATIONID,
-            "loanWorkflowStage": "LN_APP_INITIATION",
-            "subStageCode": "LN_DEMGRP",
-            "moduleCode": module,
-            "pageCode": page,
-            "status": "Completed"
-        }
+            "loanWorkflowStage": global.PDSTAGE,
+            "subStageCode": global.PDSUBSTAGE,
+            "moduleCode": global.PDMODULE,
+            "subModule": global.PDSUBMODULE,
+            "pageCode": currentPageCode,
+            "status": "Completed",
+            "userId": global.USERID
+        };
+
         const baseURL = global.PORT1;
         setLoading(true);
         apiInstance(baseURL)
-            .post(`/api/v2/loan-application-status/updateStatus`, appDetails)
+            .post(`/api/v2/PD/Update/PD_WORKFLOW/updateStatus`, appDetails)
             .then(async response => {
                 // Handle the response data
-                if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
+                if (global.DEBUG_MODE) console.log('UpdatePDStatusApiResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
                 if (response.status == 200) {
-                    if (global.CLIENTTYPE == 'APPL') {
-                        global.COMPLETEDMODULE = 'LN_DMGP_APLCT';
-                        global.COMPLETEDPAGE = 'DMGRC_APPL_FNCL_DTLS';
-                    } else if (global.CLIENTTYPE == 'CO-APPL') {
-                        global.COMPLETEDMODULE = 'LN_DMGP_COAPLCT';
-                        global.COMPLETEDPAGE = 'DMGRC_COAPPL_FNCL_DTLS';
-                    } else if (global.CLIENTTYPE == 'GRNTR') {
-                        global.COMPLETEDMODULE = 'LN_DMGP_GRNTR';
-                        global.COMPLETEDPAGE = 'DMGRC_GRNTR_FNCL_DTLS';
-                    }
-                    navigatetoBank();
-                } else if (response.data.statusCode === 201) {
+                    getAllStatus();
+                }
+                else if (response.data.statusCode === 201) {
                     setApiError(response.data.message);
                     setErrorModalVisible(true);
                 } else if (response.data.statusCode === 202) {
@@ -649,7 +688,10 @@ const PDFinancialVerification = (props, { navigation }) => {
             })
             .catch(error => {
                 // Handle the error
-                if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
+                if (global.DEBUG_MODE)
+                    console.log(
+                        'UpdateStatusApiResponse' + JSON.stringify(error.response),
+                    );
                 setLoading(false);
 
                 if (error.response.status == 404) {
@@ -666,31 +708,26 @@ const PDFinancialVerification = (props, { navigation }) => {
                     setErrorModalVisible(true)
                 }
             });
-
     };
 
-    const insertData = (mergedArray) => {
+    const getAllStatus = () => {
 
-        for (let i = 0; i < mergedArray.length; i++) {
-            tbl_finexpdetails.insertIncExpDetails(
-                global.LOANAPPLICATIONID,
-                global.CLIENTID,
-                global.CLIENTTYPE,
-                '',
-                mergedArray[i].usercode,
-                mergedArray[i].incomeLabel,
-                mergedArray[i].Amount,
-            ).then(result => {
-                if (global.DEBUG_MODE) console.log('Inserted Financial detail:', result);
-            })
-                .catch(error => {
-                    if (global.DEBUG_MODE) console.error('Error Inserting Financial detail:', error);
-                });
+        const filteredModule = props.pdSubStage[0].personalDiscussionSubStageLogs
+            .filter(data => data.subStageCode === global.PDSUBSTAGE)[0]
+            .personalDiscussionModuleLogs
+            .filter(data => data.moduleCode === global.PDMODULE)[0]
+
+        if (filteredModule) {
+            props.updatePDModule(global.PDSUBSTAGE, global.PDMODULE);
+            props.updatePDSubModule(global.PDSUBSTAGE, global.PDMODULE, global.PDSUBMODULE);
+            props.updatePDPage(global.PDSUBSTAGE, global.PDMODULE, global.PDSUBMODULE, currentPageCode);
+            props.navigation.replace('PDItems', { clientType: global.CLIENTTYPE });
+        } else {
+            if (Common.DEBUG_MODE) console.log('Module not found.');
         }
 
-        updateLoanStatus();
-
     }
+
 
     const closeErrorModal = () => {
         setErrorModalVisible(false);
@@ -720,18 +757,6 @@ const PDFinancialVerification = (props, { navigation }) => {
                     <View
                         style={{
                             width: '100%',
-                            height: 56,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                        }}>
-                        <HeadComp
-                            textval={language[0][props.language].str_pd}
-                            props={props} onGoBack={onGoBack}
-                        />
-                    </View>
-                    <View
-                        style={{
-                            width: '100%',
                             alignItems: 'center',
                         }}>
                         <View
@@ -751,10 +776,11 @@ const PDFinancialVerification = (props, { navigation }) => {
                                     fontFamily: 'Poppins-Medium',
                                     color: Colors.mediumgrey,
                                 }}>
-                                Financial Details Verification
+                                Finacial Details Verification
                             </Text>
                         </View>
                     </View>
+
 
                     <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
                         <View style={{ width: '90%', marginTop: 10 }}>
@@ -814,6 +840,7 @@ const PDFinancialVerification = (props, { navigation }) => {
                         <ModalContainer
                             visible={incomeModalVisible}
                             closeModal={hideIncomeSheet}
+                            modalstyle={styles.modalContent}
                             contentComponent={<BusinessIncome addIncome={addIncome} onCloseIncome={hideIncomeSheet} incomeList={incomeList} otherIncomeList={otherIncomeList} componentName={componentName} />} // Pass your custom component here
                         />
 
@@ -844,27 +871,6 @@ const PDFinancialVerification = (props, { navigation }) => {
                             keyExtractor={item => item.incomeLabel}
                         />
                     </View>
-
-                    {global.USERTYPEID == 1164 &&
-                        <View
-                            style={{
-                                marginTop: 25,
-                                width: '90%',
-                                flexDirection: 'row',
-                                justifyContent: 'flex-end',
-                            }}>
-
-                            <TouchableOpacity onPress={() => showIncomeSheet('Income')}>
-                                <Text
-                                    style={{
-                                        color: Colors.darkblue,
-                                        fontFamily: 'Poppins-Medium'
-                                    }}>
-                                    + Add Income
-                                </Text>
-                            </TouchableOpacity>
-
-                        </View>}
 
                     {incomeList.length > 0 &&
                         <View style={{ width: '100%', marginTop: '3%', alignItems: 'center' }}>
@@ -914,25 +920,7 @@ const PDFinancialVerification = (props, { navigation }) => {
                         />
                     </View>
 
-                    {global.USERTYPEID == 1164 &&
-                        <View
-                            style={{
-                                marginTop: 25,
-                                width: '90%',
-                                flexDirection: 'row',
-                                justifyContent: 'flex-end',
-                            }}>
-                            <TouchableOpacity onPress={() => showIncomeSheet('OtherIncome')}>
-                                <Text
-                                    style={{
-                                        color: Colors.darkblue,
-                                        fontFamily: 'Poppins-Medium'
-                                    }}>
-                                    + Add Other Income
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                    }
+
                     {otherIncomeList.length > 0 &&
                         <View style={{ width: '100%', marginTop: '3%', alignItems: 'center' }}>
                             <View style={{ width: '90%', marginTop: 10 }}>
@@ -1022,25 +1010,6 @@ const PDFinancialVerification = (props, { navigation }) => {
                         />
                     </View>
 
-                    {global.USERTYPEID == 1164 &&
-                        <View
-                            style={{
-                                marginTop: 25,
-                                width: '90%',
-                                flexDirection: 'row',
-                                justifyContent: 'flex-end',
-                            }}>
-                            <TouchableOpacity onPress={() => showIncomeSheet('Expenses')}>
-                                <Text
-                                    style={{
-                                        color: Colors.darkblue,
-                                        fontFamily: 'Poppins-Medium'
-                                    }}>
-                                    + Add Expenses
-                                </Text>
-                            </TouchableOpacity>
-                        </View>}
-
                     {expenseList.length > 0 &&
                         <View style={{ width: '100%', marginTop: '3%', alignItems: 'center' }}>
                             <View style={{ width: '90%', marginTop: 10 }}>
@@ -1089,25 +1058,6 @@ const PDFinancialVerification = (props, { navigation }) => {
                             keyExtractor={item => item.incomeLabel}
                         />
                     </View>
-
-                    {global.USERTYPEID == 1164 &&
-                        <View
-                            style={{
-                                marginTop: 25,
-                                width: '90%',
-                                flexDirection: 'row',
-                                justifyContent: 'flex-end',
-                            }}>
-                            <TouchableOpacity onPress={() => showIncomeSheet('OtherExpense')}>
-                                <Text
-                                    style={{
-                                        color: Colors.darkblue,
-                                        fontFamily: 'Poppins-Medium'
-                                    }}>
-                                    + Add Other Expenses
-                                </Text>
-                            </TouchableOpacity>
-                        </View>}
 
                     {otherExpenseList.length > 0 &&
                         <View style={{ width: '100%', marginTop: '3%', alignItems: 'center' }}>
@@ -1158,15 +1108,6 @@ const PDFinancialVerification = (props, { navigation }) => {
 
                         </View>
                     }
-                    <ButtonViewComp
-                        textValue={language[0][props.language].str_next.toUpperCase()}
-                        textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
-                        viewStyle={Commonstyles.buttonView}
-                        innerStyle={Commonstyles.buttonViewInnerStyle}
-                        handleClick={callFinancialData}
-                    />
-
-
 
                 </View>
 
@@ -1217,29 +1158,40 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
         margin: 0,
     },
-    modalContent: {
-        backgroundColor: 'white',
-        padding: 16,
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-    },
     checkbox: {
         alignSelf: 'center',
     },
+    modalContent: {
+        width: '90%',  // Set width to 90% of the screen width
+        aspectRatio: 0.5,
+        backgroundColor: 'white',
+        padding: 10,
+        margin: 10,
+        borderRadius: 20,
+        alignItems: 'center',
+    },
 });
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
     const { language } = state.languageReducer;
     const { profileDetails } = state.profileReducer;
     const { mobileCodeDetails } = state.mobilecodeReducer;
+    const { pdDetails } = state.personalDiscussionReducer;
+    const { pdSubStages } = state.pdStagesReducer;
     return {
         language: language,
         profiledetail: profileDetails,
-        mobilecodedetail: mobileCodeDetails
+        pdDetail: pdDetails,
+        mobilecodedetail: mobileCodeDetails,
+        pdSubStage: pdSubStages
     }
-}
+};
 
 const mapDispatchToProps = dispatch => ({
     languageAction: item => dispatch(languageAction(item)),
+    updatePDSubStage: item => dispatch(updatePDSubStage(item)),
+    updatePDModule: (subStage, module) => dispatch(updatePDModule(subStage, module)),
+    updatePDSubModule: (subStage, module, subModule) => dispatch(updatePDSubModule(subStage, module, subModule)),
+    updatePDPage: (subStage, module, subModule, page) => dispatch(updatePDPage(subStage, module, subModule, page)),
 });
 
 export default connect(

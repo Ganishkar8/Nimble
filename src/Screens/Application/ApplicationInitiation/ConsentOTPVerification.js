@@ -260,48 +260,31 @@ const ConsentOTPVerification = (props, { navigation }) => {
 
         var module = ''; var page = '';
 
-        if (global.CLIENTTYPE == 'APPL') {
-            module = 'DOC_UPLD';
-            page = 'DOC_UPLD_APPLCNT';
-        } else if (global.CLIENTTYPE == 'CO-APPL') {
-            module = 'DOC_UPLD';
-            page = 'DOC_UPLD_COAPPLCNT';
-        } else if (global.CLIENTTYPE == 'GRNTR') {
-            module = 'DOC_UPLD';
-            page = 'DOC_UPLD_GRNTR';
-        }
+        module = 'BRE';
+        page = 'BRE_VIEW';
+
 
         const appDetails = {
             "loanApplicationId": global.LOANAPPLICATIONID,
             "loanWorkflowStage": "LN_APP_INITIATION",
-            "subStageCode": "LN_DEMGRP",
+            "subStageCode": "BRE",
             "moduleCode": module,
             "pageCode": page,
             "status": "Completed"
         }
         const baseURL = '8901';
         setLoading(true);
-        apiInstancelocal(baseURL)
+        apiInstance(baseURL)
             .post(`/api/v2/loan-application-status/updateStatus`, appDetails)
             .then(async response => {
                 // Handle the response data
-
                 if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
-
-                if (global.CLIENTTYPE == 'APPL') {
-                    global.COMPLETEDMODULE = 'DOC_UPLD';
-                    global.COMPLETEDPAGE = 'DOC_UPLD_APPLCNT';
-                } else if (global.CLIENTTYPE == 'CO-APPL') {
-                    global.COMPLETEDMODULE = 'DOC_UPLD';
-                    global.COMPLETEDPAGE = 'DOC_UPLD_COAPPLCNT';
-                } else if (global.CLIENTTYPE == 'GRNTR') {
-                    global.COMPLETEDMODULE = 'DOC_UPLD';
-                    global.COMPLETEDPAGE = 'DOC_UPLD_GRNTR';
-                }
-
                 global.COMPLETEDSUBSTAGE = 'BRE';
-                sendDataBack();
+                global.COMPLETEDMODULE = 'BRE';
+                global.COMPLETEDPAGE = 'BRE_VIEW';
+
+                props.navigation.replace('LoanApplicationMain', { fromScreen: 'BREView' })
 
             })
             .catch(error => {

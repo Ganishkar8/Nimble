@@ -326,7 +326,7 @@ const LoanDocumentUpload = (props, { navigation }) => {
             });
 
             try {
-                const response = await fetch('http://192.168.1.120:8094/api/documents', {
+                const response = await fetch(global.BASEURL + '8094/api/documents', {
                     method: 'POST',
                     body: formData,
                     headers: {
@@ -570,26 +570,26 @@ const LoanDocumentUpload = (props, { navigation }) => {
 
                 if (global.DEBUG_MODE) console.log('UpdateDMSIDResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
+                updateLoanStatus();
+                // if (processModuleLength == 1) {
 
-                if (processModuleLength == 1) {
-
-                } else if (processModuleLength == 2) {
-                    if (global.CLIENTTYPE == 'APPL') {
-                        updateLoanStatus();
-                    } else if (global.CLIENTTYPE == 'CO-APPL') {
-                        props.navigation.navigate('FinalConsentScreen');
-                    } else if (global.CLIENTTYPE == 'GRNTR') {
-                        props.navigation.navigate('FinalConsentScreen');
-                    }
-                } else if (processModuleLength == 3) {
-                    if (global.CLIENTTYPE == 'APPL') {
-                        updateLoanStatus();
-                    } else if (global.CLIENTTYPE == 'CO-APPL') {
-                        updateLoanStatus();
-                    } else if (global.CLIENTTYPE == 'GRNTR') {
-                        props.navigation.navigate('FinalConsentScreen');
-                    }
-                }
+                // } else if (processModuleLength == 2) {
+                //     if (global.CLIENTTYPE == 'APPL') {
+                //         updateLoanStatus();
+                //     } else if (global.CLIENTTYPE == 'CO-APPL') {
+                //         props.navigation.navigate('FinalConsentScreen');
+                //     } else if (global.CLIENTTYPE == 'GRNTR') {
+                //         props.navigation.navigate('FinalConsentScreen');
+                //     }
+                // } else if (processModuleLength == 3) {
+                //     if (global.CLIENTTYPE == 'APPL') {
+                //         updateLoanStatus();
+                //     } else if (global.CLIENTTYPE == 'CO-APPL') {
+                //         updateLoanStatus();
+                //     } else if (global.CLIENTTYPE == 'GRNTR') {
+                //         props.navigation.navigate('FinalConsentScreen');
+                //     }
+                // }
 
             })
             .catch(error => {
@@ -649,11 +649,8 @@ const LoanDocumentUpload = (props, { navigation }) => {
                     global.COMPLETEDSUBSTAGE = 'BRE';
                     global.COMPLETEDMODULE = 'DOC_UPLD';
                     global.COMPLETEDPAGE = 'DOC_UPLD_GRNTR';
-                    props.navigation.navigate('FinalConsentScreen');
+                    props.navigation.replace('LoanApplicationMain', { fromScreen: 'BankList' });
                 }
-
-
-
 
             })
             .catch(error => {

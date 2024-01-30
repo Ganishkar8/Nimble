@@ -79,6 +79,19 @@ const getLoanAppWorkFlowID = (id, clientType) => {
   });
 };
 
+const deleteLoanBasedOnID = (id) => {
+  const db = databaseInstance.getInstance();
+  db.transaction((tx) => {
+    tx.executeSql(`DELETE FROM ${tableName} WHERE id = ?`,
+      [id],
+      (tx, results) => {
+        console.log('Rows affected:', results.rowsAffected);
+      }, (error) => {
+        console.error('Error executing SQL:', error);
+      });
+  });
+};
+
 const deleteAllLoan = async () => {
   try {
     const db = databaseInstance.getInstance(); // Execute the DELETE query
@@ -97,5 +110,6 @@ export default {
   insertLoanApplication,
   getLoanAppBasedOnID,
   deleteAllLoan,
-  getLoanAppWorkFlowID
+  getLoanAppWorkFlowID,
+  deleteLoanBasedOnID
 };

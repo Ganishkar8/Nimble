@@ -47,6 +47,7 @@ import ImageDetailComp from '../../../Components/ImageDetailComp';
 import Geolocation from 'react-native-geolocation-service';
 import { useIsFocused } from '@react-navigation/native';
 import ErrorModal from '../../../Components/ErrorModal';
+import DateInputComp from '../../../Components/DateInputComp';
 
 const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const [errorModalVisible, setErrorModalVisible] = useState(false);
@@ -122,6 +123,13 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const [kycIDDisable, setkycIDDisable] = useState(false);
   const KycIDRef = useRef(null);
 
+  const [kycExpiryDate, setkycExpiryDate] = useState('');
+  const [kycExpiryDateCaption, setkycExpiryDateCaption] = useState('EXPIRY DATE');
+  const [kycExpiryDateMan, setkycExpiryDateMan] = useState(false);
+  const [kycExpiryDateVisible, setkycExpiryDateVisible] = useState(false);
+  const [kycExpiryDateDisable, setkycExpiryDateDisable] = useState(true);
+  const KycExpiryDateRef = useRef(null);
+
   const [kycID1, setkycID1] = useState('');
   const [kycID1Caption, setkycID1Caption] = useState('KYC ID 1');
   const [kycID1Man, setkycID1Man] = useState(false);
@@ -157,6 +165,25 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const [KycSourceCaption, setKycSourceCaption] = useState('KYC SOURCE');
   const [KycSourceLabel, setKycSourceLabel] = useState('');
   const [KycSourceIndex, setKycSourceIndex] = useState('');
+
+
+  const [expiryDate1, setExpiry1Date] = useState('');
+  const [expiryDate2, setExpiry2Date] = useState('');
+  const [expiryDate3, setExpiry3Date] = useState('');
+  const [expiryDate4, setExpiry4Date] = useState('');
+  const [expiryDateCaption, setExpiryDateCaption] = useState('EXPIRY DATE');
+  const [expiryDate1Man, setExpiry1DateMan] = useState(false);
+  const [expiryDate2Man, setExpiry2DateMan] = useState(false);
+  const [expiryDate3Man, setExpiry3DateMan] = useState(false);
+  const [expiryDate4Man, setExpiry4DateMan] = useState(false);
+  const [expiryDate1Visible, setExpiry1DateVisible] = useState(false);
+  const [expiryDate2Visible, setExpiry2DateVisible] = useState(false);
+  const [expiryDate3Visible, setExpiry3DateVisible] = useState(false);
+  const [expiryDate4Visible, setExpiry4DateVisible] = useState(false);
+  const [expiryDate1Disable, setExpiry1DateDisable] = useState(true);
+  const [expiryDate2Disable, setExpiry2DateDisable] = useState(true);
+  const [expiryDate3Disable, setExpiry3DateDisable] = useState(true);
+  const [expiryDate4Disable, setExpiry4DateDisable] = useState(true);
 
   const [selectedDocument, setSelectedDocument] = useState(null);
 
@@ -194,10 +221,6 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
 
   useEffect(() => {
-    props.navigation
-      .getParent()
-      ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
 
     getClientData();
 
@@ -224,11 +247,20 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       setHideDelete(false);
     }
 
+  }, [props.navigation]);
+
+  useEffect(() => {
+    props.navigation
+      .getParent()
+      ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
+
+
     return () => {
       props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
       backHandler.remove();
     }
-  }, [props.navigation, isScreenVisible]);
+  }, [isScreenVisible]);
 
   const handleBackButton = () => {
     onGoBack();
@@ -274,7 +306,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   }
 
 
-  const getImage = (dmsID) => {
+  const getImage = (dmsID, type) => {
 
     Common.getNetworkConnection().then(value => {
       if (value.isConnected == true) {
@@ -290,7 +322,10 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
             if (response.status == 200) {
               setFileName(response.data.fileName)
               setImageUri('data:image/png;base64,' + response.data.base64Content)
-              props.navigation.navigate('PreviewImage', { imageName: response.data.fileName, imageUri: 'data:image/png;base64,' + response.data.base64Content })
+              if (type == '0') {
+                props.navigation.navigate('PreviewImage', { imageName: response.data.fileName, imageUri: 'data:image/png;base64,' + response.data.base64Content })
+              }
+
             } else if (response.data.statusCode === 201) {
               setApiError(response.data.message);
               setErrorModalVisible(true);
@@ -346,13 +381,17 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
               if (imageUri.length > 0) {
 
               } else {
-                getImage(response.data.kycDmsId);
+                getImage(response.data.kycDmsId, '1');
               }
+            }
+            else {
+              getImage(response.data.kycDmsId, '1');
             }
 
           }
           setKycTypeLabel(response.data.kycType)
           setkycID(response.data.kycValue)
+          setkycExpiryDate(response.data.kycExpiryDate);
         } else if (response.data.statusCode === 201) {
           setApiError(response.data.message);
           setErrorModalVisible(true);
@@ -590,12 +629,40 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       if (value !== undefined && value.length > 0) {
         setKycType1Label(value[0].kycTypeId1);
         setkycID1(value[0].kycIdValue1);
+        if (value[0].kycTypeId1 == '002' || value[0].kycTypeId1 == '008') {
+          setExpiry1DateVisible(true);
+          setExpiry1Date(value[0].expiryDate1);
+        } else {
+          setExpiry1Date('');
+          setExpiry1DateVisible(false);
+        }
         setKycType2Label(value[0].kycTypeId2);
         setkycID2(value[0].kycIdValue2);
+        if (value[0].kycTypeId2 == '002' || value[0].kycTypeId2 == '008') {
+          setExpiry2DateVisible(true);
+          setExpiry2Date(value[0].expiryDate2);
+        } else {
+          setExpiry2Date('');
+          setExpiry2DateVisible(false);
+        }
         setKycType3Label(value[0].kycTypeId3);
         setkycID3(value[0].kycIdValue3);
+        if (value[0].kycTypeId3 == '002' || value[0].kycTypeId3 == '008') {
+          setExpiry3DateVisible(true);
+          setExpiry3Date(value[0].expiryDate3);
+        } else {
+          setExpiry3Date('');
+          setExpiry3DateVisible(false);
+        }
         setKycType4Label(value[0].kycTypeId4);
         setkycID4(value[0].kycIdValue4);
+        if (value[0].kycTypeId4 == '002' || value[0].kycTypeId4 == '008') {
+          setExpiry4DateVisible(true);
+          setExpiry4Date(value[0].expiryDate4);
+        } else {
+          setExpiry4Date('');
+          setExpiry4DateVisible(false);
+        }
         if (value[0].kycTypeId1 == '001') {
           setKycTypeLabel(value[0].kycTypeId1);
           setkycID(value[0].kycIdValue1);
@@ -740,13 +807,37 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       setKycTypeLabel(label);
       setKycTypeIndex(index);
       if (label == KycType1Label) {
+        if (label == '002' || label == '008') {
+          setkycExpiryDate(expiryDate1)
+          setkycExpiryDateVisible(true);
+        } else {
+          setkycExpiryDateVisible(false);
+        }
         setkycID(kycID1)
       } else if (label == KycType2Label) {
         setkycID(kycID2)
+        if (label == '002' || label == '008') {
+          setkycExpiryDate(expiryDate2)
+          setkycExpiryDateVisible(true);
+        } else {
+          setkycExpiryDateVisible(false);
+        }
       } else if (label == KycType3Label) {
         setkycID(kycID3)
+        if (label == '002' || label == '008') {
+          setkycExpiryDate(expiryDate3)
+          setkycExpiryDateVisible(true);
+        } else {
+          setkycExpiryDateVisible(false);
+        }
       } else if (label == KycType4Label) {
         setkycID(kycID4)
+        if (label == '002' || label == '008') {
+          setkycExpiryDate(expiryDate4)
+          setkycExpiryDateVisible(true);
+        } else {
+          setkycExpiryDateVisible(false);
+        }
       }
 
     } else if (componentName == 'KycType1Picker') {
@@ -800,12 +891,12 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       setImageFile(image)
 
       const lastDotIndex = image.path.lastIndexOf('.');
-      var imageName = 'Photo' + '_' + global.leadID;
+      var imageName = 'Photo' + '_' + global.CLIENTID;
       if (lastDotIndex !== -1) {
         // Get the substring from the last dot to the end of the string
         const fileExtension = image.path.substring(lastDotIndex);
         imageName = imageName + fileExtension;
-        console.log('File extension:', fileExtension);
+        if (global.DEBUG_MODE) console.log('File extension:', fileExtension);
       }
 
       // const imageName = image.path.split('/').pop();
@@ -831,7 +922,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       setImageFile(image);
 
       const lastDotIndex = image.path.lastIndexOf('.');
-      var imageName = 'Photo' + '_' + global.TEMPAPPID;
+      var imageName = 'Photo' + '_' + global.CLIENTID;
       if (lastDotIndex !== -1) {
         // Get the substring from the last dot to the end of the string
         const fileExtension = image.path.substring(lastDotIndex);
@@ -856,7 +947,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       if (imageUri.length > 0) {
         props.navigation.navigate('PreviewImage', { imageName: fileName, imageUri: imageUri })
       } else {
-        getImage(kycDmsId);
+        getImage(kycDmsId, '0');
       }
     }
 
@@ -1024,10 +1115,16 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
   const updateKYCDetails = (id) => {
     setLoading(true)
+    var kycDate = '';
+    if (kycExpiryDate != undefined && kycExpiryDate != null) {
+      if (kycExpiryDate.length > 0) {
+        kycDate = Common.convertYearDateFormat(kycExpiryDate)
+      }
+    }
     const appDetails = [{
       "kycType": KycTypeLabel,
       "kycValue": kycID,
-      "kycExpiryDate": "",
+      "kycExpiryDate": '',
       "kycDmsId": parseInt(id),
       "createdBy": global.USERID,
     }]
@@ -1333,6 +1430,39 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
             </View>
           )}
 
+          {kycExpiryDateVisible && (
+            <View
+              style={{
+                width: '100%',
+                marginTop: 19,
+                paddingHorizontal: 0,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                <TextComp
+                  textVal={kycExpiryDateCaption}
+                  textStyle={Commonstyles.inputtextStyle}
+                  Visible={kycExpiryDateMan}
+                />
+              </View>
+
+              <View style={{ width: '100%', alignItems: 'center' }}>
+                <DateInputComp
+                  textStyle={[Commonstyles.inputtextStyle, { width: '90%' }]}
+                  ComponentName="kycexpiryDate"
+                  textValue={kycExpiryDate}
+                  type="numeric"
+                  Disable={kycExpiryDateDisable}
+                  handleClick={handleClick}
+                  handleReference={handleReference}
+                  minDate={new Date()}
+                />
+              </View>
+
+            </View>
+          )}
+
           {!isAadharVerified &&
             <View
               style={{
@@ -1346,7 +1476,11 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                   alignItems: 'center',
                   marginTop: 20,
                 }}>
-                <TouchableOpacity style={{ width: '30%' }} onPress={pickDocument} activeOpacity={0}>
+                <TouchableOpacity style={{ width: '30%' }} onPress={() => {
+                  if (global.USERTYPEID != 1163) {
+                    pickDocument();
+                  }
+                }} activeOpacity={0}>
                   <View style={{ width: 40, height: 40, backgroundColor: '#DBDBDB', borderRadius: 10, justifyContent: 'center', alignItems: 'center' }}>
                     <Image
                       source={require('../../../Images/cloudcomputing.png')}
@@ -1468,41 +1602,42 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                     handleClick={handleClick}
                     handleReference={handleReference}
                   />
-                  {/* <View
-                    style={{
-                      width: '100%',
-                      marginTop: 19,
-                      paddingHorizontal: 0,
-                      alignItems: 'right',
-                      justifyContent: 'right',
-                    }}>
-                    <View style={{ flexDirection: 'row' }}>
-                      <View
-                        style={{
-                          width: '80%',
-                          color: 'green',
-                        }}></View>
-                      <View
-                        style={{
-                          width: '20%',
-                          marginTop: 3,
-                          color: 'green',
-                        }}>
-                        <TouchableOpacity
-                          onPress={onClickVerify}
-                          activeOpacity={0}>
-                          <Text
-                            style={{
-                              color: Colors.green,
-                            }}>
-                            Verified
-                          </Text>
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                  </View> */}
                 </View>
               )}
+
+              {expiryDate1Visible && (
+                <View
+                  style={{
+                    width: '100%',
+                    marginTop: 19,
+                    paddingHorizontal: 0,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                  <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                    <TextComp
+                      textVal={expiryDateCaption}
+                      textStyle={Commonstyles.inputtextStyle}
+                      Visible={expiryDate1Man}
+                    />
+                  </View>
+
+                  <View style={{ width: '100%', alignItems: 'center' }}>
+                    <DateInputComp
+                      textStyle={[Commonstyles.inputtextStyle, { width: '90%' }]}
+                      ComponentName="expiryDate1"
+                      textValue={expiryDate1}
+                      type="numeric"
+                      Disable={expiryDate1Disable}
+                      handleClick={handleClick}
+                      handleReference={handleReference}
+                      minDate={new Date()}
+                    />
+                  </View>
+
+                </View>
+              )}
+
             </View>
           ) : (
             <View></View>
@@ -1633,6 +1768,40 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                   </View> */}
                 </View>
               )}
+
+              {expiryDate2Visible && (
+                <View
+                  style={{
+                    width: '100%',
+                    marginTop: 19,
+                    paddingHorizontal: 0,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                  <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                    <TextComp
+                      textVal={expiryDateCaption}
+                      textStyle={Commonstyles.inputtextStyle}
+                      Visible={expiryDate2Man}
+                    />
+                  </View>
+
+                  <View style={{ width: '100%', alignItems: 'center' }}>
+                    <DateInputComp
+                      textStyle={[Commonstyles.inputtextStyle, { width: '90%' }]}
+                      ComponentName="expiryDate2"
+                      textValue={expiryDate2}
+                      type="numeric"
+                      Disable={expiryDate2Disable}
+                      handleClick={handleClick}
+                      handleReference={handleReference}
+                      minDate={new Date()}
+                    />
+                  </View>
+
+                </View>
+              )}
+
             </View>
           ) : (
             <View></View>
@@ -1761,6 +1930,38 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                       </View>
                     </View>
                   </View> */}
+                </View>
+              )}
+              {expiryDate3Visible && (
+                <View
+                  style={{
+                    width: '100%',
+                    marginTop: 19,
+                    paddingHorizontal: 0,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                  <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                    <TextComp
+                      textVal={expiryDateCaption}
+                      textStyle={Commonstyles.inputtextStyle}
+                      Visible={expiryDate3Man}
+                    />
+                  </View>
+
+                  <View style={{ width: '100%', alignItems: 'center' }}>
+                    <DateInputComp
+                      textStyle={[Commonstyles.inputtextStyle, { width: '90%' }]}
+                      ComponentName="expiryDate3"
+                      textValue={expiryDate3}
+                      type="numeric"
+                      Disable={expiryDate3Disable}
+                      handleClick={handleClick}
+                      handleReference={handleReference}
+                      minDate={new Date()}
+                    />
+                  </View>
+
                 </View>
               )}
             </View>
@@ -1892,6 +2093,38 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                       </View>
                     </View>
                   </View> */}
+                </View>
+              )}
+              {expiryDate4Visible && (
+                <View
+                  style={{
+                    width: '100%',
+                    marginTop: 19,
+                    paddingHorizontal: 0,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                  <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                    <TextComp
+                      textVal={expiryDateCaption}
+                      textStyle={Commonstyles.inputtextStyle}
+                      Visible={expiryDate4Man}
+                    />
+                  </View>
+
+                  <View style={{ width: '100%', alignItems: 'center' }}>
+                    <DateInputComp
+                      textStyle={[Commonstyles.inputtextStyle, { width: '90%' }]}
+                      ComponentName="expiryDate4"
+                      textValue={expiryDate4}
+                      type="numeric"
+                      Disable={expiryDate4Disable}
+                      handleClick={handleClick}
+                      handleReference={handleReference}
+                      minDate={new Date()}
+                    />
+                  </View>
+
                 </View>
               )}
             </View>

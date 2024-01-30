@@ -19,6 +19,7 @@ import tbl_loanaddressinfo from '../../../Database/Table/tbl_loanaddressinfo';
 import apiInstance from '../../../Utils/apiInstance';
 import ErrorModal from '../../../Components/ErrorModal';
 import tbl_client from '../../../Database/Table/tbl_client';
+import tbl_clientaddressinfo from '../../../Database/Table/tbl_clientaddressinfo';
 
 const LoanAddressDetails = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
@@ -235,6 +236,10 @@ const LoanAddressDetails = (props, { navigation }) => {
                 //spinner
                 setAddressTypeLabel(data[0].address_type)
                 if (data[0].address_type == 'ROA' || data[0].address_type == 'OPA') {
+                    setAddressOwnerTypeVisible(true);
+                    setOwnerDetailsVisible(true);
+                    setOwnerNameVisible(true)
+                } else {
                     setAddressOwnerTypeVisible(false);
                     setOwnerDetailsVisible(false);
                     setOwnerNameVisible(false)
@@ -242,6 +247,16 @@ const LoanAddressDetails = (props, { navigation }) => {
                 if (global.DEBUG_MODE) console.log("LoanAddressType::" + data[0].address_type)
                 setAddressOwnerTypeLabel(data[0].address_ownership)
                 setOwnerDetailsLabel(data[0].owner_details)
+                if (data[0].owner_details == 'OD-OTH' || data[0].owner_details == 'OD-RLT') {
+                    setOwnerNameDisable(false);
+                    setOwnerNameMan(true);
+                    setOwnerNameVisible(true);
+                } else {
+                    setOwnerNameDisable(true);
+                    setOwnerNameMan(false);
+                    setOwnerNameVisible(false);
+                    setOwnerName('')
+                }
                 if (data[0].isKyc === "1") {
                     disableAadharFields(data)
                 }
@@ -256,28 +271,83 @@ const LoanAddressDetails = (props, { navigation }) => {
 
     const disableAadharFields = (data) => {
         setAddressTypeDisable(true)
-        setAddressLine1Disable(true)
-        setAddressLine2Disable(true)
-        if (data[0].landmark != null && data[0].landmark != "") {
+        if (data[0].address_line_1) {
+            setAddressLine1Disable(true)
+        }
+        if (data[0].address_line_2) {
+            setAddressLine2Disable(true)
+        }
+        if (data[0].landmark) {
             setLandmarkDisable(true)
         }
-        setPincodeDisable(true)
-        setDistrictDisable(true)
-        setStateDisable(true)
-        setCountryDisable(true)
-        setOwnerNameDisable(true)
+        if (data[0].pincode) {
+            setPincodeDisable(true)
+        }
+        if (data[0].city) {
+            setCityDisable(true);
+        }
+        if (data[0].district) {
+            setDistrictDisable(true)
+        }
+        if (data[0].state) {
+            setStateDisable(true)
+        }
+        if (data[0].country) {
+            setCountryDisable(true)
+        }
+        if (data[0].mobile_or_land_line_number) {
+            setMobileNoDisable(true)
+        }
+        if (data[0].email_id) {
+            setEmailDisable(true);
+        }
+
     }
 
     const getSystemCodeDetail = () => {
 
-        const filterAddressTypeData = userCodeDetail.filter((data) => data.masterId === 'ADDRESS_TYPE');
-        setaddressTypeData(filterAddressTypeData)
+        // const filterAddressTypeData = userCodeDetail.filter((data) => data.masterId === 'ADDRESS_TYPE');
+        // setaddressTypeData(filterAddressTypeData)
+
+        getAddressData();
 
         const filterOwnershipTypeData = userCodeDetail.filter((data) => data.masterId === 'ADDRESS_OWNERSHIP_TYPE');
         setAddressOwnerTypeData(filterOwnershipTypeData)
 
         const filterOwnerDetailsData = userCodeDetail.filter((data) => data.masterId === 'OWNER_DETAILS');
         setOwnerDetailsData(filterOwnerDetailsData)
+
+    }
+
+    const getAddressData = async () => {
+
+        var availAddresssType = [];
+
+        await tbl_loanaddressinfo.getAllLoanAddressDetailsForLoanID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
+            .then(data => {
+                if (global.DEBUG_MODE) console.log('Address Detail:', data);
+                if (data !== undefined && data.length > 0) {
+                    data.forEach(item => {
+                        availAddresssType.push(item.address_type)
+                    });
+
+                }
+            })
+            .catch(error => {
+                if (global.DEBUG_MODE) console.error('Error fetching Address details:', error);
+            });
+
+
+        const filterAddressTypeData = userCodeDetail.filter((data) => data.masterId === 'ADDRESS_TYPE');
+        if (isNew === 'new') {
+            const uniqueFilterAddressTypeData = filterAddressTypeData.filter(data => !availAddresssType.includes(data.subCodeId));
+            setaddressTypeData(uniqueFilterAddressTypeData)
+        } else {
+            setaddressTypeData(filterAddressTypeData)
+        }
+
+
+
 
     }
 
@@ -701,8 +771,8 @@ const LoanAddressDetails = (props, { navigation }) => {
                 "district": district,
                 "state": state,
                 "country": country,
-                "mobileOrLandLineNumber": "",
-                "emailId": "",
+                "mobileOrLandLineNumber": mobileNo,
+                "emailId": email,
                 "addressOwnership": addressOwnerTypeLabel,
                 "ownerDetails": ownerDetailsLabel,
                 "ownerName": ownerName,
@@ -720,7 +790,13 @@ const LoanAddressDetails = (props, { navigation }) => {
                     if (global.DEBUG_MODE) console.log('PostAddressResponse::' + JSON.stringify(response.data),);
 
                     setLoading(false);
-                    insertData(response.data[0].id)
+                    if (addressID) {
+                        insertData(response.data[0].id)
+                    } else {
+                        tbl_loanaddressinfo.deleteLoanDataBasedOnAddressAndClient(global.LOANAPPLICATIONID, addressTypeLabel, global.CLIENTTYPE);
+                        insertData(response.data[0].id)
+                    }
+
                 })
                 .catch(error => {
                     // Handle the error
@@ -757,8 +833,8 @@ const LoanAddressDetails = (props, { navigation }) => {
                 "district": district,
                 "state": state,
                 "country": country,
-                "mobileOrLandLineNumber": "",
-                "emailId": "",
+                "mobileOrLandLineNumber": mobileNo,
+                "emailId": email,
                 "addressOwnership": addressOwnerTypeLabel,
                 "ownerDetails": ownerDetailsLabel,
                 "ownerName": ownerName,
@@ -879,6 +955,16 @@ const LoanAddressDetails = (props, { navigation }) => {
         } else if (componentName === 'OwnerDetailsPicker') {
             setOwnerDetailsLabel(label);
             setOwnerDetailsIndex(index);
+            if (label == 'OD-OTH' || label == 'OD-RLT') {
+                setOwnerNameDisable(false);
+                setOwnerNameMan(true);
+                setOwnerNameVisible(true);
+            } else {
+                setOwnerNameDisable(true);
+                setOwnerNameMan(false);
+                setOwnerNameVisible(false);
+                setOwnerName('')
+            }
         }
 
     }

@@ -278,6 +278,14 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
 
     }, [props.navigation, isScreenVisible]);
 
+
+    useEffect(() => {
+
+        getApplicantData();
+
+    }, [props.navigation]);
+
+
     const handleBackButton = () => {
         onGoBack();
         return true; // Prevent default back button behavior
@@ -287,7 +295,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
         React.useCallback(() => {
             makeSystemMandatoryFields();
             getSystemCodeDetail();
-            getApplicantData();
+            // getApplicantData();
 
             if (global.USERTYPEID == 1163) {
                 setOnlyView(true);
@@ -347,7 +355,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                         setLoanTypeLabel(data[0].loan_type)
                         setLoanProductLabel(data[0].product)
                         setLoanPurposeLabel(data[0].loan_purpose);
-                        callLoanTenure(data[0].product, data[0].loan_amount, '')
+                        callLoanTenure(data[0].product, data[0].loan_amount, loanTenure)
                         setLoanAmount(data[0].loan_amount)
                         setLoanPurposeLabel(data[0].loan_purpose);
                         getProductID(data[0].loan_type, parseInt(data[0].workflow_id))
@@ -455,7 +463,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
 
         const IntRateMenuID = filteredProductIDData[0].IntRateMenuID;
         // const filteredIntRateMenuData = props.mobilecodedetail.t_InterestRateMenuDetail.filter((data) => data.RateMenuID === IntRateMenuID);
-
+        //alert(JSON.stringify(IntRateMenuID + '' + loanAmount + '' + loanTenure))
         const filteredIntRateMenuData = props.mobilecodedetail.t_InterestRateMenuDetail.filter(item =>
             item.RateMenuID === IntRateMenuID &&
             loanAmount >= item.AmountSlabFrom &&
@@ -473,7 +481,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
         } else {
             setInterestRate('')
         }
-        console.log("Filtered Data::", JSON.stringify(filteredIntRateMenuData));
+        if (global.DEBUG_MODE) console.log("Filtered Data::", JSON.stringify(filteredIntRateMenuData));
         // alert(JSON.stringify(filteredIntRateMenuData[0].EffectiveRate))
 
         if (props.mobilecodedetail && props.mobilecodedetail.t_ProductLoan) {
