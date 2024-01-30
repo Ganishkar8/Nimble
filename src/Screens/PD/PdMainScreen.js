@@ -370,7 +370,7 @@ const PdMainScreen = (props, { navigation }) => {
 
                 if (response.status == 200) {
                     props.navigation.navigate('PDItems', { clientType: global.CLIENTTYPE });
-
+                }
                 else if (response.data.statusCode === 201) {
                     setApiError(response.data.message);
                     setErrorModalVisible(true);
