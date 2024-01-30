@@ -44,34 +44,40 @@ import { useIsFocused } from '@react-navigation/native';
 import tbl_client from '../../../Database/Table/tbl_client';
 import tbl_loanApplication from '../../../Database/Table/tbl_loanApplication';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { addLoanInitiationDetails, updateLoanInitiationDetails, deleteLoanInitiationDetails } from '../../../Utils/redux/actions/loanInitiationAction';
 
 const ProfileShortBasicDetails = (props, { navigation }) => {
   var aadhar = '';
   const [loading, setLoading] = useState(false);
+  const [errMsg, setErrMsg] = useState('');
+  const isScreenVisible = useIsFocused();
+  const data = [{ name: 'Ajith', id: '590', branch: '1180' }];
+  const [apiError, setApiError] = useState('');
+  const [minLoanAmount, setMinLoanAmount] = useState(0);
+  const [maxLoanAmount, setMaxLoanAmount] = useState(0);
+  const [aadharNumber, setAadharNumber] = useState('');
+  const [isDedupeDone, setIsDedupeDone] = useState(false);
+  const [onlyView, setOnlyView] = useState(false);
+  const [pageId, setPageId] = useState(global.CURRENTPAGEID);
+  const [profileDetail, setProfileDetail] = useState(props.profiledetail.userPersonalDetailsDto);
 
+
+  //Custome Category
   const [custCatgLabel, setCustCatgLabel] = useState('');
   const [custCatgIndex, setCustCatgIndex] = useState('');
   const [custCatgCaption, setCustCatgCaption] = useState('CUSTOMER CATEGORY');
-
-  const [mobileNumber, setMobileNumber] = useState('');
-  const [isMobileVerified, setIsMobileVerified] = useState('0');
-  const [mobileNumberCaption, setMobileNumberCaption] =
-    useState('MOBILE NUMBER');
-  const [mobileNumberMan, setMobileNumberMan] = useState(false);
-  const [mobileNumberVisible, setMobileNumberVisible] = useState(true);
-  const [mobileNumberDisable, setMobileNumberDisable] = useState(false);
   const [custCatgMan, setCustCatgMan] = useState(false);
   const [custCatgVisible, setCustCatgVisible] = useState(true);
   const [custCatgDisable, setCustCatgDisable] = useState(false);
   const [custCatData, setCustCatData] = useState([]);
-  const [errMsg, setErrMsg] = useState('');
-  const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
-  const showBottomSheet = () => setBottomErrorSheetVisible(true);
-  const hideBottomSheet = () => setBottomErrorSheetVisible(false);
-  const mobileNumberRef = useRef(null);
-  const isScreenVisible = useIsFocused();
 
-  const data = [{ name: 'Ajith', id: '590', branch: '1180' }];
+  const [mobileNumber, setMobileNumber] = useState('');
+  const [isMobileVerified, setIsMobileVerified] = useState('0');
+  const [mobileNumberCaption, setMobileNumberCaption] = useState('MOBILE NUMBER');
+  const [mobileNumberMan, setMobileNumberMan] = useState(false);
+  const [mobileNumberVisible, setMobileNumberVisible] = useState(true);
+  const [mobileNumberDisable, setMobileNumberDisable] = useState(false);
+  const mobileNumberRef = useRef(null);
 
   const [leadID, setLeadID] = useState('');
   const [leadIDCaption, setLeadIDCaption] = useState('LEAD ID');
@@ -85,9 +91,8 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   const [relationTypeVisible, setRelationTypeVisible] = useState(false); //Hide or not
   const [relationTypeDisable, setRelationTypeDisable] = useState(false); //Enable or Disable
   const [relationTypeData, setRelationTypeData] = useState([]); //DataPicking
-  const [relationTypeCaption, setRelationTypeCaption] =
-    useState('RELATION TYPE'); //FieldCaption
-  const [relationTypeLabel, setRelationTypeLabel] = useState('');
+  const [relationTypeCaption, setRelationTypeCaption] = useState('RELATION TYPE'); //FieldCaption
+  const [relationTypeLabel, setRelationTypeLabel] = useState('');//Contains Selected RelationId
   const [relationTypeIndex, setRelationTypeIndex] = useState('');
 
   //loanType - dropdown
@@ -99,6 +104,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   const [loanTypeLabel, setLoanTypeLabel] = useState('');
   const [loanTypeIndex, setLoanTypeIndex] = useState('');
 
+  //Product Type
   const [ProductTypeMan, setProductTypeMan] = useState(false);
   const [ProductTypeVisible, setProductTypeVisible] = useState(true);
   const [ProductTypeDisable, setProductTypeDisable] = useState(false);
@@ -132,9 +138,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   const [genderData, setGenderData] = useState([]);
 
   const [LoanAmount, setLoanAmount] = useState('');
-  const [LoanAmountCaption, setLoanAmountCaption] = useState(
-    "LOAN AMOUNT(IN MULTIPLE OF 5000's)",
-  );
+  const [LoanAmountCaption, setLoanAmountCaption] = useState("LOAN AMOUNT(IN MULTIPLE OF 5000's)",);
   const [LoanAmountMan, setLoanAmountMan] = useState(false);
   const [LoanAmountVisible, setLoanAmountVisible] = useState(true);
   const [LoanAmountDisable, setLoanAmountDisable] = useState(false);
@@ -149,14 +153,10 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   const [LoanPurposeIndex, setLoanPurposeIndex] = useState('');
 
   const [CustomerSubCategoryMan, setCustomerSubCategoryMan] = useState(false);
-  const [CustomerSubCategoryVisible, setCustomerSubCategoryVisible] =
-    useState(true);
-  const [CustomerSubCategoryDisable, setCustomerSubCategoryDisable] =
-    useState(false);
+  const [CustomerSubCategoryVisible, setCustomerSubCategoryVisible] = useState(true);
+  const [CustomerSubCategoryDisable, setCustomerSubCategoryDisable] = useState(false);
   const [CustomerSubCategoryData, setCustomerSubCategoryData] = useState([]);
-  const [CustomerSubCategoryCaption, setCustomerSubCategoryCaption] = useState(
-    'CUSTOMER SUB CATEGORY',
-  );
+  const [CustomerSubCategoryCaption, setCustomerSubCategoryCaption] = useState('CUSTOMER SUB CATEGORY');
   const [CustomerSubCategoryLabel, setCustomerSubCategoryLabel] = useState('');
   const [CustomerSubCategoryIndex, setCustomerSubCategoryIndex] = useState('');
 
@@ -164,8 +164,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   const [MaritalStatusVisible, setMaritalStatusVisible] = useState(true);
   const [MaritalStatusDisable, setMaritalStatusDisable] = useState(false);
   const [MaritalStatusData, setMaritalStatusData] = useState([]);
-  const [MaritalStatusCaption, setMaritalStatusCaption] =
-    useState('MARITAL STATUS');
+  const [MaritalStatusCaption, setMaritalStatusCaption] = useState('MARITAL STATUS');
   const [MaritalStatusLabel, setMaritalStatusLabel] = useState('');
   const [MaritalStatusIndex, setMaritalStatusIndex] = useState('');
 
@@ -268,9 +267,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   const NameRef = useRef(null);
 
   const [URNumber, setURNumber] = useState('');
-  const [URNumberCaption, setURNumberCaption] = useState(
-    'UDYAM REGISTRATION NUMBERS',
-  );
+  const [URNumberCaption, setURNumberCaption] = useState('UDYAM REGISTRATION NUMBERS',);
   const [URNumberMan, setURNumberMan] = useState(false);
   const [URNumberVisible, setURNumberVisible] = useState(false);
   const [URNumberDisable, setURNumberDisable] = useState(false);
@@ -283,44 +280,22 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   const [chkMsmeVisible, setchkMsmeVisible] = useState(true);
   const [chkMsmeDisable, setchkMsmeDisable] = useState(false);
 
-  const [leadsystemCodeDetail, setLeadSystemCodeDetail] = useState(
-    props.mobilecodedetail.leadSystemCodeDto,
-  );
-  const [systemCodeDetail, setSystemCodeDetail] = useState(
-    props.mobilecodedetail.t_SystemCodeDetail,
-  );
-  const [leaduserCodeDetail, setLeadUserCodeDetail] = useState(
-    props.mobilecodedetail.leadUserCodeDto,
-  );
-  const [userCodeDetail, setUserCodeDetail] = useState(
-    props.mobilecodedetail.t_UserCodeDetail,
-  );
-  const [bankUserCodeDetail, setBankUserCodeDetail] = useState(
-    props.mobilecodedetail.t_BankUserCode,
-  );
-  const [workFlowDetail, setWorkFlowDetail] = useState(
-    props.mobilecodedetail.wfConfig1s,
-  );
-  const [kycConifig, setKYCConfig] = useState(
-    props.mobilecodedetail.loanProductKycLink,
-  );
+  const [leadsystemCodeDetail, setLeadSystemCodeDetail] = useState(props.mobilecodedetail.leadSystemCodeDto);
+  const [systemCodeDetail, setSystemCodeDetail] = useState(props.mobilecodedetail.t_SystemCodeDetail);
+  const [leaduserCodeDetail, setLeadUserCodeDetail] = useState(props.mobilecodedetail.leadUserCodeDto);
+  const [userCodeDetail, setUserCodeDetail] = useState(props.mobilecodedetail.t_UserCodeDetail);
+  const [bankUserCodeDetail, setBankUserCodeDetail] = useState(props.mobilecodedetail.t_BankUserCode);
+  const [workFlowDetail, setWorkFlowDetail] = useState(props.mobilecodedetail.wfConfig1s);
+  const [kycConifig, setKYCConfig] = useState(props.mobilecodedetail.loanProductKycLink);
+  const [systemMandatoryField, setSystemMandatoryField] = useState(props.mobilecodedetail.processSystemMandatoryFields);
 
-  const [systemMandatoryField, setSystemMandatoryField] = useState(
-    props.mobilecodedetail.processSystemMandatoryFields,
-  );
+  //BottomSheet
+  const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
+  const showBottomSheet = () => setBottomErrorSheetVisible(true);
+  const hideBottomSheet = () => setBottomErrorSheetVisible(false);
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [errorModalVisible1, setErrorModalVisible1] = useState(false);
-  const [apiError, setApiError] = useState('');
-  const [minLoanAmount, setMinLoanAmount] = useState(0);
-  const [maxLoanAmount, setMaxLoanAmount] = useState(0);
-
-  const [aadharNumber, setAadharNumber] = useState('');
-
   const [dedupeModalVisible, setDedupeModalVisible] = useState(false);
-  const [isDedupeDone, setIsDedupeDone] = useState(false);
-  const [onlyView, setOnlyView] = useState(false);
-  const [pageId, setPageId] = useState(global.CURRENTPAGEID);
-
 
   useEffect(() => {
     makeSystemMandatoryFields();
@@ -1450,6 +1425,10 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
             } else {
               global.CLIENTID = response.data[0].id;
             }
+
+            alert(JSON.stringify(response.data));
+            addInRedux(response.data)
+            return;
             await insertData();
 
             if (global.isDedupeDone == '1') {
@@ -1499,6 +1478,35 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
         });
     }
   };
+
+  const addInRedux = (data) => {
+    const loanData = {
+      id: data.id,
+      loanApplicationNumber: data.loanApplicationNumber,
+      tempNumber: data.tempNumber,
+      branchId: data.branchId,
+      customerCategory: data.customerCategory,
+      customerSubcategory: data.customerSubcategory,
+      customerType: data.customerType,
+      loanType: data.loanType,
+      loanPurpose: data.loanPurpose,
+      product: data.product,
+      loanAmount: data.loanAmount,
+      workflowId: data.workflowId,
+      consent: data.consent,
+      finalConsent: false,
+      applicationAppliedBy: data.applicationAppliedBy,
+      applicationCreationDate: data.applicationCreationDate,
+      lmsApplicationNumber: data.lmsApplicationNumber,
+      isManualKyc: data.isManualKyc,
+      manualKycStatus: data.manualKycStatus,
+      manualKycApprovedBy: data.manualKycApprovedBy,
+      manualKycApprovedDate: data.manualKycApprovedDate,
+    }
+
+    props.updateLoanInitiationDetails(data.id, loanData, 'clientDetail', data.clientDetail)
+
+  }
 
   const generateLoanAppNum = () => {
     if (validate()) {
@@ -4183,6 +4191,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => ({
   languageAction: item => dispatch(languageAction(item)),
   dedupeAction: item => dispatch(dedupeAction(item)),
+  updateLoanInitiationDetails: (loanApplicationId, loanData, key, updatedDetails) => dispatch(dedupeAction(loanApplicationId, loanData, key, updatedDetails)),
 });
 
 export default connect(
