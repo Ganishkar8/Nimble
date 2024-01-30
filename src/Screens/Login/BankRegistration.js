@@ -21,6 +21,7 @@ import Loading from '../../Components/Loading';
 import TextComp from '../../Components/TextComp';
 import { connect } from 'react-redux';
 import { languageAction } from '../../Utils/redux/actions/languageAction';
+import { addBank } from '../../Utils/redux/actions/bankAction';
 import { language } from '../../Utils/LanguageString';
 import Commonstyles from '../../Utils/Commonstyles';
 import ImageComp from '../../Components/ImageComp';
@@ -395,6 +396,7 @@ const BankRegistration = (props, { navigation }) => {
                     const certificateHash = bankDetails.CertificateHash[0];
                     global.BRCONNECTAPIKEY = bankDetails.BRConnectAPIKey[0];
                     global.BRCONNECTAPPID = bankDetails.BRConnectAPPID[0];
+                    addtoRedux(global.BANKID, global.BASEURL, configVersion, bankURL1, global.BRCONNECTVERSION, global.BRCONNECTAPIKEY, global.BRCONNECTAPPID, certificateHash);
                     Bank_Detail_Table.deleteAllBankRecords().then(deleted => {
                         handleInsertBankDetail(global.BANKID, global.BASEURL, "1", global.BASEURL, bankURL1, configVersion, certificateHash)
                     })
@@ -415,12 +417,30 @@ const BankRegistration = (props, { navigation }) => {
         return validresponse;
     }
 
-    const handleInsertBankDetail = (bankID, bankURL, isRegistered, bankURL1, bankURL2, configVersion, certificateHash) => {
+    const addtoRedux = (bankId, bankUrl, configVersion, bankUrl1, brConnectVersionNo, brConnectApiKey, brConnectAppId, certificateHash) => {
+
+        var bankDetail = {
+            'BankID': bankId,
+            'BankURL': bankUrl,
+            'ConfigVersion': configVersion,
+            'BankURL1': bankUrl1,
+            'BRConnectVersionNo': brConnectVersionNo,
+            'BRConnectAPIKey': brConnectApiKey,
+            'BRConnectAPPID': brConnectAppId,
+            'CertificateHash': certificateHash,
+            'INSTANCE': instance
+        }
+
+        props.addBank(bankDetail);
+
+    }
+
+    const handleInsertBankDetail = (bankID, bankURL, isRegistered, bankURL2, configVersion, certificateHash) => {
         Bank_Detail_Table.insertBankDetail(
             bankID,
             bankURL,
             isRegistered,
-            bankURL1,
+            bankURL,
             bankURL2,
             configVersion,
             certificateHash
@@ -489,6 +509,7 @@ const BankRegistration = (props, { navigation }) => {
                                 <Menu.Item onPress={() => { setInstance('LIV'); closeMenu() }} style={{ backgroundColor: instance == 'LIV' ? Colors.darkblue : Colors.white, }} titleStyle={{ color: instance == 'LIV' ? Colors.white : Colors.black, fontFamily: 'PoppinsRegular' }} title="LIVE" />
                                 <Menu.Item onPress={() => { setInstance('UAT'); closeMenu() }} style={{ backgroundColor: instance == 'UAT' ? Colors.darkblue : Colors.white }} titleStyle={{ color: instance == 'UAT' ? Colors.white : Colors.black, fontFamily: 'PoppinsRegular' }} title="UAT" />
                                 <Menu.Item onPress={() => { setInstance('DEV'); closeMenu() }} style={{ backgroundColor: instance == 'DEV' ? Colors.darkblue : Colors.white }} titleStyle={{ color: instance == 'DEV' ? Colors.white : Colors.black, fontFamily: 'PoppinsRegular' }} title="DEV" />
+                                <Menu.Item onPress={() => { setInstance('DEV'); closeMenu() }} style={{ backgroundColor: instance == 'DEV' ? Colors.darkblue : Colors.white }} titleStyle={{ color: instance == 'QA' ? Colors.white : Colors.black, fontFamily: 'PoppinsRegular' }} title="QA" />
                             </Menu>
 
                         </View>
@@ -584,6 +605,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => ({
     languageAction: (item) => dispatch(languageAction(item)),
+    addBank: (item) => dispatch(addBank(item)),
 });
 
 

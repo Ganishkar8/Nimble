@@ -2640,73 +2640,73 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
     }
 
-    if (KycType1Label == '012') {
-      if (kycID1.length > 0) {
-        if (kycID1.length != 10) {
-          errorMessage =
-            errorMessage +
-            i +
-            ')' +
-            ' ' +
-            language[0][props.language].str_plsenter +
-            'Valid Voter ID' +
-            '\n';
-          i++;
-          flag = true;
-        }
-      }
-    }
+    // if (KycType1Label == '012') {
+    //   if (kycID1.length > 0) {
+    //     if (kycID1.length != 10) {
+    //       errorMessage =
+    //         errorMessage +
+    //         i +
+    //         ')' +
+    //         ' ' +
+    //         language[0][props.language].str_plsenter +
+    //         'Valid Voter ID' +
+    //         '\n';
+    //       i++;
+    //       flag = true;
+    //     }
+    //   }
+    // }
 
-    if (KycType2Label == '012') {
-      if (kycID2.length > 0) {
-        if (kycID2.length != 10) {
-          errorMessage =
-            errorMessage +
-            i +
-            ')' +
-            ' ' +
-            language[0][props.language].str_plsenter +
-            'Valid Voter ID' +
-            '\n';
-          i++;
-          flag = true;
-        }
-      }
-    }
+    // if (KycType2Label == '012') {
+    //   if (kycID2.length > 0) {
+    //     if (kycID2.length != 10) {
+    //       errorMessage =
+    //         errorMessage +
+    //         i +
+    //         ')' +
+    //         ' ' +
+    //         language[0][props.language].str_plsenter +
+    //         'Valid Voter ID' +
+    //         '\n';
+    //       i++;
+    //       flag = true;
+    //     }
+    //   }
+    // }
 
-    if (KycType3Label == '012') {
-      if (kycID3.length > 0) {
-        if (kycID3.length != 10) {
-          errorMessage =
-            errorMessage +
-            i +
-            ')' +
-            ' ' +
-            language[0][props.language].str_plsenter +
-            'Valid Voter ID' +
-            '\n';
-          i++;
-          flag = true;
-        }
-      }
-    }
+    // if (KycType3Label == '012') {
+    //   if (kycID3.length > 0) {
+    //     if (kycID3.length != 10) {
+    //       errorMessage =
+    //         errorMessage +
+    //         i +
+    //         ')' +
+    //         ' ' +
+    //         language[0][props.language].str_plsenter +
+    //         'Valid Voter ID' +
+    //         '\n';
+    //       i++;
+    //       flag = true;
+    //     }
+    //   }
+    // }
 
-    if (KycType4Label == '012') {
-      if (kycID4.length > 0) {
-        if (kycID4.length != 10) {
-          errorMessage =
-            errorMessage +
-            i +
-            ')' +
-            ' ' +
-            language[0][props.language].str_plsenter +
-            'Valid Voter ID' +
-            '\n';
-          i++;
-          flag = true;
-        }
-      }
-    }
+    // if (KycType4Label == '012') {
+    //   if (kycID4.length > 0) {
+    //     if (kycID4.length != 10) {
+    //       errorMessage =
+    //         errorMessage +
+    //         i +
+    //         ')' +
+    //         ' ' +
+    //         language[0][props.language].str_plsenter +
+    //         'Valid Voter ID' +
+    //         '\n';
+    //       i++;
+    //       flag = true;
+    //     }
+    //   }
+    // }
 
     if (KycType1Label == '002') {
       if (kycID1.length > 0) {
