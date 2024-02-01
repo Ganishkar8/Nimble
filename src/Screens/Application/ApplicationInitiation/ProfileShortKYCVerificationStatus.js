@@ -48,6 +48,7 @@ import Geolocation from 'react-native-geolocation-service';
 import { useIsFocused } from '@react-navigation/native';
 import ErrorModal from '../../../Components/ErrorModal';
 import DateInputComp from '../../../Components/DateInputComp';
+import { updateNestedClientDetails, deleteLoanInitiationDetails } from '../../../Utils/redux/actions/loanInitiationAction';
 
 const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const [errorModalVisible, setErrorModalVisible] = useState(false);
@@ -222,7 +223,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
   useEffect(() => {
 
-    getClientData();
+    getApplicantData();
 
     if (global.isAadharVerified == '1') {
       setIsAadharVerified(true);
@@ -239,7 +240,6 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       }
       setOnlyView(true);
       fieldsdisable();
-      getClientID();
       setHideRetake(true);
       setHideDelete(true);
     } else {
@@ -281,28 +281,64 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     setkycID4Disable(true);
   }
 
-  const getClientID = () => {
+  const updateDetails = (loanApplicationId, clientId, key, nestedKey, data) => {
+    var clientData = [{ "id": 632, "loanApplicationNumber": "IND0000632NEW", "tempNumber": "LAN1180000632", "branchId": 1180, "customerCategory": "INDV", "customerSubcategory": "SE", "customerType": "NEW", "loanType": "UNSEC", "loanPurpose": "MFT", "product": "002", "loanAmount": 500000, "workflowId": 134, "consent": true, "finalConsent": false, "applicationAppliedBy": "225", "applicationCreationDate": "2024-01-30T20:26:48.163Z", "lmsApplicationNumber": "", "isManualKyc": true, "manualKycStatus": "Pending", "clientDetail": [{ "isActive": true, "id": 671, "clientType": "APPL", "relationType": "", "title": "MR", "firstName": "Chjcvjcj", "middleName": "", "lastName": "", "gender": "M", "maritalStatus": "S", "mobileNumber": "7598133718", "email": "", "isKycManual": false, "kycTypeId1": "007", "kycIdValue1": "CJJCD6426G", "kycTypeId2": "012", "kycIdValue2": "CHJCJVVN", "kycTypeId3": "", "kycIdValue3": "", "kycTypeId4": "", "kycIdValue4": "", "isMsme": false, "isMobileNumberVerified": true, "isEmailVerified": false, "isAadharNumberVerified": false, "isPanVerified": false, "udyamRegistrationNumber": "", "dedupeCheck": false, "dedupeCheckDate": "2024-01-31T12:43:40.115Z", "clientAddress": [], "clientBankDetail": [], "clientManualKycLink": [] }] }]
+    // var data = { "hello": '1', 'hello2': '2' }
+    const updatedClientData = clientData.map((item) => {
+      if (item.id === parseInt(loanApplicationId)) {
+        return {
+          ...item,
+          [key]: item[key].map((clientDetail) => {
+            if (clientDetail.id === parseInt(clientId)) {
+              return {
+                ...clientDetail,
+                [nestedKey]: clientDetail[nestedKey].length
+                  ? clientDetail[nestedKey].map((link) =>
+                    link.id === data.id ? { ...link, ...data } : link
+                  )
+                  : [{ ...data }],
+              };
+            }
+            return clientDetail;
+          }),
+        };
+      }
+      return item;
+    });
+    alert(JSON.stringify(updatedClientData))
+  }
 
-    tbl_client.getOnlyClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
-      .then(data => {
-        if (global.DEBUG_MODE) console.log('Applicant Data:', data);
-        if (data !== undefined && data.length > 0) {
 
-          getKYCManualDetails(data[0].id);
-          global.isAadharVerified = data[0].isAadharNumberVerified;
-          if (data[0].isAadharNumberVerified == 1) {
-            setIsAadharVerified(true);
-          } else {
-            setIsAadharVerified(false);
+  const getApplicantData = async () => {
+    // Filter data based on loan application number
+    const filteredData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID));
 
-          }
+    if (filteredData.length > 0) {
 
-        }
+      const clientDetail = filteredData[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
 
-      })
-      .catch(error => {
-        if (global.DEBUG_MODE) console.error('Error fetching Applicant details:', error);
-      });
+      if (clientDetail) {
+        getClientData(clientDetail);
+      }
+
+    } else {
+      if (global.DEBUG_MODE) console.log("Loan application number not found.");
+    }
+
+  };
+  const getClientID = (data) => {
+    if (data.clientManualKycLink) {
+      if (data.clientManualKycLink.length > 0) {
+        getManualDetails(data.clientManualKycLink[0]);
+      }
+    }
+    if (data.isAadharNumberVerified) {
+      setIsAadharVerified(true);
+      global.isAadharVerified = '1';
+    } else {
+      setIsAadharVerified(false);
+    }
+
   }
 
 
@@ -362,6 +398,34 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     })
   }
 
+  const getManualDetails = (data) => {
+
+    if (data.kycDmsId != null && data.kycDmsId != undefined) {
+      if (data.kycDmsId.toString().length > 0)
+        setkycDmsId(data.kycDmsId)
+      if (imageUri != undefined && imageUri != null) {
+        if (imageUri.length > 0) {
+
+        } else {
+          getImage(data.kycDmsId, '1');
+        }
+      }
+      else {
+        getImage(data.kycDmsId, '1');
+      }
+    }
+    setKycTypeLabel(data.kycType)
+    setkycID(response.data.kycValue)
+    if (value.kycType == '002' || value.kycType == '008') {
+      setkycExpiryDateVisible(true);
+      setkycExpiryDate(data.kycExpiryDate);
+    } else {
+      setkycExpiryDate('');
+      setkycExpiryDateVisible(false);
+    }
+
+  }
+
   const getKYCManualDetails = (id) => {
 
     const baseURL = global.PORT1
@@ -373,6 +437,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
         if (global.DEBUG_MODE) console.log("ManualKYCDetails::" + JSON.stringify(response.data));
         setLoading(false)
+
         if (response.status == 200) {
           if (response.data.kycDmsId != null && response.data.kycDmsId != undefined) {
             if (response.data.kycDmsId.toString().length > 0)
@@ -623,68 +688,61 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     setKycType4Data(dataArray);
   }
 
-  const getClientData = () => {
 
-    tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE).then(value => {
-      if (value !== undefined && value.length > 0) {
-        setKycType1Label(value[0].kycTypeId1);
-        setkycID1(value[0].kycIdValue1);
-        if (value[0].kycTypeId1 == '002' || value[0].kycTypeId1 == '008') {
-          setExpiry1DateVisible(true);
-          setExpiry1Date(value[0].expiryDate1);
-        } else {
-          setExpiry1Date('');
-          setExpiry1DateVisible(false);
-        }
-        setKycType2Label(value[0].kycTypeId2);
-        setkycID2(value[0].kycIdValue2);
-        if (value[0].kycTypeId2 == '002' || value[0].kycTypeId2 == '008') {
-          setExpiry2DateVisible(true);
-          setExpiry2Date(value[0].expiryDate2);
-        } else {
-          setExpiry2Date('');
-          setExpiry2DateVisible(false);
-        }
-        setKycType3Label(value[0].kycTypeId3);
-        setkycID3(value[0].kycIdValue3);
-        if (value[0].kycTypeId3 == '002' || value[0].kycTypeId3 == '008') {
-          setExpiry3DateVisible(true);
-          setExpiry3Date(value[0].expiryDate3);
-        } else {
-          setExpiry3Date('');
-          setExpiry3DateVisible(false);
-        }
-        setKycType4Label(value[0].kycTypeId4);
-        setkycID4(value[0].kycIdValue4);
-        if (value[0].kycTypeId4 == '002' || value[0].kycTypeId4 == '008') {
-          setExpiry4DateVisible(true);
-          setExpiry4Date(value[0].expiryDate4);
-        } else {
-          setExpiry4Date('');
-          setExpiry4DateVisible(false);
-        }
-        if (value[0].kycTypeId1 == '001') {
-          setKycTypeLabel(value[0].kycTypeId1);
-          setkycID(value[0].kycIdValue1);
-        } else if (value[0].kycTypeId2 == '001') {
-          setKycTypeLabel(value[0].kycTypeId2);
-          setkycID(value[0].kycIdValue2);
-        } else if (value[0].kycTypeId3 == '001') {
-          setKycTypeLabel(value[0].kycTypeId3);
-          setkycID(value[0].kycIdValue3);
-        } else if (value[0].kycTypeId4 == '001') {
-          setKycTypeLabel(value[0].kycTypeId4);
-          setkycID(value[0].kycIdValue4);
-        }
-        if (value[0].isKycManual == '1') {
+  const getClientData = (value) => {
 
-        } else {
+    setKycType1Label(value.kycTypeId1);
+    setkycID1(value.kycIdValue1);
+    if (value.kycTypeId1 == '002' || value.kycTypeId1 == '008') {
+      setExpiry1DateVisible(true);
+      setExpiry1Date(value.kycType1ExpiryDate);
+    } else {
+      setExpiry1Date('');
+      setExpiry1DateVisible(false);
+    }
+    setKycType2Label(value.kycTypeId2);
+    setkycID2(value.kycIdValue2);
+    if (value.kycTypeId2 == '002' || value.kycTypeId2 == '008') {
+      setExpiry2DateVisible(true);
+      setExpiry2Date(value.kycType2ExpiryDate);
+    } else {
+      setExpiry2Date('');
+      setExpiry2DateVisible(false);
+    }
+    setKycType3Label(value.kycTypeId3);
+    setkycID3(value.kycIdValue3);
+    if (value.kycTypeId3 == '002' || value.kycTypeId3 == '008') {
+      setExpiry3DateVisible(true);
+      setExpiry3Date(value.kycType3ExpiryDate);
+    } else {
+      setExpiry3Date('');
+      setExpiry3DateVisible(false);
+    }
+    setKycType4Label(value.kycTypeId4);
+    setkycID4(value.kycIdValue4);
+    if (value.kycTypeId4 == '002' || value.kycTypeId4 == '008') {
+      setExpiry4DateVisible(true);
+      setExpiry4Date(value.kycType4ExpiryDate);
+    } else {
+      setExpiry4Date('');
+      setExpiry4DateVisible(false);
+    }
+    if (value.kycTypeId1 == '001') {
+      setKycTypeLabel(value.kycTypeId1);
+      setkycID(value.kycIdValue1);
+    } else if (value.kycTypeId2 == '001') {
+      setKycTypeLabel(value.kycTypeId2);
+      setkycID(value.kycIdValue2);
+    } else if (value.kycTypeId3 == '001') {
+      setKycTypeLabel(value.kycTypeId3);
+      setkycID(value.kycIdValue3);
+    } else if (value.kycTypeId4 == '001') {
+      setKycTypeLabel(value.kycTypeId4);
+      setkycID(value.kycIdValue4);
+    }
+    getClientID(value);
+    getKYCType(value.kycTypeId1, value.kycTypeId2, value.kycTypeId3, value.kycTypeId4);
 
-        }
-        getKYCType(value[0].kycTypeId1, value[0].kycTypeId2, value[0].kycTypeId3, value[0].kycTypeId4);
-      }
-
-    })
   }
 
 
@@ -1137,6 +1195,8 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
         if (response.status == 200) {
           if (global.DEBUG_MODE) console.log("ManualKYCApiResponse::" + JSON.stringify(response.data));
           tbl_client.updateKYCManual("1", global.LOANAPPLICATIONID, global.CLIENTTYPE)
+          props.updateNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientManualKycLink', response.data[0])
+          //updateDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientManualKycLink', response.data[0])
           buttonNext();
         } else if (response.data.statusCode === 201) {
           setApiError(response.data.message);
@@ -2187,15 +2247,19 @@ const mapStateToProps = (state) => {
   const { language } = state.languageReducer;
   const { profileDetails } = state.profileReducer;
   const { mobileCodeDetails } = state.mobilecodeReducer;
+  const { loanInitiationDetails } = state.loanInitiationReducer;
   return {
     language: language,
     profiledetail: profileDetails,
-    mobilecodedetail: mobileCodeDetails
+    mobilecodedetail: mobileCodeDetails,
+    loanInitiationDetails: loanInitiationDetails
   }
 }
 
 const mapDispatchToProps = dispatch => ({
   languageAction: item => dispatch(languageAction(item)),
+  deleteLoanInitiationDetails: item => dispatch(deleteLoanInitiationDetails(item)),
+  updateNestedClientDetails: (loanApplicationId, clientId, key, nestedKey, data) => dispatch(updateNestedClientDetails(loanApplicationId, clientId, key, nestedKey, data)),
 });
 
 export default connect(

@@ -46,6 +46,7 @@ import { useIsFocused } from '@react-navigation/native';
 import ErrorModal from '../../../Components/ErrorModal';
 import ImageBottomPreview from '../../../Components/ImageBottomPreview';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { updateLoanInitiationDetails, updateNestedClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
 
 const ProfileShortApplicantDetails = (props, { navigation }) => {
 
@@ -218,9 +219,10 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       .getParent()
       ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
+
     makeSystemMandatoryFields();
     getSystemCodeDetail();
-    getClientData();
+    getApplicantData();
     if (global.USERTYPEID == 1164) {
       setHideDelete(false);
       setHideRetake(false);
@@ -235,7 +237,14 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
       backHandler.remove();
     }
-  }, [props.navigation, gpslatlon]);
+  }, [props.navigation]);
+
+
+  useEffect(() => {
+
+    zoomToMarker();
+
+  }, [gpslatlon]);
 
   const handleBackButton = () => {
     onGoBack();
@@ -609,84 +618,80 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
 
   };
 
+  const getApplicantData = async () => {
+    // Filter data based on loan application number
+    const filteredData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID));
 
-  const getClientData = async () => {
+    if (filteredData.length > 0) {
 
-    await tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE).then(value => {
-      if (global.DEBUG_MODE) console.log('ApplicantData::' + JSON.stringify(value));
-      if (value !== undefined && value.length > 0) {
-        setTitleLabel(value[0]?.titleId ?? '');
-        setFirstName(value[0]?.firstName ?? '');
-        setMiddleName(value[0]?.middleName ?? '');
-        setLastName(value[0]?.lastName ?? '');
-        setGenderLabel(value[0]?.genderId ?? '');
-        setDOB(value[0]?.dateOfBirth ?? '');
-        setAge(value[0]?.age ?? '');
-        setFatherName(value[0]?.fatherName ?? '');
-        setSpouseName(value[0]?.spouseName ?? '');
-        //value[0].titleId !== undefined ? setTitleLabel(value[0].titleId) : setTitleLabel('');
-        //value[0].firstName !== undefined ? setFirstName(value[0].firstName) : setFirstName('');
-        //value[0].middleName !== undefined ? setMiddleName(value[0].middleName) : setMiddleName('');
-        //value[0].lastName !== undefined ? setLastName(value[0].lastName) : setLastName('');
-        //value[0].genderId !== undefined ? setGenderLabel(value[0].genderId) : setGenderLabel('');
-        // value[0].dateOfBirth !== undefined ? setDOB(value[0].dateOfBirth) : setDOB('');
-        //value[0].age !== undefined ? setAge(value[0].age) : setAge('');
-        //value[0].fatherName !== undefined ? setFatherName(value[0].fatherName) : setFatherName('');
-        //value[0].spouseName !== undefined ? setSpouseName(value[0].spouseName) : setSpouseName('');
-        setCasteLabel(value[0]?.casteId ?? '');
-        setReligionLabel(value[0]?.religionId ?? '');
-        setMotherTongueLabel(value[0]?.motherTongueId ?? '');
-        setEADLabel(value[0]?.educationQualificationId ?? '');
-        setKYCManual(value[0]?.isKycManual ?? '');
-        // value[0].casteId !== undefined ? setCasteLabel(value[0].casteId) : setCasteLabel('');
-        //value[0].religionId !== undefined ? setReligionLabel(value[0].religionId) : setReligionLabel('');
-        //value[0].motherTongueId !== undefined ? setMotherTongueLabel(value[0].motherTongueId) : setMotherTongueLabel('');
-        //value[0].educationQualificationId !== undefined ? setEADLabel(value[0].educationQualificationId) : setEADLabel('');
-        //value[0].isKycManual !== undefined ? setKYCManual(value[0].isKycManual) : setKYCManual('');
+      const clientDetail = filteredData[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
 
-        var aadharverify = false;
-        if (value[0].isAadharNumberVerified !== undefined && value[0].isAadharNumberVerified !== null) {
-          if (value[0].isAadharNumberVerified == 1) {
-            setIsAadharVerified(true);
-            aadharverify = true;
-          } else {
-            setIsAadharVerified(false);
-            aadharverify = false;
-          }
-        }
-
-        if (global.USERTYPEID == 1163) {
-          if (value[0].isKycManual == '1') {
-            setHideDelete(true);
-            setHideRetake(true);
-          } else {
-            fieldsDisable();
-            setHideDelete(true);
-            setHideRetake(true);
-          }
-        }
-
-        disableAadharFields(aadharverify, value[0].fatherName, value[0].spouseName);
-        if (value[0].dmsId !== undefined && value[0].dmsId !== null) {
-          if (value[0].dmsId.length > 0) {
-            getImage(value[0].dmsId);
-          }
-          setDocID(value[0].dmsId);
-        }
-
-        if (value[0].geoCode !== undefined && value[0].geoCode !== null) {
-          if (value[0].geoCode.length > 0) {
-            const [latitude, longitude] = value[0].geoCode.split(',');
-            setCurrentLongitude(parseFloat(longitude));
-            setCurrentLatitude(parseFloat(latitude));
-            zoomToMarker();
-            setGPSLatLon(value[0].geoCode)
-          }
-        }
-
+      if (clientDetail) {
+        getClientData(clientDetail);
       }
-    })
 
+    } else {
+      if (global.DEBUG_MODE) console.log("Loan application number not found.");
+    }
+
+  };
+
+  const getClientData = (value) => {
+
+    setTitleLabel(value?.title ?? '');
+    setFirstName(value?.firstName ?? '');
+    setMiddleName(value?.middleName ?? '');
+    setLastName(value?.lastName ?? '');
+    setGenderLabel(value?.gender ?? '');
+    setDOB(value?.dateOfBirth ?? '');
+    setAge(value?.age.toString() ?? '');
+    setFatherName(value?.fatherName ?? '');
+    setSpouseName(value?.spouseName ?? '');
+    setCasteLabel(value?.caste ?? '');
+    setReligionLabel(value?.religion ?? '');
+    setMotherTongueLabel(value?.motherTongue ?? '');
+    setEADLabel(value?.educationQualification ?? '');
+    setKYCManual(value?.isKycManual ?? '');
+
+    var aadharverify = false;
+    if (value.isAadharNumberVerified !== undefined && value.isAadharNumberVerified !== null) {
+      if (value.isAadharNumberVerified) {
+        setIsAadharVerified(true);
+        aadharverify = true;
+      } else {
+        setIsAadharVerified(false);
+        aadharverify = false;
+      }
+    }
+
+    if (global.USERTYPEID == 1163) {
+      if (value.isKycManual) {
+        setHideDelete(true);
+        setHideRetake(true);
+      } else {
+        fieldsDisable();
+        setHideDelete(true);
+        setHideRetake(true);
+      }
+    }
+
+    disableAadharFields(aadharverify, value.fatherName, value.spouseName);
+    if (value.dmsId !== undefined && value.dmsId !== null) {
+      if (value.dmsId.toString().length > 0) {
+        getImage(value.dmsId);
+      }
+      setDocID(value.dmsId);
+    }
+
+    if (value.geoCode !== undefined && value.geoCode !== null) {
+      if (value.geoCode.length > 0) {
+        const [latitude, longitude] = value.geoCode.split(',');
+        setCurrentLongitude(parseFloat(longitude));
+        setCurrentLatitude(parseFloat(latitude));
+        zoomToMarker();
+        setGPSLatLon(value.geoCode)
+      }
+    }
 
   }
 
@@ -900,6 +905,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
 
           setLoading(false);
           if (response.status == 200) {
+            props.updateLoanInitiationDetails(parseInt(global.LOANAPPLICATIONID), [], 'clientDetail', response.data.id, response.data)
             if (global.USERTYPEID == 1163) {
               navigatetoAddress();
             } else {
@@ -2178,15 +2184,18 @@ const mapStateToProps = (state) => {
   const { language } = state.languageReducer;
   const { profileDetails } = state.profileReducer;
   const { mobileCodeDetails } = state.mobilecodeReducer;
+  const { loanInitiationDetails } = state.loanInitiationReducer;
   return {
     language: language,
     profiledetail: profileDetails,
-    mobilecodedetail: mobileCodeDetails
+    mobilecodedetail: mobileCodeDetails,
+    loanInitiationDetails: loanInitiationDetails,
   }
 }
 
 const mapDispatchToProps = dispatch => ({
   languageAction: item => dispatch(languageAction(item)),
+  updateLoanInitiationDetails: (loanApplicationId, loanData, key, clientId, updatedDetails) => dispatch(updateLoanInitiationDetails(loanApplicationId, loanData, key, clientId, updatedDetails)),
 });
 
 export default connect(

@@ -30,6 +30,7 @@ import tbl_loanbusinessDetail from '../../../Database/Table/tbl_loanbusinessDeta
 import tbl_loanaddressinfo from '../../../Database/Table/tbl_loanaddressinfo';
 import tbl_finexpdetails from '../../../Database/Table/tbl_finexpdetails';
 import tbl_bankdetails from '../../../Database/Table/tbl_bankdetails';
+import { addLoanInitiationDetails } from '../../../Utils/redux/actions/loanInitiationAction';
 
 
 const LoanApplicationTrackerDetails = (props, { navigation }) => {
@@ -79,6 +80,13 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
                 if (response.status == 200) {
                     if (global.DEBUG_MODE) console.log("LoanAppDetails::" + JSON.stringify(response.data));
                     global.LEADTRACKERDATA = response.data;
+                    const updatedObject = Object.keys(response.data).reduce((acc, key) => {
+                        if (key !== 'loanApplicationStatusDtos') {
+                            acc[key] = response.data[key];
+                        }
+                        return acc;
+                    }, {});
+                    props.addLoanInitiationDetails(updatedObject);
                     insertData(response.data);
                 }
                 else if (response.data.statusCode === 201) {
@@ -383,6 +391,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => ({
     languageAction: (item) => dispatch(languageAction(item)),
+    addLoanInitiationDetails: (item) => dispatch(addLoanInitiationDetails(item)),
 });
 export default connect(mapStateToProps, mapDispatchToProps)(LoanApplicationTrackerDetails);
 

@@ -44,7 +44,7 @@ import { useIsFocused } from '@react-navigation/native';
 import tbl_client from '../../../Database/Table/tbl_client';
 import tbl_loanApplication from '../../../Database/Table/tbl_loanApplication';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { addLoanInitiationDetails, updateLoanInitiationDetails, deleteLoanInitiationDetails } from '../../../Utils/redux/actions/loanInitiationAction';
+import { addLoanInitiationDetails, updateLoanInitiationDetails, deleteLoanInitiationDetails, updateClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
 
 const ProfileShortBasicDetails = (props, { navigation }) => {
   var aadhar = '';
@@ -357,6 +357,8 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   useFocusEffect(
     React.useCallback(() => {
 
+      //alert(JSON.stringify(props.loanInitiationDetails))
+      console.log(JSON.stringify(props.loanInitiationDetails))
       props.navigation
         .getParent()
         ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
@@ -396,232 +398,199 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   );
 
   const getApplicantData = async () => {
-    setLoading(true);
-    tbl_loanApplication
-      .getLoanAppWorkFlowID(global.LOANAPPLICATIONID, 'APPL')
-      .then(data => {
-        if (global.DEBUG_MODE) console.log('Applicant Data:', data);
-        if (data !== undefined && data.length > 0) {
+    // Filter data based on loan application number
+    const filteredData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID));
 
-          if (data[0].workflow_id !== undefined && data[0].workflow_id !== null) {
-            if (data[0].workflow_id.length > 0) {
-              getID1data(data[0].workflow_id);
-              getID2data(data[0].workflow_id);
-              getID3data(data[0].workflow_id);
-              getID4data(data[0].workflow_id);
-              setWorkflowIDLabel(data[0].workflow_id)
-            }
-          }
+    if (filteredData.length > 0) {
 
-        }
-      })
-      .catch(error => {
-        if (global.DEBUG_MODE)
-          console.error('Error fetching Second Loan Applicant details:', error);
-      });
+      getID1data(filteredData[0].workflowId);
+      getID2data(filteredData[0].workflowId);
+      getID3data(filteredData[0].workflowId);
+      getID4data(filteredData[0].workflowId);
+      setWorkflowIDLabel(filteredData[0].workflowId)
 
-    tbl_loanApplication
-      .getLoanAppBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
-      .then(data => {
-        if (global.DEBUG_MODE) console.log('Applicant Data:', data);
-        if (data !== undefined && data.length > 0) {
-          setLoanTypeLabel(data[0]?.loan_type ?? loanTypeLabel);
-          setProductTypeLabel(data[0].product);
-          setCustCatgLabel(data[0].customer_category);
-          if (data[0].customer_subcategory !== undefined && data[0].customer_subcategory !== null) {
-            if (data[0].customer_subcategory.length > 0) {
-              setCustomerSubCategoryLabel(data[0].customer_subcategory);
-            }
-          }
-          if (data[0].workflow_id !== undefined && data[0].workflow_id !== null) {
-            if (data[0].workflow_id.length > 0) {
-              setWorkflowIDLabel(parseInt(data[0].workflow_id))
-              callLoanAmount(parseInt(data[0].workflow_id));
-            }
-          }
+      if (global.CLIENTTYPE == 'APPL') {
+        getLoanData(filteredData[0]);
+      }
+      const clientDetail = filteredData[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
 
-          setLoanAmount(data[0].loan_amount);
-          setLoanPurposeLabel(data[0].loan_purpose);
-          getProductID(data[0].loan_type);
-          setClientTypeLabel(data[0].customer_type);
-          getWorkFlowID(
-            data[0].loan_type,
-            data[0].product,
-            data[0].customer_category,
-          );
-        }
-      })
-      .catch(error => {
-        if (global.DEBUG_MODE)
-          console.error('Error fetching Loan Applicant details:', error);
-      });
+      if (clientDetail) {
+        getClientData(clientDetail);
+      } else {
+        const filteredrelationTypeData = leadsystemCodeDetail
+          .filter(data => data.masterId === 'RELATIONSHIP')
+          .sort((a, b) => a.Description.localeCompare(b.Description));
+        setRelationTypeData(filteredrelationTypeData);
 
-    await tbl_client
-      .getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
-      .then(data => {
-        if (global.DEBUG_MODE) console.log('Applicant Data:', data);
-        if (data !== undefined && data.length > 0) {
+        if (global.DEBUG_MODE) console.log("Client ID not found in clientDetail array.");
+      }
 
-          if (data[0].leadID !== undefined && data[0].leadID !== null) {
-            if (data[0].leadID.length > 0) {
-              setLeadIDVisible(true);
-              setLeadID(data[0].leadID);
-            }
-          } else {
-            setLeadIDVisible(false);
-            setLeadID('');
-          }
-          setRelationTypeLabel(data[0].relationTypeId);
-          setTitleLabel(data[0].titleId);
-          setName(data[0].firstName);
-          setGenderLabel(data[0].genderId);
-          setMaritalStatusLabel(data[0].maritalStatusId);
-          setKycType1Label(data[0].kycTypeId1);
-          setkycID1(data[0].kycIdValue1);
-          if (data[0].kycTypeId1 == '002' || data[0].kycTypeId1 == '008') {
-            setExpiry1DateVisible(true);
-            setExpiry1DateMan(true);
-            setExpiry1Date(Common.convertDateFormat(data[0].expiryDate1));
-          } else {
-            setExpiry1Date('');
-            setExpiry1DateVisible(false);
-            setExpiry1DateMan(false);
-          }
-          setKycType2Label(data[0].kycTypeId2);
-          setkycID2(data[0].kycIdValue2);
-          if (data[0].kycTypeId2 == '002' || data[0].kycTypeId2 == '008') {
-            setExpiry2DateVisible(true);
-            setExpiry2DateMan(true);
-            setExpiry2Date(Common.convertDateFormat(data[0].expiryDate2));
-          } else {
-            setExpiry2Date('');
-            setExpiry2DateVisible(false);
-            setExpiry2DateMan(false);
-          }
-          setKycType3Label(data[0].kycTypeId3);
-          setkycID3(data[0].kycIdValue3);
-          if (data[0].kycTypeId3 == '002' || data[0].kycTypeId3 == '008') {
-            setExpiry3DateVisible(true);
-            setExpiry3DateMan(true);
-            setExpiry3Date(Common.convertDateFormat(data[0].expiryDate3));
-          } else {
-            setExpiry3Date('');
-            setExpiry3DateVisible(false);
-            setExpiry3DateMan(false);
-          }
-          setKycType4Label(data[0].kycTypeId4);
-          setkycID4(data[0].kycIdValue4);
-          if (data[0].kycTypeId4 == '002' || data[0].kycTypeId4 == '008') {
-            setExpiry4DateVisible(true);
-            setExpiry4DateMan(true);
-            setExpiry4Date(Common.convertDateFormat(data[0].expiryDate4));
-          } else {
-            setExpiry4Date('');
-            setExpiry4DateVisible(false);
-            setExpiry4DateMan(false);
-          }
-          setMobileNumber(data[0].mobileNumber);
-          setEmail(data[0].email);
-          setURNumber(data[0].udyamRegistrationNumber);
+      const applicantDetail = filteredData[0].clientDetail.find(client => client.clientType === 'APPL');
 
-          if (data[0].isMsme == '1' || data[0].isMsme == true) {
-            setchkMsme(true);
-            setURNumberVisible(true);
-          }
+      if (applicantDetail) {
+        getRelationTypeData(applicantDetail)
+      } else {
+        const filteredrelationTypeData = leadsystemCodeDetail
+          .filter(data => data.masterId === 'RELATIONSHIP')
+          .sort((a, b) => a.Description.localeCompare(b.Description));
+        setRelationTypeData(filteredrelationTypeData);
+      }
 
-          if (data[0].dedupeCheck == '1' || data[0].dedupeCheck == true) {
-            setIsDedupeDone(true);
-            global.isDedupeDone = '1';
-            fieldsDisable();
-            setClientTypeVisible(true)
-            setWorkflowIDDisable(true);
-            setLoanAmountDisable(true);
-          } else {
-            setIsDedupeDone(false);
-            global.isDedupeDone = '0';
-            setClientTypeVisible(false);
-          }
-          if (data[0].isMobileNumberVerified == '1' || data[0].isMobileVerified) {
-            global.isMobileVerified = '1';
-            setIsMobileVerified('1');
-          } else {
-            global.isMobileVerified = '0';
-            setIsMobileVerified('0')
-          }
-          // setIsMobileVerified('1')
-          // global.isMobileVerified = "1";
+      if (global.CLIENTTYPE == 'GRNTR') {
+        const coapplicantDetail = filteredData[0].clientDetail.find(client => client.clientType === 'CO-APPL');
 
-
-          setLoading(false);
-        } else {
-          setLoading(false);
+        if (coapplicantDetail) {
           const filteredrelationTypeData = leadsystemCodeDetail
-            .filter(data => data.masterId === 'RELATIONSHIP')
+            .filter(data => data.masterId === 'RELATIONSHIP' && data.subCodeId !== coapplicantDetail.relationType)
             .sort((a, b) => a.Description.localeCompare(b.Description));
+          if (global.DEBUG_MODE) console.log('Filtered Data:', filteredrelationTypeData);
           setRelationTypeData(filteredrelationTypeData);
+
         }
-      })
-      .catch(error => {
-        setLoading(false);
-        if (global.DEBUG_MODE)
-          console.error('Error fetching Applicant details:', error);
-      });
-
-
-    await tbl_client
-      .getClientBasedOnID(global.LOANAPPLICATIONID, 'APPL')
-      .then(data => {
-        if (global.DEBUG_MODE) console.log('Applicant Data:', data);
-        if (data !== undefined && data.length > 0) {
-          if (global.CLIENTTYPE == 'CO-APPL') {
-            if (data[0].maritalStatusId == 'M') {
-              const filteredrelationTypeData = leadsystemCodeDetail
-                .filter(data => data.masterId === 'RELATIONSHIP' && data.subCodeId === 'SPS')
-                .sort((a, b) => a.Description.localeCompare(b.Description));
-              if (global.DEBUG_MODE) console.log('Filtered Data:', filteredrelationTypeData);
-              setRelationTypeData(filteredrelationTypeData);
-            } else {
-              const filteredrelationTypeData = leadsystemCodeDetail
-                .filter(data => data.masterId === 'RELATIONSHIP')
-                .sort((a, b) => a.Description.localeCompare(b.Description));
-              setRelationTypeData(filteredrelationTypeData);
-            }
-          }
-        } else {
-          setLoading(false);
-          const filteredrelationTypeData = leadsystemCodeDetail
-            .filter(data => data.masterId === 'RELATIONSHIP')
-            .sort((a, b) => a.Description.localeCompare(b.Description));
-          setRelationTypeData(filteredrelationTypeData);
-        }
-      })
-      .catch(error => {
-        if (global.DEBUG_MODE)
-          console.error('Error fetching Second Applicant details:', error);
-      });
-
-    if (global.CLIENTTYPE == 'GRNTR') {
-      await tbl_client
-        .getClientBasedOnID(global.LOANAPPLICATIONID, 'CO-APPL')
-        .then(data1 => {
-          if (global.DEBUG_MODE) console.log('Applicant Data:', data1);
-          if (data1 !== undefined && data1.length > 0) {
-
-            const filteredrelationTypeData = leadsystemCodeDetail
-              .filter(data => data.masterId === 'RELATIONSHIP' && data.subCodeId !== data1[0].relationTypeId)
-              .sort((a, b) => a.Description.localeCompare(b.Description));
-            if (global.DEBUG_MODE) console.log('Filtered Data:', filteredrelationTypeData);
-            setRelationTypeData(filteredrelationTypeData);
-
-          }
-        })
-        .catch(error => {
-          if (global.DEBUG_MODE)
-            console.error('Error fetching Second Applicant details:', error);
-        });
+      }
+    } else {
+      if (global.DEBUG_MODE) console.log("Loan application number not found.");
     }
 
   };
+
+  const getLoanData = (data) => {
+    setLoanTypeLabel(data?.loanType ?? loanTypeLabel);
+    setProductTypeLabel(data.product);
+    setCustCatgLabel(data.customerCategory);
+    if (data.customerSubcategory !== undefined && data.customer_subcategory !== null) {
+      if (data.customerSubcategory.length > 0) {
+        setCustomerSubCategoryLabel(data.customerSubcategory);
+      }
+    }
+    if (data.workflowId !== undefined && data.workflowId !== null) {
+      if (data.workflowId.length > 0) {
+        setWorkflowIDLabel(parseInt(data.workflowId))
+        callLoanAmount(parseInt(data.workflowId));
+      }
+    }
+    if (data.loanAmount) {
+      setLoanAmount(data.loanAmount.toString());
+    }
+    setLoanPurposeLabel(data.loanPurpose);
+    getProductID(data.loanType);
+    setClientTypeLabel(data.customerType);
+    getWorkFlowID(
+      data.loanType,
+      data.product,
+      data.customerCategory,
+    );
+  }
+
+  const getClientData = (data) => {
+    if (data.leadID !== undefined && data.leadID !== null) {
+      if (data.leadID.length > 0) {
+        setLeadIDVisible(true);
+        setLeadID(data[0].leadID);
+      }
+    } else {
+      setLeadIDVisible(false);
+      setLeadID('');
+    }
+    setRelationTypeLabel(data.relationType);
+    setTitleLabel(data.title);
+    setName(data.firstName + ' ' + data.middleName + ' ' + data.lastName);
+    setGenderLabel(data.gender);
+    setMaritalStatusLabel(data.maritalStatus);
+    setKycType1Label(data.kycTypeId1);
+    setkycID1(data.kycIdValue1);
+    if (data.kycTypeId1 == '002' || data.kycTypeId1 == '008') {
+      setExpiry1DateVisible(true);
+      setExpiry1DateMan(true);
+      setExpiry1Date(Common.convertDateFormat(data.kycType1ExpiryDate));
+    } else {
+      setExpiry1Date('');
+      setExpiry1DateVisible(false);
+      setExpiry1DateMan(false);
+    }
+    setKycType2Label(data.kycTypeId2);
+    setkycID2(data.kycIdValue2);
+    if (data.kycTypeId2 == '002' || data.kycTypeId2 == '008') {
+      setExpiry2DateVisible(true);
+      setExpiry2DateMan(true);
+      setExpiry2Date(Common.convertDateFormat(data[0].kycType2ExpiryDate));
+    } else {
+      setExpiry2Date('');
+      setExpiry2DateVisible(false);
+      setExpiry2DateMan(false);
+    }
+    setKycType3Label(data.kycTypeId3);
+    setkycID3(data.kycIdValue3);
+    if (data.kycTypeId3 == '002' || data.kycTypeId3 == '008') {
+      setExpiry3DateVisible(true);
+      setExpiry3DateMan(true);
+      setExpiry3Date(Common.convertDateFormat(data[0].kycType3ExpiryDate));
+    } else {
+      setExpiry3Date('');
+      setExpiry3DateVisible(false);
+      setExpiry3DateMan(false);
+    }
+    setKycType4Label(data.kycTypeId4);
+    setkycID4(data.kycIdValue4);
+    if (data.kycTypeId4 == '002' || data.kycTypeId4 == '008') {
+      setExpiry4DateVisible(true);
+      setExpiry4DateMan(true);
+      setExpiry4Date(Common.convertDateFormat(data[0].kycType4ExpiryDate));
+    } else {
+      setExpiry4Date('');
+      setExpiry4DateVisible(false);
+      setExpiry4DateMan(false);
+    }
+    setMobileNumber(data.mobileNumber);
+    setEmail(data.email);
+    setURNumber(data.udyamRegistrationNumber);
+
+    if (data.isMsme) {
+      setchkMsme(true);
+      setURNumberVisible(true);
+    }
+    if (data.dedupeCheck) {
+      setIsDedupeDone(true);
+      global.isDedupeDone = '1';
+      fieldsDisable();
+      setClientTypeVisible(true)
+      setWorkflowIDDisable(true);
+      setLoanAmountDisable(true);
+    } else {
+      setIsDedupeDone(false);
+      global.isDedupeDone = '0';
+      setClientTypeVisible(false);
+    }
+    if (data.isMobileNumberVerified) {
+      global.isMobileVerified = '1';
+      setIsMobileVerified('1');
+    } else {
+      global.isMobileVerified = '0';
+      setIsMobileVerified('0')
+    }
+    // setIsMobileVerified('1')
+    // global.isMobileVerified = "1";
+
+  }
+
+  const getRelationTypeData = (data) => {
+
+    if (global.CLIENTTYPE == 'CO-APPL') {
+      if (data.maritalStatus == 'M') {
+        const filteredrelationTypeData = leadsystemCodeDetail
+          .filter(data => data.masterId === 'RELATIONSHIP' && data.subCodeId === 'SPS')
+          .sort((a, b) => a.Description.localeCompare(b.Description));
+        if (global.DEBUG_MODE) console.log('Filtered Data:', filteredrelationTypeData);
+        setRelationTypeData(filteredrelationTypeData);
+      } else {
+        const filteredrelationTypeData = leadsystemCodeDetail
+          .filter(data => data.masterId === 'RELATIONSHIP')
+          .sort((a, b) => a.Description.localeCompare(b.Description));
+        setRelationTypeData(filteredrelationTypeData);
+      }
+    }
+
+  }
 
   const fieldsDisable = () => {
     setLoanTypeDisable(true);
@@ -1422,14 +1391,11 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           if (response.status === 200) {
             if (global.CLIENTTYPE == 'APPL') {
               global.CLIENTID = response.data.clientDetail[0].id;
+              addInRedux(response.data)
             } else {
               global.CLIENTID = response.data[0].id;
+              props.updateClientDetails(global.LOANAPPLICATIONID, response.data[0].id, 'clientDetail', response.data[0])
             }
-
-            alert(JSON.stringify(response.data));
-            addInRedux(response.data)
-            return;
-            await insertData();
 
             if (global.isDedupeDone == '1') {
               if (global.CLIENTTYPE == 'APPL') {
@@ -1504,7 +1470,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       manualKycApprovedDate: data.manualKycApprovedDate,
     }
 
-    props.updateLoanInitiationDetails(data.id, loanData, 'clientDetail', data.clientDetail)
+    props.updateLoanInitiationDetails(data.id, loanData, 'clientDetail', data.clientDetail.id, data.clientDetail)
 
   }
 
@@ -1804,102 +1770,6 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           }
         });
     }
-  };
-
-  const insertData = async () => {
-    await tbl_client.insertClient(
-      global.CLIENTID,
-      global.LOANAPPLICATIONID,
-      global.CLIENTTYPE,
-      leadID,
-      relationTypeLabel,
-      titleLabel,
-      Name,
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      genderLabel,
-      MaritalStatusLabel,
-      mobileNumber,
-      Email,
-      '',
-      KycType1Label,
-      kycID1,
-      expiryDate1 ?? Common.convertYearDateFormat(expiryDate1),
-      KycType2Label,
-      kycID2,
-      expiryDate2 ?? Common.convertYearDateFormat(expiryDate2),
-      KycType3Label,
-      kycID3,
-      expiryDate3 ?? Common.convertYearDateFormat(expiryDate3),
-      KycType4Label,
-      kycID4,
-      expiryDate4 ?? Common.convertYearDateFormat(expiryDate4),
-      chkMsme,
-      '',
-      '',
-      URNumber,
-      '',
-      isMobileVerified,
-      isEmailVerified,
-      isDedupeDone,
-      '',
-      '',
-      '',
-      '',
-      '1',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-    );
-
-    await tbl_loanApplication.insertLoanApplication(
-      global.LOANAPPLICATIONID,
-      global.CLIENTTYPE,
-      global.TEMPAPPID,
-      global.TEMPAPPID,
-      '1180',
-      global.leadID,
-      custCatgLabel,
-      CustomerSubCategoryLabel,
-      clientTypeLabel,
-      loanTypeLabel,
-      LoanPurposeLabel,
-      ProductTypeLabel,
-      LoanAmount,
-      workflowIDLabel,
-      '',
-      'true',
-      'true',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-    );
   };
 
   const generateOTP = () => {
@@ -2648,73 +2518,73 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
     }
 
-    if (KycType1Label == '012') {
-      if (kycID1.length > 0) {
-        if (kycID1.length != 10) {
-          errorMessage =
-            errorMessage +
-            i +
-            ')' +
-            ' ' +
-            language[0][props.language].str_plsenter +
-            'Valid Voter ID' +
-            '\n';
-          i++;
-          flag = true;
-        }
-      }
-    }
+    // if (KycType1Label == '012') {
+    //   if (kycID1.length > 0) {
+    //     if (kycID1.length != 10) {
+    //       errorMessage =
+    //         errorMessage +
+    //         i +
+    //         ')' +
+    //         ' ' +
+    //         language[0][props.language].str_plsenter +
+    //         'Valid Voter ID' +
+    //         '\n';
+    //       i++;
+    //       flag = true;
+    //     }
+    //   }
+    // }
 
-    if (KycType2Label == '012') {
-      if (kycID2.length > 0) {
-        if (kycID2.length != 10) {
-          errorMessage =
-            errorMessage +
-            i +
-            ')' +
-            ' ' +
-            language[0][props.language].str_plsenter +
-            'Valid Voter ID' +
-            '\n';
-          i++;
-          flag = true;
-        }
-      }
-    }
+    // if (KycType2Label == '012') {
+    //   if (kycID2.length > 0) {
+    //     if (kycID2.length != 10) {
+    //       errorMessage =
+    //         errorMessage +
+    //         i +
+    //         ')' +
+    //         ' ' +
+    //         language[0][props.language].str_plsenter +
+    //         'Valid Voter ID' +
+    //         '\n';
+    //       i++;
+    //       flag = true;
+    //     }
+    //   }
+    // }
 
-    if (KycType3Label == '012') {
-      if (kycID3.length > 0) {
-        if (kycID3.length != 10) {
-          errorMessage =
-            errorMessage +
-            i +
-            ')' +
-            ' ' +
-            language[0][props.language].str_plsenter +
-            'Valid Voter ID' +
-            '\n';
-          i++;
-          flag = true;
-        }
-      }
-    }
+    // if (KycType3Label == '012') {
+    //   if (kycID3.length > 0) {
+    //     if (kycID3.length != 10) {
+    //       errorMessage =
+    //         errorMessage +
+    //         i +
+    //         ')' +
+    //         ' ' +
+    //         language[0][props.language].str_plsenter +
+    //         'Valid Voter ID' +
+    //         '\n';
+    //       i++;
+    //       flag = true;
+    //     }
+    //   }
+    // }
 
-    if (KycType4Label == '012') {
-      if (kycID4.length > 0) {
-        if (kycID4.length != 10) {
-          errorMessage =
-            errorMessage +
-            i +
-            ')' +
-            ' ' +
-            language[0][props.language].str_plsenter +
-            'Valid Voter ID' +
-            '\n';
-          i++;
-          flag = true;
-        }
-      }
-    }
+    // if (KycType4Label == '012') {
+    //   if (kycID4.length > 0) {
+    //     if (kycID4.length != 10) {
+    //       errorMessage =
+    //         errorMessage +
+    //         i +
+    //         ')' +
+    //         ' ' +
+    //         language[0][props.language].str_plsenter +
+    //         'Valid Voter ID' +
+    //         '\n';
+    //       i++;
+    //       flag = true;
+    //     }
+    //   }
+    // }
 
     if (KycType1Label == '002') {
       if (kycID1.length > 0) {
@@ -4181,17 +4051,20 @@ const mapStateToProps = state => {
   const { language } = state.languageReducer;
   const { profileDetails } = state.profileReducer;
   const { mobileCodeDetails } = state.mobilecodeReducer;
+  const { loanInitiationDetails } = state.loanInitiationReducer;
   return {
     language: language,
     profiledetail: profileDetails,
     mobilecodedetail: mobileCodeDetails,
+    loanInitiationDetails: loanInitiationDetails,
   };
 };
 
 const mapDispatchToProps = dispatch => ({
   languageAction: item => dispatch(languageAction(item)),
   dedupeAction: item => dispatch(dedupeAction(item)),
-  updateLoanInitiationDetails: (loanApplicationId, loanData, key, updatedDetails) => dispatch(dedupeAction(loanApplicationId, loanData, key, updatedDetails)),
+  updateClientDetails: (loanApplicationId, clientId, key, data) => dispatch(updateClientDetails(loanApplicationId, clientId, key, data)),
+  updateLoanInitiationDetails: (loanApplicationId, loanData, key, clientId, updatedDetails) => dispatch(updateLoanInitiationDetails(loanApplicationId, loanData, key, clientId, updatedDetails)),
 });
 
 export default connect(

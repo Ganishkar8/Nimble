@@ -21,6 +21,7 @@ import tbl_client from '../../../Database/Table/tbl_client';
 import apiInstance from '../../../Utils/apiInstance';
 import CheckBoxComp from '../../../Components/CheckBoxComp';
 import { it } from 'react-native-paper-dates';
+import { updateLoanInitiationDetails, deleteLoanInitiationDetails, updateNestedClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
 
 const AddressDetails = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -189,24 +190,23 @@ const AddressDetails = (props, { navigation }) => {
 
   const getExistingData = () => {
 
-    tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE).then(value => {
-      if (value !== undefined && value.length > 0) {
+    // tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE).then(value => {
+    //   if (value !== undefined && value.length > 0) {
 
-        setKYCManual(value[0].isKycManual)
+    //     setKYCManual(value[0].isKycManual)
 
-        if (global.USERTYPEID == 1163) {
-          if (!(value[0].isKycManual == '1')) {
-            fieldsDisable();
-          }
-        }
+    //     if (global.USERTYPEID == 1163) {
+    //       if (!(value[0].isKycManual == '1')) {
+    //         fieldsDisable();
+    //       }
+    //     }
 
-      }
-    })
-
+    //   }
+    // })
 
     if (isNew != 'new') {
       setPostORPut('put')
-      getExistingAddressData(isNew.loanApplicationId, isNew.id)
+      getExistingAddressData(isNew)
     } else {
       setPostORPut('post');
     }
@@ -266,107 +266,109 @@ const AddressDetails = (props, { navigation }) => {
 
   }
 
-  const getExistingAddressData = (loanAppId, id) => {
-    tbl_clientaddressinfo.getAllAddressDetailsForLoanIDAndID(loanAppId, id.toString())
-      .then(data => {
-        if (global.DEBUG_MODE) console.log('Address Detail:', data);
-
-        if (data !== undefined && data.length > 0) {
-          setAddressID(data[0].id)
-          setAddressLine1(data[0].address_line_1)
-          setAddressLine2(data[0].address_line_2)
-          setLandmark(data[0].landmark)
-          setPincode(data[0].pincode)
-          setCity(data[0].city)
-          setDistrict(data[0].district)
-          setState(data[0].state)
-          setCountry(data[0].country)
-          setYearsAtResidence(data[0].years_at_residence)
-          setOwnerName(data[0].owner_name)
-          setYearsAtCity(data[0].years_in_current_city_or_town)
-          //spinner
-          setAddressTypeLabel(data[0].address_type)
-          if (data[0].address_type == 'P') {
-            setGeoClassificationVisible(false);
-            setGeoClassificationMan(false);
-            setYearsAtResidenceVisible(false);
-            setYearsAtResidenceMan(false);
-            setYearsAtCityVisible(false);
-            setYearsAtResidenceMan(false);
-          }
-          setGeoClassificationLabel(data[0].geo_classification)
-          setAddressOwnerTypeLabel(data[0].address_ownership)
-          setOwnerDetailsLabel(data[0].owner_details)
-          if (data[0].owner_details == 'OD-OTH' || data[0].owner_details == 'OD-RLT') {
-            setOwnerNameDisable(false);
-            setOwnerNameMan(true);
-            setOwnerNameVisible(true);
-          } else {
-            setOwnerNameDisable(true);
-            setOwnerNameMan(false);
-            setOwnerNameVisible(false);
-            setOwnerName('')
-          }
-          if (data[0].isKyc === "1") {
-            disableAadharFields(data)
-          }
-          setIsKYC(data[0].isKyc);
-          setLoading(false)
-        }
-
-      })
-      .catch(error => {
-        if (global.DEBUG_MODE) console.error('Error fetching bank details:', error);
-        setLoading(false)
-      });
+  const getExistingAddressData = (data) => {
+    setAddressID(data.id)
+    setAddressLine1(data.addressLine1)
+    setAddressLine2(data.addressLine2)
+    setLandmark(data.landmark)
+    setPincode(data.pincode)
+    setCity(data.city)
+    setDistrict(data.district)
+    setState(data.state)
+    setCountry(data.country)
+    setYearsAtResidence(data.yearsAtResidence.toString())
+    setOwnerName(data.ownerName)
+    setYearsAtCity(data.yearsInCurrentCityOrTown.toString())
+    //spinner
+    setAddressTypeLabel(data.addressType)
+    if (data.addressType == 'P') {
+      setGeoClassificationVisible(false);
+      setGeoClassificationMan(false);
+      setYearsAtResidenceVisible(false);
+      setYearsAtResidenceMan(false);
+      setYearsAtCityVisible(false);
+      setYearsAtResidenceMan(false);
+    }
+    setGeoClassificationLabel(data.geoClassification)
+    setAddressOwnerTypeLabel(data.addressOwnership)
+    setOwnerDetailsLabel(data.ownerDetails)
+    if (data.ownerDetails == 'OD-OTH' || data.ownerDetails == 'OD-RLT') {
+      setOwnerNameDisable(false);
+      setOwnerNameMan(true);
+      setOwnerNameVisible(true);
+    } else {
+      setOwnerNameDisable(true);
+      setOwnerNameMan(false);
+      setOwnerNameVisible(false);
+      setOwnerName('')
+    }
+    if (data.isKyc === "1") {
+      disableAadharFields(data)
+    }
+    setIsKYC(data.isKyc);
   }
 
   const getPermanentAddressData = () => {
-    tbl_clientaddressinfo.getPermanentAddress(global.LOANAPPLICATIONID, global.CLIENTTYPE)
-      .then(data => {
-        if (global.DEBUG_MODE) console.log('Address Detail:', data);
 
-        if (data !== undefined && data.length > 0) {
-          setAddressLine1(data[0].address_line_1)
-          setAddressLine2(data[0].address_line_2)
-          setLandmark(data[0].landmark)
-          setPincode(data[0].pincode)
-          setCity(data[0].city)
-          setDistrict(data[0].district)
-          setState(data[0].state)
-          setCountry(data[0].country)
-          setYearsAtResidence(data[0].years_at_residence)
-          setOwnerName(data[0].owner_name)
-          setYearsAtCity(data[0].years_in_current_city_or_town)
-          setGeoClassificationLabel(data[0].geo_classification)
-          setAddressOwnerTypeLabel(data[0].address_ownership)
-          setOwnerDetailsLabel(data[0].owner_details)
+    const filteredData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID));
 
-          if (data[0].owner_details == 'OD-OTH' || data[0].owner_details == 'OD-RLT') {
-            setOwnerNameDisable(false);
-            setOwnerNameMan(true);
-            setOwnerNameVisible(true);
-          } else {
-            setOwnerNameDisable(true);
-            setOwnerNameMan(false);
-            setOwnerNameVisible(false);
-            setOwnerName('')
+    if (filteredData.length > 0) {
+
+      const clientDetail = filteredData[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
+
+      if (clientDetail) {
+
+        const addressDetails = clientDetail.clientAddress;
+        if (addressDetails) {
+
+          const permanentAddress = addressDetails.find(item => item.addressType === 'P');
+
+          if (permanentAddress) {
+            setAddressLine1(permanentAddress.addressLine1)
+            setAddressLine2(permanentAddress.addressLine2)
+            setLandmark(permanentAddress.landmark)
+            setPincode(permanentAddress.pincode)
+            setCity(permanentAddress.city)
+            setDistrict(permanentAddress.district)
+            setState(permanentAddress.state)
+            setCountry(permanentAddress.country)
+            setYearsAtResidence(permanentAddress.yearsAtResidence)
+            setOwnerName(permanentAddress.ownerName)
+            setYearsAtCity(permanentAddress.yearsInCurrentCityOrTown)
+            setGeoClassificationLabel(permanentAddress.geoClassification)
+            setAddressOwnerTypeLabel(permanentAddress.addressOwnership)
+            setOwnerDetailsLabel(permanentAddress.ownerDetails)
+
+            if (permanentAddress.ownerDetails == 'OD-OTH' || permanentAddress.ownerDetails == 'OD-RLT') {
+              setOwnerNameDisable(false);
+              setOwnerNameMan(true);
+              setOwnerNameVisible(true);
+            } else {
+              setOwnerNameDisable(true);
+              setOwnerNameMan(false);
+              setOwnerNameVisible(false);
+              setOwnerName('')
+            }
+            fieldsDisable();
+            setGeoClassificationDisable(false);
+            setYearsAtResidenceDisable(false);
+            setYearsAtCityDisable(false);
+            setAddressTypeDisable(false);
+            setsameAsPermDisable(false);
+            setIsKYC('0');
           }
-          fieldsDisable();
-          setGeoClassificationDisable(false);
-          setYearsAtResidenceDisable(false);
-          setYearsAtCityDisable(false);
-          setAddressTypeDisable(false);
-          setsameAsPermDisable(false);
-          setIsKYC('0');
-          setLoading(false)
+
         }
 
-      })
-      .catch(error => {
-        if (global.DEBUG_MODE) console.error('Error fetching bank details:', error);
-        setLoading(false)
-      });
+        if (global.DEBUG_MODE) console.log("Address Details:", addressDetails);
+      } else {
+        if (global.DEBUG_MODE) console.log("Client ID not found in clientDetail array.");
+      }
+    } else {
+      if (global.DEBUG_MODE) console.log("Loan application number not found.");
+    }
+
+
   }
 
   const disableAadharFields = (data) => {
@@ -881,11 +883,8 @@ const AddressDetails = (props, { navigation }) => {
 
           setLoading(false);
           if (response.status == 200) {
-            const deletePromises = [
-              tbl_clientaddressinfo.deleteDataBasedOnType(global.LOANAPPLICATIONID, global.CLIENTTYPE, addressTypeLabel)
-            ];
-            await Promise.all(deletePromises);
-            insertData(response.data[0].id)
+            props.updateNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientAddress', response.data[0])
+            props.navigation.replace('AddressMainList')
           } else if (response.data.statusCode === 201) {
             setApiError(response.data.message);
             setErrorModalVisible(true);
@@ -912,7 +911,6 @@ const AddressDetails = (props, { navigation }) => {
             setErrorModalVisible(true)
           }
         });
-      //insertData()
     }
   };
 
@@ -959,13 +957,8 @@ const AddressDetails = (props, { navigation }) => {
           if (global.DEBUG_MODE) console.log('UpdateAddressResponse::' + JSON.stringify(response.data));
           setLoading(false);
           if (response.status == 200) {
-            try {
-              insertData(addressID)
-            } catch (error) {
-
-              if (global.DEBUG_MODE) console.error('InsertAddressError:', error.message);
-
-            }
+            props.updateNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientAddress', response.data)
+            props.navigation.replace('AddressMainList');
           } else if (response.data.statusCode === 201) {
             setApiError(response.data.message);
             setErrorModalVisible(true);
@@ -993,7 +986,6 @@ const AddressDetails = (props, { navigation }) => {
             setErrorModalVisible(true)
           }
         });
-      //insertData()
     }
   };
 
@@ -1046,54 +1038,6 @@ const AddressDetails = (props, { navigation }) => {
       });
 
   };
-
-  const insertData = (id) => {
-    tbl_clientaddressinfo.insertClientAddress(
-      global.LOANAPPLICATIONID,
-      id,
-      global.CLIENTID,
-      global.CLIENTTYPE,
-      addressTypeLabel,
-      addressLine1,
-      addressLine2,
-      landmark,
-      pincode,
-      city,
-      district,
-      state,
-      country,
-      "",
-      "",
-      addressOwnerTypeLabel,
-      ownerDetailsLabel,
-      ownerName,
-      geoClassificationLabel,
-      yearsAtResidence,
-      yearsAtCity,
-      "true",
-      global.USERID,
-      new Date(),
-      global.USERID,
-      new Date(),
-      global.USERID,
-      new Date(),
-      isKYC
-    )
-      .then(result => {
-        if (global.DEBUG_MODE) console.log('Inserted Address detail:', result);
-        props.navigation.replace('AddressMainList')
-        // tbl_clientaddressinfo.getAllAddressDetailsForLoanID('12345')
-        //   .then(data => {
-        //     if (global.DEBUG_MODE) console.log('Address Detail:', data);
-        //   })
-        //   .catch(error => {
-        //     if (global.DEBUG_MODE) console.error('Error fetching bank details:', error);
-        //   });
-      })
-      .catch(error => {
-        if (global.DEBUG_MODE) console.error('Error Inserting Address detail:', error);
-      });
-  }
 
   const handlePickerClick = (componentName, label, index) => {
 
@@ -1448,15 +1392,19 @@ const mapStateToProps = state => {
   const { language } = state.languageReducer;
   const { profileDetails } = state.profileReducer;
   const { mobileCodeDetails } = state.mobilecodeReducer;
+  const { loanInitiationDetails } = state.loanInitiationReducer;
   return {
     language: language,
     profiledetail: profileDetails,
-    mobilecodedetail: mobileCodeDetails
+    mobilecodedetail: mobileCodeDetails,
+    loanInitiationDetails: loanInitiationDetails
   }
 };
 
 const mapDispatchToProps = dispatch => ({
   languageAction: item => dispatch(languageAction(item)),
+  updateNestedClientDetails: (loanApplicationId, clientId, key, nestedKey, data) => dispatch(updateNestedClientDetails(loanApplicationId, clientId, key, nestedKey, data)),
+  updateLoanInitiationDetails: (loanApplicationId, loanData, key, clientId, updatedDetails) => dispatch(updateLoanInitiationDetails(loanApplicationId, loanData, key, clientId, updatedDetails)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(AddressDetails);

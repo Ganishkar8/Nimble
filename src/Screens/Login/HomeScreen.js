@@ -234,20 +234,23 @@ const HomeScreen = (props, { navigation }) => {
                                     </TouchableOpacity>
                                 </View>
 
-                                <View style={{ width: '93%', height: 170, justifyContent: 'space-between', flexDirection: 'row', marginTop: '4%' }}>
 
-                                    <TouchableOpacity onPress={() => props.navigation.navigate('PDTracker', { fromScreen: 'HomeSCreen' })} activeOpacity={0.5} style={{ width: '48%', height: '100%', backgroundColor: '#ffffff99', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
-                                        <View>
-                                            <View style={{ flexDirection: 'column', alignItems: 'center' }}>
-                                                <View style={styles.circularView1}>
-                                                    <Image source={require('../../Images/lead_list.png')}
-                                                        style={{ width: 22.5, height: 25 }} />
+                                {(props.bankDetails.INSTANCE == 'UAT' || props.bankDetails.INSTANCE == 'DEV') &&
+                                    <View style={{ width: '93%', height: 170, justifyContent: 'space-between', flexDirection: 'row', marginTop: '4%' }}>
+
+                                        <TouchableOpacity onPress={() => props.navigation.navigate('PDTracker', { fromScreen: 'HomeSCreen' })} activeOpacity={0.5} style={{ width: '48%', height: '100%', backgroundColor: '#ffffff99', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
+                                            <View>
+                                                <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+                                                    <View style={styles.circularView1}>
+                                                        <Image source={require('../../Images/lead_list.png')}
+                                                            style={{ width: 22.5, height: 25 }} />
+                                                    </View>
+                                                    <Text style={styles.textstyle1}>Personal Discussion{'\n'}Tracker</Text>
                                                 </View>
-                                                <Text style={styles.textstyle1}>Personal Discussion{'\n'}Tracker</Text>
                                             </View>
-                                        </View>
-                                    </TouchableOpacity>
-                                </View>
+                                        </TouchableOpacity>
+                                    </View>
+                                }
 
                                 {/* {global.USERTYPEID == '1164' &&
 
@@ -485,10 +488,12 @@ const mapStateToProps = (state) => {
     const { language } = state.languageReducer;
     const { profiledetail } = state.profileReducer;
     const { mobilecodedetail } = state.mobilecodeReducer;
+    const { bankDetails } = state.bankDetailReducer;
     return {
         language: language,
         profiledetail: profiledetail,
-        mobilecodedetail: mobilecodedetail
+        mobilecodedetail: mobilecodedetail,
+        bankDetails: bankDetails
     }
 }
 

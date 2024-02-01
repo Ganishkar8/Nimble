@@ -63,8 +63,11 @@ const LoginScreen = (props, { navigation }) => {
     const colorScheme = useColorScheme();
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const [apiError, setApiError] = useState('');
+    var clientData1 = [{ "id": 632, "loanApplicationNumber": "IND0000632NEW", "tempNumber": "LAN1180000632", "branchId": 1180, "customerCategory": "INDV", "customerSubcategory": "SE", "customerType": "NEW", "loanType": "UNSEC", "loanPurpose": "MFT", "product": "002", "loanAmount": 500000, "workflowId": 134, "consent": true, "finalConsent": false, "applicationAppliedBy": "225", "applicationCreationDate": "2024-01-30T20:26:48.163Z", "lmsApplicationNumber": "", "isManualKyc": true, "manualKycStatus": "Pending", "clientDetail": [{ "isActive": true, "id": 671, "clientType": "APPL", "relationType": "", "title": "MR", "firstName": "Chjcvjcj", "middleName": "", "lastName": "", "gender": "M", "maritalStatus": "S", "mobileNumber": "7598133718", "email": "", "isKycManual": false, "kycTypeId1": "007", "kycIdValue1": "CJJCD6426G", "kycTypeId2": "012", "kycIdValue2": "CHJCJVVN", "kycTypeId3": "", "kycIdValue3": "", "kycTypeId4": "", "kycIdValue4": "", "isMsme": false, "isMobileNumberVerified": true, "isEmailVerified": false, "isAadharNumberVerified": false, "isPanVerified": false, "udyamRegistrationNumber": "", "dedupeCheck": false, "dedupeCheckDate": "2024-01-31T12:43:40.115Z", "clientAddress": [], "clientBankDetail": [], "clientManualKycLink": [{ id: 1, "hello": '1' }] }] }]
+    const [clientData, setClientData] = useState(clientData1);
 
     useEffect(() => {
+        updateDetails();
         if (isFocused) {
             BackHandler.addEventListener('hardwareBackPress', handleBackButton);
         }
@@ -72,6 +75,43 @@ const LoginScreen = (props, { navigation }) => {
             BackHandler.removeEventListener('hardwareBackPress', handleBackButton);
         };
     }, [isFocused]);
+
+
+    const updateDetails = () => {
+        // var clientData = [{ "id": 632, ... "clientManualKycLink": [] }]
+        const newData = {
+            isActive: true,
+            id: 672,
+            clientType: "APPL",
+            relationType: "",
+            title: "MR",
+            // ... add other properties as needed
+        };
+        console.log(JSON.stringify(clientData1))
+        const updatedClientData = clientData.map((item) => {
+            if (item.id === 632) {
+                const isExistingId = item.clientDetail.some(
+                    (clientDetail) => clientDetail.id === newData.id
+                );
+
+                return {
+                    ...item,
+                    clientDetail: isExistingId
+                        ? item.clientDetail.map((clientDetail) =>
+                            clientDetail.id === newData.id
+                                ? { ...clientDetail, ...newData } // Update existing data
+                                : clientDetail
+                        )
+                        : [...item.clientDetail, newData], // Add new data
+                };
+            }
+            return item;
+        });
+
+        setClientData(updatedClientData);
+        alert(JSON.stringify(updatedClientData));
+    };
+
 
     const handleBackButton = () => {
         // Close the app
