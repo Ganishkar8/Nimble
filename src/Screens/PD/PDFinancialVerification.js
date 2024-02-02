@@ -160,33 +160,30 @@ const PDFinancialVerification = (props, { navigation }) => {
 
         const appDetails = {
             "clientId": global.CLIENTID,
-            "userId": global.USERID,
-            "pageId": currentPageId,
             "pdLevel": global.PDSTAGE,
-            "loanApplicationNumber": global.LOANAPPLICATIONNUM
         }
 
-        if (global.PDSTAGE == 'PD_2') {
+        // if (global.PDSTAGE == 'PD_2') {
 
-            if (currentPageCode == 'PG_FN_DTLS_VRF_APPL') {
-                appDetails.previousPage = 10;
-            } else if (currentPageCode == 'PG_FN_DTLS_VRF_CO_APPL') {
-                appDetails.previousPage = 22;
-            } else if (currentPageCode == 'PG_FN_DTLS_VRF_GRNTR') {
-                appDetails.previousPage = 34;
-            }
+        //     if (currentPageCode == 'PG_FN_DTLS_VRF_APPL') {
+        //         appDetails.previousPage = 10;
+        //     } else if (currentPageCode == 'PG_FN_DTLS_VRF_CO_APPL') {
+        //         appDetails.previousPage = 22;
+        //     } else if (currentPageCode == 'PG_FN_DTLS_VRF_GRNTR') {
+        //         appDetails.previousPage = 34;
+        //     }
 
-        } else if (global.PDSTAGE == 'PD_3') {
-            if (currentPageCode == 'PG_FN_DTLS_VRF_APPL') {
-                appDetails.previousPage = 47;
-            } else if (currentPageCode == 'PG_FN_DTLS_VRF_CO_APPL') {
-                appDetails.previousPage = 59;
-            } else if (currentPageCode == 'PG_FN_DTLS_VRF_GRNTR') {
-                appDetails.previousPage = 71;
-            }
-        }
+        // } else if (global.PDSTAGE == 'PD_3') {
+        //     if (currentPageCode == 'PG_FN_DTLS_VRF_APPL') {
+        //         appDetails.previousPage = 47;
+        //     } else if (currentPageCode == 'PG_FN_DTLS_VRF_CO_APPL') {
+        //         appDetails.previousPage = 59;
+        //     } else if (currentPageCode == 'PG_FN_DTLS_VRF_GRNTR') {
+        //         appDetails.previousPage = 71;
+        //     }
+        // }
 
-        apiInstance(baseURL).post(`/api/v1/pd/PDFinancialDetailsVerification`, appDetails)
+        apiInstance(baseURL).post(`/api/v1/pd/PDFinancialDetailsVerification/previousData`, appDetails)
             .then((response) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(response.data));
@@ -196,8 +193,8 @@ const PDFinancialVerification = (props, { navigation }) => {
                     if (response.data === '') {
                         //getDocuments([]);
                     } else {
-                        setParentFinancialId(response.data.id);
-                        getSavedData(response.data);
+                        //setParentFinancialId(response.data.id);
+                        getSavedData(response.data[0]);
                     }
 
                 }

@@ -484,15 +484,15 @@ const LoanDemographicBusinessDetail = (props) => {
                                 setEntShopNameDisable(true)
                             }
                             if (response.data.clientBusinessDetailDto.dateOfRegistration) {
-                                setDOR(response.data.clientBusinessDetailDto.dateOfRegistration)
+                                setDOR(Common.convertDateFormat(response.data.clientBusinessDetailDto.dateOfRegistration))
                                 setDORDisable(true)
                             }
                             if (response.data.clientBusinessDetailDto.dateOfIncorporation) {
-                                setDOI(response.data.clientBusinessDetailDto.dateOfIncorporation)
+                                setDOI(Common.convertDateFormat(response.data.clientBusinessDetailDto.dateOfIncorporation))
                                 setDOIDisable(true)
                             }
                             if (response.data.clientBusinessDetailDto.dateOfBusinessCommencement) {
-                                setDOBC(response.data.clientBusinessDetailDto.dateOfBusinessCommencement)
+                                setDOBC(Common.convertDateFormat(response.data.clientBusinessDetailDto.dateOfBusinessCommencement))
                                 setDOBCDisable(true)
                             }
                             if (response.data.clientBusinessDetailDto.businessVintageYears) {
@@ -559,7 +559,7 @@ const LoanDemographicBusinessDetail = (props) => {
                         if (Common.DEBUG_MODE) console.log("GetPhotoApiResponse::" + JSON.stringify(response.data));
 
                         if (response.status == 200) {
-                            
+
                         } else if (response.data.statusCode === 201) {
                             setApiError(response.data.message);
                             setErrorModalVisible(true);
@@ -1765,7 +1765,16 @@ const LoanDemographicBusinessDetail = (props) => {
         } else if (componentName === 'EnterpriseShopName') {
             setEntShopName(textValue);
         } else if (componentName === 'URMNumber') {
-            setUrmNumber(textValue);
+            const alphanumericInput = textValue.replace(/\W/g, '');
+
+            let formattedText = '';
+            for (let i = 0; i < alphanumericInput.length; i++) {
+                if (i === 5 || i === 7 || i === 9) {
+                    formattedText += '-';
+                }
+                formattedText += alphanumericInput[i];
+            }
+            setUrmNumber(formattedText);
         } else if (componentName === 'DOI') {
             setDOI(textValue);
         } else if (componentName === 'DOBC') {
@@ -2132,12 +2141,13 @@ const LoanDemographicBusinessDetail = (props) => {
                             <TextInputComp
                                 textValue={urmNumber}
                                 textStyle={Commonstyles.textinputtextStyle}
-                                type="numeric"
+                                type="email-address"
                                 Disable={urmNumberDisable}
                                 ComponentName="URMNumber"
                                 reference={urmNumberRef}
                                 returnKey="next"
                                 handleClick={handleClick}
+                                autocapital={'characters'}
                                 handleReference={handleReference}
                             />
                         </View>

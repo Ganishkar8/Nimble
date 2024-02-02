@@ -114,7 +114,7 @@ const PDDocumentUpload = (props, { navigation }) => {
         //parseDocuments(filteredDocumentData);
         //parseDocuments();
         getSystemCodeDetail();
-        getAllDocuments();
+
 
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
@@ -129,6 +129,7 @@ const PDDocumentUpload = (props, { navigation }) => {
             .sort((a, b) => a.displayOrder - b.displayOrder);
 
         setSpinnerList(filteredResponseData);
+        getAllDocuments(filteredResponseData[0].subCodeId);
 
     };
 
@@ -675,7 +676,7 @@ const PDDocumentUpload = (props, { navigation }) => {
     }
 
 
-    const getAllDocuments = () => {
+    const getAllDocuments = (status) => {
 
         const baseURL = global.PORT1;
         setLoading(true)
@@ -716,7 +717,11 @@ const PDDocumentUpload = (props, { navigation }) => {
 
                 if (response.status == 200) {
                     setLoading(false)
-                    parseDocuments(response.data.pdApplicantDocumentVerificationChild);
+                    if (response.data.id) {
+                        setParentDocId(response.data.id)
+                    }
+                    const updatedData = response.data.pdApplicantDocumentVerificationChild.map(obj => ({ ...obj, finalDocumentStatus: status }));
+                    parseDocuments(updatedData);
                 }
                 else if (response.data.statusCode === 201) {
                     setLoading(false)

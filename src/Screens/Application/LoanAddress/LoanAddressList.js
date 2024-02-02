@@ -144,13 +144,19 @@ const LoanAddressList = (props, { navigation }) => {
                     }
                     const RegisteredOfficeAddress = data.find(item => item.address_type === 'ROA');
                     if (!RegisteredOfficeAddress) {
-                        getUdyamRAOCheck(urmNumber);
-
+                        if (urmNumber) {
+                            if (urmNumber.length > 0) {
+                                getUdyamRAOCheck(urmNumber);
+                            }
+                        }
                     }
                     setRefreshFlatList(!refreshFlatlist)
                 } else {
-                    getUdyamRAOCheck(urmNumber);
-
+                    if (urmNumber) {
+                        if (urmNumber.length > 0) {
+                            getUdyamRAOCheck(urmNumber);
+                        }
+                    }
                 }
             })
             .catch(error => {
