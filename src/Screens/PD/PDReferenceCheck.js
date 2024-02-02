@@ -216,6 +216,7 @@ const PDReferenceCheck = (props, { navigation }) => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
         getSystemCodeDetail();
+        setParentReferenceId(props.route.params.parentReferenceId);
         makeSystemMandatoryFields();
         getReferenceData();
         return () => {
@@ -475,6 +476,7 @@ const PDReferenceCheck = (props, { navigation }) => {
             setGPSLatLon(prevCount => currentLatitude + ',' + currentLongitude);
 
         } else {
+            setReferenceId(0);
             getlocationPermission();
         }
     }
@@ -1022,7 +1024,6 @@ const PDReferenceCheck = (props, { navigation }) => {
 
         const baseURL = global.PORT1;
         setLoading(true)
-
         const appDetails = {
             "createdBy": global.USERID,
             "createdDate": new Date(),

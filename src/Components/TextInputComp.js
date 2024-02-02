@@ -14,7 +14,7 @@ const TextInputComp = ({
   returnKey,
   handleClick,
   handleReference,
-  length, multilines, secureText
+  length, multilines, secureText, autocapital
 }) => {
   const setValue = txt => {
 
@@ -42,7 +42,7 @@ const TextInputComp = ({
         keyboardType={type}
         multiline={multilines ? true : false}
         maxLength={length}
-        //autoCapitalize="characters"
+        autoCapitalize={autocapital}
         style={[textStyle, { color: !Disable ? Colors.black : Colors.lightgrey, overflow: 'scroll' }]}
         ref={reference}
         returnKeyType={returnKey}

@@ -631,8 +631,8 @@ const PDFinancialDetails = (props, { navigation }) => {
 
             const appDetails = {
                 "id": parentFinancialId,
-                "clientType": "string",
-                "pdLevel": "string",
+                "clientType": global.CLIENTTYPE,
+                "pdLevel": global.PDSTAGE,
                 "earningType": earningTypeLabel,
                 "earningFrequency": earningFrequencyLabel,
                 "totalBusinessIncome": parseInt(totalBusineesIncome),

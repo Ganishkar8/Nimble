@@ -71,6 +71,7 @@ const PDReferenceCheckList = (props, { navigation }) => {
     const [currentPageCode, setCurrentPageCode] = useState(props.route.params.pageCode);
     const [currentPageDesc, setCurrentPageDesc] = useState(props.route.params.pageDesc);
     const [currentPageMan, setCurrentPageMan] = useState(props.route.params.pageMandatory);
+    const [parentReferenceId, setParentReferenceId] = useState(0);
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
@@ -118,8 +119,11 @@ const PDReferenceCheckList = (props, { navigation }) => {
                 if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(response.data));
 
                 if (response.status == 200) {
-                    if (response.data.personalDiscussionQARefference) {
-                        setReferenceDetails(response.data.personalDiscussionQARefference)
+                    if (response.data.length > 0) {
+                        if (response.data[0].personalDiscussionQARefference) {
+                            setReferenceDetails(response.data[0].personalDiscussionQARefference)
+                        }
+                        setParentReferenceId(response.data[0].id)
                     }
                     setLoading(false)
                 }
@@ -181,7 +185,7 @@ const PDReferenceCheckList = (props, { navigation }) => {
                 //getting the Latitude from the location json
                 const currentLatitude = JSON.stringify(position.coords.latitude);
                 hideLocationBottomSheet();
-                props.navigation.navigate('PDReferenceCheck', { referenceDetail: [], 'pageId': currentPageId, 'pageCode': currentPageCode, 'pageDesc': currentPageDesc, 'pageMandatory': currentPageMan })
+                props.navigation.navigate('PDReferenceCheck', { referenceDetail: [], 'parentReferenceId': parentReferenceId, 'pageId': currentPageId, 'pageCode': currentPageCode, 'pageDesc': currentPageDesc, 'pageMandatory': currentPageMan })
 
             },
             error => {
@@ -375,7 +379,7 @@ const PDReferenceCheckList = (props, { navigation }) => {
     const handleClick = (value, data) => {
 
         if (value === 'edit') {
-            props.navigation.navigate('PDReferenceCheck', { referenceDetail: [data], 'pageId': currentPageId, 'pageCode': currentPageCode, 'pageDesc': currentPageDesc, 'pageMandatory': currentPageMan })
+            props.navigation.navigate('PDReferenceCheck', { referenceDetail: [data], 'parentReferenceId': parentReferenceId, 'pageId': currentPageId, 'pageCode': currentPageCode, 'pageDesc': currentPageDesc, 'pageMandatory': currentPageMan })
         } else if (value === 'new') {
             getlocationPermission();
 

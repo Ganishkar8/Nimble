@@ -3492,6 +3492,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
                 ComponentName="kycID1"
                 reference={KycID1Ref}
                 returnKey="next"
+                autocapital={'characters'}
                 handleClick={handleClick}
                 handleReference={handleReference}
               />
@@ -3588,6 +3589,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
                 ComponentName="kycID2"
                 reference={KycID2Ref}
                 returnKey="next"
+                autocapital={'characters'}
                 handleClick={handleClick}
                 handleReference={handleReference}
               />
@@ -3684,6 +3686,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
                 ComponentName="kycID3"
                 reference={KycID3Ref}
                 returnKey="next"
+                autocapital={'characters'}
                 handleClick={handleClick}
                 handleReference={handleReference}
               />
@@ -3780,6 +3783,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
                 ComponentName="kycID4"
                 reference={KycID4Ref}
                 returnKey="next"
+                autocapital={'characters'}
                 handleClick={handleClick}
                 handleReference={handleReference}
               />
