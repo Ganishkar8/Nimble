@@ -44,6 +44,10 @@ import { updatePDModule, updatePDSubStage, updatePDSubModule, updatePDPage } fro
 
 
 const PDNonGSTDetail = (props, { navigation }) => {
+    const monthNames = [
+        '', 'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+        'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'
+    ];
     const [loading, setLoading] = useState(false);
     const [pdDetails, setPdDetails] = useState([]);
     const [refreshFlatlist, setRefreshFlatList] = useState(false);
@@ -193,18 +197,18 @@ const PDNonGSTDetail = (props, { navigation }) => {
 
                             setTotalDeclaredSales(updatedDataArray.reduce((total, month) => total + parseInt(month.sales), 0));
                             setTotalDeclaredPurchases(updatedDataArray.reduce((total, month) => total + parseInt(month.purchase), 0));
-                            setTotalVerifiedSales(updatedDataArray.reduce((total, month) => total + parseInt(month.verifiedSales), 0));
-                            setTotalVerifiedPurchases(updatedDataArray.reduce((total, month) => total + parseInt(month.verifiedPurchase), 0));
-
+                            // setTotalVerifiedSales(updatedDataArray.reduce((total, month) => total + parseInt(month.verifiedSales), 0));
+                            // setTotalVerifiedPurchases(updatedDataArray.reduce((total, month) => total + parseInt(month.verifiedPurchase), 0));
+                            calculateverifiedSales(updatedDataArray);
                             setNonGSTData(response.data.nonGstCustomerDetailsDto.pdNonGstCustomerDet)
                         } else {
                             const updatedDataArray = [...response.data.pdNonGstCustomerDet];
 
                             setTotalDeclaredSales(updatedDataArray.reduce((total, month) => total + parseInt(month.sales), 0));
                             setTotalDeclaredPurchases(updatedDataArray.reduce((total, month) => total + parseInt(month.purchase), 0));
-                            setTotalVerifiedSales(updatedDataArray.reduce((total, month) => total + parseInt(month.verifiedSales), 0));
-                            setTotalVerifiedPurchases(updatedDataArray.reduce((total, month) => total + parseInt(month.verifiedPurchase), 0));
-
+                            // setTotalVerifiedSales(updatedDataArray.reduce((total, month) => total + parseInt(month.verifiedSales), 0));
+                            // setTotalVerifiedPurchases(updatedDataArray.reduce((total, month) => total + parseInt(month.verifiedPurchase), 0));
+                            calculateverifiedSales(updatedDataArray);
                             setNonGSTData(response.data.pdNonGstCustomerDet)
                         }
 
@@ -471,7 +475,7 @@ const PDNonGSTDetail = (props, { navigation }) => {
                                 color: Colors.mediumgrey,
                                 fontFamily: 'PoppinsRegular'
                             }}>
-                            {item.month}
+                            {monthNames[item.month]}
                         </Text>
                     </View>
 
@@ -680,10 +684,30 @@ const PDNonGSTDetail = (props, { navigation }) => {
         if (value) {
             updatedDataArray[index].verifiedSales = 0;
             updatedDataArray[index].verifiedPurchase = 0;
+        } else {
+            updatedDataArray[index].verifiedSales = updatedDataArray[index].sales;
+            updatedDataArray[index].verifiedPurchase = updatedDataArray[index].purchase;
         }
         updatedDataArray[index].verified = value;
-
+        if (global.DEBUG_MODE) console.log(updatedDataArray)
+        calculateverifiedSales(updatedDataArray)
         setNonGSTData(updatedDataArray);
+        setRefreshMonthsFlatList(!refreshMonthsFlatlist)
+    }
+
+    const calculateverifiedSales = (data) => {
+        const totalSales = data.reduce((total, item) => {
+            const { sales, verified, verifiedSales } = item;
+            const salesToAdd = verified ? parseInt(sales) : parseInt(verifiedSales);
+            return total + salesToAdd;
+        }, 0);
+        setTotalVerifiedSales(totalSales);
+        const totalpurchase = data.reduce((total, item) => {
+            const { purchase, verified, verifiedPurchase } = item;
+            const purchaseToAdd = verified ? parseInt(purchase) : parseInt(verifiedPurchase);
+            return total + purchaseToAdd;
+        }, 0);
+        setTotalVerifiedPurchases(totalpurchase);
     }
 
     const updateMonthsData = (index, value, newAmount) => {
@@ -696,9 +720,9 @@ const PDNonGSTDetail = (props, { navigation }) => {
             updatedDataArray[index].verifiedPurchase = newAmount;
         }
 
-        setTotalVerifiedSales(updatedDataArray.reduce((total, month) => total + parseInt(month.verifiedSales), 0));
-        setTotalVerifiedPurchases(updatedDataArray.reduce((total, month) => total + parseInt(month.verifiedPurchase), 0));
-
+        // setTotalVerifiedSales(updatedDataArray.reduce((total, month) => total + parseInt(month.verifiedSales), 0));
+        // setTotalVerifiedPurchases(updatedDataArray.reduce((total, month) => total + parseInt(month.verifiedPurchase), 0));
+        calculateverifiedSales(updatedDataArray);
         // Set the state with the updated array
         setNonGSTData(updatedDataArray);
     }

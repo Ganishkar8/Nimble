@@ -51,7 +51,6 @@ const PDItems = (props, { navigation }) => {
         //props.updatePDModule('PD_APPL', 'TR_DTLS_APPL');
         //props.updatePDSubModule('PD_APPL', 'TR_DTLS_APPL', 'TR_DTLS_APPL');
         //props.updatePDPage('PD_APPL', 'TR_DTLS_APPL', 'TR_DTLS_APPL', 'PG_TR_DTLS_APPL');
-        alert(JSON.stringify(props.route.params.clientType))
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
             backHandler.remove();
@@ -241,37 +240,135 @@ const PDItems = (props, { navigation }) => {
         global.PDSUBMODULE = item.personalDiscussionSubModuleLogs[0].subModuleCode;
 
         if (item.moduleCode == 'TR_DTLS_APPL') {
-            props.navigation.replace('PdTravelDetails', { 'pageId': 1, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
+            if (global.PDSTAGE == 'PD_1') {
+                pageId = 1;
+            } else if (global.PDSTAGE == 'PD_2') {
+                pageId = 38;
+            } else {
+                pageId = 75;
+            }
+            props.navigation.replace('PdTravelDetails', { 'pageId': pageId, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
         } else if (item.moduleCode == 'TR_DTLS_CO_APPL') {
-            props.navigation.replace('PdTravelDetails', { 'pageId': 14, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
+            if (global.PDSTAGE == 'PD_1') {
+                pageId = 14;
+            } else if (global.PDSTAGE == 'PD_2') {
+                pageId = 51;
+            } else {
+                pageId = 88;
+            }
+            props.navigation.replace('PdTravelDetails', { 'pageId': pageId, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
         } else if (item.moduleCode == 'TR_DTLS_GRNTR') {
-            props.navigation.replace('PdTravelDetails', { 'pageId': 26, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
+            if (global.PDSTAGE == 'PD_1') {
+                pageId = 26;
+            } else if (global.PDSTAGE == 'PD_2') {
+                pageId = 63;
+            } else {
+                pageId = 100;
+            }
+            props.navigation.replace('PdTravelDetails', { 'pageId': pageId, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
         } else if (item.moduleCode == 'QU_RFR_CHCK_APPL' || item.moduleCode == 'QU_RFR_CHCK_CO_APPL' || item.moduleCode == 'QU_RFR_CHCK_GRNTR') {
             props.navigation.replace('PdQuestionSubStage');
         } else if (item.moduleCode == 'NON_GST_CST_APPL') {
-            props.navigation.replace('PDNonGSTDetail', { 'pageId': 7, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
+            if (global.PDSTAGE == 'PD_1') {
+                pageId = 7;
+            } else if (global.PDSTAGE == 'PD_2') {
+                pageId = 44;
+            } else {
+                pageId = 81;
+            }
+            props.navigation.replace('PDNonGSTDetail', { 'pageId': pageId, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
         } else if (item.moduleCode == 'PH_DOC_VRF_APPL') {
-            props.navigation.replace('PDDocumentVerification', { 'pageId': 8, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
+            if (global.PDSTAGE == 'PD_1') {
+                pageId = 8;
+            } else if (global.PDSTAGE == 'PD_2') {
+                pageId = 45;
+            } else {
+                pageId = 82;
+            }
+            props.navigation.replace('PDDocumentVerification', { 'pageId': pageId, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
         } else if (item.moduleCode == 'PH_DOC_VRF_CO_APPL') {
-            props.navigation.replace('PDDocumentVerification', { 'pageId': 20, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
+            if (global.PDSTAGE == 'PD_1') {
+                pageId = 20;
+            } else if (global.PDSTAGE == 'PD_2') {
+                pageId = 57;
+            } else {
+                pageId = 94;
+            }
+            props.navigation.replace('PDDocumentVerification', { 'pageId': pageId, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
         } else if (item.moduleCode == 'PH_DOC_VRF_GRNTR') {
-            props.navigation.replace('PDDocumentVerification', { 'pageId': 32, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
+            if (global.PDSTAGE == 'PD_1') {
+                pageId = 32;
+            } else if (global.PDSTAGE == 'PD_2') {
+                pageId = 69;
+            } else {
+                pageId = 106;
+            }
+            props.navigation.replace('PDDocumentVerification', { 'pageId': pageId, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
         } else if (item.moduleCode == 'DOC_UPL_APPL') {
-            props.navigation.replace('PDDocumentUpload', { 'pageId': 9, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
+            if (global.PDSTAGE == 'PD_1') {
+                pageId = 9;
+            } else if (global.PDSTAGE == 'PD_2') {
+                pageId = 46;
+            } else {
+                pageId = 83;
+            }
+            props.navigation.replace('PDDocumentUpload', { 'pageId': pageId, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
         } else if (item.moduleCode == 'DOC_UPL_CO_APPL') {
-            props.navigation.replace('PDDocumentUpload', { 'pageId': 21, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
+            if (global.PDSTAGE == 'PD_1') {
+                pageId = 21;
+            } else if (global.PDSTAGE == 'PD_2') {
+                pageId = 58;
+            } else {
+                pageId = 95;
+            }
+            props.navigation.replace('PDDocumentUpload', { 'pageId': pageId, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
         } else if (item.moduleCode == 'DOC_UPL_GRNTR') {
-            props.navigation.replace('PDDocumentUpload', { 'pageId': 33, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
+            if (global.PDSTAGE == 'PD_1') {
+                pageId = 33;
+            } else if (global.PDSTAGE == 'PD_2') {
+                pageId = 70;
+            } else {
+                pageId = 107;
+            }
+            props.navigation.replace('PDDocumentUpload', { 'pageId': pageId, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
         } else if (item.moduleCode == 'FN_DTLS_VRF_APPL') {
-            props.navigation.replace('PDFinancialDetails', { 'pageId': 10, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
+            if (global.PDSTAGE == 'PD_1') {
+                pageId = 10;
+            } else if (global.PDSTAGE == 'PD_2') {
+                pageId = 47;
+            } else {
+                pageId = 84;
+            }
+            props.navigation.replace('PDFinancialDetails', { 'pageId': pageId, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
         } else if (item.moduleCode == 'FN_DTLS_VRF_CO_APPL') {
-            props.navigation.replace('PDFinancialDetails', { 'pageId': 22, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
+            if (global.PDSTAGE == 'PD_1') {
+                pageId = 22;
+            } else if (global.PDSTAGE == 'PD_2') {
+                pageId = 59;
+            } else {
+                pageId = 96;
+            }
+            props.navigation.replace('PDFinancialDetails', { 'pageId': pageId, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
         } else if (item.moduleCode == 'FN_DTLS_VRF_GRNTR') {
-            props.navigation.replace('PDFinancialDetails', { 'pageId': 34, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
+            if (global.PDSTAGE == 'PD_1') {
+                pageId = 34;
+            } else if (global.PDSTAGE == 'PD_2') {
+                pageId = 71;
+            } else {
+                pageId = 108;
+            }
+            props.navigation.replace('PDFinancialDetails', { 'pageId': pageId, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
         } else if (item.moduleCode == 'HS_VT_APPL') {
+            if (global.PDSTAGE == 'PD_1') {
+                pageId = 11;
+            } else if (global.PDSTAGE == 'PD_2') {
+                pageId = 48;
+            } else {
+                pageId = 85;
+            }
             checkPermissions().then(res => {
                 if (res == true) {
-                    getOneTimeLocation('House', 11, pageCode, pageDesc, pageMan);
+                    getOneTimeLocation('House', pageId, pageCode, pageDesc, pageMan);
                 } else {
                     setApiError('Permission Not Granted');
                     setErrorModalVisible(true)
@@ -279,9 +376,16 @@ const PDItems = (props, { navigation }) => {
 
             })
         } else if (item.moduleCode == 'HS_VT_CO_APPLHo') {
+            if (global.PDSTAGE == 'PD_1') {
+                pageId = 23;
+            } else if (global.PDSTAGE == 'PD_2') {
+                pageId = 60;
+            } else {
+                pageId = 97;
+            }
             checkPermissions().then(res => {
                 if (res == true) {
-                    getOneTimeLocation('House', 23, pageCode, pageDesc, pageMan);
+                    getOneTimeLocation('House', pageId, pageCode, pageDesc, pageMan);
                 } else {
                     setApiError('Permission Not Granted');
                     setErrorModalVisible(true)
@@ -289,9 +393,16 @@ const PDItems = (props, { navigation }) => {
 
             });
         } else if (item.moduleCode == 'HS_VT_GRNTRHo') {
+            if (global.PDSTAGE == 'PD_1') {
+                pageId = 35;
+            } else if (global.PDSTAGE == 'PD_2') {
+                pageId = 72;
+            } else {
+                pageId = 109;
+            }
             checkPermissions().then(res => {
                 if (res == true) {
-                    getOneTimeLocation('House', 35, pageCode, pageDesc, pageMan);
+                    getOneTimeLocation('House', pageId, pageCode, pageDesc, pageMan);
                 } else {
                     setApiError('Permission Not Granted');
                     setErrorModalVisible(true)
@@ -299,9 +410,16 @@ const PDItems = (props, { navigation }) => {
 
             });
         } else if (item.moduleCode == 'BSN_VT_APPL') {
+            if (global.PDSTAGE == 'PD_1') {
+                pageId = 12;
+            } else if (global.PDSTAGE == 'PD_2') {
+                pageId = 49;
+            } else {
+                pageId = 86;
+            }
             checkPermissions().then(res => {
                 if (res == true) {
-                    getOneTimeLocation('Business', 12, pageCode, pageDesc, pageMan);
+                    getOneTimeLocation('Business', pageId, pageCode, pageDesc, pageMan);
                 } else {
                     setApiError('Permission Not Granted');
                     setErrorModalVisible(true)
@@ -309,9 +427,16 @@ const PDItems = (props, { navigation }) => {
 
             });
         } else if (item.moduleCode == 'BSN_VT_CO_APPLB') {
+            if (global.PDSTAGE == 'PD_1') {
+                pageId = 24;
+            } else if (global.PDSTAGE == 'PD_2') {
+                pageId = 61;
+            } else {
+                pageId = 98;
+            }
             checkPermissions().then(res => {
                 if (res == true) {
-                    getOneTimeLocation('Business', 24, pageCode, pageDesc, pageMan);
+                    getOneTimeLocation('Business', pageId, pageCode, pageDesc, pageMan);
                 } else {
                     setApiError('Permission Not Granted');
                     setErrorModalVisible(true)
@@ -319,9 +444,16 @@ const PDItems = (props, { navigation }) => {
 
             });
         } else if (item.moduleCode == 'BSN_VT_GRNTRB') {
+            if (global.PDSTAGE == 'PD_1') {
+                pageId = 36;
+            } else if (global.PDSTAGE == 'PD_2') {
+                pageId = 73;
+            } else {
+                pageId = 110;
+            }
             checkPermissions().then(res => {
                 if (res == true) {
-                    getOneTimeLocation('Business', 36, pageCode, pageDesc, pageMan);
+                    getOneTimeLocation('Business', pageId, pageCode, pageDesc, pageMan);
                 } else {
                     setApiError('Permission Not Granted');
                     setErrorModalVisible(true)
@@ -329,11 +461,32 @@ const PDItems = (props, { navigation }) => {
 
             });
         } else if (item.moduleCode == 'PD_FD_BK_APPL') {
-            props.navigation.replace('PDFeedback', { 'pageId': 13, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
+            if (global.PDSTAGE == 'PD_1') {
+                pageId = 13;
+            } else if (global.PDSTAGE == 'PD_2') {
+                pageId = 50;
+            } else {
+                pageId = 87;
+            }
+            props.navigation.replace('PDFeedback', { 'pageId': pageId, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
         } else if (item.moduleCode == 'PD_FD_BK_CO_APPL') {
-            props.navigation.replace('PDFeedback', { 'pageId': 25, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
+            if (global.PDSTAGE == 'PD_1') {
+                pageId = 25;
+            } else if (global.PDSTAGE == 'PD_2') {
+                pageId = 62;
+            } else {
+                pageId = 99;
+            }
+            props.navigation.replace('PDFeedback', { 'pageId': pageId, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
         } else if (item.moduleCode == 'PD_FD_BK_GRNTR') {
-            props.navigation.replace('PDFeedback', { 'pageId': 37, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
+            if (global.PDSTAGE == 'PD_1') {
+                pageId = 37;
+            } else if (global.PDSTAGE == 'PD_2') {
+                pageId = 74;
+            } else {
+                pageId = 111;
+            }
+            props.navigation.replace('PDFeedback', { 'pageId': pageId, 'pageCode': pageCode, 'pageDesc': pageDesc, 'pageMandatory': pageMan })
         }
 
     }

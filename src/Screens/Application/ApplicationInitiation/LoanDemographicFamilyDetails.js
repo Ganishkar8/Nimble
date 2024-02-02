@@ -1695,6 +1695,7 @@ const LoanDemographicFamilyDetails = (props) => {
                                 ComponentName="kycID1"
                                 reference={KycID1Ref}
                                 returnKey="next"
+                                autocapital={'characters'}
                                 handleClick={handleClick}
                                 handleReference={handleReference}
                             />
@@ -1787,6 +1788,7 @@ const LoanDemographicFamilyDetails = (props) => {
                                 ComponentName="kycID2"
                                 reference={KycID2Ref}
                                 returnKey="next"
+                                autocapital={'characters'}
                                 handleClick={handleClick}
                                 handleReference={handleReference}
                             />
@@ -1880,6 +1882,7 @@ const LoanDemographicFamilyDetails = (props) => {
                                 ComponentName="kycID3"
                                 reference={KycID3Ref}
                                 returnKey="next"
+                                autocapital={'characters'}
                                 handleClick={handleClick}
                                 handleReference={handleReference}
                             />
@@ -1972,6 +1975,7 @@ const LoanDemographicFamilyDetails = (props) => {
                                 ComponentName="kycID4"
                                 reference={KycID4Ref}
                                 returnKey="next"
+                                autocapital={'characters'}
                                 handleClick={handleClick}
                                 handleReference={handleReference}
                             />

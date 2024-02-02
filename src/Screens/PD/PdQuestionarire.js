@@ -47,6 +47,7 @@ const PdQuestionarire = (props, { navigation }) => {
     const [currentPageId, setCurrentPageId] = useState(props.route.params.pageId);
     const [currentPageCode, setCurrentPageCode] = useState(props.route.params.pageCode);
     const [parentQuestionId, setParentQuestionId] = useState(0);
+    const [defaultSatisficationLabel, setDefaultSatisficationLabel] = useState('');
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const [apiError, setApiError] = useState('');
     const [leadsystemCodeDetail, setLeadSystemCodeDetail] = useState(
@@ -74,7 +75,6 @@ const PdQuestionarire = (props, { navigation }) => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
         getSystemCodeDetail();
-        getQuestions();
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
             backHandler.remove();
@@ -95,12 +95,14 @@ const PdQuestionarire = (props, { navigation }) => {
         const filteredResponseData = leaduserCodeDetail
             .filter(data => data.masterId === 'PD_RESPONSE')
             .sort((a, b) => a.displayOrder - b.displayOrder);
-
+        setDefaultSatisficationLabel(filteredResponseData[0].subCodeId)
         setSpinnerList(filteredResponseData);
+
+        getQuestions(filteredResponseData[0].subCodeId);
 
     };
 
-    const getQuestions = () => {
+    const getQuestions = (defaultSatisficationLabel) => {
 
         const baseURL = global.PORT1;
         setLoading(true)
@@ -176,8 +178,13 @@ const PdQuestionarire = (props, { navigation }) => {
                 if (response.status == 200) {
                     if (response.data.pdQAcheckDto) {
                         setParentQuestionId(response.data.pdQAcheckDto.id)
+                        setPdQuestions(response.data.quationAnswers)
+                    } else {
+                        const updatedData = response.data.quationAnswers.map(obj => ({ ...obj, satisfactionLevel: defaultSatisficationLabel }));
+                        if (global.DEBUG_MODE) console.log("UpdatedData::" + JSON.stringify(updatedData));
+                        setPdQuestions(updatedData)
                     }
-                    setPdQuestions(response.data.quationAnswers)
+
                     setLoading(false)
                 }
                 else if (response.data.statusCode === 201) {
