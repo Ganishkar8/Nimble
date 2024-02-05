@@ -67,7 +67,7 @@ const LoginScreen = (props, { navigation }) => {
     const [clientData, setClientData] = useState(clientData1);
 
     useEffect(() => {
-        updateDetails();
+        //updateDetails();
         if (isFocused) {
             BackHandler.addEventListener('hardwareBackPress', handleBackButton);
         }

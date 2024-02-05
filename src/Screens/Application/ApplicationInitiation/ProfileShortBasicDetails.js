@@ -297,7 +297,14 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   const [errorModalVisible1, setErrorModalVisible1] = useState(false);
   const [dedupeModalVisible, setDedupeModalVisible] = useState(false);
 
+
+  const [isPageCompleted, setIsPageCompleted] = useState(false);
+
   useEffect(() => {
+    setIsPageCompleted(props.route.params.isPageCompleted)
+    if (props.route.params.isPageCompleted) {
+      setOnlyView(true);
+    }
     makeSystemMandatoryFields();
     getSystemCodeDetail();
     hideFields();
@@ -463,14 +470,12 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
         setCustomerSubCategoryLabel(data.customerSubcategory);
       }
     }
-    if (data.workflowId !== undefined && data.workflowId !== null) {
-      if (data.workflowId.length > 0) {
-        setWorkflowIDLabel(parseInt(data.workflowId))
-        callLoanAmount(parseInt(data.workflowId));
-      }
+    if (data.workflowId) {
+      setWorkflowIDLabel(parseInt(data.workflowId))
+      callLoanAmount(parseInt(data.workflowId));
     }
     if (data.loanAmount) {
-      setLoanAmount(data.loanAmount.toString());
+      setLoanAmount(data?.loanAmount?.toString());
     }
     setLoanPurposeLabel(data.loanPurpose);
     getProductID(data.loanType);
@@ -913,6 +918,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   };
 
   const callLoanAmount = workflowID => {
+
     const filteredProductIDData = props.mobilecodedetail.laProductLoan.filter(
       data => data.wfId === workflowID,
     );
@@ -1311,7 +1317,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
               isMsme: chkMsme,
               isEmailVerified: false,
               isPanVerified: false,
-              dedupeCheck: isDedupeDone,
+              dedupeCheck: true,
               clientAddress: [],
               clientBankDetail: [],
               clientManualKycLink: []
@@ -1358,7 +1364,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
               isMsme: chkMsme,
               isEmailVerified: false,
               isPanVerified: false,
-              dedupeCheck: isDedupeDone,
+              dedupeCheck: true,
               clientAddress: [],
               clientBankDetail: [],
               clientManualKycLink: []
@@ -2917,7 +2923,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       getID3data(label);
       getID4data(label);
 
-      if (label.toString().length > 0) {
+      if (label?.toString().length > 0) {
         callLoanAmount(label);
       } else {
         setMinLoanAmount(0);

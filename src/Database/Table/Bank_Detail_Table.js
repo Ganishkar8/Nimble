@@ -21,6 +21,8 @@ const insertBankDetail = (bankID, bankURL, isRegistered, bankURL1, bankURL2, con
     });
 };
 
+
+
 const getAllBankDetails = () => {
     const db = databaseInstance.getInstance();
 

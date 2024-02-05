@@ -220,9 +220,13 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const [hideRetake, setHideRetake] = useState(false);
   const [hideDelete, setHideDelete] = useState(false);
 
+  const [isPageCompleted, setIsPageCompleted] = useState(false);
 
   useEffect(() => {
-
+    setIsPageCompleted(props.route.params.isPageCompleted)
+    if (props.route.params.isPageCompleted) {
+      setOnlyView(true);
+    }
     getApplicantData();
 
     if (global.isAadharVerified == '1') {
@@ -415,8 +419,8 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       }
     }
     setKycTypeLabel(data.kycType)
-    setkycID(response.data.kycValue)
-    if (value.kycType == '002' || value.kycType == '008') {
+    setkycID(data.kycValue)
+    if (data.kycType == '002' || data.kycType == '008') {
       setkycExpiryDateVisible(true);
       setkycExpiryDate(data.kycExpiryDate);
     } else {

@@ -168,6 +168,7 @@ const AddressDetails = (props, { navigation }) => {
   const [permAddressAvailable, setPermAddressAvailable] = useState(false);
   const [pageId, setPageId] = useState(global.CURRENTPAGEID);
 
+  const [onlyView, setOnlyView] = useState(false);
 
   useEffect(() => {
     props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
@@ -276,9 +277,9 @@ const AddressDetails = (props, { navigation }) => {
     setDistrict(data.district)
     setState(data.state)
     setCountry(data.country)
-    setYearsAtResidence(data.yearsAtResidence.toString())
+    setYearsAtResidence(data?.yearsAtResidence?.toString())
     setOwnerName(data.ownerName)
-    setYearsAtCity(data.yearsInCurrentCityOrTown.toString())
+    setYearsAtCity(data?.yearsInCurrentCityOrTown?.toString())
     //spinner
     setAddressTypeLabel(data.addressType)
     if (data.addressType == 'P') {
@@ -402,22 +403,59 @@ const AddressDetails = (props, { navigation }) => {
 
     var availAddresssType = [];
 
-    await tbl_clientaddressinfo.getAllAddressDetailsForLoanID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
-      .then(data => {
-        if (global.DEBUG_MODE) console.log('Address Detail:', data);
-        if (data !== undefined && data.length > 0) {
-          data.forEach(item => {
-            if (item.address_type == 'P') {
-              setPermAddressAvailable(true)
+    const filteredData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID));
+
+    if (filteredData.length > 0) {
+
+      const clientDetail = filteredData[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
+
+      if (clientDetail) {
+
+        const hasTrueManualKyc = clientDetail.clientManualKycLink.some(link => link.isManualKyc);
+        if (hasTrueManualKyc) {
+          setIsManualKYCAvailable(true);
+        }
+
+        if (clientDetail) {
+
+          //kycManual
+          if (!clientDetail.isKycManual) {
+            setKYCManual('0');
+            if (global.USERTYPEID == 1163) {
+              setOnlyView(true);
+              fieldsDisable();
             }
-            availAddresssType.push(item.address_type)
-          });
+          } else {
+            setKYCManual('1');
+          }
+
+          //manualKycStatus
+          if (clientDetail.clientManualKycLink.length > 0) {
+            if (clientDetail.clientManualKycLink[0].manualKycStatus) {
+              fieldsDisable();
+              setOnlyView(true);
+            }
+          }
 
         }
-      })
-      .catch(error => {
-        if (global.DEBUG_MODE) console.error('Error fetching Address details:', error);
-      });
+
+        const addressDetails = clientDetail.clientAddress;
+        if (addressDetails) {
+          addressDetails.forEach(item => {
+            if (item.addressType == 'P') {
+              setPermAddressAvailable(true)
+            }
+            availAddresssType.push(item.addressType)
+          });
+        }
+        // Log or use the addressDetails as needed
+        if (global.DEBUG_MODE) console.log("Address Details:", addressDetails);
+      } else {
+        if (global.DEBUG_MODE) console.log("Client ID not found in clientDetail array.");
+      }
+    } else {
+      if (global.DEBUG_MODE) console.log("Loan application number not found.");
+    }
 
 
     const filterAddressTypeData = userCodeDetail.filter((data) => data.masterId === 'PRF_SHORT_ADDRESS_TYPE');
@@ -825,11 +863,15 @@ const AddressDetails = (props, { navigation }) => {
 
   const addressSubmit = () => {
 
-    if (global.USERTYPEID == 1163) {
-      if (!(kycManual == '1')) {
-        props.navigation.replace('AddressMainList')
-        return;
-      }
+    // if (global.USERTYPEID == 1163) {
+    //   if (!(kycManual == '1')) {
+    //     props.navigation.replace('AddressMainList')
+    //     return;
+    //   }
+    // }
+    if (onlyView) {
+      props.navigation.replace('AddressMainList')
+      return;
     }
 
     if (addressID.length <= 0) {

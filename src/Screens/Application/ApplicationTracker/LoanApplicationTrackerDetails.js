@@ -30,7 +30,7 @@ import tbl_loanbusinessDetail from '../../../Database/Table/tbl_loanbusinessDeta
 import tbl_loanaddressinfo from '../../../Database/Table/tbl_loanaddressinfo';
 import tbl_finexpdetails from '../../../Database/Table/tbl_finexpdetails';
 import tbl_bankdetails from '../../../Database/Table/tbl_bankdetails';
-import { addLoanInitiationDetails } from '../../../Utils/redux/actions/loanInitiationAction';
+import { addLoanInitiationDetails, deleteLoanInitiationDetails } from '../../../Utils/redux/actions/loanInitiationAction';
 
 
 const LoanApplicationTrackerDetails = (props, { navigation }) => {
@@ -86,6 +86,7 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
                         }
                         return acc;
                     }, {});
+                    props.deleteLoanInitiationDetails(global.LOANAPPLICATIONID);
                     props.addLoanInitiationDetails(updatedObject);
                     insertData(response.data);
                 }
@@ -392,6 +393,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => ({
     languageAction: (item) => dispatch(languageAction(item)),
     addLoanInitiationDetails: (item) => dispatch(addLoanInitiationDetails(item)),
+    deleteLoanInitiationDetails: (item) => dispatch(deleteLoanInitiationDetails(item)),
 });
 export default connect(mapStateToProps, mapDispatchToProps)(LoanApplicationTrackerDetails);
 

@@ -89,22 +89,29 @@ const AddressMainList = (props, { navigation }) => {
 
     if (filteredData.length > 0) {
 
+      const hasTrueManualKyc = filteredData[0].clientDetail.some(link => link.isKycManual);
+      if (hasTrueManualKyc) {
+        setIsManualKYCAvailable(true);
+      }
+
       const clientDetail = filteredData[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
 
       if (clientDetail) {
 
-        const hasTrueManualKyc = clientDetail.clientManualKycLink.some(link => link.isManualKyc);
-        if (hasTrueManualKyc) {
-          setIsManualKYCAvailable(true);
-        }
-        if (clientDetail.clientManualKycLink.length > 0) {
-          if (clientDetail.clientManualKycLink[0].manualKycStatus !== null && clientDetail.clientManualKycLink[0].manualKycStatus) {
-            setKYCManual('0');
+        if (clientDetail) {
+          if (clientDetail.clientManualKycLink) {
+            if (clientDetail.clientManualKycLink.length > 0) {
+              if (clientDetail.clientManualKycLink[0].manualKycStatus) {
+                setKYCManual('0');
+              } else {
+                setKYCManual('1');
+              }
+            } else {
+              setKYCManual('0');
+            }
           } else {
-            setKYCManual('1');
+            setKYCManual('0');
           }
-        } else {
-          setKYCManual('0');
         }
         const addressDetails = clientDetail.clientAddress;
         if (addressDetails) {

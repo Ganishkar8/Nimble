@@ -207,6 +207,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
 
   const [isAadharVerified, setIsAadharVerified] = useState(false);
   const [pageId, setPageId] = useState(global.CURRENTPAGEID);
+  const [onlyView, setOnlyView] = useState(false);
 
 
 
@@ -627,6 +628,12 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       const clientDetail = filteredData[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
 
       if (clientDetail) {
+        if (clientDetail.clientManualKycLink.length > 0) {
+          if (clientDetail.clientManualKycLink[0].manualKycStatus) {
+            fieldsDisable();
+            setOnlyView(true);
+          }
+        }
         getClientData(clientDetail);
       }
 
@@ -644,7 +651,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
     setLastName(value?.lastName ?? '');
     setGenderLabel(value?.gender ?? '');
     setDOB(value?.dateOfBirth ?? '');
-    setAge(value?.age.toString() ?? '');
+    setAge(value?.age?.toString() ?? '');
     setFatherName(value?.fatherName ?? '');
     setSpouseName(value?.spouseName ?? '');
     setCasteLabel(value?.caste ?? '');
@@ -670,6 +677,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
         setHideRetake(true);
       } else {
         fieldsDisable();
+        setOnlyView(true);
         setHideDelete(true);
         setHideRetake(true);
       }
@@ -796,7 +804,10 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
   const uploadImage = async () => {
 
     if (global.USERTYPEID == 1163) {
-      if (kycManual == '1') {
+      if (onlyView) {
+        navigatetoAddress();
+        return;
+      } else if (kycManual == '1') {
         updateApplicantDetails(docID)
       } else {
         navigatetoAddress();

@@ -48,6 +48,7 @@ import AadharSuccessModal from '../../../Components/AadharSuccessModal';
 import tbl_client from '../../../Database/Table/tbl_client';
 import tbl_clientaddressinfo from '../../../Database/Table/tbl_clientaddressinfo';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { updateClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
 
 const CELL_COUNT = 3;
 const CELL_SIZE = 46;
@@ -454,45 +455,48 @@ const AadharOTPVerification = (props, { navigation }) => {
 
         // if (global.DEBUG_MODE) console.log('Gender::' + JSON.stringify(gender));
         // if (global.DEBUG_MODE) console.log('FatherName::' + JSON.stringify(fatherName));
-        if (aadhaarResponse.clientAddress.length > 0) {
-            await tbl_clientaddressinfo.insertClientAddress(
-                global.LOANAPPLICATIONID,
-                aadhaarResponse.clientAddress[0].id,
-                global.CLIENTID,
-                global.CLIENTTYPE,
-                aadhaarResponse.clientAddress[0].addressType,
-                aadhaarResponse.clientAddress[0].addressLine1,
-                aadhaarResponse.clientAddress[0].addressLine2,
-                aadhaarResponse.clientAddress[0].landmark,
-                aadhaarResponse.clientAddress[0].pincode,
-                aadhaarResponse.clientAddress[0].city,
-                aadhaarResponse.clientAddress[0].district,
-                aadhaarResponse.clientAddress[0].state,
-                aadhaarResponse.clientAddress[0].country,
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "true",
-                global.USERID,
-                new Date(),
-                global.USERID,
-                new Date(),
-                global.USERID,
-                new Date(),
-                "1"
-            )
-                .then(result => {
-                    if (global.DEBUG_MODE) console.log('Inserted Address detail:', result);
-                })
-                .catch(error => {
-                    if (global.DEBUG_MODE) console.error('Error Inserting Address detail:', error);
-                });
-        }
+
+        props.updateClientDetails(global.LOANAPPLICATIONID, aadhaarResponse.id, 'clientDetail', aadhaarResponse)
+
+        // if (aadhaarResponse.clientAddress.length > 0) {
+        //     await tbl_clientaddressinfo.insertClientAddress(
+        //         global.LOANAPPLICATIONID,
+        //         aadhaarResponse.clientAddress[0].id,
+        //         global.CLIENTID,
+        //         global.CLIENTTYPE,
+        //         aadhaarResponse.clientAddress[0].addressType,
+        //         aadhaarResponse.clientAddress[0].addressLine1,
+        //         aadhaarResponse.clientAddress[0].addressLine2,
+        //         aadhaarResponse.clientAddress[0].landmark,
+        //         aadhaarResponse.clientAddress[0].pincode,
+        //         aadhaarResponse.clientAddress[0].city,
+        //         aadhaarResponse.clientAddress[0].district,
+        //         aadhaarResponse.clientAddress[0].state,
+        //         aadhaarResponse.clientAddress[0].country,
+        //         "",
+        //         "",
+        //         "",
+        //         "",
+        //         "",
+        //         "",
+        //         "",
+        //         "",
+        //         "true",
+        //         global.USERID,
+        //         new Date(),
+        //         global.USERID,
+        //         new Date(),
+        //         global.USERID,
+        //         new Date(),
+        //         "1"
+        //     )
+        //         .then(result => {
+        //             if (global.DEBUG_MODE) console.log('Inserted Address detail:', result);
+        //         })
+        //         .catch(error => {
+        //             if (global.DEBUG_MODE) console.error('Error Inserting Address detail:', error);
+        //         });
+        // }
 
         global.isAadharVerified = "1";
         updateLoanStatus("1");
@@ -700,13 +704,16 @@ const AadharOTPVerification = (props, { navigation }) => {
 
 const mapStateToProps = (state) => {
     const { language } = state.languageReducer;
+    const { loanInitiationDetails } = state.loanInitiationReducer;
     return {
-        language: language
+        language: language,
+        loanInitiationDetails: loanInitiationDetails,
     }
 }
 
 const mapDispatchToProps = (dispatch) => ({
     languageAction: (item) => dispatch(languageAction(item)),
+    updateClientDetails: (loanApplicationId, clientId, key, data) => dispatch(updateClientDetails(loanApplicationId, clientId, key, data)),
 });
 
 

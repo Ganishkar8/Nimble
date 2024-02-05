@@ -235,7 +235,7 @@ const HomeScreen = (props, { navigation }) => {
                                 </View>
 
 
-                                {(props.bankDetails.INSTANCE == 'UAT' || props.bankDetails.INSTANCE == 'DEV') &&
+                                {(props.bankDetails[0].INSTANCE == 'UAT' || props.bankDetails[0].INSTANCE == 'DEV') &&
                                     <View style={{ width: '93%', height: 170, justifyContent: 'space-between', flexDirection: 'row', marginTop: '4%' }}>
 
                                         <TouchableOpacity onPress={() => props.navigation.navigate('PDTracker', { fromScreen: 'HomeSCreen' })} activeOpacity={0.5} style={{ width: '48%', height: '100%', backgroundColor: '#ffffff99', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>

@@ -8,7 +8,7 @@ const initialState = {
 const bankDetailReducer = (state = initialState, action) => {
     switch (action.type) {
         case ADDBANK: return {
-            bankDetails: action.payload,
+            bankDetails: [action.payload],
         };
         default: return state
     }
