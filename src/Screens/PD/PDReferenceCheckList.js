@@ -120,10 +120,9 @@ const PDReferenceCheckList = (props, { navigation }) => {
 
                 if (response.status == 200) {
                     if (response.data.length > 0) {
-                        if (response.data[0].personalDiscussionQARefference) {
-                            setReferenceDetails(response.data[0].personalDiscussionQARefference)
-                        }
-                        setParentReferenceId(response.data[0].id)
+
+                        setReferenceDetails(response.data)
+
                     }
                     setLoading(false)
                 }
