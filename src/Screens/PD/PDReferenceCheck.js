@@ -453,17 +453,17 @@ const PDReferenceCheck = (props, { navigation }) => {
             setKycTypeLabel(detail.kycType);
             setKycID(detail.kycId);
             setReferenceTypeLabel(detail.contactNo);
-            setFwa(detail.familarityWithApplicant.toString())
+            setFwa(detail.familarityWithApplicant?.toString())
             setAddressLine1(detail.addressLine1)
             setAddressLine2(detail.addressLine2)
             setLandmark(detail.landmark)
-            setPincode(detail.pinCode.toString())
+            setPincode(detail.pinCode?.toString())
             setCity(detail.city)
             setDistrict(detail.district)
             setState(detail.state)
             setRemarksLabel(detail.remark)
             if (detail.dmsId !== undefined && detail.dmsId !== null) {
-                if (detail.dmsId.toString().length > 0) {
+                if (detail.dmsId?.toString().length > 0) {
                     getImage(detail.dmsId);
                 }
                 setDocID(detail.dmsId);
@@ -1025,37 +1025,34 @@ const PDReferenceCheck = (props, { navigation }) => {
         const baseURL = global.PORT1;
         setLoading(true)
         const appDetails = {
+
             "createdBy": global.USERID,
             "createdDate": new Date(),
-            "id": parentReferenceId,
             "clientType": global.CLIENTTYPE,
             "pdLevel": global.PDSTAGE,
             "pageId": currentPageId,
-            "personalDiscussionQARefference": [{
-                "createdBy": global.USERID,
-                "createdDate": new Date(),
-                "id": referenceId,
-                "name": name,
-                "contactNo": contactNumber,
-                "kycType": kycTypeLabel,
-                "kycId": kycID,
-                "reffernceType": referenceTypeLabel,
-                "familarityWithApplicant": fwa,
-                "addressLine1": addressLine1,
-                "addressLine2": addressLine2,
-                "landmark": landmark,
-                "pinCode": pincode,
-                "city": city,
-                "subDistrict": "",
-                "district": district,
-                "state": state,
-                "remark": remarksLabel,
-                "dmsId": docID,
-                "imageName": fileName,
-                "geoCodes": currentLatitude + "," + currentLongitude,
-                "comments": comments,
-                "imageSize": ""
-            }]
+            "id": referenceId,
+            "name": name,
+            "contactNo": contactNumber,
+            "kycType": kycTypeLabel,
+            "kycId": kycID,
+            "reffernceType": referenceTypeLabel,
+            "familarityWithApplicant": fwa,
+            "addressLine1": addressLine1,
+            "addressLine2": addressLine2,
+            "landmark": landmark,
+            "pinCode": pincode,
+            "city": city,
+            "subDistrict": "",
+            "district": district,
+            "state": state,
+            "remark": remarksLabel,
+            "dmsId": docID,
+            "imageName": fileName,
+            "geoCodes": currentLatitude + "," + currentLongitude,
+            "comments": comments,
+            "imageSize": ""
+
         }
 
         apiInstance(baseURL).post(`/api/v1/pd/PdQAcheck/refference/loan-application-number/${global.LOANAPPLICATIONNUM}/clientId/${global.CLIENTID}`, appDetails)
