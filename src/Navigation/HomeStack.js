@@ -62,6 +62,7 @@ import PDFinancialDetails from '../Screens/PD/PDFinancialDetails';
 import PDFeedback from '../Screens/PD/PDFeedback';
 import PDNonGSTDetail from '../Screens/PD/PDNonGSTDetail';
 import PDDocumentVerification from '../Screens/PD/PDDocumentVerification';
+import RemarksScreen from '../Screens/Application/ApplicationInitiation/RemarksScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -432,6 +433,12 @@ export default HomeStack = () => {
       <Stack.Screen
         name="PDDocumentVerification"
         component={PDDocumentVerification}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="RemarksScreen"
+        component={RemarksScreen}
         options={{ headerShown: false, tabBarVisible: false }}
       />
 

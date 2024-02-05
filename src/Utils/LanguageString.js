@@ -223,7 +223,7 @@ export const language = [
       str_aadharverifydesc: 'An authentication code has been send to registered mobile number',
       str_aadharverifynewcust: 'Aadhar OTP Verification New Customer',
       str_dedupefailedresult: 'Dedupe Failed Result',
-      str_clientdedupecheck: 'Client Dedupe Check',
+      str_clientdedupecheck: 'Client Dedupe ',
       str_clientdedupeavailable: 'Another client ID is available for the selected KYC.',
       str_accopendate: 'ACCOUNT OPENED DATE',
       str_loansacamount: 'LOAN SANCTIONED AMOUNT',

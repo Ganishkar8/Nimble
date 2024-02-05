@@ -10,6 +10,7 @@ import { language } from '../Utils/LanguageString';
 import { connect } from 'react-redux';
 import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import { it } from 'react-native-paper-dates';
 
 const DedupeModal = props => {
 
@@ -34,9 +35,9 @@ const DedupeModal = props => {
                     <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
 
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, flexDirection: 'row' }}>
-                            <TextComp textVal={language[0][props.language].str_dedupefailedresult} textStyle={{ width: '90%', color: Colors.darkblack, fontFamily: 'Poppins-Medium', fontSize: 16 }} Visible={false} />
+                            <TextComp textVal={`${language[0][props.language].str_clientdedupecheck}${props.dedupeDetails.remarks ? 'Failed' : ''}`} textStyle={{ width: '90%', color: Colors.darkblack, fontFamily: 'Poppins-Medium', fontSize: 16 }} Visible={false} />
 
-                            <TouchableOpacity onPress={() => alert('cancel')} style={{ justifyContent: 'center' }}>
+                            <TouchableOpacity onPress={() => props.onClose('Cancel')} style={{ justifyContent: 'center' }}>
                                 <View >
 
                                     <Entypo name='cross' size={23} color={Colors.darkblack} />
@@ -47,35 +48,49 @@ const DedupeModal = props => {
 
 
                         <TextComp textVal={language[0][props.language].str_clientdedupecheck} textStyle={{ width: '90%', color: Colors.darkblack, fontFamily: 'Poppins-Medium', fontSize: 14, marginTop: 20 }} Visible={false} />
-                        <TextComp textVal={language[0][props.language].str_clientdedupeavailable} textStyle={{ width: '90%', color: Colors.darkblack, fontFamily: 'Poppins-Medium', fontSize: 14, marginTop: 20 }} Visible={false} />
+                        {!props.lmsDedupeCheck && !props.losDedupeCheck &&
+                            <View style={{ width: '90%' }}>
 
-                        <View style={{ width: '90%', marginTop: 20 }}>
-                            <FlatList
-                                data={props.dedupeDta}
-                                showsHorizontalScrollIndicator={false}
-                                keyExtractor={(item, index) => index.toString()}
-                                renderItem={({ item, index }) => {
-                                    return (
+                                <Text style={[{ color: Colors.mediumgrey, fontFamily: 'Poppins-Medium', fontSize: 12, marginTop: 5 }]}>
+                                    {props.dedupeDetails.remarks.substring(1, props.dedupeDetails.remarks.length - 1).replace('\n, ', '\n')}
+                                </Text>
 
-                                        <View style={{ width: '100%', flexDirection: 'row', color: Colors.white, justifyContent: 'center' }}>
-                                            <View style={{ width: '90%' }}>
-                                                <Text style={[{ color: Colors.lightgrey, fontFamily: 'PoppinsRegular', fontSize: 12 }]}>CLIENT ID - CLIENT NAME - BRANCH</Text>
-                                                <Text style={[{ color: Colors.mediumgrey, fontFamily: 'Poppins-Medium', fontSize: 12, marginTop: 5 }]}>{`${item.id} - ${item.name} - ${item.branch}`}</Text>
-                                            </View>
-                                            <TouchableOpacity onPress={() => alert('cancel')} style={{ justifyContent: 'center', alignItems: 'center', width: '10%' }}>
-                                                <View >
 
-                                                    <AntDesign name='eye' size={23} color={Colors.darkblue} />
+
+                            </View>}
+                        {(props.lmsDedupeCheck || props.losDedupeCheck) &&
+                            <View style={{ width: '90%', marginTop: 20, height: '60%' }}>
+                                <FlatList
+                                    data={props.lmsDedupeCheck ? props.lmsData : props.losData}
+                                    showsHorizontalScrollIndicator={false}
+                                    keyExtractor={(item, index) => index.toString()}
+                                    renderItem={({ item, index }) => {
+                                        return (
+
+                                            <View style={{ width: '100%', flexDirection: 'row', color: Colors.white, justifyContent: 'center' }}>
+                                                <View style={{ width: '90%' }}>
+
+                                                    <Text style={[{ color: Colors.mediumgrey, fontFamily: 'Poppins-Medium', fontSize: 12, marginTop: 5 }]}>
+                                                        {item.label}
+                                                    </Text>
 
                                                 </View>
-                                            </TouchableOpacity>
-                                        </View>
+                                                {item.remarks &&
+                                                    <TouchableOpacity onPress={() => props.navigateToRemarks()} style={{ justifyContent: 'center', alignItems: 'center', width: '10%' }}>
+                                                        <View >
 
-                                    )
-                                }}
-                            />
-                        </View>
-                        <View style={{ width: '100%', flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'flex-end', marginTop: 40 }}>
+                                                            <AntDesign name='eye' size={23} color={Colors.darkblue} />
+
+                                                        </View>
+                                                    </TouchableOpacity>
+                                                }
+                                            </View>
+
+                                        )
+                                    }}
+                                />
+                            </View>}
+                        <View style={{ width: '100%', flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'flex-end' }}>
 
                             <TouchableOpacity onPress={() => { props.onClose("Proceed") }} style={styles.closeButton}>
                                 <Text style={{ color: Colors.darkblue, fontWeight: 500 }}>{language[0][props.language].str_proceed}</Text>
@@ -92,7 +107,7 @@ const DedupeModal = props => {
 
                 </View>
             </View>
-        </Modal>
+        </Modal >
     );
 };
 
@@ -107,6 +122,7 @@ const styles = StyleSheet.create({
         width: '80%',
         backgroundColor: 'white',
         padding: 20,
+        aspectRatio: 0.7,
         borderRadius: 10,
         alignItems: 'center',
     },
@@ -129,10 +145,12 @@ const mapStateToProps = (state) => {
     const { language } = state.languageReducer;
     const { profileDetails } = state.profileReducer;
     const { mobileCodeDetails } = state.mobilecodeReducer;
+    const { dedupeDetails } = state.profileReducer;
     return {
         language: language,
         profiledetail: profileDetails,
-        mobilecodedetail: mobileCodeDetails
+        mobilecodedetail: mobileCodeDetails,
+        dedupeDetails: dedupeDetails
     }
 }
 
