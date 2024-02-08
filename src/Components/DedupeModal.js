@@ -46,51 +46,20 @@ const DedupeModal = props => {
                             </TouchableOpacity>
                         </View>
 
-
-                        <TextComp textVal={language[0][props.language].str_clientdedupecheck} textStyle={{ width: '90%', color: Colors.darkblack, fontFamily: 'Poppins-Medium', fontSize: 14, marginTop: 20 }} Visible={false} />
-                        {!props.lmsDedupeCheck && !props.losDedupeCheck &&
+                        {props.dedupeDetails.remarks ? (
                             <View style={{ width: '90%' }}>
-
                                 <Text style={[{ color: Colors.mediumgrey, fontFamily: 'Poppins-Medium', fontSize: 12, marginTop: 5 }]}>
                                     {props.dedupeDetails.remarks.substring(1, props.dedupeDetails.remarks.length - 1).replace('\n, ', '\n')}
                                 </Text>
+                            </View>
+                        ) : (
+                            <View style={{ width: '90%' }}>
+                                <Text style={[{ color: Colors.lightgrey, fontFamily: 'PoppinsRegular', fontSize: 12 }]}>CLIENT ID - CLIENT NAME - BRANCH</Text>
+                                <Text style={[{ color: Colors.mediumgrey, fontFamily: 'Poppins-Medium', fontSize: 12, marginTop: 5 }]}>{props.dedupeDetails.clientExistingDetails ? `${props.dedupeDetails.clientExistingDetails[0].lmsClientId} - ${props.dedupeDetails.clientExistingDetails[0].lmsCustomerName} - ${props.dedupeDetails.clientExistingDetails[0].branchId}` : ''}</Text>
+                            </View>
+                        )}
 
-
-
-                            </View>}
-                        {(props.lmsDedupeCheck || props.losDedupeCheck) &&
-                            <View style={{ width: '90%', marginTop: 20, height: '60%' }}>
-                                <FlatList
-                                    data={props.lmsDedupeCheck ? props.lmsData : props.losData}
-                                    showsHorizontalScrollIndicator={false}
-                                    keyExtractor={(item, index) => index.toString()}
-                                    renderItem={({ item, index }) => {
-                                        return (
-
-                                            <View style={{ width: '100%', flexDirection: 'row', color: Colors.white, justifyContent: 'center' }}>
-                                                <View style={{ width: '90%' }}>
-
-                                                    <Text style={[{ color: Colors.mediumgrey, fontFamily: 'Poppins-Medium', fontSize: 12, marginTop: 5 }]}>
-                                                        {item.label}
-                                                    </Text>
-
-                                                </View>
-                                                {item.remarks &&
-                                                    <TouchableOpacity onPress={() => props.navigateToRemarks()} style={{ justifyContent: 'center', alignItems: 'center', width: '10%' }}>
-                                                        <View >
-
-                                                            <AntDesign name='eye' size={23} color={Colors.darkblue} />
-
-                                                        </View>
-                                                    </TouchableOpacity>
-                                                }
-                                            </View>
-
-                                        )
-                                    }}
-                                />
-                            </View>}
-                        <View style={{ width: '100%', flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'flex-end' }}>
+                        <View style={{ width: '100%', flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'flex-end', alignSelf: 'flex-end', marginTop: 20 }}>
 
                             <TouchableOpacity onPress={() => { props.onClose("Proceed") }} style={styles.closeButton}>
                                 <Text style={{ color: Colors.darkblue, fontWeight: 500 }}>{language[0][props.language].str_proceed}</Text>
@@ -122,7 +91,7 @@ const styles = StyleSheet.create({
         width: '80%',
         backgroundColor: 'white',
         padding: 20,
-        aspectRatio: 0.7,
+        aspectRatio: 1.5,
         borderRadius: 10,
         alignItems: 'center',
     },

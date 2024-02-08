@@ -63,6 +63,8 @@ import PDFeedback from '../Screens/PD/PDFeedback';
 import PDNonGSTDetail from '../Screens/PD/PDNonGSTDetail';
 import PDDocumentVerification from '../Screens/PD/PDDocumentVerification';
 import RemarksScreen from '../Screens/Application/ApplicationInitiation/RemarksScreen';
+import LMSLOSDetails from '../Screens/Application/ApplicationInitiation/LMSLOSDetails';
+import ExistingLoanAndCollateralDetails from '../Screens/Application/ApplicationInitiation/ExistingLoanAndCollateralDetails';
 
 const Stack = createNativeStackNavigator();
 
@@ -439,6 +441,18 @@ export default HomeStack = () => {
       <Stack.Screen
         name="RemarksScreen"
         component={RemarksScreen}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="LMSLOSDetails"
+        component={LMSLOSDetails}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="ExistingLoanAndCollateralDetails"
+        component={ExistingLoanAndCollateralDetails}
         options={{ headerShown: false, tabBarVisible: false }}
       />
 

@@ -66,7 +66,9 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const [KYC3, setKYC3] = useState(true);
   const [KYC4Caption, setKYC4Caption] = useState('KYC 4');
   const [KYC4, setKYC4] = useState(true);
-  const [kycDmsId, setkycDmsId] = useState(true);
+  const [kycSourceDmsId, setkycSourceDmsId] = useState('');
+  const [kycID1DmsId, setkycID1DmsId] = useState('');
+  const [dobDmsId, setdobDmsId] = useState('');
 
   const [LoanApplicationID, setLoanApplicationID] = useState('');
   const [LoanApplicationIDCaption, setLoanApplicationIDCaption] = useState('Loan APPLICATION ID');
@@ -121,7 +123,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const [kycIDCaption, setkycIDCaption] = useState('KYC ID');
   const [kycIDMan, setkycIDMan] = useState(false);
   const [kycIDVisible, setkycIDVisible] = useState(true);
-  const [kycIDDisable, setkycIDDisable] = useState(false);
+  const [kycIDDisable, setkycIDDisable] = useState(true);
   const KycIDRef = useRef(null);
 
   const [kycExpiryDate, setkycExpiryDate] = useState('');
@@ -199,10 +201,18 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const hidephotoBottomSheet = () => setphotoOptionvisible(false);
   const [deleteVisible, setDeleteVisible] = useState(false);
   const [imageFile, setImageFile] = useState([]);
+  const [kycID1imageFile, setKycID1ImageFile] = useState([]);
+  const [kycDobimageFile, setKycDobImageFile] = useState([]);
   const [imageUri, setImageUri] = useState(null);
+  const [kycID1ImageUri, setkycID1ImageUri] = useState(null);
+  const [kycDobImageUri, setkycDobImageUri] = useState(null);
   const [docID, setDocID] = useState('');
   const [fileName, setFileName] = useState('');
+  const [kycID1FileName, setKycID1FileName] = useState('');
+  const [kycDOBFileName, setKycDOBFileName] = useState('');
   const [fileType, setFileType] = useState('');
+  const [kycID1Type, setKycID1Type] = useState('');
+  const [kycDOBType, setKycDOBType] = useState('');
   const [time, setTime] = useState('');
   const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
   const showImageBottomSheet = () => { setBottomSheetVisible(true) };
@@ -221,20 +231,26 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const [hideDelete, setHideDelete] = useState(false);
 
   const [isPageCompleted, setIsPageCompleted] = useState(false);
+  const [selectedImageType, setSelectedImageType] = useState('');
+
+  const [DOB, setDOB] = useState('');
+  const [DOBCaption, setDOBCaption] = useState('DATE OF BIRTH');
+  const [DOBMan, setDOBMan] = useState(true);
+  const [DOBVisible, setDOBVisible] = useState(true);
+  const [DOBDisable, setDOBDisable] = useState(false);
+  const DOBRef = useRef(null);
 
   useEffect(() => {
-    setIsPageCompleted(props.route.params.isPageCompleted)
-    if (props.route.params.isPageCompleted) {
-      setOnlyView(true);
-    }
+
+    getSystemCodeDetail(true);
     getApplicantData();
 
     if (global.isAadharVerified == '1') {
       setIsAadharVerified(true);
-      getSystemCodeDetail(true);
+      //getSystemCodeDetail(true);
     } else {
       setIsAadharVerified(false);
-      getSystemCodeDetail(false);
+      //getSystemCodeDetail(false);
     }
 
 
@@ -284,34 +300,6 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     setKycType4Disable(true);
     setkycID4Disable(true);
   }
-
-  const updateDetails = (loanApplicationId, clientId, key, nestedKey, data) => {
-    var clientData = [{ "id": 632, "loanApplicationNumber": "IND0000632NEW", "tempNumber": "LAN1180000632", "branchId": 1180, "customerCategory": "INDV", "customerSubcategory": "SE", "customerType": "NEW", "loanType": "UNSEC", "loanPurpose": "MFT", "product": "002", "loanAmount": 500000, "workflowId": 134, "consent": true, "finalConsent": false, "applicationAppliedBy": "225", "applicationCreationDate": "2024-01-30T20:26:48.163Z", "lmsApplicationNumber": "", "isManualKyc": true, "manualKycStatus": "Pending", "clientDetail": [{ "isActive": true, "id": 671, "clientType": "APPL", "relationType": "", "title": "MR", "firstName": "Chjcvjcj", "middleName": "", "lastName": "", "gender": "M", "maritalStatus": "S", "mobileNumber": "7598133718", "email": "", "isKycManual": false, "kycTypeId1": "007", "kycIdValue1": "CJJCD6426G", "kycTypeId2": "012", "kycIdValue2": "CHJCJVVN", "kycTypeId3": "", "kycIdValue3": "", "kycTypeId4": "", "kycIdValue4": "", "isMsme": false, "isMobileNumberVerified": true, "isEmailVerified": false, "isAadharNumberVerified": false, "isPanVerified": false, "udyamRegistrationNumber": "", "dedupeCheck": false, "dedupeCheckDate": "2024-01-31T12:43:40.115Z", "clientAddress": [], "clientBankDetail": [], "clientManualKycLink": [] }] }]
-    // var data = { "hello": '1', 'hello2': '2' }
-    const updatedClientData = clientData.map((item) => {
-      if (item.id === parseInt(loanApplicationId)) {
-        return {
-          ...item,
-          [key]: item[key].map((clientDetail) => {
-            if (clientDetail.id === parseInt(clientId)) {
-              return {
-                ...clientDetail,
-                [nestedKey]: clientDetail[nestedKey].length
-                  ? clientDetail[nestedKey].map((link) =>
-                    link.id === data.id ? { ...link, ...data } : link
-                  )
-                  : [{ ...data }],
-              };
-            }
-            return clientDetail;
-          }),
-        };
-      }
-      return item;
-    });
-    alert(JSON.stringify(updatedClientData))
-  }
-
 
   const getApplicantData = async () => {
     // Filter data based on loan application number
@@ -406,7 +394,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
     if (data.kycDmsId != null && data.kycDmsId != undefined) {
       if (data.kycDmsId.toString().length > 0)
-        setkycDmsId(data.kycDmsId)
+        setkycSourceDmsId(data.kycDmsId)
       if (imageUri != undefined && imageUri != null) {
         if (imageUri.length > 0) {
 
@@ -445,7 +433,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
         if (response.status == 200) {
           if (response.data.kycDmsId != null && response.data.kycDmsId != undefined) {
             if (response.data.kycDmsId.toString().length > 0)
-              setkycDmsId(response.data.kycDmsId)
+              setkycSourceDmsId(response.data.kycDmsId)
             if (imageUri != undefined && imageUri != null) {
               if (imageUri.length > 0) {
 
@@ -596,20 +584,19 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
   const getSystemCodeDetail = async (adharVerified) => {
 
+    const filteredKycSourceData = leaduserCodeDetail.filter((data) => data.masterId === 'KYC_SOURCE').sort((a, b) => a.Description.localeCompare(b.Description));
+    setKycSourceData(filteredKycSourceData);
 
-    if (adharVerified) {
-      setKycSourceVisible(false);
-      setKycTypeDisable(true);
-      setkycIDDisable(true);
-    } else {
-      const dataArray = [];
-      dataArray.push({ 'subCodeId': 'MAN', Description: 'Manual' });
-      setKycSourceLabel('MAN');
-      setKycSourceData(dataArray);
-      setKycSourceVisible(true);
-      setKycTypeDisable(false);
-      setkycIDDisable(true);
-    }
+    // if (adharVerified) {
+    //   setKycSourceVisible(false);
+    //   setKycTypeDisable(true);
+    //   setkycIDDisable(true);
+    // } else {
+    //   setKycSourceLabel('MNL');
+    //   setKycSourceVisible(true);
+    //   setKycTypeDisable(false);
+    //   setkycIDDisable(true);
+    // }
 
     getID1data();
     getID2data();
@@ -747,6 +734,29 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     getClientID(value);
     getKYCType(value.kycTypeId1, value.kycTypeId2, value.kycTypeId3, value.kycTypeId4);
 
+    if (value.clientManualKycLink.length > 0) {
+
+    } else {
+      if (value.lmsClientId) {
+        if (value.isAadharNumberVerified) {
+          setKycSourceLabel('EVRF');
+        } else {
+          if (value.isManualKyc) {
+            setKycSourceLabel('MNL');
+          } else {
+            setKycSourceLabel('LMS');
+          }
+        }
+      } else {
+        if (value.isAadharNumberVerified) {
+          setKycSourceLabel('EVRF');
+        } else {
+          setKycSourceLabel('MNL');
+        }
+      }
+    }
+
+
   }
 
 
@@ -846,6 +856,9 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       setkycID1(textValue);
     } else if (componentName === 'kycID2') {
       setkycID2(textValue);
+    } else if (componentName === 'DOB') {
+      setDOB(textValue);
+      setAge(Common.calculateAge(textValue).toString())
     }
   };
 
@@ -963,9 +976,20 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
       // const imageName = image.path.split('/').pop();
       setTime(Common.getCurrentDateTime());
-      setFileType(image.mime)
-      setFileName(imageName)
-      setImageUri(image.path)
+      if (selectedImageType == 'KYCSOURCE') {
+        setFileType(image.mime)
+        setFileName(imageName)
+        setImageUri(image.path)
+      } else if (selectedImageType == 'KYCID1') {
+        setKycID1Type(image.mime)
+        setKycID1FileName(imageName)
+        setkycID1ImageUri(image.path)
+      } else if (selectedImageType == 'KYCDOB') {
+        setKycDOBType(image.mime)
+        setKycDOBFileName(imageName)
+        setkycDobImageUri(image.path)
+      }
+      updateImage(image.path, image.mime, imageName)
       //setVisible(false)
       props.onChange?.(image);
     })
@@ -991,9 +1015,21 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
         imageName = imageName + fileExtension;
         console.log('File extension:', fileExtension);
       }
-      setFileType(image.mime)
-      setFileName(imageName)
-      setImageUri(image.path)
+      if (selectedImageType == 'KYCSOURCE') {
+        setFileType(image.mime)
+        setFileName(imageName)
+        setImageUri(image.path)
+      } else if (selectedImageType == 'KYCID1') {
+        setKycID1Type(image.mime)
+        setKycID1FileName(imageName)
+        setkycID1ImageUri(image.path)
+      } else if (selectedImageType == 'KYCDOB') {
+        setKycDOBType(image.mime)
+        setKycDOBFileName(imageName)
+        setkycDobImageUri(image.path)
+      }
+
+      updateImage(image.path, image.mime, imageName)
       //setVisible(false)
       //setDeleteVisible(false)
       props.onChange?.(image);
@@ -1005,11 +1041,29 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const previewImage = () => {
     hideImageBottomSheet();
 
-    if (imageUri != undefined && imageUri != null) {
-      if (imageUri.length > 0) {
-        props.navigation.navigate('PreviewImage', { imageName: fileName, imageUri: imageUri })
-      } else {
-        getImage(kycDmsId, '0');
+    if (selectedImageType == 'KYCSOURCE') {
+      if (imageUri != undefined && imageUri != null) {
+        if (imageUri.length > 0) {
+          props.navigation.navigate('PreviewImage', { imageName: fileName, imageUri: imageUri })
+        } else {
+          getImage(kycSourceDmsId, '0');
+        }
+      }
+    } else if (selectedImageType == 'KYCID1') {
+      if (kycID1ImageUri) {
+        if (kycID1ImageUri.length > 0) {
+          props.navigation.navigate('PreviewImage', { imageName: kycID1FileName, imageUri: kycID1ImageUri })
+        } else {
+          getImage(kycID1DmsId, '0');
+        }
+      }
+    } else if (selectedImageType == 'KYCDOB') {
+      if (kycDobImageUri) {
+        if (kycDobImageUri.length > 0) {
+          props.navigation.navigate('PreviewImage', { imageName: kycDOBFileName, imageUri: kycDobImageUri })
+        } else {
+          getImage(dobDmsId, '0');
+        }
       }
     }
 
@@ -1030,10 +1084,25 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       setDeleteVisible(false);
       hideImageBottomSheet();
     } else {
-      setImageUri(null);
-      setFileName('');
-      setFileType('');
-      setImageFile('');
+
+      if (selectedImageType == 'KYCSOURCE') {
+        setImageUri(null);
+        setFileName('');
+        setFileType('');
+        setImageFile('');
+        setkycSourceDmsId('')
+      } else if (selectedImageType == 'KYCID1') {
+        setkycID1ImageUri(null);
+        setKycID1FileName('');
+        setKycID1Type('');
+        setkycID1DmsId('');
+      } else if (selectedImageType == 'KYCDOB') {
+        setkycDobImageUri(null);
+        setKycDOBFileName('');
+        setKycDOBType('');
+        setdobDmsId('');
+      }
+
       setDeleteVisible(false);
       hideImageBottomSheet();
     }
@@ -1059,7 +1128,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       return;
     }
 
-    if (isAadharVerified) {
+    if (KycSourceLabel == 'EVRF') {
       buttonNext();
       return;
     }
@@ -1071,7 +1140,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
     Common.getNetworkConnection().then(value => {
       if (value.isConnected == true) {
-        updateImage();
+        updateKYCDetails();
       } else {
         setApiError(language[0][props.language].str_errinternet);
         setErrorModalVisible(true)
@@ -1087,19 +1156,9 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     var i = 1;
     var errorMessage = '';
 
-    if (imageUri == null) {
-      errorMessage =
-        errorMessage +
-        i +
-        ')' +
-        ' ' +
-        language[0][props.language].str_errorimage +
-        '\n';
-      i++;
-      flag = true;
-    }
 
-    if (!isAadharVerified) {
+
+    if (!(KycSourceLabel == 'MNL')) {
       if (KycTypeLabel.length <= 0) {
         errorMessage =
           errorMessage +
@@ -1130,11 +1189,66 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
     }
 
+    if (KycSourceLabel == 'MNL') {
+      if (!imageUri) {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          language[0][props.language].str_errorsourceimage +
+          '\n';
+        i++;
+        flag = true;
+      }
+    } else if (KycSourceLabel == 'LMS') {
+      if (!kycID1ImageUri) {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          language[0][props.language].str_errorkycId1image +
+          '\n';
+        i++;
+        flag = true;
+      }
+
+      if (!kycDobImageUri) {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          language[0][props.language].str_errordobimage +
+          '\n';
+        i++;
+        flag = true;
+      }
+
+    }
+
+    if (DOBMan && DOBVisible) {
+      if (DOB.length <= 0) {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          language[0][props.language].str_plsselect +
+          DOBCaption +
+          '\n';
+        i++;
+        flag = true;
+      }
+    }
+
+
     setErrMsg(errorMessage);
     return flag;
   };
 
-  const updateImage = async () => {
+  const updateImage = async (imageUri, fileType, fileName) => {
     if (imageUri) {
       setLoading(true);
       const formData = new FormData();
@@ -1156,8 +1270,15 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
           const data = await response.json();
           // Handle the response from Cloudinary
           setLoading(false)
+          if (selectedImageType == 'KYCSOURCE') {
+            setkycSourceDmsId(data.docId)
+          } else if (selectedImageType == 'KYCID1') {
+            setkycID1DmsId(data.docId)
+          } else if (selectedImageType == 'KYCDOB') {
+            setdobDmsId(data.docId)
+          }
           setDocID(data.docId);
-          updateKYCDetails(data.docId);
+          //updateKYCDetails(data.docId);
         } else {
           setLoading(false)
           if (global.DEBUG_MODE) console.log('Upload failed:', response.status);
@@ -1183,13 +1304,36 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
         kycDate = Common.convertYearDateFormat(kycExpiryDate)
       }
     }
-    const appDetails = [{
-      "kycType": KycTypeLabel,
-      "kycValue": kycID,
-      "kycExpiryDate": '',
-      "kycDmsId": parseInt(id),
-      "createdBy": global.USERID,
-    }]
+    const appDetails = [
+      {
+        "kycType": KycTypeLabel,
+        "kycValue": kycID,
+        "kycDmsId": kycSourceDmsId,
+        "kycExpiryDate": kycExpiryDate,
+        "createdBy": global.USERID,
+        "createdDate": new Date(),
+      }
+    ]
+
+    if (KycSourceLabel == 'LMS') {
+      appDetails[0].clientManualDobs = [
+        {
+          "dobDmsId": dobDmsId,
+          "createdBy": global.USERID,
+          "createdDate": new Date()
+        }
+      ],
+        appDetails[0].clientManualKycs = [
+          {
+            "kycType": KycType1Label,
+            "kycValue": kycID1,
+            "kycDmsId": kycID1DmsId,
+            "kycExpiryDate": "",
+            "createdBy": global.USERID,
+            "createdDate": new Date(),
+          }
+        ]
+    }
 
     const baseURL = global.PORT1
     apiInstance(baseURL).post(`/api/v2/profile-short/manualKyc/${global.CLIENTID}`, appDetails)
@@ -1247,7 +1391,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
       <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
       <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
-      <ImageBottomPreview bottomSheetVisible={bottomSheetVisible} previewImage={previewImage} hideBottomSheet={hideImageBottomSheet} reTakePhoto={reTakePhoto} fileName={fileName} detailHide={true} deleteVisible={deleteVisible} deletePhoto={deletePhoto} onDeleteorCancel={onDeleteorCancel} hideDelete={hideDelete} hideRetake={hideRetake} />
+      <ImageBottomPreview bottomSheetVisible={bottomSheetVisible} previewImage={previewImage} hideBottomSheet={hideImageBottomSheet} reTakePhoto={reTakePhoto} fileName={selectedImageType == 'KYCSOURCE' ? fileName : selectedImageType == 'KYCID1' ? kycID1FileName : kycDOBFileName} detailHide={true} deleteVisible={deleteVisible} deletePhoto={deletePhoto} onDeleteorCancel={onDeleteorCancel} hideDelete={hideDelete} hideRetake={hideRetake} />
 
       <Modal
         isVisible={photoOptionvisible}
@@ -1527,7 +1671,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
             </View>
           )}
 
-          {!isAadharVerified &&
+          {KycSourceLabel == 'MNL' &&
             <View
               style={{
                 width: '100%',
@@ -1542,6 +1686,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                 }}>
                 <TouchableOpacity style={{ width: '30%' }} onPress={() => {
                   if (global.USERTYPEID != 1163) {
+                    setSelectedImageType('KYCSOURCE');
                     pickDocument();
                   }
                 }} activeOpacity={0}>
@@ -1562,6 +1707,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                   <TouchableOpacity style={{ width: '20%', alignItems: 'flex-end' }}
                     onPress={() => {
                       showImageBottomSheet();
+                      setSelectedImageType('KYCSOURCE');
                     }}>
                     <Entypo
                       name="dots-three-vertical"
@@ -1575,229 +1721,284 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
             </View>
           }
 
-          <View
-            style={{
-              width: '100%',
-              alignItems: 'center',
-            }}>
-            <TouchableOpacity onPress={onClick} activeOpacity={1}>
+          {KycType1Label &&
+            <View>
               <View
                 style={{
-                  width: '90%',
-                  flexDirection: 'row',
+                  width: '100%',
                   alignItems: 'center',
-                  marginTop: 20,
                 }}>
-                <TextComp
-                  textVal={KYC1Caption}
-                  textStyle={Commonstyles.HeaderStyle}
-                />
-                {KYC1 ? (
-                  <MaterialIcons
-                    name="keyboard-arrow-up"
-                    size={20}
-                    color="#343434"
-                  />
-                ) : (
-                  <MaterialIcons
-                    name="keyboard-arrow-down"
-                    size={20}
-                    color="#343434"
-                  />
-                )}
+                <TouchableOpacity onPress={onClick} activeOpacity={1}>
+                  <View
+                    style={{
+                      width: '90%',
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginTop: 20,
+                    }}>
+                    <TextComp
+                      textVal={KYC1Caption}
+                      textStyle={Commonstyles.HeaderStyle}
+                    />
+                    {KYC1 ? (
+                      <MaterialIcons
+                        name="keyboard-arrow-up"
+                        size={20}
+                        color="#343434"
+                      />
+                    ) : (
+                      <MaterialIcons
+                        name="keyboard-arrow-down"
+                        size={20}
+                        color="#343434"
+                      />
+                    )}
+                  </View>
+                </TouchableOpacity>
               </View>
-            </TouchableOpacity>
-          </View>
-          {KYC1 ? (
+              {KYC1 ? (
+                <View>
+                  {KycType1Visible && (
+                    <View
+                      style={{
+                        width: '100%',
+                        alignItems: 'center',
+                        marginTop: '4%',
+                      }}>
+                      <View
+                        style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                        <TextComp
+                          textVal={KycType1Caption}
+                          textStyle={Commonstyles.inputtextStyle}
+                          Visible={KycType1Man}
+                        />
+                      </View>
+
+                      <PickerComp
+                        textLabel={KycType1Label}
+                        pickerStyle={Commonstyles.picker}
+                        Disable={KycType1Disable}
+                        pickerdata={KycType1Data}
+                        componentName="KycType1Picker"
+                        handlePickerClick={handlePickerClick}
+                      />
+                    </View>
+                  )}
+
+                  {kycID1Visible && (
+                    <View
+                      style={{
+                        width: '100%',
+                        marginTop: 19,
+                        paddingHorizontal: 0,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                      <View
+                        style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                        <TextComp
+                          textVal={kycID1Caption}
+                          textStyle={Commonstyles.inputtextStyle}
+                          Visible={kycID1Man}
+                        />
+                      </View>
+
+                      <TextInputComp
+                        textValue={kycID1}
+                        textStyle={Commonstyles.textinputtextStyle}
+                        type="email-address"
+                        Disable={kycID1Disable}
+                        ComponentName="kycID1"
+                        reference={KycID1Ref}
+                        returnKey="next"
+                        handleClick={handleClick}
+                        handleReference={handleReference}
+                      />
+                    </View>
+                  )}
+
+                  {expiryDate1Visible && (
+                    <View
+                      style={{
+                        width: '100%',
+                        marginTop: 19,
+                        paddingHorizontal: 0,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                      <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                        <TextComp
+                          textVal={expiryDateCaption}
+                          textStyle={Commonstyles.inputtextStyle}
+                          Visible={expiryDate1Man}
+                        />
+                      </View>
+
+                      <View style={{ width: '100%', alignItems: 'center' }}>
+                        <DateInputComp
+                          textStyle={[Commonstyles.inputtextStyle, { width: '90%' }]}
+                          ComponentName="expiryDate1"
+                          textValue={expiryDate1}
+                          type="numeric"
+                          Disable={expiryDate1Disable}
+                          handleClick={handleClick}
+                          handleReference={handleReference}
+                          minDate={new Date()}
+                        />
+                      </View>
+
+                    </View>
+                  )}
+
+                  {KycSourceLabel == 'LMS' &&
+                    <View
+                      style={{
+                        width: '100%',
+                        alignItems: 'center',
+                      }}>
+                      <View
+                        style={{
+                          width: '90%',
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          marginTop: 20,
+                        }}>
+                        <TouchableOpacity style={{ width: '30%' }} onPress={() => {
+                          if (global.USERTYPEID != 1163) {
+                            pickDocument();
+                            setSelectedImageType('KYCID1');
+                          }
+                        }} activeOpacity={0}>
+                          <View style={{ width: 40, height: 40, backgroundColor: '#DBDBDB', borderRadius: 10, justifyContent: 'center', alignItems: 'center' }}>
+                            <Image
+                              source={require('../../../Images/cloudcomputing.png')}
+                              style={{ width: 28, height: 22 }}
+                            />
+                            {/* <FontAwesome6 name="cloud-arrow-up" size={25} color="#b5b6b6" /> */}
+                          </View>
+                        </TouchableOpacity>
+
+                        <Text style={{ width: '50%', color: Colors.dimmText, textAlign: 'left', fontFamily: 'PoppinsRegular' }}>
+                          {kycID1FileName}
+                        </Text>
+
+                        {kycID1ImageUri &&
+                          <TouchableOpacity style={{ width: '20%', alignItems: 'flex-end' }}
+                            onPress={() => {
+                              showImageBottomSheet();
+                              setSelectedImageType('KYCID1');
+                            }}>
+                            <Entypo
+                              name="dots-three-vertical"
+                              size={25}
+                              color={Colors.darkblue}
+                            />
+                          </TouchableOpacity>
+                        }
+
+                      </View>
+                    </View>
+                  }
+
+                </View>
+              ) : (
+                <View></View>
+              )}
+            </View>}
+
+          {KycType2Label &&
             <View>
-              {KycType1Visible && (
-                <View
-                  style={{
-                    width: '100%',
-                    alignItems: 'center',
-                    marginTop: '4%',
-                  }}>
-                  <View
-                    style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
-                    <TextComp
-                      textVal={KycType1Caption}
-                      textStyle={Commonstyles.inputtextStyle}
-                      Visible={KycType1Man}
-                    />
-                  </View>
-
-                  <PickerComp
-                    textLabel={KycType1Label}
-                    pickerStyle={Commonstyles.picker}
-                    Disable={KycType1Disable}
-                    pickerdata={KycType1Data}
-                    componentName="KycType1Picker"
-                    handlePickerClick={handlePickerClick}
-                  />
-                </View>
-              )}
-
-              {kycID1Visible && (
-                <View
-                  style={{
-                    width: '100%',
-                    marginTop: 19,
-                    paddingHorizontal: 0,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}>
-                  <View
-                    style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
-                    <TextComp
-                      textVal={kycID1Caption}
-                      textStyle={Commonstyles.inputtextStyle}
-                      Visible={kycID1Man}
-                    />
-                  </View>
-
-                  <TextInputComp
-                    textValue={kycID1}
-                    textStyle={Commonstyles.textinputtextStyle}
-                    type="email-address"
-                    Disable={kycID1Disable}
-                    ComponentName="kycID1"
-                    reference={KycID1Ref}
-                    returnKey="next"
-                    handleClick={handleClick}
-                    handleReference={handleReference}
-                  />
-                </View>
-              )}
-
-              {expiryDate1Visible && (
-                <View
-                  style={{
-                    width: '100%',
-                    marginTop: 19,
-                    paddingHorizontal: 0,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}>
-                  <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
-                    <TextComp
-                      textVal={expiryDateCaption}
-                      textStyle={Commonstyles.inputtextStyle}
-                      Visible={expiryDate1Man}
-                    />
-                  </View>
-
-                  <View style={{ width: '100%', alignItems: 'center' }}>
-                    <DateInputComp
-                      textStyle={[Commonstyles.inputtextStyle, { width: '90%' }]}
-                      ComponentName="expiryDate1"
-                      textValue={expiryDate1}
-                      type="numeric"
-                      Disable={expiryDate1Disable}
-                      handleClick={handleClick}
-                      handleReference={handleReference}
-                      minDate={new Date()}
-                    />
-                  </View>
-
-                </View>
-              )}
-
-            </View>
-          ) : (
-            <View></View>
-          )}
-
-          <View
-            style={{
-              width: '100%',
-              alignItems: 'center',
-            }}>
-            <TouchableOpacity onPress={onClickKYC2} activeOpacity={1}>
               <View
                 style={{
-                  width: '90%',
-                  flexDirection: 'row',
+                  width: '100%',
                   alignItems: 'center',
-                  marginTop: 20,
                 }}>
-                <TextComp
-                  textVal={KYC2Caption}
-                  textStyle={Commonstyles.HeaderStyle}
-                />
-                {KYC2 ? (
-                  <MaterialIcons
-                    name="keyboard-arrow-up"
-                    size={20}
-                    color="#343434"
-                  />
-                ) : (
-                  <MaterialIcons
-                    name="keyboard-arrow-down"
-                    size={20}
-                    color="#343434"
-                  />
-                )}
+                <TouchableOpacity onPress={onClickKYC2} activeOpacity={1}>
+                  <View
+                    style={{
+                      width: '90%',
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginTop: 20,
+                    }}>
+                    <TextComp
+                      textVal={KYC2Caption}
+                      textStyle={Commonstyles.HeaderStyle}
+                    />
+                    {KYC2 ? (
+                      <MaterialIcons
+                        name="keyboard-arrow-up"
+                        size={20}
+                        color="#343434"
+                      />
+                    ) : (
+                      <MaterialIcons
+                        name="keyboard-arrow-down"
+                        size={20}
+                        color="#343434"
+                      />
+                    )}
+                  </View>
+                </TouchableOpacity>
               </View>
-            </TouchableOpacity>
-          </View>
-          {KYC2 ? (
-            <View>
-              {KycType2Visible && (
-                <View
-                  style={{
-                    width: '100%',
-                    alignItems: 'center',
-                    marginTop: '4%',
-                  }}>
-                  <View
-                    style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
-                    <TextComp
-                      textVal={KycType2Caption}
-                      textStyle={Commonstyles.inputtextStyle}
-                      Visible={KycType2Man}
-                    />
-                  </View>
+              {KYC2 ? (
+                <View>
+                  {KycType2Visible && (
+                    <View
+                      style={{
+                        width: '100%',
+                        alignItems: 'center',
+                        marginTop: '4%',
+                      }}>
+                      <View
+                        style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                        <TextComp
+                          textVal={KycType2Caption}
+                          textStyle={Commonstyles.inputtextStyle}
+                          Visible={KycType2Man}
+                        />
+                      </View>
 
-                  <PickerComp
-                    textLabel={KycType2Label}
-                    pickerStyle={Commonstyles.picker}
-                    Disable={KycType2Disable}
-                    pickerdata={KycType2Data}
-                    componentName="KycType2Picker"
-                    handlePickerClick={handlePickerClick}
-                  />
-                </View>
-              )}
-              {kycID2Visible && (
-                <View
-                  style={{
-                    width: '100%',
-                    marginTop: 19,
-                    paddingHorizontal: 0,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}>
-                  <View
-                    style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
-                    <TextComp
-                      textVal={kycID2Caption}
-                      textStyle={Commonstyles.inputtextStyle}
-                      Visible={kycID2Man}
-                    />
-                  </View>
+                      <PickerComp
+                        textLabel={KycType2Label}
+                        pickerStyle={Commonstyles.picker}
+                        Disable={KycType2Disable}
+                        pickerdata={KycType2Data}
+                        componentName="KycType2Picker"
+                        handlePickerClick={handlePickerClick}
+                      />
+                    </View>
+                  )}
+                  {kycID2Visible && (
+                    <View
+                      style={{
+                        width: '100%',
+                        marginTop: 19,
+                        paddingHorizontal: 0,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                      <View
+                        style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                        <TextComp
+                          textVal={kycID2Caption}
+                          textStyle={Commonstyles.inputtextStyle}
+                          Visible={kycID2Man}
+                        />
+                      </View>
 
-                  <TextInputComp
-                    textValue={kycID2}
-                    textStyle={Commonstyles.textinputtextStyle}
-                    type="email-address"
-                    Disable={kycID2Disable}
-                    ComponentName="kycID2"
-                    reference={KycID2Ref}
-                    returnKey="next"
-                    handleClick={handleClick}
-                    handleReference={handleReference}
-                  />
-                  {/* <View
+                      <TextInputComp
+                        textValue={kycID2}
+                        textStyle={Commonstyles.textinputtextStyle}
+                        type="email-address"
+                        Disable={kycID2Disable}
+                        ComponentName="kycID2"
+                        reference={KycID2Ref}
+                        returnKey="next"
+                        handleClick={handleClick}
+                        handleReference={handleReference}
+                      />
+                      {/* <View
                     style={{
                       width: '100%',
                       marginTop: 19,
@@ -1830,138 +2031,142 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                       </View>
                     </View>
                   </View> */}
+                    </View>
+                  )}
+
+                  {expiryDate2Visible && (
+                    <View
+                      style={{
+                        width: '100%',
+                        marginTop: 19,
+                        paddingHorizontal: 0,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                      <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                        <TextComp
+                          textVal={expiryDateCaption}
+                          textStyle={Commonstyles.inputtextStyle}
+                          Visible={expiryDate2Man}
+                        />
+                      </View>
+
+                      <View style={{ width: '100%', alignItems: 'center' }}>
+                        <DateInputComp
+                          textStyle={[Commonstyles.inputtextStyle, { width: '90%' }]}
+                          ComponentName="expiryDate2"
+                          textValue={expiryDate2}
+                          type="numeric"
+                          Disable={expiryDate2Disable}
+                          handleClick={handleClick}
+                          handleReference={handleReference}
+                          minDate={new Date()}
+                        />
+                      </View>
+
+                    </View>
+                  )}
+
                 </View>
+              ) : (
+                <View></View>
               )}
-
-              {expiryDate2Visible && (
-                <View
-                  style={{
-                    width: '100%',
-                    marginTop: 19,
-                    paddingHorizontal: 0,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}>
-                  <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
-                    <TextComp
-                      textVal={expiryDateCaption}
-                      textStyle={Commonstyles.inputtextStyle}
-                      Visible={expiryDate2Man}
-                    />
-                  </View>
-
-                  <View style={{ width: '100%', alignItems: 'center' }}>
-                    <DateInputComp
-                      textStyle={[Commonstyles.inputtextStyle, { width: '90%' }]}
-                      ComponentName="expiryDate2"
-                      textValue={expiryDate2}
-                      type="numeric"
-                      Disable={expiryDate2Disable}
-                      handleClick={handleClick}
-                      handleReference={handleReference}
-                      minDate={new Date()}
-                    />
-                  </View>
-
-                </View>
-              )}
-
             </View>
-          ) : (
-            <View></View>
-          )}
+          }
 
-          <View
-            style={{
-              width: '100%',
-              alignItems: 'center',
-            }}>
-            <TouchableOpacity onPress={onClickKYC3} activeOpacity={1}>
+          {KycType3Label &&
+            <View>
               <View
                 style={{
-                  width: '90%',
-                  flexDirection: 'row',
+                  width: '100%',
                   alignItems: 'center',
-                  marginTop: 20,
                 }}>
-                <TextComp
-                  textVal={KYC3Caption}
-                  textStyle={Commonstyles.HeaderStyle}
-                />
-                {KYC3 ? (
-                  <MaterialIcons
-                    name="keyboard-arrow-up"
-                    size={20}
-                    color="#343434"
-                  />
-                ) : (
-                  <MaterialIcons
-                    name="keyboard-arrow-down"
-                    size={20}
-                    color="#343434"
-                  />
-                )}
+                <TouchableOpacity onPress={onClickKYC3} activeOpacity={1}>
+                  <View
+                    style={{
+                      width: '90%',
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginTop: 20,
+                    }}>
+                    <TextComp
+                      textVal={KYC3Caption}
+                      textStyle={Commonstyles.HeaderStyle}
+                    />
+                    {KYC3 ? (
+                      <MaterialIcons
+                        name="keyboard-arrow-up"
+                        size={20}
+                        color="#343434"
+                      />
+                    ) : (
+                      <MaterialIcons
+                        name="keyboard-arrow-down"
+                        size={20}
+                        color="#343434"
+                      />
+                    )}
+                  </View>
+                </TouchableOpacity>
               </View>
-            </TouchableOpacity>
-          </View>
-          {KYC3 ? (
-            <View>
-              {KycType3Visible && (
-                <View
-                  style={{
-                    width: '100%',
-                    alignItems: 'center',
-                    marginTop: '4%',
-                  }}>
-                  <View
-                    style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
-                    <TextComp
-                      textVal={KycType3Caption}
-                      textStyle={Commonstyles.inputtextStyle}
-                      Visible={KycType3Man}
-                    />
-                  </View>
+              {KYC3 ? (
+                <View>
+                  {KycType3Visible && (
+                    <View
+                      style={{
+                        width: '100%',
+                        alignItems: 'center',
+                        marginTop: '4%',
+                      }}>
+                      <View
+                        style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                        <TextComp
+                          textVal={KycType3Caption}
+                          textStyle={Commonstyles.inputtextStyle}
+                          Visible={KycType3Man}
+                        />
+                      </View>
 
-                  <PickerComp
-                    textLabel={KycType3Label}
-                    pickerStyle={Commonstyles.picker}
-                    Disable={KycType3Disable}
-                    pickerdata={KycType3Data}
-                    componentName="KycType3Picker"
-                    handlePickerClick={handlePickerClick}
-                  />
-                </View>
-              )}
-              {kycID3Visible && (
-                <View
-                  style={{
-                    width: '100%',
-                    marginTop: 19,
-                    paddingHorizontal: 0,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}>
-                  <View
-                    style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
-                    <TextComp
-                      textVal={kycID3Caption}
-                      textStyle={Commonstyles.inputtextStyle}
-                      Visible={kycID3Man}
-                    />
-                  </View>
+                      <PickerComp
+                        textLabel={KycType3Label}
+                        pickerStyle={Commonstyles.picker}
+                        Disable={KycType3Disable}
+                        pickerdata={KycType3Data}
+                        componentName="KycType3Picker"
+                        handlePickerClick={handlePickerClick}
+                      />
+                    </View>
+                  )}
+                  {kycID3Visible && (
+                    <View
+                      style={{
+                        width: '100%',
+                        marginTop: 19,
+                        paddingHorizontal: 0,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                      <View
+                        style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                        <TextComp
+                          textVal={kycID3Caption}
+                          textStyle={Commonstyles.inputtextStyle}
+                          Visible={kycID3Man}
+                        />
+                      </View>
 
-                  <TextInputComp
-                    textValue={kycID3}
-                    textStyle={Commonstyles.textinputtextStyle}
-                    type="email-address"
-                    Disable={kycID3Disable}
-                    ComponentName="kycID3"
-                    reference={KycID3Ref}
-                    returnKey="next"
-                    handleClick={handleClick}
-                    handleReference={handleReference}
-                  />
-                  {/* <View
+                      <TextInputComp
+                        textValue={kycID3}
+                        textStyle={Commonstyles.textinputtextStyle}
+                        type="email-address"
+                        Disable={kycID3Disable}
+                        ComponentName="kycID3"
+                        reference={KycID3Ref}
+                        returnKey="next"
+                        handleClick={handleClick}
+                        handleReference={handleReference}
+                      />
+                      {/* <View
                     style={{
                       width: '100%',
                       marginTop: 19,
@@ -1994,137 +2199,140 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                       </View>
                     </View>
                   </View> */}
+                    </View>
+                  )}
+                  {expiryDate3Visible && (
+                    <View
+                      style={{
+                        width: '100%',
+                        marginTop: 19,
+                        paddingHorizontal: 0,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                      <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                        <TextComp
+                          textVal={expiryDateCaption}
+                          textStyle={Commonstyles.inputtextStyle}
+                          Visible={expiryDate3Man}
+                        />
+                      </View>
+
+                      <View style={{ width: '100%', alignItems: 'center' }}>
+                        <DateInputComp
+                          textStyle={[Commonstyles.inputtextStyle, { width: '90%' }]}
+                          ComponentName="expiryDate3"
+                          textValue={expiryDate3}
+                          type="numeric"
+                          Disable={expiryDate3Disable}
+                          handleClick={handleClick}
+                          handleReference={handleReference}
+                          minDate={new Date()}
+                        />
+                      </View>
+
+                    </View>
+                  )}
                 </View>
+              ) : (
+                <View></View>
               )}
-              {expiryDate3Visible && (
-                <View
-                  style={{
-                    width: '100%',
-                    marginTop: 19,
-                    paddingHorizontal: 0,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}>
-                  <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
-                    <TextComp
-                      textVal={expiryDateCaption}
-                      textStyle={Commonstyles.inputtextStyle}
-                      Visible={expiryDate3Man}
-                    />
-                  </View>
-
-                  <View style={{ width: '100%', alignItems: 'center' }}>
-                    <DateInputComp
-                      textStyle={[Commonstyles.inputtextStyle, { width: '90%' }]}
-                      ComponentName="expiryDate3"
-                      textValue={expiryDate3}
-                      type="numeric"
-                      Disable={expiryDate3Disable}
-                      handleClick={handleClick}
-                      handleReference={handleReference}
-                      minDate={new Date()}
-                    />
-                  </View>
-
-                </View>
-              )}
-            </View>
-          ) : (
-            <View></View>
-          )}
+            </View>}
 
 
-          <View
-            style={{
-              width: '100%',
-              alignItems: 'center',
-            }}>
-            <TouchableOpacity onPress={onClickKYC4} activeOpacity={1}>
+          {KycType4Label &&
+            <View>
               <View
                 style={{
-                  width: '90%',
-                  flexDirection: 'row',
+                  width: '100%',
                   alignItems: 'center',
-                  marginTop: 20,
                 }}>
-                <TextComp
-                  textVal={KYC4Caption}
-                  textStyle={Commonstyles.HeaderStyle}
-                />
-                {KYC4 ? (
-                  <MaterialIcons
-                    name="keyboard-arrow-up"
-                    size={20}
-                    color="#343434"
-                  />
-                ) : (
-                  <MaterialIcons
-                    name="keyboard-arrow-down"
-                    size={20}
-                    color="#343434"
-                  />
-                )}
+                <TouchableOpacity onPress={onClickKYC4} activeOpacity={1}>
+                  <View
+                    style={{
+                      width: '90%',
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginTop: 20,
+                    }}>
+                    <TextComp
+                      textVal={KYC4Caption}
+                      textStyle={Commonstyles.HeaderStyle}
+                    />
+                    {KYC4 ? (
+                      <MaterialIcons
+                        name="keyboard-arrow-up"
+                        size={20}
+                        color="#343434"
+                      />
+                    ) : (
+                      <MaterialIcons
+                        name="keyboard-arrow-down"
+                        size={20}
+                        color="#343434"
+                      />
+                    )}
+                  </View>
+                </TouchableOpacity>
               </View>
-            </TouchableOpacity>
-          </View>
-          {KYC4 ? (
-            <View>
-              {KycType4Visible && (
-                <View
-                  style={{
-                    width: '100%',
-                    alignItems: 'center',
-                    marginTop: '4%',
-                  }}>
-                  <View
-                    style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
-                    <TextComp
-                      textVal={KycType4Caption}
-                      textStyle={Commonstyles.inputtextStyle}
-                      Visible={KycType4Man}
-                    />
-                  </View>
+              {KYC4 ? (
+                <View>
+                  {KycType4Visible && (
+                    <View
+                      style={{
+                        width: '100%',
+                        alignItems: 'center',
+                        marginTop: '4%',
+                      }}>
+                      <View
+                        style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                        <TextComp
+                          textVal={KycType4Caption}
+                          textStyle={Commonstyles.inputtextStyle}
+                          Visible={KycType4Man}
+                        />
+                      </View>
 
-                  <PickerComp
-                    textLabel={KycType4Label}
-                    pickerStyle={Commonstyles.picker}
-                    Disable={KycType4Disable}
-                    pickerdata={KycType4Data}
-                    componentName="KycType4Picker"
-                    handlePickerClick={handlePickerClick}
-                  />
-                </View>
-              )}
-              {kycID4Visible && (
-                <View
-                  style={{
-                    width: '100%',
-                    marginTop: 19,
-                    paddingHorizontal: 0,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}>
-                  <View
-                    style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
-                    <TextComp
-                      textVal={kycID4Caption}
-                      textStyle={Commonstyles.inputtextStyle}
-                      Visible={kycID4Man}
-                    />
-                  </View>
+                      <PickerComp
+                        textLabel={KycType4Label}
+                        pickerStyle={Commonstyles.picker}
+                        Disable={KycType4Disable}
+                        pickerdata={KycType4Data}
+                        componentName="KycType4Picker"
+                        handlePickerClick={handlePickerClick}
+                      />
+                    </View>
+                  )}
+                  {kycID4Visible && (
+                    <View
+                      style={{
+                        width: '100%',
+                        marginTop: 19,
+                        paddingHorizontal: 0,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                      <View
+                        style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                        <TextComp
+                          textVal={kycID4Caption}
+                          textStyle={Commonstyles.inputtextStyle}
+                          Visible={kycID4Man}
+                        />
+                      </View>
 
-                  <TextInputComp
-                    textValue={kycID4}
-                    textStyle={Commonstyles.textinputtextStyle}
-                    type="email-address"
-                    Disable={kycID4Disable}
-                    ComponentName="kycID4"
-                    reference={KycID4Ref}
-                    returnKey="next"
-                    handleClick={handleClick}
-                    handleReference={handleReference}
-                  />
-                  {/* <View
+                      <TextInputComp
+                        textValue={kycID4}
+                        textStyle={Commonstyles.textinputtextStyle}
+                        type="email-address"
+                        Disable={kycID4Disable}
+                        ComponentName="kycID4"
+                        reference={KycID4Ref}
+                        returnKey="next"
+                        handleClick={handleClick}
+                        handleReference={handleReference}
+                      />
+                      {/* <View
                     style={{
                       width: '100%',
                       marginTop: 19,
@@ -2157,44 +2365,127 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                       </View>
                     </View>
                   </View> */}
-                </View>
-              )}
-              {expiryDate4Visible && (
-                <View
-                  style={{
-                    width: '100%',
-                    marginTop: 19,
-                    paddingHorizontal: 0,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}>
-                  <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
-                    <TextComp
-                      textVal={expiryDateCaption}
-                      textStyle={Commonstyles.inputtextStyle}
-                      Visible={expiryDate4Man}
-                    />
-                  </View>
+                    </View>
+                  )}
+                  {expiryDate4Visible && (
+                    <View
+                      style={{
+                        width: '100%',
+                        marginTop: 19,
+                        paddingHorizontal: 0,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                      <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                        <TextComp
+                          textVal={expiryDateCaption}
+                          textStyle={Commonstyles.inputtextStyle}
+                          Visible={expiryDate4Man}
+                        />
+                      </View>
 
-                  <View style={{ width: '100%', alignItems: 'center' }}>
-                    <DateInputComp
-                      textStyle={[Commonstyles.inputtextStyle, { width: '90%' }]}
-                      ComponentName="expiryDate4"
-                      textValue={expiryDate4}
-                      type="numeric"
-                      Disable={expiryDate4Disable}
-                      handleClick={handleClick}
-                      handleReference={handleReference}
-                      minDate={new Date()}
-                    />
-                  </View>
+                      <View style={{ width: '100%', alignItems: 'center' }}>
+                        <DateInputComp
+                          textStyle={[Commonstyles.inputtextStyle, { width: '90%' }]}
+                          ComponentName="expiryDate4"
+                          textValue={expiryDate4}
+                          type="numeric"
+                          Disable={expiryDate4Disable}
+                          handleClick={handleClick}
+                          handleReference={handleReference}
+                          minDate={new Date()}
+                        />
+                      </View>
 
+                    </View>
+                  )}
                 </View>
+              ) : (
+                <View></View>
               )}
+            </View>}
+
+
+          {DOBVisible && (
+            <View
+              style={{
+                width: '100%',
+                marginTop: 19,
+                paddingHorizontal: 0,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                <TextComp
+                  textVal={DOBCaption}
+                  textStyle={Commonstyles.inputtextStyle}
+                  Visible={DOBMan}
+                />
+              </View>
+
+              <View style={{ width: '100%', alignItems: 'center' }}>
+                <DateInputComp textStyle={[Commonstyles.inputtextStyle, { width: '90%' }]} ComponentName="DOB"
+                  textValue={DOB}
+                  type="numeric"
+                  handleClick={handleClick}
+                  Disable={DOBDisable}
+                  reference={DOBRef}
+                  maxDate={new Date()}
+                  handleReference={handleReference} />
+              </View>
+
             </View>
-          ) : (
-            <View></View>
           )}
+
+          {KycSourceLabel == 'LMS' &&
+            <View
+              style={{
+                width: '100%',
+                alignItems: 'center',
+              }}>
+              <View
+                style={{
+                  width: '90%',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginTop: 20,
+                }}>
+                <TouchableOpacity style={{ width: '30%' }} onPress={() => {
+                  if (global.USERTYPEID != 1163) {
+                    pickDocument();
+                    setSelectedImageType('KYCDOB');
+                  }
+                }} activeOpacity={0}>
+                  <View style={{ width: 40, height: 40, backgroundColor: '#DBDBDB', borderRadius: 10, justifyContent: 'center', alignItems: 'center' }}>
+                    <Image
+                      source={require('../../../Images/cloudcomputing.png')}
+                      style={{ width: 28, height: 22 }}
+                    />
+                    {/* <FontAwesome6 name="cloud-arrow-up" size={25} color="#b5b6b6" /> */}
+                  </View>
+                </TouchableOpacity>
+
+                <Text style={{ width: '50%', color: Colors.dimmText, textAlign: 'left', fontFamily: 'PoppinsRegular' }}>
+                  {kycDOBFileName}
+                </Text>
+
+                {kycDobImageUri &&
+                  <TouchableOpacity style={{ width: '20%', alignItems: 'flex-end' }}
+                    onPress={() => {
+                      showImageBottomSheet();
+                      setSelectedImageType('KYCDOB');
+                    }}>
+                    <Entypo
+                      name="dots-three-vertical"
+                      size={25}
+                      color={Colors.darkblue}
+                    />
+                  </TouchableOpacity>
+                }
+
+              </View>
+            </View>
+          }
 
         </View>
 

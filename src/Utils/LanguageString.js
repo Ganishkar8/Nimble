@@ -118,6 +118,9 @@ export const language = [
       str_initiatepd: 'Initiate Personal Discussion',
       str_leadcreation: 'Lead Creation',
       str_errorimage: 'Please Capture Image',
+      str_errorsourceimage: 'Please Capture KYC Source Image',
+      str_errorkycId1image: 'Please Capture KYC ID1 Image',
+      str_errordobimage: 'Please Capture DOB Image',
       str_appconfig: 'App Configuration',
       str_enterinstid: 'Enter Institution ID',
       str_enterchallengecode: 'Enter Challenge Code',
@@ -281,6 +284,13 @@ export const language = [
       str_editLoan: 'Edit Loan',
       str_viewbreresult: 'View BRE Result',
       str_consentotpverify: 'Consent OTP Verification',
+      str_lmsdedupeResult: 'LMS Dedupe Result',
+      str_losdedupeResult: 'LOS Dedupe Result',
+      str_collateralCategory: 'COLLATERAL CATEGORY',
+      str_collateraltype: 'COLLATERAL TYPE',
+      str_collateralvalue: 'COLLATERAL VALUE',
+      str_collateralutilization: 'COLLATERAL UTILIZATION',
+      str_freecollateral: 'FREE COLLATERAL',
     },
 
     ta: {

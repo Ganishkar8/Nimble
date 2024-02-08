@@ -26,6 +26,7 @@ const loanInitiationReducer = (state = initialState, action) => {
                         index === existingItemIndex
                             ? {
                                 ...item,
+                                customerType: loanData.customerType,
                                 [action.payload.key]: Array.isArray(item[action.payload.key])
                                     ? item[action.payload.key].map(clientDetail =>
                                         clientDetail.id === action.payload.clientId

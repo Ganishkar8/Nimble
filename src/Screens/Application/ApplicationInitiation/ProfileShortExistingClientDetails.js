@@ -33,6 +33,7 @@ import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import { Directions } from 'react-native-gesture-handler';
 import ChildHeadComp from '../../../Components/ChildHeadComp';
 import CheckBoxComp from '../../../Components/CheckBoxComp';
+import { useIsFocused } from '@react-navigation/native';
 
 const ProfileShortExistingClientDetails = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -54,7 +55,7 @@ const ProfileShortExistingClientDetails = (props, { navigation }) => {
   const [ClientIDVisible, setClientIDVisible] = useState(true);
   const [ClientIDDisable, setClientIDDisable] = useState(false);
   const ClientIDRef = useRef(null);
-  const [ActiveBasicDetials, setActiveBasicDetials] = useState(false);
+  const [ActiveBasicDetials, setActiveBasicDetials] = useState(true);
   const [ExistingLoanDetails, setExistingLoanDetails] = useState(false);
 
   const [CustomerSubCategoryMan, setCustomerSubCategoryMan] = useState(false);
@@ -73,13 +74,26 @@ const ProfileShortExistingClientDetails = (props, { navigation }) => {
   const [KycType1Visible, setKycType1Visible] = useState(true);
   const [KycType1Disable, setKycType1Disable] = useState(false);
   const [KycType1Data, setKycType1Data] = useState([]);
-  const [KycType1Caption, setKycType1Caption] = useState('KYC TYPE');
+  const [KycType1Caption, setKycType1Caption] = useState('KYC TYPE 1');
   const [KycType1Label, setKycType1Label] = useState('');
   const [KycType1Index, setKycType1Index] = useState('');
 
+  const [KycType2Caption, setKycType2Caption] = useState('KYC TYPE 2');
+  const [KycType2Label, setKycType2Label] = useState('');
+  const [KycType3Caption, setKycType3Caption] = useState('KYC TYPE 3');
+  const [KycType3Label, setKycType3Label] = useState('');
+  const [KycType4Caption, setKycType4Caption] = useState('KYC TYPE 4');
+  const [KycType4Label, setKycType4Label] = useState('');
+
   //kycid1 -- TextInput
   const [kycID1, setkycID1] = useState('');
-  const [kycID1Caption, setkycID1Caption] = useState('KYC ID');
+  const [kycID2, setkycID2] = useState('');
+  const [kycID3, setkycID3] = useState('');
+  const [kycID4, setkycID4] = useState('');
+  const [kycID1Caption, setkycID1Caption] = useState('KYC ID 1');
+  const [kycID2Caption, setkycID2Caption] = useState('KYC ID 2');
+  const [kycID3Caption, setkycID3Caption] = useState('KYC ID 3');
+  const [kycID4Caption, setkycID4Caption] = useState('KYC ID 4');
   const [kycID1Man, setkycID1Man] = useState(false);
   const [kycID1Visible, setkycID1Visible] = useState(true);
   const [kycID1Disable, setkycID1Disable] = useState(false);
@@ -115,291 +129,153 @@ const ProfileShortExistingClientDetails = (props, { navigation }) => {
 
   const [existingClientDetail, setExistingClientDetail] = useState(props.dedupeDetail.clientExistingDetails);
   const [existingClientLoanDetail, setExistingClientLoanDetail] = useState(props.dedupeDetail.clientExistingLoanDetails);
+  const [apiError, setApiError] = useState('');
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const isScreenVisible = useIsFocused();
+
+  const [existingData, setExistingData] = useState([]);
+
+  const [leadsystemCodeDetail, setLeadSystemCodeDetail] = useState(props.mobilecodedetail.leadSystemCodeDto);
+  const [systemCodeDetail, setSystemCodeDetail] = useState(props.mobilecodedetail.t_SystemCodeDetail);
+  const [leaduserCodeDetail, setLeadUserCodeDetail] = useState(props.mobilecodedetail.leadUserCodeDto);
+  const [userCodeDetail, setUserCodeDetail] = useState(props.mobilecodedetail.t_UserCodeDetail);
+  const [bankUserCodeDetail, setBankUserCodeDetail] = useState(props.mobilecodedetail.t_BankUserCode);
 
   useEffect(() => {
+
+    getExistingClientDetail();
+    pickerData();
+
+  }, [props.navigation]);
+
+  useEffect(() => {
+
     props.navigation
       .getParent()
       ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
 
-    pickerData();
-    return () =>
+    return () => {
       props.navigation
         .getParent()
         ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
-  }, [navigation]);
+    };
+  }, [isScreenVisible]);
 
   const pickerData = async () => {
-    tbl_SystemCodeDetails
-      .getSystemCodeDetailsBasedOnID('CustomerSubCategory')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
+    const filteredCustomerSubCategoryData = leaduserCodeDetail
+      .filter(data => data.masterId === 'CUSTOMER_SUBCATEGORY')
+      .sort((a, b) => a.Description.localeCompare(b.Description));
+    setCustomerSubCategoryData(filteredCustomerSubCategoryData);
 
-          for (var i = 0; i < value.length; i++) {
-            if (value[i].IsDefault === '1') {
-              setCustomerSubCategoryLabel(value[i].SubCodeID);
-              setCustomerSubCategoryIndex(i + 1);
+
+    const filteredKYCData = bankUserCodeDetail
+      .filter(data => data.ID === 'IndIdentitySettingID')
+      .sort((a, b) => a.Description.localeCompare(b.Description));
+    setKycType1Data(filteredKYCData);
+
+
+  };
+
+  const getExistingClientDetail = () => {
+    //props.dedupeDetail.clientExistingDetails[0].lmsClientId 1105000055
+    const clientDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
+
+    const baseURL = '8100';
+    setLoading(true);
+    apiInstance(baseURL)
+      .post(
+        `api/v1/lms-get-api/getDetailsByClientId/userID/${global.USERID}/clientId/${clientDetail.lmsClientId}`,
+      )
+      .then(async response => {
+        // Handle the response data
+        if (global.DEBUG_MODE) console.log('DedupeApiResponse::' + JSON.stringify(response.data));
+        //await tbl_client.deleteAllClient();
+        if (response.status == 200) {
+          setLoading(false);
+          if (response.data) {
+
+            setExistingData(response.data)
+
+            if (response.data.clientExistingDetails) {
+
+              setClientID(response.data.clientExistingDetails[0].lmsClientId)
+              setBranchID(response.data.clientExistingDetails[0].branchId)
+              setCustomerName(response.data.clientExistingDetails[0].lmsCustomerName)
+              setCustomerSubCategoryLabel(Common.getSystemCodeDescription(leaduserCodeDetail, 'CUSTOMER_SUBCATEGORY', response.data.clientExistingDetails[0].customerSubCategoryId))
+              if (response.data.clientExistingDetails[0].kycTypeId1) {
+                setKycType1Label(Common.getBankCodeDescription(bankUserCodeDetail, 'IndIdentitySettingID', response.data.clientExistingDetails[0].kycTypeId1))
+                setkycID1(response.data.clientExistingDetails[0].kycIdValue1)
+              }
+              if (response.data.clientExistingDetails[0].kycTypeId2) {
+                setKycType2Label(Common.getBankCodeDescription(bankUserCodeDetail, 'IndIdentitySettingID', response.data.clientExistingDetails[0].kycTypeId2))
+                setkycID2(response.data.clientExistingDetails[0].kycIdValue2)
+              }
+              if (response.data.clientExistingDetails[0].kycTypeId3) {
+                setKycType3Label(Common.getBankCodeDescription(bankUserCodeDetail, 'IndIdentitySettingID', response.data.clientExistingDetails[0].kycTypeId3))
+                setkycID3(response.data.clientExistingDetails[0].kycIdValue3)
+              }
+              if (response.data.clientExistingDetails[0].kycTypeId4) {
+                setKycType4Label(Common.getBankCodeDescription(bankUserCodeDetail, 'IndIdentitySettingID', response.data.clientExistingDetails[0].kycTypeId4))
+                setkycID4(response.data.clientExistingDetails[0].kycIdValue4)
+              }
+
             }
-          }
 
-          setCustomerSubCategoryData(value);
+          }
+        } else if (response.data.statusCode === 201) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+          setLoading(false);
+        } else if (response.data.statusCode === 202) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+          setLoading(false);
+        }
+      })
+      .catch(error => {
+        // Handle the error
+        if (global.DEBUG_MODE)
+          console.log('DedupeApiResponse' + JSON.stringify(error));
+        setLoading(false);
+        if (error.response.status == 404) {
+          setApiError(Common.error404);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 400) {
+          setApiError(Common.error400);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 500) {
+          setApiError(Common.error500);
+          setErrorModalVisible(true)
+        } else if (error.response.data != null) {
+          setApiError(error.response.data.message);
+          setErrorModalVisible(true)
         }
       });
-
-    tbl_SystemCodeDetails
-      .getSystemCodeDetailsBasedOnID('KycType1')
-      .then(value => {
-        if (value !== undefined && value.length > 0) {
-          console.log(value);
-
-          for (var i = 0; i < value.length; i++) {
-            if (value[i].IsDefault === '1') {
-              setKycType1Label(value[i].SubCodeID);
-              setKycType1Index(i + 1);
-            }
-          }
-
-          setKycType1Data(value);
-        }
-      });
+    //}
   };
 
-  const updateLeadDetails = () => {
+  const onGoBack = () => {
 
-    props.navigation.navigate('AadharOTPVerification', { aadharNumber: "717485993554" });
-
+    props.navigation.goBack();
   };
 
-  const validate = () => {
-    var flag = false;
-    var i = 1;
-    var errorMessage = '';
+  const onButtonClick = () => {
 
-    if (ClientIDMan && ClientIDVisible) {
-      if (ClientID.length <= 0) {
-        errorMessage =
-          errorMessage +
-          i +
-          ')' +
-          ' ' +
-          language[0][props.language].str_plsenter +
-          ClientIDCaption +
-          '\n';
-        i++;
-        flag = true;
-      }
-    }
-    if (BranchIDMan && BranchIDVisible) {
-      if (BranchID.length <= 0) {
-        errorMessage =
-          errorMessage +
-          i +
-          ')' +
-          ' ' +
-          language[0][props.language].str_plsenter +
-          BranchIDCaption +
-          '\n';
-        i++;
-        flag = true;
-      }
-    }
-    if (CustomerNameMan && CustomerNameVisible) {
-      if (CustomerName.length <= 0) {
-        errorMessage =
-          errorMessage +
-          i +
-          ')' +
-          ' ' +
-          language[0][props.language].str_plsenter +
-          CustomerNameCaption +
-          '\n';
-        i++;
-        flag = true;
-      }
-    }
-
-    if (CustomerSubCategoryMan && CustomerSubCategoryVisible) {
-      if (CustomerSubCategoryLabel.length <= 0) {
-        errorMessage =
-          errorMessage +
-          i +
-          ')' +
-          ' ' +
-          language[0][props.language].str_plsselect +
-          CustomerSubCategoryCaption +
-          '\n';
-        i++;
-        flag = true;
-      }
-    }
-
-    if (KycType1Man && KycType1Visible) {
-      if (KycType1Label.length <= 0) {
-        errorMessage =
-          errorMessage +
-          i +
-          ')' +
-          ' ' +
-          language[0][props.language].str_plsselect +
-          KycType1Caption +
-          '\n';
-        i++;
-        flag = true;
-      }
-    }
-
-    if (kycID1Man && kycID1Visible) {
-      if (kycID1.length <= 0) {
-        errorMessage =
-          errorMessage +
-          i +
-          ')' +
-          ' ' +
-          language[0][props.language].str_plsenter +
-          kycID1Caption +
-          '\n';
-        i++;
-        flag = true;
-      }
-    }
-
-    if (EmailMan && EmailVisible) {
-      if (Email.length <= 0) {
-        errorMessage =
-          errorMessage +
-          i +
-          ')' +
-          ' ' +
-          language[0][props.language].str_plsenter +
-          EmailCaption +
-          '\n';
-        i++;
-        flag = true;
-      }
-    }
-
-    if (mobileNumberMan && mobileNumberVisible) {
-      if (mobileNumber.length <= 0) {
-        errorMessage =
-          errorMessage +
-          i +
-          ')' +
-          ' ' +
-          language[0][props.language].str_plsenter +
-          mobileNumberCaption +
-          '\n';
-        i++;
-        flag = true;
-      } else if (!Common.isValidPhoneNumber(mobileNumber)) {
-        errorMessage =
-          errorMessage +
-          i +
-          ')' +
-          ' ' +
-          language[0][props.language].str_plsentervalid +
-          mobileNumberCaption +
-          '\n';
-        i++;
-        flag = true;
-      }
-    }
-
-    setErrMsg(errorMessage);
-    return flag;
+    props.navigation.replace('ProfileShortBasicDetails');
   };
 
-  const handleClick = (componentName, textValue) => {
-    if (componentName === 'ClientID') {
-      setClientID(textValue);
-    } else if (componentName === 'kycID1') {
-      setkycID1(textValue);
-    } else if (componentName === 'Email') {
-      setEmail(textValue);
-    } else if (componentName === 'CustomerName') {
-      setCustomerName(textValue);
-    } else if (componentName === 'BranchID') {
-      setBranchID(textValue);
-    } else if (componentName === 'mobileNumber') {
-      if (textValue.length > 0) {
-        if (Common.numberRegex.test(textValue)) setMobileNumber(textValue);
-      } else {
-        setMobileNumber(textValue);
-      }
-    }
-  };
-
-  const handleReference = componentName => {
-    if (componentName === 'ClientID') {
-      BranchIDRef.current.focus();
-    } else if (componentName === 'CustomerName') {
-      KycID1Ref.current.focus();
-    } else if (componentName === 'BranchID') {
-      CustomerNameRef.current.focus();
-    } else if (componentName === 'kycID1') {
-      mobileNumberRef.current.focus();
-    } else if (componentName === 'mobileNumber') {
-      EmailRef.current.focus();
-    }
-  };
-
-  const handlePickerClick = (componentName, label, index) => {
-    if (componentName == 'CustomerSubCategoryPicker') {
-      setCustomerSubCategoryLabel(label);
-      setCustomerSubCategoryIndex(index);
-    } else if (componentName == 'KycType1Picker') {
-      setKycType1Label(label);
-      setKycType1Index(index);
-    }
-  };
 
   const onClick = () => {
     setActiveBasicDetials(!ActiveBasicDetials);
   };
 
-  const onClickExistingLoanDetails = () => {
-    setExistingLoanDetails(!ExistingLoanDetails);
+  const onClickExistingLoanDetails = (isCollateral, isLoan, LoanData, CollateralData) => {
+    props.navigation.navigate('ExistingLoanAndCollateralDetails', { 'isCollateral': isCollateral, 'isLoan': isLoan, 'LoanData': LoanData, 'CollateralData': CollateralData })
+    //setExistingLoanDetails(!ExistingLoanDetails);
   };
 
-  const DATA = [
-    {
-      id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-      title: 'Loan 1',
-    },
-    {
-      id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-      title: 'Loan 2',
-    },
-    {
-      id: '58694a0f-3da1-471f-bd96-145571e29d72',
-      title: 'Laon 3',
-    },
-  ];
 
-  const Item = ({ title }) => (
-    <View style={Commonstyles.item}>
-      <Text style={Commonstyles.HeaderStyle}>{title}</Text>
-      <View
-        style={{
-          width: '100%',
-          alignItems: 'center',
-        }}>
-        <View
-          style={{
-            width: '100%',
-            flexDirection: 'row',
-            alignItems: 'center',
-          }}>
-          <View style={{ width: '50%', alignItems: 'left' }}>
-            <Text style={Commonstyles.inputtextStyle}>{title}</Text>
-          </View>
 
-          <View style={{ width: '50%', alignItems: 'left' }}>
-            <Text style={Commonstyles.inputtextStyle}>{title}</Text>
-          </View>
-        </View>
-      </View>
-    </View>
-  );
   return (
     // enclose all components in this View tag
     <SafeAreaView
@@ -431,10 +307,15 @@ const ProfileShortExistingClientDetails = (props, { navigation }) => {
             <HeadComp
               textval={language[0][props.language].str_profileshort}
               props={props}
+              onGoBack={onGoBack}
             />
           </View>
           <ChildHeadComp
-            textval={language[0][props.language].str_applicantdetails}
+            textval={global.CLIENTTYPE == 'APPL'
+              ? language[0][props.language].str_applicantdetails
+              : global.CLIENTTYPE == 'CO-APPL'
+                ? language[0][props.language].str_coapplicantdetails
+                : language[0][props.language].str_guarantordetails}
           />
 
           <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
@@ -451,30 +332,28 @@ const ProfileShortExistingClientDetails = (props, { navigation }) => {
             </View>
           </View>
 
-          {ClientIDVisible && (
-            <View
-              style={{
-                width: '100%',
-                marginTop: 19,
-                paddingHorizontal: 0,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
-                <TextComp
-                  textVal={ClientIDCaption}
-                  textStyle={[Commonstyles.inputtextStyle, { color: Colors.lightgrey }]}
-                  Visible={ClientIDMan}
-                />
-                <TextComp
-                  textVal={existingClientDetail.lmsClientId}
-                  textStyle={[Commonstyles.inputtextStyle, { color: Colors.black, fontSize: 14, marginTop: 3 }]}
-                  Visible={ClientIDMan}
-                />
-              </View>
-
+          <View
+            style={{
+              width: '100%',
+              marginTop: 19,
+              paddingHorizontal: 0,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+              <TextComp
+                textVal={ClientIDCaption}
+                textStyle={[Commonstyles.inputtextStyle, { color: Colors.lightgrey }]}
+                Visible={ClientIDMan}
+              />
+              <TextComp
+                textVal={ClientID}
+                textStyle={[Commonstyles.inputtextStyle, { color: Colors.black, fontSize: 14, marginTop: 3 }]}
+                Visible={ClientIDMan}
+              />
             </View>
-          )}
+
+          </View>
 
           <View
             style={{
@@ -511,7 +390,7 @@ const ProfileShortExistingClientDetails = (props, { navigation }) => {
           </View>
           {ActiveBasicDetials ? (
             <View>
-              {BranchIDVisible && (
+              {BranchID && (
                 <View
                   style={{
                     width: '100%',
@@ -529,7 +408,7 @@ const ProfileShortExistingClientDetails = (props, { navigation }) => {
                     />
 
                     <TextComp
-                      textVal={existingClientDetail.branchId}
+                      textVal={BranchID}
                       textStyle={[Commonstyles.inputtextStyle, { color: Colors.black, fontSize: 14, marginTop: 3 }]}
                       Visible={ClientIDMan}
                     />
@@ -539,7 +418,7 @@ const ProfileShortExistingClientDetails = (props, { navigation }) => {
                 </View>
               )}
 
-              {CustomerNameVisible && (
+              {CustomerName && (
                 <View
                   style={{
                     width: '100%',
@@ -557,7 +436,7 @@ const ProfileShortExistingClientDetails = (props, { navigation }) => {
                     />
 
                     <TextComp
-                      textVal={existingClientDetail.lmsCustomerName}
+                      textVal={CustomerName}
                       textStyle={[Commonstyles.inputtextStyle, { color: Colors.black, fontSize: 14, marginTop: 3 }]}
                       Visible={ClientIDMan}
                     />
@@ -567,7 +446,7 @@ const ProfileShortExistingClientDetails = (props, { navigation }) => {
                 </View>
               )}
 
-              {CustomerSubCategoryVisible && (
+              {CustomerSubCategoryLabel && (
                 <View
                   style={{
                     width: '100%',
@@ -583,18 +462,15 @@ const ProfileShortExistingClientDetails = (props, { navigation }) => {
                     />
                   </View>
 
-                  <PickerComp
-                    textLabel={CustomerSubCategoryLabel}
-                    pickerStyle={Commonstyles.picker}
-                    Disable={CustomerSubCategoryDisable}
-                    pickerdata={CustomerSubCategoryData}
-                    componentName="CustomerSubCategoryPicker"
-                    handlePickerClick={handlePickerClick}
+                  <TextComp
+                    textVal={CustomerSubCategoryLabel}
+                    textStyle={[Commonstyles.inputtextStyle, { color: Colors.black, fontSize: 14, marginTop: 3 }]}
+                    Visible={ClientIDMan}
                   />
                 </View>
               )}
 
-              {KycType1Visible && (
+              {KycType1Label && (
                 <View
                   style={{
                     width: '100%',
@@ -608,20 +484,20 @@ const ProfileShortExistingClientDetails = (props, { navigation }) => {
                       textStyle={[Commonstyles.inputtextStyle, { color: Colors.lightgrey }]}
                       Visible={KycType1Man}
                     />
+
+                    <TextComp
+                      textVal={KycType1Label}
+                      textStyle={[Commonstyles.inputtextStyle, { color: Colors.black, fontSize: 14, marginTop: 3 }]}
+                      Visible={ClientIDMan}
+                    />
+
                   </View>
 
-                  <PickerComp
-                    textLabel={KycType1Label}
-                    pickerStyle={Commonstyles.picker}
-                    Disable={KycType1Disable}
-                    pickerdata={KycType1Data}
-                    componentName="KycType1Picker"
-                    handlePickerClick={handlePickerClick}
-                  />
+
                 </View>
               )}
 
-              {kycID1Visible && (
+              {KycType1Label && (
                 <View
                   style={{
                     width: '100%',
@@ -639,7 +515,7 @@ const ProfileShortExistingClientDetails = (props, { navigation }) => {
                     />
 
                     <TextComp
-                      textVal={existingClientDetail.kycTypeId1}
+                      textVal={kycID1}
                       textStyle={[Commonstyles.inputtextStyle, { color: Colors.black, fontSize: 14, marginTop: 3 }]}
                       Visible={ClientIDMan}
                     />
@@ -649,7 +525,172 @@ const ProfileShortExistingClientDetails = (props, { navigation }) => {
                 </View>
               )}
 
-              {mobileNumberVisible && (
+              {KycType2Label && (
+                <View
+                  style={{
+                    width: '100%',
+                    alignItems: 'center',
+                    marginTop: '4%',
+                  }}>
+                  <View
+                    style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                    <TextComp
+                      textVal={KycType2Caption}
+                      textStyle={[Commonstyles.inputtextStyle, { color: Colors.lightgrey }]}
+                      Visible={KycType1Man}
+                    />
+
+                    <TextComp
+                      textVal={KycType2Label}
+                      textStyle={[Commonstyles.inputtextStyle, { color: Colors.black, fontSize: 14, marginTop: 3 }]}
+                      Visible={ClientIDMan}
+                    />
+
+                  </View>
+
+
+                </View>
+              )}
+
+              {KycType2Label && (
+                <View
+                  style={{
+                    width: '100%',
+                    marginTop: 19,
+                    paddingHorizontal: 0,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                  <View
+                    style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                    <TextComp
+                      textVal={kycID2Caption}
+                      textStyle={[Commonstyles.inputtextStyle, { color: Colors.lightgrey }]}
+                      Visible={kycID1Man}
+                    />
+
+                    <TextComp
+                      textVal={kycID2}
+                      textStyle={[Commonstyles.inputtextStyle, { color: Colors.black, fontSize: 14, marginTop: 3 }]}
+                      Visible={ClientIDMan}
+                    />
+
+                  </View>
+
+                </View>
+              )}
+
+              {KycType3Label && (
+                <View
+                  style={{
+                    width: '100%',
+                    alignItems: 'center',
+                    marginTop: '4%',
+                  }}>
+                  <View
+                    style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                    <TextComp
+                      textVal={KycType3Caption}
+                      textStyle={[Commonstyles.inputtextStyle, { color: Colors.lightgrey }]}
+                      Visible={KycType1Man}
+                    />
+
+                    <TextComp
+                      textVal={KycType3Label}
+                      textStyle={[Commonstyles.inputtextStyle, { color: Colors.black, fontSize: 14, marginTop: 3 }]}
+                      Visible={ClientIDMan}
+                    />
+
+                  </View>
+
+
+                </View>
+              )}
+
+              {KycType3Label && (
+                <View
+                  style={{
+                    width: '100%',
+                    marginTop: 19,
+                    paddingHorizontal: 0,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                  <View
+                    style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                    <TextComp
+                      textVal={kycID3Caption}
+                      textStyle={[Commonstyles.inputtextStyle, { color: Colors.lightgrey }]}
+                      Visible={kycID1Man}
+                    />
+
+                    <TextComp
+                      textVal={kycID3}
+                      textStyle={[Commonstyles.inputtextStyle, { color: Colors.black, fontSize: 14, marginTop: 3 }]}
+                      Visible={ClientIDMan}
+                    />
+
+                  </View>
+
+                </View>
+              )}
+
+              {KycType4Label && (
+                <View
+                  style={{
+                    width: '100%',
+                    alignItems: 'center',
+                    marginTop: '4%',
+                  }}>
+                  <View
+                    style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                    <TextComp
+                      textVal={KycType4Caption}
+                      textStyle={[Commonstyles.inputtextStyle, { color: Colors.lightgrey }]}
+                      Visible={KycType1Man}
+                    />
+
+                    <TextComp
+                      textVal={KycType4Label}
+                      textStyle={[Commonstyles.inputtextStyle, { color: Colors.black, fontSize: 14, marginTop: 3 }]}
+                      Visible={ClientIDMan}
+                    />
+
+                  </View>
+
+
+                </View>
+              )}
+
+              {KycType4Label && (
+                <View
+                  style={{
+                    width: '100%',
+                    marginTop: 19,
+                    paddingHorizontal: 0,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                  <View
+                    style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                    <TextComp
+                      textVal={kycID4Caption}
+                      textStyle={[Commonstyles.inputtextStyle, { color: Colors.lightgrey }]}
+                      Visible={kycID1Man}
+                    />
+
+                    <TextComp
+                      textVal={kycID4}
+                      textStyle={[Commonstyles.inputtextStyle, { color: Colors.black, fontSize: 14, marginTop: 3 }]}
+                      Visible={ClientIDMan}
+                    />
+
+                  </View>
+
+                </View>
+              )}
+
+              {mobileNumber && (
                 <View
                   style={{
                     width: '100%',
@@ -667,7 +708,7 @@ const ProfileShortExistingClientDetails = (props, { navigation }) => {
                     />
 
                     <TextComp
-                      textVal={existingClientDetail.mobileNumber}
+                      textVal={mobileNumber}
                       textStyle={[Commonstyles.inputtextStyle, { color: Colors.black, fontSize: 14, marginTop: 3 }]}
                       Visible={ClientIDMan}
                     />
@@ -677,7 +718,7 @@ const ProfileShortExistingClientDetails = (props, { navigation }) => {
                 </View>
               )}
 
-              {EmailVisible && (
+              {Email && (
                 <View
                   style={{
                     width: '100%',
@@ -695,7 +736,7 @@ const ProfileShortExistingClientDetails = (props, { navigation }) => {
                     />
 
                     <TextComp
-                      textVal={existingClientDetail.emailId}
+                      textVal={Email}
                       textStyle={[Commonstyles.inputtextStyle, { color: Colors.black, fontSize: 14, marginTop: 3 }]}
                       Visible={ClientIDMan}
                     />
@@ -709,128 +750,71 @@ const ProfileShortExistingClientDetails = (props, { navigation }) => {
             <View></View>
           )}
 
-          <View
-            style={{
-              width: '100%',
-              alignItems: 'center',
-            }}>
-            <TouchableOpacity
-              onPress={onClickExistingLoanDetails}
-              activeOpacity={1}>
-              <View
-                style={{
-                  width: '93%',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginTop: 20,
-                }}>
-                <TextComp
-                  textVal={ExistingLoanDetailsCaption}
-                  textStyle={Commonstyles.HeaderStyle}
-                />
-                {ExistingLoanDetails ? (
+          {existingData.clientExistingLoanDetails &&
+            <View
+              style={{
+                width: '100%',
+                alignItems: 'center',
+              }}>
+              <TouchableOpacity
+                onPress={() => { onClickExistingLoanDetails(false, true, existingData.clientExistingLoanDetails) }}
+                activeOpacity={1}>
+                <View
+                  style={{
+                    width: '93%',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginTop: 20,
+                  }}>
+                  <TextComp
+                    textVal={ExistingLoanDetailsCaption}
+                    textStyle={Commonstyles.HeaderStyle}
+                  />
+
                   <MaterialIcons
-                    name="keyboard-arrow-up"
+                    name="keyboard-arrow-right"
                     size={20}
                     color="#343434"
                   />
-                ) : (
-                  <MaterialIcons
-                    name="keyboard-arrow-down"
-                    size={20}
-                    color="#343434"
-                  />
-                )}
-              </View>
-            </TouchableOpacity>
-          </View>
-          {ExistingLoanDetails ? (
-            <View style={{ width: '100%' }}>
-              <FlatList
-                data={existingClientLoanDetail}
-                renderItem={({ item, index }) => {
-                  return (
 
-                    <View style={{ width: '90%', alignSelf: 'center' }}>
+                </View>
+              </TouchableOpacity>
 
-                      <Text style={{ color: Colors.black, fontSize: 16, fontFamily: 'Poppins-Medium', marginTop: 14 }}>{`Loan ${index + 1}`}</Text>
-
-                      <View style={{ flexDirection: 'row', width: '100%', marginTop: 10 }}>
-
-                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.mediumgrey, width: '50%', fontFamily: 'Poppins-Medium' }]}>{language[0][props.language].str_accopendate}</Text>
-                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.black, width: '50%', marginTop: 0.2 }]}>{item.accountOpenedDate}</Text>
-
-                      </View>
-
-                      <View style={{ flexDirection: 'row', width: '100%', marginTop: 10 }}>
-
-                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.mediumgrey, width: '50%', fontFamily: 'Poppins-Medium' }]}>{language[0][props.language].str_loantype.toUpperCase()}</Text>
-                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.black, width: '50%', marginTop: 0.2 }]}>{item.loanTypeId}</Text>
-
-                      </View>
-
-                      <View style={{ flexDirection: 'row', width: '100%', marginTop: 10 }}>
-
-                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.mediumgrey, width: '50%', fontFamily: 'Poppins-Medium' }]}>{language[0][props.language].str_productId.toUpperCase()}</Text>
-                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.black, width: '50%', marginTop: 0.2 }]}>{item.productId}</Text>
-
-                      </View>
-
-                      <View style={{ flexDirection: 'row', width: '100%', marginTop: 10 }}>
-
-                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.mediumgrey, width: '50%', fontFamily: 'Poppins-Medium' }]}>{language[0][props.language].str_loansacamount.toUpperCase()}</Text>
-                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.black, width: '50%', marginTop: 0.2 }]}>₹ {item.loanSanctionedAmount}</Text>
-
-                      </View>
-
-                      <View style={{ flexDirection: 'row', width: '100%', marginTop: 10 }}>
-
-                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.mediumgrey, width: '50%', fontFamily: 'Poppins-Medium' }]}>{language[0][props.language].str_loannum.toUpperCase()}</Text>
-                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.black, width: '50%', marginTop: 0.2 }]}>{item.lmsLoanAccountNumber}</Text>
-
-                      </View>
-
-                      <View style={{ flexDirection: 'row', width: '100%', marginTop: 10 }}>
-
-                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.mediumgrey, width: '50%', fontFamily: 'Poppins-Medium' }]}>{language[0][props.language].str_loanassclass.toUpperCase()}</Text>
-                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.black, width: '50%', marginTop: 0.2 }]}>{item.loanAssetClassification}</Text>
-
-                      </View>
-
-                      <View style={{ flexDirection: 'row', width: '100%', marginTop: 10 }}>
-
-                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.mediumgrey, width: '50%', fontFamily: 'Poppins-Medium' }]}>{language[0][props.language].str_dpddays.toUpperCase()}</Text>
-                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.black, width: '50%', marginTop: 0.2 }]}>{item.dpdDays}</Text>
-
-                      </View>
-
-                      <View style={{ flexDirection: 'row', width: '100%', marginTop: 10 }}>
-
-                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.mediumgrey, width: '50%', fontFamily: 'Poppins-Medium' }]}>{language[0][props.language].str_outstandingamt.toUpperCase()}</Text>
-                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.black, width: '50%', marginTop: 0.2 }]}>₹ {item.outstandingAmount}</Text>
-
-                      </View>
-
-                      <View style={{ flexDirection: 'row', width: '100%', marginTop: 10 }}>
-
-                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.mediumgrey, width: '50%', fontFamily: 'Poppins-Medium' }]}>{language[0][props.language].str_overdueamt.toUpperCase()}</Text>
-                        <Text style={[Commonstyles.inputtextStyle, { color: Colors.black, width: '50%', marginTop: 0.2 }]}>₹ {item.overdueAmount}</Text>
-
-                      </View>
-
-
-                    </View>
-
-                  )
-                }
-
-                }
-                keyExtractor={item => item.id}
-              />
             </View>
-          ) : (
-            <View></View>
-          )}
+          }
+
+          {existingData.clientExistingCollateralDetails &&
+            <View
+              style={{
+                width: '100%',
+                alignItems: 'center',
+              }}>
+              <TouchableOpacity
+                onPress={() => { onClickExistingLoanDetails(true, false, [], existingData.clientExistingCollateralDetails) }}
+                activeOpacity={1}>
+                <View
+                  style={{
+                    width: '93%',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginTop: 20,
+                  }}>
+                  <TextComp
+                    textVal={'Collateral Details'}
+                    textStyle={Commonstyles.HeaderStyle}
+                  />
+
+                  <MaterialIcons
+                    name="keyboard-arrow-right"
+                    size={20}
+                    color="#343434"
+                  />
+
+                </View>
+              </TouchableOpacity>
+            </View>
+          }
+
         </View>
 
         <ButtonViewComp
@@ -838,7 +822,7 @@ const ProfileShortExistingClientDetails = (props, { navigation }) => {
           textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
           viewStyle={Commonstyles.buttonView}
           innerStyle={Commonstyles.buttonViewInnerStyle}
-          handleClick={updateLeadDetails}
+          handleClick={onButtonClick}
         />
       </ScrollView>
     </SafeAreaView>
@@ -853,7 +837,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    paddingBottom: 50,
+    paddingBottom: 20,
     flexGrow: 1,
   },
   line: {
@@ -887,11 +871,13 @@ const mapStateToProps = (state) => {
   const { profileDetails } = state.profileReducer;
   const { mobileCodeDetails } = state.mobilecodeReducer;
   const { dedupeDetails } = state.profileReducer;
+  const { loanInitiationDetails } = state.loanInitiationReducer;
   return {
     language: language,
     profiledetail: profileDetails,
     mobilecodedetail: mobileCodeDetails,
-    dedupeDetail: dedupeDetails
+    dedupeDetail: dedupeDetails,
+    loanInitiationDetails: loanInitiationDetails,
   }
 }
 

@@ -1,4 +1,4 @@
-import { PROFILEDETAIL, DEDUPEDETAIL } from "../actions/ProfileActionType"
+import { PROFILEDETAIL, DEDUPEDETAIL, DELETE_ALL_DEDUPE_DETAILS } from "../actions/ProfileActionType"
 
 
 const initialState = {
@@ -17,6 +17,12 @@ const profileReducer = (state = initialState, action) => {
             ...state,
             dedupeDetails: action.payload,
         };
+
+        case DELETE_ALL_DEDUPE_DETAILS:
+            return {
+                ...state,
+                dedupeDetails: [],
+            };
 
         default: return state
     }

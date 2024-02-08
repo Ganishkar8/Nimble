@@ -220,7 +220,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       .getParent()
       ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
-
+    alert(JSON.stringify(props.loanInitiationDetails))
     makeSystemMandatoryFields();
     getSystemCodeDetail();
     getApplicantData();
