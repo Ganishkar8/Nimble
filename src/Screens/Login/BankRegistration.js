@@ -509,7 +509,7 @@ const BankRegistration = (props, { navigation }) => {
                                 <Menu.Item onPress={() => { setInstance('LIV'); closeMenu() }} style={{ backgroundColor: instance == 'LIV' ? Colors.darkblue : Colors.white, }} titleStyle={{ color: instance == 'LIV' ? Colors.white : Colors.black, fontFamily: 'PoppinsRegular' }} title="LIVE" />
                                 <Menu.Item onPress={() => { setInstance('UAT'); closeMenu() }} style={{ backgroundColor: instance == 'UAT' ? Colors.darkblue : Colors.white }} titleStyle={{ color: instance == 'UAT' ? Colors.white : Colors.black, fontFamily: 'PoppinsRegular' }} title="UAT" />
                                 <Menu.Item onPress={() => { setInstance('DEV'); closeMenu() }} style={{ backgroundColor: instance == 'DEV' ? Colors.darkblue : Colors.white }} titleStyle={{ color: instance == 'DEV' ? Colors.white : Colors.black, fontFamily: 'PoppinsRegular' }} title="DEV" />
-                                <Menu.Item onPress={() => { setInstance('DEV'); closeMenu() }} style={{ backgroundColor: instance == 'DEV' ? Colors.darkblue : Colors.white }} titleStyle={{ color: instance == 'QA' ? Colors.white : Colors.black, fontFamily: 'PoppinsRegular' }} title="QA" />
+                                <Menu.Item onPress={() => { setInstance('QA'); closeMenu() }} style={{ backgroundColor: instance == 'QA' ? Colors.darkblue : Colors.white }} titleStyle={{ color: instance == 'QA' ? Colors.white : Colors.black, fontFamily: 'PoppinsRegular' }} title="QA" />
                             </Menu>
 
                         </View>

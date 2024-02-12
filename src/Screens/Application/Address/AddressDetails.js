@@ -691,7 +691,7 @@ const AddressDetails = (props, { navigation }) => {
     }
 
     if (addressLine1Man && addressLine1Visible) {
-      if (addressLine1.length <= 0) {
+      if (addressLine1 == null || addressLine1 == undefined || addressLine1.length <= 0) {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + addressLine1Caption + '\n';
         i++;
         flag = true;
@@ -699,7 +699,7 @@ const AddressDetails = (props, { navigation }) => {
     }
 
     if (addressLine2Man && addressLine2Visible) {
-      if (addressLine2.length <= 0) {
+      if (addressLine2 == null || addressLine2 == undefined || addressLine2.length <= 0) {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + addressLine2Caption + '\n';
         i++;
         flag = true;
@@ -721,23 +721,25 @@ const AddressDetails = (props, { navigation }) => {
     }
 
     if (pincodeMan && pincodeVisible) {
-      if (pincode.length <= 0) {
+      if (pincode == null || pincode == undefined || pincode.length <= 0) {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + pincodeCaption + '\n';
         i++;
         flag = true;
       }
     }
 
-    if (pincode.length > 0) {
-      if (pincode.length < 6) {
-        errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + "Valid " + pincodeCaption + '\n';
-        i++;
-        flag = true;
+    if (pincode) {
+      if (pincode.length > 0) {
+        if (pincode.length < 6) {
+          errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + "Valid " + pincodeCaption + '\n';
+          i++;
+          flag = true;
+        }
       }
     }
 
     if (cityMan && cityVisible) {
-      if (city.length <= 0) {
+      if (city == null || city == undefined || city.length <= 0) {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + cityCaption + '\n';
         i++;
         flag = true;
@@ -745,7 +747,7 @@ const AddressDetails = (props, { navigation }) => {
     }
 
     if (districtMan && districtVisible) {
-      if (district.length <= 0) {
+      if (district == null || district == undefined || district.length <= 0) {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + districtCaption + '\n';
         i++;
         flag = true;
@@ -753,7 +755,7 @@ const AddressDetails = (props, { navigation }) => {
     }
 
     if (stateMan && stateVisible) {
-      if (state.length <= 0) {
+      if (state == null || state == undefined || state.length <= 0) {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + stateCaption + '\n';
         i++;
         flag = true;
@@ -761,7 +763,7 @@ const AddressDetails = (props, { navigation }) => {
     }
 
     if (countryMan && countryVisible) {
-      if (country.length <= 0) {
+      if (country == null || country == undefined || country.length <= 0) {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + countryCaption + '\n';
         i++;
         flag = true;
@@ -769,7 +771,7 @@ const AddressDetails = (props, { navigation }) => {
     }
 
     if (geoClassificationMan && geoClassificationVisible) {
-      if (geoClassificationLabel.length <= 0) {
+      if (geoClassificationLabel == null || geoClassificationLabel == undefined || geoClassificationLabel.length <= 0) {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + geoClassificationCaption + '\n';
         i++;
         flag = true;
@@ -777,7 +779,7 @@ const AddressDetails = (props, { navigation }) => {
     }
 
     if (yearsAtResidenceMan && yearsAtResidenceVisible) {
-      if (yearsAtResidence.length <= 0) {
+      if (yearsAtResidence == null || yearsAtResidence == undefined || yearsAtResidence.length <= 0) {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + yearsAtResidenceCaption + '\n';
         i++;
         flag = true;
@@ -785,7 +787,7 @@ const AddressDetails = (props, { navigation }) => {
     }
 
     if (yearsAtCityMan && yearsAtCityVisible) {
-      if (yearsAtCity.length <= 0) {
+      if (yearsAtCity == null || yearsAtCity == undefined || yearsAtCity.length <= 0) {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + yearsAtCityCaption + '\n';
         i++;
         flag = true;
@@ -793,7 +795,7 @@ const AddressDetails = (props, { navigation }) => {
     }
 
     if (addressOwnerTypeMan && addressOwnerTypeVisible) {
-      if (addressOwnerTypeLabel.length <= 0) {
+      if (addressOwnerTypeLabel == null || addressOwnerTypeLabel == undefined || addressOwnerTypeLabel.length <= 0) {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + addressOwnerTypeCaption + '\n';
         i++;
         flag = true;
@@ -801,7 +803,7 @@ const AddressDetails = (props, { navigation }) => {
     }
 
     if (ownerDetailsMan && ownerDetailsVisible) {
-      if (ownerDetailsLabel.length <= 0) {
+      if (ownerDetailsLabel == null || ownerDetailsLabel == undefined || ownerDetailsLabel.length <= 0) {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + ownerDetailsCaption + '\n';
         i++;
         flag = true;
@@ -809,7 +811,7 @@ const AddressDetails = (props, { navigation }) => {
     }
 
     if (ownerNameMan && ownerNameVisible) {
-      if (ownerName.length <= 0) {
+      if (ownerName == null || ownerName == undefined || ownerName.length <= 0) {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + ownerNameCaption + '\n';
         i++;
         flag = true;
