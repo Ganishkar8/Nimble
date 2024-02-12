@@ -735,27 +735,41 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     getKYCType(value.kycTypeId1, value.kycTypeId2, value.kycTypeId3, value.kycTypeId4);
 
     if (value.clientManualKycLink.length > 0) {
-
-    } else {
-      if (value.lmsClientId) {
-        if (value.isAadharNumberVerified) {
-          setKycSourceLabel('EVRF');
-        } else {
-          if (value.isManualKyc) {
-            setKycSourceLabel('MNL');
-          } else {
-            setKycSourceLabel('LMS');
-          }
-        }
-      } else {
-        if (value.isAadharNumberVerified) {
-          setKycSourceLabel('EVRF');
-        } else {
-          setKycSourceLabel('MNL');
+      alert(JSON.stringify(value.clientManualKycLink))
+      setKycTypeLabel(value.clientManualKycLink[0].kycType);
+      setkycID(value.clientManualKycLink[0].kycValue);
+      setkycSourceDmsId(value.clientManualKycLink[0]?.kycDmsId);
+      if (value.clientManualKycLink[0].clientManualDobs) {
+        if (value.clientManualKycLink[0].clientManualDobs.length > 0) {
+          setdobDmsId(value.clientManualKycLink[0].clientManualDobs[0]?.dobDmsId)
         }
       }
+      if (value.clientManualKycLink[0].clientManualKycs) {
+        if (value.clientManualKycLink[0].clientManualKycs.length > 0) {
+          setkycID1DmsId(value.clientManualKycLink[0].clientManualKycs[0]?.kycDmsId)
+        }
+      }
+    } else {
+
     }
 
+    if (value.lmsClientId) {
+      if (value.isAadharNumberVerified) {
+        setKycSourceLabel('EVRF');
+      } else {
+        if (value.isManualKyc) {
+          setKycSourceLabel('MNL');
+        } else {
+          setKycSourceLabel('LMS');
+        }
+      }
+    } else {
+      if (value.isAadharNumberVerified) {
+        setKycSourceLabel('EVRF');
+      } else {
+        setKycSourceLabel('MNL');
+      }
+    }
 
   }
 
@@ -1042,28 +1056,29 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     hideImageBottomSheet();
 
     if (selectedImageType == 'KYCSOURCE') {
-      if (imageUri != undefined && imageUri != null) {
+      if (imageUri) {
         if (imageUri.length > 0) {
           props.navigation.navigate('PreviewImage', { imageName: fileName, imageUri: imageUri })
-        } else {
-          getImage(kycSourceDmsId, '0');
         }
+      } else {
+        getImage(kycSourceDmsId, '0');
       }
     } else if (selectedImageType == 'KYCID1') {
+
       if (kycID1ImageUri) {
         if (kycID1ImageUri.length > 0) {
           props.navigation.navigate('PreviewImage', { imageName: kycID1FileName, imageUri: kycID1ImageUri })
-        } else {
-          getImage(kycID1DmsId, '0');
         }
+      } else {
+        getImage(kycID1DmsId, '0');
       }
     } else if (selectedImageType == 'KYCDOB') {
       if (kycDobImageUri) {
         if (kycDobImageUri.length > 0) {
           props.navigation.navigate('PreviewImage', { imageName: kycDOBFileName, imageUri: kycDobImageUri })
-        } else {
-          getImage(dobDmsId, '0');
         }
+      } else {
+        getImage(dobDmsId, '0');
       }
     }
 
@@ -1703,7 +1718,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                   {fileName}
                 </Text>
 
-                {imageUri &&
+                {kycSourceDmsId &&
                   <TouchableOpacity style={{ width: '20%', alignItems: 'flex-end' }}
                     onPress={() => {
                       showImageBottomSheet();
@@ -1882,7 +1897,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                           {kycID1FileName}
                         </Text>
 
-                        {kycID1ImageUri &&
+                        {kycID1DmsId &&
                           <TouchableOpacity style={{ width: '20%', alignItems: 'flex-end' }}
                             onPress={() => {
                               showImageBottomSheet();
@@ -2469,7 +2484,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                   {kycDOBFileName}
                 </Text>
 
-                {kycDobImageUri &&
+                {dobDmsId &&
                   <TouchableOpacity style={{ width: '20%', alignItems: 'flex-end' }}
                     onPress={() => {
                       showImageBottomSheet();

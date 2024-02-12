@@ -1339,6 +1339,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
 
     if (global.isDedupeDone == '1') {
       updatePersonalDetails();
+      //alert(JSON.stringify(props.loanInitiationDetails))
     } else {
       updateBasicDetails();
     }
@@ -1381,8 +1382,6 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
         clientType: global.CLIENTTYPE,
         title: titleLabel,
         firstName: Name,
-        middleName: '',
-        lastName: '',
         customerType: clientTypeLabel,
         gender: genderLabel,
         relationType: relationTypeLabel,

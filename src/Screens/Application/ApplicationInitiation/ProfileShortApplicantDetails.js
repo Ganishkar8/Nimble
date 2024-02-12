@@ -26,7 +26,7 @@ import ProgressComp from '../../../Components/ProgressComp';
 import tbl_SystemMandatoryFields from '../../../Database/Table/tbl_SystemMandatoryFields';
 import Modal from 'react-native-modal';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import Common from '../../../Utils/Common';
+import Common, { calculateAge } from '../../../Utils/Common';
 import tbl_SystemCodeDetails from '../../../Database/Table/tbl_SystemCodeDetails';
 import TextInputComp from '../../../Components/TextInputComp';
 import PickerComp from '../../../Components/PickerComp';
@@ -650,8 +650,17 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
     setMiddleName(value?.middleName ?? '');
     setLastName(value?.lastName ?? '');
     setGenderLabel(value?.gender ?? '');
-    setDOB(value?.dateOfBirth ?? '');
-    setAge(value?.age?.toString() ?? '');
+    //setDOB(value?.dateOfBirth ?? '');
+    if (value.dateOfBirth) {
+      setDOB(Common.convertDateFormat(value.dateOfBirth))
+    }
+
+    if (value.age) {
+      setAge(value?.age?.toString() ?? '');
+    } else {
+      setAge(Common.calculateAge(Common.convertDateFormat(value.dateOfBirth)).toString())
+    }
+
     setFatherName(value?.fatherName ?? '');
     setSpouseName(value?.spouseName ?? '');
     setCasteLabel(value?.caste ?? '');
@@ -903,7 +912,6 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
         "dmsId": id,
         "imageName": fileName,
         "geoCode": currentLatitude + "," + currentLongitude,
-        "kycManual": manualKYC,
       }
       const baseURL = global.PORT1;
       setLoading(true);
