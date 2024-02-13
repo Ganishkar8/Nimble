@@ -171,7 +171,7 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
         await Promise.all(deletePromises);
         var loanApplicationID = value.id;
         tbl_loanApplication.insertLoanApplication(loanApplicationID, 'APPL', value.loanApplicationNumber, value.tempNumber, value.branchId, value.leadId, value.customerCategory, value.customerSubcategory, value.customerType, value.loanType, value.loanPurpose,
-            value.product, value.loanAmount, value.workflowId, '', value.consent, '', '', value.applicationAppliedBy, '', value.lmsApplicationNumber, value.isManualKyc, value.manualKycStatus, '', '', value.createdBy, 'value.createdDate', '', 'value.modifiedDate', '', '')
+            value.product, value.loanAmount, value.workflowId, '', value.consent, '', '', value.applicationAppliedBy, '', value.lmsApplicationNumber, value.isKycManual, value.manualKycStatus, '', '', value.createdBy, 'value.createdDate', '', 'value.modifiedDate', '', '')
 
         await value.clientDetail.forEach(async (client) => {
             var dob = '';

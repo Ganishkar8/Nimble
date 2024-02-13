@@ -735,10 +735,10 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     getKYCType(value.kycTypeId1, value.kycTypeId2, value.kycTypeId3, value.kycTypeId4);
 
     if (value.clientManualKycLink.length > 0) {
-      alert(JSON.stringify(value.clientManualKycLink))
       setKycTypeLabel(value.clientManualKycLink[0].kycType);
       setkycID(value.clientManualKycLink[0].kycValue);
       setkycSourceDmsId(value.clientManualKycLink[0]?.kycDmsId);
+      setKycSourceLabel(value.clientManualKycLink[0].kycSource);
       if (value.clientManualKycLink[0].clientManualDobs) {
         if (value.clientManualKycLink[0].clientManualDobs.length > 0) {
           setdobDmsId(value.clientManualKycLink[0].clientManualDobs[0]?.dobDmsId)
@@ -750,26 +750,27 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
         }
       }
     } else {
-
-    }
-
-    if (value.lmsClientId) {
-      if (value.isAadharNumberVerified) {
-        setKycSourceLabel('EVRF');
-      } else {
-        if (value.isManualKyc) {
-          setKycSourceLabel('MNL');
+      setDOB(Common.convertDateFormat(value.dateOfBirth))
+      if (value.lmsClientId) {
+        if (value.isAadharNumberVerified) {
+          setKycSourceLabel('EVRF');
         } else {
-          setKycSourceLabel('LMS');
+          if (value.isKycManual) {
+            setKycSourceLabel('MNL');
+          } else {
+            setKycSourceLabel('LMS');
+          }
+        }
+      } else {
+        if (value.isAadharNumberVerified) {
+          setKycSourceLabel('EVRF');
+        } else {
+          setKycSourceLabel('MNL');
         }
       }
-    } else {
-      if (value.isAadharNumberVerified) {
-        setKycSourceLabel('EVRF');
-      } else {
-        setKycSourceLabel('MNL');
-      }
     }
+
+
 
   }
 
@@ -1327,6 +1328,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
         "kycExpiryDate": kycExpiryDate,
         "createdBy": global.USERID,
         "createdDate": new Date(),
+        "kycSource": KycSourceLabel,
       }
     ]
 
@@ -1334,6 +1336,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       appDetails[0].clientManualDobs = [
         {
           "dobDmsId": dobDmsId,
+          "dateOfBirth": DOB ? Common.convertYearDateFormat(DOB) : '',
           "createdBy": global.USERID,
           "createdDate": new Date()
         }

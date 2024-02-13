@@ -48,7 +48,7 @@ import AadharSuccessModal from '../../../Components/AadharSuccessModal';
 import tbl_client from '../../../Database/Table/tbl_client';
 import tbl_clientaddressinfo from '../../../Database/Table/tbl_clientaddressinfo';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { updateClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
+import { updateClientDetails, updateLoanInitiationDetails } from '../../../Utils/redux/actions/loanInitiationAction';
 
 const CELL_COUNT = 3;
 const CELL_SIZE = 46;
@@ -518,7 +518,7 @@ const AadharOTPVerification = (props, { navigation }) => {
     const manualKYC = () => {
         if (isManualKYC) {
             global.isAadharVerified = "0";
-            updateLoanStatus("0");
+            updateApplicantDetails();
 
         } else {
             if (mobileOTP.length < 6) {
@@ -529,6 +529,56 @@ const AadharOTPVerification = (props, { navigation }) => {
             validateOTP();
         }
     }
+
+    const updateApplicantDetails = () => {
+
+        const appDetails = {
+            "isActive": true,
+            "createdBy": global.USERID,
+            "id": global.CLIENTID,
+            "isKycManual": true
+        }
+        const baseURL = global.PORT1;
+        setLoading(true);
+        apiInstance(baseURL)
+            .put(`/api/v2/profile-short/personal-details/${global.CLIENTID}`, appDetails)
+            .then(async response => {
+                // Handle the response data
+                if (global.DEBUG_MODE) console.log('PersonalDetailApiResponse::' + JSON.stringify(response.data));
+                //  await tbl_client.updatePersonalDetails(TitleLabel, firstName, middleName, lastName, DOB, Age, GenderLabel, FatherName, SpouseName, CasteLabel, ReligionLabel, MotherTongueLabel, EADLabel, gpslatlon, id, global.LOANAPPLICATIONID);
+
+                setLoading(false);
+                if (response.status == 200) {
+                    props.updateLoanInitiationDetails(parseInt(global.LOANAPPLICATIONID), [], 'clientDetail', response.data.id, response.data)
+                    updateLoanStatus("0");
+                }
+                else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
+            })
+            .catch(error => {
+                // Handle the error
+                setLoading(false);
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
+
+    };
 
     const checkPermissions = async () => {
         const permissionsToRequest = [];
@@ -714,6 +764,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => ({
     languageAction: (item) => dispatch(languageAction(item)),
     updateClientDetails: (loanApplicationId, clientId, key, data) => dispatch(updateClientDetails(loanApplicationId, clientId, key, data)),
+    updateLoanInitiationDetails: (loanApplicationId, loanData, key, clientId, updatedDetails) => dispatch(updateLoanInitiationDetails(loanApplicationId, loanData, key, clientId, updatedDetails)),
 });
 
 

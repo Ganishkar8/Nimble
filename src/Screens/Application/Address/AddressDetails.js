@@ -645,34 +645,31 @@ const AddressDetails = (props, { navigation }) => {
   }
 
   const getActionType = (clientDetail) => {
-    if (clientDetail.lmsClientId) {
-      if (clientDetail.isAadharNumberVerified) {
-        setActionTypeVisible(true);
-        setActionTypeMan(true);
-        setActionTypeLabel('PRCD');
-        fieldsDisable();
-      } else {
-        if (clientDetail.isManualKyc) {
-          setActionTypeVisible(false);
-          setActionTypeMan(false);
-        } else {
+
+    if (clientDetail.clientManualKycLink.length > 0) {
+      if (clientDetail.lmsClientId) {
+        if (clientDetail.clientManualKycLink[0].kycSource == 'EVRF' || clientDetail.clientManualKycLink[0].kycSource == 'LMS') {
           setActionTypeVisible(true);
           setActionTypeMan(true);
           setActionTypeLabel('PRCD');
           fieldsDisable();
+        } else if (clientDetail.clientManualKycLink[0].kycSource == 'MNL') {
+          setActionTypeVisible(false);
+          setActionTypeMan(false);
+        }
+      } else {
+        if (clientDetail.clientManualKycLink[0].kycSource == 'EVRF') {
+          setActionTypeVisible(true);
+          setActionTypeMan(true);
+          setActionTypeLabel('PRCD');
+          fieldsDisable();
+        } else {
+          setActionTypeVisible(false);
+          setActionTypeMan(false);
         }
       }
-    } else {
-      if (clientDetail.isAadharNumberVerified) {
-        setActionTypeVisible(true);
-        setActionTypeMan(true);
-        setActionTypeLabel('PRCD');
-        fieldsDisable();
-      } else {
-        setActionTypeVisible(false);
-        setActionTypeMan(false);
-      }
     }
+
   }
 
   const makeSystemMandatoryFields = () => {

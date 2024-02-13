@@ -220,7 +220,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       .getParent()
       ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
-    alert(JSON.stringify(props.loanInitiationDetails))
+
     makeSystemMandatoryFields();
     getSystemCodeDetail();
     getApplicantData();
@@ -920,7 +920,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
         .then(async response => {
           // Handle the response data
           if (global.DEBUG_MODE) console.log('PersonalDetailApiResponse::' + JSON.stringify(response.data));
-          await tbl_client.updatePersonalDetails(TitleLabel, firstName, middleName, lastName, DOB, Age, GenderLabel, FatherName, SpouseName, CasteLabel, ReligionLabel, MotherTongueLabel, EADLabel, gpslatlon, id, global.LOANAPPLICATIONID);
+          //  await tbl_client.updatePersonalDetails(TitleLabel, firstName, middleName, lastName, DOB, Age, GenderLabel, FatherName, SpouseName, CasteLabel, ReligionLabel, MotherTongueLabel, EADLabel, gpslatlon, id, global.LOANAPPLICATIONID);
 
           setLoading(false);
           if (response.status == 200) {

@@ -53,6 +53,7 @@ const LMSLOSDetails = (props, { navigation }) => {
     const [existingClientLoanDetail, setExistingClientLoanDetail] = useState(props.dedupeDetail.clientExistingLoanDetails);
     const [lmsDedupeCheck, setLmsDedupeCheck] = useState(true);
     const [losDedupeCheck, setLosDedupeCheck] = useState(false);
+    const [onlyLOS, setOnlyLOS] = useState(false);
     const [lmsData, setlmsData] = useState([]);
     const [losData, setlosData] = useState([]);
 
@@ -62,7 +63,7 @@ const LMSLOSDetails = (props, { navigation }) => {
         loanOriginationDedupeCheck();
         updateBasicDedupe();
 
-    }, [props.navigation]);
+    }, [props.navigation, isScreenVisible]);
 
 
     useEffect(() => {
@@ -85,37 +86,31 @@ const LMSLOSDetails = (props, { navigation }) => {
                 setLmsDedupeCheck(false);
                 setLosDedupeCheck(true);
             } else {
-                props.navigation.navigate('ProfileShortExistingClientDetails')
+                if (onlyLOS) {
+                    props.navigation.replace('ProfileShortBasicDetails');
+                } else {
+                    props.navigation.navigate('ProfileShortExistingClientDetails')
+                }
+
             }
         }
 
 
     };
 
+
     const updateBasicDedupe = () => {
-        //setLoading(true)
+
         const clientDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
 
-        var appDetails = {
-            id: global.LOANAPPLICATIONID,
-            nominee: [],
-            familyDetail: [],
-            clientDetail: [
-                {
-                    id: global.CLIENTID,
-                    clientType: global.CLIENTTYPE,
-                    isActive: true,
-                    dedupeCheck: true,
-                    dedupeCheckDate: new Date(),
-                    clientAddress: clientDetail.clientAddress,
-                    clientBankDetail: [],
-                    clientManualKycLink: []
-                }
-            ],
-            applicantLoanProductLink: [],
-            applicantDocumentDetail: []
-        }
 
+        const appDetails = {
+            "isActive": true,
+            "createdBy": global.USERID,
+            "id": global.CLIENTID,
+            "dedupeCheck": true,
+            "dedupeCheckDate": new Date(),
+        }
 
         if (clientDetail.lmsClientId) {
             appDetails.customerType = "EXISTING";
@@ -123,39 +118,38 @@ const LMSLOSDetails = (props, { navigation }) => {
             appDetails.customerType = "NEW";
         }
 
-        // console.log(JSON.stringify(appDetails))
+        if (props.dedupeDetail.clientExistingDetails) {
+            appDetails.lmsClientId = props.dedupeDetail.clientExistingDetails[0].lmsClientId;
+        }
 
         const baseURL = global.PORT1;
         setLoading(true);
         apiInstance(baseURL)
-            .put(
-                `api/v2/profile-short/basic-details/${global.LOANAPPLICATIONID}`,
-                appDetails,
-            )
+            .put(`/api/v2/profile-short/personal-details/${global.CLIENTID}`, appDetails)
             .then(async response => {
                 // Handle the response data
+                if (global.DEBUG_MODE) console.log('PersonalDetailApiResponse::' + JSON.stringify(response.data));
+                //  await tbl_client.updatePersonalDetails(TitleLabel, firstName, middleName, lastName, DOB, Age, GenderLabel, FatherName, SpouseName, CasteLabel, ReligionLabel, MotherTongueLabel, EADLabel, gpslatlon, id, global.LOANAPPLICATIONID);
 
-                if (global.DEBUG_MODE) console.log(
-                    'UpdateDedupeBasicApiResponse::' + JSON.stringify(response.data),
-                );
                 setLoading(false);
-                if (response.status === 200) {
+                if (response.status == 200) {
+                    if (global.CLIENTTYPE == 'APPL') {
+                        props.updateLoanInitiationDetails(parseInt(global.LOANAPPLICATIONID), { customerType: appDetails.customerType }, 'clientDetail', response.data.id, response.data)
+                    } else {
+                        props.updateLoanInitiationDetails(parseInt(global.LOANAPPLICATIONID), [], 'clientDetail', response.data.id, response.data)
+                    }
 
-                    props.updateLoanInitiationDetails(parseInt(global.LOANAPPLICATIONID), { customerType: appDetails.customerType }, 'clientDetail', response.data.clientDetail[0].id, response.data.clientDetail[0])
-
-
-                } else if (response.data.statusCode === 201) {
+                }
+                else if (response.data.statusCode === 201) {
                     setApiError(response.data.message);
                     setErrorModalVisible(true);
                 } else if (response.data.statusCode === 202) {
                     setApiError(response.data.message);
                     setErrorModalVisible(true);
                 }
-
             })
             .catch(error => {
                 // Handle the error
-                if (global.DEBUG_MODE) console.log('Error' + JSON.stringify(error));
                 setLoading(false);
                 if (error.response.status == 404) {
                     setApiError(Common.error404);
@@ -171,8 +165,8 @@ const LMSLOSDetails = (props, { navigation }) => {
                     setErrorModalVisible(true)
                 }
             });
-    }
 
+    };
 
 
     const loanOriginationDedupeCheck = () => {
@@ -204,6 +198,7 @@ const LMSLOSDetails = (props, { navigation }) => {
                 }
                 setLmsDedupeCheck(false);
                 setLosDedupeCheck(true);
+                setOnlyLOS(true);
             }
         }
 

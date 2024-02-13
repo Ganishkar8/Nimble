@@ -11,6 +11,7 @@ import { connect } from 'react-redux';
 import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { it } from 'react-native-paper-dates';
+import CheckBoxComp from './CheckBoxComp';
 
 const DedupeModal = props => {
 
@@ -27,7 +28,6 @@ const DedupeModal = props => {
             visible={props.isVisible}
             animationType="slide"
             transparent={true}
-            onRequestClose={props.onClose}
         >
             <View style={styles.modalContainer}>
                 <View style={styles.modalContent}>
@@ -37,13 +37,13 @@ const DedupeModal = props => {
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, flexDirection: 'row' }}>
                             <TextComp textVal={`${language[0][props.language].str_clientdedupecheck}${props.dedupeDetails.remarks ? 'Failed' : ''}`} textStyle={{ width: '90%', color: Colors.darkblack, fontFamily: 'Poppins-Medium', fontSize: 16 }} Visible={false} />
 
-                            <TouchableOpacity onPress={() => props.onClose('Cancel')} style={{ justifyContent: 'center' }}>
+                            {/* <TouchableOpacity onPress={() => props.onClose('Cancel')} style={{ justifyContent: 'center' }}>
                                 <View >
 
                                     <Entypo name='cross' size={23} color={Colors.darkblack} />
 
                                 </View>
-                            </TouchableOpacity>
+                            </TouchableOpacity> */}
                         </View>
 
                         {props.dedupeDetails.remarks ? (
@@ -54,8 +54,33 @@ const DedupeModal = props => {
                             </View>
                         ) : (
                             <View style={{ width: '90%' }}>
-                                <Text style={[{ color: Colors.lightgrey, fontFamily: 'PoppinsRegular', fontSize: 12 }]}>CLIENT ID - CLIENT NAME - BRANCH</Text>
-                                <Text style={[{ color: Colors.mediumgrey, fontFamily: 'Poppins-Medium', fontSize: 12, marginTop: 5 }]}>{props.dedupeDetails.clientExistingDetails ? `${props.dedupeDetails.clientExistingDetails[0].lmsClientId} - ${props.dedupeDetails.clientExistingDetails[0].lmsCustomerName} - ${props.dedupeDetails.clientExistingDetails[0].branchId}` : ''}</Text>
+
+                                <FlatList
+                                    data={props.dedupeDetails.clientExistingDetails}
+                                    showsHorizontalScrollIndicator={false}
+                                    keyExtractor={(item, index) => index.toString()}
+                                    renderItem={({ item, index }) => {
+                                        return (
+
+                                            <View style={{ width: '100%', flexDirection: 'row', color: Colors.white, justifyContent: 'center' }}>
+
+                                                <View style={{ width: '90%' }}>
+                                                    <Text style={[{ color: Colors.lightgrey, fontFamily: 'PoppinsRegular', fontSize: 12 }]}>CLIENT ID - CLIENT NAME - BRANCH</Text>
+                                                    <Text style={[{ color: Colors.mediumgrey, fontFamily: 'Poppins-Medium', fontSize: 12, marginTop: 5 }]}>{`${item.lmsClientId} - ${item.lmsCustomerName} - ${item.branchId}`}</Text>
+                                                </View>
+                                                <TouchableOpacity onPress={() => alert('cancel')} style={{ justifyContent: 'center', alignItems: 'center', width: '10%' }}>
+                                                    <View >
+
+                                                        <AntDesign name='eye' size={23} color={Colors.darkblue} />
+
+                                                    </View>
+                                                </TouchableOpacity>
+                                            </View>
+
+                                        )
+                                    }}
+                                />
+
                             </View>
                         )}
 

@@ -9,6 +9,7 @@ import {
   Text,
   CheckBox,
   BackHandler,
+  Modal
 } from 'react-native';
 import apiInstance from '../../../Utils/apiInstance';
 import Colors from '../../../Utils/Colors';
@@ -23,7 +24,7 @@ import Commonstyles from '../../../Utils/Commonstyles';
 import HeadComp from '../../../Components/HeadComp';
 import ProgressComp from '../../../Components/ProgressComp';
 import tbl_SystemMandatoryFields from '../../../Database/Table/tbl_SystemMandatoryFields';
-import Modal from 'react-native-modal';
+
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Common from '../../../Utils/Common';
 import tbl_SystemCodeDetails from '../../../Database/Table/tbl_SystemCodeDetails';
@@ -300,6 +301,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   const [errorModalVisible1, setErrorModalVisible1] = useState(false);
   const [dedupeModalVisible, setDedupeModalVisible] = useState(false);
 
+  const [aadharModalVisible, setAadharModalVisible] = useState(false);
 
   const [isPageCompleted, setIsPageCompleted] = useState(false);
 
@@ -506,10 +508,13 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       getID2data(filteredData[0].workflowId);
       getID3data(filteredData[0].workflowId);
       getID4data(filteredData[0].workflowId);
-      setWorkflowIDLabel(filteredData[0].workflowId)
+      //setWorkflowIDLabel(filteredData[0].workflowId)
+      setWorkflowIDLabel(137)
 
       if (global.CLIENTTYPE == 'APPL') {
         getLoanData(filteredData[0]);
+      } else {
+        setClientTypeVisible(false);
       }
       const clientDetail = filteredData[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
 
@@ -652,9 +657,9 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       setIsDedupeDone(true);
       global.isDedupeDone = '1';
       fieldsDisable();
-      setClientTypeVisible(true)
-      setWorkflowIDDisable(true);
-      setLoanAmountDisable(true);
+      setClientTypeVisible(true);
+      setWorkflowIDDisable(false);
+      setLoanAmountDisable(false);
     } else {
       setIsDedupeDone(false);
       global.isDedupeDone = '0';
@@ -758,7 +763,6 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       .filter(data => data.masterId === 'CUSTOMER_TYPE')
       .sort((a, b) => a.Description.localeCompare(b.Description));
     setClientTypeData(filteredCustomerTypeData);
-
     // getID1data();
     // getID2data();
     // getID3data();
@@ -1430,20 +1434,24 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
 
             props.updateLoanInitiationDetails(parseInt(global.LOANAPPLICATIONID), { customerType: loanDetail.customerType }, 'clientDetail', response.data.id, response.data)
 
-            if (global.CLIENTTYPE == 'APPL') {
-              generateLoanAppNum();
-            } else {
-              if (
-                KycType1Label == '001' ||
-                KycType2Label == '001' ||
-                KycType3Label == '001' ||
-                KycType4Label == '001'
-              ) {
-                generateAadharOTP();
+            // if (global.CLIENTTYPE == 'APPL') {
+            //   generateLoanAppNum();
+            // } else {
+            if (
+              KycType1Label == '001' ||
+              KycType2Label == '001' ||
+              KycType3Label == '001' ||
+              KycType4Label == '001'
+            ) {
+              if (clientTypeLabel == 'EXISTING') {
+                setAadharModalVisible(true);
               } else {
-                updateLoanStatus();
+                generateAadharOTP();
               }
+            } else {
+              updateLoanStatus('Completed', '1');
             }
+            // }
 
           } else if (response.data.statusCode === 201) {
             setApiError(response.data.message);
@@ -1514,8 +1522,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           loanType: loanTypeLabel,
           loanPurpose: LoanPurposeLabel,
           product: ProductTypeLabel,
-          //workflowId: workflowIDLabel,
-          workflowId: 134,
+          workflowId: workflowIDLabel,
           loanAmount: parseInt(LoanAmount),
           consent: true,
           applicationAppliedBy: global.USERID,
@@ -1646,9 +1653,13 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
                   KycType3Label == '001' ||
                   KycType4Label == '001'
                 ) {
-                  generateAadharOTP();
+                  if (clientTypeLabel == 'EXISTING') {
+                    setAadharModalVisible(true);
+                  } else {
+                    generateAadharOTP();
+                  }
                 } else {
-                  updateLoanStatus();
+                  updateLoanStatus('Completed', '1');
                 }
               }
             } else {
@@ -1703,7 +1714,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       applicationAppliedBy: data.applicationAppliedBy,
       applicationCreationDate: data.applicationCreationDate,
       lmsApplicationNumber: data.lmsApplicationNumber,
-      isManualKyc: data.isManualKyc,
+      isKycManual: data.isKycManual,
       manualKycStatus: data.manualKycStatus,
       manualKycApprovedBy: data.manualKycApprovedBy,
       manualKycApprovedDate: data.manualKycApprovedDate,
@@ -1713,40 +1724,70 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
 
   }
 
-  const generateLoanAppNum = () => {
+  const generateLoanAppNum = (dedupeData) => {
+
     if (validate()) {
       showBottomSheet();
     } else {
-      const clientDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
+      //const clientDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
+
+      var lmsID = '';
+      // if (clientDetail.lmsClientId) {
+      //   lmsID = clientDetail.lmsClientId;
+      // }
 
       const appDetails = {
         loanApplicationId: global.LOANAPPLICATIONID,
-        lmsClientId: clientDetail.lmsClientId,
+        lmsClientId: lmsID,
       };
       const baseURL = global.PORT1;
       setLoading(true);
       apiInstance(baseURL)
         .post(`/api/v2/profile-short/generateLoanApplicationNumber`, appDetails)
         .then(async response => {
+          if (global.DEBUG_MODE)
+            console.log(
+              'GenerateLoanAppNumBasicApiResponse::' +
+              JSON.stringify(response.data),
+            );
           // Handle the response data
           if (response.status == 200) {
-            if (global.DEBUG_MODE)
-              console.log(
-                'GenerateLoanAppNumBasicApiResponse::' +
-                JSON.stringify(response.data),
-              );
+
             global.TEMPAPPID = response.data.loanApplicationNumber;
-            setLoading(false);
-            if (
-              KycType1Label == '001' ||
-              KycType2Label == '001' ||
-              KycType3Label == '001' ||
-              KycType4Label == '001'
-            ) {
-              generateAadharOTP();
+
+            if (dedupeData.clientExistingDetails == null) {
+              setClientTypeLabel('NEW');
+              setClientTypeVisible(true);
+              if (global.CLIENTTYPE == 'APPL') {
+                // setErrorModalVisible(true);
+                // setApiError('No Result Found');
+                props.navigation.navigate('LMSLOSDetails');
+              } else {
+                // setErrorModalVisible1(true);
+                // setApiError('No Result Found');
+                props.navigation.navigate('LMSLOSDetails');
+              }
             } else {
-              updateLoanStatus();
+              props.dedupeAction(dedupeData);
+              setDedupeModalVisible(true);
+              setClientTypeLabel('EXISTING');
+              setClientTypeVisible(true);
             }
+
+            global.isDedupeDone = '1';
+            setIsDedupeDone(true);
+            setClientTypeVisible(true);
+            setLoading(false);
+            // if (
+            //   KycType1Label == '001' ||
+            //   KycType2Label == '001' ||
+            //   KycType3Label == '001' ||
+            //   KycType4Label == '001'
+            // ) {
+            //   generateAadharOTP();
+            // } else {
+            //   updateLoanStatus('Completed', '1');
+            // }
           }
           else if (response.data.statusCode === 201) {
             setApiError(response.data.message);
@@ -1781,7 +1822,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     }
   };
 
-  const updateLoanStatus = () => {
+  const updateLoanStatus = (status, type) => {
     var module = '';
     var page = '';
 
@@ -1802,7 +1843,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       subStageCode: 'PRF_SHRT',
       moduleCode: module,
       pageCode: page,
-      status: 'Completed',
+      status: status,
     };
     const baseURL = global.PORT1;
     setLoading(true);
@@ -1816,17 +1857,21 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           );
         setLoading(false);
         if (response.status == 200) {
-          if (global.CLIENTTYPE == 'APPL') {
-            global.COMPLETEDMODULE = 'PRF_SHRT_APLCT';
-            global.COMPLETEDPAGE = 'PRF_SHRT_APLCT_BSC_DTLS';
-          } else if (global.CLIENTTYPE == 'CO-APPL') {
-            global.COMPLETEDMODULE = 'PRF_SHRT_COAPLCT';
-            global.COMPLETEDPAGE = 'PRF_SHRT_COAPLCT_BSC_DTLS';
-          } else if (global.CLIENTTYPE == 'GRNTR') {
-            global.COMPLETEDMODULE = 'PRF_SHRT_GRNTR';
-            global.COMPLETEDPAGE = 'PRF_SHRT_GRNTR_BSC_DTLS';
+          if (type == '1') {
+            if (global.CLIENTTYPE == 'APPL') {
+              global.COMPLETEDMODULE = 'PRF_SHRT_APLCT';
+              global.COMPLETEDPAGE = 'PRF_SHRT_APLCT_BSC_DTLS';
+            } else if (global.CLIENTTYPE == 'CO-APPL') {
+              global.COMPLETEDMODULE = 'PRF_SHRT_COAPLCT';
+              global.COMPLETEDPAGE = 'PRF_SHRT_COAPLCT_BSC_DTLS';
+            } else if (global.CLIENTTYPE == 'GRNTR') {
+              global.COMPLETEDMODULE = 'PRF_SHRT_GRNTR';
+              global.COMPLETEDPAGE = 'PRF_SHRT_GRNTR_BSC_DTLS';
+            }
+            props.navigation.replace('ProfileShortKYCVerificationStatus');
+          } else {
+            props.navigation.replace('HomeScreen');
           }
-          props.navigation.replace('ProfileShortKYCVerificationStatus');
         }
         else if (response.data.statusCode === 201) {
           setApiError(response.data.message);
@@ -1884,9 +1929,13 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
             KycType3Label == '001' ||
             KycType4Label == '001'
           ) {
-            generateAadharOTP();
+            if (clientTypeLabel == 'EXISTING') {
+              setAadharModalVisible(true);
+            } else {
+              generateAadharOTP();
+            }
           } else {
-            updateLoanStatus();
+            updateLoanStatus('Completed', '1');
           }
         } else if (response.data.statusCode === 201) {
           setApiError(response.data.message);
@@ -1994,28 +2043,9 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
               props.updateClientDetails(global.LOANAPPLICATIONID, response.data.clientDetailDto.id, 'clientDetail', response.data.clientDetailDto)
             }
 
-            if (response.data.clientExistingDetails == null) {
-              setClientTypeLabel('NEW');
-              setClientTypeVisible(true);
-              if (global.CLIENTTYPE == 'APPL') {
-                // setErrorModalVisible(true);
-                // setApiError('No Result Found');
-                props.navigation.navigate('LMSLOSDetails');
-              } else {
-                // setErrorModalVisible1(true);
-                // setApiError('No Result Found');
-                props.navigation.navigate('LMSLOSDetails');
-              }
-            } else {
-              props.dedupeAction(response.data);
-              setDedupeModalVisible(true);
-              setClientTypeLabel('EXISTING');
-              setClientTypeVisible(true);
-            }
+            generateLoanAppNum(response.data);
 
-            global.isDedupeDone = '1';
-            setIsDedupeDone(true);
-            setClientTypeVisible(true);
+
             setLoading(false);
             // props.navigation.navigate('AadharOTPVerification', { aadharNumber: aadhar });
             // generateAadharOTP();
@@ -2135,10 +2165,16 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           }
         } else if (response.data.statusCode === 201) {
           setApiError(response.data.message);
-          setErrorModalVisible(true);
+          //setErrorModalVisible(true);
+          props.navigation.navigate('AadharOTPVerification', {
+            aadharNumber: aadhar,
+          });
         } else if (response.data.statusCode === 202) {
           setApiError(response.data.message);
-          setErrorModalVisible(true);
+          //setErrorModalVisible(true);
+          props.navigation.navigate('AadharOTPVerification', {
+            aadharNumber: aadhar,
+          });
         }
 
         setLoading(false);
@@ -2150,26 +2186,24 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
             'MobileOTPApiResponse::::' + JSON.stringify(error.response),
           );
         setLoading(false);
+        props.navigation.navigate('AadharOTPVerification', {
+          aadharNumber: aadhar,
+        });
+        // if (error.response.status == 404) {
+        //   setApiError(Common.error404);
+        //   setErrorModalVisible(true)
+        // } else if (error.response.status == 400) {
+        //   setApiError(Common.error400);
+        //   setErrorModalVisible(true)
+        // } else if (error.response.status == 500) {
+        //   setApiError(Common.error500);
+        //   setErrorModalVisible(true);
 
-        if (error.response.status == 404) {
-          setApiError(Common.error404);
-          setErrorModalVisible(true)
-        } else if (error.response.status == 400) {
-          setApiError(Common.error400);
-          setErrorModalVisible(true)
-        } else if (error.response.status == 500) {
-          setApiError(Common.error500);
-          setErrorModalVisible(true);
-          props.navigation.navigate('AadharOTPVerification', {
-            aadharNumber: aadhar,
-          });
-        } else if (error.response.data != null) {
-          setApiError(error.response.data.message);
-          setErrorModalVisible(true)
-          props.navigation.navigate('AadharOTPVerification', {
-            aadharNumber: aadhar,
-          });
-        }
+        // } else if (error.response.data != null) {
+        //   setApiError(error.response.data.message);
+        //   setErrorModalVisible(true)
+
+        // }
       });
   };
 
@@ -3270,6 +3304,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
 
     } else if (value == 'Reject') {
       setDedupeModalVisible(false);
+      updateLoanStatus('Rejected', '0');
     } else {
       setDedupeModalVisible(false);
     }
@@ -3304,10 +3339,26 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
         setAadharNumber(kycID4);
         aadhar = kycID4;
       }
-      generateAadharOTP();
+      if (clientTypeLabel == 'EXISTING') {
+        setAadharModalVisible(true);
+      } else {
+        generateAadharOTP();
+      }
     } else {
-      updateLoanStatus();
+      updateLoanStatus('Completed', '1');
     }
+  };
+
+  const onAadharModalClick = (type) => {
+
+    if (type == 'Yes') {
+      generateAadharOTP();
+      setAadharModalVisible(false);
+    } else {
+      setAadharModalVisible(false);
+      updateLoanStatus('Completed', '1');
+    }
+
   };
 
   const onGoBack = () => {
@@ -3381,6 +3432,32 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
             textError={language[0][props.language].str_error}
             textClose={language[0][props.language].str_ok}
           />
+
+          <Modal
+            visible={aadharModalVisible}
+            animationType="slide"
+            transparent={true}
+          >
+            <View style={styles.modalContainer}>
+              <View style={styles.modalContent}>
+
+                <View style={{ justifyContent: 'flex-start' }}>
+
+                  <Text style={{ color: Colors.black, fontSize: 18, fontFamily: 'Poppins-Medium' }}>{'Aadhar OTP'}</Text>
+
+                </View>
+                <Text style={{ color: Colors.dimblack, marginTop: 25, fontFamily: 'Poppins-Medium' }}>{'Do you want to generate Aadhar OTP?'}</Text>
+                <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+                  <TouchableOpacity onPress={() => onAadharModalClick('Yes')} style={styles.closeButton}>
+                    <Text style={{ color: Colors.darkblue, fontFamily: 'Poppins-SemiBold', fontSize: 14 }}>Yes</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => onAadharModalClick('No')} style={[styles.closeButton, { marginLeft: 20 }]}>
+                    <Text style={{ color: Colors.darkblue, fontFamily: 'Poppins-SemiBold', fontSize: 14 }}>No</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </Modal>
 
           <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
             <View style={{ width: '90%', marginTop: 3 }}>
@@ -4343,10 +4420,16 @@ const styles = StyleSheet.create({
     margin: 0,
   },
   modalContent: {
+    width: '80%',
     backgroundColor: 'white',
-    padding: 16,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    padding: 20,
+    borderRadius: 8,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // semi-transparent background
   },
 });
 
