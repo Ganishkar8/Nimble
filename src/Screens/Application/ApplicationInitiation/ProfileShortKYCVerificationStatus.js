@@ -169,6 +169,8 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const [KycSourceLabel, setKycSourceLabel] = useState('');
   const [KycSourceIndex, setKycSourceIndex] = useState('');
 
+  const [dobImageUploadVisible, setDOBImageUploadVisible] = useState(false);
+  const [kycID1ImageUploadVisible, setkycID1ImageUploadVisible] = useState(false);
 
   const [expiryDate1, setExpiry1Date] = useState('');
   const [expiryDate2, setExpiry2Date] = useState('');
@@ -265,6 +267,10 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     } else {
       setHideRetake(false);
       setHideDelete(false);
+    }
+
+    if (global.ALLOWEDIT == "0") {
+      fieldsdisable();
     }
 
   }, [props.navigation]);
@@ -742,6 +748,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       if (value.clientManualKycLink[0].clientManualDobs) {
         if (value.clientManualKycLink[0].clientManualDobs.length > 0) {
           setdobDmsId(value.clientManualKycLink[0].clientManualDobs[0]?.dobDmsId)
+          setDOB(Common.convertDateFormat(value.clientManualKycLink[0].clientManualDobs[0]?.dateOfBirth))
         }
       }
       if (value.clientManualKycLink[0].clientManualKycs) {
@@ -750,10 +757,19 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
         }
       }
     } else {
-      setDOB(Common.convertDateFormat(value.dateOfBirth))
+
       if (value.lmsClientId) {
         if (value.isAadharNumberVerified) {
           setKycSourceLabel('EVRF');
+          if (value.dateOfBirth) {
+            if (isValidDob(value.dateOfBirth)) {
+              setDOBDisable(true)
+            } else {
+              setDOBDisable(false)
+            }
+          } else {
+            setDOBDisable(false)
+          }
         } else {
           if (value.isKycManual) {
             setKycSourceLabel('MNL');
@@ -764,9 +780,21 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       } else {
         if (value.isAadharNumberVerified) {
           setKycSourceLabel('EVRF');
+          if (value.dateOfBirth) {
+            if (isValidDob(value.dateOfBirth)) {
+              setDOBDisable(true)
+            } else {
+              setDOBDisable(false)
+            }
+          } else {
+            setDOBDisable(false)
+          }
         } else {
           setKycSourceLabel('MNL');
         }
+      }
+      if (value.dateOfBirth) {
+        setDOB(Common.convertDateFormat(value?.dateOfBirth))
       }
     }
 
@@ -1139,7 +1167,15 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
   const uploadImage = async () => {
 
-    if (onlyView) {
+    if (global.ALLOWEDIT == '0') {
+      if (global.CLIENTTYPE == 'APPL') {
+        page = 'PRF_SHRT_APLCT_PRSNL_DTLS';
+      } else if (global.CLIENTTYPE == 'CO-APPL') {
+        page = 'PRF_SHRT_COAPLCT_PRSNL_DTLS';
+      } else if (global.CLIENTTYPE == 'GRNTR') {
+        page = 'PRF_SHRT_GRNTR_PRSNL_DTLS';
+      }
+      await Common.getPageStatus(global.FILTEREDPROCESSMODULE, page)
       navigatetoPersonal();
       return;
     }

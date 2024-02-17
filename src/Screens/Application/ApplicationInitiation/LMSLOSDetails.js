@@ -25,7 +25,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useIsFocused } from '@react-navigation/native';
 import { addLoanInitiationDetails, updateLoanInitiationDetails, deleteLoanInitiationDetails, updateClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
-
+import { deleteDedupe } from '../../../Utils/redux/actions/ProfileAction';
 
 const LMSLOSDetails = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
@@ -63,7 +63,7 @@ const LMSLOSDetails = (props, { navigation }) => {
         loanOriginationDedupeCheck();
         updateBasicDedupe();
 
-    }, [props.navigation, isScreenVisible]);
+    }, [props.navigation]);
 
 
     useEffect(() => {
@@ -96,6 +96,75 @@ const LMSLOSDetails = (props, { navigation }) => {
         }
 
 
+    };
+
+    const updateLoanStatus = () => {
+        var module = '';
+        var page = '';
+
+        if (global.CLIENTTYPE == 'APPL') {
+            module = 'PRF_SHRT_APLCT';
+            page = 'PRF_SHRT_APLCT_BSC_DTLS';
+        } else if (global.CLIENTTYPE == 'CO-APPL') {
+            module = 'PRF_SHRT_COAPLCT';
+            page = 'PRF_SHRT_COAPLCT_BSC_DTLS';
+        } else if (global.CLIENTTYPE == 'GRNTR') {
+            module = 'PRF_SHRT_GRNTR';
+            page = 'PRF_SHRT_GRNTR_BSC_DTLS';
+        }
+
+        const appDetails = {
+            loanApplicationId: global.LOANAPPLICATIONID,
+            loanWorkflowStage: 'LN_APP_INITIATION',
+            subStageCode: 'PRF_SHRT',
+            moduleCode: module,
+            pageCode: page,
+            status: 'Rejected',
+        };
+        const baseURL = global.PORT1;
+        setLoading(true);
+        apiInstance(baseURL)
+            .post(`/api/v2/loan-application-status/updateStatus`, appDetails)
+            .then(async response => {
+                // Handle the response data
+                if (global.DEBUG_MODE)
+                    console.log(
+                        'UpdateStatusApiResponse::' + JSON.stringify(response.data),
+                    );
+                setLoading(false);
+                if (response.status == 200) {
+                    props.navigation.replace('HomeScreen');
+                }
+                else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
+            })
+            .catch(error => {
+                // Handle the error
+                if (global.DEBUG_MODE)
+                    console.log(
+                        'UpdateStatusApiResponse' + JSON.stringify(error.response),
+                    );
+                setLoading(false);
+
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
     };
 
 
@@ -184,21 +253,32 @@ const LMSLOSDetails = (props, { navigation }) => {
                 setLmsDedupeCheck(true);
                 setLosDedupeCheck(false);
             } else {
-                appDetails.clientExistingDetails = {
-                    "kycTypeId1": clientDetail.kycTypeId1,
-                    "kycIdValue1": clientDetail.kycIdValue1,
-                    "kycTypeId2": clientDetail.kycTypeId2,
-                    "kycIdValue2": clientDetail.kycIdValue2,
-                    "kycTypeId3": clientDetail.kycTypeId3,
-                    "kycIdValue3": clientDetail.kycIdValue3,
-                    "kycTypeId4": clientDetail.kycTypeId4,
-                    "kycIdValue4": clientDetail.kycIdValue4,
-                    "emailId": clientDetail.email,
-                    "mobileNumber": clientDetail.mobileNumber
+
+                if (clientDetail.lmsClientId) {
+                    setLmsDedupeCheck(true);
+                    setLosDedupeCheck(false);
+                    appDetails.clientExistingDetails = {
+                        "lmsClientId": clientDetail.lmsClientId,
+                    }
+                } else {
+                    setLmsDedupeCheck(false);
+                    setLosDedupeCheck(true);
+                    setOnlyLOS(true);
+                    appDetails.clientExistingDetails = {
+                        "kycTypeId1": clientDetail.kycTypeId1,
+                        "kycIdValue1": clientDetail.kycIdValue1,
+                        "kycTypeId2": clientDetail.kycTypeId2,
+                        "kycIdValue2": clientDetail.kycIdValue2,
+                        "kycTypeId3": clientDetail.kycTypeId3,
+                        "kycIdValue3": clientDetail.kycIdValue3,
+                        "kycTypeId4": clientDetail.kycTypeId4,
+                        "kycIdValue4": clientDetail.kycIdValue4,
+                        "emailId": clientDetail.email,
+                        "mobileNumber": clientDetail.mobileNumber
+                    }
                 }
-                setLmsDedupeCheck(false);
-                setLosDedupeCheck(true);
-                setOnlyLOS(true);
+
+
             }
         }
 
@@ -217,6 +297,11 @@ const LMSLOSDetails = (props, { navigation }) => {
                     setLoading(false);
                     if (response.data) {
 
+                        response.data.forEach(item => {
+                            if (item.remarks.length > 1) {
+                                item.remarks = item.remarks.substring(1, item.remarks.length - 1).replace(/\n, /g, '\n');
+                            }
+                        });
                         const lmsData = response.data.filter(item => item.businessRuleCode == 'LMS_DEDUPE')
                         const losData = response.data.filter(item => item.businessRuleCode == 'LOS_DEDUPE')
                         setlmsData(lmsData);
@@ -260,9 +345,15 @@ const LMSLOSDetails = (props, { navigation }) => {
     const onGoBack = () => {
         if (lmsDedupeCheck) {
             props.navigation.goBack();
+            props.deleteDedupe();
         } else {
-            setLosDedupeCheck(false);
-            setLmsDedupeCheck(true);
+            if (onlyLOS) {
+                props.navigation.goBack();
+                props.deleteDedupe();
+            } else {
+                setLosDedupeCheck(false);
+                setLmsDedupeCheck(true);
+            }
         }
     };
 
@@ -349,7 +440,7 @@ const LMSLOSDetails = (props, { navigation }) => {
                     textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
                     viewStyle={[Commonstyles.buttonView, { width: '50%' }]}
                     innerStyle={Commonstyles.buttonViewInnerStyle}
-                    handleClick={onButtonClick}
+                    handleClick={updateLoanStatus}
                     value={'Reject'}
                 />
             </View>
@@ -414,6 +505,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = dispatch => ({
     languageAction: item => dispatch(languageAction(item)),
     updateClientDetails: (loanApplicationId, clientId, key, data) => dispatch(updateClientDetails(loanApplicationId, clientId, key, data)),
+    deleteDedupe: item => dispatch(deleteDedupe()),
     updateLoanInitiationDetails: (loanApplicationId, loanData, key, clientId, updatedDetails) => dispatch(updateLoanInitiationDetails(loanApplicationId, loanData, key, clientId, updatedDetails)),
 });
 

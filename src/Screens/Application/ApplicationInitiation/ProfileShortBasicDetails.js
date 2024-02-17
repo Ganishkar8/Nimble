@@ -422,6 +422,11 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     if (isDedupeDone) {
       fieldsDisable();
     }
+    if (global.ALLOWEDIT == '0') {
+      fieldsDisable();
+      setWorkflowIDDisable(true);
+      setLoanAmountDisable(true);
+    }
   }, [isDedupeDone]);
   // useEffect(() => {
 
@@ -513,8 +518,6 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
 
       if (global.CLIENTTYPE == 'APPL') {
         getLoanData(filteredData[0]);
-      } else {
-        setClientTypeVisible(false);
       }
       const clientDetail = filteredData[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
 
@@ -1335,8 +1338,19 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     }
   };
 
-  const postBasicDetails = () => {
-    if (onlyView) {
+  const postBasicDetails = async () => {
+    if (global.ALLOWEDIT == '0') {
+      if (global.CLIENTTYPE == 'APPL') {
+        module = 'PRF_SHRT_APLCT';
+        page = 'PRF_SHRT_APLCT_VRF_STATUS';
+      } else if (global.CLIENTTYPE == 'CO-APPL') {
+        module = 'PRF_SHRT_COAPLCT';
+        page = 'PRF_SHRT_COAPLCT_VRF_STATUS';
+      } else if (global.CLIENTTYPE == 'GRNTR') {
+        module = 'PRF_SHRT_GRNTR';
+        page = 'PRF_SHRT_GRNTR_VRF_STATUS';
+      }
+      await Common.getPageStatus(global.FILTEREDPROCESSMODULE, page)
       props.navigation.replace('ProfileShortKYCVerificationStatus');
       return;
     }
@@ -1432,7 +1446,12 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           setLoading(false);
           if (response.status === 200) {
 
-            props.updateLoanInitiationDetails(parseInt(global.LOANAPPLICATIONID), { customerType: loanDetail.customerType }, 'clientDetail', response.data.id, response.data)
+            if (global.CLIENTTYPE == 'APPL') {
+              props.updateLoanInitiationDetails(parseInt(global.LOANAPPLICATIONID), { customerType: loanDetail.customerType }, 'clientDetail', response.data.id, response.data)
+            } else {
+              props.updateLoanInitiationDetails(parseInt(global.LOANAPPLICATIONID), [], 'clientDetail', response.data.id, response.data)
+            }
+
 
             // if (global.CLIENTTYPE == 'APPL') {
             //   generateLoanAppNum();
@@ -1523,6 +1542,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           loanPurpose: LoanPurposeLabel,
           product: ProductTypeLabel,
           workflowId: workflowIDLabel,
+          //workflowId: 134,
           loanAmount: parseInt(LoanAmount),
           consent: true,
           applicationAppliedBy: global.USERID,
@@ -1623,7 +1643,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       setLoading(true);
       apiInstance(baseURL)
         .put(
-          `api/v2/profile-short/basic-details/${global.LOANAPPLICATIONID}`,
+          `/api/v2/profile-short/basic-details/${global.LOANAPPLICATIONID}`,
           appDetails,
         )
         .then(async response => {
@@ -1633,7 +1653,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
             console.log(
               'LeadCreationBasicApiResponse::' + JSON.stringify(response.data),
             );
-          setLoading(false);
+
           if (response.status === 200) {
             if (global.CLIENTTYPE == 'APPL') {
               global.CLIENTID = response.data.clientDetail[0].id;
@@ -1647,6 +1667,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
               if (global.CLIENTTYPE == 'APPL') {
                 generateLoanAppNum();
               } else {
+                setLoading(false);
                 if (
                   KycType1Label == '001' ||
                   KycType2Label == '001' ||
@@ -1666,9 +1687,11 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
               internalDedupeCheck();
             }
           } else if (response.data.statusCode === 201) {
+            setLoading(false);
             setApiError(response.data.message);
             setErrorModalVisible(true);
           } else if (response.data.statusCode === 202) {
+            setLoading(false);
             setApiError(response.data.message);
             setErrorModalVisible(true);
           }
@@ -1730,7 +1753,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       showBottomSheet();
     } else {
       //const clientDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
-
+      setLoading(true);
       var lmsID = '';
       // if (clientDetail.lmsClientId) {
       //   lmsID = clientDetail.lmsClientId;
@@ -1761,23 +1784,27 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
               if (global.CLIENTTYPE == 'APPL') {
                 // setErrorModalVisible(true);
                 // setApiError('No Result Found');
+
                 props.navigation.navigate('LMSLOSDetails');
+                setLoading(false);
               } else {
                 // setErrorModalVisible1(true);
                 // setApiError('No Result Found');
                 props.navigation.navigate('LMSLOSDetails');
+                setLoading(false);
               }
             } else {
               props.dedupeAction(dedupeData);
               setDedupeModalVisible(true);
               setClientTypeLabel('EXISTING');
               setClientTypeVisible(true);
+              setLoading(false);
             }
 
             global.isDedupeDone = '1';
             setIsDedupeDone(true);
             setClientTypeVisible(true);
-            setLoading(false);
+
             // if (
             //   KycType1Label == '001' ||
             //   KycType2Label == '001' ||
@@ -2046,13 +2073,15 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
             generateLoanAppNum(response.data);
 
 
-            setLoading(false);
+
             // props.navigation.navigate('AadharOTPVerification', { aadharNumber: aadhar });
             // generateAadharOTP();
           } else if (response.data.statusCode === 201) {
+            setLoading(false);
             setApiError(response.data.message);
             setErrorModalVisible(true);
           } else if (response.data.statusCode === 202) {
+            setLoading(false);
             setApiError(response.data.message);
             setErrorModalVisible(true);
           }
@@ -2138,6 +2167,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   };
 
   const generateAadharOTP = () => {
+    getAadhar();
     const appDetails = {
       clientId: global.CLIENTID,
       aadharNumber: aadhar,
@@ -2207,12 +2237,8 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       });
   };
 
-  const validate = () => {
-    var flag = false;
-    isAadharAvailable = false;
-    var i = 1;
-    var errorMessage = '';
 
+  const getAadhar = () => {
     if (KycType1Label == '001') {
       setAadharNumber(kycID1);
       aadhar = kycID1;
@@ -2230,6 +2256,15 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       aadhar = kycID4;
       isAadharAvailable = true;
     }
+  }
+
+  const validate = () => {
+    var flag = false;
+    isAadharAvailable = false;
+    var i = 1;
+    var errorMessage = '';
+
+    getAadhar();
 
     if (relationTypeMan && relationTypeVisible) {
       if (relationTypeLabel.length <= 0) {
@@ -2674,18 +2709,19 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           '\n';
         i++;
         flag = true;
-      } else if (isMobileVerified == '0') {
-        errorMessage =
-          errorMessage +
-          i +
-          ')' +
-          ' ' +
-          language[0][props.language].str_plsverify +
-          mobileNumberCaption +
-          '\n';
-        i++;
-        flag = true;
       }
+      //else if (isMobileVerified == '0') {
+      //   errorMessage =
+      //     errorMessage +
+      //     i +
+      //     ')' +
+      //     ' ' +
+      //     language[0][props.language].str_plsverify +
+      //     mobileNumberCaption +
+      //     '\n';
+      //   i++;
+      //   flag = true;
+      // }
     }
 
     if (mobileNumber.length > 0) {
@@ -4373,6 +4409,16 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
             </View>
           )}
         </View>
+
+        {isDedupeDone &&
+          <ButtonViewComp
+            textValue={language[0][props.language].str_viewDedupeResult}
+            textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
+            viewStyle={Commonstyles.buttonView}
+            innerStyle={Commonstyles.buttonViewInnerStyle}
+            handleClick={() => { props.navigation.navigate('LMSLOSDetails'); }}
+          />
+        }
 
         <ButtonViewComp
           textValue={

@@ -784,7 +784,7 @@ const LoanAddressDetails = (props, { navigation }) => {
             const baseURL = '8901';
             setLoading(true);
             apiInstance(baseURL)
-                .post(`api/v2/profile-short/address-details/${global.CLIENTID}`, appDetails)
+                .post(`/api/v2/profile-short/address-details/${global.CLIENTID}`, appDetails)
                 .then(async response => {
                     // Handle the response data
                     if (global.DEBUG_MODE) console.log('PostAddressResponse::' + JSON.stringify(response.data),);
@@ -846,7 +846,7 @@ const LoanAddressDetails = (props, { navigation }) => {
             const baseURL = '8901';
             setLoading(true);
             apiInstance(baseURL)
-                .put(`api/v2/profile-short/address-details/${addressID}`, appDetails)
+                .put(`/api/v2/profile-short/address-details/${addressID}`, appDetails)
                 .then(async response => {
                     // Handle the response data
                     if (global.DEBUG_MODE) console.log('UpdateAddressResponse::' + JSON.stringify(response.data),);
@@ -874,7 +874,7 @@ const LoanAddressDetails = (props, { navigation }) => {
         const baseURL = '8082';
         setLoading(true);
         apiInstance(baseURL)
-            .get(`api/v1/pincode/new/${pincode}`)
+            .get(`/api/v1/pincode/new/${pincode}`)
             .then(async response => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log('PincodeApiResponse::' + JSON.stringify(response.data),);

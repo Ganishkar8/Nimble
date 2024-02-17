@@ -822,7 +822,7 @@ const BankDetailsScreen = (props, { navigation }) => {
         const baseURL = global.PORT4;
         setLoading(true);
         apiInstance(baseURL)
-            .get(`api/v1/ifsc-config/getByIfsc/${IFSC}`)
+            .get(`/api/v1/ifsc-config/getByIfsc/${IFSC}`)
             .then(async response => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log('IFSCApiResponse::' + JSON.stringify(response.data));

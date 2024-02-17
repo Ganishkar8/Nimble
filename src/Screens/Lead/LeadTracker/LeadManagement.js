@@ -359,7 +359,7 @@ const LeadManagement = (props, { navigation, route }) => {
                 "sort": sort
             }
         }
-        apiInstance(baseURL).post(`api/v1/${url}/${global.USERID}`, appDetails)
+        apiInstance(baseURL).post(`/api/v1/${url}/${global.USERID}`, appDetails)
             .then((response) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(response.data));
@@ -420,7 +420,7 @@ const LeadManagement = (props, { navigation, route }) => {
         const baseURL = global.PORT1
         setLoading(true)
 
-        apiInstance(baseURL).get(`api/v1/lead-creation-initiation/getByLeadId/${leadID}`)
+        apiInstance(baseURL).get(`/api/v1/lead-creation-initiation/getByLeadId/${leadID}`)
             .then((response) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(response.data));
@@ -644,7 +644,7 @@ const LeadManagement = (props, { navigation, route }) => {
 
     const callAgentNameApi = () => {
         setLoading(true);
-        apiInstance(global.PORT1).get(`api/v1/dropdown/{supervisorId}?supervisorId=${global.USERID}`)
+        apiInstance(global.PORT1).get(`/api/v1/dropdown/{supervisorId}?supervisorId=${global.USERID}`)
             .then(async (response) => {
 
                 setLoading(false);

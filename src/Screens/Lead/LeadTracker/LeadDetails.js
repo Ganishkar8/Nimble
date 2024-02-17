@@ -115,7 +115,7 @@ const LeadDetails = (props, { navigation, route }) => {
     const getLeadData = () => {
         const baseURL = global.PORT1
         setLoading(true)
-        apiInstance(baseURL).get(`api/v1/lead-creation-initiation/getByLeadId/${props.route.params.leadData.id}`)
+        apiInstance(baseURL).get(`/api/v1/lead-creation-initiation/getByLeadId/${props.route.params.leadData.id}`)
             .then((response) => {
 
                 setLoading(false)

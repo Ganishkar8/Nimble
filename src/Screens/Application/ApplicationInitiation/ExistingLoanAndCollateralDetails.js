@@ -8,6 +8,7 @@ import {
     Image,
     Text,
     FlatList,
+    BackHandler
 } from 'react-native';
 import apiInstance from '../../../Utils/apiInstance';
 import Colors from '../../../Utils/Colors';
@@ -66,11 +67,16 @@ const ExistingLoanAndCollateralDetails = (props, { navigation }) => {
         props.navigation
             .getParent()
             ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
+        const backHandler = BackHandler.addEventListener(
+            'hardwareBackPress',
+            handleBackButton,
+        );
 
         return () => {
             props.navigation
                 .getParent()
                 ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
+            backHandler.remove();
         };
     }, [isScreenVisible]);
 
@@ -176,13 +182,15 @@ const ExistingLoanAndCollateralDetails = (props, { navigation }) => {
         props.navigation.navigate('RemarksScreen', { "remarks": remarks });
     }
 
+    const handleBackButton = () => {
+        onGoBack();
+        return true; // Prevent default back button behavior
+    };
+
     const onGoBack = () => {
-        if (lmsDedupeCheck) {
-            props.navigation.goBack();
-        } else {
-            setLosDedupeCheck(false);
-            setLmsDedupeCheck(true);
-        }
+
+        props.navigation.goBack();
+
     };
 
     const LoanView = ({ item, index }) => {

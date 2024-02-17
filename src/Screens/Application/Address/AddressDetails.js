@@ -175,7 +175,10 @@ const AddressDetails = (props, { navigation }) => {
 
   const [addressID, setAddressID] = useState('');
   const [addressDmsID, setAddressDmsID] = useState('');
-  const [isKYC, setIsKYC] = useState('');
+
+  const [isKYC, setIsKYC] = useState(false);
+  const [isLms, setIsLms] = useState(false);
+  const [isUdyam, setIsUdyam] = useState(false);
 
 
   const [postorput, setPostORPut] = useState('post');
@@ -457,7 +460,9 @@ const AddressDetails = (props, { navigation }) => {
     if (data.isKyc === "1") {
       disableAadharFields(data)
     }
-    setIsKYC(data.isKyc);
+    setIsKYC(data.isEkyc);
+    setIsLms(data.isLms);
+    setIsUdyam(data.isUdyam);
   }
 
   const getPermanentAddressData = () => {
@@ -507,7 +512,7 @@ const AddressDetails = (props, { navigation }) => {
             setYearsAtCityDisable(false);
             setAddressTypeDisable(false);
             setsameAsPermDisable(false);
-            setIsKYC('0');
+            setIsKYC(false);
           }
 
         }
@@ -575,8 +580,17 @@ const AddressDetails = (props, { navigation }) => {
             if (global.USERTYPEID == 1163) {
               setOnlyView(true);
               fieldsDisable();
+            } else {
+              if (global.ALLOWEDIT == "0") {
+                setOnlyView(true);
+                fieldsDisable();
+              }
             }
           } else {
+            if (global.ALLOWEDIT == "0") {
+              setOnlyView(true);
+              fieldsDisable();
+            }
             setKYCManual('1');
           }
 
@@ -1129,7 +1143,7 @@ const AddressDetails = (props, { navigation }) => {
       const baseURL = global.PORT1;
       setLoading(true);
       apiInstance(baseURL)
-        .post(`api/v2/profile-short/address-details/${global.CLIENTID}`, appDetails)
+        .post(`/api/v2/profile-short/address-details/${global.CLIENTID}`, appDetails)
         .then(async response => {
           // Handle the response data
           if (global.DEBUG_MODE) console.log('PostAddressResponse::' + JSON.stringify(response.data),);
@@ -1209,7 +1223,7 @@ const AddressDetails = (props, { navigation }) => {
       const baseURL = global.PORT1;
       setLoading(true);
       apiInstance(baseURL)
-        .put(`api/v2/profile-short/address-details/${addressID}`, appDetails)
+        .put(`/api/v2/profile-short/address-details/${addressID}`, appDetails)
         .then(async response => {
           // Handle the response data
           if (global.DEBUG_MODE) console.log('UpdateAddressResponse::' + JSON.stringify(response.data));
@@ -1261,7 +1275,7 @@ const AddressDetails = (props, { navigation }) => {
     const baseURL = global.PORT4;
     setLoading(true);
     apiInstance(baseURL)
-      .get(`api/v1/pincode/new/${pincode}`)
+      .get(`/api/v1/pincode/new/${pincode}`)
       .then(async response => {
         // Handle the response data
         if (global.DEBUG_MODE) console.log('PincodeApiResponse::' + JSON.stringify(response.data),);

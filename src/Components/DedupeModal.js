@@ -12,16 +12,40 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { it } from 'react-native-paper-dates';
 import CheckBoxComp from './CheckBoxComp';
+import CheckBox from '@react-native-community/checkbox';
 
 const DedupeModal = props => {
+
+    const [clientData, setClientData] = React.useState([]);
+    const [oneSelected, setOneSelected] = React.useState(false);
 
     const setValue = (ComponentName, txt) => {
         props.handleClick(ComponentName, txt);
     };
 
-    const setValue1 = (ComponentName, txt) => {
+    const valueChange = (item) => {
+        let fiterStatusPosition = clientData
+        for (let i = 0; i < fiterStatusPosition.length; i++) {
+            if (fiterStatusPosition[i].lmsClientId == item.lmsClientId) {
+                fiterStatusPosition[i].isSelected = !fiterStatusPosition[i].isSelected
+            } else {
+                fiterStatusPosition[i].isSelected = false
+            }
+        }
+        const isAtLeastOneSelected = fiterStatusPosition.some(item => item.isSelected);
+        setOneSelected(isAtLeastOneSelected);
+        setClientData(fiterStatusPosition)
+    }
 
-    };
+    React.useEffect(() => {
+        //updateAgeData(formattedServerDatee, formattedServerDatee)
+        const extraJson = { isSelected: false };
+        if (props.dedupeDetails.clientExistingDetails) {
+            const updatedList = props.dedupeDetails.clientExistingDetails.map(item => ({ ...item, ...extraJson }));
+            setClientData(updatedList);
+        }
+
+    }, [props]);
 
     return (
         <Modal
@@ -37,13 +61,13 @@ const DedupeModal = props => {
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, flexDirection: 'row' }}>
                             <TextComp textVal={`${language[0][props.language].str_clientdedupecheck}${props.dedupeDetails.remarks ? 'Failed' : ''}`} textStyle={{ width: '90%', color: Colors.darkblack, fontFamily: 'Poppins-Medium', fontSize: 16 }} Visible={false} />
 
-                            {/* <TouchableOpacity onPress={() => props.onClose('Cancel')} style={{ justifyContent: 'center' }}>
+                            <TouchableOpacity onPress={() => props.onClose('Cancel')} style={{ justifyContent: 'center' }}>
                                 <View >
 
                                     <Entypo name='cross' size={23} color={Colors.darkblack} />
 
                                 </View>
-                            </TouchableOpacity> */}
+                            </TouchableOpacity>
                         </View>
 
                         {props.dedupeDetails.remarks ? (
@@ -53,10 +77,10 @@ const DedupeModal = props => {
                                 </Text>
                             </View>
                         ) : (
-                            <View style={{ width: '90%' }}>
+                            <View style={{ width: '100%', marginTop: 15 }}>
 
                                 <FlatList
-                                    data={props.dedupeDetails.clientExistingDetails}
+                                    data={clientData}
                                     showsHorizontalScrollIndicator={false}
                                     keyExtractor={(item, index) => index.toString()}
                                     renderItem={({ item, index }) => {
@@ -64,17 +88,26 @@ const DedupeModal = props => {
 
                                             <View style={{ width: '100%', flexDirection: 'row', color: Colors.white, justifyContent: 'center' }}>
 
+                                                <CheckBox
+                                                    value={item.isSelected}
+                                                    disabled={false}
+                                                    onValueChange={() => { valueChange(item) }}
+                                                    color="#000000"
+                                                    style={styles.checkbox}
+                                                    tintColors={{ true: Colors.darkblue }}
+                                                />
+
                                                 <View style={{ width: '90%' }}>
                                                     <Text style={[{ color: Colors.lightgrey, fontFamily: 'PoppinsRegular', fontSize: 12 }]}>CLIENT ID - CLIENT NAME - BRANCH</Text>
                                                     <Text style={[{ color: Colors.mediumgrey, fontFamily: 'Poppins-Medium', fontSize: 12, marginTop: 5 }]}>{`${item.lmsClientId} - ${item.lmsCustomerName} - ${item.branchId}`}</Text>
                                                 </View>
-                                                <TouchableOpacity onPress={() => alert('cancel')} style={{ justifyContent: 'center', alignItems: 'center', width: '10%' }}>
+                                                {/* <TouchableOpacity onPress={() => alert('cancel')} style={{ justifyContent: 'center', alignItems: 'center', width: '10%' }}>
                                                     <View >
 
                                                         <AntDesign name='eye' size={23} color={Colors.darkblue} />
 
                                                     </View>
-                                                </TouchableOpacity>
+                                                </TouchableOpacity> */}
                                             </View>
 
                                         )
@@ -84,22 +117,26 @@ const DedupeModal = props => {
                             </View>
                         )}
 
-                        <View style={{ width: '100%', flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'flex-end', alignSelf: 'flex-end', marginTop: 20 }}>
 
+                    </View>
+
+
+
+                    <View style={{ width: '100%', height: 'auto', flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'flex-end', alignSelf: 'flex-end', marginTop: 20, }}>
+                        {!(props.dedupeDetails.remarks) && oneSelected &&
                             <TouchableOpacity onPress={() => { props.onClose("Proceed") }} style={styles.closeButton}>
                                 <Text style={{ color: Colors.darkblue, fontWeight: 500 }}>{language[0][props.language].str_proceed}</Text>
                             </TouchableOpacity>
+                        }
 
-                            <TouchableOpacity onPress={() => { props.onClose("Reject") }} style={styles.closeButton}>
-                                <Text style={{ color: Colors.darkblue, fontWeight: 500 }}>{language[0][props.language].str_reject}</Text>
-                            </TouchableOpacity>
-
-                        </View>
-
+                        <TouchableOpacity onPress={() => { props.onClose("Reject") }} style={styles.closeButton}>
+                            <Text style={{ color: Colors.darkblue, fontWeight: 500 }}>{language[0][props.language].str_reject}</Text>
+                        </TouchableOpacity>
 
                     </View>
 
                 </View>
+
             </View>
         </Modal >
     );
@@ -114,11 +151,16 @@ const styles = StyleSheet.create({
     },
     modalContent: {
         width: '80%',
+        height: 'auto',
         backgroundColor: 'white',
         padding: 20,
-        aspectRatio: 1.5,
         borderRadius: 10,
         alignItems: 'center',
+    },
+    checkbox: {
+        alignSelf: 'center',
+        borderColor: Colors.black,
+        fontFamily: 'PoppinsRegular'
     },
     closeButton: {
         marginTop: 10,

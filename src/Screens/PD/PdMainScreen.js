@@ -82,7 +82,7 @@ const PdMainScreen = (props, { navigation }) => {
         setLoading(true)
 
 
-        apiInstance(baseURL).post(`api/v1/pd/PDMaster/findByLoanApplicationId/${global.LOANAPPLICATIONID}`)
+        apiInstance(baseURL).post(`/api/v1/pd/PDMaster/findByLoanApplicationId/${global.LOANAPPLICATIONID}`)
             .then((response) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(response.data));
@@ -134,7 +134,7 @@ const PdMainScreen = (props, { navigation }) => {
             "subCode": global.PDSTAGE //props.route.params.PDData.subStage
         }
 
-        apiInstance(baseURL).post(`api/v2/PD/Update/PD_WORKFLOW/createWorkFlow`, appDetails)
+        apiInstance(baseURL).post(`/api/v2/PD/Update/PD_WORKFLOW/createWorkFlow`, appDetails)
             .then((response) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(response.data));

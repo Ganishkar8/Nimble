@@ -20,6 +20,7 @@ import { languageAction } from '../../../Utils/redux/actions/languageAction';
 import { language } from '../../../Utils/LanguageString';
 import Commonstyles from '../../../Utils/Commonstyles';
 import HeadComp from '../../../Components/HeadComp';
+import { deleteDedupe } from '../../../Utils/redux/actions/ProfileAction';
 import ProgressComp from '../../../Components/ProgressComp';
 import tbl_SystemMandatoryFields from '../../../Database/Table/tbl_SystemMandatoryFields';
 import Modal from 'react-native-modal';
@@ -127,8 +128,6 @@ const ProfileShortExistingClientDetails = (props, { navigation }) => {
     'Existing Loan Details',
   );
 
-  const [existingClientDetail, setExistingClientDetail] = useState(props.dedupeDetail.clientExistingDetails);
-  const [existingClientLoanDetail, setExistingClientLoanDetail] = useState(props.dedupeDetail.clientExistingLoanDetails);
   const [apiError, setApiError] = useState('');
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const isScreenVisible = useIsFocused();
@@ -184,7 +183,7 @@ const ProfileShortExistingClientDetails = (props, { navigation }) => {
     setLoading(true);
     apiInstance(baseURL)
       .post(
-        `api/v1/lms-get-api/getDetailsByClientId/userID/${global.USERID}/clientId/${clientDetail.lmsClientId}`,
+        `/api/v1/lms-get-api/getDetailsByClientId/userID/${global.USERID}/clientId/${clientDetail.lmsClientId}`,
       )
       .then(async response => {
         // Handle the response data
@@ -260,7 +259,7 @@ const ProfileShortExistingClientDetails = (props, { navigation }) => {
   };
 
   const onButtonClick = () => {
-
+    props.deleteDedupe();
     props.navigation.replace('ProfileShortBasicDetails');
   };
 
@@ -883,6 +882,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = dispatch => ({
   languageAction: item => dispatch(languageAction(item)),
+  deleteDedupe: item => dispatch(deleteDedupe()),
 });
 
 export default connect(

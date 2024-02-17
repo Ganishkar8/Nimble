@@ -202,7 +202,7 @@ const LoanApplicationMain = (props, { navigation }) => {
         const baseURL = global.PORT1;;
         setLoading(true);
         apiInstance(baseURL)
-            .get(`api/v2/current-status/${global.LOANAPPLICATIONID}`)
+            .get(`/api/v2/current-status/${global.LOANAPPLICATIONID}`)
             .then(async response => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log('CBCheckApiResponse::' + JSON.stringify(response.data),);
@@ -343,7 +343,7 @@ const LoanApplicationMain = (props, { navigation }) => {
     const findNavigation = async () => {
 
         let firstIncompleteData = null;
-
+        global.ALLOWEDIT = "1";
         processModuleData.find((data) => {
             if (firstIncompleteData) { return true; }
             const incompleteNestedSubData = data.nestedSubData.filter((nestedData) => nestedData.nestedSubDataIsCompleted === false);
@@ -672,65 +672,101 @@ const LoanApplicationMain = (props, { navigation }) => {
         //    if (global.USERTYPEID == 1163) {
 
         if (item.pageCode == 'PRF_SHRT_APLCT_BSC_DTLS') {
-            global.CLIENTTYPE = 'APPL';
-            global.CURRENTPAGEID = item.pageId;
-            await getClientID(global.CLIENTTYPE);
-            props.navigation.replace('ProfileShortBasicDetails');
+            if (item.nestedSubDataIsCompleted) {
+                global.ALLOWEDIT = "0";
+                global.CLIENTTYPE = 'APPL';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('ProfileShortBasicDetails');
+            }
         } else if (item.pageCode == 'PRF_SHRT_APLCT_VRF_STATUS') {
-            global.CLIENTTYPE = 'APPL';
-            global.CURRENTPAGEID = item.pageId;
-            await getClientID(global.CLIENTTYPE);
-            props.navigation.replace('ProfileShortKYCVerificationStatus');
+            if (item.nestedSubDataIsCompleted) {
+                global.ALLOWEDIT = "0";
+                global.CLIENTTYPE = 'APPL';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('ProfileShortKYCVerificationStatus');
+            }
         } else if (item.pageCode == 'PRF_SHRT_APLCT_PRSNL_DTLS') {
-            global.CLIENTTYPE = 'APPL';
-            global.CURRENTPAGEID = item.pageId;
-            await getClientID(global.CLIENTTYPE);
-            props.navigation.replace('ProfileShortApplicantDetails');
+            if (item.nestedSubDataIsCompleted) {
+                global.ALLOWEDIT = "0";
+                global.CLIENTTYPE = 'APPL';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('ProfileShortApplicantDetails');
+            }
         } else if (item.pageCode == 'PRF_SHRT_APLCT_ADDRS_DTLS') {
-            global.CLIENTTYPE = 'APPL';
-            global.CURRENTPAGEID = item.pageId;
-            await getClientID(global.CLIENTTYPE);
-            props.navigation.replace('AddressMainList');
+            if (item.nestedSubDataIsCompleted) {
+                global.ALLOWEDIT = "0";
+                global.CLIENTTYPE = 'APPL';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('AddressMainList');
+            }
         } else if (item.pageCode == 'PRF_SHRT_COAPLCT_BSC_DTLS') {
-            global.CLIENTTYPE = 'CO-APPL';
-            global.CURRENTPAGEID = item.pageId;
-            await getClientID(global.CLIENTTYPE);
-            props.navigation.replace('ProfileShortBasicDetails');
+            if (item.nestedSubDataIsCompleted) {
+                global.ALLOWEDIT = "0";
+                global.CLIENTTYPE = 'CO-APPL';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('ProfileShortBasicDetails');
+            }
         } else if (item.pageCode == 'PRF_SHRT_COAPLCT_VRF_STATUS') {
-            global.CLIENTTYPE = 'CO-APPL';
-            global.CURRENTPAGEID = item.pageId;
-            await getClientID(global.CLIENTTYPE);
-            props.navigation.replace('ProfileShortKYCVerificationStatus');
+            if (item.nestedSubDataIsCompleted) {
+                global.ALLOWEDIT = "0";
+                global.CLIENTTYPE = 'CO-APPL';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('ProfileShortKYCVerificationStatus');
+            }
         } else if (item.pageCode == 'PRF_SHRT_COAPLCT_PRSNL_DTLS') {
-            global.CLIENTTYPE = 'CO-APPL';
-            global.CURRENTPAGEID = item.pageId;
-            await getClientID(global.CLIENTTYPE);
-            props.navigation.replace('ProfileShortApplicantDetails');
+            if (item.nestedSubDataIsCompleted) {
+                global.ALLOWEDIT = "0";
+                global.CLIENTTYPE = 'CO-APPL';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('ProfileShortApplicantDetails');
+            }
         } else if (item.pageCode == 'PRF_SHRT_COAPLCT_ADDRS_DTLS') {
-            global.CLIENTTYPE = 'CO-APPL';
-            global.CURRENTPAGEID = item.pageId;
-            await getClientID(global.CLIENTTYPE);
-            props.navigation.replace('AddressMainList');
+            if (item.nestedSubDataIsCompleted) {
+                global.ALLOWEDIT = "0";
+                global.CLIENTTYPE = 'CO-APPL';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('AddressMainList');
+            }
         } else if (item.pageCode == 'PRF_SHRT_GRNTR_BSC_DTLS') {
-            global.CLIENTTYPE = 'GRNTR';
-            global.CURRENTPAGEID = item.pageId;
-            await getClientID(global.CLIENTTYPE);
-            props.navigation.replace('ProfileShortBasicDetails');
+            if (item.nestedSubDataIsCompleted) {
+                global.ALLOWEDIT = "0";
+                global.CLIENTTYPE = 'GRNTR';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('ProfileShortBasicDetails');
+            }
         } else if (item.pageCode == 'PRF_SHRT_GRNTR_VRF_STATUS') {
-            global.CLIENTTYPE = 'GRNTR';
-            global.CURRENTPAGEID = item.pageId;
-            await getClientID(global.CLIENTTYPE);
-            props.navigation.replace('ProfileShortKYCVerificationStatus');
+            if (item.nestedSubDataIsCompleted) {
+                global.ALLOWEDIT = "0";
+                global.CLIENTTYPE = 'GRNTR';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('ProfileShortKYCVerificationStatus');
+            }
         } else if (item.pageCode == 'PRF_SHRT_GRNTR_PRSNL_DTLS') {
-            global.CLIENTTYPE = 'GRNTR';
-            global.CURRENTPAGEID = item.pageId;
-            await getClientID(global.CLIENTTYPE);
-            props.navigation.replace('ProfileShortApplicantDetails');
+            if (item.nestedSubDataIsCompleted) {
+                global.ALLOWEDIT = "0";
+                global.CLIENTTYPE = 'GRNTR';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('ProfileShortApplicantDetails');
+            }
         } else if (item.pageCode == 'PRF_SHRT_GRNTR_ADDRS_DTLS') {
-            global.CLIENTTYPE = 'GRNTR';
-            global.CURRENTPAGEID = item.pageId;
-            await getClientID(global.CLIENTTYPE);
-            props.navigation.replace('AddressMainList');
+            if (item.nestedSubDataIsCompleted) {
+                global.ALLOWEDIT = "0";
+                global.CLIENTTYPE = 'GRNTR';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('AddressMainList');
+            }
         } else if (item.pageCode == 'DMGRC_APPL_FMLY_DTLS') {
             if (isLoanCompleted) {
                 global.CLIENTTYPE = 'APPL';

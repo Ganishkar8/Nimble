@@ -291,6 +291,7 @@ export const language = [
       str_collateralvalue: 'COLLATERAL VALUE',
       str_collateralutilization: 'COLLATERAL UTILIZATION',
       str_freecollateral: 'FREE COLLATERAL',
+      str_viewDedupeResult: 'VIEW DEDUPE RESULT',
     },
 
     ta: {

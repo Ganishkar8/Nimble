@@ -90,7 +90,7 @@ const PDItems = (props, { navigation }) => {
         const baseURL = '8901'
         setLoading(true)
 
-        apiInstance(baseURL).post(`api/v1/pd/PDMaster/findByPdSubcode/${global.PDSTAGE}`) //${global.PDSTAGE}
+        apiInstance(baseURL).post(`/api/v1/pd/PDMaster/findByPdSubcode/${global.PDSTAGE}`) //${global.PDSTAGE}
             .then((response) => {
                 // Handle the response data
 

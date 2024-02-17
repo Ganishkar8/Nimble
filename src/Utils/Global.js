@@ -40,6 +40,7 @@ global.CURRENTPAGEID = '';
 global.PDSTAGE = '';
 global.PDSUBSTAGE = '';
 global.PDMODULE = '';
+global.ALLOWEDIT = '0';
 global.PDSUBMODULE = '';
 global.FILTEREDPROCESSMODULE = [];
 global.PDSTAGES = [];

@@ -224,9 +224,14 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
     makeSystemMandatoryFields();
     getSystemCodeDetail();
     getApplicantData();
+
     if (global.USERTYPEID == 1164) {
       setHideDelete(false);
       setHideRetake(false);
+      if (global.ALLOWEDIT == "0") {
+        setOnlyView(true);
+        fieldsDisable();
+      }
     }
     if (global.USERTYPEID == 1164) {
       getlocationPermission();
@@ -658,7 +663,9 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
     if (value.age) {
       setAge(value?.age?.toString() ?? '');
     } else {
-      setAge(Common.calculateAge(Common.convertDateFormat(value.dateOfBirth)).toString())
+      if (value.dateOfBirth) {
+        setAge(Common.calculateAge(Common.convertDateFormat(value.dateOfBirth)).toString())
+      }
     }
 
     setFatherName(value?.fatherName ?? '');
@@ -771,16 +778,19 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
               setFileName(response.data.fileName)
               setVisible(false)
               setImageUri('data:image/png;base64,' + response.data.base64Content)
+              setLoading(false);
               // props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
             }
             else if (response.data.statusCode === 201) {
               setApiError(response.data.message);
               setErrorModalVisible(true);
+              setLoading(false)
             } else if (response.data.statusCode === 202) {
               setApiError(response.data.message);
               setErrorModalVisible(true);
+              setLoading(false)
             }
-            setLoading(false)
+
 
           })
           .catch((error) => {
@@ -812,11 +822,13 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
 
   const uploadImage = async () => {
 
+    if (onlyView) {
+      navigatetoAddress();
+      return;
+    }
+
     if (global.USERTYPEID == 1163) {
-      if (onlyView) {
-        navigatetoAddress();
-        return;
-      } else if (kycManual == '1') {
+      if (kycManual == '1') {
         updateApplicantDetails(docID)
       } else {
         navigatetoAddress();

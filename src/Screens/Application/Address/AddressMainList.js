@@ -101,7 +101,8 @@ const AddressMainList = (props, { navigation }) => {
         if (clientDetail) {
           if (clientDetail.clientManualKycLink) {
             if (clientDetail.clientManualKycLink.length > 0) {
-              if (clientDetail.clientManualKycLink[0].manualKycStatus) {
+
+              if (clientDetail.clientManualKycLink[0].manualKycStatus == 'Approved') {
                 setKYCManual('0');
               } else {
                 setKYCManual('1');
@@ -158,6 +159,9 @@ const AddressMainList = (props, { navigation }) => {
 
       }
     }
+    if (global.ALLOWEDIT == "0") {
+      bg = 'GREY';
+    }
     return (
       <View style={{ marginLeft: 10, marginRight: 10 }}>
         <View>
@@ -201,9 +205,14 @@ const AddressMainList = (props, { navigation }) => {
             if (global.USERTYPEID == 1163) {
 
             } else {
-              if (item.isKyc != '1') {
-                handleClick('delete', item)
+              if (global.ALLOWEDIT == "0") {
+
+              } else {
+                if (item.isKyc != '1') {
+                  handleClick('delete', item)
+                }
               }
+
             }
           }
           }>
@@ -514,7 +523,7 @@ const AddressMainList = (props, { navigation }) => {
     const baseURL = global.PORT1;
     setLoading(true);
     apiInstance(baseURL)
-      .put(`api/v2/profile-short/manualKyc/${global.CLIENTID}`, appDetails)
+      .put(`/api/v2/profile-short/manualKyc/${global.CLIENTID}`, appDetails)
       .then(async response => {
         // Handle the response data
         if (global.DEBUG_MODE) console.log('ApproveKYCApiResponse::' + JSON.stringify(response.data),);

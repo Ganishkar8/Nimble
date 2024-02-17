@@ -183,7 +183,7 @@ const ConsentScreen = (props, { navigation }) => {
 
         const baseURL = global.PORT1
         setLoading(true)
-        apiInstance(baseURL).post(`api/v2/profile-short/loan-creation`, appDetails)
+        apiInstance(baseURL).post(`/api/v2/profile-short/loan-creation`, appDetails)
             .then(async (response) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log("TempIDCreationApiResponse::" + JSON.stringify(response));

@@ -335,7 +335,7 @@ const BankList = (props, { navigation }) => {
         const baseURL = '8901';
         setLoading(true);
         apiInstancelocal(baseURL)
-            .put(`api/v2/profile-short/manualKyc/${global.CLIENTID}`, appDetails)
+            .put(`/api/v2/profile-short/manualKyc/${global.CLIENTID}`, appDetails)
             .then(async response => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log('ApproveKYCApiResponse::' + JSON.stringify(response.data),);
