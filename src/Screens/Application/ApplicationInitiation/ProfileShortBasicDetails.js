@@ -1720,23 +1720,35 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       //   "ID4CaptionID": KycType4Label,
       //   "MobileNo": mobileNumber,
       // }
-      const appDetails = {
-        Method: 'InternalDedupRequest',
-        ID1: KycType1Label,
-        ID1CaptionID: kycID1,
-        ID2: KycType2Label,
-        ID2CaptionID: kycID2,
-        ID3: KycType2Label,
-        ID3CaptionID: kycID3,
-        ID4: KycType1Label,
-        ID4CaptionID: kycID4,
-        MobileNo: mobileNumber,
+      const appDetails =
+      {
+        "userId": global.USERID,
+        "loanApplicationId": global.LOANAPPLICATIONID,
+        "clientId": global.CLIENTID,
+        "clientType": global.CLIENTTYPE,
+        "internalDedeupRequest1": {
+          "Method": "InternalDedupRequest",
+          "ID1": kycID1,
+          "ID1CaptionID": KycType1Label,
+          "ID2": kycID2,
+          "ID2CaptionID": KycType2Label,
+          "ID3": kycID3,
+          "ID3CaptionID": KycType3Label,
+          "ID4": kycID4,
+          "ID4CaptionID": KycType4Label,
+          "MobileNo": mobileNumber,
+          "EmailID": Email,
+          "UniqueRefNo": "18112311"
+        }
+
       };
+
+
       const baseURL = global.PORT1;
       setLoading(true);
       apiInstance(baseURL)
         .post(
-          `/api/v2/profile-short/internal-dedupe-check/${global.USERID}/loanApplicationId/${global.LOANAPPLICATIONID}`,
+          `/api/v2/profile-short/lms-dedupe-check`, appDetails,
           appDetails,
         )
         .then(async response => {
@@ -1745,22 +1757,22 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
             console.log('DedupeApiResponse::' + JSON.stringify(response.data));
           //await tbl_client.deleteAllClient();
           if (response.status == 200) {
-            if (response.data.clientExistingDetails == null) {
-              setClientTypeLabel('NEW');
-              setClientTypeVisible(true);
-              if (global.CLIENTTYPE == 'APPL') {
-                setErrorModalVisible(true);
-                setApiError('No Result Found');
-              } else {
-                setErrorModalVisible1(true);
-                setApiError('No Result Found');
-              }
+            //  if (response.data.clientExistingDetails == null) {
+            setClientTypeLabel('NEW');
+            setClientTypeVisible(true);
+            if (global.CLIENTTYPE == 'APPL') {
+              setErrorModalVisible(true);
+              setApiError('No Result Found');
             } else {
-              props.dedupeAction(response.data);
-              setDedupeModalVisible(true);
-              setClientTypeLabel('EXISTING');
-              setClientTypeVisible(true);
+              setErrorModalVisible1(true);
+              setApiError('No Result Found');
             }
+            // } else {
+            //   props.dedupeAction(response.data);
+            //   setDedupeModalVisible(true);
+            //   setClientTypeLabel('EXISTING');
+            //   setClientTypeVisible(true);
+            // }
 
             global.isDedupeDone = '1';
             setIsDedupeDone(true);
