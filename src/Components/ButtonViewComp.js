@@ -4,10 +4,10 @@ import Colors from '../Utils/Colors';
 import Commonstyles from '../Utils/Commonstyles';
 import TextComp from './TextComp';
 
-const ButtonViewComp = ({ textValue, textStyle, viewStyle, innerStyle, handleClick }) => {
+const ButtonViewComp = ({ textValue, textStyle, viewStyle, innerStyle, handleClick, value }) => {
 
     const onClick = () => {
-        handleClick();
+        handleClick(value);
     };
 
     return (

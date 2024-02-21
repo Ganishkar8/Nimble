@@ -17,17 +17,18 @@ const apiInstancelocal = baseURL => {
     config => {
 
       if (global.DEBUG_MODE) {
-        console.log('MobileRequest::' + JSON.stringify(config));
+        console.log('MobileRequest::' + JSON.stringify(config.baseURL + config.url));
         console.log('MobileRequestHeader::' + config.headers);
         console.log('MobileRequestData::' + JSON.stringify(config.data));
         console.log('MobileRequestbaseUrl::' + config.baseURL);
         const logTime = `------------------------------Date: ${new Date()} --------------------------------------------------------------------\n\n`;
-        const logBaseUrl = `Request Url: ${JSON.stringify(config.data)}\n`;
+        const logBaseUrl = `Request Url: ${JSON.stringify(config.baseURL + config.url)}\n`;
         const logHeader = `Request Headers: ${JSON.stringify(config.headers)}\n`;
+        const logMethod = `Request Method: ${JSON.stringify(config.method)}\n`;
         if (config.data != undefined) {
           var logData = `Request Data: ${JSON.stringify(config.data)}\n\n`;
         }
-        const logcontent = logTime + logBaseUrl + logHeader + logData;
+        const logcontent = logTime + logBaseUrl + logHeader + logMethod + logData;
         writeToFile(logcontent);
       }
       // Modify the request config before it is sent

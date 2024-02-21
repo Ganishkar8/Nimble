@@ -35,6 +35,8 @@ import tbl_bankdetails from '../../../Database/Table/tbl_bankdetails';
 import tbl_loanApplication from '../../../Database/Table/tbl_loanApplication';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import tbl_loanaddressinfo from '../../../Database/Table/tbl_loanaddressinfo';
+import { deleteNestedClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
+
 
 const BankList = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
@@ -73,18 +75,25 @@ const BankList = (props, { navigation }) => {
 
     const getBankData = () => {
 
-        tbl_bankdetails.getAllBankDetailsDetailsForLoanID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
-            .then(data => {
-                if (global.DEBUG_MODE) console.log('Bank Detail:', data);
-                if (data !== undefined && data.length > 0) {
-                    setBankDetails(data)
+        const clientBankDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID)).clientBankDetail;
 
-                    setRefreshFlatList(!refreshFlatlist)
-                }
-            })
-            .catch(error => {
-                if (global.DEBUG_MODE) console.error('Error fetching bank details:', error);
-            });
+        if (clientBankDetail) {
+            setBankDetails(clientBankDetail)
+            setRefreshFlatList(!refreshFlatlist)
+        }
+
+        // tbl_bankdetails.getAllBankDetailsDetailsForLoanID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
+        //     .then(data => {
+        //         if (global.DEBUG_MODE) console.log('Bank Detail:', data);
+        //         if (data !== undefined && data.length > 0) {
+        //             setBankDetails(data)
+
+        //             setRefreshFlatList(!refreshFlatlist)
+        //         }
+        //     })
+        //     .catch(error => {
+        //         if (global.DEBUG_MODE) console.error('Error fetching bank details:', error);
+        //     });
     }
 
     const FlatView = ({ item }) => {
@@ -94,22 +103,20 @@ const BankList = (props, { navigation }) => {
         if (global.USERTYPEID == 1163) {
             bg = 'GREY'
         } else {
-            if (item.isKyc == '1') {
-                bg = 'GREY'
-            }
+
         }
         return (
             <View style={{ marginLeft: 10, marginRight: 10 }}>
                 <View>
                     <Text style={{ fontSize: 14, fontFamily: 'Poppins-SemiBold', marginTop: 5, color: Colors.black }}>
-                        {item.account_holder_name}
+                        {item.accountHolderNameAsPerBank}
                     </Text>
-                    <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: Colors.black }}>Acc No : {`${item.account_number}`}</Text>
-                    <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: Colors.black }}>IFSC Code : {`${item.ifsc_code}`}</Text>
+                    <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: Colors.black }}>Acc No : {`${item.accountNumber}`}</Text>
+                    <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: Colors.black }}>IFSC Code : {`${item.ifscCode}`}</Text>
                     <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: Colors.black }}>
-                        {Common.getSystemCodeDescription(props.mobilecodedetail.leadSystemCodeDto, 'ACCOUNT_TYPE', item.account_type)}
+                        {Common.getSystemCodeDescription(props.mobilecodedetail.leadSystemCodeDto, 'ACCOUNT_TYPE', item.accountType)}
                     </Text>
-                    <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: Colors.black }}>{`${item.branch_name}, ${item.bank_name}`}</Text>
+                    <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: Colors.black }}>{`${item.branchName}, ${item.bankName}`}</Text>
                 </View>
 
                 <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
@@ -145,9 +152,9 @@ const BankList = (props, { navigation }) => {
                         if (global.USERTYPEID == 1163) {
 
                         } else {
-                            if (item.isKyc != '1') {
-                                handleClick('delete', item)
-                            }
+
+                            handleClick('delete', item)
+
                         }
                     }
                     }>
@@ -222,6 +229,7 @@ const BankList = (props, { navigation }) => {
 
                 setLoading(false);
                 deletedata(bankID);
+                props.deleteNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientBankDetail', bankID)
             })
             .catch(error => {
                 // Handle the error
@@ -236,11 +244,6 @@ const BankList = (props, { navigation }) => {
     };
 
     const deletedata = async (bankID) => {
-
-        const deletePromises = [
-            tbl_bankdetails.deleteBankDataBasedOnLoanIDAndType(global.LOANAPPLICATIONID, global.CLIENTTYPE, bankID)
-        ];
-        await Promise.all(deletePromises);
 
         const newArray = bankDetails.filter(item => item.id !== bankID);
         setBankDetails(newArray);
@@ -313,40 +316,6 @@ const BankList = (props, { navigation }) => {
             .catch(error => {
                 // Handle the error
                 if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
-                setLoading(false);
-                if (error.response.data != null) {
-                    setApiError(error.response.data.message);
-                    setErrorModalVisible(true)
-                }
-            });
-
-    };
-
-    const approveManualKYC = (status) => {
-
-        const appDetails = {
-            "kycType": "001",
-            "kycValue": "123456789012",
-            "kycDmsId": 100,
-            "kycExpiryDate": null,
-            "manualKycStatus": status,
-            "manualKycApprovedBy": "Muthu"
-        }
-        const baseURL = '8901';
-        setLoading(true);
-        apiInstancelocal(baseURL)
-            .put(`api/v2/profile-short/manualKyc/${global.CLIENTID}`, appDetails)
-            .then(async response => {
-                // Handle the response data
-                if (global.DEBUG_MODE) console.log('ApproveKYCApiResponse::' + JSON.stringify(response.data),);
-                setLoading(false);
-                props.navigation.replace('LoanApplicationMain', { fromScreen: 'AddressDetail' });
-
-
-            })
-            .catch(error => {
-                // Handle the error
-                if (global.DEBUG_MODE) console.log('ApproveKYCApiResponse' + JSON.stringify(error.response));
                 setLoading(false);
                 if (error.response.data != null) {
                     setApiError(error.response.data.message);
@@ -484,15 +453,18 @@ const mapStateToProps = state => {
     const { language } = state.languageReducer;
     const { profileDetails } = state.profileReducer;
     const { mobileCodeDetails } = state.mobilecodeReducer;
+    const { loanInitiationDetails } = state.loanInitiationReducer;
     return {
         language: language,
         profiledetail: profileDetails,
-        mobilecodedetail: mobileCodeDetails
+        mobilecodedetail: mobileCodeDetails,
+        loanInitiationDetails: loanInitiationDetails
     }
 };
 
 const mapDispatchToProps = dispatch => ({
     languageAction: item => dispatch(languageAction(item)),
+    deleteNestedClientDetails: (loanApplicationId, clientId, key, nestedKey, id) => dispatch(deleteNestedClientDetails(loanApplicationId, clientId, key, nestedKey, id)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(BankList);

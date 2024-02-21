@@ -34,6 +34,8 @@ import tbl_client from '../../../Database/Table/tbl_client';
 import tbl_loanApplication from '../../../Database/Table/tbl_loanApplication';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import tbl_loanaddressinfo from '../../../Database/Table/tbl_loanaddressinfo';
+import { deleteNestedClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
+
 
 const LoanAddressList = (props, { navigation }) => {
 
@@ -65,9 +67,11 @@ const LoanAddressList = (props, { navigation }) => {
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
 
         getAddressData()
+
         if (global.USERTYPEID == 1163) {
             setOnlyView(true);
         }
+
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
             backHandler.remove();
@@ -81,51 +85,47 @@ const LoanAddressList = (props, { navigation }) => {
 
     const getAddressData = () => {
 
-        // tbl_loanApplication.getLoanAppWorkFlowID(global.LOANAPPLICATIONID, 'APPL')
-        //   .then(data => {
-        //     if (global.DEBUG_MODE) console.log('Applicant Data:', data);
-        //     if (data !== undefined && data.length > 0) {
-        //       const filteredProcessModuleStage = processModule.filter((data1) => {
-        //         return data1.wfId === parseInt(data[0].workflow_id) && data1.process_sub_stage_id === 1;
-        //       })
-        //       alert(data[0].workflow_id)
-        //       if (filteredProcessModuleStage) {
-        //         setProcessModuleLength(filteredProcessModuleStage.length);
-        //       }
-        //     }
 
-        //   })
-        //   .catch(error => {
-        //     if (global.DEBUG_MODE) console.error('Error fetching Applicant details:', error);
-        //   });
+        const allClientDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].clientDetail;
 
-        tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE).then(value => {
-            if (value !== undefined && value.length > 0) {
-
-                if (value[0].udyamRegistrationNumber !== undefined && value[0].udyamRegistrationNumber !== null) {
-                    if (value[0].udyamRegistrationNumber.length > 0) {
-                        setUrmNumber(value[0].udyamRegistrationNumber);
-                        // setUrmNumberDisable(true);
-                        UrNumberAvailable = true;
-                        getAllLoanAddressData(value[0].udyamRegistrationNumber);
-
-                    } else {
-                        getAllLoanAddressData("")
-                    }
-                } else {
-                    getAllLoanAddressData("")
-                }
-
-                setKYCManual(value[0].isKycManual)
-
-                if (global.USERTYPEID == 1163) {
-                    if (!(value[0].isKycManual == '1')) {
-
-                    }
-                }
-
+        allClientDetail.map(item => {
+            if (item.udyamRegistrationNumber) {
+                setUrmNumber(item.udyamRegistrationNumber);
+                // setUrmNumberDisable(true);
+                // UrNumberAvailable = true;
+                getAllLoanAddressData(item.udyamRegistrationNumber);
+            } else {
+                getAllLoanAddressData("")
             }
-        })
+        });
+
+        // tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE).then(value => {
+        //     if (value !== undefined && value.length > 0) {
+
+        //         if (value[0].udyamRegistrationNumber !== undefined && value[0].udyamRegistrationNumber !== null) {
+        //             if (value[0].udyamRegistrationNumber.length > 0) {
+        //                 setUrmNumber(value[0].udyamRegistrationNumber);
+        //                 // setUrmNumberDisable(true);
+        //                 UrNumberAvailable = true;
+        //                 getAllLoanAddressData(value[0].udyamRegistrationNumber);
+
+        //             } else {
+        //                 getAllLoanAddressData("")
+        //             }
+        //         } else {
+        //             getAllLoanAddressData("")
+        //         }
+
+        //         setKYCManual(value[0].isKycManual)
+
+        //         if (global.USERTYPEID == 1163) {
+        //             if (!(value[0].isKycManual == '1')) {
+
+        //             }
+        //         }
+
+        //     }
+        // })
 
 
     }
@@ -133,35 +133,58 @@ const LoanAddressList = (props, { navigation }) => {
 
     const getAllLoanAddressData = (urmNumber) => {
 
-        tbl_loanaddressinfo.getAllLoanAddressDetailsForLoanID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
-            .then(data => {
-                if (global.DEBUG_MODE) console.log('Address Detail:', data);
-                if (data !== undefined && data.length > 0) {
-                    setAddressDetails(data)
-                    const communicationAddress = data.find(item => item.address_type === 'C');
-                    if (communicationAddress) {
-                        setCommunicationAvailable(true);
-                    }
-                    const RegisteredOfficeAddress = data.find(item => item.address_type === 'ROA');
-                    if (!RegisteredOfficeAddress) {
-                        if (urmNumber) {
-                            if (urmNumber.length > 0) {
-                                getUdyamRAOCheck(urmNumber);
-                            }
-                        }
-                    }
-                    setRefreshFlatList(!refreshFlatlist)
-                } else {
-                    if (urmNumber) {
-                        if (urmNumber.length > 0) {
-                            getUdyamRAOCheck(urmNumber);
-                        }
+        const clientDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
+        const filterBusinessAddress = clientDetail.clientAddress.filter(item => item.addressType != 'P' && item.addressType != 'C')
+
+        if (filterBusinessAddress.length > 0) {
+            setAddressDetails(filterBusinessAddress)
+            const RegisteredOfficeAddress = filterBusinessAddress.find(item => item.addressType === 'ROA');
+            if (!RegisteredOfficeAddress) {
+                if (urmNumber) {
+                    if (urmNumber.length > 0) {
+                        getUdyamRAOCheck(urmNumber);
                     }
                 }
-            })
-            .catch(error => {
-                if (global.DEBUG_MODE) console.error('Error fetching bank details:', error);
-            });
+            }
+            setRefreshFlatList(!refreshFlatlist)
+        } else {
+            if (urmNumber) {
+                if (urmNumber.length > 0) {
+                    getUdyamRAOCheck(urmNumber);
+                }
+            }
+        }
+        // console.log(clientDetail.clientAddress)
+
+        // tbl_loanaddressinfo.getAllLoanAddressDetailsForLoanID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
+        //     .then(data => {
+        //         if (global.DEBUG_MODE) console.log('Address Detail:', data);
+        //         if (data !== undefined && data.length > 0) {
+        //             setAddressDetails(data)
+        //             const communicationAddress = data.find(item => item.address_type === 'C');
+        //             if (communicationAddress) {
+        //                 setCommunicationAvailable(true);
+        //             }
+        //             const RegisteredOfficeAddress = data.find(item => item.address_type === 'ROA');
+        //             if (!RegisteredOfficeAddress) {
+        //                 if (urmNumber) {
+        //                     if (urmNumber.length > 0) {
+        //                         getUdyamRAOCheck(urmNumber);
+        //                     }
+        //                 }
+        //             }
+        //             setRefreshFlatList(!refreshFlatlist)
+        //         } else {
+        //             if (urmNumber) {
+        //                 if (urmNumber.length > 0) {
+        //                     getUdyamRAOCheck(urmNumber);
+        //                 }
+        //             }
+        //         }
+        //     })
+        //     .catch(error => {
+        //         if (global.DEBUG_MODE) console.error('Error fetching bank details:', error);
+        //     });
 
     }
 
@@ -268,7 +291,7 @@ const LoanAddressList = (props, { navigation }) => {
         if (global.USERTYPEID == 1163) {
             bg = 'GREY'
         } else {
-            if (item.isKyc == '1') {
+            if (item.isUdyam) {
                 bg = 'GREY'
             }
         }
@@ -276,9 +299,9 @@ const LoanAddressList = (props, { navigation }) => {
             <View style={{ marginLeft: 10, marginRight: 10 }}>
                 <View>
                     <Text style={{ fontSize: 14, fontFamily: 'Poppins-SemiBold', marginTop: 5, color: Colors.black }}>
-                        {Common.getSystemCodeDescription(props.mobilecodedetail.leadUserCodeDto, 'ADDRESS_TYPE', item.address_type)}
+                        {Common.getSystemCodeDescription(props.mobilecodedetail.leadUserCodeDto, 'ADDRESS_TYPE', item.addressType)}
                     </Text>
-                    <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: Colors.mediumgrey }}>{`${item.address_line_1},${item.address_line_2}`}</Text>
+                    <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: Colors.mediumgrey }}>{`${item.addressLine1},${item.addressLine2}`}</Text>
                     <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: Colors.mediumgrey }}>{`${item.district},${item.state}`}</Text>
                 </View>
 
@@ -315,7 +338,7 @@ const LoanAddressList = (props, { navigation }) => {
                         if (global.USERTYPEID == 1163) {
 
                         } else {
-                            if (item.isKyc != '1') {
+                            if (item.isUdyam) {
                                 handleClick('delete', item)
                             }
                         }
@@ -391,6 +414,7 @@ const LoanAddressList = (props, { navigation }) => {
                 setLoading(false);
                 if (response.status == 200) {
                     deletedata(addressID);
+                    props.deleteNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientAddress', addressID)
                 } else if (response.data.statusCode === 201) {
                     setApiError(response.data.message);
                     setErrorModalVisible(true);
@@ -421,11 +445,6 @@ const LoanAddressList = (props, { navigation }) => {
     };
 
     const deletedata = async (addressID) => {
-
-        const deletePromises = [
-            tbl_loanaddressinfo.deleteLoanDataBasedOnLoanIDAndID(global.LOANAPPLICATIONID, addressID)
-        ];
-        await Promise.all(deletePromises);
 
         const newArray = addressDetails.filter(item => item.id !== addressID);
         setAddressDetails(newArray);
@@ -679,15 +698,18 @@ const mapStateToProps = state => {
     const { language } = state.languageReducer;
     const { profileDetails } = state.profileReducer;
     const { mobileCodeDetails } = state.mobilecodeReducer;
+    const { loanInitiationDetails } = state.loanInitiationReducer;
     return {
         language: language,
         profiledetail: profileDetails,
-        mobilecodedetail: mobileCodeDetails
+        mobilecodedetail: mobileCodeDetails,
+        loanInitiationDetails: loanInitiationDetails
     }
 };
 
 const mapDispatchToProps = dispatch => ({
     languageAction: item => dispatch(languageAction(item)),
+    deleteNestedClientDetails: (loanApplicationId, clientId, key, nestedKey, id) => dispatch(deleteNestedClientDetails(loanApplicationId, clientId, key, nestedKey, id)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(LoanAddressList);

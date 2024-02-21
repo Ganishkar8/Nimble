@@ -38,6 +38,8 @@ import { RadioButton, Card } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import ErrorModal from '../../../Components/ErrorModal';
+import { addLoanInitiationDetails, updateLoanInitiationDetails, deleteLoanInitiationDetails, updateClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
+
 
 const LoanDemographicsGSTDetails = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -702,7 +704,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
         .then(async response => {
           // Handle the response data
           if (global.DEBUG_MODE) console.log('PostGSTResponse::' + JSON.stringify(response.data),);
-
+          props.updateClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'applicantSalesDetail', response.data);
           setLoading(false);
           updateLoanStatus();
         })
@@ -1381,6 +1383,10 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = dispatch => ({
   languageAction: item => dispatch(languageAction(item)),
+  dedupeAction: item => dispatch(dedupeAction(item)),
+  deleteDedupe: item => dispatch(deleteDedupe()),
+  updateClientDetails: (loanApplicationId, clientId, key, data) => dispatch(updateClientDetails(loanApplicationId, clientId, key, data)),
+  updateLoanInitiationDetails: (loanApplicationId, loanData, key, clientId, updatedDetails) => dispatch(updateLoanInitiationDetails(loanApplicationId, loanData, key, clientId, updatedDetails)),
 });
 
 export default connect(

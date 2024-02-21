@@ -73,18 +73,22 @@ const LoanNomineeList = (props, { navigation }) => {
 
     const getNomineeData = () => {
 
-        tbl_nomineeDetails.getAllNomineeDetails(global.LOANAPPLICATIONID)
-            .then(data => {
-                if (global.DEBUG_MODE) console.log('Nominee Detail:', data);
-                if (data !== undefined && data.length > 0) {
-                    setNomineeDetails(data)
+        const nomineeDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].nominee;
+        setNomineeDetails(nomineeDetail)
+        setRefreshFlatList(!refreshFlatlist)
 
-                    setRefreshFlatList(!refreshFlatlist)
-                }
-            })
-            .catch(error => {
-                if (global.DEBUG_MODE) console.error('Error fetching bank details:', error);
-            });
+        // tbl_nomineeDetails.getAllNomineeDetails(global.LOANAPPLICATIONID)
+        //     .then(data => {
+        //         if (global.DEBUG_MODE) console.log('Nominee Detail:', data);
+        //         if (data !== undefined && data.length > 0) {
+        //             setNomineeDetails(data)
+
+        //             setRefreshFlatList(!refreshFlatlist)
+        //         }
+        //     })
+        //     .catch(error => {
+        //         if (global.DEBUG_MODE) console.error('Error fetching bank details:', error);
+        //     });
     }
 
     const FlatView = ({ item }) => {
@@ -99,13 +103,13 @@ const LoanNomineeList = (props, { navigation }) => {
             <View style={{ marginLeft: 10, marginRight: 10 }}>
                 <View>
                     <Text style={{ fontSize: 14, fontFamily: 'Poppins-SemiBold', marginTop: 5, color: Colors.black }}>
-                        {item.account_holder_name}
+                        {item.nomineeNameInBank}
                     </Text>
                     <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 12.5, color: Colors.black }}>Name : {item.fullName}</Text>
-                    <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 12.5, color: Colors.black }}>Relationship status with Borrower : {`${Common.getSystemCodeDescription(props.mobilecodedetail.leadSystemCodeDto, 'RELATIONSHIP', item.relstatuswithBorrower)}`}</Text>
-                    <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 12.5, color: Colors.black }}>Aadhar ID : {`${item.aadharId}`}</Text>
-                    <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 12.5, color: Colors.black }}>Nominee Bank A/C No : {`${item.nomineeBankAccNo}`}</Text>
-                    <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 12.5, color: Colors.black }}>{`${item.nomineeBankBranch}, ${item.nomineeBankName}`}</Text>
+                    <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 12.5, color: Colors.black }}>Relationship status with Borrower : {`${Common.getSystemCodeDescription(props.mobilecodedetail.leadSystemCodeDto, 'RELATIONSHIP', item.relationshipWithBorrower)}`}</Text>
+                    <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 12.5, color: Colors.black }}>Aadhar ID : {`${item.aadhaarId}`}</Text>
+                    <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 12.5, color: Colors.black }}>Nominee Bank A/C No : {`${item.nomineeBankAccountNo}`}</Text>
+                    <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 12.5, color: Colors.black }}>{`${item.nomineeBranchName}, ${item.nomineeBankName}`}</Text>
                 </View>
 
                 <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
@@ -398,10 +402,12 @@ const mapStateToProps = state => {
     const { language } = state.languageReducer;
     const { profileDetails } = state.profileReducer;
     const { mobileCodeDetails } = state.mobilecodeReducer;
+    const { loanInitiationDetails } = state.loanInitiationReducer;
     return {
         language: language,
         profiledetail: profileDetails,
-        mobilecodedetail: mobileCodeDetails
+        mobilecodedetail: mobileCodeDetails,
+        loanInitiationDetails: loanInitiationDetails
     }
 };
 

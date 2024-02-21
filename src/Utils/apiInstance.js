@@ -18,17 +18,19 @@ const apiInstance = (baseURL, authToken) => {
     // Request interceptor
     instance.interceptors.request.use(
         (config) => {
+            if (global.DEBUG_MODE) console.log('MobileRequest::' + JSON.stringify(config.baseURL + config.url))
             if (global.DEBUG_MODE) console.log('MobileRequestHeader::' + config.headers)
             if (global.DEBUG_MODE) console.log('MobileRequestData::' + JSON.stringify(config.data))
             if (global.DEBUG_MODE) console.log('MobileRequestbaseUrl::' + config.baseURL)
             if (global.DEBUG_MODE) {
                 const logTime = `------------------------------Date: ${new Date()} --------------------------------------------------------------------\n\n`;
-                const logBaseUrl = `Request Url: ${JSON.stringify(config.data)}\n`;
+                const logBaseUrl = `Request Url: ${JSON.stringify(config.baseURL + config.url)}\n`;
                 const logHeader = `Request Headers: ${JSON.stringify(config.headers)}\n`;
+                const logMethod = `Request Method: ${JSON.stringify(config.method)}\n`;
                 if (config.data != undefined) {
                     var logData = `Request Data: ${JSON.stringify(config.data)}\n\n`;
                 }
-                const logcontent = logTime + logBaseUrl + logHeader + logData;
+                const logcontent = logTime + logBaseUrl + logHeader + logMethod + logData;
                 writeToFile(logcontent);
             }
             // Modify the request config before it is sent

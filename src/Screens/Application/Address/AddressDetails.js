@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, SafeAreaView, StyleSheet, BackHandler } from 'react-native';
+import { View, Text, ScrollView, SafeAreaView, StyleSheet, BackHandler, TouchableOpacity, Image } from 'react-native';
 import { React, useState, useRef, useEffect } from 'react';
 import MyStatusBar from '../../../Components/MyStatusBar';
 import HeadComp from '../../../Components/HeadComp';
@@ -10,10 +10,12 @@ import Colors from '../../../Utils/Colors';
 import Loading from '../../../Components/Loading';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import SystemMandatoryField from '../../../Components/SystemMandatoryField';
+import Modal from 'react-native-modal';
 import ButtonViewComp from '../../../Components/ButtonViewComp';
 import TextComp from '../../../Components/TextComp';
 import PickerComp from '../../../Components/PickerComp';
 import TextInputComp from '../../../Components/TextInputComp';
+import Entypo from 'react-native-vector-icons/Entypo';
 import Common from '../../../Utils/Common';
 import tbl_clientaddressinfo from '../../../Database/Table/tbl_clientaddressinfo';
 import ErrorModal from '../../../Components/ErrorModal';
@@ -21,10 +23,17 @@ import tbl_client from '../../../Database/Table/tbl_client';
 import apiInstance from '../../../Utils/apiInstance';
 import CheckBoxComp from '../../../Components/CheckBoxComp';
 import { it } from 'react-native-paper-dates';
+import ImagePicker, { ImageOrVideo } from 'react-native-image-crop-picker';
+import ImageBottomPreview from '../../../Components/ImageBottomPreview';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useIsFocused } from '@react-navigation/native';
+import { updateLoanInitiationDetails, deleteLoanInitiationDetails, updateNestedClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
 
 const AddressDetails = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
   // const [Data, setNewData] = useState();
+  const isScreenVisible = useIsFocused();
   const [DataArray, setNewDataArray] = useState([]);
   const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
   const showBottomSheet = () => setBottomErrorSheetVisible(true);
@@ -46,6 +55,14 @@ const AddressDetails = (props, { navigation }) => {
   const ownerNameRef = useRef(null);
 
   const [isNew, setIsNew] = useState(props.route.params.addressType);
+
+  const [actionTypeLabel, setActionTypeLabel] = useState('');
+  const [actionTypeIndex, setActionTypeIndex] = useState('');
+  const [actionTypeCaption, setActionTypeCaption] = useState('ACTION TYPE');
+  const [actionTypeMan, setActionTypeMan] = useState(false);
+  const [actionTypeVisible, setActionTypeVisible] = useState(false);
+  const [actionTypeDisable, setActionTypeDisable] = useState(false);
+  const [actionTypeData, setActionTypeData] = useState([]);
 
   const [addressTypeLabel, setAddressTypeLabel] = useState('');
   const [addressTypeIndex, setAddressTypeIndex] = useState('');
@@ -157,7 +174,11 @@ const AddressDetails = (props, { navigation }) => {
   const [apiError, setApiError] = useState('');
 
   const [addressID, setAddressID] = useState('');
-  const [isKYC, setIsKYC] = useState('');
+  const [addressDmsID, setAddressDmsID] = useState('');
+
+  const [isKYC, setIsKYC] = useState(false);
+  const [isLms, setIsLms] = useState(false);
+  const [isUdyam, setIsUdyam] = useState(false);
 
 
   const [postorput, setPostORPut] = useState('post');
@@ -167,20 +188,42 @@ const AddressDetails = (props, { navigation }) => {
   const [permAddressAvailable, setPermAddressAvailable] = useState(false);
   const [pageId, setPageId] = useState(global.CURRENTPAGEID);
 
+  const [onlyView, setOnlyView] = useState(false);
+
+  const [photoOptionvisible, setphotoOptionvisible] = useState(false);
+  const showphotoBottomSheet = () => setphotoOptionvisible(true);
+  const hidephotoBottomSheet = () => setphotoOptionvisible(false);
+  const [deleteVisible, setDeleteVisible] = useState(false);
+  const [imageFile, setImageFile] = useState([]);
+  const [imageUri, setImageUri] = useState(null);
+  const [fileName, setFileName] = useState('');
+  const [fileType, setFileType] = useState('');
+  const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
+  const showImageBottomSheet = () => { setBottomSheetVisible(true) };
+  const hideImageBottomSheet = () => setBottomSheetVisible(false);
+  const [hideRetake, setHideRetake] = useState(false);
+  const [hideDelete, setHideDelete] = useState(false);
+
 
   useEffect(() => {
-    props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
+
     getSystemCodeDetail()
     getAddressData();
     makeSystemMandatoryFields();
     getExistingData();
 
+  }, [props.navigation]);
+
+  useEffect(() => {
+    props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
+
     return () => {
       props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
       backHandler.remove();
     }
-  }, [props.navigation]);
+  }, [isScreenVisible]);
+
 
   const handleBackButton = () => {
     onGoBack();
@@ -189,24 +232,23 @@ const AddressDetails = (props, { navigation }) => {
 
   const getExistingData = () => {
 
-    tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE).then(value => {
-      if (value !== undefined && value.length > 0) {
+    // tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE).then(value => {
+    //   if (value !== undefined && value.length > 0) {
 
-        setKYCManual(value[0].isKycManual)
+    //     setKYCManual(value[0].isKycManual)
 
-        if (global.USERTYPEID == 1163) {
-          if (!(value[0].isKycManual == '1')) {
-            fieldsDisable();
-          }
-        }
+    //     if (global.USERTYPEID == 1163) {
+    //       if (!(value[0].isKycManual == '1')) {
+    //         fieldsDisable();
+    //       }
+    //     }
 
-      }
-    })
-
+    //   }
+    // })
 
     if (isNew != 'new') {
       setPostORPut('put')
-      getExistingAddressData(isNew.loanApplicationId, isNew.id)
+      getExistingAddressData(isNew)
     } else {
       setPostORPut('post');
     }
@@ -266,115 +308,253 @@ const AddressDetails = (props, { navigation }) => {
 
   }
 
-  const getExistingAddressData = (loanAppId, id) => {
-    tbl_clientaddressinfo.getAllAddressDetailsForLoanIDAndID(loanAppId, id.toString())
-      .then(data => {
-        if (global.DEBUG_MODE) console.log('Address Detail:', data);
+  const KycFieldsDisable = () => {
 
-        if (data !== undefined && data.length > 0) {
-          setAddressID(data[0].id)
-          setAddressLine1(data[0].address_line_1)
-          setAddressLine2(data[0].address_line_2)
-          setLandmark(data[0].landmark)
-          setPincode(data[0].pincode)
-          setCity(data[0].city)
-          setDistrict(data[0].district)
-          setState(data[0].state)
-          setCountry(data[0].country)
-          setYearsAtResidence(data[0].years_at_residence)
-          setOwnerName(data[0].owner_name)
-          setYearsAtCity(data[0].years_in_current_city_or_town)
-          //spinner
-          setAddressTypeLabel(data[0].address_type)
-          if (data[0].address_type == 'P') {
-            setGeoClassificationVisible(false);
-            setGeoClassificationMan(false);
-            setYearsAtResidenceVisible(false);
-            setYearsAtResidenceMan(false);
-            setYearsAtCityVisible(false);
-            setYearsAtResidenceMan(false);
-          }
-          setGeoClassificationLabel(data[0].geo_classification)
-          setAddressOwnerTypeLabel(data[0].address_ownership)
-          setOwnerDetailsLabel(data[0].owner_details)
-          if (data[0].owner_details == 'OD-OTH' || data[0].owner_details == 'OD-RLT') {
-            setOwnerNameDisable(false);
-            setOwnerNameMan(true);
-            setOwnerNameVisible(true);
-          } else {
-            setOwnerNameDisable(true);
-            setOwnerNameMan(false);
-            setOwnerNameVisible(false);
-            setOwnerName('')
-          }
-          if (data[0].isKyc === "1") {
-            disableAadharFields(data)
-          }
-          setIsKYC(data[0].isKyc);
-          setLoading(false)
-        }
+    setAddressTypeDisable(true);
+    setAddressLine1Disable(true);
+    setAddressLine2Disable(true);
+    setLandmarkDisable(true);
+    setPincodeDisable(true);
+    setCityDisable(true);
+    setDistrictDisable(true);
+    setStateDisable(true)
+    setCountryDisable(true)
+  }
 
-      })
-      .catch(error => {
-        if (global.DEBUG_MODE) console.error('Error fetching bank details:', error);
-        setLoading(false)
-      });
+  const KycFieldsEnable = () => {
+
+    setAddressTypeDisable(false);
+    setAddressLine1Disable(false);
+    setAddressLine2Disable(false);
+    setLandmarkDisable(false);
+    setPincodeDisable(false);
+    setCityDisable(false);
+    setDistrictDisable(false);
+    setStateDisable(false)
+    setCountryDisable(false)
+    setGeoClassificationDisable(false);
+    setYearsAtResidenceDisable(false);
+    setYearsAtCityDisable(false);
+    setAddressOwnerTypeDisable(false);
+    setOwnerDetailsDisable(false);
+    setOwnerNameDisable(false);
+  }
+
+  const KycHybridFieldsEnable = () => {
+
+    if (addressTypeLabel) {
+      setAddressTypeDisable(true);
+    } else {
+      setAddressTypeDisable(false);
+    }
+
+    if (addressLine1) {
+      setAddressLine1Disable(true);
+    } else {
+      setAddressLine1Disable(false);
+    }
+
+    if (addressLine2) {
+      setAddressLine2Disable(true);
+    } else {
+      setAddressLine2Disable(false);
+    }
+
+    if (landmark) {
+      setLandmarkDisable(true);
+    } else {
+      setLandmarkDisable(false);
+    }
+
+    if (pincode) {
+      setPincodeDisable(true);
+    } else {
+      setPincodeDisable(false);
+    }
+
+    if (city) {
+      setCityDisable(true);
+    } else {
+      setCityDisable(false);
+    }
+
+    if (district) {
+      setDistrictDisable(true);
+    } else {
+      setDistrictDisable(false);
+    }
+
+    if (state) {
+      setStateDisable(true);
+    } else {
+      setStateDisable(false);
+    }
+
+    if (country) {
+      setCountryDisable(true);
+    } else {
+      setCountryDisable(false);
+    }
+
+    // if (geoClassificationLabel) {
+    //   setGeoClassificationDisable(true);
+    // } else {
+    //   setGeoClassificationDisable(false);
+    // }
+
+    // if (yearsAtResidence) {
+    //   setYearsAtResidenceDisable(true);
+    // } else {
+    //   setYearsAtResidenceDisable(false);
+    // }
+
+    // if (yearsAtCity) {
+    //   setYearsAtCityDisable(true);
+    // } else {
+    //   setYearsAtCityDisable(false);
+    // }
+
+    // if (addressOwnerTypeLabel) {
+    //   setAddressOwnerTypeDisable(true);
+    // } else {
+    //   setAddressOwnerTypeDisable(false);
+    // }
+
+    // if (ownerDetailsLabel) {
+    //   setOwnerDetailsDisable(true);
+    // } else {
+    //   setOwnerDetailsDisable(false);
+    // }
+
+    // if (ownerName) {
+    //   setOwnerNameDisable(true);
+    // } else {
+    //   setOwnerNameDisable(false);
+    // }
+
+  }
+
+  const getExistingAddressData = (data) => {
+    setAddressID(data.id)
+    setAddressLine1(data.addressLine1)
+    setAddressLine2(data.addressLine2)
+    setLandmark(data.landmark)
+    setPincode(data.pincode)
+    setCity(data.city)
+    setDistrict(data.district)
+    setState(data.state)
+    setCountry(data.country)
+    setYearsAtResidence(data?.yearsAtResidence?.toString())
+    setOwnerName(data.ownerName)
+    setYearsAtCity(data?.yearsInCurrentCityOrTown?.toString())
+    //spinner
+    setAddressTypeLabel(data.addressType)
+    if (data.addressType == 'P') {
+      setGeoClassificationVisible(false);
+      setGeoClassificationMan(false);
+      setYearsAtResidenceVisible(false);
+      setYearsAtResidenceMan(false);
+      setYearsAtCityVisible(false);
+      setYearsAtResidenceMan(false);
+    }
+    if (data.isEkyc || data.isLms) {
+      setAddressTypeDisable(true);
+    } else {
+      setAddressTypeDisable(false);
+    }
+    setGeoClassificationLabel(data.geoClassification)
+    setAddressOwnerTypeLabel(data.addressOwnership)
+    setOwnerDetailsLabel(data.ownerDetails)
+    if (data.ownerDetails == 'OD-OTH' || data.ownerDetails == 'OD-RLT') {
+      setOwnerNameDisable(false);
+      setOwnerNameMan(true);
+      setOwnerNameVisible(true);
+    } else {
+      setOwnerNameDisable(true);
+      setOwnerNameMan(false);
+      setOwnerNameVisible(false);
+      setOwnerName('')
+    }
+    if (data.isEkyc) {
+      disableAadharFields(data)
+    }
+    setIsKYC(data.isEkyc);
+    setIsLms(data.isLms);
+    setIsUdyam(data.isUdyam);
   }
 
   const getPermanentAddressData = () => {
-    tbl_clientaddressinfo.getPermanentAddress(global.LOANAPPLICATIONID, global.CLIENTTYPE)
-      .then(data => {
-        if (global.DEBUG_MODE) console.log('Address Detail:', data);
 
-        if (data !== undefined && data.length > 0) {
-          setAddressLine1(data[0].address_line_1)
-          setAddressLine2(data[0].address_line_2)
-          setLandmark(data[0].landmark)
-          setPincode(data[0].pincode)
-          setCity(data[0].city)
-          setDistrict(data[0].district)
-          setState(data[0].state)
-          setCountry(data[0].country)
-          setYearsAtResidence(data[0].years_at_residence)
-          setOwnerName(data[0].owner_name)
-          setYearsAtCity(data[0].years_in_current_city_or_town)
-          setGeoClassificationLabel(data[0].geo_classification)
-          setAddressOwnerTypeLabel(data[0].address_ownership)
-          setOwnerDetailsLabel(data[0].owner_details)
+    const filteredData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID));
 
-          if (data[0].owner_details == 'OD-OTH' || data[0].owner_details == 'OD-RLT') {
-            setOwnerNameDisable(false);
-            setOwnerNameMan(true);
-            setOwnerNameVisible(true);
-          } else {
-            setOwnerNameDisable(true);
-            setOwnerNameMan(false);
-            setOwnerNameVisible(false);
-            setOwnerName('')
+    if (filteredData.length > 0) {
+
+      const clientDetail = filteredData[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
+
+      if (clientDetail) {
+
+        const addressDetails = clientDetail.clientAddress;
+        if (addressDetails) {
+
+          const permanentAddress = addressDetails.find(item => item.addressType === 'P');
+
+          if (permanentAddress) {
+            setAddressLine1(permanentAddress.addressLine1)
+            setAddressLine2(permanentAddress.addressLine2)
+            setLandmark(permanentAddress.landmark)
+            setPincode(permanentAddress.pincode)
+            setCity(permanentAddress.city)
+            setDistrict(permanentAddress.district)
+            setState(permanentAddress.state)
+            setCountry(permanentAddress.country)
+            setYearsAtResidence(permanentAddress.yearsAtResidence)
+            setOwnerName(permanentAddress.ownerName)
+            setYearsAtCity(permanentAddress.yearsInCurrentCityOrTown)
+            setGeoClassificationLabel(permanentAddress.geoClassification)
+            setAddressOwnerTypeLabel(permanentAddress.addressOwnership)
+            setOwnerDetailsLabel(permanentAddress.ownerDetails)
+
+            if (permanentAddress.ownerDetails == 'OD-OTH' || permanentAddress.ownerDetails == 'OD-RLT') {
+              setOwnerNameDisable(false);
+              setOwnerNameMan(true);
+              setOwnerNameVisible(true);
+            } else {
+              setOwnerNameDisable(true);
+              setOwnerNameMan(false);
+              setOwnerNameVisible(false);
+              setOwnerName('')
+            }
+            fieldsDisable();
+            setGeoClassificationDisable(false);
+            setYearsAtResidenceDisable(false);
+            setYearsAtCityDisable(false);
+            setAddressTypeDisable(false);
+            setsameAsPermDisable(false);
+            setIsKYC(false);
           }
-          fieldsDisable();
-          setGeoClassificationDisable(false);
-          setYearsAtResidenceDisable(false);
-          setYearsAtCityDisable(false);
-          setAddressTypeDisable(false);
-          setsameAsPermDisable(false);
-          setIsKYC('0');
-          setLoading(false)
+
         }
 
-      })
-      .catch(error => {
-        if (global.DEBUG_MODE) console.error('Error fetching bank details:', error);
-        setLoading(false)
-      });
+        if (global.DEBUG_MODE) console.log("Address Details:", addressDetails);
+      } else {
+        if (global.DEBUG_MODE) console.log("Client ID not found in clientDetail array.");
+      }
+    } else {
+      if (global.DEBUG_MODE) console.log("Loan application number not found.");
+    }
+
+
   }
 
   const disableAadharFields = (data) => {
     setAddressTypeDisable(true)
     setAddressLine1Disable(true)
     setAddressLine2Disable(true)
-    if (data[0].landmark != null && data[0].landmark != "") {
+    if (data.landmark) {
       setLandmarkDisable(true)
+    }
+    if (data.city) {
+      setCityDisable(true)
     }
     setPincodeDisable(true)
     setDistrictDisable(true)
@@ -400,22 +580,107 @@ const AddressDetails = (props, { navigation }) => {
 
     var availAddresssType = [];
 
-    await tbl_clientaddressinfo.getAllAddressDetailsForLoanID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
-      .then(data => {
-        if (global.DEBUG_MODE) console.log('Address Detail:', data);
-        if (data !== undefined && data.length > 0) {
-          data.forEach(item => {
-            if (item.address_type == 'P') {
-              setPermAddressAvailable(true)
+    const filteredData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID));
+
+    if (filteredData.length > 0) {
+
+      const clientDetail = filteredData[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
+
+      if (clientDetail) {
+
+        const hasTrueManualKyc = clientDetail.clientManualKycLink.some(link => link.isManualKyc);
+        if (hasTrueManualKyc) {
+          setIsManualKYCAvailable(true);
+        }
+
+        if (clientDetail) {
+
+          //kycManual
+          if (!clientDetail.isKycManual) {
+            setKYCManual('0');
+            if (global.USERTYPEID == 1163) {
+              setOnlyView(true);
+              fieldsDisable();
+            } else {
+              if (global.ALLOWEDIT == "0") {
+                setOnlyView(true);
+                fieldsDisable();
+              }
             }
-            availAddresssType.push(item.address_type)
-          });
+          } else {
+            if (global.ALLOWEDIT == "0") {
+              setOnlyView(true);
+              fieldsDisable();
+            }
+            setKYCManual('1');
+          }
+
+          //manualKycStatus
+          if (clientDetail.clientManualKycLink.length > 0) {
+            if (clientDetail.clientManualKycLink[0].manualKycStatus == 'Approved') {
+              fieldsDisable();
+              setOnlyView(true);
+            }
+
+            if (clientDetail.clientManualKycLink[0].clientManualAddresses) {
+              if (clientDetail.clientManualKycLink[0].clientManualAddresses.length > 0) {
+
+                if (isNew != 'new') {
+                  const filteredAddress = clientDetail.clientManualKycLink[0].clientManualAddresses.filter(item => item.addressType == isNew.addressType)
+
+                  if (filteredAddress.length > 0) {
+                    setActionTypeLabel(filteredAddress[0].addressChangeType)
+                    setActionTypeVisible(true);
+                    setAddressDmsID(filteredAddress[0].addrDmsId)
+                  } else {
+                    if (isNew.addressType == 'P') {
+                      setActionTypeLabel('PRCD');
+                      setActionTypeVisible(true);
+                    }
+                  }
+                }
+
+              } else {
+                if (isNew.addressType == 'P') {
+                  getActionType(clientDetail);
+                }
+              }
+            } else {
+              if (isNew.addressType == 'P') {
+                getActionType(clientDetail);
+              }
+            }
+
+          } else {
+            if (clientDetail.isAadharNumberVerified) {
+              if (isNew.addressType == 'P') {
+                setActionTypeVisible(true);
+                setActionTypeMan(true);
+                setActionTypeLabel('PRCD');
+                KycFieldsDisable();
+              }
+            }
+          }
 
         }
-      })
-      .catch(error => {
-        if (global.DEBUG_MODE) console.error('Error fetching Address details:', error);
-      });
+
+        const addressDetails = clientDetail.clientAddress;
+        if (addressDetails) {
+          addressDetails.forEach(item => {
+            if (item.addressType == 'P') {
+              setPermAddressAvailable(true)
+            }
+            availAddresssType.push(item.addressType)
+          });
+        }
+        // Log or use the addressDetails as needed
+        if (global.DEBUG_MODE) console.log("Address Details:", addressDetails);
+      } else {
+        if (global.DEBUG_MODE) console.log("Client ID not found in clientDetail array.");
+      }
+    } else {
+      if (global.DEBUG_MODE) console.log("Loan application number not found.");
+    }
 
 
     const filterAddressTypeData = userCodeDetail.filter((data) => data.masterId === 'PRF_SHORT_ADDRESS_TYPE');
@@ -426,8 +691,40 @@ const AddressDetails = (props, { navigation }) => {
       setaddressTypeData(filterAddressTypeData)
     }
 
+    const filterActionTypeData = userCodeDetail.filter((data) => data.masterId === 'ACTION_TYPE');
+    setActionTypeData(filterActionTypeData);
 
+  }
 
+  const getActionType = (clientDetail) => {
+
+    if (clientDetail.clientManualKycLink.length > 0) {
+      if (clientDetail.lmsClientId) {
+        if (clientDetail.clientManualKycLink[0].kycSource == 'EVRF' || clientDetail.clientManualKycLink[0].kycSource == 'LMS') {
+          if (isNew.addressType == 'P') {
+            setActionTypeVisible(true);
+            setActionTypeMan(true);
+            setActionTypeLabel('PRCD');
+            KycFieldsDisable();
+          }
+        } else if (clientDetail.clientManualKycLink[0].kycSource == 'MNL') {
+          setActionTypeVisible(false);
+          setActionTypeMan(false);
+        }
+      } else {
+        if (clientDetail.clientManualKycLink[0].kycSource == 'EVRF') {
+          if (isNew.addressType == 'P') {
+            setActionTypeVisible(true);
+            setActionTypeMan(true);
+            setActionTypeLabel('PRCD');
+            KycFieldsDisable();
+          }
+        } else {
+          setActionTypeVisible(false);
+          setActionTypeMan(false);
+        }
+      }
+    }
 
   }
 
@@ -682,6 +979,14 @@ const AddressDetails = (props, { navigation }) => {
     var i = 1;
     var errorMessage = '';
 
+    if (actionTypeMan && actionTypeVisible) {
+      if (actionTypeLabel.length <= 0) {
+        errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + actionTypeCaption + '\n';
+        i++;
+        flag = true;
+      }
+    }
+
     if (addressTypeMan && addressTypeVisible) {
       if (addressTypeLabel.length <= 0) {
         errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + addressTypeCaption + '\n';
@@ -818,6 +1123,20 @@ const AddressDetails = (props, { navigation }) => {
       }
     }
 
+    if (actionTypeVisible && actionTypeLabel != 'PRCD') {
+      if (imageUri == null) {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          language[0][props.language].str_errorimage +
+          '\n';
+        i++;
+        flag = true;
+      }
+    }
+
 
     setErrMsg(errorMessage);
     return flag;
@@ -825,11 +1144,15 @@ const AddressDetails = (props, { navigation }) => {
 
   const addressSubmit = () => {
 
-    if (global.USERTYPEID == 1163) {
-      if (!(kycManual == '1')) {
-        props.navigation.replace('AddressMainList')
-        return;
-      }
+    // if (global.USERTYPEID == 1163) {
+    //   if (!(kycManual == '1')) {
+    //     props.navigation.replace('AddressMainList')
+    //     return;
+    //   }
+    // }
+    if (onlyView) {
+      props.navigation.replace('AddressMainList')
+      return;
     }
 
     if (addressID.length <= 0) {
@@ -876,18 +1199,20 @@ const AddressDetails = (props, { navigation }) => {
       const baseURL = global.PORT1;
       setLoading(true);
       apiInstance(baseURL)
-        .post(`api/v2/profile-short/address-details/${global.CLIENTID}`, appDetails)
+        .post(`/api/v2/profile-short/address-details/${global.CLIENTID}`, appDetails)
         .then(async response => {
           // Handle the response data
           if (global.DEBUG_MODE) console.log('PostAddressResponse::' + JSON.stringify(response.data),);
 
           setLoading(false);
           if (response.status == 200) {
-            const deletePromises = [
-              tbl_clientaddressinfo.deleteDataBasedOnType(global.LOANAPPLICATIONID, global.CLIENTTYPE, addressTypeLabel)
-            ];
-            await Promise.all(deletePromises);
-            insertData(response.data[0].id)
+            props.updateNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientAddress', response.data[0])
+            if (actionTypeVisible && actionTypeLabel != 'PRCD') {
+              updateManualKYCDetails();
+            } else {
+              navigateToAddress();
+            }
+
           } else if (response.data.statusCode === 201) {
             setApiError(response.data.message);
             setErrorModalVisible(true);
@@ -914,7 +1239,6 @@ const AddressDetails = (props, { navigation }) => {
             setErrorModalVisible(true)
           }
         });
-      //insertData()
     }
   };
 
@@ -955,18 +1279,17 @@ const AddressDetails = (props, { navigation }) => {
       const baseURL = global.PORT1;
       setLoading(true);
       apiInstance(baseURL)
-        .put(`api/v2/profile-short/address-details/${addressID}`, appDetails)
+        .put(`/api/v2/profile-short/address-details/${addressID}`, appDetails)
         .then(async response => {
           // Handle the response data
           if (global.DEBUG_MODE) console.log('UpdateAddressResponse::' + JSON.stringify(response.data));
           setLoading(false);
           if (response.status == 200) {
-            try {
-              insertData(addressID)
-            } catch (error) {
-
-              if (global.DEBUG_MODE) console.error('InsertAddressError:', error.message);
-
+            props.updateNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientAddress', response.data)
+            if (actionTypeVisible && actionTypeLabel != 'PRCD') {
+              updateManualKYCDetails();
+            } else {
+              navigateToAddress();
             }
           } else if (response.data.statusCode === 201) {
             setApiError(response.data.message);
@@ -995,9 +1318,12 @@ const AddressDetails = (props, { navigation }) => {
             setErrorModalVisible(true)
           }
         });
-      //insertData()
     }
   };
+
+  const navigateToAddress = () => {
+    props.navigation.replace('AddressMainList');
+  }
 
 
   const getPinCode = (pincode) => {
@@ -1005,7 +1331,7 @@ const AddressDetails = (props, { navigation }) => {
     const baseURL = global.PORT4;
     setLoading(true);
     apiInstance(baseURL)
-      .get(`api/v1/pincode/new/${pincode}`)
+      .get(`/api/v1/pincode/new/${pincode}`)
       .then(async response => {
         // Handle the response data
         if (global.DEBUG_MODE) console.log('PincodeApiResponse::' + JSON.stringify(response.data),);
@@ -1049,54 +1375,6 @@ const AddressDetails = (props, { navigation }) => {
 
   };
 
-  const insertData = (id) => {
-    tbl_clientaddressinfo.insertClientAddress(
-      global.LOANAPPLICATIONID,
-      id,
-      global.CLIENTID,
-      global.CLIENTTYPE,
-      addressTypeLabel,
-      addressLine1,
-      addressLine2,
-      landmark,
-      pincode,
-      city,
-      district,
-      state,
-      country,
-      "",
-      "",
-      addressOwnerTypeLabel,
-      ownerDetailsLabel,
-      ownerName,
-      geoClassificationLabel,
-      yearsAtResidence,
-      yearsAtCity,
-      "true",
-      global.USERID,
-      new Date(),
-      global.USERID,
-      new Date(),
-      global.USERID,
-      new Date(),
-      isKYC
-    )
-      .then(result => {
-        if (global.DEBUG_MODE) console.log('Inserted Address detail:', result);
-        props.navigation.replace('AddressMainList')
-        // tbl_clientaddressinfo.getAllAddressDetailsForLoanID('12345')
-        //   .then(data => {
-        //     if (global.DEBUG_MODE) console.log('Address Detail:', data);
-        //   })
-        //   .catch(error => {
-        //     if (global.DEBUG_MODE) console.error('Error fetching bank details:', error);
-        //   });
-      })
-      .catch(error => {
-        if (global.DEBUG_MODE) console.error('Error Inserting Address detail:', error);
-      });
-  }
-
   const handlePickerClick = (componentName, label, index) => {
 
     if (componentName === 'AddressTypePicker') {
@@ -1128,6 +1406,16 @@ const AddressDetails = (props, { navigation }) => {
     } else if (componentName === 'AddressOwnershipPicker') {
       setAddressOwnerTypeLabel(label);
       setAddressOwnerTypeIndex(index);
+    } else if (componentName === 'ActionTypePicker') {
+      setActionTypeLabel(label);
+      setActionTypeIndex(index);
+      if (label == 'PRCD') {
+        KycFieldsDisable();
+      } else if (label == 'HBD') {
+        KycHybridFieldsEnable();
+      } else {
+        KycFieldsEnable();
+      }
     } else if (componentName === 'OwnerDetailsPicker') {
       setOwnerDetailsLabel(label);
       setOwnerDetailsIndex(index);
@@ -1142,6 +1430,78 @@ const AddressDetails = (props, { navigation }) => {
         setOwnerName('')
       }
     }
+
+  }
+
+  const updateManualKYCDetails = () => {
+    setLoading(true)
+
+    const appDetails = {
+      "manualKycStatus": "InProgress",
+      "clientManualAddresses": [
+        {
+          "addressChangeType": actionTypeLabel,
+          "addressType": addressTypeLabel,
+          "addressLine1": addressLine1,
+          "addressLine2": addressLine2,
+          "landmark": landmark,
+          "pincode": pincode,
+          "city": city,
+          "district": district,
+          "state": state,
+          "country": country,
+          "mobileOrLandLineNumber": "",
+          "emailId": "",
+          "addressOwnership": addressOwnerTypeLabel,
+          "ownerDetails": ownerDetailsLabel,
+          "ownerName": ownerName,
+          "geoClassification": geoClassificationLabel,
+          "yearsAtResidence": parseInt(yearsAtResidence),
+          "yearsInCurrentCityOrTown": parseInt(yearsAtCity),
+          "isActive": true,
+          "addrDmsId": addressDmsID,
+        }
+      ]
+    }
+
+
+    const baseURL = global.PORT1
+    apiInstance(baseURL).put(`/api/v2/profile-short/manualKyc/${global.CLIENTID}`, appDetails)
+      .then(async (response) => {
+        // Handle the response data
+        setLoading(false)
+        if (response.status == 200) {
+          if (global.DEBUG_MODE) console.log("ManualKYCApiResponse::" + JSON.stringify(response.data));
+          props.updateNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientManualKycLink', response.data)
+          navigateToAddress();
+        } else if (response.data.statusCode === 201) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        } else if (response.data.statusCode === 202) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        }
+
+
+      })
+      .catch((error) => {
+        // Handle the error
+        if (global.DEBUG_MODE) console.log("ManualKYCApiResponse:::" + JSON.stringify(error.response))
+        setLoading(false)
+        if (error.response.status == 404) {
+          setApiError(Common.error404);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 400) {
+          setApiError(Common.error400);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 500) {
+          setApiError(Common.error500);
+          setErrorModalVisible(true)
+        } else if (error.response.data != null) {
+          setApiError(error.response.data.message);
+          setErrorModalVisible(true)
+        }
+      });
 
   }
 
@@ -1249,9 +1609,226 @@ const AddressDetails = (props, { navigation }) => {
 
   };
 
+  const getImage = (dmsID) => {
+
+    Common.getNetworkConnection().then(value => {
+      if (value.isConnected == true) {
+        setLoading(true)
+        const baseURL = global.PORT2
+        apiInstance(baseURL).get(`/api/documents/document/${parseInt(dmsID)}`)
+          .then(async (response) => {
+            // Handle the response data
+            console.log("GetPhotoApiResponse::" + JSON.stringify(response.data));
+
+            // props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
+            setLoading(false)
+            if (response.status == 200) {
+              setFileName(response.data.fileName)
+              setImageUri('data:image/png;base64,' + response.data.base64Content)
+              props.navigation.navigate('PreviewImage', { imageName: response.data.fileName, imageUri: 'data:image/png;base64,' + response.data.base64Content })
+            } else if (response.data.statusCode === 201) {
+              setApiError(response.data.message);
+              setErrorModalVisible(true);
+            } else if (response.data.statusCode === 202) {
+              setApiError(response.data.message);
+              setErrorModalVisible(true);
+            }
+
+          })
+          .catch((error) => {
+            // Handle the error
+            setLoading(false)
+            if (global.DEBUG_MODE) console.log("GetPhotoApiResponse::" + JSON.stringify(error.response.data));
+            if (error.response.status == 404) {
+              setApiError(Common.error404);
+              setErrorModalVisible(true)
+            } else if (error.response.status == 400) {
+              setApiError(Common.error400);
+              setErrorModalVisible(true)
+            } else if (error.response.status == 500) {
+              setApiError(Common.error500);
+              setErrorModalVisible(true)
+            } else if (error.response.data != null) {
+              setApiError(error.response.data.message);
+              setErrorModalVisible(true)
+            }
+          });
+      } else {
+        setApiError(language[0][props.language].str_errinternetimage);
+        setErrorModalVisible(true)
+
+      }
+
+    })
+  }
+
   const closeErrorModal = () => {
     setErrorModalVisible(false);
   };
+
+  const previewImage = () => {
+    hideImageBottomSheet();
+
+    if (imageUri) {
+      if (imageUri.length > 0) {
+        props.navigation.navigate('PreviewImage', { imageName: fileName, imageUri: imageUri })
+      }
+    } else {
+      getImage(addressDmsID);
+    }
+
+
+  }
+
+  const pickImage = () => {
+    // setVisible(false)
+
+    hidephotoBottomSheet();
+    ImagePicker.openCamera({
+      cropping: true,
+    }).then(image => {
+      setImageFile(image)
+
+      const lastDotIndex = image.path.lastIndexOf('.');
+      var imageName = 'Photo' + '_' + global.CLIENTID;
+      if (lastDotIndex !== -1) {
+        // Get the substring from the last dot to the end of the string
+        const fileExtension = image.path.substring(lastDotIndex);
+        imageName = imageName + fileExtension;
+        if (global.DEBUG_MODE) console.log('File extension:', fileExtension);
+      }
+
+      // const imageName = image.path.split('/').pop();
+      setTime(Common.getCurrentDateTime());
+
+      setFileType(image.mime)
+      setFileName(imageName)
+      setImageUri(image.path)
+
+      updateImage(image.path, image.mime, imageName)
+      //setVisible(false)
+      props.onChange?.(image);
+    })
+
+  };
+
+  const selectImage = async () => {
+    // setVisible(false)
+
+    hidephotoBottomSheet();
+    ImagePicker.openPicker({
+      width: 300,
+      height: 400,
+      cropping: true,
+    }).then(image => {
+      setImageFile(image);
+
+      const lastDotIndex = image.path.lastIndexOf('.');
+      var imageName = 'Photo' + '_' + global.CLIENTID;
+      if (lastDotIndex !== -1) {
+        // Get the substring from the last dot to the end of the string
+        const fileExtension = image.path.substring(lastDotIndex);
+        imageName = imageName + fileExtension;
+        console.log('File extension:', fileExtension);
+      }
+
+      setFileType(image.mime)
+      setFileName(imageName)
+      setImageUri(image.path)
+
+
+      updateImage(image.path, image.mime, imageName)
+      //setVisible(false)
+      //setDeleteVisible(false)
+      props.onChange?.(image);
+    })
+
+  };
+
+  const updateImage = async (imageUri, fileType, fileName) => {
+    if (imageUri) {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append('file', {
+        uri: imageUri,
+        type: fileType,
+        name: fileName,
+      });
+
+      try {
+        const response = await fetch(global.BASEURL + '8094/api/documents', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          // Handle the response from Cloudinary
+          setLoading(false)
+
+          setAddressDmsID(data.docId)
+
+          //updateKYCDetails(data.docId);
+        } else {
+          setLoading(false)
+          if (global.DEBUG_MODE) console.log('Upload failed:', response.status);
+          setApiError(response.status);
+          setErrorModalVisible(true)
+        }
+      } catch (error) {
+        setLoading(false)
+        if (global.DEBUG_MODE) console.log('Upload error:', error);
+        setApiError(error.response.data.message);
+        setErrorModalVisible(true)
+      } finally {
+        setLoading(false);
+      }
+    }
+  }
+
+  const pickDocument = async () => {
+    // try {
+    //   const result = await DocumentPicker.pick({
+    //     type: [DocumentPicker.types.images],
+    //   });
+
+    //   setSelectedDocument(result);
+    // } catch (err) {
+    //   if (DocumentPicker.isCancel(err)) {
+    //   } else {
+    //     throw err;
+    //   }
+    // }
+    showphotoBottomSheet();
+  };
+
+  const reTakePhoto = () => {
+    pickDocument();
+    hideImageBottomSheet();
+  }
+
+  const deletePhoto = () => {
+    setDeleteVisible(true);
+  }
+
+  const onDeleteorCancel = (value) => {
+    if (value == 'Cancel') {
+      setDeleteVisible(false);
+      hideImageBottomSheet();
+    } else {
+
+      setImageUri(null);
+      setFileName('');
+      setFileType('');
+      setImageFile('');
+      setAddressDmsID('')
+
+      setDeleteVisible(false);
+      hideImageBottomSheet();
+    }
+  }
 
   const onGoBack = () => {
     props.navigation.goBack();
@@ -1273,9 +1850,68 @@ const AddressDetails = (props, { navigation }) => {
         <HeadComp textval={language[0][props.language].str_addaddressbutton} props={props} onGoBack={onGoBack} />
       </View>
 
+      <ImageBottomPreview bottomSheetVisible={bottomSheetVisible} previewImage={previewImage} hideBottomSheet={hideImageBottomSheet} reTakePhoto={reTakePhoto} fileName={fileName} detailHide={true} deleteVisible={deleteVisible} deletePhoto={deletePhoto} onDeleteorCancel={onDeleteorCancel} hideDelete={hideDelete} hideRetake={hideRetake} />
+
+
+      <Modal
+        isVisible={photoOptionvisible}
+        onBackdropPress={hidephotoBottomSheet}
+        style={styles.modal}>
+        <View style={styles.modalContent}>
+          <TouchableOpacity
+            onPress={() => hidephotoBottomSheet()}
+            style={{
+              width: 33,
+              height: 33,
+              position: 'absolute',
+              right: 0,
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1,
+              backgroundColor: Colors.common,
+              borderBottomStartRadius: 10,
+            }}>
+            <AntDesign name="close" size={18} color={Colors.black} />
+          </TouchableOpacity>
+
+          <View style={{ width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+            <View style={{ width: '30%', alignItems: 'center' }}>
+              <TouchableOpacity onPress={() => pickImage()} activeOpacity={11}>
+                <View style={{
+                  width: 53, height: 53, borderRadius: 53, backgroundColor: '#E74C3C',
+                  alignItems: 'center', justifyContent: 'center'
+                }}>
+                  <Ionicons name='camera-outline' size={31} color={Colors.white} />
+                </View>
+              </TouchableOpacity>
+              <Text style={{ fontSize: 14, color: Colors.black, marginTop: 7, fontFamily: 'PoppinsRegular' }}>Camera</Text>
+            </View>
+            <View style={{ width: '30%', alignItems: 'center' }}>
+              <TouchableOpacity onPress={() => selectImage()} activeOpacity={11}>
+                <View style={{
+                  width: 53, height: 53, borderRadius: 53, backgroundColor: '#8E44AD',
+                  alignItems: 'center', justifyContent: 'center'
+                }}>
+                  <Ionicons name='image-outline' size={27} color={Colors.white} />
+                </View>
+              </TouchableOpacity>
+              <Text style={{ fontSize: 14, color: Colors.black, marginTop: 7 }}>Gallery</Text>
+            </View>
+
+          </View>
+        </View>
+      </Modal>
+
       <ScrollView style={styles.scrollView}
         contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         {loading ? <Loading /> : null}
+
+        {actionTypeVisible && <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+          <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
+            <TextComp textVal={actionTypeCaption} textStyle={Commonstyles.inputtextStyle} Visible={actionTypeMan} />
+          </View>
+          <PickerComp textLabel={actionTypeLabel} pickerStyle={Commonstyles.picker} Disable={actionTypeDisable} pickerdata={actionTypeData} componentName='ActionTypePicker' handlePickerClick={handlePickerClick} />
+        </View>}
 
         {addressTypeVisible && <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
           <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
@@ -1397,6 +2033,54 @@ const AddressDetails = (props, { navigation }) => {
           <TextInputComp textValue={ownerName} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={ownerNameDisable} ComponentName='OwnerName' reference={ownerNameRef} returnKey="next" handleClick={handleClick} handleReference={handleReference} length={30} />
         </View>}
 
+        {actionTypeVisible && actionTypeLabel != 'PRCD' &&
+          <View
+            style={{
+              width: '100%',
+              alignItems: 'center',
+            }}>
+            <View
+              style={{
+                width: '90%',
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginTop: 20,
+              }}>
+              <TouchableOpacity style={{ width: '30%' }} onPress={() => {
+                if (global.USERTYPEID != 1163) {
+                  pickDocument();
+                }
+              }} activeOpacity={0}>
+                <View style={{ width: 40, height: 40, backgroundColor: '#DBDBDB', borderRadius: 10, justifyContent: 'center', alignItems: 'center' }}>
+                  <Image
+                    source={require('../../../Images/cloudcomputing.png')}
+                    style={{ width: 28, height: 22 }}
+                  />
+                  {/* <FontAwesome6 name="cloud-arrow-up" size={25} color="#b5b6b6" /> */}
+                </View>
+              </TouchableOpacity>
+
+              <Text style={{ width: '50%', color: Colors.dimmText, textAlign: 'left', fontFamily: 'PoppinsRegular' }}>
+                {fileName}
+              </Text>
+
+              {addressDmsID &&
+                <TouchableOpacity style={{ width: '20%', alignItems: 'flex-end' }}
+                  onPress={() => {
+                    showImageBottomSheet();
+                  }}>
+                  <Entypo
+                    name="dots-three-vertical"
+                    size={25}
+                    color={Colors.darkblue}
+                  />
+                </TouchableOpacity>
+              }
+
+            </View>
+          </View>
+        }
+
 
         <ButtonViewComp
           textValue={language[0][props.language].str_next.toUpperCase()}
@@ -1450,15 +2134,19 @@ const mapStateToProps = state => {
   const { language } = state.languageReducer;
   const { profileDetails } = state.profileReducer;
   const { mobileCodeDetails } = state.mobilecodeReducer;
+  const { loanInitiationDetails } = state.loanInitiationReducer;
   return {
     language: language,
     profiledetail: profileDetails,
-    mobilecodedetail: mobileCodeDetails
+    mobilecodedetail: mobileCodeDetails,
+    loanInitiationDetails: loanInitiationDetails
   }
 };
 
 const mapDispatchToProps = dispatch => ({
   languageAction: item => dispatch(languageAction(item)),
+  updateNestedClientDetails: (loanApplicationId, clientId, key, nestedKey, data) => dispatch(updateNestedClientDetails(loanApplicationId, clientId, key, nestedKey, data)),
+  updateLoanInitiationDetails: (loanApplicationId, loanData, key, clientId, updatedDetails) => dispatch(updateLoanInitiationDetails(loanApplicationId, loanData, key, clientId, updatedDetails)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(AddressDetails);

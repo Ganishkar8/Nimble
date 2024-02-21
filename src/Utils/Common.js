@@ -201,7 +201,27 @@ export function isDateGreaterThan(date1, date2) {
 
 export function getSystemCodeDescription(systemCodeDetail, type, subCodeId) {
 
-  const matchingItem = systemCodeDetail.find((data) => data.masterId === type && data.subCodeId === subCodeId);
+  const matchingItem = systemCodeDetail.find((data) => data.masterId === type && data.subCodeId == subCodeId);
+
+  if (matchingItem) {
+    return matchingItem.Description;
+  } else {
+    return ''; // Or any other appropriate value for no match
+  }
+
+  // systemCodeDetail.filter((data) => data.masterId === type).map((value, index) => {
+
+  //   if (value.subCodeId === subCodeId) {
+  //     console.log('subCodeId::::' + value.subCodeId + ' ' + subCodeId + ' ' + value.label)
+  //     return value.label;
+  //   }
+
+  // });
+}
+
+export function getBankCodeDescription(systemCodeDetail, type, subCodeId) {
+
+  const matchingItem = systemCodeDetail.find((data) => data.ID === type && data.subCodeId == subCodeId);
 
   if (matchingItem) {
     return matchingItem.Description;
@@ -351,12 +371,41 @@ export async function getPageID(processModuleData, pageCode) {
   });
 }
 
+export async function getPageStatus(processModuleData, pageCode) {
+
+  await processModuleData.forEach((data) => {
+    const incompleteNestedSubData = data.nestedSubData.filter((nestedData) => nestedData.pageCode === pageCode);
+    if (incompleteNestedSubData.length > 0) {
+      if (incompleteNestedSubData[0].nestedSubDataIsCompleted) {
+        global.ALLOWEDIT = "0";
+      } else {
+        global.ALLOWEDIT = "1";
+      }
+      return incompleteNestedSubData[0].nestedSubDataIsCompleted;
+    }
+
+  });
+}
+
 export function isEmptyObject(obj) {
   return Object.keys(obj).length === 0;
 };
 
+export function isValidDob(dob) {
+  // Regular expression to match the format YYYY-MM-DD
+  const dobPattern = /^\d{4}-\d{2}-\d{2}$/;
+
+  // Check if the DOB matches the pattern
+  if (!dobPattern.test(dob)) {
+    return false; // Return false if the pattern doesn't match
+  }
+
+  return true;
+
+}
+
 export default {
   isValidPhoneNumber, isEmailValid, isValidText, convertDateFormat, isDateGreaterThan, isValidAlphaText, showErrorAlert, getSystemCodeDescription,
-  numberRegex, CS_URL, CS_URL1, integerPattern, formatDate, getCodeDescription, formatTime, hasOnlyOneKey, getCurrentDateTime, getNetworkConnection,
-  isValidPin, isValidPAN, validateVerhoeff, isValidEmail, calculateAge, convertYearDateFormat, getPageID, getClientID, isEmptyObject, error400, error404, error500, errorNetwork
+  numberRegex, CS_URL, CS_URL1, integerPattern, formatDate, getCodeDescription, formatTime, hasOnlyOneKey, getCurrentDateTime, getNetworkConnection, isValidDob,
+  isValidPin, isValidPAN, validateVerhoeff, isValidEmail, calculateAge, convertYearDateFormat, getPageID, getClientID, isEmptyObject, error400, error404, error500, errorNetwork, getBankCodeDescription, getPageStatus
 };

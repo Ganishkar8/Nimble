@@ -1024,6 +1024,7 @@ const PDReferenceCheck = (props, { navigation }) => {
 
         const baseURL = global.PORT1;
         setLoading(true)
+
         const appDetails = {
 
             "createdBy": global.USERID,
@@ -1246,7 +1247,7 @@ const PDReferenceCheck = (props, { navigation }) => {
         const baseURL = '8082';
         setLoading(true);
         apiInstance(baseURL)
-            .get(`api/v1/pincode/new/${pincode}`)
+            .get(`/api/v1/pincode/new/${pincode}`)
             .then(async response => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log('PincodeApiResponse::' + JSON.stringify(response.data),);

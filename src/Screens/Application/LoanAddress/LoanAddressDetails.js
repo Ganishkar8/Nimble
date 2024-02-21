@@ -20,6 +20,8 @@ import apiInstance from '../../../Utils/apiInstance';
 import ErrorModal from '../../../Components/ErrorModal';
 import tbl_client from '../../../Database/Table/tbl_client';
 import tbl_clientaddressinfo from '../../../Database/Table/tbl_clientaddressinfo';
+import { updateLoanInitiationDetails, deleteLoanInitiationDetails, updateNestedClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
+
 
 const LoanAddressDetails = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
@@ -177,24 +179,27 @@ const LoanAddressDetails = (props, { navigation }) => {
 
     const getExistingData = () => {
 
-        tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE).then(value => {
-            if (value !== undefined && value.length > 0) {
+        // tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE).then(value => {
+        //     if (value !== undefined && value.length > 0) {
 
-                setKYCManual(value[0].isKycManual)
+        //         setKYCManual(value[0].isKycManual)
 
-                if (global.USERTYPEID == 1163) {
-                    if (!(value[0].isKycManual == '1')) {
-                        fieldsDisable();
-                    }
-                }
+        //         if (global.USERTYPEID == 1163) {
+        //             if (!(value[0].isKycManual == '1')) {
+        //                 fieldsDisable();
+        //             }
+        //         }
 
-            }
-        })
+        //     }
+        // })
 
+        if (global.USERTYPEID == 1163) {
+            fieldsDisable();
+        }
 
         if (isNew != 'new') {
             setPostORPut('put')
-            getExistingAddressData(isNew.loanApplicationId, isNew.id)
+            getExistingAddressData(isNew)
         } else {
             setPostORPut('post');
         }
@@ -217,56 +222,53 @@ const LoanAddressDetails = (props, { navigation }) => {
 
     }
 
-    const getExistingAddressData = (loanAppId, id) => {
-        tbl_loanaddressinfo.getAllLoanAddressDetailsForLoanIDAndID(loanAppId, id.toString())
-            .then(data => {
-                if (global.DEBUG_MODE) console.log('Address Detail:', data);
-                setAddressID(data[0].id)
-                setAddressLine1(data[0].address_line_1)
-                setAddressLine2(data[0].address_line_2)
-                setLandmark(data[0].landmark)
-                setPincode(data[0].pincode)
-                setCity(data[0].city)
-                setDistrict(data[0].district)
-                setState(data[0].state)
-                setCountry(data[0].country)
-                setOwnerName(data[0].owner_name)
-                setMobileNo(data[0].mobile_or_land_line_number)
-                setEmail(data[0].email_id)
-                //spinner
-                setAddressTypeLabel(data[0].address_type)
-                if (data[0].address_type == 'ROA' || data[0].address_type == 'OPA') {
-                    setAddressOwnerTypeVisible(true);
-                    setOwnerDetailsVisible(true);
-                    setOwnerNameVisible(true)
-                } else {
-                    setAddressOwnerTypeVisible(false);
-                    setOwnerDetailsVisible(false);
-                    setOwnerNameVisible(false)
-                }
-                if (global.DEBUG_MODE) console.log("LoanAddressType::" + data[0].address_type)
-                setAddressOwnerTypeLabel(data[0].address_ownership)
-                setOwnerDetailsLabel(data[0].owner_details)
-                if (data[0].owner_details == 'OD-OTH' || data[0].owner_details == 'OD-RLT') {
-                    setOwnerNameDisable(false);
-                    setOwnerNameMan(true);
-                    setOwnerNameVisible(true);
-                } else {
-                    setOwnerNameDisable(true);
-                    setOwnerNameMan(false);
-                    setOwnerNameVisible(false);
-                    setOwnerName('')
-                }
-                if (data[0].isKyc === "1") {
-                    disableAadharFields(data)
-                }
-                setIsKYC(data[0].isKyc);
-                setLoading(false)
-            })
-            .catch(error => {
-                if (global.DEBUG_MODE) console.error('Error fetching bank details:', error);
-                setLoading(false)
-            });
+    const getExistingAddressData = (data) => {
+
+        setAddressID(data.id)
+        setAddressLine1(data.addressLine1)
+        setAddressLine2(data.addressLine2)
+        setLandmark(data.landmark)
+        setPincode(data.pincode)
+        setCity(data.city)
+        setDistrict(data.district)
+        setState(data.state)
+        setCountry(data.country)
+        setOwnerName(data.ownerName)
+        setMobileNo(data.mobileOrLandLineNumber)
+        setEmail(data.emailId)
+        //spinner
+        setAddressTypeLabel(data.addressType)
+        if (data.addressType == 'ROA' || data.addressType == 'OPA') {
+            setAddressOwnerTypeVisible(true);
+            setOwnerDetailsVisible(true);
+            setOwnerNameVisible(true)
+        } else {
+            setAddressOwnerTypeVisible(false);
+            setOwnerDetailsVisible(false);
+            setOwnerNameVisible(false)
+        }
+
+        setAddressOwnerTypeLabel(data.addressOwnership)
+        setOwnerDetailsLabel(data.ownerDetails)
+        if (data.ownerDetails == 'OD-OTH' || data.ownerDetails == 'OD-RLT') {
+            setOwnerNameDisable(false);
+            setOwnerNameMan(true);
+            setOwnerNameVisible(true);
+        } else {
+            setOwnerNameDisable(true);
+            setOwnerNameMan(false);
+            setOwnerNameVisible(false);
+            setOwnerName('')
+        }
+        // if (data[0].isKyc === "1") {
+        //     disableAadharFields(data)
+        // }
+        if (data.isUdyam) {
+            setAddressTypeDisable(true);
+        }
+        setIsKYC(data.isEkyc);
+        setLoading(false)
+
     }
 
     const disableAadharFields = (data) => {
@@ -323,19 +325,15 @@ const LoanAddressDetails = (props, { navigation }) => {
 
         var availAddresssType = [];
 
-        await tbl_loanaddressinfo.getAllLoanAddressDetailsForLoanID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
-            .then(data => {
-                if (global.DEBUG_MODE) console.log('Address Detail:', data);
-                if (data !== undefined && data.length > 0) {
-                    data.forEach(item => {
-                        availAddresssType.push(item.address_type)
-                    });
+        const clientDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
+        const filterBusinessAddress = clientDetail.clientAddress.filter(item => item.addressType != 'P' && item.addressType != 'C')
 
-                }
-            })
-            .catch(error => {
-                if (global.DEBUG_MODE) console.error('Error fetching Address details:', error);
-            });
+
+        filterBusinessAddress.forEach(item => {
+            availAddresssType.push(item.addressType)
+        });
+
+
 
 
         const filterAddressTypeData = userCodeDetail.filter((data) => data.masterId === 'ADDRESS_TYPE');
@@ -784,18 +782,21 @@ const LoanAddressDetails = (props, { navigation }) => {
             const baseURL = '8901';
             setLoading(true);
             apiInstance(baseURL)
-                .post(`api/v2/profile-short/address-details/${global.CLIENTID}`, appDetails)
+                .post(`/api/v2/profile-short/address-details/${global.CLIENTID}`, appDetails)
                 .then(async response => {
                     // Handle the response data
                     if (global.DEBUG_MODE) console.log('PostAddressResponse::' + JSON.stringify(response.data),);
 
                     setLoading(false);
-                    if (addressID) {
-                        insertData(response.data[0].id)
-                    } else {
-                        tbl_loanaddressinfo.deleteLoanDataBasedOnAddressAndClient(global.LOANAPPLICATIONID, addressTypeLabel, global.CLIENTTYPE);
-                        insertData(response.data[0].id)
-                    }
+                    // if (addressID) {
+                    //     props.updateNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientManualKycLink', response.data)
+                    //     insertData(response.data[0].id)
+                    // } else {
+                    //     tbl_loanaddressinfo.deleteLoanDataBasedOnAddressAndClient(global.LOANAPPLICATIONID, addressTypeLabel, global.CLIENTTYPE);
+                    //     insertData(response.data[0].id)
+                    // }
+                    props.updateNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientAddress', response.data[0])
+                    props.navigation.replace('LoanAddressList')
 
                 })
                 .catch(error => {
@@ -846,12 +847,13 @@ const LoanAddressDetails = (props, { navigation }) => {
             const baseURL = '8901';
             setLoading(true);
             apiInstance(baseURL)
-                .put(`api/v2/profile-short/address-details/${addressID}`, appDetails)
+                .put(`/api/v2/profile-short/address-details/${addressID}`, appDetails)
                 .then(async response => {
                     // Handle the response data
                     if (global.DEBUG_MODE) console.log('UpdateAddressResponse::' + JSON.stringify(response.data),);
-
-                    insertData(addressID)
+                    props.updateNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientAddress', response.data)
+                    props.navigation.replace('LoanAddressList')
+                    //insertData(addressID)
 
                     setLoading(false);
                 })
@@ -874,7 +876,7 @@ const LoanAddressDetails = (props, { navigation }) => {
         const baseURL = '8082';
         setLoading(true);
         apiInstance(baseURL)
-            .get(`api/v1/pincode/new/${pincode}`)
+            .get(`/api/v1/pincode/new/${pincode}`)
             .then(async response => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log('PincodeApiResponse::' + JSON.stringify(response.data),);
@@ -1239,15 +1241,19 @@ const mapStateToProps = state => {
     const { language } = state.languageReducer;
     const { profileDetails } = state.profileReducer;
     const { mobileCodeDetails } = state.mobilecodeReducer;
+    const { loanInitiationDetails } = state.loanInitiationReducer;
     return {
         language: language,
         profiledetail: profileDetails,
-        mobilecodedetail: mobileCodeDetails
+        mobilecodedetail: mobileCodeDetails,
+        loanInitiationDetails: loanInitiationDetails
     }
 };
 
 const mapDispatchToProps = dispatch => ({
     languageAction: item => dispatch(languageAction(item)),
+    updateNestedClientDetails: (loanApplicationId, clientId, key, nestedKey, data) => dispatch(updateNestedClientDetails(loanApplicationId, clientId, key, nestedKey, data)),
+    updateLoanInitiationDetails: (loanApplicationId, loanData, key, clientId, updatedDetails) => dispatch(updateLoanInitiationDetails(loanApplicationId, loanData, key, clientId, updatedDetails)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(LoanAddressDetails);

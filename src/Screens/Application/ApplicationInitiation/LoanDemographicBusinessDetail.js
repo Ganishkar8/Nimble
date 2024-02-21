@@ -50,6 +50,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ImagePicker, { ImageOrVideo } from 'react-native-image-crop-picker';
 import tbl_loanbusinessDetail from '../../../Database/Table/tbl_loanbusinessDetail';
+import { addLoanInitiationDetails, updateLoanInitiationDetails, deleteLoanInitiationDetails, updateClientDetails, updateNestedClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
 
 
 const LoanDemographicBusinessDetail = (props) => {
@@ -1290,6 +1291,7 @@ const LoanDemographicBusinessDetail = (props) => {
 
                     setLoading(false);
                     if (response.status == 200) {
+                        props.updateNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientBusinessDetail', response.data)
                         await insertData(response.data.id, imageID);
                     } else if (response.data.statusCode === 201) {
                         setApiError(response.data.message);
@@ -2812,16 +2814,22 @@ const mapStateToProps = (state) => {
     const { language } = state.languageReducer;
     const { profileDetails } = state.profileReducer;
     const { mobileCodeDetails } = state.mobilecodeReducer;
+    const { loanInitiationDetails } = state.loanInitiationReducer;
     return {
         language: language,
         profiledetail: profileDetails,
-        mobilecodedetail: mobileCodeDetails
+        mobilecodedetail: mobileCodeDetails,
+        loanInitiationDetails: loanInitiationDetails
     }
 }
 
 const mapDispatchToProps = dispatch => ({
     languageAction: item => dispatch(languageAction(item)),
     dedupeAction: item => dispatch(dedupeAction(item)),
+    deleteDedupe: item => dispatch(deleteDedupe()),
+    updateNestedClientDetails: (loanApplicationId, clientId, key, nestedKey, data) => dispatch(updateNestedClientDetails(loanApplicationId, clientId, key, nestedKey, data)),
+    updateClientDetails: (loanApplicationId, clientId, key, data) => dispatch(updateClientDetails(loanApplicationId, clientId, key, data)),
+    updateLoanInitiationDetails: (loanApplicationId, loanData, key, clientId, updatedDetails) => dispatch(updateLoanInitiationDetails(loanApplicationId, loanData, key, clientId, updatedDetails)),
 });
 
 export default connect(

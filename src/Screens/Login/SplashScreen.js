@@ -19,28 +19,39 @@ import tbl_UserCodeDetails from '../../Database/Table/tbl_UserCodeDetails';
 import tbl_SystemCodeDetails from '../../Database/Table/tbl_SystemCodeDetails';
 import Bank_Detail_Table from '../../Database/Table/Bank_Detail_Table';
 import Video from 'react-native-video';
+import { connect } from 'react-redux';
 
 
-const SplashScreen = ({ navigation }) => {
+const SplashScreen = (props, { navigation }) => {
   useEffect(() => {
+
     Sqlitedatabase.createTables().then(table => {
+
       setTimeout(() => {
-        AsyncStorage.getItem('IsBankRegistered').then(value => {
-          if (value == 'true') {
-            Bank_Detail_Table.getAllBankDetails().then(value => {
-              global.BASEURL = value[0].BankURL;
-              AsyncStorage.getItem('IsLogin').then(value => {
-                if (value == 'true') {
-                  navigation.replace('BottomNavigation');
-                } else {
-                  navigation.replace('LoginScreen');
-                }
-              });
-            });
-          } else {
-            navigation.replace('BankRegistration');
-          }
-        });
+
+        if (props.bankDetails.length > 0) {
+          global.BASEURL = props.bankDetails[0].BankURL;
+          props.navigation.replace('LoginScreen');
+        } else {
+          props.navigation.replace('BankRegistration');
+        }
+
+        // AsyncStorage.getItem('IsBankRegistered').then(value => {
+        //   if (value == 'true') {
+        //     Bank_Detail_Table.getAllBankDetails().then(value => {
+        //       global.BASEURL = value[0].BankURL;
+        //       AsyncStorage.getItem('IsLogin').then(value => {
+        //         if (value == 'true') {
+        //           props.navigation.replace('BottomNavigation');
+        //         } else {
+        //           props.navigation.replace('LoginScreen');
+        //         }
+        //       });
+        //     });
+        //   } else {
+        //     props.navigation.replace('BankRegistration');
+        //   }
+        // });
       }, 3000);
     });
   }, []);
@@ -109,4 +120,14 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SplashScreen;
+const mapStateToProps = (state) => {
+  const { language } = state.languageReducer;
+  const { bankDetails } = state.bankDetailReducer;
+  return {
+    language: language,
+    bankDetails: bankDetails
+  }
+}
+
+export default connect(mapStateToProps)(SplashScreen);
+

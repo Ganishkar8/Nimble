@@ -380,7 +380,7 @@ const PDTracker = (props, { navigation, route }) => {
         const baseURL = '8901'
         setLoading(true)
 
-        apiInstance(baseURL).get(`api/v1/lead-creation-initiation/getByLeadId/${leadID}`)
+        apiInstance(baseURL).get(`/api/v1/lead-creation-initiation/getByLeadId/${leadID}`)
             .then((response) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(response.data));
@@ -549,7 +549,7 @@ const PDTracker = (props, { navigation, route }) => {
 
     const callAgentNameApi = () => {
         setLoading(true);
-        apiInstancelocal('8901').get(`api/v1/dropdown/{supervisorId}?supervisorId=${global.USERID}`)
+        apiInstancelocal('8901').get(`/api/v1/dropdown/{supervisorId}?supervisorId=${global.USERID}`)
             .then(async (response) => {
 
                 setLoading(false);

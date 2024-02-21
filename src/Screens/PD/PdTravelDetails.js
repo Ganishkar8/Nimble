@@ -489,7 +489,7 @@ const PdTravelDetails = (props, { navigation }) => {
         const baseURL = '8901'
         setLoading(true)
 
-        apiInstance(baseURL).post(`api/v1/pd/travelDetails/loan-application-number/${global.LOANAPPLICATIONNUM}/personal-discussion/clientId/${global.CLIENTID}`, appDetails)
+        apiInstance(baseURL).post(`/api/v1/pd/travelDetails/loan-application-number/${global.LOANAPPLICATIONNUM}/personal-discussion/clientId/${global.CLIENTID}`, appDetails)
             .then((response) => {
                 // Handle the response data ${item.clientId}
                 if (global.DEBUG_MODE) console.log("PDTravelDetailsApi::" + JSON.stringify(response.data));
@@ -581,7 +581,7 @@ const PdTravelDetails = (props, { navigation }) => {
         const baseURL = '8901'
         setLoading(true)
 
-        apiInstance(baseURL).put(`api/v1/pd/travelDetails/update/id/${travelID}`, appDetails)
+        apiInstance(baseURL).put(`/api/v1/pd/travelDetails/update/id/${travelID}`, appDetails)
             .then((response) => {
                 // Handle the response data ${item.clientId}
                 if (global.DEBUG_MODE) console.log("PDTravelDetailsApi::" + JSON.stringify(response.data));

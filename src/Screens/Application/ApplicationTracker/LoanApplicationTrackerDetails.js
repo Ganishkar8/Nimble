@@ -30,6 +30,7 @@ import tbl_loanbusinessDetail from '../../../Database/Table/tbl_loanbusinessDeta
 import tbl_loanaddressinfo from '../../../Database/Table/tbl_loanaddressinfo';
 import tbl_finexpdetails from '../../../Database/Table/tbl_finexpdetails';
 import tbl_bankdetails from '../../../Database/Table/tbl_bankdetails';
+import { addLoanInitiationDetails, deleteLoanInitiationDetails } from '../../../Utils/redux/actions/loanInitiationAction';
 
 
 const LoanApplicationTrackerDetails = (props, { navigation }) => {
@@ -79,6 +80,14 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
                 if (response.status == 200) {
                     if (global.DEBUG_MODE) console.log("LoanAppDetails::" + JSON.stringify(response.data));
                     global.LEADTRACKERDATA = response.data;
+                    const updatedObject = Object.keys(response.data).reduce((acc, key) => {
+                        if (key !== 'loanApplicationStatusDtos') {
+                            acc[key] = response.data[key];
+                        }
+                        return acc;
+                    }, {});
+                    props.deleteLoanInitiationDetails(global.LOANAPPLICATIONID);
+                    props.addLoanInitiationDetails(updatedObject);
                     insertData(response.data);
                 }
                 else if (response.data.statusCode === 201) {
@@ -162,7 +171,7 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
         await Promise.all(deletePromises);
         var loanApplicationID = value.id;
         tbl_loanApplication.insertLoanApplication(loanApplicationID, 'APPL', value.loanApplicationNumber, value.tempNumber, value.branchId, value.leadId, value.customerCategory, value.customerSubcategory, value.customerType, value.loanType, value.loanPurpose,
-            value.product, value.loanAmount, value.workflowId, '', value.consent, '', '', value.applicationAppliedBy, '', value.lmsApplicationNumber, value.isManualKyc, value.manualKycStatus, '', '', value.createdBy, 'value.createdDate', '', 'value.modifiedDate', '', '')
+            value.product, value.loanAmount, value.workflowId, '', value.consent, '', '', value.applicationAppliedBy, '', value.lmsApplicationNumber, value.isKycManual, value.manualKycStatus, '', '', value.createdBy, 'value.createdDate', '', 'value.modifiedDate', '', '')
 
         await value.clientDetail.forEach(async (client) => {
             var dob = '';
@@ -383,6 +392,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => ({
     languageAction: (item) => dispatch(languageAction(item)),
+    addLoanInitiationDetails: (item) => dispatch(addLoanInitiationDetails(item)),
+    deleteLoanInitiationDetails: (item) => dispatch(deleteLoanInitiationDetails(item)),
 });
 export default connect(mapStateToProps, mapDispatchToProps)(LoanApplicationTrackerDetails);
 

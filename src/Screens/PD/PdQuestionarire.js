@@ -170,7 +170,7 @@ const PdQuestionarire = (props, { navigation }) => {
             }
         }
 
-        apiInstance(baseURL).post(`api/v1/pd/PdQAcheck/findbyClientId`, appDetails)
+        apiInstance(baseURL).post(`/api/v1/pd/PdQAcheck/findbyClientId`, appDetails)
             .then((response) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(response.data));
@@ -272,7 +272,7 @@ const PdQuestionarire = (props, { navigation }) => {
             "personalDiscussionQARefference": []
         }
 
-        apiInstance(baseURL).post(`api/v1/pd/PdQAcheck/loan-application-number/${global.LOANAPPLICATIONNUM}/clientId/${global.CLIENTID}`, appDetails)
+        apiInstance(baseURL).post(`/api/v1/pd/PdQAcheck/loan-application-number/${global.LOANAPPLICATIONNUM}/clientId/${global.CLIENTID}`, appDetails)
             .then((response) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log("PostQuestionApi::" + JSON.stringify(response));

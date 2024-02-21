@@ -216,7 +216,7 @@ const ReAssign = (props, { navigation }) => {
         }
         const baseURL = '8901'
         setLoading(true)
-        apiInstance(baseURL).post(`api/v1/lead-Approved/ReAssignedByBm/true/${global.leadID}`, appDetails)
+        apiInstance(baseURL).post(`/api/v1/lead-Approved/ReAssignedByBm/true/${global.leadID}`, appDetails)
             .then(async (response) => {
                 // Handle the response data
                 setLoading(false)

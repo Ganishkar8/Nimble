@@ -35,6 +35,7 @@ import tbl_client from '../../../Database/Table/tbl_client';
 import tbl_loanApplication from '../../../Database/Table/tbl_loanApplication';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import { check } from 'react-native-permissions';
+import { deleteNestedClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
 
 const AddressMainList = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -60,7 +61,9 @@ const AddressMainList = (props, { navigation }) => {
   useEffect(() => {
     props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
+    //alert(JSON.stringify(props.loanInitiationDetails))
 
+    //props.deleteNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientAddress', 870)
     getAddressData()
     if (global.USERTYPEID == 1163) {
       setAddAddressVisible(false)
@@ -81,64 +84,42 @@ const AddressMainList = (props, { navigation }) => {
 
   const getAddressData = () => {
 
-    tbl_client.getAllClientID(global.LOANAPPLICATIONID)
-      .then(data => {
-        if (global.DEBUG_MODE) console.log('Applicant Data:', data);
-        if (data !== undefined && data.length > 0) {
-          data.forEach((client) => {
-            if (client.isKycManual == '1' || client.isKycManual == true) {
-              setIsManualKYCAvailable(true);
-              return;
-            }
-          });
-        }
+    // Filter data based on loan application number
+    const filteredData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID));
 
-      })
-      .catch(error => {
-        if (global.DEBUG_MODE) console.error('Error fetching Applicant details:', error);
-      });
+    if (filteredData.length > 0) {
 
-    if (global.USERTYPEID == 1163) {
-      if (global.LEADTRACKERDATA) {
-        const filterClient = global.LEADTRACKERDATA.clientDetail.filter((data) => data.clientType === global.CLIENTTYPE);
-        if (filterClient[0].clientManualKycLink.length > 0) {
-          if (filterClient[0].clientManualKycLink[0].manualKycStatus !== null && filterClient[0].clientManualKycLink[0].manualKycStatus) {
-            setKYCManual('0');
-          } else {
-            setKYCManual('1');
-          }
-        } else {
-          setKYCManual('0');
-        }
-        //alert(JSON.stringify(filterClient[0].clientManualKycLink))
-      } else {
-        setKYCManual('0')
+      const hasTrueManualKyc = filteredData[0].clientDetail.some(link => link.isKycManual);
+      if (hasTrueManualKyc) {
+        setIsManualKYCAvailable(true);
       }
-    }
 
+      const clientDetail = filteredData[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
 
+      if (clientDetail) {
 
-    // tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE).then(value => {
-    //   if (value !== undefined && value.length > 0) {
+        if (clientDetail) {
+          if (clientDetail.clientManualKycLink) {
+            if (clientDetail.clientManualKycLink.length > 0) {
 
-    //     setKYCManual(value[0].isKycManual)
+              if (clientDetail.clientManualKycLink[0].manualKycStatus == 'Approved') {
+                setKYCManual('0');
+              } else {
+                setKYCManual('1');
+              }
+            } else {
+              setKYCManual('0');
+            }
+          } else {
+            setKYCManual('0');
+          }
+        }
+        const addressDetails = clientDetail.clientAddress.filter(item => item.addressType == 'P' || item.addressType == 'C');
 
-    //     if (global.USERTYPEID == 1163) {
-    //       if (!(value[0].isKycManual == '1')) {
-
-    //       }
-    //     }
-
-    //   }
-    // })
-
-    tbl_clientaddressinfo.getAllAddressDetailsForLoanID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
-      .then(data => {
-        if (global.DEBUG_MODE) console.log('Address Detail:', data);
-        if (data !== undefined && data.length > 0) {
-          setAddressDetails(data)
-          const communicationAddress = data.find(item => item.address_type === 'C');
-          const permanentAddress = data.find(item => item.address_type === 'P');
+        if (addressDetails) {
+          setAddressDetails(addressDetails)
+          const communicationAddress = addressDetails.find(item => item.addressType === 'C');
+          const permanentAddress = addressDetails.find(item => item.addressType === 'P');
           if (communicationAddress) {
             setCommunicationAvailable(true);
           } else {
@@ -156,10 +137,14 @@ const AddressMainList = (props, { navigation }) => {
           }
           setRefreshFlatList(!refreshFlatlist)
         }
-      })
-      .catch(error => {
-        if (global.DEBUG_MODE) console.error('Error fetching bank details:', error);
-      });
+        // Log or use the addressDetails as needed
+        if (global.DEBUG_MODE) console.log("Address Details:", addressDetails);
+      } else {
+        if (global.DEBUG_MODE) console.log("Client ID not found in clientDetail array.");
+      }
+    } else {
+      if (global.DEBUG_MODE) console.log("Loan application number not found.");
+    }
   }
 
   const FlatView = ({ item }) => {
@@ -169,19 +154,23 @@ const AddressMainList = (props, { navigation }) => {
     if (global.USERTYPEID == 1163) {
       bg = 'GREY'
     } else {
-      if (item.isKyc == '1') {
-        bg = 'GREY'
-      } else {
-
+      if (item.addressType == 'P') {
+        if (item.isEkyc || item.isLms) {
+          bg = 'GREY'
+        }
       }
+
+    }
+    if (global.ALLOWEDIT == "0") {
+      bg = 'GREY';
     }
     return (
       <View style={{ marginLeft: 10, marginRight: 10 }}>
         <View>
           <Text style={{ fontSize: 14, fontFamily: 'Poppins-SemiBold', marginTop: 5, color: Colors.black }}>
-            {Common.getSystemCodeDescription(props.mobilecodedetail.leadUserCodeDto, 'PRF_SHORT_ADDRESS_TYPE', item.address_type)}
+            {Common.getSystemCodeDescription(props.mobilecodedetail.leadUserCodeDto, 'PRF_SHORT_ADDRESS_TYPE', item.addressType)}
           </Text>
-          <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: Colors.mediumgrey }}>{`${item.address_line_1},${item.address_line_2}`}</Text>
+          <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: Colors.mediumgrey }}>{`${item.addressLine1},${item.addressLine2}`}</Text>
           <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: Colors.mediumgrey }}>{`${item.district},${item.state}`}</Text>
         </View>
 
@@ -218,9 +207,21 @@ const AddressMainList = (props, { navigation }) => {
             if (global.USERTYPEID == 1163) {
 
             } else {
-              if (item.isKyc != '1') {
-                handleClick('delete', item)
+              if (global.ALLOWEDIT == "0") {
+
+              } else {
+                if (item.addressType == 'P') {
+                  if (item.isEkyc || item.isLms) {
+
+                  } else {
+                    handleClick('delete', item)
+                  }
+                } else {
+                  handleClick('delete', item)
+                }
+
               }
+
             }
           }
           }>
@@ -295,6 +296,7 @@ const AddressMainList = (props, { navigation }) => {
         setLoading(false);
         if (response.status == 200) {
           deletedata(addressID);
+          props.deleteNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientAddress', addressID)
         } else if (response.data.statusCode === 201) {
           setApiError(response.data.message);
           setErrorModalVisible(true);
@@ -325,11 +327,6 @@ const AddressMainList = (props, { navigation }) => {
   };
 
   const deletedata = async (addressID) => {
-
-    const deletePromises = [
-      tbl_clientaddressinfo.deleteDataBasedOnLoanIDAndID(global.LOANAPPLICATIONID, addressID)
-    ];
-    await Promise.all(deletePromises);
 
     const newArray = addressDetails.filter(item => item.id !== addressID);
     if (newArray.length > 0) {
@@ -530,7 +527,7 @@ const AddressMainList = (props, { navigation }) => {
     const baseURL = global.PORT1;
     setLoading(true);
     apiInstance(baseURL)
-      .put(`api/v2/profile-short/manualKyc/${global.CLIENTID}`, appDetails)
+      .put(`/api/v2/profile-short/manualKyc/${global.CLIENTID}`, appDetails)
       .then(async response => {
         // Handle the response data
         if (global.DEBUG_MODE) console.log('ApproveKYCApiResponse::' + JSON.stringify(response.data),);
@@ -801,15 +798,18 @@ const mapStateToProps = state => {
   const { language } = state.languageReducer;
   const { profileDetails } = state.profileReducer;
   const { mobileCodeDetails } = state.mobilecodeReducer;
+  const { loanInitiationDetails } = state.loanInitiationReducer;
   return {
     language: language,
     profiledetail: profileDetails,
-    mobilecodedetail: mobileCodeDetails
+    mobilecodedetail: mobileCodeDetails,
+    loanInitiationDetails: loanInitiationDetails
   }
 };
 
 const mapDispatchToProps = dispatch => ({
   languageAction: item => dispatch(languageAction(item)),
+  deleteNestedClientDetails: (loanApplicationId, clientId, key, nestedKey, id) => dispatch(deleteNestedClientDetails(loanApplicationId, clientId, key, nestedKey, id)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(AddressMainList);

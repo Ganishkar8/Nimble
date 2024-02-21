@@ -90,7 +90,7 @@ const FinalConsentScreen = (props, { navigation }) => {
 
         const baseURL = '8901'
         setLoading(true)
-        apiInstance(baseURL).put(`api/v2/profile-short/basic-details/${global.LOANAPPLICATIONID}`, appDetails)
+        apiInstance(baseURL).put(`/api/v2/profile-short/basic-details/${global.LOANAPPLICATIONID}`, appDetails)
             .then(async (response) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log("FinalConsentApiResponse::" + JSON.stringify(response));

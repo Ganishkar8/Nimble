@@ -171,7 +171,6 @@ const LoanApplicationMain = (props, { navigation }) => {
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
         //getProcessSubStage();
 
-
         return () => {
             setIsMounted(false);
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
@@ -203,13 +202,13 @@ const LoanApplicationMain = (props, { navigation }) => {
         const baseURL = global.PORT1;;
         setLoading(true);
         apiInstance(baseURL)
-            .get(`api/v2/current-status/${global.LOANAPPLICATIONID}`)
+            .get(`/api/v2/current-status/${global.LOANAPPLICATIONID}`)
             .then(async response => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log('CBCheckApiResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
                 if (response.status == 200) {
-
+                    global.TRACKERSTATUSDATA = response.data;
                     const filterLNAPP = response.data.loanApplicationStatus.filter((data) => data.loanWorkflowStage === 'LN_APP_INITIATION');
                     const filterSubStage = filterLNAPP[0].subStageLog.filter((data) => data.subStageCode === 'CB_CHK');
                     const filtermodule = filterSubStage[0].moduleLog.filter((data) => data.moduleCode === 'CB_BRE_DCSN');
@@ -226,6 +225,7 @@ const LoanApplicationMain = (props, { navigation }) => {
                         setIsLoanCompleted(true);
                     }
                     setCbCheckStatus(filterSubStage[0].subStageStatus)
+                    // getCurrentStatusData(response.data)
                     getWorkFlowID();
                 } else if (response.data.statusCode === 201) {
                     setApiError(response.data.message);
@@ -260,29 +260,24 @@ const LoanApplicationMain = (props, { navigation }) => {
     };
 
     const getWorkFlowID = () => {
-        tbl_loanApplication.getLoanAppWorkFlowID(global.LOANAPPLICATIONID, 'APPL')
-            .then(data => {
-                if (global.DEBUG_MODE) console.log('Loan Application Data:', data);
-                if (data !== undefined && data.length > 0) {
-                    if (data[0].workflow_id.toString().length > 0) {
-                        getDisplayerOrder(data[0].workflow_id);
-                        setWorkflowIDLabel(data[0].workflow_id);
-                    } else {
-                        getDisplayerOrder(props.mobilecodedetail.wfConfig1s[0].wfId);
-                        setWorkflowIDLabel(props.mobilecodedetail.wfConfig1s[0].wfId);
-                    }
 
-                } else {
-                    getDisplayerOrder(props.mobilecodedetail.wfConfig1s[0].wfId);
-                    //getDisplayerOrder(126);
-                    setWorkflowIDLabel(props.mobilecodedetail.wfConfig1s[0].wfId);
-                    //setWorkflowIDLabel(126);
-                }
+        if (props.loanInitiationDetails) {
 
-            })
-            .catch(error => {
-                if (global.DEBUG_MODE) console.error('Error fetching Loan Applicant details:', error);
-            });
+            const filteredData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID));
+
+            if (filteredData.length > 0) {
+                getDisplayerOrder(filteredData[0].workflowId);
+                setWorkflowIDLabel(filteredData[0].workflowId);
+            } else {
+                if (global.DEBUG_MODE) console.log("Loan application number not found.");
+                getDisplayerOrder(props.mobilecodedetail.wfConfig1s[0].wfId);
+                setWorkflowIDLabel(props.mobilecodedetail.wfConfig1s[0].wfId);
+            }
+        } else {
+            getDisplayerOrder(props.mobilecodedetail.wfConfig1s[0].wfId);
+            setWorkflowIDLabel(props.mobilecodedetail.wfConfig1s[0].wfId);
+        }
+
     }
 
     const getDisplayerOrder = (workFlowID) => {
@@ -346,8 +341,9 @@ const LoanApplicationMain = (props, { navigation }) => {
     }
 
     const findNavigation = async () => {
-        let firstIncompleteData = null;
 
+        let firstIncompleteData = null;
+        global.ALLOWEDIT = "1";
         processModuleData.find((data) => {
             if (firstIncompleteData) { return true; }
             const incompleteNestedSubData = data.nestedSubData.filter((nestedData) => nestedData.nestedSubDataIsCompleted === false);
@@ -537,25 +533,38 @@ const LoanApplicationMain = (props, { navigation }) => {
     }
 
     const getClientID = async (clientType) => {
-        await tbl_client.getOnlyClientBasedOnID(global.LOANAPPLICATIONID, clientType)
-            .then(data => {
-                if (global.DEBUG_MODE) console.log('Applicant Data:', data);
-                if (data !== undefined && data.length > 0) {
-                    global.CLIENTID = data[0].id;
-                    global.isAadharVerified = data[0].isAadharNumberVerified;
-                    return global.CLIENTID;
-                } else {
-                    global.CLIENTID = '';
-                    global.isAadharVerified = '0';
-                    global.isDedupeDone = '0';
-                    global.isMobileVerified = '0';
-                    return '';
-                }
 
-            })
-            .catch(error => {
-                if (global.DEBUG_MODE) console.error('Error fetching Applicant details:', error);
-            });
+        const filteredData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID));
+
+        if (filteredData.length > 0) {
+
+            const clientDetail = filteredData[0].clientDetail.find(client => client.clientType === clientType);
+
+            if (clientDetail) {
+                global.CLIENTID = clientDetail.id;
+                if (clientDetail.isAadharNumberVerified) {
+                    global.isAadharVerified = '1';
+                } else {
+                    global.isAadharVerified = '0';
+                }
+            } else {
+                global.CLIENTID = '';
+                global.isAadharVerified = '0';
+                global.isDedupeDone = '0';
+                global.isMobileVerified = '0';
+
+                if (global.DEBUG_MODE) console.log("Client ID not found in clientDetail array.");
+            }
+
+        } else {
+            if (global.DEBUG_MODE) console.log("Loan application number not found.");
+            global.CLIENTID = '';
+            global.isAadharVerified = '0';
+            global.isDedupeDone = '0';
+            global.isMobileVerified = '0';
+        }
+
+
     }
 
     const onClickMainList = (item, substageId) => {
@@ -660,232 +669,278 @@ const LoanApplicationMain = (props, { navigation }) => {
             )
         );
 
-        if (global.USERTYPEID == 1163) {
+        //    if (global.USERTYPEID == 1163) {
 
-            if (item.pageCode == 'PRF_SHRT_APLCT_BSC_DTLS') {
+        if (item.pageCode == 'PRF_SHRT_APLCT_BSC_DTLS') {
+            if (item.nestedSubDataIsCompleted) {
+                global.ALLOWEDIT = "0";
                 global.CLIENTTYPE = 'APPL';
                 global.CURRENTPAGEID = item.pageId;
                 await getClientID(global.CLIENTTYPE);
                 props.navigation.replace('ProfileShortBasicDetails');
-            } else if (item.pageCode == 'PRF_SHRT_APLCT_VRF_STATUS') {
-                global.CLIENTTYPE = 'APPL';
-                global.CURRENTPAGEID = item.pageId;
-                await getClientID(global.CLIENTTYPE);
-                props.navigation.replace('ProfileShortKYCVerificationStatus');
-            } else if (item.pageCode == 'PRF_SHRT_APLCT_PRSNL_DTLS') {
-                global.CLIENTTYPE = 'APPL';
-                global.CURRENTPAGEID = item.pageId;
-                await getClientID(global.CLIENTTYPE);
-                props.navigation.replace('ProfileShortApplicantDetails');
-            } else if (item.pageCode == 'PRF_SHRT_APLCT_ADDRS_DTLS') {
-                global.CLIENTTYPE = 'APPL';
-                global.CURRENTPAGEID = item.pageId;
-                await getClientID(global.CLIENTTYPE);
-                props.navigation.replace('AddressMainList');
-            } else if (item.pageCode == 'PRF_SHRT_COAPLCT_BSC_DTLS') {
-                global.CLIENTTYPE = 'CO-APPL';
-                global.CURRENTPAGEID = item.pageId;
-                await getClientID(global.CLIENTTYPE);
-                props.navigation.replace('ProfileShortBasicDetails');
-            } else if (item.pageCode == 'PRF_SHRT_COAPLCT_VRF_STATUS') {
-                global.CLIENTTYPE = 'CO-APPL';
-                global.CURRENTPAGEID = item.pageId;
-                await getClientID(global.CLIENTTYPE);
-                props.navigation.replace('ProfileShortKYCVerificationStatus');
-            } else if (item.pageCode == 'PRF_SHRT_COAPLCT_PRSNL_DTLS') {
-                global.CLIENTTYPE = 'CO-APPL';
-                global.CURRENTPAGEID = item.pageId;
-                await getClientID(global.CLIENTTYPE);
-                props.navigation.replace('ProfileShortApplicantDetails');
-            } else if (item.pageCode == 'PRF_SHRT_COAPLCT_ADDRS_DTLS') {
-                global.CLIENTTYPE = 'CO-APPL';
-                global.CURRENTPAGEID = item.pageId;
-                await getClientID(global.CLIENTTYPE);
-                props.navigation.replace('AddressMainList');
-            } else if (item.pageCode == 'PRF_SHRT_GRNTR_BSC_DTLS') {
-                global.CLIENTTYPE = 'GRNTR';
-                global.CURRENTPAGEID = item.pageId;
-                await getClientID(global.CLIENTTYPE);
-                props.navigation.replace('ProfileShortBasicDetails');
-            } else if (item.pageCode == 'PRF_SHRT_GRNTR_VRF_STATUS') {
-                global.CLIENTTYPE = 'GRNTR';
-                global.CURRENTPAGEID = item.pageId;
-                await getClientID(global.CLIENTTYPE);
-                props.navigation.replace('ProfileShortKYCVerificationStatus');
-            } else if (item.pageCode == 'PRF_SHRT_GRNTR_PRSNL_DTLS') {
-                global.CLIENTTYPE = 'GRNTR';
-                global.CURRENTPAGEID = item.pageId;
-                await getClientID(global.CLIENTTYPE);
-                props.navigation.replace('ProfileShortApplicantDetails');
-            } else if (item.pageCode == 'PRF_SHRT_GRNTR_ADDRS_DTLS') {
-                global.CLIENTTYPE = 'GRNTR';
-                global.CURRENTPAGEID = item.pageId;
-                await getClientID(global.CLIENTTYPE);
-                props.navigation.replace('AddressMainList');
-            } else if (item.pageCode == 'DMGRC_APPL_FMLY_DTLS') {
-                if (isLoanCompleted) {
-                    global.CLIENTTYPE = 'APPL';
-                    global.CURRENTPAGEID = item.pageId;
-                    await getClientID(global.CLIENTTYPE);
-                    props.navigation.replace('FamilyDetailList');
-                }
-            } else if (item.pageCode == 'DMGRC_APPL_BSN_DTLS') {
-                if (isLoanCompleted) {
-                    global.CLIENTTYPE = 'APPL';
-                    global.CURRENTPAGEID = item.pageId;
-                    await getClientID(global.CLIENTTYPE);
-                    await props.navigation.replace('LoanDemographicBusinessDetail');
-                }
-            } else if (item.pageCode == 'DMGRC_APPL_BSN_ADDR_DTLS') {
-                if (isLoanCompleted) {
-                    global.CLIENTTYPE = 'APPL';
-                    global.CURRENTPAGEID = item.pageId;
-                    await getClientID(global.CLIENTTYPE);
-                    props.navigation.replace('LoanAddressList');
-                }
-            } else if (item.pageCode == 'DMGRC_APPL_GST_DTLS') {
-                if (isLoanCompleted) {
-                    global.CLIENTTYPE = 'APPL';
-                    global.CURRENTPAGEID = item.pageId;
-                    await getClientID(global.CLIENTTYPE);
-                    props.navigation.replace('LoanDemographicsGSTDetails');
-                }
-            } else if (item.pageCode == 'DMGRC_APPL_FNCL_DTLS') {
-                if (isLoanCompleted) {
-                    global.CLIENTTYPE = 'APPL';
-                    global.CURRENTPAGEID = item.pageId;
-                    await getClientID(global.CLIENTTYPE);
-                    props.navigation.replace('LoanDemographicsFinancialDetails');
-                }
-            } else if (item.pageCode == 'DMGRC_APPL_BNK_DTLS') {
-                if (isLoanCompleted) {
-                    global.CLIENTTYPE = 'APPL';
-                    global.CURRENTPAGEID = item.pageId;
-                    await getClientID(global.CLIENTTYPE);
-                    props.navigation.replace('BankList');
-                }
-            } else if (item.pageCode == 'DMGRC_COAPPL_BSN_DTLS') {
-                if (isLoanCompleted) {
-                    global.CLIENTTYPE = 'CO-APPL';
-                    global.CURRENTPAGEID = item.pageId;
-                    await getClientID(global.CLIENTTYPE);
-                    await props.navigation.replace('LoanDemographicBusinessDetail');
-                }
-            } else if (item.pageCode == 'DMGRC_COAPPL_BSN_ADDR_DTLS') {
-                if (isLoanCompleted) {
-                    global.CLIENTTYPE = 'CO-APPL';
-                    global.CURRENTPAGEID = item.pageId;
-                    await getClientID(global.CLIENTTYPE);
-                    props.navigation.replace('LoanAddressList');
-                }
-            } else if (item.pageCode == 'DMGRC_COAPPL_FNCL_DTLS') {
-                if (isLoanCompleted) {
-                    global.CLIENTTYPE = 'CO-APPL';
-                    global.CURRENTPAGEID = item.pageId;
-                    await getClientID(global.CLIENTTYPE);
-                    props.navigation.replace('LoanDemographicsFinancialDetails');
-                }
-            } else if (item.pageCode == 'DMGRC_COAPPL_BNK_DTLS') {
-                if (isLoanCompleted) {
-                    global.CLIENTTYPE = 'CO-APPL';
-                    global.CURRENTPAGEID = item.pageId;
-                    await getClientID(global.CLIENTTYPE);
-                    props.navigation.replace('BankList');
-                }
-            } else if (item.pageCode == 'DMGRC_GRNTR_BSN_DTLS') {
-                if (isLoanCompleted) {
-                    global.CLIENTTYPE = 'GRNTR';
-                    global.CURRENTPAGEID = item.pageId;
-                    await getClientID(global.CLIENTTYPE);
-                    await props.navigation.replace('LoanDemographicBusinessDetail');
-                }
-            } else if (item.pageCode == 'DMGRC_GRNTR_BSN_ADDR_DTLS') {
-                if (isLoanCompleted) {
-                    global.CLIENTTYPE = 'GRNTR';
-                    global.CURRENTPAGEID = item.pageId;
-                    await getClientID(global.CLIENTTYPE);
-                    props.navigation.replace('LoanAddressList');
-                }
-            } else if (item.pageCode == 'DMGRC_GRNTR_FNCL_DTLS') {
-                if (isLoanCompleted) {
-                    global.CLIENTTYPE = 'GRNTR';
-                    await getClientID(global.CLIENTTYPE);
-                    global.CURRENTPAGEID = item.pageId;
-                    props.navigation.replace('LoanDemographicsFinancialDetails');
-                }
-            } else if (item.pageCode == 'DMGRC_GRNTR_BNK_DTLS') {
-                if (isLoanCompleted) {
-                    global.CLIENTTYPE = 'GRNTR';
-                    global.CURRENTPAGEID = item.pageId;
-                    await getClientID(global.CLIENTTYPE);
-                    props.navigation.replace('BankList');
-                }
-            } else if (item.pageCode == 'CB_CHK_CB_RSPNS') {
-
-                props.navigation.replace('CBResponseScreen');
-
-            } else if (item.pageCode == 'CB_CHK_BRE_DCSN') {
-                if (isConditionMet) {
-
-                    props.navigation.replace('CBStatus', { pageStatus: cbBreCheckStatus });
-
-                }
-            } else if (item.pageCode == 'DOC_UPLD_APPLCNT') {
-                if (isLoanCompleted) {
-                    global.CLIENTTYPE = 'APPL';
-                    global.CURRENTPAGEID = item.pageId;
-                    await getClientID(global.CLIENTTYPE);
-                    props.navigation.replace('LoanDocumentUpload');
-                }
-            } else if (item.pageCode == 'DOC_UPLD_COAPPLCNT') {
-                if (isLoanCompleted) {
-                    global.CLIENTTYPE = 'CO-APPL';
-                    global.CURRENTPAGEID = item.pageId;
-                    await getClientID(global.CLIENTTYPE);
-                    props.navigation.replace('LoanDocumentUpload');
-                }
-            } else if (item.pageCode == 'DOC_UPLD_GRNTR') {
-                if (isLoanCompleted) {
-                    global.CLIENTTYPE = 'GRNTR';
-                    global.CURRENTPAGEID = item.pageId;
-                    await getClientID(global.CLIENTTYPE);
-                    props.navigation.replace('LoanDocumentUpload');
-                }
-            } else if (item.pageCode == 'LN_PRDT_SLCTN') {
-                if (isLoanCompleted) {
-                    global.CLIENTTYPE = 'APPL';
-                    global.CURRENTPAGEID = item.pageId;
-                    await getClientID(global.CLIENTTYPE);
-                    props.navigation.replace('LoanDemographicProductSelection');
-                }
-            } else if (item.pageCode == 'NMN_DTLS') {
-                if (isLoanCompleted) {
-                    global.CLIENTTYPE = 'APPL';
-                    await getClientID(global.CLIENTTYPE);
-                    global.CURRENTPAGEID = item.pageId;
-                    props.navigation.replace('LoanNomineeList');
-                }
-            } else if (item.pageCode == 'BRE_VIEW') {
-                global.CLIENTTYPE = 'APPL';
-                global.CURRENTPAGEID = item.pageId;
-                props.navigation.replace('BREView');
             }
+        } else if (item.pageCode == 'PRF_SHRT_APLCT_VRF_STATUS') {
+            if (item.nestedSubDataIsCompleted) {
+                global.ALLOWEDIT = "0";
+                global.CLIENTTYPE = 'APPL';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('ProfileShortKYCVerificationStatus');
+            }
+        } else if (item.pageCode == 'PRF_SHRT_APLCT_PRSNL_DTLS') {
+            if (item.nestedSubDataIsCompleted) {
+                global.ALLOWEDIT = "0";
+                global.CLIENTTYPE = 'APPL';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('ProfileShortApplicantDetails');
+            }
+        } else if (item.pageCode == 'PRF_SHRT_APLCT_ADDRS_DTLS') {
+            if (item.nestedSubDataIsCompleted) {
+                global.ALLOWEDIT = "0";
+                global.CLIENTTYPE = 'APPL';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('AddressMainList');
+            }
+        } else if (item.pageCode == 'PRF_SHRT_COAPLCT_BSC_DTLS') {
+            if (item.nestedSubDataIsCompleted) {
+                global.ALLOWEDIT = "0";
+                global.CLIENTTYPE = 'CO-APPL';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('ProfileShortBasicDetails');
+            }
+        } else if (item.pageCode == 'PRF_SHRT_COAPLCT_VRF_STATUS') {
+            if (item.nestedSubDataIsCompleted) {
+                global.ALLOWEDIT = "0";
+                global.CLIENTTYPE = 'CO-APPL';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('ProfileShortKYCVerificationStatus');
+            }
+        } else if (item.pageCode == 'PRF_SHRT_COAPLCT_PRSNL_DTLS') {
+            if (item.nestedSubDataIsCompleted) {
+                global.ALLOWEDIT = "0";
+                global.CLIENTTYPE = 'CO-APPL';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('ProfileShortApplicantDetails');
+            }
+        } else if (item.pageCode == 'PRF_SHRT_COAPLCT_ADDRS_DTLS') {
+            if (item.nestedSubDataIsCompleted) {
+                global.ALLOWEDIT = "0";
+                global.CLIENTTYPE = 'CO-APPL';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('AddressMainList');
+            }
+        } else if (item.pageCode == 'PRF_SHRT_GRNTR_BSC_DTLS') {
+            if (item.nestedSubDataIsCompleted) {
+                global.ALLOWEDIT = "0";
+                global.CLIENTTYPE = 'GRNTR';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('ProfileShortBasicDetails');
+            }
+        } else if (item.pageCode == 'PRF_SHRT_GRNTR_VRF_STATUS') {
+            if (item.nestedSubDataIsCompleted) {
+                global.ALLOWEDIT = "0";
+                global.CLIENTTYPE = 'GRNTR';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('ProfileShortKYCVerificationStatus');
+            }
+        } else if (item.pageCode == 'PRF_SHRT_GRNTR_PRSNL_DTLS') {
+            if (item.nestedSubDataIsCompleted) {
+                global.ALLOWEDIT = "0";
+                global.CLIENTTYPE = 'GRNTR';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('ProfileShortApplicantDetails');
+            }
+        } else if (item.pageCode == 'PRF_SHRT_GRNTR_ADDRS_DTLS') {
+            if (item.nestedSubDataIsCompleted) {
+                global.ALLOWEDIT = "0";
+                global.CLIENTTYPE = 'GRNTR';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('AddressMainList');
+            }
+        } else if (item.pageCode == 'DMGRC_APPL_FMLY_DTLS') {
+            if (isLoanCompleted) {
+                global.CLIENTTYPE = 'APPL';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('FamilyDetailList');
+            }
+        } else if (item.pageCode == 'DMGRC_APPL_BSN_DTLS') {
+            if (isLoanCompleted) {
+                global.CLIENTTYPE = 'APPL';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                await props.navigation.replace('LoanDemographicBusinessDetail');
+            }
+        } else if (item.pageCode == 'DMGRC_APPL_BSN_ADDR_DTLS') {
+            if (isLoanCompleted) {
+                global.CLIENTTYPE = 'APPL';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('LoanAddressList');
+            }
+        } else if (item.pageCode == 'DMGRC_APPL_GST_DTLS') {
+            if (isLoanCompleted) {
+                global.CLIENTTYPE = 'APPL';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('LoanDemographicsGSTDetails');
+            }
+        } else if (item.pageCode == 'DMGRC_APPL_FNCL_DTLS') {
+            if (isLoanCompleted) {
+                global.CLIENTTYPE = 'APPL';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('LoanDemographicsFinancialDetails');
+            }
+        } else if (item.pageCode == 'DMGRC_APPL_BNK_DTLS') {
+            if (isLoanCompleted) {
+                global.CLIENTTYPE = 'APPL';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('BankList');
+            }
+        } else if (item.pageCode == 'DMGRC_COAPPL_BSN_DTLS') {
+            if (isLoanCompleted) {
+                global.CLIENTTYPE = 'CO-APPL';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                await props.navigation.replace('LoanDemographicBusinessDetail');
+            }
+        } else if (item.pageCode == 'DMGRC_COAPPL_BSN_ADDR_DTLS') {
+            if (isLoanCompleted) {
+                global.CLIENTTYPE = 'CO-APPL';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('LoanAddressList');
+            }
+        } else if (item.pageCode == 'DMGRC_COAPPL_FNCL_DTLS') {
+            if (isLoanCompleted) {
+                global.CLIENTTYPE = 'CO-APPL';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('LoanDemographicsFinancialDetails');
+            }
+        } else if (item.pageCode == 'DMGRC_COAPPL_BNK_DTLS') {
+            if (isLoanCompleted) {
+                global.CLIENTTYPE = 'CO-APPL';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('BankList');
+            }
+        } else if (item.pageCode == 'DMGRC_GRNTR_BSN_DTLS') {
+            if (isLoanCompleted) {
+                global.CLIENTTYPE = 'GRNTR';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                await props.navigation.replace('LoanDemographicBusinessDetail');
+            }
+        } else if (item.pageCode == 'DMGRC_GRNTR_BSN_ADDR_DTLS') {
+            if (isLoanCompleted) {
+                global.CLIENTTYPE = 'GRNTR';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('LoanAddressList');
+            }
+        } else if (item.pageCode == 'DMGRC_GRNTR_FNCL_DTLS') {
+            if (isLoanCompleted) {
+                global.CLIENTTYPE = 'GRNTR';
+                await getClientID(global.CLIENTTYPE);
+                global.CURRENTPAGEID = item.pageId;
+                props.navigation.replace('LoanDemographicsFinancialDetails');
+            }
+        } else if (item.pageCode == 'DMGRC_GRNTR_BNK_DTLS') {
+            if (isLoanCompleted) {
+                global.CLIENTTYPE = 'GRNTR';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('BankList');
+            }
+        } else if (item.pageCode == 'CB_CHK_CB_RSPNS') {
 
-        } else {
+            props.navigation.replace('CBResponseScreen');
 
-            if (global.DEBUG_MODE) console.log(JSON.stringify(isConditionMet))
-            if (item.pageCode == 'CB_CHK_CB_RSPNS') {
-                props.navigation.replace('CBResponseScreen');
-            } else if (item.pageCode == 'CB_CHK_BRE_DCSN') {
-                if (isConditionMet) {
-                    props.navigation.replace('CBStatus', { pageStatus: cbBreCheckStatus });
-                }
+        } else if (item.pageCode == 'CB_CHK_BRE_DCSN') {
+            if (isConditionMet) {
+
+                props.navigation.replace('CBStatus', { pageStatus: cbBreCheckStatus });
 
             }
+        } else if (item.pageCode == 'DOC_UPLD_APPLCNT') {
+            if (isLoanCompleted) {
+                global.CLIENTTYPE = 'APPL';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('LoanDocumentUpload');
+            }
+        } else if (item.pageCode == 'DOC_UPLD_COAPPLCNT') {
+            if (isLoanCompleted) {
+                global.CLIENTTYPE = 'CO-APPL';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('LoanDocumentUpload');
+            }
+        } else if (item.pageCode == 'DOC_UPLD_GRNTR') {
+            if (isLoanCompleted) {
+                global.CLIENTTYPE = 'GRNTR';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('LoanDocumentUpload');
+            }
+        } else if (item.pageCode == 'LN_PRDT_SLCTN') {
+            if (isLoanCompleted) {
+                global.CLIENTTYPE = 'APPL';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('LoanDemographicProductSelection');
+            }
+        } else if (item.pageCode == 'NMN_DTLS') {
+            if (isLoanCompleted) {
+                global.CLIENTTYPE = 'APPL';
+                await getClientID(global.CLIENTTYPE);
+                global.CURRENTPAGEID = item.pageId;
+                props.navigation.replace('LoanNomineeList');
+            }
+        } else if (item.pageCode == 'BRE_VIEW') {
+            global.CLIENTTYPE = 'APPL';
+            global.CURRENTPAGEID = item.pageId;
+            props.navigation.replace('BREView');
         }
+
+        // } else {
+
+        //     if (global.DEBUG_MODE) console.log(JSON.stringify(isConditionMet))
+        //     if (item.pageCode == 'CB_CHK_CB_RSPNS') {
+        //         props.navigation.replace('CBResponseScreen');
+        //     } else if (item.pageCode == 'CB_CHK_BRE_DCSN') {
+        //         if (isConditionMet) {
+        //             props.navigation.replace('CBStatus', { pageStatus: cbBreCheckStatus });
+        //         }
+
+        //     }
+        // }
 
     }
 
+    const getCurrentStatusData = (statusData) => {
+
+
+        const filteredProcessStage = statusData.loanApplicationStatus.filter((data) => {
+            return data.loanWorkflowStage === 'LN_APP_INITIATION';
+        }).map((data) => {
+            setProcessSubStageData(data.subStageLog);
+        }).sort((a, b) => a.id - b.id);
+
+    }
 
     const getProcessSubStage = async (stageId, subStageOrder, moduleOrder, pageOrder, workFlowID) => {
 
@@ -1155,10 +1210,14 @@ const mapStateToProps = (state) => {
     const { language } = state.languageReducer;
     const { profileDetails } = state.profileReducer;
     const { mobileCodeDetails } = state.mobilecodeReducer;
+    const { loanInitiationDetails } = state.loanInitiationReducer;
+    const { dedupeDetails } = state.profileReducer;
     return {
         language: language,
         profiledetail: profileDetails,
-        mobilecodedetail: mobileCodeDetails
+        mobilecodedetail: mobileCodeDetails,
+        loanInitiationDetails: loanInitiationDetails,
+        dedupeDetails: dedupeDetails
     }
 }
 

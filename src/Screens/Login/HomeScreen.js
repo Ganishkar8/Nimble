@@ -74,7 +74,7 @@ const HomeScreen = (props, { navigation }) => {
 
         const baseURL = global.PORT1;
         setLoading(true)
-        apiInstance(baseURL).post(`api/v1/user-personal-details/userID/${global.USERID}`)
+        apiInstance(baseURL).post(`/api/v1/user-personal-details/userID/${global.USERID}`)
             .then(async (response) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log("ResponseHomeScreenApi::" + JSON.stringify(response.data));
@@ -235,7 +235,7 @@ const HomeScreen = (props, { navigation }) => {
                                 </View>
 
 
-                                {(props.bankDetails.INSTANCE == 'QA' || props.bankDetails.INSTANCE == 'DEV') &&
+                                {(props.bankDetails[0].INSTANCE == 'QA' || props.bankDetails[0].INSTANCE == 'DEV') &&
                                     <View style={{ width: '93%', height: 170, justifyContent: 'space-between', flexDirection: 'row', marginTop: '4%' }}>
 
                                         <TouchableOpacity onPress={() => props.navigation.navigate('PDTracker', { fromScreen: 'HomeSCreen' })} activeOpacity={0.5} style={{ width: '48%', height: '100%', backgroundColor: '#ffffff99', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
