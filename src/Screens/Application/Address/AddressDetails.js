@@ -1433,6 +1433,108 @@ const AddressDetails = (props, { navigation }) => {
 
   }
 
+  // const postManualKYCDetails = (id) => {
+  //   setLoading(true)
+
+  //   const clientDetail = filteredData[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
+
+  //   var kycType='',kycValue='';
+
+  //   if (value.kycTypeId1 == '001') {
+  //     kycType = value.kycTypeId1;
+  //     kycValue = value.kycIdValue1;
+  //   } else if (value.kycTypeId2 == '001') {
+  //     kycType = value.kycTypeId2;
+  //     kycValue = value.kycIdValue2;
+  //   } else if (value.kycTypeId3 == '001') {
+  //     kycType = value.kycTypeId3;
+  //     kycValue= value.kycIdValue3;
+  //   } else if (value.kycTypeId4 == '001') {
+  //     kycType = value.kycTypeId4;
+  //     kycValue = value.kycIdValue4;
+  //   }
+
+  //   const appDetails = [
+  //     {
+  //       "kycType": kycType,
+  //       "kycValue": kycValue,
+  //       "kycDmsId": '',
+  //       "kycExpiryDate": '',
+  //       "createdBy": global.USERID,
+  //       "createdDate": new Date(),
+  //       "kycSource": 'LMS', 
+  //     "clientManualAddresses": [
+  //       {
+  //         "addressChangeType": actionTypeLabel,
+  //         "addressType": addressTypeLabel,
+  //         "addressLine1": addressLine1,
+  //         "addressLine2": addressLine2,
+  //         "landmark": landmark,
+  //         "pincode": pincode,
+  //         "city": city,
+  //         "district": district,
+  //         "state": state,
+  //         "country": country,
+  //         "mobileOrLandLineNumber": "",
+  //         "emailId": "",
+  //         "addressOwnership": addressOwnerTypeLabel,
+  //         "ownerDetails": ownerDetailsLabel,
+  //         "ownerName": ownerName,
+  //         "geoClassification": geoClassificationLabel,
+  //         "yearsAtResidence": parseInt(yearsAtResidence),
+  //         "yearsInCurrentCityOrTown": parseInt(yearsAtCity),
+  //         "isActive": true,
+  //         "addrDmsId": addressDmsID,
+  //       }
+  //     ]
+  //   }
+  //   ]
+
+
+
+
+  //   const baseURL = global.PORT1
+  //   apiInstance(baseURL).post(`/api/v2/profile-short/manualKyc/${global.CLIENTID}`, appDetails)
+  //     .then(async (response) => {
+  //       // Handle the response data
+  //       setLoading(false)
+  //       if (response.status == 200) {
+  //         if (global.DEBUG_MODE) console.log("ManualKYCApiResponse::" + JSON.stringify(response.data));
+  //         // tbl_client.updateKYCManual("1", global.LOANAPPLICATIONID, global.CLIENTTYPE)
+  //         props.updateNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientManualKycLink', response.data[0])
+  //         //updateDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientManualKycLink', response.data[0])
+  //         buttonNext();
+  //       } else if (response.data.statusCode === 201) {
+  //         setApiError(response.data.message);
+  //         setErrorModalVisible(true);
+  //       } else if (response.data.statusCode === 202) {
+  //         setApiError(response.data.message);
+  //         setErrorModalVisible(true);
+  //       }
+
+
+  //     })
+  //     .catch((error) => {
+  //       // Handle the error
+  //       if (global.DEBUG_MODE) console.log("ManualKYCApiResponse:::" + JSON.stringify(error.response))
+  //       setLoading(false)
+  //       if (error.response.status == 404) {
+  //         setApiError(Common.error404);
+  //         setErrorModalVisible(true)
+  //       } else if (error.response.status == 400) {
+  //         setApiError(Common.error400);
+  //         setErrorModalVisible(true)
+  //       } else if (error.response.status == 500) {
+  //         setApiError(Common.error500);
+  //         setErrorModalVisible(true)
+  //       } else if (error.response.data != null) {
+  //         setApiError(error.response.data.message);
+  //         setErrorModalVisible(true)
+  //       }
+  //     });
+
+  // }
+
   const updateManualKYCDetails = () => {
     setLoading(true)
 
