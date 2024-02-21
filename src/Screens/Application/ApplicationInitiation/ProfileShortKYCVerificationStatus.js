@@ -807,11 +807,12 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
           setkycID1ImageUploadVisible(false);
           setDOBImageUploadVisible(false);
         } else {
+
           if (value.isKycManual) {
             setkycSourceImageUploadVisible(true);
             setkycID1ImageUploadVisible(false);
             setDOBImageUploadVisible(false);
-            setKycTypeDisable(true);
+            setKycTypeDisable(false);
           } else {
             setkycSourceImageUploadVisible(false);
             setkycID1ImageUploadVisible(false);
@@ -1268,10 +1269,10 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       return;
     }
 
-    if (KycSourceLabel == 'EVRF') {
-      buttonNext();
-      return;
-    }
+    // if (!kycSourceImageUploadVisible && !kycID1ImageUploadVisible && !dobImageUploadVisible) {
+    //   buttonNext();
+    //   return;
+    // }
 
     if (validate()) {
       showBottomSheet();

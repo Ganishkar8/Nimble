@@ -1349,6 +1349,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   };
 
   const postBasicDetails = async () => {
+
     if (global.ALLOWEDIT == '0') {
       if (global.CLIENTTYPE == 'APPL') {
         module = 'PRF_SHRT_APLCT';
@@ -1437,6 +1438,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
         isEmailVerified: false,
         isPanVerified: false,
         dedupeCheck: true,
+        isKycManual: aadhar ? false : true,
       }
 
       const baseURL = global.PORT1;
