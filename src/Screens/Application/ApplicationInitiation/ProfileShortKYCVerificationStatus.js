@@ -169,8 +169,10 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const [KycSourceLabel, setKycSourceLabel] = useState('');
   const [KycSourceIndex, setKycSourceIndex] = useState('');
 
+  const [lmsAadharMatch, setLmsAadharMatch] = useState(false);
   const [dobImageUploadVisible, setDOBImageUploadVisible] = useState(false);
   const [kycID1ImageUploadVisible, setkycID1ImageUploadVisible] = useState(false);
+  const [kycSourceImageUploadVisible, setkycSourceImageUploadVisible] = useState(false);
 
   const [expiryDate1, setExpiry1Date] = useState('');
   const [expiryDate2, setExpiry2Date] = useState('');
@@ -235,6 +237,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const [isPageCompleted, setIsPageCompleted] = useState(false);
   const [selectedImageType, setSelectedImageType] = useState('');
 
+  const [lmsDOB, setLmsDOB] = useState('');
   const [DOB, setDOB] = useState('');
   const [DOBCaption, setDOBCaption] = useState('DATE OF BIRTH');
   const [DOBMan, setDOBMan] = useState(true);
@@ -305,6 +308,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     setkycID3Disable(true);
     setKycType4Disable(true);
     setkycID4Disable(true);
+    setDOBDisable(true);
   }
 
   const getApplicantData = async () => {
@@ -741,14 +745,34 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     getKYCType(value.kycTypeId1, value.kycTypeId2, value.kycTypeId3, value.kycTypeId4);
 
     if (value.clientManualKycLink.length > 0) {
+      if (value.lmsClientId) {
+        if (value.isAadharNumberVerified) {
+          setKycTypeDisable(true);
+        }
+      }
       setKycTypeLabel(value.clientManualKycLink[0].kycType);
       setkycID(value.clientManualKycLink[0].kycValue);
       setkycSourceDmsId(value.clientManualKycLink[0]?.kycDmsId);
+      if (value.clientManualKycLink[0].kycDmsId) {
+        setkycSourceImageUploadVisible(true)
+      }
       setKycSourceLabel(value.clientManualKycLink[0].kycSource);
+
       if (value.clientManualKycLink[0].clientManualDobs) {
         if (value.clientManualKycLink[0].clientManualDobs.length > 0) {
           setdobDmsId(value.clientManualKycLink[0].clientManualDobs[0]?.dobDmsId)
+          if (value.clientManualKycLink[0].clientManualDobs[0].dobDmsId) {
+            setDOBImageUploadVisible(true);
+          }
           setDOB(Common.convertDateFormat(value.clientManualKycLink[0].clientManualDobs[0]?.dateOfBirth))
+        } else {
+          if (value.dateOfBirth) {
+            setDOB(Common.convertDateFormat(value?.dateOfBirth))
+          }
+        }
+      } else {
+        if (value.dateOfBirth) {
+          setDOB(Common.convertDateFormat(value?.dateOfBirth))
         }
       }
       if (value.clientManualKycLink[0].clientManualKycs) {
@@ -759,40 +783,89 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     } else {
 
       if (value.lmsClientId) {
+        setKycSourceLabel('LMS');
+        setkycSourceImageUploadVisible(false);
+        setkycID1ImageUploadVisible(false);
+        setDOBImageUploadVisible(false);
         if (value.isAadharNumberVerified) {
-          setKycSourceLabel('EVRF');
+          setKycTypeDisable(true);
           if (value.dateOfBirth) {
-            if (isValidDob(value.dateOfBirth)) {
+            if (Common.isValidDob(value.dateOfBirth)) {
               setDOBDisable(true)
+              setDOB(Common.convertDateFormat(value?.dateOfBirth))
+              setLmsDOB(Common.convertDateFormat(value?.dateOfBirth));
             } else {
+              setDOBImageUploadVisible(true);
               setDOBDisable(false)
             }
           } else {
+            setDOBImageUploadVisible(true);
             setDOBDisable(false)
           }
+        } else if (value.isAadharNumberVerified == null || value.isAadharNumberVerified == undefined) {
+          setkycSourceImageUploadVisible(true);
+          setkycID1ImageUploadVisible(false);
+          setDOBImageUploadVisible(false);
         } else {
           if (value.isKycManual) {
-            setKycSourceLabel('MNL');
+            setkycSourceImageUploadVisible(true);
+            setkycID1ImageUploadVisible(false);
+            setDOBImageUploadVisible(false);
+            setKycTypeDisable(true);
           } else {
-            setKycSourceLabel('LMS');
+            setkycSourceImageUploadVisible(false);
+            setkycID1ImageUploadVisible(false);
+            setDOBImageUploadVisible(false);
+            setLmsAadharMatch(true);
+            setKycTypeDisable(true);
           }
+
         }
+        // if (value.isAadharNumberVerified) {
+        //   setKycSourceLabel('EVRF');
+        //   if (value.dateOfBirth) {
+        //     if (Common.isValidDob(value.dateOfBirth)) {
+        //       setDOBDisable(true)
+        //       setDOB(Common.convertDateFormat(value?.dateOfBirth))
+        //     } else {
+        //       setDOBDisable(false)
+        //     }
+        //   } else {
+        //     setDOBDisable(false)
+        //   }
+        // } else {
+        //   if (value.isKycManual) {
+        //     setKycSourceLabel('MNL');
+        //   } else {
+        //     setKycSourceLabel('LMS');
+        //     setDOBImageUploadVisible(true);
+        //   }
+        // }
       } else {
         if (value.isAadharNumberVerified) {
           setKycSourceLabel('EVRF');
+          setkycSourceImageUploadVisible(false);
+          setkycID1ImageUploadVisible(false);
+          setDOBImageUploadVisible(false);
           if (value.dateOfBirth) {
             if (isValidDob(value.dateOfBirth)) {
               setDOBDisable(true)
             } else {
               setDOBDisable(false)
+              setDOBImageUploadVisible(true);
             }
           } else {
             setDOBDisable(false)
+            setDOBImageUploadVisible(true);
           }
         } else {
           setKycSourceLabel('MNL');
+          setkycSourceImageUploadVisible(true);
+          setkycID1ImageUploadVisible(false);
+          setDOBImageUploadVisible(false);
         }
       }
+
       if (value.dateOfBirth) {
         setDOB(Common.convertDateFormat(value?.dateOfBirth))
       }
@@ -800,6 +873,15 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
 
 
+  }
+
+  const areDatesMatching = (dob1, dob2) => {
+    // Creating Date objects for both DOBs
+    const date1 = new Date(dob1);
+    const date2 = new Date(dob2);
+
+    // Comparing the Date objects
+    return date1.getTime() === date2.getTime();
   }
 
 
@@ -901,7 +983,13 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       setkycID2(textValue);
     } else if (componentName === 'DOB') {
       setDOB(textValue);
-      setAge(Common.calculateAge(textValue).toString())
+      if (lmsAadharMatch) {
+        if (areDatesMatching(Common.convertYearDateFormat(textValue), Common.convertYearDateFormat(lmsDOB))) {
+          setDOBImageUploadVisible(false);
+        } else {
+          setDOBImageUploadVisible(true);
+        }
+      }
     }
   };
 
@@ -1241,7 +1329,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
     }
 
-    if (KycSourceLabel == 'MNL') {
+    if (kycSourceImageUploadVisible) {
       if (!imageUri) {
         errorMessage =
           errorMessage +
@@ -1253,7 +1341,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
         i++;
         flag = true;
       }
-    } else if (KycSourceLabel == 'LMS') {
+    } else if (kycID1ImageUploadVisible) {
       if (!kycID1ImageUri) {
         errorMessage =
           errorMessage +
@@ -1265,7 +1353,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
         i++;
         flag = true;
       }
-
+    } else if (dobImageUploadVisible) {
       if (!kycDobImageUri) {
         errorMessage =
           errorMessage +
@@ -1277,7 +1365,6 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
         i++;
         flag = true;
       }
-
     }
 
     if (DOBMan && DOBVisible) {
@@ -1368,7 +1455,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       }
     ]
 
-    if (KycSourceLabel == 'LMS') {
+    if (dobImageUploadVisible) {
       appDetails[0].clientManualDobs = [
         {
           "dobDmsId": dobDmsId,
@@ -1376,17 +1463,22 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
           "createdBy": global.USERID,
           "createdDate": new Date()
         }
-      ],
-        appDetails[0].clientManualKycs = [
-          {
-            "kycType": KycType1Label,
-            "kycValue": kycID1,
-            "kycDmsId": kycID1DmsId,
-            "kycExpiryDate": "",
-            "createdBy": global.USERID,
-            "createdDate": new Date(),
-          }
-        ]
+      ]
+
+    }
+
+    if (kycID1ImageUploadVisible) {
+      appDetails[0].clientManualKycs = [
+        {
+          "kycType": KycType1Label,
+          "kycValue": kycID1,
+          "kycDmsId": kycID1DmsId,
+          "kycExpiryDate": "",
+          "createdBy": global.USERID,
+          "createdDate": new Date(),
+        }
+      ]
+
     }
 
     const baseURL = global.PORT1
@@ -1396,7 +1488,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
         setLoading(false)
         if (response.status == 200) {
           if (global.DEBUG_MODE) console.log("ManualKYCApiResponse::" + JSON.stringify(response.data));
-          tbl_client.updateKYCManual("1", global.LOANAPPLICATIONID, global.CLIENTTYPE)
+          // tbl_client.updateKYCManual("1", global.LOANAPPLICATIONID, global.CLIENTTYPE)
           props.updateNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientManualKycLink', response.data[0])
           //updateDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientManualKycLink', response.data[0])
           buttonNext();
@@ -1725,7 +1817,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
             </View>
           )}
 
-          {KycSourceLabel == 'MNL' &&
+          {kycSourceImageUploadVisible &&
             <View
               style={{
                 width: '100%',
@@ -1904,7 +1996,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                     </View>
                   )}
 
-                  {KycSourceLabel == 'LMS' &&
+                  {kycID1ImageUploadVisible &&
                     <View
                       style={{
                         width: '100%',
@@ -2491,7 +2583,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
             </View>
           )}
 
-          {KycSourceLabel == 'LMS' &&
+          {dobImageUploadVisible &&
             <View
               style={{
                 width: '100%',

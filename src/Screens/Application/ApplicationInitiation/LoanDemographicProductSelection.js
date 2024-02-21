@@ -47,11 +47,14 @@ import tbl_client from '../../../Database/Table/tbl_client';
 import tbl_loanApplication from '../../../Database/Table/tbl_loanApplication';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import ChargeModal from '../../../Components/ChargeModal';
+import { addLoanInitiationDetails, updateLoanInitiationDetails, deleteLoanInitiationDetails, updateClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
 
 
 const LoanDemographicProductSelection = (props, { navigation }) => {
     var aadhar = "";
     const [loading, setLoading] = useState(false);
+
+    const [loanSelectionID, setLoanSelectionID] = useState(0);
 
     const [custCatgLabel, setCustCatgLabel] = useState('');
     const [custCatgIndex, setCustCatgIndex] = useState('');
@@ -346,32 +349,22 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
         }
 
         // else {
-        setLoading(true);
-        tbl_loanApplication.getLoanAppBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
-            .then(data => {
-                if (global.DEBUG_MODE) console.log('Loan Data:', data);
-                if (data !== undefined && data.length > 0) {
-                    if (loanProductLinkData.length <= 0) {
-                        setLoanTypeLabel(data[0].loan_type)
-                        setLoanProductLabel(data[0].product)
-                        setLoanPurposeLabel(data[0].loan_purpose);
-                        callLoanTenure(data[0].product, data[0].loan_amount, loanTenure)
-                        setLoanAmount(data[0].loan_amount)
-                        setLoanPurposeLabel(data[0].loan_purpose);
-                        getProductID(data[0].loan_type, parseInt(data[0].workflow_id))
-                    }
-                    callLoanAmount(parseInt(data[0].workflow_id));
-                    setLoading(false)
 
-                } else {
-                    setLoading(false)
-                }
+        const loanDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0];
 
-            })
-            .catch(error => {
-                setLoading(false)
-                if (global.DEBUG_MODE) console.error('Error fetching Loan details:', error);
-            });
+
+        if (loanProductLinkData.length <= 0) {
+            setLoanTypeLabel(loanDetail.loanType)
+            setLoanProductLabel(loanDetail.product)
+            setLoanPurposeLabel(loanDetail.loanPurpose);
+            callLoanTenure(loanDetail.product, loanDetail.loanAmount, loanTenure)
+            setLoanAmount(loanDetail.loanAmount.toString())
+            setLoanPurposeLabel(loanDetail.loanPurpose);
+            getProductID(loanDetail.loanType, parseInt(loanDetail.workflowId))
+        }
+        callLoanAmount(parseInt(loanDetail.workflowId));
+
+
         //  }
 
 
@@ -832,6 +825,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
     const callRepaySchedule = (disbursementDate, type) => {
 
         var appDetails = {
+            "id": loanSelectionID,
             "loanType": loanTypeLabel,
             "loanProduct": loanProductLabel,
             "loanPurposeCategory": loanPurposeCatgLabel,
@@ -863,10 +857,9 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                 if (global.DEBUG_MODE) console.log('RepaymentScheduleApiResponse::' + JSON.stringify(response.data),);
 
                 setLoading(false);
-
-
                 //await insertData();
                 if (response.status === 200) {
+                    setLoanSelectionID(response.data.id)
                     setRepayScheduleData(response.data.loanRepaymentSchedules);
                     setChargeData(response.data.loanProductChargeDetails);
                     setEmiAmount(response.data.emiAmount.toString())
@@ -876,6 +869,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                     setAppInsuranceAmount(response.data.applicantInsuranceAmount.toString())
                     setCoAppInsuranceAmount(response.data.coApplicantInsuranceAmount.toString())
                     setApprxDisbAmount(response.data.approximateDisbursementAmount.toString())
+                    props.updateClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'applicantLoanProductLink', response.data);
                     if (type == 'Submit') {
                         updateLoanStatus();
                     }
@@ -1933,16 +1927,21 @@ const mapStateToProps = (state) => {
     const { language } = state.languageReducer;
     const { profileDetails } = state.profileReducer;
     const { mobileCodeDetails } = state.mobilecodeReducer;
+    const { loanInitiationDetails } = state.loanInitiationReducer;
     return {
         language: language,
         profiledetail: profileDetails,
-        mobilecodedetail: mobileCodeDetails
+        mobilecodedetail: mobileCodeDetails,
+        loanInitiationDetails: loanInitiationDetails
     }
 }
 
 const mapDispatchToProps = dispatch => ({
     languageAction: item => dispatch(languageAction(item)),
     dedupeAction: item => dispatch(dedupeAction(item)),
+    deleteDedupe: item => dispatch(deleteDedupe()),
+    updateClientDetails: (loanApplicationId, clientId, key, data) => dispatch(updateClientDetails(loanApplicationId, clientId, key, data)),
+    updateLoanInitiationDetails: (loanApplicationId, loanData, key, clientId, updatedDetails) => dispatch(updateLoanInitiationDetails(loanApplicationId, loanData, key, clientId, updatedDetails)),
 });
 
 export default connect(

@@ -60,7 +60,7 @@ const AddressDetails = (props, { navigation }) => {
   const [actionTypeIndex, setActionTypeIndex] = useState('');
   const [actionTypeCaption, setActionTypeCaption] = useState('ACTION TYPE');
   const [actionTypeMan, setActionTypeMan] = useState(false);
-  const [actionTypeVisible, setActionTypeVisible] = useState(true);
+  const [actionTypeVisible, setActionTypeVisible] = useState(false);
   const [actionTypeDisable, setActionTypeDisable] = useState(false);
   const [actionTypeData, setActionTypeData] = useState([]);
 
@@ -308,6 +308,19 @@ const AddressDetails = (props, { navigation }) => {
 
   }
 
+  const KycFieldsDisable = () => {
+
+    setAddressTypeDisable(true);
+    setAddressLine1Disable(true);
+    setAddressLine2Disable(true);
+    setLandmarkDisable(true);
+    setPincodeDisable(true);
+    setCityDisable(true);
+    setDistrictDisable(true);
+    setStateDisable(true)
+    setCountryDisable(true)
+  }
+
   const KycFieldsEnable = () => {
 
     setAddressTypeDisable(false);
@@ -383,41 +396,41 @@ const AddressDetails = (props, { navigation }) => {
       setCountryDisable(false);
     }
 
-    if (geoClassificationLabel) {
-      setGeoClassificationDisable(true);
-    } else {
-      setGeoClassificationDisable(false);
-    }
+    // if (geoClassificationLabel) {
+    //   setGeoClassificationDisable(true);
+    // } else {
+    //   setGeoClassificationDisable(false);
+    // }
 
-    if (yearsAtResidence) {
-      setYearsAtResidenceDisable(true);
-    } else {
-      setYearsAtResidenceDisable(false);
-    }
+    // if (yearsAtResidence) {
+    //   setYearsAtResidenceDisable(true);
+    // } else {
+    //   setYearsAtResidenceDisable(false);
+    // }
 
-    if (yearsAtCity) {
-      setYearsAtCityDisable(true);
-    } else {
-      setYearsAtCityDisable(false);
-    }
+    // if (yearsAtCity) {
+    //   setYearsAtCityDisable(true);
+    // } else {
+    //   setYearsAtCityDisable(false);
+    // }
 
-    if (addressOwnerTypeLabel) {
-      setAddressOwnerTypeDisable(true);
-    } else {
-      setAddressOwnerTypeDisable(false);
-    }
+    // if (addressOwnerTypeLabel) {
+    //   setAddressOwnerTypeDisable(true);
+    // } else {
+    //   setAddressOwnerTypeDisable(false);
+    // }
 
-    if (ownerDetailsLabel) {
-      setOwnerDetailsDisable(true);
-    } else {
-      setOwnerDetailsDisable(false);
-    }
+    // if (ownerDetailsLabel) {
+    //   setOwnerDetailsDisable(true);
+    // } else {
+    //   setOwnerDetailsDisable(false);
+    // }
 
-    if (ownerName) {
-      setOwnerNameDisable(true);
-    } else {
-      setOwnerNameDisable(false);
-    }
+    // if (ownerName) {
+    //   setOwnerNameDisable(true);
+    // } else {
+    //   setOwnerNameDisable(false);
+    // }
 
   }
 
@@ -444,6 +457,11 @@ const AddressDetails = (props, { navigation }) => {
       setYearsAtCityVisible(false);
       setYearsAtResidenceMan(false);
     }
+    if (data.isEkyc || data.isLms) {
+      setAddressTypeDisable(true);
+    } else {
+      setAddressTypeDisable(false);
+    }
     setGeoClassificationLabel(data.geoClassification)
     setAddressOwnerTypeLabel(data.addressOwnership)
     setOwnerDetailsLabel(data.ownerDetails)
@@ -457,7 +475,7 @@ const AddressDetails = (props, { navigation }) => {
       setOwnerNameVisible(false);
       setOwnerName('')
     }
-    if (data.isKyc === "1") {
+    if (data.isEkyc) {
       disableAadharFields(data)
     }
     setIsKYC(data.isEkyc);
@@ -532,8 +550,11 @@ const AddressDetails = (props, { navigation }) => {
     setAddressTypeDisable(true)
     setAddressLine1Disable(true)
     setAddressLine2Disable(true)
-    if (data[0].landmark != null && data[0].landmark != "") {
+    if (data.landmark) {
       setLandmarkDisable(true)
+    }
+    if (data.city) {
+      setCityDisable(true)
     }
     setPincodeDisable(true)
     setDistrictDisable(true)
@@ -596,7 +617,7 @@ const AddressDetails = (props, { navigation }) => {
 
           //manualKycStatus
           if (clientDetail.clientManualKycLink.length > 0) {
-            if (clientDetail.clientManualKycLink[0].manualKycStatus) {
+            if (clientDetail.clientManualKycLink[0].manualKycStatus == 'Approved') {
               fieldsDisable();
               setOnlyView(true);
             }
@@ -609,19 +630,36 @@ const AddressDetails = (props, { navigation }) => {
 
                   if (filteredAddress.length > 0) {
                     setActionTypeLabel(filteredAddress[0].addressChangeType)
+                    setActionTypeVisible(true);
                     setAddressDmsID(filteredAddress[0].addrDmsId)
                   } else {
-                    setActionTypeLabel('PRCD');
+                    if (isNew.addressType == 'P') {
+                      setActionTypeLabel('PRCD');
+                      setActionTypeVisible(true);
+                    }
                   }
                 }
 
               } else {
-                getActionType(clientDetail);
+                if (isNew.addressType == 'P') {
+                  getActionType(clientDetail);
+                }
               }
             } else {
-              getActionType(clientDetail);
+              if (isNew.addressType == 'P') {
+                getActionType(clientDetail);
+              }
             }
 
+          } else {
+            if (clientDetail.isAadharNumberVerified) {
+              if (isNew.addressType == 'P') {
+                setActionTypeVisible(true);
+                setActionTypeMan(true);
+                setActionTypeLabel('PRCD');
+                KycFieldsDisable();
+              }
+            }
           }
 
         }
@@ -663,20 +701,24 @@ const AddressDetails = (props, { navigation }) => {
     if (clientDetail.clientManualKycLink.length > 0) {
       if (clientDetail.lmsClientId) {
         if (clientDetail.clientManualKycLink[0].kycSource == 'EVRF' || clientDetail.clientManualKycLink[0].kycSource == 'LMS') {
-          setActionTypeVisible(true);
-          setActionTypeMan(true);
-          setActionTypeLabel('PRCD');
-          fieldsDisable();
+          if (isNew.addressType == 'P') {
+            setActionTypeVisible(true);
+            setActionTypeMan(true);
+            setActionTypeLabel('PRCD');
+            KycFieldsDisable();
+          }
         } else if (clientDetail.clientManualKycLink[0].kycSource == 'MNL') {
           setActionTypeVisible(false);
           setActionTypeMan(false);
         }
       } else {
         if (clientDetail.clientManualKycLink[0].kycSource == 'EVRF') {
-          setActionTypeVisible(true);
-          setActionTypeMan(true);
-          setActionTypeLabel('PRCD');
-          fieldsDisable();
+          if (isNew.addressType == 'P') {
+            setActionTypeVisible(true);
+            setActionTypeMan(true);
+            setActionTypeLabel('PRCD');
+            KycFieldsDisable();
+          }
         } else {
           setActionTypeVisible(false);
           setActionTypeMan(false);
@@ -1081,6 +1123,20 @@ const AddressDetails = (props, { navigation }) => {
       }
     }
 
+    if (actionTypeVisible && actionTypeLabel != 'PRCD') {
+      if (imageUri == null) {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          language[0][props.language].str_errorimage +
+          '\n';
+        i++;
+        flag = true;
+      }
+    }
+
 
     setErrMsg(errorMessage);
     return flag;
@@ -1151,7 +1207,7 @@ const AddressDetails = (props, { navigation }) => {
           setLoading(false);
           if (response.status == 200) {
             props.updateNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientAddress', response.data[0])
-            if (actionTypeVisible) {
+            if (actionTypeVisible && actionTypeLabel != 'PRCD') {
               updateManualKYCDetails();
             } else {
               navigateToAddress();
@@ -1230,7 +1286,7 @@ const AddressDetails = (props, { navigation }) => {
           setLoading(false);
           if (response.status == 200) {
             props.updateNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientAddress', response.data)
-            if (actionTypeVisible) {
+            if (actionTypeVisible && actionTypeLabel != 'PRCD') {
               updateManualKYCDetails();
             } else {
               navigateToAddress();
@@ -1354,7 +1410,7 @@ const AddressDetails = (props, { navigation }) => {
       setActionTypeLabel(label);
       setActionTypeIndex(index);
       if (label == 'PRCD') {
-        fieldsDisable();
+        KycFieldsDisable();
       } else if (label == 'HBD') {
         KycHybridFieldsEnable();
       } else {
@@ -1977,7 +2033,7 @@ const AddressDetails = (props, { navigation }) => {
           <TextInputComp textValue={ownerName} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={ownerNameDisable} ComponentName='OwnerName' reference={ownerNameRef} returnKey="next" handleClick={handleClick} handleReference={handleReference} length={30} />
         </View>}
 
-        {actionTypeVisible &&
+        {actionTypeVisible && actionTypeLabel != 'PRCD' &&
           <View
             style={{
               width: '100%',

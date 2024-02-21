@@ -34,6 +34,8 @@ import tbl_client from '../../../Database/Table/tbl_client';
 import tbl_loanApplication from '../../../Database/Table/tbl_loanApplication';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import tbl_familydetails from '../../../Database/Table/tbl_familydetails';
+import { addLoanInitiationDetails, updateLoanInitiationDetails, deleteLoanInitiationDetails, updateClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
+
 
 const FamilyDetailList = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
@@ -62,6 +64,7 @@ const FamilyDetailList = (props, { navigation }) => {
         if (global.USERTYPEID == 1163) {
             setOnlyView(true);
         }
+
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
             backHandler.remove();
@@ -75,18 +78,22 @@ const FamilyDetailList = (props, { navigation }) => {
 
     const getRelationData = () => {
 
+        const familyDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].familyDetail;
+        setRelationDetails(familyDetail)
+        setRefreshFlatList(!refreshFlatlist)
+        // console.log(JSON.stringify(familyDetail))
 
-        tbl_familydetails.getAllFamilyDetails(global.LOANAPPLICATIONID)
-            .then(data => {
-                if (global.DEBUG_MODE) console.log('Relation Detail:', data);
-                if (data !== undefined && data.length > 0) {
-                    setRelationDetails(data)
-                    setRefreshFlatList(!refreshFlatlist)
-                }
-            })
-            .catch(error => {
-                if (global.DEBUG_MODE) console.error('Error fetching Relation details:', error);
-            });
+        // tbl_familydetails.getAllFamilyDetails(global.LOANAPPLICATIONID)
+        //     .then(data => {
+        //         if (global.DEBUG_MODE) console.log('Relation Detail:', data);
+        //         if (data !== undefined && data.length > 0) {
+        //             setRelationDetails(data)
+        //             setRefreshFlatList(!refreshFlatlist)
+        //         }
+        //     })
+        //     .catch(error => {
+        //         if (global.DEBUG_MODE) console.error('Error fetching Relation details:', error);
+        //     });
 
 
 
@@ -107,10 +114,10 @@ const FamilyDetailList = (props, { navigation }) => {
             <View style={{ marginLeft: 10, marginRight: 10 }}>
                 <View>
                     <Text style={{ fontSize: 14, fontFamily: 'Poppins-SemiBold', marginTop: 5, color: Colors.black }}>
-                        {Common.getSystemCodeDescription(props.mobilecodedetail.leadSystemCodeDto, 'RELATIONSHIP', item.relationTypeId)}
+                        {Common.getSystemCodeDescription(props.mobilecodedetail.leadSystemCodeDto, 'RELATIONSHIP', item.relationshipWithApplicant)}
                     </Text>
-                    <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: Colors.mediumgrey }}>{`${Common.getSystemCodeDescription(props.mobilecodedetail.leadUserCodeDto, 'TITLE', item.titleId)} ${item.firstName}`}</Text>
-                    <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: Colors.mediumgrey }}>{item.dateOfBirth}</Text>
+                    <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: Colors.mediumgrey }}>{`${Common.getSystemCodeDescription(props.mobilecodedetail.leadUserCodeDto, 'TITLE', item.title)} ${item.name}`}</Text>
+                    <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: Colors.mediumgrey }}>{item.dateOfBirth ? Common.convertDateFormat(item.dateOfBirth) : ''}</Text>
                 </View>
 
                 <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
@@ -146,9 +153,9 @@ const FamilyDetailList = (props, { navigation }) => {
                         if (global.USERTYPEID == 1163) {
 
                         } else {
-                            if (item.isKyc != '1') {
-                                handleClick('delete', item)
-                            }
+
+                            handleClick('delete', item)
+
                         }
                     }
                     }>
@@ -443,10 +450,12 @@ const mapStateToProps = state => {
     const { language } = state.languageReducer;
     const { profileDetails } = state.profileReducer;
     const { mobileCodeDetails } = state.mobilecodeReducer;
+    const { loanInitiationDetails } = state.loanInitiationReducer;
     return {
         language: language,
         profiledetail: profileDetails,
-        mobilecodedetail: mobileCodeDetails
+        mobilecodedetail: mobileCodeDetails,
+        loanInitiationDetails: loanInitiationDetails
     }
 };
 

@@ -35,6 +35,7 @@ global.COMPLETEDMODULE = '';
 global.COMPLETEDPAGE = '';
 global.LOANSTATUS = '';
 global.LEADTRACKERDATA = [];
+global.TRACKERSTATUSDATA = [];
 global.PDTRACKERDATA = [];
 global.CURRENTPAGEID = '';
 global.PDSTAGE = '';

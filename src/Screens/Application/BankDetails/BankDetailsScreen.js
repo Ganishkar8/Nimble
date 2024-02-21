@@ -30,6 +30,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Modal from 'react-native-modal';
 import ImagePicker, { ImageOrVideo } from 'react-native-image-crop-picker';
 import { useIsFocused } from '@react-navigation/native';
+import { updateLoanInitiationDetails, deleteLoanInitiationDetails, updateNestedClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
+
 
 const BankDetailsScreen = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
@@ -181,7 +183,7 @@ const BankDetailsScreen = (props, { navigation }) => {
     const getExistingData = () => {
 
         if (isNew != 'new') {
-            getExistingBankData(isNew.loanApplicationId, isNew.client_type)
+            getExistingBankData(isNew)
         }
     }
 
@@ -202,33 +204,25 @@ const BankDetailsScreen = (props, { navigation }) => {
 
     }
 
-    const getExistingBankData = (loanAppId, id) => {
-        tbl_bankdetails.getAllBankDetailsDetailsForLoanID(loanAppId, id)
-            .then(data => {
-                if (global.DEBUG_MODE) console.log('Bank Detail:', data);
-                setBankID(data[0].id)
-                setAccountTypeLabel(data[0].account_type)
-                setAccountHolderName(data[0].account_holder_name)
-                setIfscCode(data[0].ifsc_code)
-                setBankName(data[0].bank_name)
-                setBranchName(data[0].branch_name)
-                setAccountNumber(data[0].account_number)
-                setConfirmAccountNumber(data[0].account_number)
-                setBankLinkedMobNo(data[0].mobile_number)
-                setUpiID(data[0].upi_id)
-                setAccountToUseLabel(data[0].accountUsedFor)
-                setLoading(false)
-                if (data[0].dmsId !== undefined && data[0].dmsId !== null) {
-                    if (data[0].dmsId.length > 0) {
-                        getImage(data[0].dmsId);
-                    }
-                    setDocID(data[0].dmsId);
-                }
-            })
-            .catch(error => {
-                if (global.DEBUG_MODE) console.error('Error fetching Bank details:', error);
-                setLoading(false)
-            });
+    const getExistingBankData = (data) => {
+
+        setBankID(data.id)
+        setAccountTypeLabel(data.accountType)
+        setAccountHolderName(data.accountHolderNameAsPerBank)
+        setIfscCode(data.ifscCode)
+        setBankName(data.bankName)
+        setBranchName(data.branchName)
+        setAccountNumber(data.accountNumber)
+        setConfirmAccountNumber(data.confirmedAccountNumber)
+        setBankLinkedMobNo(data.bankLinkedMobileNo)
+        setUpiID(data.upiId)
+        setAccountToUseLabel(data.accountToBeUsedFor)
+        setLoading(false)
+        if (data.dmsId) {
+            getImage(data.dmsId);
+            setDocID(data.dmsId);
+        }
+
     }
 
     const getImage = (dmsID) => {
@@ -721,7 +715,9 @@ const BankDetailsScreen = (props, { navigation }) => {
                     if (global.DEBUG_MODE) console.log('PostBankResponse::' + JSON.stringify(response.data),);
                     setLoading(false);
                     if (response.status == 200) {
-                        insertData(response.data[0].id, dmsID)
+                        props.updateNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientBankDetail', response.data[0])
+                        props.navigation.replace('BankList')
+                        //insertData(response.data[0].id, dmsID)
                     } else if (response.data.statusCode === 201) {
                         setApiError(response.data.message);
                         setErrorModalVisible(true);
@@ -781,7 +777,9 @@ const BankDetailsScreen = (props, { navigation }) => {
                     // Handle the response data
                     if (global.DEBUG_MODE) console.log('UpdateBankResponse::' + JSON.stringify(response.data),);
                     if (response.status == 200) {
-                        insertData(bankID, dmsID)
+                        // insertData(bankID, dmsID)
+                        props.updateNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientBankDetail', response.data)
+                        props.navigation.replace('BankList')
                     } else if (response.data.statusCode === 201) {
                         setApiError(response.data.message);
                         setErrorModalVisible(true);
@@ -1370,6 +1368,8 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => ({
     languageAction: item => dispatch(languageAction(item)),
+    updateNestedClientDetails: (loanApplicationId, clientId, key, nestedKey, data) => dispatch(updateNestedClientDetails(loanApplicationId, clientId, key, nestedKey, data)),
+    updateLoanInitiationDetails: (loanApplicationId, loanData, key, clientId, updatedDetails) => dispatch(updateLoanInitiationDetails(loanApplicationId, loanData, key, clientId, updatedDetails)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(BankDetailsScreen);

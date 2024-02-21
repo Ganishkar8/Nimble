@@ -18,6 +18,7 @@ const DedupeModal = props => {
 
     const [clientData, setClientData] = React.useState([]);
     const [oneSelected, setOneSelected] = React.useState(false);
+    const [selectedItem, setSelectedItem] = React.useState([]);
 
     const setValue = (ComponentName, txt) => {
         props.handleClick(ComponentName, txt);
@@ -29,11 +30,16 @@ const DedupeModal = props => {
             if (fiterStatusPosition[i].lmsClientId == item.lmsClientId) {
                 fiterStatusPosition[i].isSelected = !fiterStatusPosition[i].isSelected
             } else {
-                fiterStatusPosition[i].isSelected = false
+                fiterStatusPosition[i].isSelected = false;
             }
         }
         const isAtLeastOneSelected = fiterStatusPosition.some(item => item.isSelected);
         setOneSelected(isAtLeastOneSelected);
+        if (isAtLeastOneSelected) {
+            setSelectedItem(item);
+        } else {
+            setSelectedItem([]);
+        }
         setClientData(fiterStatusPosition)
     }
 
@@ -61,7 +67,7 @@ const DedupeModal = props => {
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, flexDirection: 'row' }}>
                             <TextComp textVal={`${language[0][props.language].str_clientdedupecheck}${props.dedupeDetails.remarks ? 'Failed' : ''}`} textStyle={{ width: '90%', color: Colors.darkblack, fontFamily: 'Poppins-Medium', fontSize: 16 }} Visible={false} />
 
-                            <TouchableOpacity onPress={() => props.onClose('Cancel')} style={{ justifyContent: 'center' }}>
+                            <TouchableOpacity onPress={() => props.onClose('Cancel', [])} style={{ justifyContent: 'center' }}>
                                 <View >
 
                                     <Entypo name='cross' size={23} color={Colors.darkblack} />
@@ -124,12 +130,12 @@ const DedupeModal = props => {
 
                     <View style={{ width: '100%', height: 'auto', flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'flex-end', alignSelf: 'flex-end', marginTop: 20, }}>
                         {!(props.dedupeDetails.remarks) && oneSelected &&
-                            <TouchableOpacity onPress={() => { props.onClose("Proceed") }} style={styles.closeButton}>
+                            <TouchableOpacity onPress={() => { props.onClose("Proceed", selectedItem) }} style={styles.closeButton}>
                                 <Text style={{ color: Colors.darkblue, fontWeight: 500 }}>{language[0][props.language].str_proceed}</Text>
                             </TouchableOpacity>
                         }
 
-                        <TouchableOpacity onPress={() => { props.onClose("Reject") }} style={styles.closeButton}>
+                        <TouchableOpacity onPress={() => { props.onClose("Reject", []) }} style={styles.closeButton}>
                             <Text style={{ color: Colors.darkblue, fontWeight: 500 }}>{language[0][props.language].str_reject}</Text>
                         </TouchableOpacity>
 

@@ -26,7 +26,6 @@ const loanInitiationReducer = (state = initialState, action) => {
                         index === existingItemIndex
                             ? {
                                 ...item,
-                                customerType: loanData.customerType,
                                 [action.payload.key]: Array.isArray(item[action.payload.key])
                                     ? item[action.payload.key].map(clientDetail =>
                                         clientDetail.id === action.payload.clientId
@@ -45,7 +44,7 @@ const loanInitiationReducer = (state = initialState, action) => {
                 // Add new item
                 return {
                     ...state,
-                    loanInitiationDetails: [...state.loanInitiationDetails, { id: action.payload.loanApplicationId, loanApplicationNumber: loanData.loanApplicationNumber, tempNumber: loanData.tempNumber, branchId: loanData.branchId, customerCategory: loanData.customerCategory, customerSubcategory: loanData.customerSubcategory, customerType: loanData.customerType, loanType: loanData.loanType, loanPurpose: loanData.loanPurpose, product: loanData.product, loanAmount: loanData.loanAmount, workflowId: loanData.workflowId, consent: loanData.consent, finalConsent: loanData.finalConsent, applicationAppliedBy: loanData.applicationAppliedBy, applicationCreationDate: loanData.applicationCreationDate, lmsApplicationNumber: loanData.lmsApplicationNumber, isKycManual: loanData.isKycManual, manualKycStatus: loanData.manualKycStatus, manualKycApprovedBy: loanData.manualKycApprovedBy, manualKycApprovedDate: loanData.manualKycApprovedDate, [action.payload.key]: action.payload.data }],
+                    loanInitiationDetails: [...state.loanInitiationDetails, { id: action.payload.loanApplicationId, loanApplicationNumber: loanData.loanApplicationNumber, tempNumber: loanData.tempNumber, branchId: loanData.branchId, customerCategory: loanData.customerCategory, customerSubcategory: loanData.customerSubcategory, loanType: loanData.loanType, loanPurpose: loanData.loanPurpose, product: loanData.product, loanAmount: loanData.loanAmount, workflowId: loanData.workflowId, consent: loanData.consent, finalConsent: loanData.finalConsent, applicationAppliedBy: loanData.applicationAppliedBy, applicationCreationDate: loanData.applicationCreationDate, lmsApplicationNumber: loanData.lmsApplicationNumber, isKycManual: loanData.isKycManual, manualKycStatus: loanData.manualKycStatus, manualKycApprovedBy: loanData.manualKycApprovedBy, manualKycApprovedDate: loanData.manualKycApprovedDate, [action.payload.key]: action.payload.data }],
                 };
             }
 

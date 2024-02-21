@@ -47,6 +47,8 @@ import apiInstance from '../../../Utils/apiInstance';
 import DocumentPicker from 'react-native-document-picker';
 import RNFS, { writeFile } from 'react-native-fs';
 import Share from 'react-native-share';
+import { addLoanInitiationDetails, updateLoanInitiationDetails, deleteLoanInitiationDetails, updateClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
+
 
 const LoanDocumentUpload = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
@@ -1021,6 +1023,10 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => ({
     languageAction: item => dispatch(languageAction(item)),
+    dedupeAction: item => dispatch(dedupeAction(item)),
+    deleteDedupe: item => dispatch(deleteDedupe()),
+    updateClientDetails: (loanApplicationId, clientId, key, data) => dispatch(updateClientDetails(loanApplicationId, clientId, key, data)),
+    updateLoanInitiationDetails: (loanApplicationId, loanData, key, clientId, updatedDetails) => dispatch(updateLoanInitiationDetails(loanApplicationId, loanData, key, clientId, updatedDetails)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(LoanDocumentUpload);

@@ -208,7 +208,7 @@ const LoanApplicationMain = (props, { navigation }) => {
                 if (global.DEBUG_MODE) console.log('CBCheckApiResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
                 if (response.status == 200) {
-
+                    global.TRACKERSTATUSDATA = response.data;
                     const filterLNAPP = response.data.loanApplicationStatus.filter((data) => data.loanWorkflowStage === 'LN_APP_INITIATION');
                     const filterSubStage = filterLNAPP[0].subStageLog.filter((data) => data.subStageCode === 'CB_CHK');
                     const filtermodule = filterSubStage[0].moduleLog.filter((data) => data.moduleCode === 'CB_BRE_DCSN');

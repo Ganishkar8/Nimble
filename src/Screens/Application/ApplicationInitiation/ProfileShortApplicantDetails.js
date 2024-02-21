@@ -723,10 +723,18 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
 
     if (aadharverify) {
       setFirstNameDisable(true);
-      setMiddleNameDisable(true);
-      setMiddleNameMan(false);
-      setLastNameDisable(true);
-      setLastNameMan(false)
+      if (middleName) {
+        setMiddleNameDisable(true);
+      } else {
+        setMiddleNameDisable(false);
+      }
+
+      if (lastName) {
+        setLastNameDisable(true);
+      } else {
+        setLastNameDisable(false);
+      }
+
 
       setMiddleNameMan(false)
       setGenderDisable(true);

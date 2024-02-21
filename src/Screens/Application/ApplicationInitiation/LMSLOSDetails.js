@@ -60,6 +60,8 @@ const LMSLOSDetails = (props, { navigation }) => {
     useEffect(() => {
         if (Common.DEBUG_MODE) console.log(JSON.stringify(props.dedupeDetail))
         //alert(JSON.stringify(props.loanInitiationDetails))
+        setLmsDedupeCheck(true);
+        setLosDedupeCheck(false);
         loanOriginationDedupeCheck();
         updateBasicDedupe();
 
@@ -187,10 +189,6 @@ const LMSLOSDetails = (props, { navigation }) => {
             appDetails.customerType = "NEW";
         }
 
-        if (props.dedupeDetail.clientExistingDetails) {
-            appDetails.lmsClientId = props.dedupeDetail.clientExistingDetails[0].lmsClientId;
-        }
-
         const baseURL = global.PORT1;
         setLoading(true);
         apiInstance(baseURL)
@@ -202,11 +200,9 @@ const LMSLOSDetails = (props, { navigation }) => {
 
                 setLoading(false);
                 if (response.status == 200) {
-                    if (global.CLIENTTYPE == 'APPL') {
-                        props.updateLoanInitiationDetails(parseInt(global.LOANAPPLICATIONID), { customerType: appDetails.customerType }, 'clientDetail', response.data.id, response.data)
-                    } else {
-                        props.updateLoanInitiationDetails(parseInt(global.LOANAPPLICATIONID), [], 'clientDetail', response.data.id, response.data)
-                    }
+
+                    props.updateLoanInitiationDetails(parseInt(global.LOANAPPLICATIONID), [], 'clientDetail', response.data.id, response.data)
+
 
                 }
                 else if (response.data.statusCode === 201) {
@@ -241,6 +237,8 @@ const LMSLOSDetails = (props, { navigation }) => {
     const loanOriginationDedupeCheck = () => {
         const clientDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
 
+
+
         const appDetails = {
             "clientId": global.CLIENTID,
             "loanApplicationId": global.LOANAPPLICATIONID,
@@ -249,7 +247,8 @@ const LMSLOSDetails = (props, { navigation }) => {
 
         if (props.dedupeDetail) {
             if (props.dedupeDetail.clientExistingDetails) {
-                appDetails.clientExistingDetails = props.dedupeDetail.clientExistingDetails[0];
+                const selectedClient = props.dedupeDetail.clientExistingDetails.filter(item => item.lmsClientId == clientDetail.lmsClientId)
+                appDetails.clientExistingDetails = selectedClient[0];
                 setLmsDedupeCheck(true);
                 setLosDedupeCheck(false);
             } else {
@@ -297,15 +296,20 @@ const LMSLOSDetails = (props, { navigation }) => {
                     setLoading(false);
                     if (response.data) {
 
-                        response.data.forEach(item => {
+
+                        response.data.rstDedupeChecks.forEach(item => {
                             if (item.remarks.length > 1) {
                                 item.remarks = item.remarks.substring(1, item.remarks.length - 1).replace(/\n, /g, '\n');
                             }
                         });
-                        const lmsData = response.data.filter(item => item.businessRuleCode == 'LMS_DEDUPE')
-                        const losData = response.data.filter(item => item.businessRuleCode == 'LOS_DEDUPE')
+                        const lmsData = response.data.rstDedupeChecks.filter(item => item.businessRuleCode == 'LMS_DEDUPE')
+                        const losData = response.data.rstDedupeChecks.filter(item => item.businessRuleCode == 'LOS_DEDUPE')
                         setlmsData(lmsData);
                         setlosData(losData);
+
+                        if (response.data.clientDetailDto) {
+                            props.updateClientDetails(global.LOANAPPLICATIONID, response.data.clientDetailDto.id, 'clientDetail', response.data.clientDetailDto)
+                        }
 
                     }
                 } else if (response.data.statusCode === 201) {
@@ -344,11 +348,11 @@ const LMSLOSDetails = (props, { navigation }) => {
 
     const onGoBack = () => {
         if (lmsDedupeCheck) {
-            props.navigation.goBack();
+            props.navigation.replace('ProfileShortBasicDetails');
             props.deleteDedupe();
         } else {
             if (onlyLOS) {
-                props.navigation.goBack();
+                props.navigation.replace('ProfileShortBasicDetails');
                 props.deleteDedupe();
             } else {
                 setLosDedupeCheck(false);

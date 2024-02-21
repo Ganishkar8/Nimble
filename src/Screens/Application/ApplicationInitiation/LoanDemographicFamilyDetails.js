@@ -45,6 +45,7 @@ import tbl_client from '../../../Database/Table/tbl_client';
 import tbl_loanApplication from '../../../Database/Table/tbl_loanApplication';
 import tbl_familydetails from '../../../Database/Table/tbl_familydetails';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { addLoanInitiationDetails, updateLoanInitiationDetails, deleteLoanInitiationDetails, updateClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
 
 
 const LoanDemographicFamilyDetails = (props) => {
@@ -267,24 +268,24 @@ const LoanDemographicFamilyDetails = (props) => {
         var data = props.route.params.familyDetails;
         setFamilyDetailAvailable(true);
         setFamilyID(data[0].id)
-        setRelationTypeLabel(data[0].relationTypeId);
-        setTitleLabel(data[0].titleId);
-        setName(data[0].firstName);
-        setGenderLabel(data[0].genderId);
+        setRelationTypeLabel(data[0].relationshipWithApplicant);
+        setTitleLabel(data[0].title);
+        setName(data[0].name);
+        setGenderLabel(data[0].gender);
         setDOB(data[0].dateOfBirth)
         setAge(data[0].age)
         setMobileNumber(data[0].mobileNumber)
         setKycType1Label(data[0].kycTypeId1)
         setkycID1(data[0].kycIdValue1)
-        setExpiry1Date(data[0].expiryDate1)
+        setExpiry1Date(data[0].kycType1ExpiryDate)
         setKycType2Label(data[0].kycTypeId2)
         setkycID2(data[0].kycIdValue2)
-        setExpiry2Date(data[0].expiryDate2)
+        setExpiry2Date(data[0].kycType2ExpiryDate)
         setKycType3Label(data[0].kycTypeId3)
         setkycID3(data[0].kycTypeId3)
-        setExpiry3Date(data[0].kycIdValue3)
-        setRelationStatuswithCOAPPLabel(data[0].relationWithCOAPPL)
-        setRelationStatuswithGRNTRLabel(data[0].relationWithGRNTR)
+        setExpiry3Date(data[0].kycType3ExpiryDate)
+        setRelationStatuswithCOAPPLabel(data[0].relationshipWithCoApplicant)
+        setRelationStatuswithGRNTRLabel(data[0].relationshipWithGuarantor)
     };
 
     useFocusEffect(
@@ -749,16 +750,16 @@ const LoanDemographicFamilyDetails = (props) => {
                     "gender": genderLabel,
                     "kycTypeId1": KycType1Label,
                     "kycIdValue1": kycID1,
-                    "kycType1ExpiryDate": expiryDate1.length > 0 ? Common.convertYearDateFormat(expiryDate1) : '',
+                    "kycType1ExpiryDate": expiryDate1 ? Common.convertYearDateFormat(expiryDate1) : '',
                     "kycTypeId2": KycType2Label,
                     "kycIdValue2": kycID2,
-                    "kycType2ExpiryDate": expiryDate2.length > 0 ? Common.convertYearDateFormat(expiryDate2) : '',
+                    "kycType2ExpiryDate": expiryDate2 ? Common.convertYearDateFormat(expiryDate2) : '',
                     "kycTypeId3": KycType3Label,
                     "kycIdValue3": kycID3,
-                    "kycType3ExpiryDate": expiryDate3.length > 0 ? Common.convertYearDateFormat(expiryDate3) : '',
+                    "kycType3ExpiryDate": expiryDate3 ? Common.convertYearDateFormat(expiryDate3) : '',
                     "kycTypeId4": KycType4Label,
                     "kycIdValue4": kycID4,
-                    "kycType4ExpiryDate": expiryDate4.length > 0 ? Common.convertYearDateFormat(expiryDate4) : '',
+                    "kycType4ExpiryDate": expiryDate4 ? Common.convertYearDateFormat(expiryDate4) : '',
                     "relationshipWithApplicant": relationTypeLabel,
                     "relationshipWithCoApplicant": relationStatuswithCOAPPLabel,
                     "relationshipWithGuarantor": relationStatuswithGRNTRLabel,
@@ -776,7 +777,9 @@ const LoanDemographicFamilyDetails = (props) => {
                     if (global.DEBUG_MODE) console.log('PostFamilyDetailApiResponse::' + JSON.stringify(response.data),);
                     setLoading(false);
                     if (response.status == 200) {
-                        await insertData(response.data[0].id);
+                        props.updateClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'familyDetail', response.data[0])
+                        props.navigation.replace('FamilyDetailList');
+                        //await insertData(response.data[0].id);
                     } else if (response.data.statusCode === 201) {
                         setApiError(response.data.message);
                         setErrorModalVisible(true);
@@ -816,23 +819,23 @@ const LoanDemographicFamilyDetails = (props) => {
             var appDetails = {
                 "id": familyID,
                 "name": Name,
-                "dateOfBirth": DOB.length > 0 ? Common.convertYearDateFormat(DOB) : '',
+                "dateOfBirth": DOB ? Common.convertYearDateFormat(DOB) : '',
                 "age": Age,
                 "title": titleLabel,
                 "gender": genderLabel,
                 "mobileNumber": mobileNumber,
                 "kycTypeId1": KycType1Label,
                 "kycIdValue1": kycID1,
-                "kycType1ExpiryDate": expiryDate1.length > 0 ? Common.convertYearDateFormat(expiryDate1) : '',
+                "kycType1ExpiryDate": expiryDate1 ? Common.convertYearDateFormat(expiryDate1) : '',
                 "kycTypeId2": KycType2Label,
                 "kycIdValue2": kycID2,
-                "kycType2ExpiryDate": expiryDate2.length > 0 ? Common.convertYearDateFormat(expiryDate2) : '',
+                "kycType2ExpiryDate": expiryDate2 ? Common.convertYearDateFormat(expiryDate2) : '',
                 "kycTypeId3": KycType3Label,
                 "kycIdValue3": kycID3,
-                "kycType3ExpiryDate": expiryDate3.length > 0 ? Common.convertYearDateFormat(expiryDate3) : '',
+                "kycType3ExpiryDate": expiryDate3 ? Common.convertYearDateFormat(expiryDate3) : '',
                 "kycTypeId4": KycType4Label,
                 "kycIdValue4": kycID4,
-                "kycType4ExpiryDate": expiryDate4.length > 0 ? Common.convertYearDateFormat(expiryDate4) : '',
+                "kycType4ExpiryDate": expiryDate4 ? Common.convertYearDateFormat(expiryDate4) : '',
                 "relationshipWithApplicant": relationTypeLabel,
                 "relationshipWithCoApplicant": relationStatuswithCOAPPLabel,
                 "relationshipWithGuarantor": relationStatuswithGRNTRLabel,
@@ -849,7 +852,9 @@ const LoanDemographicFamilyDetails = (props) => {
                     if (global.DEBUG_MODE) console.log('UpdateFamilyApiResponse::' + JSON.stringify(response.data),);
                     setLoading(false);
                     if (response.status == 200) {
-                        await insertData(familyID);
+                        props.updateLoanInitiationDetails(parseInt(global.LOANAPPLICATIONID), [], 'familyDetail', response.data.id, response.data)
+                        props.navigation.replace('FamilyDetailList');
+                        // await insertData(familyID);
                     } else if (response.data.statusCode === 201) {
                         setApiError(response.data.message);
                         setErrorModalVisible(true);
@@ -2120,16 +2125,21 @@ const mapStateToProps = (state) => {
     const { language } = state.languageReducer;
     const { profileDetails } = state.profileReducer;
     const { mobileCodeDetails } = state.mobilecodeReducer;
+    const { loanInitiationDetails } = state.loanInitiationReducer;
     return {
         language: language,
         profiledetail: profileDetails,
-        mobilecodedetail: mobileCodeDetails
+        mobilecodedetail: mobileCodeDetails,
+        loanInitiationDetails: loanInitiationDetails
     }
 }
 
 const mapDispatchToProps = dispatch => ({
     languageAction: item => dispatch(languageAction(item)),
     dedupeAction: item => dispatch(dedupeAction(item)),
+    deleteDedupe: item => dispatch(deleteDedupe()),
+    updateClientDetails: (loanApplicationId, clientId, key, data) => dispatch(updateClientDetails(loanApplicationId, clientId, key, data)),
+    updateLoanInitiationDetails: (loanApplicationId, loanData, key, clientId, updatedDetails) => dispatch(updateLoanInitiationDetails(loanApplicationId, loanData, key, clientId, updatedDetails)),
 });
 
 export default connect(

@@ -114,7 +114,8 @@ const AddressMainList = (props, { navigation }) => {
             setKYCManual('0');
           }
         }
-        const addressDetails = clientDetail.clientAddress;
+        const addressDetails = clientDetail.clientAddress.filter(item => item.addressType == 'P' || item.addressType == 'C');
+
         if (addressDetails) {
           setAddressDetails(addressDetails)
           const communicationAddress = addressDetails.find(item => item.addressType === 'C');
@@ -153,11 +154,12 @@ const AddressMainList = (props, { navigation }) => {
     if (global.USERTYPEID == 1163) {
       bg = 'GREY'
     } else {
-      if (item.isKyc == '1') {
-        bg = 'GREY'
-      } else {
-
+      if (item.addressType == 'P') {
+        if (item.isEkyc || item.isLms) {
+          bg = 'GREY'
+        }
       }
+
     }
     if (global.ALLOWEDIT == "0") {
       bg = 'GREY';
@@ -208,9 +210,16 @@ const AddressMainList = (props, { navigation }) => {
               if (global.ALLOWEDIT == "0") {
 
               } else {
-                if (item.isKyc != '1') {
+                if (item.addressType == 'P') {
+                  if (item.isEkyc || item.isLms) {
+
+                  } else {
+                    handleClick('delete', item)
+                  }
+                } else {
                   handleClick('delete', item)
                 }
+
               }
 
             }
@@ -318,11 +327,6 @@ const AddressMainList = (props, { navigation }) => {
   };
 
   const deletedata = async (addressID) => {
-
-    const deletePromises = [
-      tbl_clientaddressinfo.deleteDataBasedOnLoanIDAndID(global.LOANAPPLICATIONID, addressID)
-    ];
-    await Promise.all(deletePromises);
 
     const newArray = addressDetails.filter(item => item.id !== addressID);
     if (newArray.length > 0) {

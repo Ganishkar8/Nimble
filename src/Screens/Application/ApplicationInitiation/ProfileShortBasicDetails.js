@@ -99,6 +99,8 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   const [relationTypeLabel, setRelationTypeLabel] = useState('');//Contains Selected RelationId
   const [relationTypeIndex, setRelationTypeIndex] = useState('');
 
+
+  const [isAadharVerificationMandatoryMan, setIsAadharVerificationMandatoryMan] = useState(false); //Manditory or not
   //loanType - dropdown
   const [loanTypeMan, setLoanTypeMan] = useState(false); //Manditory or not
   const [loanTypeVisible, setLoanTypeVisible] = useState(true); //Hide or not
@@ -513,8 +515,8 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       getID2data(filteredData[0].workflowId);
       getID3data(filteredData[0].workflowId);
       getID4data(filteredData[0].workflowId);
-      //setWorkflowIDLabel(filteredData[0].workflowId)
-      setWorkflowIDLabel(137)
+      setWorkflowIDLabel(filteredData[0].workflowId)
+      // setWorkflowIDLabel(137)
 
       if (global.CLIENTTYPE == 'APPL') {
         getLoanData(filteredData[0]);
@@ -571,17 +573,17 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
     }
     if (data.workflowId) {
-      //setWorkflowIDLabel(parseInt(data.workflowId))
-      //callLoanAmount(parseInt(data.workflowId));
-      setWorkflowIDLabel(137)
-      callLoanAmount(137);
+      setWorkflowIDLabel(parseInt(data.workflowId))
+      callLoanAmount(parseInt(data.workflowId));
+      //setWorkflowIDLabel(137)
+      //callLoanAmount(137);
     }
     if (data.loanAmount) {
       setLoanAmount(data?.loanAmount?.toString());
     }
     setLoanPurposeLabel(data.loanPurpose);
     getProductID(data.loanType);
-    setClientTypeLabel(data.customerType);
+
     getWorkFlowID(
       data.loanType,
       data.product,
@@ -599,7 +601,15 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       setLeadIDVisible(false);
       setLeadID('');
     }
+
+    if (data.isAadharVerificationMandatory) {
+      setIsAadharVerificationMandatoryMan(true)
+    } else {
+      setIsAadharVerificationMandatoryMan(false)
+    }
+
     setRelationTypeLabel(data.relationType);
+    setClientTypeLabel(data.customerType);
     setTitleLabel(data.title);
     setName(data.firstName + ' ' + data.middleName + ' ' + data.lastName);
     setGenderLabel(data.gender);
@@ -1446,11 +1456,8 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           setLoading(false);
           if (response.status === 200) {
 
-            if (global.CLIENTTYPE == 'APPL') {
-              props.updateLoanInitiationDetails(parseInt(global.LOANAPPLICATIONID), { customerType: loanDetail.customerType }, 'clientDetail', response.data.id, response.data)
-            } else {
-              props.updateLoanInitiationDetails(parseInt(global.LOANAPPLICATIONID), [], 'clientDetail', response.data.id, response.data)
-            }
+            props.updateLoanInitiationDetails(parseInt(global.LOANAPPLICATIONID), [], 'clientDetail', response.data.id, response.data)
+
 
 
             // if (global.CLIENTTYPE == 'APPL') {
@@ -1463,7 +1470,11 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
               KycType4Label == '001'
             ) {
               if (clientTypeLabel == 'EXISTING') {
-                setAadharModalVisible(true);
+                if (isAadharVerificationMandatoryMan) {
+                  generateAadharOTP();
+                } else {
+                  setAadharModalVisible(true);
+                }
               } else {
                 generateAadharOTP();
               }
@@ -1537,7 +1548,6 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           customerCategory: custCatgLabel,
           leadId: leadID,
           customerSubcategory: CustomerSubCategoryLabel,
-          customerType: clientTypeLabel,
           loanType: loanTypeLabel,
           loanPurpose: LoanPurposeLabel,
           product: ProductTypeLabel,
@@ -1555,6 +1565,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
               lastName: '',
               gender: genderLabel,
               relationType: relationTypeLabel,
+              customerType: clientTypeLabel,
               maritalStatus: MaritalStatusLabel,
               kycTypeId1: KycType1Label,
               kycIdValue1: kycID1,
@@ -1578,6 +1589,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
               isMsme: chkMsme,
               isEmailVerified: false,
               isPanVerified: false,
+              isAadharVerificationMandatory: false,
               dedupeCheck: isDedupeDone,
               clientAddress: [],
               clientBankDetail: [],
@@ -1726,7 +1738,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       branchId: data.branchId,
       customerCategory: data.customerCategory,
       customerSubcategory: data.customerSubcategory,
-      customerType: data.customerType,
+      //customerType: data.customerType,
       loanType: data.loanType,
       loanPurpose: data.loanPurpose,
       product: data.product,
@@ -1785,12 +1797,12 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
                 // setErrorModalVisible(true);
                 // setApiError('No Result Found');
 
-                props.navigation.navigate('LMSLOSDetails');
+                props.navigation.replace('LMSLOSDetails');
                 setLoading(false);
               } else {
                 // setErrorModalVisible1(true);
                 // setApiError('No Result Found');
-                props.navigation.navigate('LMSLOSDetails');
+                props.navigation.replace('LMSLOSDetails');
                 setLoading(false);
               }
             } else {
@@ -2066,13 +2078,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           //await tbl_client.deleteAllClient();
           if (response.status == 200) {
 
-            if (response.data.clientDetailDto) {
-              props.updateClientDetails(global.LOANAPPLICATIONID, response.data.clientDetailDto.id, 'clientDetail', response.data.clientDetailDto)
-            }
-
             generateLoanAppNum(response.data);
-
-
 
             // props.navigation.navigate('AadharOTPVerification', { aadharNumber: aadhar });
             // generateAadharOTP();
@@ -3324,19 +3330,20 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     }
   };
 
-  const dedupeAcceptance = value => {
+  const dedupeAcceptance = (value, item) => {
     if (value == 'Proceed') {
       //props.navigation.navigate('ProfileShortExistingClientDetails');
-      if (lmsDedupeCheck) {
-        setLosDedupeCheck(true);
-        setLmsDedupeCheck(false);
-      } else if (losDedupeCheck) {
-        setDedupeModalVisible(false);
-      } else {
-        setDedupeModalVisible(false);
-        props.navigation.navigate('LMSLOSDetails');
-        //loanOriginationDedupeCheck();
-      }
+      // if (lmsDedupeCheck) {
+      //   setLosDedupeCheck(true);
+      //   setLmsDedupeCheck(false);
+      // } else if (losDedupeCheck) {
+      //   setDedupeModalVisible(false);
+      // } else {
+      setDedupeModalVisible(false);
+      updateBasicDedupe(item.lmsClientId, 'EXISTING');
+
+      //loanOriginationDedupeCheck();
+      // }
 
     } else if (value == 'Reject') {
       setDedupeModalVisible(false);
@@ -3344,6 +3351,62 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     } else {
       setDedupeModalVisible(false);
     }
+  };
+
+  const updateBasicDedupe = (lmsClientId, type) => {
+
+    const appDetails = {
+      "isActive": true,
+      "createdBy": global.USERID,
+      "id": global.CLIENTID,
+      "dedupeCheck": true,
+      "dedupeCheckDate": new Date(),
+      "lmsClientId": lmsClientId,
+      "customerType": type
+    }
+
+    const baseURL = global.PORT1;
+    setLoading(true);
+    apiInstance(baseURL)
+      .put(`/api/v2/profile-short/personal-details/${global.CLIENTID}`, appDetails)
+      .then(async response => {
+        // Handle the response data
+        if (global.DEBUG_MODE) console.log('PersonalDetailApiResponse::' + JSON.stringify(response.data));
+        //  await tbl_client.updatePersonalDetails(TitleLabel, firstName, middleName, lastName, DOB, Age, GenderLabel, FatherName, SpouseName, CasteLabel, ReligionLabel, MotherTongueLabel, EADLabel, gpslatlon, id, global.LOANAPPLICATIONID);
+
+        setLoading(false);
+        if (response.status == 200) {
+
+          props.updateLoanInitiationDetails(parseInt(global.LOANAPPLICATIONID), [], 'clientDetail', response.data.id, response.data)
+          props.navigation.replace('LMSLOSDetails');
+
+        }
+        else if (response.data.statusCode === 201) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        } else if (response.data.statusCode === 202) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        }
+      })
+      .catch(error => {
+        // Handle the error
+        setLoading(false);
+        if (error.response.status == 404) {
+          setApiError(Common.error404);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 400) {
+          setApiError(Common.error400);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 500) {
+          setApiError(Common.error500);
+          setErrorModalVisible(true)
+        } else if (error.response.data != null) {
+          setApiError(error.response.data.message);
+          setErrorModalVisible(true)
+        }
+      });
+
   };
 
   const navigateToRemarks = (remarks) => {
@@ -4416,7 +4479,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
             textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
             viewStyle={Commonstyles.buttonView}
             innerStyle={Commonstyles.buttonViewInnerStyle}
-            handleClick={() => { props.navigation.navigate('LMSLOSDetails'); }}
+            handleClick={() => { props.navigation.replace('LMSLOSDetails'); }}
           />
         }
 
