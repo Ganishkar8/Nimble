@@ -596,6 +596,7 @@ const AddressDetails = (props, { navigation }) => {
         if (clientDetail) {
 
           //kycManual
+
           if (!clientDetail.isKycManual) {
             setKYCManual('0');
             if (global.USERTYPEID == 1163) {
@@ -616,6 +617,7 @@ const AddressDetails = (props, { navigation }) => {
           }
 
           //manualKycStatus
+
           if (clientDetail.clientManualKycLink.length > 0) {
             if (clientDetail.clientManualKycLink[0].manualKycStatus == 'Approved') {
               fieldsDisable();
@@ -646,6 +648,7 @@ const AddressDetails = (props, { navigation }) => {
                 }
               }
             } else {
+
               if (isNew.addressType == 'P') {
                 getActionType(clientDetail);
               }
@@ -1801,7 +1804,6 @@ const AddressDetails = (props, { navigation }) => {
       }
 
       // const imageName = image.path.split('/').pop();
-      setTime(Common.getCurrentDateTime());
 
       setFileType(image.mime)
       setFileName(imageName)
