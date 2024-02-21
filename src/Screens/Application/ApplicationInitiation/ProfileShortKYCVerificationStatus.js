@@ -1269,10 +1269,10 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       return;
     }
 
-    if (!kycSourceImageUploadVisible && !kycID1ImageUploadVisible && !dobImageUploadVisible) {
-      buttonNext();
-      return;
-    }
+    // if (!kycSourceImageUploadVisible && !kycID1ImageUploadVisible && !dobImageUploadVisible) {
+    //   buttonNext();
+    //   return;
+    // }
 
     if (validate()) {
       showBottomSheet();
