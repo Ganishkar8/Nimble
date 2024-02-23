@@ -163,7 +163,7 @@ const loanInitiationReducer = (state = initialState, action) => {
             };
 
             case DELETE_CLIENT_DETAIL: {
-                const { loanApplicationId, clientId, key, data } = action.payload;
+                const { loanApplicationId, clientId, key } = action.payload;
               
                 return {
                   ...state,
