@@ -36,6 +36,7 @@ import tbl_loanApplication from '../../../Database/Table/tbl_loanApplication';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import tbl_loanaddressinfo from '../../../Database/Table/tbl_loanaddressinfo';
 import tbl_nomineeDetails from '../../../Database/Table/tbl_nomineeDetails';
+import { deleteClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
 
 const LoanNomineeList = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
@@ -221,6 +222,7 @@ const LoanNomineeList = (props, { navigation }) => {
 
                 setLoading(false);
                 deletedata(nomineeID);
+                props.deleteClientDetails(global.LOANAPPLICATIONID,nomineeID,"nominee");
             })
             .catch(error => {
                 // Handle the error
@@ -413,6 +415,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => ({
     languageAction: item => dispatch(languageAction(item)),
+    deleteClientDetails: (loanApplicationId, clientId, key) => dispatch(deleteClientDetails(loanApplicationId, clientId, key)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(LoanNomineeList);
