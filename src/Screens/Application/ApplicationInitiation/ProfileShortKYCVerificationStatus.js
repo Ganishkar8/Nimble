@@ -848,8 +848,9 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
           setkycSourceImageUploadVisible(false);
           setkycID1ImageUploadVisible(false);
           setDOBImageUploadVisible(false);
+          setKycTypeDisable(true);
           if (value.dateOfBirth) {
-            if (isValidDob(value.dateOfBirth)) {
+            if (Common.isValidDob(value.dateOfBirth)) {
               setDOBDisable(true)
             } else {
               setDOBDisable(false)
@@ -1466,6 +1467,8 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
         }
       ]
 
+    } else {
+      appDetails[0].clientManualDobs = []
     }
 
     if (kycID1ImageUploadVisible) {
@@ -1480,7 +1483,11 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
         }
       ]
 
+    } else {
+      appDetails[0].clientManualKycs = []
     }
+
+    appDetails[0].clientManualAddresses = []
 
     const baseURL = global.PORT1
     apiInstance(baseURL).post(`/api/v2/profile-short/manualKyc/${global.CLIENTID}`, appDetails)

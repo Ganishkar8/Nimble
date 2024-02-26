@@ -34,7 +34,7 @@ import tbl_client from '../../../Database/Table/tbl_client';
 import tbl_loanApplication from '../../../Database/Table/tbl_loanApplication';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import tbl_loanaddressinfo from '../../../Database/Table/tbl_loanaddressinfo';
-import { deleteNestedClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
+import { deleteNestedClientDetails, updateNestedClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
 
 
 const LoanAddressList = (props, { navigation }) => {
@@ -68,7 +68,7 @@ const LoanAddressList = (props, { navigation }) => {
 
         getAddressData()
 
-        if (global.USERTYPEID == 1163) {
+        if (global.USERTYPEID == 1163 || global.ALLOWEDIT == "0") {
             setOnlyView(true);
         }
 
@@ -130,7 +130,6 @@ const LoanAddressList = (props, { navigation }) => {
 
     }
 
-
     const getAllLoanAddressData = (urmNumber) => {
 
         const clientDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
@@ -142,7 +141,9 @@ const LoanAddressList = (props, { navigation }) => {
             if (!RegisteredOfficeAddress) {
                 if (urmNumber) {
                     if (urmNumber.length > 0) {
-                        getUdyamRAOCheck(urmNumber);
+                        if (!onlyView) {
+                            getUdyamRAOCheck(urmNumber);
+                        }
                     }
                 }
             }
@@ -150,7 +151,9 @@ const LoanAddressList = (props, { navigation }) => {
         } else {
             if (urmNumber) {
                 if (urmNumber.length > 0) {
-                    getUdyamRAOCheck(urmNumber);
+                    if (!onlyView) {
+                        getUdyamRAOCheck(urmNumber);
+                    }
                 }
             }
         }
@@ -243,7 +246,9 @@ const LoanAddressList = (props, { navigation }) => {
 
                             setLoading(false);
 
-                            insertData(response.data);
+                            props.updateNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientAddress', response.data)
+
+                            //insertData(response.data);
 
 
                         } else if (response.data.statusCode === 201) {
@@ -291,7 +296,7 @@ const LoanAddressList = (props, { navigation }) => {
         if (global.USERTYPEID == 1163) {
             bg = 'GREY'
         } else {
-            if (item.isUdyam) {
+            if (item.isUdyam || global.ALLOWEDIT == "0") {
                 bg = 'GREY'
             }
         }
@@ -338,7 +343,7 @@ const LoanAddressList = (props, { navigation }) => {
                         if (global.USERTYPEID == 1163) {
 
                         } else {
-                            if (item.isUdyam) {
+                            if (!item.isUdyam && !(global.ALLOWEDIT == "0")) {
                                 handleClick('delete', item)
                             }
                         }
@@ -453,9 +458,18 @@ const LoanAddressList = (props, { navigation }) => {
     }
 
 
-    const buttonNext = () => {
+    const buttonNext = async () => {
 
         if (onlyView) {
+            if (global.CLIENTTYPE == 'APPL') {
+                page = 'DMGRC_APPL_GST_DTLS';
+            } else if (global.CLIENTTYPE == 'CO-APPL') {
+                page = 'DMGRC_COAPPL_FNCL_DTLS';
+            } else if (global.CLIENTTYPE == 'GRNTR') {
+                page = 'DMGRC_GRNTR_FNCL_DTLS';
+            }
+            await Common.getPageStatus(global.FILTEREDPROCESSMODULE, page)
+
             navigatetoGSTDetail();
             return;
         }
@@ -709,6 +723,18 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => ({
     languageAction: item => dispatch(languageAction(item)),
+    updateNestedClientDetails: (loanApplicationId, clientId, key, nestedKey, data) => {
+        // Dispatch the updateNestedClientDetails action creator
+        return dispatch(updateNestedClientDetails(loanApplicationId, clientId, key, nestedKey, data))
+            .then(() => {
+                // After the update is done, dispatch getAddressData
+                getAddressData();
+            })
+            .catch(error => {
+                // Handle any errors that might occur during the update process
+                console.error('Error updating client details:', error);
+            });
+    },
     deleteNestedClientDetails: (loanApplicationId, clientId, key, nestedKey, id) => dispatch(deleteNestedClientDetails(loanApplicationId, clientId, key, nestedKey, id)),
 });
 

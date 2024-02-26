@@ -151,6 +151,7 @@ const BankDetailsScreen = (props, { navigation }) => {
     const [hideRetake, setHideRetake] = useState(false);
     const [hideDelete, setHideDelete] = useState(false);
     const [pageId, setPageId] = useState(global.CURRENTPAGEID);
+    const [onlyView, setOnlyView] = useState(false);
 
 
     useEffect(() => {
@@ -159,7 +160,8 @@ const BankDetailsScreen = (props, { navigation }) => {
         makeSystemMandatoryFields();
         getExistingData()
 
-        if (global.USERTYPEID == 1163) {
+        if (global.USERTYPEID == 1163 || global.ALLOWEDIT == "0") {
+            setOnlyView(true);
             fieldsDisable();
         }
 
@@ -615,7 +617,7 @@ const BankDetailsScreen = (props, { navigation }) => {
 
     const bankSubmit = () => {
 
-        if (global.USERTYPEID == 1163) {
+        if (onlyView) {
             props.navigation.replace('BankList')
             return;
         }

@@ -272,7 +272,7 @@ const LoanDemographicFamilyDetails = (props) => {
         setTitleLabel(data[0].title);
         setName(data[0].name);
         setGenderLabel(data[0].gender);
-        setDOB(data[0].dateOfBirth)
+        setDOB(Common.convertDateFormat(data[0].dateOfBirth))
         setAge(data[0].age)
         setMobileNumber(data[0].mobileNumber)
         setKycType1Label(data[0].kycTypeId1)
@@ -296,7 +296,7 @@ const LoanDemographicFamilyDetails = (props) => {
 
 
 
-            if (global.USERTYPEID == 1163) {
+            if (global.USERTYPEID == 1163 || global.ALLOWEDIT == "0") {
                 setOnlyView(true);
                 fieldsDisable();
             }
@@ -310,37 +310,19 @@ const LoanDemographicFamilyDetails = (props) => {
 
     const getApplicantData = () => {
 
-        tbl_loanApplication.getLoanAppWorkFlowID(global.LOANAPPLICATIONID, 'APPL', relationID)
-            .then(data => {
-                if (global.DEBUG_MODE) console.log('Loan Data:', data);
-                if (data !== undefined && data.length > 0) {
+        if (props.loanInitiationDetails) {
 
-                    getID1data(data[0].workflow_id);
-                    getID2data(data[0].workflow_id);
-                    getID3data(data[0].workflow_id);
-                    getID4data(data[0].workflow_id);
-                    setWorkflowIDLabel(data[0].workflow_id)
-                }
+            const filteredData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID));
 
-            })
-            .catch(error => {
-                if (global.DEBUG_MODE) console.error('Error fetching Loan details:', error);
-            });
+            if (filteredData.length > 0) {
+                getID1data(filteredData[0].workflowId);
+                getID2data(filteredData[0].workflowId);
+                getID3data(filteredData[0].workflowId);
+                getID4data(filteredData[0].workflowId);
+                setWorkflowIDLabel(filteredData[0].workflowId)
+            }
 
-        tbl_familydetails.getFamilyDetailsOnID(global.LOANAPPLICATIONID, 'APPL', familyID)
-            .then(data => {
-                if (global.DEBUG_MODE) console.log('Family Data:', data);
-                if (data !== undefined && data.length > 0) {
-
-                }
-
-            })
-            .catch(error => {
-                if (global.DEBUG_MODE) console.error('Error fetching Family details:', error);
-            });
-
-
-
+        }
 
     }
 

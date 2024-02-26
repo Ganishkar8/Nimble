@@ -59,20 +59,31 @@ const loanInitiationReducer = (state = initialState, action) => {
                 ...state,
                 loanInitiationDetails: state.loanInitiationDetails.map((item) => {
                     if (item.id === parseInt(loanApplicationId)) {
-                        const isExistingId = item[key].some(
+                        const isExistingId = item[key] && item[key].some(
                             (clientDetail) => clientDetail.id === parseInt(clientId)
                         );
 
-                        return {
-                            ...item,
-                            [key]: isExistingId
-                                ? item[key].map((clientDetail) =>
-                                    clientDetail.id === data.id
-                                        ? { ...clientDetail, ...data } // Update existing data
-                                        : clientDetail
-                                )
-                                : [...item[key], data], // Add new data
-                        };
+                        if (key == 'applicantSalesDetail') {
+                            return {
+                                ...item,
+                                [key]: isExistingId
+                                    ? { ...item[key], ...data } // Update existing data
+                                    : data, // Assign new data
+                            };
+                        } else {
+                            return {
+                                ...item,
+                                [key]: isExistingId
+                                    ? item[key].map((clientDetail) =>
+                                        clientDetail.id === data.id
+                                            ? { ...clientDetail, ...data } // Update existing data
+                                            : clientDetail
+                                    )
+                                    : [...item[key], data], // Add new data
+                            };
+                        }
+
+
                     }
                     return item;
                 })

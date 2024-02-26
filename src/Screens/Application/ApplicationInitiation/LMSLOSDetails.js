@@ -22,6 +22,7 @@ import Common from '../../../Utils/Common';
 import ButtonViewComp from '../../../Components/ButtonViewComp';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useIsFocused } from '@react-navigation/native';
 import { addLoanInitiationDetails, updateLoanInitiationDetails, deleteLoanInitiationDetails, updateClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
@@ -301,7 +302,18 @@ const LMSLOSDetails = (props, { navigation }) => {
                             if (item.remarks.length > 1) {
                                 item.remarks = item.remarks.substring(1, item.remarks.length - 1).replace(/\n, /g, '\n');
                             }
+
+                            response.data.rstDedupeChecks.sort((a, b) => {
+                                if (a.result === 'Pass' && b.result !== 'Pass') {
+                                    return -1; // 'Pass' comes before other results
+                                } else if (a.result !== 'Pass' && b.result === 'Pass') {
+                                    return 1; // 'Pass' comes after other results
+                                } else {
+                                    return 0; // Maintain the original order
+                                }
+                            });
                         });
+
                         const lmsData = response.data.rstDedupeChecks.filter(item => item.businessRuleCode == 'LMS_DEDUPE')
                         const losData = response.data.rstDedupeChecks.filter(item => item.businessRuleCode == 'LOS_DEDUPE')
                         setlmsData(lmsData);
@@ -406,14 +418,21 @@ const LMSLOSDetails = (props, { navigation }) => {
 
                                     </View>
 
-                                    {item.remarks &&
-                                        <TouchableOpacity onPress={() => navigateToRemarks(item.remarks)} style={{ justifyContent: 'center', alignItems: 'center', width: '10%' }}>
-                                            <View >
-
-                                                <AntDesign name='eye' size={23} color={Colors.darkblue} />
-
-                                            </View>
-                                        </TouchableOpacity>
+                                    {
+                                        item.result === 'Fail' ?
+                                            (
+                                                <TouchableOpacity onPress={() => navigateToRemarks(item.remarks)} style={{ justifyContent: 'center', alignItems: 'center', width: '10%' }}>
+                                                    <View>
+                                                        <AntDesign name='eye' size={23} color={Colors.darkblue} />
+                                                    </View>
+                                                </TouchableOpacity>
+                                            )
+                                            :
+                                            (
+                                                <View>
+                                                    <Ionicons name='checkmark-circle-sharp' size={23} color={Colors.green} />
+                                                </View>
+                                            )
                                     }
 
                                 </View>

@@ -108,15 +108,14 @@ const AddressMainList = (props, { navigation }) => {
               } else {
                 if (clientDetail.clientManualKycLink[0].kycDmsId) {
                   setKYCManual('1');
-                } else if (clientDetail.clientManualKycLink[0].clientManualDobs) {
-                  if (clientDetail.clientManualKycLink[0].clientManualDobs.length > 0) {
-                    if (clientDetail.clientManualKycLink[0].clientManualDobs[0].dobDmsId) {
-                      setKYCManual('1');
-                    } else {
-                      setKYCManual('0');
-                    }
+                } else if (clientDetail.clientManualKycLink[0].clientManualDobs.length > 0) {
+                  if (clientDetail.clientManualKycLink[0].clientManualDobs[0].dobDmsId) {
+                    setKYCManual('1');
+                  } else {
+                    setKYCManual('0');
                   }
-                } else if (clientDetail.clientManualKycLink[0].clientManualAddresses) {
+                }
+                else if (clientDetail.clientManualKycLink[0].clientManualAddresses) {
                   if (clientDetail.clientManualKycLink[0].clientManualAddresses.length > 0) {
                     if (clientDetail.clientManualKycLink[0].clientManualAddresses[0].addrDmsId) {
                       setKYCManual('1');

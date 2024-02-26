@@ -119,7 +119,7 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [apiError, setApiError] = useState('');
   const [pageId, setPageId] = useState(global.CURRENTPAGEID);
-
+  const [onlyView, setOnlyView] = useState(false);
 
   useEffect(() => {
     props.navigation
@@ -129,10 +129,12 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
     getSystemCodeDetail();
     getSavedData()
 
-    if (global.USERTYPEID == 1163) {
+    if (global.USERTYPEID == 1163 || global.ALLOWEDIT == "0") {
+      setOnlyView(true);
       setEarningFrequencyDisable(true);
       setEarningTypeDisable(true);
     }
+
 
     return () =>
       props.navigation
@@ -464,7 +466,7 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
 
           </View>
 
-          {global.USERTYPEID == 1164 &&
+          {!onlyView &&
             <View>
               <MaterialCommunityIcons
                 name="delete"
@@ -480,9 +482,18 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
 
   }
 
-  const callFinancialData = () => {
+  const callFinancialData = async () => {
 
-    if (global.USERTYPEID == 1163) {
+    if (onlyView) {
+      if (global.CLIENTTYPE == 'APPL') {
+        page = 'DMGRC_APPL_BNK_DTLS';
+      } else if (global.CLIENTTYPE == 'CO-APPL') {
+        page = 'DMGRC_COAPPL_BNK_DTLS';
+      } else if (global.CLIENTTYPE == 'GRNTR') {
+        page = 'DMGRC_GRNTR_BNK_DTLS';
+      }
+      await Common.getPageStatus(global.FILTEREDPROCESSMODULE, page)
+
       navigatetoBank();
       return;
     }
@@ -838,7 +849,7 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
             />
           </View>
 
-          {global.USERTYPEID == 1164 &&
+          {!onlyView &&
             <View
               style={{
                 marginTop: 25,
@@ -907,7 +918,7 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
             />
           </View>
 
-          {global.USERTYPEID == 1164 &&
+          {!onlyView &&
             <View
               style={{
                 marginTop: 25,
@@ -1015,7 +1026,7 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
             />
           </View>
 
-          {global.USERTYPEID == 1164 &&
+          {!onlyView &&
             <View
               style={{
                 marginTop: 25,
@@ -1083,7 +1094,7 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
             />
           </View>
 
-          {global.USERTYPEID == 1164 &&
+          {!onlyView &&
             <View
               style={{
                 marginTop: 25,

@@ -103,6 +103,8 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
   const [apiError, setApiError] = useState('');
   const [gstData, setGstData] = useState(global.LEADTRACKERDATA.applicantSalesDetail);
   const [pageId, setPageId] = useState(global.CURRENTPAGEID);
+  const [onlyView, setOnlyView] = useState(false);
+  const [checkboxDisable, setCheckboxDisable] = useState(false);
 
 
   useEffect(() => {
@@ -113,6 +115,11 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
     getData();
     makeSystemMandatoryFields();
 
+    if (global.USERTYPEID == 1163 || global.ALLOWEDIT == "0") {
+      setOnlyView(true);
+      fieldsDisable();
+    }
+
 
     return () =>
       props.navigation
@@ -121,6 +128,8 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
   }, [props.navigation]);
 
   const getData = () => {
+
+    const gstData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].applicantSalesDetail;
 
     if (gstData != undefined) {
       if (gstData.isAvailable) {
@@ -221,6 +230,12 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
 
   };
 
+
+  const fieldsDisable = () => {
+    setCaptureReasonDisable(true);
+    setTimeFrameDisable(true);
+    setCheckboxDisable(true);
+  }
 
   const validate = () => {
     var flag = false;
@@ -452,7 +467,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
 
             <CheckBox
               value={item.isSelect}
-              disabled={false}
+              disabled={checkboxDisable}
               color="#000000"
               onValueChange={() => { valueChange(item, index) }}
               style={styles.checkbox}
@@ -540,7 +555,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
               placeholderTextColor={Colors.lightgrey}
               keyboardType={'numeric'}
               multiline={false}
-              editable={global.USERTYPEID == 1164 ? true : false}
+              editable={onlyView ? false : true}
               maxLength={25}
               style={{ width: 70, color: Colors.black, overflow: 'scroll' }}
               returnKeyType={'done'}
@@ -561,7 +576,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
               placeholderTextColor={Colors.lightgrey}
               keyboardType={'numeric'}
               multiline={false}
-              editable={global.USERTYPEID == 1164 ? true : false}
+              editable={onlyView ? false : true}
               maxLength={25}
               style={{ width: 70, color: Colors.black, overflow: 'scroll' }}
               returnKeyType={'done'}
@@ -617,7 +632,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
               keyboardType={'numeric'}
               multiline={false}
               maxLength={25}
-              editable={global.USERTYPEID == 1164 ? true : false}
+              editable={onlyView ? false : true}
               style={{ width: 70, color: Colors.black, overflow: 'scroll' }}
               returnKeyType={'done'}
 
@@ -638,7 +653,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
               keyboardType={'numeric'}
               multiline={false}
               maxLength={25}
-              editable={global.USERTYPEID == 1164 ? true : false}
+              editable={onlyView ? false : true}
               style={{ width: 70, color: Colors.black, overflow: 'scroll' }}
               returnKeyType={'done'}
 
@@ -829,8 +844,13 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
     props.navigation.replace('LoanDemographicsFinancialDetails');
   }
 
-  const buttonNext = () => {
-    if (global.USERTYPEID == 1163) {
+  const buttonNext = async () => {
+    if (onlyView) {
+      if (global.CLIENTTYPE == 'APPL') {
+        page = 'DMGRC_APPL_FNCL_DTLS';
+      }
+      await Common.getPageStatus(global.FILTEREDPROCESSMODULE, page)
+
       navigatetoFinancial();
       return;
     }
@@ -930,7 +950,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
                 status={selectedValue === 'Available' ? 'checked' : 'unchecked'}
                 onPress={() => setSelectedValue('Available')}
                 color="#007BFF"
-                disabled={global.USERTYPEID == 1164 ? false : true}
+                disabled={!onlyView ? false : true}
               />
               <Text style={{
                 color: Colors.mediumgrey,
@@ -953,7 +973,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
                 status={selectedValue === 'NotAvailable' ? 'checked' : 'unchecked'}
                 onPress={() => setSelectedValue('NotAvailable')}
                 color="#007BFF"
-                disabled={global.USERTYPEID == 1164 ? false : true}
+                disabled={!onlyView ? false : true}
               />
               <Text style={{
                 color: Colors.mediumgrey,
@@ -985,7 +1005,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
                   flexDirection: 'row',
                   justifyContent: 'flex-end',
                 }}>
-                {global.USERTYPEID == 1164 &&
+                {!onlyView &&
                   <TouchableOpacity onPress={() => AddGST()}>
                     <Text
                       style={{
@@ -1374,10 +1394,12 @@ const mapStateToProps = (state) => {
   const { language } = state.languageReducer;
   const { profileDetails } = state.profileReducer;
   const { mobileCodeDetails } = state.mobilecodeReducer;
+  const { loanInitiationDetails } = state.loanInitiationReducer;
   return {
     language: language,
     profiledetail: profileDetails,
-    mobilecodedetail: mobileCodeDetails
+    mobilecodedetail: mobileCodeDetails,
+    loanInitiationDetails: loanInitiationDetails
   }
 }
 

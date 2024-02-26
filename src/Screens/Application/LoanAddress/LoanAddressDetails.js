@@ -161,7 +161,7 @@ const LoanAddressDetails = (props, { navigation }) => {
         getSystemCodeDetail()
         makeSystemMandatoryFields();
         getExistingData()
-        if (global.USERTYPEID == 1163) {
+        if (global.USERTYPEID == 1163 || global.ALLOWEDIT == "0") {
             fieldsDisable();
             setOnlyView(true);
         }
@@ -735,7 +735,7 @@ const LoanAddressDetails = (props, { navigation }) => {
 
     const addressSubmit = () => {
 
-        if (global.USERTYPEID == 1163) {
+        if (onlyView) {
             props.navigation.replace('LoanAddressList')
             return;
         }
