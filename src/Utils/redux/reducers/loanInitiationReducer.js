@@ -162,6 +162,25 @@ const loanInitiationReducer = (state = initialState, action) => {
                 ),
             };
 
+            case DELETE_CLIENT_DETAIL: {
+                const { loanApplicationId, clientId, key } = action.payload;
+              
+                return {
+                  ...state,
+                  loanInitiationDetails: state.loanInitiationDetails.map((item) => {
+                    if (item.id === parseInt(loanApplicationId)) {
+                      // Use filter and reassign the result to item[key]
+                      item[key] = item[key].filter(
+                        (clientDetail) => clientDetail.id !== parseInt(clientId)
+                      );
+                    }
+                    return item;
+                  }),
+                };
+              }
+              
+            
+
         default:
             return state;
     }

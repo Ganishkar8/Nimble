@@ -241,6 +241,8 @@ const LoanDemographicFamilyDetails = (props) => {
             .getParent()
             ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
+        const clientDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].familyDetail;
+        
         if (props.route.params.familyDetails.length > 0) {
             fetchFamilyData();
         }

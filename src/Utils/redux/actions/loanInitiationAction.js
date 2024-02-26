@@ -42,3 +42,10 @@ export const deleteLoanInitiationDetails = (loanApplicationId) => {
         payload: { loanApplicationId },
     }
 }
+
+export const deleteClientDetails = (loanApplicationId, clientId, key) => {
+    return {
+        type: DELETE_CLIENT_DETAIL,
+        payload: { loanApplicationId, clientId, key },
+    }
+}
