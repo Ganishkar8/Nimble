@@ -65,6 +65,7 @@ import PDDocumentVerification from '../Screens/PD/PDDocumentVerification';
 import RemarksScreen from '../Screens/Application/ApplicationInitiation/RemarksScreen';
 import LMSLOSDetails from '../Screens/Application/ApplicationInitiation/LMSLOSDetails';
 import ExistingLoanAndCollateralDetails from '../Screens/Application/ApplicationInitiation/ExistingLoanAndCollateralDetails';
+import PreviousDocumentPreview from '../Screens/PD/PreviousDocumentPreview';
 
 const Stack = createNativeStackNavigator();
 
@@ -453,6 +454,13 @@ export default HomeStack = () => {
       <Stack.Screen
         name="ExistingLoanAndCollateralDetails"
         component={ExistingLoanAndCollateralDetails}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+
+      <Stack.Screen
+        name="PreviousDocumentPreview"
+        component={PreviousDocumentPreview}
         options={{ headerShown: false, tabBarVisible: false }}
       />
 

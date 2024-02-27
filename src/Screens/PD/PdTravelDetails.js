@@ -2,19 +2,23 @@
 /* eslint-disable no-trailing-spaces */
 /* eslint-disable react-native/no-inline-styles */
 import {
-    View,
-    Text,
-    ScrollView,
-    StyleSheet,
-    SafeAreaView,
-    FlatList, TouchableOpacity, BackHandler, Modal, ToastAndroid
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  SafeAreaView,
+  FlatList,
+  TouchableOpacity,
+  BackHandler,
+  Modal,
+  ToastAndroid,
 } from 'react-native';
-import { React, useState, useEffect, useRef } from 'react';
+import {React, useState, useEffect, useRef} from 'react';
 import MyStatusBar from '../../Components/MyStatusBar';
 import HeadComp from '../../Components/HeadComp';
-import { connect } from 'react-redux';
-import { languageAction } from '../../Utils/redux/actions/languageAction';
-import { language } from '../../Utils/LanguageString';
+import {connect} from 'react-redux';
+import {languageAction} from '../../Utils/redux/actions/languageAction';
+import {language} from '../../Utils/LanguageString';
 import Loading from '../../Components/Loading';
 import ChildHeadComp from '../../Components/ChildHeadComp';
 import ProgressComp from '../../Components/ProgressComp';
@@ -22,7 +26,7 @@ import Colors from '../../Utils/Colors';
 import Commonstyles from '../../Utils/Commonstyles';
 import Common from '../../Utils/Common';
 import IconButtonViewComp from '../../Components/IconButtonViewComp';
-import { useIsFocused } from '@react-navigation/native';
+import {useIsFocused} from '@react-navigation/native';
 import TextComp from '../../Components/TextComp';
 import ImageComp from '../../Components/ImageComp';
 import Feather from 'react-native-vector-icons/Feather';
@@ -30,1159 +34,1421 @@ import DateInputComp from '../../Components/DateInputComp';
 import PickerComp from '../../Components/PickerComp';
 import TextInputComp from '../../Components/TextInputComp';
 import ButtonViewComp from '../../Components/ButtonViewComp';
-import { tr } from 'react-native-paper-dates';
+import {tr} from 'react-native-paper-dates';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import ModalContainer from '../../Components/ModalContainer';
 import apiInstance from '../../Utils/apiInstance';
 import ErrorModal from '../../Components/ErrorModal';
 import ErrorMessageModal from '../../Components/ErrorMessageModal';
-import { addTravelDetails, updateTravelDetails, deleteTravelDetails, deleteOfficerTravelDetails } from '../../Utils/redux/actions/PersonalDiscussionAction';
-import { updatePDModule, updatePDSubStage, updatePDSubModule, updatePDPage } from '../../Utils/redux/actions/PDAction';
+import {
+  addTravelDetails,
+  updateTravelDetails,
+  deleteTravelDetails,
+  deleteOfficerTravelDetails,
+} from '../../Utils/redux/actions/PersonalDiscussionAction';
+import {
+  updatePDModule,
+  updatePDSubStage,
+  updatePDSubModule,
+  updatePDPage,
+} from '../../Utils/redux/actions/PDAction';
 
+const PdTravelDetails = (props, {navigation}) => {
+  const [loading, setLoading] = useState(false);
+  const [pdDetails, setPdDetails] = useState([]);
+  const [refreshFlatlist, setRefreshFlatList] = useState(false);
+  const isScreenVisible = useIsFocused();
+  const [profileDetail, setProfileDetail] = useState(
+    props.profiledetail.userPersonalDetailsDto,
+  );
 
-const PdTravelDetails = (props, { navigation }) => {
-    const [loading, setLoading] = useState(false);
-    const [pdDetails, setPdDetails] = useState([]);
-    const [refreshFlatlist, setRefreshFlatList] = useState(false);
-    const isScreenVisible = useIsFocused();
-    const [profileDetail, setProfileDetail] = useState(props.profiledetail.userPersonalDetailsDto);
+  const [dateOfTravel, setDateOfTravel] = useState('');
+  const [dateOfTravelCaption, setDateOfTravelCaption] =
+    useState('DATE OF TRAVEL');
+  const [dateOfTravelMan, setDateOfTravelMan] = useState(false);
+  const [dateOfTravelVisible, setDateOfTravelVisible] = useState(true);
+  const [dateOfTravelDisable, setDateOfTravelDisable] = useState(false);
+  const dateOfTravelRef = useRef(null);
 
-    const [dateOfTravel, setDateOfTravel] = useState('');
-    const [dateOfTravelCaption, setDateOfTravelCaption] = useState('DATE OF TRAVEL');
-    const [dateOfTravelMan, setDateOfTravelMan] = useState(false);
-    const [dateOfTravelVisible, setDateOfTravelVisible] = useState(true);
-    const [dateOfTravelDisable, setDateOfTravelDisable] = useState(false);
-    const dateOfTravelRef = useRef(null);
+  const [personalDiscussionDate, setPersonalDiscussionDate] = useState('');
+  const [personalDiscussionDateCaption, setPersonalDiscussionDateCaption] =
+    useState('PERSONAL DISCUSSION DATE');
+  const [personalDiscussionDateMan, setPersonalDiscussionDateMan] =
+    useState(false);
+  const [personalDiscussionDateVisible, setPersonalDiscussionDateVisible] =
+    useState(true);
+  const [personalDiscussionDateDisable, setPersonalDiscussionDateDisable] =
+    useState(false);
+  const personalDiscussionDateRef = useRef(null);
 
-    const [personalDiscussionDate, setPersonalDiscussionDate] = useState('');
-    const [personalDiscussionDateCaption, setPersonalDiscussionDateCaption] = useState('PERSONAL DISCUSSION DATE');
-    const [personalDiscussionDateMan, setPersonalDiscussionDateMan] = useState(false);
-    const [personalDiscussionDateVisible, setPersonalDiscussionDateVisible] = useState(true);
-    const [personalDiscussionDateDisable, setPersonalDiscussionDateDisable] = useState(false);
-    const personalDiscussionDateRef = useRef(null);
+  const [modeOfTravelMan, setModeOfTravelMan] = useState(false);
+  const [modeOfTravelVisible, setModeOfTravelVisible] = useState(true);
+  const [modeOfTravelDisable, setModeOfTravelDisable] = useState(false);
+  const [modeOfTravelData, setModeOfTravelData] = useState([]);
+  const [modeOfTravelCaption, setModeOfTravelCaption] =
+    useState('MODE OF TRAVEL');
+  const [modeOfTravelLabel, setModeOfTravelLabel] = useState('');
+  const [modeOfTravelIndex, setModeOfTravelIndex] = useState('');
 
-    const [modeOfTravelMan, setModeOfTravelMan] = useState(false);
-    const [modeOfTravelVisible, setModeOfTravelVisible] = useState(true);
-    const [modeOfTravelDisable, setModeOfTravelDisable] = useState(false);
-    const [modeOfTravelData, setModeOfTravelData] = useState([]);
-    const [modeOfTravelCaption, setModeOfTravelCaption] = useState('MODE OF TRAVEL');
-    const [modeOfTravelLabel, setModeOfTravelLabel] = useState('');
-    const [modeOfTravelIndex, setModeOfTravelIndex] = useState('');
+  const [distanceTravelled, setDistanceTravelled] = useState('');
 
-    const [distanceTravelled, setDistanceTravelled] = useState('');
-    const [distanceTravelledCaption, setNomineeBranchNameCaption] = useState('DISTANCE TRAVELLED (IN KM)');
-    const [distanceTravelledMan, setNomineeBranchNameMan] = useState(false);
-    const [distanceTravelledVisible, setNomineeBranchNameVisible] = useState(true);
-    const [distanceTravelledDisable, setNomineeBranchNameDisable] = useState(false);
-    const distanceTravelledRef = useRef(null);
+  const [distanceTravelledCaption, setNomineeBranchNameCaption] = useState(
+    'DISTANCE TRAVELLED (IN KM)',
+  );
+  const [distanceTravelledMan, setNomineeBranchNameMan] = useState(false);
+  const [distanceTravelledVisible, setNomineeBranchNameVisible] =
+    useState(true);
+  const [distanceTravelledDisable, setNomineeBranchNameDisable] =
+    useState(false);
+  const distanceTravelledRef = useRef(null);
 
-    const [remarks, setRemarks] = useState('');
-    const [remarksCaption, setRemarksCaption] = useState('Remarks');
-    const [remarksMan, setRemarksMan] = useState(false);
-    const [remarksVisible, setRemarksVisible] = useState(true);
-    const [remarksDisable, setRemarksDisable] = useState(false);
-    const remarksRef = useRef(null);
+  const [remarks, setRemarks] = useState('');
+  const [remarksCaption, setRemarksCaption] = useState('Remarks');
+  const [remarksMan, setRemarksMan] = useState(false);
+  const [remarksVisible, setRemarksVisible] = useState(true);
+  const [remarksDisable, setRemarksDisable] = useState(false);
+  const remarksRef = useRef(null);
 
-    const [componentName, setComponentName] = useState('officer');
-    const [officerMainList, setOfficerMainList] = useState([]);
-    const [officerList, setOfficerList] = useState([]);
-    const [officerModalVisible, setOfficerModalVisible] = useState(false);
-    const showOfficerSheet = (label) => {
-        setComponentName(label)
-        setOfficerModalVisible(true)
+  const [componentName, setComponentName] = useState('officer');
+  const [officerMainList, setOfficerMainList] = useState([]);
+  const [officerList, setOfficerList] = useState([]);
+  const [officerModalVisible, setOfficerModalVisible] = useState(false);
+  const showOfficerSheet = label => {
+    setComponentName(label);
+    setOfficerModalVisible(true);
+  };
+  const hideOfficerSheet = () => setOfficerModalVisible(false);
+
+  const [empID, setEmpID] = useState('');
+  const [officerIDLabel, setOfficerIDLabel] = useState('');
+  const [officerIDIndex, setOfficerIDIndex] = useState('');
+  const [pageId, setPageId] = useState(props.route.params.pageId);
+  const [leadsystemCodeDetail, setLeadSystemCodeDetail] = useState(
+    props.mobilecodedetail.leadSystemCodeDto,
+  );
+  const [systemCodeDetail, setSystemCodeDetail] = useState(
+    props.mobilecodedetail.t_SystemCodeDetail,
+  );
+  const [leaduserCodeDetail, setLeadUserCodeDetail] = useState(
+    props.mobilecodedetail.leadUserCodeDto,
+  );
+  const [userCodeDetail, setUserCodeDetail] = useState(
+    props.mobilecodedetail.t_UserCodeDetail,
+  );
+
+  const [systemMandatoryField, setSystemMandatoryField] = useState(
+    props.mobilecodedetail.pdSystemMandatoryFields,
+  );
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [apiError, setApiError] = useState('');
+
+  const [errMsg, setErrMsg] = useState('');
+  const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
+  const showBottomSheet = () => setBottomErrorSheetVisible(true);
+  const hideBottomSheet = () => setBottomErrorSheetVisible(false);
+
+  const [isTravelDetailPresent, setIsTravelDetailPresent] = useState(false);
+  const [travelDetails, setTravelDetails] = useState(false);
+  const [currentPageId, setCurrentPageId] = useState(props.route.params.pageId);
+  const [currentPageCode, setCurrentPageCode] = useState(
+    props.route.params.pageCode,
+  );
+
+  useEffect(() => {
+    props.navigation
+      .getParent()
+      ?.setOptions({tabBarStyle: {display: 'none'}, tabBarVisible: false});
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      handleBackButton,
+    );
+    getSystemCodeDetail();
+    makeSystemMandatoryFields();
+    // props.deleteTravelDetails(131)
+    callPickerApi();
+
+    return () => {
+      props.navigation
+        .getParent()
+        ?.setOptions({tabBarStyle: undefined, tabBarVisible: undefined});
+      backHandler.remove();
     };
-    const hideOfficerSheet = () => setOfficerModalVisible(false);
+  }, [props.navigation, isScreenVisible]);
 
-    const [empID, setEmpID] = useState('');
-    const [officerIDLabel, setOfficerIDLabel] = useState('');
-    const [officerIDIndex, setOfficerIDIndex] = useState('');
-    const [pageId, setPageId] = useState(global.CURRENTPAGEID);
-    const [leadsystemCodeDetail, setLeadSystemCodeDetail] = useState(
-        props.mobilecodedetail.leadSystemCodeDto,
-    );
-    const [systemCodeDetail, setSystemCodeDetail] = useState(
-        props.mobilecodedetail.t_SystemCodeDetail,
-    );
-    const [leaduserCodeDetail, setLeadUserCodeDetail] = useState(
-        props.mobilecodedetail.leadUserCodeDto,
-    );
-    const [userCodeDetail, setUserCodeDetail] = useState(
-        props.mobilecodedetail.t_UserCodeDetail,
-    );
+  const handleBackButton = () => {
+    onGoBack();
+    return true; // Prevent default back button behavior
+  };
 
-    const [systemMandatoryField, setSystemMandatoryField] = useState(
-        props.mobilecodedetail.processSystemMandatoryFields,
-    );
-    const [errorModalVisible, setErrorModalVisible] = useState(false);
-    const [apiError, setApiError] = useState('');
+  const getTravelDetails = async dataArray => {
+    const baseURL = global.PORT1;
+    setLoading(true);
 
-    const [errMsg, setErrMsg] = useState('');
-    const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
-    const showBottomSheet = () => setBottomErrorSheetVisible(true);
-    const hideBottomSheet = () => setBottomErrorSheetVisible(false);
-
-    const [isTravelDetailPresent, setIsTravelDetailPresent] = useState(false);
-    const [travelDetails, setTravelDetails] = useState(false);
-    const [currentPageId, setCurrentPageId] = useState(props.route.params.pageId);
-    const [currentPageCode, setCurrentPageCode] = useState(props.route.params.pageCode);
-
-    useEffect(() => {
-        props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
-        const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
-        getSystemCodeDetail();
-        //makeSystemMandatoryFields();
-        // props.deleteTravelDetails(131)
-        callPickerApi();
-
-
-
-        return () => {
-            props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
-            backHandler.remove();
-        }
-    }, [props.navigation, isScreenVisible]);
-
-    const handleBackButton = () => {
-        onGoBack();
-        return true; // Prevent default back button behavior
+    const appDetails = {
+      clientId: global.CLIENTID,
+      userId: global.USERID,
+      pageId: currentPageId,
+      pdLevel: global.PDSTAGE,
+      loanApplicationNumber: global.LOANAPPLICATIONNUM,
     };
 
-    const getTravelDetails = async (dataArray) => {
+    apiInstance(baseURL)
+      .post(`/api/v1/pd/travelDetails`, appDetails)
+      .then(response => {
+        // Handle the response data
+        if (global.DEBUG_MODE)
+          console.log('ResponseDataApi::' + JSON.stringify(response.data));
 
-        const baseURL = global.PORT1;
-        setLoading(true)
+        if (response.status == 200) {
+          setLoading(false);
+          if (response.data === '') {
+            //getDocuments([]);
+          } else {
+            const specificItem = response.data;
+            setDateOfTravel(
+              Common.convertDateFormat(specificItem.dateOfTravel),
+            );
+            setPersonalDiscussionDate(
+              Common.convertDateFormat(specificItem.personalDiscussionDate),
+            );
+            setModeOfTravelLabel(specificItem.modeOfTravel);
+            setDistanceTravelled(specificItem.distanceTravelled.toString());
+            setRemarks(specificItem.remarks);
+            setRefreshFlatList(!refreshFlatlist);
+            const newDataArray = [];
 
-        const appDetails = {
-            "clientId": global.CLIENTID,
-            "userId": global.USERID,
-            "pageId": currentPageId,
-            "pdLevel": global.PDSTAGE,
-            "loanApplicationNumber": global.LOANAPPLICATIONNUM
-        }
+            response.data.pdaccompanyingOfficerDomains.forEach(mainData => {
+              let OfficerName = '';
 
+              const matchingItem = dataArray.find(
+                data => data.subCodeId === mainData.employeeId,
+              );
 
-        apiInstance(baseURL).post(`/api/v1/pd/travelDetails`, appDetails)
-            .then((response) => {
-                // Handle the response data
-                if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(response.data));
+              if (matchingItem) {
+                OfficerName = matchingItem.Description;
+              }
 
-                if (response.status == 200) {
-                    setLoading(false)
-                    if (response.data === '') {
-                        //getDocuments([]);
-                    } else {
+              const newObject = {
+                officerID: mainData.employeeId,
+                accompanyingOfficer: OfficerName,
+                employeeId: mainData.employeeId,
+              };
 
-                        const specificItem = response.data;
-                        setDateOfTravel(Common.convertDateFormat(specificItem.dateOfTravel));
-                        setPersonalDiscussionDate(Common.convertDateFormat(specificItem.personalDiscussionDate));
-                        setModeOfTravelLabel(specificItem.modeOfTravel)
-                        setDistanceTravelled(specificItem.distanceTravelled.toString())
-                        setRemarks(specificItem.remarks)
-                        setRefreshFlatList(!refreshFlatlist)
-                        const newDataArray = [];
-
-                        response.data.pdaccompanyingOfficerDomains.forEach((mainData) => {
-                            let OfficerName = '';
-
-                            const matchingItem = dataArray.find((data) => data.subCodeId === mainData.employeeId);
-
-                            if (matchingItem) {
-                                OfficerName = matchingItem.Description;
-                            }
-
-                            const newObject = {
-                                officerID: mainData.employeeId,
-                                accompanyingOfficer: OfficerName,
-                                employeeId: mainData.employeeId
-                            };
-
-                            newDataArray.push(newObject);
-                        });
-                        setOfficerMainList(newDataArray)
-                        //getSavedData(response.data);
-                    }
-
-                }
-                else if (response.data.statusCode === 201) {
-                    setLoading(false)
-                    setApiError(response.data.message);
-                    setErrorModalVisible(true);
-                } else if (response.data.statusCode === 202) {
-                    setLoading(false)
-                    setApiError(response.data.message);
-                    setErrorModalVisible(true);
-                }
-
-            })
-            .catch((error) => {
-                // Handle the error
-                setLoading(false)
-                if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(error.response.data));
-                if (error.response.status == 404) {
-                    setApiError(Common.error404);
-                    setErrorModalVisible(true)
-                } else if (error.response.status == 400) {
-                    setApiError(Common.error400);
-                    setErrorModalVisible(true)
-                } else if (error.response.status == 500) {
-                    setApiError(Common.error500);
-                    setErrorModalVisible(true)
-                } else if (error.response.data != null) {
-                    setApiError(error.response.data.message);
-                    setErrorModalVisible(true)
-                }
+              newDataArray.push(newObject);
             });
+            setOfficerMainList(newDataArray);
+            //getSavedData(response.data);
+          }
+        } else if (response.data.statusCode === 201) {
+          setLoading(false);
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        } else if (response.data.statusCode === 202) {
+          setLoading(false);
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        }
+      })
+      .catch(error => {
+        // Handle the error
+        setLoading(false);
+        if (global.DEBUG_MODE)
+          console.log(
+            'ResponseDataApi::' + JSON.stringify(error.response.data),
+          );
+        if (error.response.status == 404) {
+          setApiError(Common.error404);
+          setErrorModalVisible(true);
+        } else if (error.response.status == 400) {
+          setApiError(Common.error400);
+          setErrorModalVisible(true);
+        } else if (error.response.status == 500) {
+          setApiError(Common.error500);
+          setErrorModalVisible(true);
+        } else if (error.response.data != null) {
+          setApiError(error.response.data.message);
+          setErrorModalVisible(true);
+        }
+      });
+  };
 
+  const getSystemCodeDetail = async () => {
+    const filteredModeOfTravelData = leaduserCodeDetail
+      .filter(data => data.masterId === 'MODE_OF_TRAVEL')
+      .sort((a, b) => a.Description.localeCompare(b.Description));
+    setModeOfTravelData(filteredModeOfTravelData);
+  };
+
+  const makeSystemMandatoryFields = async () => {
+    systemMandatoryField
+      .filter(
+        data =>
+          data.fieldUiid === 'et_trv_dtls_dot' && data.pdPageId === pageId,
+      )
+      .map((value, index) => {
+        setDateOfTravelCaption(value.fieldName);
+
+        if (value.isMandatory) {
+          setDateOfTravelMan(true);
+        }
+        if (value.isHide) {
+          setDateOfTravelVisible(false);
+        }
+        if (value.isDisable) {
+          setDateOfTravelDisable(true);
+        }
+        if (value.isCaptionChange) {
+          setDateOfTravelCaption(value.fieldCaptionChange);
+        }
+      });
+
+    systemMandatoryField
+      .filter(
+        data =>
+          data.fieldUiid === 'sp_trv_dtls_mot' && data.pdPageId === pageId,
+      )
+      .map((value, index) => {
+        setModeOfTravelCaption(value.fieldName);
+
+        if (value.isMandatory) {
+          setModeOfTravelMan(true);
+        }
+        if (value.isHide) {
+          setModeOfTravelVisible(false);
+        }
+        if (value.isDisable) {
+          setModeOfTravelDisable(true);
+        }
+        if (value.isCaptionChange) {
+          setModeOfTravelCaption(value.fieldCaptionChange);
+        }
+      });
+
+    systemMandatoryField
+      .filter(
+        data =>
+          data.fieldUiid === 'et_trv_dtls_dst_km ' && data.pdPageId === pageId,
+      )
+      .map((value, index) => {
+        setNomineeBranchNameCaption(value.fieldName);
+
+        if (value.isMandatory) {
+          setNomineeBranchNameMan(true);
+        }
+        if (value.isHide) {
+          setNomineeBranchNameVisible(false);
+        }
+        if (value.isDisable) {
+          setNomineeBranchNameDisable(true);
+        }
+        if (value.isCaptionChange) {
+          setNomineeBranchNameCaption(value.fieldCaptionChange);
+        }
+      });
+
+    systemMandatoryField
+      .filter(
+        data =>
+          data.fieldUiid === 'et_trv_dtls_rmks' && data.pdPageId === pageId,
+      )
+      .map((value, index) => {
+        setRemarksCaption(value.fieldName);
+
+        if (value.isMandatory) {
+          setRemarksMan(true);
+        }
+        if (value.isHide) {
+          setRemarksVisible(false);
+        }
+        if (value.isDisable) {
+          setRemarksDisable(true);
+        }
+        if (value.isCaptionChange) {
+          setRemarksCaption(value.fieldCaptionChange);
+        }
+      });
+
+    systemMandatoryField
+      .filter(
+        data =>
+          data.fieldUiid === 'et_trv_dtls_pd_date' && data.pdPageId === pageId,
+      )
+      .map((value, index) => {
+        setPersonalDiscussionDateCaption(value.fieldName);
+
+        if (value.isMandatory) {
+          setPersonalDiscussionDateMan(true);
+        }
+        if (value.isHide) {
+          setPersonalDiscussionDateVisible(false);
+        }
+        if (value.isDisable) {
+          setPersonalDiscussionDateDisable(true);
+        }
+        if (value.isCaptionChange) {
+          setPersonalDiscussionDateCaption(value.fieldCaptionChange);
+        }
+      });
+  };
+
+  const validate = () => {
+    var flag = false;
+    var i = 1;
+    var errorMessage = '';
+
+    if (dateOfTravelMan && dateOfTravelVisible) {
+      if (dateOfTravel.length <= 0) {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          language[0][props.language].str_plsselect +
+          dateOfTravelCaption +
+          '\n';
+        i++;
+        flag = true;
+      }
     }
 
-    const getSystemCodeDetail = async () => {
-
-        const filteredModeOfTravelData = leaduserCodeDetail
-            .filter(data => data.masterId === 'MODE_OF_TRAVEL')
-            .sort((a, b) => a.Description.localeCompare(b.Description));
-        setModeOfTravelData(filteredModeOfTravelData);
-
-
-    };
-
-    const makeSystemMandatoryFields = async () => {
-
-        systemMandatoryField
-            .filter(data => data.fieldUiid === 'et_travelDate' && data.pageId === pageId)
-            .map((value, index) => {
-                setDateOfTravelCaption(value.fieldName);
-
-                if (value.isMandatory) {
-                    setDateOfTravelMan(true);
-                }
-                if (value.isHide) {
-                    setDateOfTravelVisible(false);
-                }
-                if (value.isDisable) {
-                    setDateOfTravelDisable(true);
-                }
-                if (value.isCaptionChange) {
-                    setDateOfTravelCaption(value[0].fieldCaptionChange);
-                }
-            });
-
-
-
-    };
-
-
-    const validate = () => {
-        var flag = false;
-        var i = 1;
-        var errorMessage = '';
-
-        if (dateOfTravelMan && dateOfTravelVisible) {
-            if (dateOfTravel.length <= 0) {
-                errorMessage =
-                    errorMessage +
-                    i +
-                    ')' +
-                    ' ' +
-                    language[0][props.language].str_plsselect +
-                    dateOfTravelCaption +
-                    '\n';
-                i++;
-                flag = true;
-            }
-        }
-
-        if (personalDiscussionDateMan && personalDiscussionDateVisible) {
-            if (personalDiscussionDate.length <= 0) {
-                errorMessage =
-                    errorMessage +
-                    i +
-                    ')' +
-                    ' ' +
-                    language[0][props.language].str_plsselect +
-                    personalDiscussionDateCaption +
-                    '\n';
-                i++;
-                flag = true;
-            }
-        }
-
-        if (modeOfTravelMan && modeOfTravelVisible) {
-            if (modeOfTravelLabel.length <= 0) {
-                errorMessage =
-                    errorMessage +
-                    i +
-                    ')' +
-                    ' ' +
-                    language[0][props.language].str_plsselect +
-                    modeOfTravelCaption +
-                    '\n';
-                i++;
-                flag = true;
-            }
-        }
-
-        if (distanceTravelledMan && distanceTravelledVisible) {
-            if (distanceTravelled.length <= 0) {
-                errorMessage =
-                    errorMessage +
-                    i +
-                    ')' +
-                    ' ' +
-                    language[0][props.language].str_plsenter +
-                    distanceTravelledCaption +
-                    '\n';
-                i++;
-                flag = true;
-            }
-        }
-
-        if (officerMainList.length <= 0) {
-            errorMessage =
-                errorMessage +
-                i +
-                ')' +
-                ' ' +
-                'Please Add ' +
-                'Officer' +
-                '\n';
-            i++;
-            flag = true;
-        }
-
-
-
-        setErrMsg(errorMessage);
-        return flag;
-    };
-
-
-    const callPickerApi = () => {
-
-        // if (officerList.length > 0) {
-        //     showOfficerSheet('Income')
-        //     return;
-        // }
-
-        const baseURL = '8901'
-        setLoading(true)
-
-        apiInstance(baseURL).post(`/api/v1/lead-Approved/ReAssignedDrowdown/${profileDetail.branchId}`)
-            .then(async (response) => {
-
-                //setOfficerList(response.data)
-                let dataArray = [];
-                response.data.forEach(data => {
-                    dataArray.push({
-                        subCodeId: data.userId.toString(),
-                        Description: data.userName,
-                    });
-                });
-                setOfficerList(dataArray);
-                getTravelDetails(dataArray);
-                // showOfficerSheet('Income')
-                setLoading(false);
-
-            })
-            .catch((error) => {
-                if (global.DEBUG_MODE) console.log("Error" + JSON.stringify(error.response))
-                setLoading(false)
-                alert(error);
-            });
-
-
+    if (personalDiscussionDateMan && personalDiscussionDateVisible) {
+      if (personalDiscussionDate.length <= 0) {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          language[0][props.language].str_plsselect +
+          personalDiscussionDateCaption +
+          '\n';
+        i++;
+        flag = true;
+      }
     }
 
-    const onGoBack = () => {
-        props.navigation.replace('PDItems', { clientType: global.CLIENTTYPE });
-    }
-    const addItem = () => {
-
-        if (officerIDLabel.length <= 0 || empID.length <= 0) {
-            showToast();
-            return;
-        }
-        const newDataArray = [...officerMainList];
-
-        let OfficerName = '';
-        const matchingItem = officerList.find((data) => data.subCodeId === officerIDLabel);
-        if (matchingItem) {
-            OfficerName = matchingItem.Description;
-        }
-        const newObject = {
-            officerID: officerIDLabel,
-            accompanyingOfficer: OfficerName,
-            employeeId: empID
-        };
-        newDataArray.push(newObject);
-        setOfficerIDLabel('');
-        setOfficerIDIndex('');
-        setEmpID('')
-        hideOfficerSheet(true)
-
-        //alert(JSON.stringify(newDataArray))
-        setOfficerMainList(newDataArray)
-        setRefreshFlatList(!refreshFlatlist)
+    if (modeOfTravelMan && modeOfTravelVisible) {
+      if (modeOfTravelLabel.length <= 0) {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          language[0][props.language].str_plsselect +
+          modeOfTravelCaption +
+          '\n';
+        i++;
+        flag = true;
+      }
     }
 
-    const deleteOfficer = (data) => {
-        const updatedOfficerList = officerMainList.filter((item) => item.officerID !== data.officerID);
-        setOfficerMainList(updatedOfficerList)
-        setRefreshFlatList(!refreshFlatlist)
+    if (distanceTravelledMan && distanceTravelledVisible) {
+      if (distanceTravelled.length <= 0) {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          language[0][props.language].str_plsenter +
+          distanceTravelledCaption +
+          '\n';
+        i++;
+        flag = true;
+      }
     }
 
-    const submitTravelData = () => {
-
-        if (validate()) {
-            showBottomSheet();
-            return;
-        }
-
-        if (travelDetails) {
-            putTravelDetails(travelDetails.pdTravelDetailsDto.id);
-        } else {
-            postTravelDetails();
-        }
-
-        //postTravelDetails();
-
+    if (officerMainList.length <= 0) {
+      errorMessage =
+        errorMessage + i + ')' + ' ' + 'Please Add ' + 'Officer' + '\n';
+      i++;
+      flag = true;
     }
 
-    const postTravelDetails = () => {
-        const appDetailsFinal = []
-        officerMainList.map((item) => {
-            const appDetails = {
-                "createdBy": global.USERID,
-                "accompanyingOfficer": item.accompanyingOfficer,
-                "employeeId": item.employeeId,
-            }
-            appDetailsFinal.push(appDetails)
+    setErrMsg(errorMessage);
+    return flag;
+  };
+
+  const callPickerApi = () => {
+    // if (officerList.length > 0) {
+    //     showOfficerSheet('Income')
+    //     return;
+    // }
+
+    const baseURL = '8901';
+    setLoading(true);
+
+    apiInstance(baseURL)
+      .post(
+        `/api/v1/lead-Approved/ReAssignedDrowdown/${profileDetail.branchId}`,
+      )
+      .then(async response => {
+        //setOfficerList(response.data)
+        let dataArray = [];
+        response.data.forEach(data => {
+          dataArray.push({
+            subCodeId: data.userId.toString(),
+            Description: data.userName,
+          });
         });
+        setOfficerList(dataArray);
+        getTravelDetails(dataArray);
+        // showOfficerSheet('Income')
+        setLoading(false);
+      })
+      .catch(error => {
+        if (global.DEBUG_MODE)
+          console.log('Error' + JSON.stringify(error.response));
+        setLoading(false);
+        alert(error);
+      });
+  };
 
-        var pdDate = '', dateoftravel = '';
+  const onGoBack = () => {
+    props.navigation.replace('PDItems', {clientType: global.CLIENTTYPE});
+  };
+  const addItem = () => {
+    if (officerIDLabel.length <= 0 || empID.length <= 0) {
+      showToast();
+      return;
+    }
+    const newDataArray = [...officerMainList];
 
-        if (personalDiscussionDate != undefined && personalDiscussionDate != null) {
-            if (personalDiscussionDate.length > 0) {
-                pdDate = Common.convertYearDateFormat(personalDiscussionDate)
-            }
-        }
+    let OfficerName = '';
+    const matchingItem = officerList.find(
+      data => data.subCodeId === officerIDLabel,
+    );
+    if (matchingItem) {
+      OfficerName = matchingItem.Description;
+    }
+    const newObject = {
+      officerID: officerIDLabel,
+      accompanyingOfficer: OfficerName,
+      employeeId: empID,
+    };
+    newDataArray.push(newObject);
+    setOfficerIDLabel('');
+    setOfficerIDIndex('');
+    setEmpID('');
+    hideOfficerSheet(true);
 
-        if (dateOfTravel != undefined && dateOfTravel != null) {
-            if (dateOfTravel.length > 0) {
-                dateoftravel = Common.convertYearDateFormat(dateOfTravel)
-            }
-        }
+    //alert(JSON.stringify(newDataArray))
+    setOfficerMainList(newDataArray);
+    setRefreshFlatList(!refreshFlatlist);
+  };
 
-        const appDetails = {
-            "createdBy": global.USERID,
-            "personalDiscussionDate": pdDate,
-            "modeOfTravel": modeOfTravelLabel,
-            "dateOfTravel": dateoftravel,
-            "clientType": global.CLIENTTYPE,
-            "pdLevel": global.PDSTAGE,
-            "distanceTravelled": distanceTravelled,
-            "remarks": remarks,
-            "pageId": currentPageId,
-            "pdaccompanyingOfficerDomains": appDetailsFinal
-        }
+  const deleteOfficer = data => {
+    const updatedOfficerList = officerMainList.filter(
+      item => item.officerID !== data.officerID,
+    );
+    setOfficerMainList(updatedOfficerList);
+    setRefreshFlatList(!refreshFlatlist);
+  };
 
-        const baseURL = '8901'
-        setLoading(true)
-
-        apiInstance(baseURL).post(`/api/v1/pd/travelDetails/loan-application-number/${global.LOANAPPLICATIONNUM}/personal-discussion/clientId/${global.CLIENTID}`, appDetails)
-            .then((response) => {
-                // Handle the response data ${item.clientId}
-                if (global.DEBUG_MODE) console.log("PDTravelDetailsApi::" + JSON.stringify(response.data));
-                setLoading(false)
-                if (response.status == 200 || response.status == 201) {
-                    //props.updatePDModule('PD_APPL', 'TR_DTLS_APPL');
-                    //props.addTravelDetails(global.LOANAPPLICATIONID, 'pdTravelDetailsDto', response.data)
-                    updatePdStatus();
-
-                }
-                else if (response.data.statusCode === 201) {
-                    setApiError(response.data.message);
-                    setErrorModalVisible(true);
-                } else if (response.data.statusCode === 202) {
-                    setApiError(response.data.message);
-                    setErrorModalVisible(true);
-                }
-            })
-            .catch((error) => {
-                // Handle the error
-                setLoading(false)
-                if (global.DEBUG_MODE) console.log("PDDataApiError::" + JSON.stringify(error.response.data));
-                if (error.response.status == 404) {
-                    setApiError(Common.error404);
-                    setErrorModalVisible(true)
-                } else if (error.response.status == 400) {
-                    setApiError(Common.error400);
-                    setErrorModalVisible(true)
-                } else if (error.response.status == 500) {
-                    setApiError(Common.error500);
-                    setErrorModalVisible(true)
-                } else if (error.response.data != null) {
-                    setApiError(error.response.data.message);
-                    setErrorModalVisible(true)
-                }
-            });
-
-        //props.deleteTravelDetails(17)
-        //props.addTravelDetails(17, 'BusinessDetail1', businessDetails)
-        // props.updateTravelDetails(14, 'BusinessDetail', businessDetails.travelDetails)
-        //props.navigation.goBack();
-
-
-
-        if (Common.DEBUG_MODE) console.log("DateOfTravel::" + dateOfTravel + " " + " Mode Of Travel::" + modeOfTravelLabel + " " +
-            "Distance Travelled::" + distanceTravelled + " " + "Remarks::" + remarks)
-
+  const submitTravelData = () => {
+    if (validate()) {
+      showBottomSheet();
+      return;
     }
 
-    const putTravelDetails = (travelID) => {
-        const appDetailsFinal = []
-        officerMainList.map((item) => {
-            const appDetails = {
-                "createdBy": global.USERID,
-                "accompanyingOfficer": item.accompanyingOfficer,
-                "employeeId": item.employeeId,
-            }
-            appDetailsFinal.push(appDetails)
-        });
-
-        var pdDate = '', dateoftravel = '';
-
-        if (personalDiscussionDate != undefined && personalDiscussionDate != null) {
-            if (personalDiscussionDate.length > 0) {
-                pdDate = Common.convertYearDateFormat(personalDiscussionDate)
-            }
-        }
-
-        if (dateOfTravel != undefined && dateOfTravel != null) {
-            if (dateOfTravel.length > 0) {
-                dateoftravel = Common.convertYearDateFormat(dateOfTravel)
-            }
-        }
-
-        const appDetails = {
-            "createdBy": global.USERID,
-            "id": travelID,
-            "personalDiscussionDate": pdDate,
-            "modeOfTravel": modeOfTravelLabel,
-            "dateOfTravel": dateoftravel,
-            "clientType": global.CLIENTTYPE,
-            "pdLevel": global.PDSTAGE,
-            "distanceTravelled": distanceTravelled,
-            "pageId": currentPageId,
-            "remarks": remarks,
-            "pdaccompanyingOfficerDomains": appDetailsFinal
-        }
-
-        const baseURL = '8901'
-        setLoading(true)
-
-        apiInstance(baseURL).put(`/api/v1/pd/travelDetails/update/id/${travelID}`, appDetails)
-            .then((response) => {
-                // Handle the response data ${item.clientId}
-                if (global.DEBUG_MODE) console.log("PDTravelDetailsApi::" + JSON.stringify(response.data));
-                setLoading(false)
-                if (response.status == 200 || response.status == 201) {
-                    updatePdStatus();
-                }
-                else if (response.data.statusCode === 201) {
-                    setApiError(response.data.message);
-                    setErrorModalVisible(true);
-                } else if (response.data.statusCode === 202) {
-                    setApiError(response.data.message);
-                    setErrorModalVisible(true);
-                }
-            })
-            .catch((error) => {
-                // Handle the error
-                setLoading(false)
-                if (global.DEBUG_MODE) console.log("PDDataApiError::" + JSON.stringify(error.response.data));
-                if (error.response.status == 404) {
-                    setApiError(Common.error404);
-                    setErrorModalVisible(true)
-                } else if (error.response.status == 400) {
-                    setApiError(Common.error400);
-                    setErrorModalVisible(true)
-                } else if (error.response.status == 500) {
-                    setApiError(Common.error500);
-                    setErrorModalVisible(true)
-                } else if (error.response.data != null) {
-                    setApiError(error.response.data.message);
-                    setErrorModalVisible(true)
-                }
-            });
+    if (travelDetails) {
+      putTravelDetails(travelDetails.pdTravelDetailsDto.id);
+    } else {
+      postTravelDetails();
     }
 
-    const updatePdStatus = () => {
+    //postTravelDetails();
+  };
 
-        const appDetails = {
-            "loanApplicationId": global.LOANAPPLICATIONID,
-            "loanWorkflowStage": global.PDSTAGE,
-            "subStageCode": global.PDSUBSTAGE,
-            "moduleCode": global.PDMODULE,
-            "subModule": global.PDSUBMODULE,
-            "pageCode": currentPageCode,
-            "status": "Completed",
-            "userId": global.USERID
-        };
+  const postTravelDetails = () => {
+    const appDetailsFinal = [];
 
-        const baseURL = global.PORT1;
-        setLoading(true);
-        apiInstance(baseURL)
-            .post(`/api/v2/PD/Update/PD_WORKFLOW/updateStatus`, appDetails)
-            .then(async response => {
-                // Handle the response data
-                if (global.DEBUG_MODE) console.log('UpdatePDStatusApiResponse::' + JSON.stringify(response.data),);
-                setLoading(false);
-                if (response.status == 200) {
-                    getAllStatus();
-                }
-                else if (response.data.statusCode === 201) {
-                    setApiError(response.data.message);
-                    setErrorModalVisible(true);
-                } else if (response.data.statusCode === 202) {
-                    setApiError(response.data.message);
-                    setErrorModalVisible(true);
-                }
-            })
-            .catch(error => {
-                // Handle the error
-                if (global.DEBUG_MODE)
-                    console.log(
-                        'UpdateStatusApiResponse' + JSON.stringify(error.response),
-                    );
-                setLoading(false);
+    officerMainList.map(item => {
+      const appDetails = {
+        createdBy: global.USERID,
+        accompanyingOfficerName: item.accompanyingOfficer,
+        employeeId: item.employeeId,
+      };
+      appDetailsFinal.push(appDetails);
+    });
 
-                if (error.response.status == 404) {
-                    setApiError(Common.error404);
-                    setErrorModalVisible(true)
-                } else if (error.response.status == 400) {
-                    setApiError(Common.error400);
-                    setErrorModalVisible(true)
-                } else if (error.response.status == 500) {
-                    setApiError(Common.error500);
-                    setErrorModalVisible(true)
-                } else if (error.response.data != null) {
-                    setApiError(error.response.data.message);
-                    setErrorModalVisible(true)
-                }
-            });
+    var pdDate = '',
+      dateoftravel = '';
+
+    if (personalDiscussionDate != undefined && personalDiscussionDate != null) {
+      if (personalDiscussionDate.length > 0) {
+        pdDate = Common.convertYearDateFormat(personalDiscussionDate);
+      }
+    }
+
+    if (dateOfTravel != undefined && dateOfTravel != null) {
+      if (dateOfTravel.length > 0) {
+        dateoftravel = Common.convertYearDateFormat(dateOfTravel);
+      }
+    }
+
+    const appDetails = {
+      createdBy: global.USERID,
+      personalDiscussionDate: pdDate,
+      modeOfTravel: modeOfTravelLabel,
+      dateOfTravel: dateoftravel,
+      clientType: global.CLIENTTYPE,
+      pdLevel: global.PDSTAGE,
+      distanceTravelled: distanceTravelled,
+      remarks: remarks,
+      pageId: currentPageId,
+      pdaccompanyingOfficerDomains: appDetailsFinal,
     };
 
-    const getAllStatus = () => {
-        const filteredModule = props.pdSubStage[0].personalDiscussionSubStageLogs
-            .filter(data => data.subStageCode === global.PDSUBSTAGE)[0]
-            .personalDiscussionModuleLogs
-            .filter(data => data.moduleCode === global.PDMODULE)[0]
+    const baseURL = '8901';
+    setLoading(true);
 
-        if (filteredModule) {
-            props.updatePDModule(global.PDSUBSTAGE, global.PDMODULE);
-            props.updatePDSubModule(global.PDSUBSTAGE, global.PDMODULE, global.PDSUBMODULE);
-            props.updatePDPage(global.PDSUBSTAGE, global.PDMODULE, global.PDSUBMODULE, currentPageCode);
-            props.navigation.replace('PDItems', { clientType: global.CLIENTTYPE });
-        } else {
-            if (Common.DEBUG_MODE) console.log('Module not found.');
+    apiInstance(baseURL)
+      .post(
+        `/api/v1/pd/travelDetails/loan-application-number/${global.LOANAPPLICATIONNUM}/personal-discussion/clientId/${global.CLIENTID}`,
+        appDetails,
+      )
+      .then(response => {
+        // Handle the response data ${item.clientId}
+        if (global.DEBUG_MODE)
+          console.log('PDTravelDetailsApi::' + JSON.stringify(response.data));
+        setLoading(false);
+        if (response.status == 200 || response.status == 201) {
+          //props.updatePDModule('PD_APPL', 'TR_DTLS_APPL');
+          //props.addTravelDetails(global.LOANAPPLICATIONID, 'pdTravelDetailsDto', response.data)
+          updatePdStatus();
+        } else if (response.data.statusCode === 201) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        } else if (response.data.statusCode === 202) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
         }
+      })
+      .catch(error => {
+        // Handle the error
+        setLoading(false);
+        if (global.DEBUG_MODE)
+          console.log('PDDataApiError::' + JSON.stringify(error.response.data));
+        if (error.response.status == 404) {
+          setApiError(Common.error404);
+          setErrorModalVisible(true);
+        } else if (error.response.status == 400) {
+          setApiError(Common.error400);
+          setErrorModalVisible(true);
+        } else if (error.response.status == 500) {
+          setApiError(Common.error500);
+          setErrorModalVisible(true);
+        } else if (error.response.data != null) {
+          setApiError(error.response.data.message);
+          setErrorModalVisible(true);
+        }
+      });
 
+    //props.deleteTravelDetails(17)
+    //props.addTravelDetails(17, 'BusinessDetail1', businessDetails)
+    // props.updateTravelDetails(14, 'BusinessDetail', businessDetails.travelDetails)
+    //props.navigation.goBack();
+
+    if (Common.DEBUG_MODE)
+      console.log(
+        'DateOfTravel::' +
+          dateOfTravel +
+          ' ' +
+          ' Mode Of Travel::' +
+          modeOfTravelLabel +
+          ' ' +
+          'Distance Travelled::' +
+          distanceTravelled +
+          ' ' +
+          'Remarks::' +
+          remarks,
+      );
+  };
+
+  const putTravelDetails = travelID => {
+    const appDetailsFinal = [];
+    officerMainList.map(item => {
+      const appDetails = {
+        createdBy: global.USERID,
+        accompanyingOfficer: item.accompanyingOfficer,
+        employeeId: item.employeeId,
+      };
+      appDetailsFinal.push(appDetails);
+    });
+
+    var pdDate = '',
+      dateoftravel = '';
+
+    if (personalDiscussionDate != undefined && personalDiscussionDate != null) {
+      if (personalDiscussionDate.length > 0) {
+        pdDate = Common.convertYearDateFormat(personalDiscussionDate);
+      }
     }
 
-    const FlatView = ({ item }) => {
-        return (
-            <View style={{ width: '100%', alignItems: 'center', marginTop: 15 }}>
-                <View style={{ width: '90%', minHeight: 100, backgroundColor: '#E5F4FE', borderRadius: 5, flexDirection: 'row', alignItems: 'center' }}>
-                    <ImageComp imageSrc={item.colorCode == 'Green' ? require('../../Images/income.png') : require('../../Images/expense.png')} imageStylee={{ marginLeft: 10, width: 30, height: 30 }} />
-                    <View style={{ width: '80%' }}>
-
-                        <Text style={{ width: '80%', fontSize: 12, fontFamily: 'PoppinsRegular', marginTop: 5, color: Colors.black, marginLeft: 10 }}>
-                            {item.accompanyingOfficer}
-                        </Text>
-
-                        <Text style={{ width: '80%', fontSize: 12, fontFamily: 'Poppins-Medium', marginTop: 5, color: Colors.black, marginLeft: 10 }}>
-                            {item.employeeId}
-                        </Text>
-
-                    </View>
-                    <View>
-                        <MaterialCommunityIcons
-                            name="delete"
-                            size={20}
-                            onPress={() => { deleteOfficer(item) }}
-                            color="#F76464"></MaterialCommunityIcons>
-                    </View>
-                </View>
-            </View >
-        )
+    if (dateOfTravel != undefined && dateOfTravel != null) {
+      if (dateOfTravel.length > 0) {
+        dateoftravel = Common.convertYearDateFormat(dateOfTravel);
+      }
     }
 
-
-    const handleReference = (componentName) => {
-
-        if (componentName === 'accountHolderName') {
-
-        } else if (componentName === 'ifsccode') {
-
-        }
-
+    const appDetails = {
+      createdBy: global.USERID,
+      id: travelID,
+      personalDiscussionDate: pdDate,
+      modeOfTravel: modeOfTravelLabel,
+      dateOfTravel: dateoftravel,
+      clientType: global.CLIENTTYPE,
+      pdLevel: global.PDSTAGE,
+      distanceTravelled: distanceTravelled,
+      pageId: currentPageId,
+      remarks: remarks,
+      pdaccompanyingOfficerDomains: appDetailsFinal,
     };
 
-    const handleClick = (componentName, textValue) => {
-        if (componentName === 'DOT') {
-            setDateOfTravel(textValue);
-        } else if (componentName === 'PDD') {
-            setPersonalDiscussionDate(textValue);
-        } else if (componentName === 'empid') {
-            setEmpID(textValue);
-        } else if (componentName === 'distance') {
-            setDistanceTravelled(textValue);
-        } else if (componentName === 'remarks') {
-            setRemarks(textValue);
-        }
-    }
-    const handlePickerClick = (componentName, label, index) => {
-        if (componentName === 'mot') {
-            setModeOfTravelLabel(label);
-            setModeOfTravelIndex(index);
-        } else if (componentName === 'officerlist') {
-            setOfficerIDLabel(label);
-            setEmpID(label)
-            setOfficerIDIndex(index);
-        }
-    }
+    const baseURL = '8901';
+    setLoading(true);
 
-    const showToast = () => {
-        ToastAndroid.showWithGravityAndOffset(
-            'Please Enter All Details',
-            ToastAndroid.LONG,
-            ToastAndroid.BOTTOM,
-            25,
-            50
-        );
+    apiInstance(baseURL)
+      .put(`/api/v1/pd/travelDetails/update/id/${travelID}`, appDetails)
+      .then(response => {
+        // Handle the response data ${item.clientId}
+        if (global.DEBUG_MODE)
+          console.log('PDTravelDetailsApi::' + JSON.stringify(response.data));
+        setLoading(false);
+        if (response.status == 200 || response.status == 201) {
+          updatePdStatus();
+        } else if (response.data.statusCode === 201) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        } else if (response.data.statusCode === 202) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        }
+      })
+      .catch(error => {
+        // Handle the error
+        setLoading(false);
+        if (global.DEBUG_MODE)
+          console.log('PDDataApiError::' + JSON.stringify(error.response.data));
+        if (error.response.status == 404) {
+          setApiError(Common.error404);
+          setErrorModalVisible(true);
+        } else if (error.response.status == 400) {
+          setApiError(Common.error400);
+          setErrorModalVisible(true);
+        } else if (error.response.status == 500) {
+          setApiError(Common.error500);
+          setErrorModalVisible(true);
+        } else if (error.response.data != null) {
+          setApiError(error.response.data.message);
+          setErrorModalVisible(true);
+        }
+      });
+  };
+
+  const updatePdStatus = () => {
+    const appDetails = {
+      loanApplicationId: global.LOANAPPLICATIONID,
+      loanWorkflowStage: global.PDSTAGE,
+      subStageCode: global.PDSUBSTAGE,
+      moduleCode: global.PDMODULE,
+      subModule: global.PDSUBMODULE,
+      pageCode: currentPageCode,
+      status: 'Completed',
+      userId: global.USERID,
     };
 
-    const closeErrorModal = () => {
-        setErrorModalVisible(false);
-    };
+    const baseURL = global.PORT1;
+    setLoading(true);
+    apiInstance(baseURL)
+      .post(`/api/v2/PD/Update/PD_WORKFLOW/updateStatus`, appDetails)
+      .then(async response => {
+        // Handle the response data
+        if (global.DEBUG_MODE)
+          console.log(
+            'UpdatePDStatusApiResponse::' + JSON.stringify(response.data),
+          );
+        setLoading(false);
+        if (response.status == 200) {
+          getAllStatus();
+        } else if (response.data.statusCode === 201) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        } else if (response.data.statusCode === 202) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        }
+      })
+      .catch(error => {
+        // Handle the error
+        if (global.DEBUG_MODE)
+          console.log(
+            'UpdateStatusApiResponse' + JSON.stringify(error.response),
+          );
+        setLoading(false);
 
+        if (error.response.status == 404) {
+          setApiError(Common.error404);
+          setErrorModalVisible(true);
+        } else if (error.response.status == 400) {
+          setApiError(Common.error400);
+          setErrorModalVisible(true);
+        } else if (error.response.status == 500) {
+          setApiError(Common.error500);
+          setErrorModalVisible(true);
+        } else if (error.response.data != null) {
+          setApiError(error.response.data.message);
+          setErrorModalVisible(true);
+        }
+      });
+  };
+
+  const getAllStatus = () => {
+    const filteredModule = props.pdSubStage[0].personalDiscussionSubStageLogs
+      .filter(data => data.subStageCode === global.PDSUBSTAGE)[0]
+      .personalDiscussionModuleLogs.filter(
+        data => data.moduleCode === global.PDMODULE,
+      )[0];
+
+    if (filteredModule) {
+      props.updatePDModule(global.PDSUBSTAGE, global.PDMODULE);
+      props.updatePDSubModule(
+        global.PDSUBSTAGE,
+        global.PDMODULE,
+        global.PDSUBMODULE,
+      );
+      props.updatePDPage(
+        global.PDSUBSTAGE,
+        global.PDMODULE,
+        global.PDSUBMODULE,
+        currentPageCode,
+      );
+      props.navigation.replace('PDItems', {clientType: global.CLIENTTYPE});
+    } else {
+      if (Common.DEBUG_MODE) console.log('Module not found.');
+    }
+  };
+
+  const FlatView = ({item}) => {
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
-            {loading ? <Loading /> : null}
-            <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
+      <View style={{width: '100%', alignItems: 'center', marginTop: 15}}>
+        <View
+          style={{
+            width: '90%',
+            minHeight: 100,
+            backgroundColor: '#E5F4FE',
+            borderRadius: 5,
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}>
+          <ImageComp
+            imageSrc={
+              item.colorCode == 'Green'
+                ? require('../../Images/income.png')
+                : require('../../Images/expense.png')
+            }
+            imageStylee={{marginLeft: 10, width: 30, height: 30}}
+          />
+          <View style={{width: '80%'}}>
+            <Text
+              style={{
+                width: '80%',
+                fontSize: 12,
+                fontFamily: 'PoppinsRegular',
+                marginTop: 5,
+                color: Colors.black,
+                marginLeft: 10,
+              }}>
+              {item.accompanyingOfficer}
+            </Text>
 
-            <ErrorModal
-                isVisible={errorModalVisible}
-                onClose={closeErrorModal}
-                textContent={apiError}
-                textClose={language[0][props.language].str_ok}
-            />
-
-            <ErrorMessageModal
-                isVisible={bottomErrorSheetVisible}
-                hideBottomSheet={hideBottomSheet}
-                errMsg={errMsg}
-                textError={language[0][props.language].str_error}
-                textClose={language[0][props.language].str_ok}
-            />
-
-            <ScrollView
-                style={styles.scrollView}
-                contentContainerStyle={styles.contentContainer}
-                showsVerticalScrollIndicator={false}
-                keyboardShouldPersistTaps="handled">
-                <View style={{ flex: 1 }}>
-
-                    <ModalContainer
-                        visible={officerModalVisible}
-                        closeModal={hideOfficerSheet}
-                        modalstyle={styles.modalContent}
-                        contentComponent={
-                            <SafeAreaView style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
-                                <ScrollView
-                                    style={styles.scrollView}
-                                    contentContainerStyle={styles.contentContainer}
-                                    showsVerticalScrollIndicator={false}
-                                    keyboardShouldPersistTaps="handled">
-                                    <View style={{ flex: 1 }}>
-
-
-                                        <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
-                                            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
-
-                                                <TextComp textVal={'Accompanying Officer (Branch)'} textStyle={Commonstyles.inputtextStyle} Visible={true} />
-
-                                            </View>
-
-                                            <PickerComp textLabel={officerIDLabel} pickerStyle={Commonstyles.picker} Disable={false} pickerdata={officerList} componentName='officerlist' handlePickerClick={handlePickerClick} />
-
-
-                                        </View>
-
-                                        <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
-
-                                            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
-                                                <TextComp textVal={'Employee ID'} textStyle={Commonstyles.inputtextStyle} Visible={true} />
-                                            </View>
-
-                                            <TextInputComp textValue={empID} textStyle={[Commonstyles.textinputtextStyle, { maxHeight: 100 }]} type='numeric' Disable={true} ComponentName='empid' returnKey="done" handleClick={handleClick} length={10} multilines={true} />
-
-                                        </View>
-
-                                        <View style={{ alignItems: 'flex-end', marginTop: 25 }}>
-                                            <ButtonViewComp textValue={language[0][props.language].str_add.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }} viewStyle={[Commonstyles.buttonView, { width: 100, height: 20 }]} innerStyle={[Commonstyles.buttonViewInnerStyle, { height: 35 }]} handleClick={addItem} />
-                                        </View>
-
-                                    </View>
-                                </ScrollView>
-                            </SafeAreaView>
-                        }
-                    />
-
-                    <View
-                        style={{
-                            width: '100%',
-                            height: 56,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                        }}>
-                        <HeadComp
-                            textval={language[0][props.language].str_pd}
-                            props={props}
-                            onGoBack={onGoBack}
-                        />
-                    </View>
-                    <View style={{ width: '93%', flexDirection: 'row', marginLeft: 20 }}>
-                        <TouchableOpacity
-                            activeOpacity={1}
-                            style={{ width: '10%', height: 40, justifyContent: 'center' }}>
-                            <View>
-                                <Feather name="briefcase" size={25} color={Colors.darkblue} />
-                            </View>
-                        </TouchableOpacity>
-                        <View style={{ width: '80%', height: 40, justifyContent: 'center' }}>
-                            <Text style={{ fontSize: 18, color: Colors.darkblack, fontFamily: 'PoppinsRegular', marginTop: 3 }}>
-                                {language[0][props.language].str_traveldetails}
-                            </Text>
-                        </View>
-                    </View>
-                    {dateOfTravelVisible && (
-                        <View
-                            style={{
-                                width: '100%',
-                                marginTop: 19,
-                                paddingHorizontal: 0,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                            }}>
-                            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
-                                <TextComp
-                                    textVal={dateOfTravelCaption}
-                                    textStyle={Commonstyles.inputtextStyle}
-                                    Visible={dateOfTravelMan}
-                                />
-                            </View>
-
-                            <View style={{ width: '100%', alignItems: 'center' }}>
-                                <DateInputComp textStyle={[Commonstyles.inputtextStyle, { width: '90%' }]} ComponentName="DOT"
-                                    textValue={dateOfTravel}
-                                    type="numeric"
-                                    handleClick={handleClick}
-                                    Disable={dateOfTravelDisable}
-                                    reference={dateOfTravelRef}
-                                    minDate={new Date()}
-                                />
-                            </View>
-
-                        </View>
-                    )}
-
-                    {personalDiscussionDateVisible && (
-                        <View
-                            style={{
-                                width: '100%',
-                                marginTop: 19,
-                                paddingHorizontal: 0,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                            }}>
-                            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
-                                <TextComp
-                                    textVal={personalDiscussionDateCaption}
-                                    textStyle={Commonstyles.inputtextStyle}
-                                    Visible={personalDiscussionDateMan}
-                                />
-                            </View>
-
-                            <View style={{ width: '100%', alignItems: 'center' }}>
-                                <DateInputComp textStyle={[Commonstyles.inputtextStyle, { width: '90%' }]} ComponentName="PDD"
-                                    textValue={personalDiscussionDate}
-                                    type="numeric"
-                                    handleClick={handleClick}
-                                    Disable={personalDiscussionDateDisable}
-                                    reference={personalDiscussionDateRef}
-                                    minDate={new Date()}
-                                />
-                            </View>
-
-                        </View>
-                    )}
-
-                    {modeOfTravelVisible && (
-                        <View
-                            style={{
-                                width: '100%',
-                                alignItems: 'center',
-                                marginTop: '4%',
-                            }}>
-                            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
-                                <TextComp
-                                    textVal={modeOfTravelCaption}
-                                    textStyle={Commonstyles.inputtextStyle}
-                                    Visible={modeOfTravelMan}
-                                />
-                            </View>
-
-                            <PickerComp
-                                textLabel={modeOfTravelLabel}
-                                pickerStyle={Commonstyles.picker}
-                                Disable={modeOfTravelDisable}
-                                pickerdata={modeOfTravelData}
-                                componentName="mot"
-                                handlePickerClick={handlePickerClick}
-                            />
-                        </View>
-                    )}
-
-                    {distanceTravelledVisible && (
-                        <View
-                            style={{
-                                width: '100%',
-                                marginTop: 19,
-                                paddingHorizontal: 0,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                            }}>
-                            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
-                                <TextComp
-                                    textVal={distanceTravelledCaption}
-                                    textStyle={Commonstyles.inputtextStyle}
-                                    Visible={distanceTravelledMan}
-                                />
-                            </View>
-
-                            <TextInputComp
-                                textValue={distanceTravelled}
-                                textStyle={Commonstyles.textinputtextStyle}
-                                type="number-pad"
-                                Disable={distanceTravelledDisable}
-                                ComponentName="distance"
-                                reference={distanceTravelledRef}
-                                returnKey="next"
-                                handleClick={handleClick}
-                                handleReference={handleReference}
-                            />
-                        </View>
-                    )}
-
-                    {remarksVisible && (
-                        <View
-                            style={{
-                                width: '100%',
-                                marginTop: 19,
-                                paddingHorizontal: 0,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                            }}>
-                            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
-                                <TextComp
-                                    textVal={remarksCaption}
-                                    textStyle={Commonstyles.inputtextStyle}
-                                    Visible={remarksMan}
-                                />
-                            </View>
-
-                            <TextInputComp
-                                textValue={remarks}
-                                textStyle={Commonstyles.textinputtextStyle}
-                                type="email-address"
-                                Disable={remarksDisable}
-                                ComponentName="remarks"
-                                reference={remarksRef}
-                                returnKey="next"
-                                handleClick={handleClick}
-                                handleReference={handleReference}
-                            />
-                        </View>
-                    )}
-
-                    <View
-                        style={{
-                            marginTop: 25,
-                            width: '90%',
-                            flexDirection: 'row',
-                            justifyContent: 'flex-end',
-                        }}>
-                        <TouchableOpacity onPress={() => showOfficerSheet('Income')}>
-                            <Text
-                                style={{
-                                    color: Colors.darkblue,
-                                    fontFamily: 'Poppins-Medium'
-                                }}>
-                                + Add Officer
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    <FlatList
-                        showsVerticalScrollIndicator={false}
-                        data={officerMainList}
-                        renderItem={FlatView}
-                        extraData={refreshFlatlist}
-                        keyExtractor={(item, index) => index.toString()}
-                    />
-
-                    <ButtonViewComp
-                        textValue={language[0][props.language].str_submit.toUpperCase()}
-                        textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500, marginBottom: 5 }}
-                        viewStyle={Commonstyles.buttonView}
-                        innerStyle={Commonstyles.buttonViewInnerStyle}
-                        handleClick={submitTravelData}
-                    />
-
-                </View>
-            </ScrollView>
-
-        </SafeAreaView >
+            <Text
+              style={{
+                width: '80%',
+                fontSize: 12,
+                fontFamily: 'Poppins-Medium',
+                marginTop: 5,
+                color: Colors.black,
+                marginLeft: 10,
+              }}>
+              {item.employeeId}
+            </Text>
+          </View>
+          <View>
+            <MaterialCommunityIcons
+              name="delete"
+              size={20}
+              onPress={() => {
+                deleteOfficer(item);
+              }}
+              color="#F76464"></MaterialCommunityIcons>
+          </View>
+        </View>
+      </View>
     );
+  };
+
+  const handleReference = componentName => {
+    if (componentName === 'accountHolderName') {
+    } else if (componentName === 'ifsccode') {
+    }
+  };
+
+  const handleClick = (componentName, textValue) => {
+    if (componentName === 'DOT') {
+      setDateOfTravel(textValue);
+    } else if (componentName === 'PDD') {
+      setPersonalDiscussionDate(textValue);
+    } else if (componentName === 'empid') {
+      setEmpID(textValue);
+    } else if (componentName === 'distance') {
+      setDistanceTravelled(textValue);
+    } else if (componentName === 'remarks') {
+      setRemarks(textValue);
+    }
+  };
+  const handlePickerClick = (componentName, label, index) => {
+    if (componentName === 'mot') {
+      setModeOfTravelLabel(label);
+      setModeOfTravelIndex(index);
+    } else if (componentName === 'officerlist') {
+      setOfficerIDLabel(label);
+      setEmpID(label);
+      setOfficerIDIndex(index);
+    }
+  };
+
+  const showToast = () => {
+    ToastAndroid.showWithGravityAndOffset(
+      'Please Enter All Details',
+      ToastAndroid.LONG,
+      ToastAndroid.BOTTOM,
+      25,
+      50,
+    );
+  };
+
+  const closeErrorModal = () => {
+    setErrorModalVisible(false);
+  };
+
+  return (
+    <SafeAreaView style={{flex: 1, backgroundColor: 'white'}}>
+      {loading ? <Loading /> : null}
+      <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
+
+      <ErrorModal
+        isVisible={errorModalVisible}
+        onClose={closeErrorModal}
+        textContent={apiError}
+        textClose={language[0][props.language].str_ok}
+      />
+
+      <ErrorMessageModal
+        isVisible={bottomErrorSheetVisible}
+        hideBottomSheet={hideBottomSheet}
+        errMsg={errMsg}
+        textError={language[0][props.language].str_error}
+        textClose={language[0][props.language].str_ok}
+      />
+
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled">
+        <View style={{flex: 1}}>
+          <ModalContainer
+            visible={officerModalVisible}
+            closeModal={hideOfficerSheet}
+            modalstyle={styles.modalContent}
+            contentComponent={
+              <SafeAreaView
+                style={[
+                  styles.parentView,
+                  {backgroundColor: Colors.lightwhite},
+                ]}>
+                <ScrollView
+                  style={styles.scrollView}
+                  contentContainerStyle={styles.contentContainer}
+                  showsVerticalScrollIndicator={false}
+                  keyboardShouldPersistTaps="handled">
+                  <View style={{flex: 1}}>
+                    <View
+                      style={{
+                        width: '100%',
+                        alignItems: 'center',
+                        marginTop: '4%',
+                      }}>
+                      <View
+                        style={{
+                          width: '90%',
+                          marginTop: 3,
+                          paddingHorizontal: 0,
+                        }}>
+                        <TextComp
+                          textVal={'Accompanying Officer (Branch)'}
+                          textStyle={Commonstyles.inputtextStyle}
+                          Visible={true}
+                        />
+                      </View>
+
+                      <PickerComp
+                        textLabel={officerIDLabel}
+                        pickerStyle={Commonstyles.picker}
+                        Disable={false}
+                        pickerdata={officerList}
+                        componentName="officerlist"
+                        handlePickerClick={handlePickerClick}
+                      />
+                    </View>
+
+                    <View
+                      style={{
+                        width: '100%',
+                        marginTop: 19,
+                        paddingHorizontal: 0,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                      <View
+                        style={{
+                          width: '90%',
+                          marginTop: 3,
+                          paddingHorizontal: 0,
+                        }}>
+                        <TextComp
+                          textVal={'Employee ID'}
+                          textStyle={Commonstyles.inputtextStyle}
+                          Visible={true}
+                        />
+                      </View>
+
+                      <TextInputComp
+                        textValue={empID}
+                        textStyle={[
+                          Commonstyles.textinputtextStyle,
+                          {maxHeight: 100},
+                        ]}
+                        type="numeric"
+                        Disable={true}
+                        ComponentName="empid"
+                        returnKey="done"
+                        handleClick={handleClick}
+                        length={10}
+                        multilines={true}
+                      />
+                    </View>
+
+                    <View style={{alignItems: 'flex-end', marginTop: 25}}>
+                      <ButtonViewComp
+                        textValue={language[0][
+                          props.language
+                        ].str_add.toUpperCase()}
+                        textStyle={{
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: 500,
+                        }}
+                        viewStyle={[
+                          Commonstyles.buttonView,
+                          {width: 100, height: 20},
+                        ]}
+                        innerStyle={[
+                          Commonstyles.buttonViewInnerStyle,
+                          {height: 35},
+                        ]}
+                        handleClick={addItem}
+                      />
+                    </View>
+                  </View>
+                </ScrollView>
+              </SafeAreaView>
+            }
+          />
+
+          <View
+            style={{
+              width: '100%',
+              height: 56,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+            <HeadComp
+              textval={language[0][props.language].str_pd}
+              props={props}
+              onGoBack={onGoBack}
+            />
+          </View>
+          <View style={{width: '93%', flexDirection: 'row', marginLeft: 20}}>
+            <TouchableOpacity
+              activeOpacity={1}
+              style={{width: '10%', height: 40, justifyContent: 'center'}}>
+              <View>
+                <Feather name="briefcase" size={25} color={Colors.darkblue} />
+              </View>
+            </TouchableOpacity>
+            <View style={{width: '80%', height: 40, justifyContent: 'center'}}>
+              <Text
+                style={{
+                  fontSize: 18,
+                  color: Colors.darkblack,
+                  fontFamily: 'PoppinsRegular',
+                  marginTop: 3,
+                }}>
+                {language[0][props.language].str_traveldetails}
+              </Text>
+            </View>
+          </View>
+          {dateOfTravelVisible && (
+            <View
+              style={{
+                width: '100%',
+                marginTop: 19,
+                paddingHorizontal: 0,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+              <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+                <TextComp
+                  textVal={dateOfTravelCaption}
+                  textStyle={Commonstyles.inputtextStyle}
+                  Visible={dateOfTravelMan}
+                />
+              </View>
+
+              <View style={{width: '100%', alignItems: 'center'}}>
+                <DateInputComp
+                  textStyle={[Commonstyles.inputtextStyle, {width: '90%'}]}
+                  ComponentName="DOT"
+                  textValue={dateOfTravel}
+                  type="numeric"
+                  handleClick={handleClick}
+                  Disable={dateOfTravelDisable}
+                  reference={dateOfTravelRef}
+                  minDate={new Date()}
+                />
+              </View>
+            </View>
+          )}
+
+          {personalDiscussionDateVisible && (
+            <View
+              style={{
+                width: '100%',
+                marginTop: 19,
+                paddingHorizontal: 0,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+              <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+                <TextComp
+                  textVal={personalDiscussionDateCaption}
+                  textStyle={Commonstyles.inputtextStyle}
+                  Visible={personalDiscussionDateMan}
+                />
+              </View>
+
+              <View style={{width: '100%', alignItems: 'center'}}>
+                <DateInputComp
+                  textStyle={[Commonstyles.inputtextStyle, {width: '90%'}]}
+                  ComponentName="PDD"
+                  textValue={personalDiscussionDate}
+                  type="numeric"
+                  handleClick={handleClick}
+                  Disable={personalDiscussionDateDisable}
+                  reference={personalDiscussionDateRef}
+                  minDate={new Date()}
+                />
+              </View>
+            </View>
+          )}
+
+          {modeOfTravelVisible && (
+            <View
+              style={{
+                width: '100%',
+                alignItems: 'center',
+                marginTop: '4%',
+              }}>
+              <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+                <TextComp
+                  textVal={modeOfTravelCaption}
+                  textStyle={Commonstyles.inputtextStyle}
+                  Visible={modeOfTravelMan}
+                />
+              </View>
+
+              <PickerComp
+                textLabel={modeOfTravelLabel}
+                pickerStyle={Commonstyles.picker}
+                Disable={modeOfTravelDisable}
+                pickerdata={modeOfTravelData}
+                componentName="mot"
+                handlePickerClick={handlePickerClick}
+              />
+            </View>
+          )}
+
+          {distanceTravelledVisible && (
+            <View
+              style={{
+                width: '100%',
+                marginTop: 19,
+                paddingHorizontal: 0,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+              <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+                <TextComp
+                  textVal={distanceTravelledCaption}
+                  textStyle={Commonstyles.inputtextStyle}
+                  Visible={distanceTravelledMan}
+                />
+              </View>
+
+              <TextInputComp
+                textValue={distanceTravelled}
+                textStyle={Commonstyles.textinputtextStyle}
+                type="number-pad"
+                Disable={distanceTravelledDisable}
+                ComponentName="distance"
+                reference={distanceTravelledRef}
+                returnKey="next"
+                handleClick={handleClick}
+                handleReference={handleReference}
+              />
+            </View>
+          )}
+
+          {remarksVisible && (
+            <View
+              style={{
+                width: '100%',
+                marginTop: 19,
+                paddingHorizontal: 0,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+              <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+                <TextComp
+                  textVal={remarksCaption}
+                  textStyle={Commonstyles.inputtextStyle}
+                  Visible={remarksMan}
+                />
+              </View>
+
+              <TextInputComp
+                textValue={remarks}
+                textStyle={Commonstyles.textinputtextStyle}
+                type="email-address"
+                Disable={remarksDisable}
+                ComponentName="remarks"
+                reference={remarksRef}
+                returnKey="next"
+                handleClick={handleClick}
+                handleReference={handleReference}
+              />
+            </View>
+          )}
+
+          <View
+            style={{
+              marginTop: 25,
+              width: '90%',
+              flexDirection: 'row',
+              justifyContent: 'flex-end',
+            }}>
+            <TouchableOpacity onPress={() => showOfficerSheet('Income')}>
+              <Text
+                style={{
+                  color: Colors.darkblue,
+                  fontFamily: 'Poppins-Medium',
+                }}>
+                + Add Officer
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <FlatList
+            showsVerticalScrollIndicator={false}
+            data={officerMainList}
+            renderItem={FlatView}
+            extraData={refreshFlatlist}
+            keyExtractor={(item, index) => index.toString()}
+          />
+
+          <ButtonViewComp
+            textValue={language[0][props.language].str_submit.toUpperCase()}
+            textStyle={{
+              color: Colors.white,
+              fontSize: 13,
+              fontWeight: 500,
+              marginBottom: 5,
+            }}
+            viewStyle={Commonstyles.buttonView}
+            innerStyle={Commonstyles.buttonViewInnerStyle}
+            handleClick={submitTravelData}
+          />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
 };
 
 const mapStateToProps = state => {
-    const { language } = state.languageReducer;
-    const { profileDetails } = state.profileReducer;
-    const { mobileCodeDetails } = state.mobilecodeReducer;
-    const { pdDetails } = state.personalDiscussionReducer;
-    const { pdSubStages } = state.pdStagesReducer;
-    return {
-        language: language,
-        profiledetail: profileDetails,
-        pdDetail: pdDetails,
-        mobilecodedetail: mobileCodeDetails,
-        pdSubStage: pdSubStages
-    }
+  const {language} = state.languageReducer;
+  const {profileDetails} = state.profileReducer;
+  const {mobileCodeDetails} = state.mobilecodeReducer;
+  const {pdDetails} = state.personalDiscussionReducer;
+  const {pdSubStages} = state.pdStagesReducer;
+  return {
+    language: language,
+    profiledetail: profileDetails,
+    pdDetail: pdDetails,
+    mobilecodedetail: mobileCodeDetails,
+    pdSubStage: pdSubStages,
+  };
 };
 
 const mapDispatchToProps = dispatch => ({
-    languageAction: item => dispatch(languageAction(item)),
-    addTravelDetails: (loanApplicationId, item, key) => dispatch(addTravelDetails(loanApplicationId, item, key)),
-    updateTravelDetails: (loanApplicationId, key, travelDetails) => dispatch(updateTravelDetails(loanApplicationId, key, travelDetails)),
-    deleteTravelDetails: (item) => dispatch(deleteTravelDetails(item)),
-    deleteOfficerTravelDetails: (loanApplicationId, index) => dispatch(deleteOfficerTravelDetails(loanApplicationId, index)),
-    updatePDSubStage: item => dispatch(updatePDSubStage(item)),
-    updatePDModule: (subStage, module) => dispatch(updatePDModule(subStage, module)),
-    updatePDSubModule: (subStage, module, subModule) => dispatch(updatePDSubModule(subStage, module, subModule)),
-    updatePDPage: (subStage, module, subModule, page) => dispatch(updatePDPage(subStage, module, subModule, page)),
+  languageAction: item => dispatch(languageAction(item)),
+  addTravelDetails: (loanApplicationId, item, key) =>
+    dispatch(addTravelDetails(loanApplicationId, item, key)),
+  updateTravelDetails: (loanApplicationId, key, travelDetails) =>
+    dispatch(updateTravelDetails(loanApplicationId, key, travelDetails)),
+  deleteTravelDetails: item => dispatch(deleteTravelDetails(item)),
+  deleteOfficerTravelDetails: (loanApplicationId, index) =>
+    dispatch(deleteOfficerTravelDetails(loanApplicationId, index)),
+  updatePDSubStage: item => dispatch(updatePDSubStage(item)),
+  updatePDModule: (subStage, module) =>
+    dispatch(updatePDModule(subStage, module)),
+  updatePDSubModule: (subStage, module, subModule) =>
+    dispatch(updatePDSubModule(subStage, module, subModule)),
+  updatePDPage: (subStage, module, subModule, page) =>
+    dispatch(updatePDPage(subStage, module, subModule, page)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(PdTravelDetails);
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f8fa',
+    alignItems: 'center',
+  },
+  parentView: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  contentContainer: {
+    paddingBottom: 50,
+    flexGrow: 1,
+  },
+  headerView: {
+    width: '100%',
+    paddingVertical: 15,
+    backgroundColor: 'white',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  viewStyle: {
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginLeft: 9,
+    marginRight: 4,
+    borderColor: '#e3e3e3',
+    marginBottom: 4,
+    marginStart: 12,
+    paddingVertical: 7,
+    borderWidth: 1,
+    borderRadius: 8,
+  },
+  bottomNavigationView: {
+    backgroundColor: '#fff',
+    width: '100%',
+    height: 400,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
 
-    container: {
-        flex: 1,
-        backgroundColor: '#f5f8fa',
-        alignItems: 'center'
-    },
-    parentView: {
-        flex: 1,
-    },
-    scrollView: {
-        flex: 1,
-    },
-    contentContainer: {
-
-        paddingBottom: 50,
-        flexGrow: 1
-    },
-    headerView: {
-        width: ('100%'),
-        paddingVertical: 15,
-        backgroundColor: 'white',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    viewStyle: {
-        alignItems: 'center',
-        paddingHorizontal: 20, marginLeft: 9, marginRight: 4,
-        borderColor: '#e3e3e3',
-        marginBottom: 4,
-        marginStart: 12,
-        paddingVertical: 7,
-        borderWidth: 1,
-        borderRadius: 8,
-    },
-    bottomNavigationView: {
-        backgroundColor: '#fff',
-        width: '100%',
-        height: 400,
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-    },
-
-    textColor: {
-        color: '#000',
-        fontSize: 14,
-        fontWeight: '400'
-    },
-    viewStyleFilter: {
-        alignItems: 'center', justifyContent: 'center',
-    },
-    viewStyleStatusData: {
-        alignItems: 'center'
-    },
-    picker: {
-        height: 50,
-        width: '85%',
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        textAlign: 'center'
-    },
-    pendingbackground: {
-        width: 90, borderColor: Colors.pendingBorder, backgroundColor: Colors.pendingBg, alignItems: 'center', padding: 3, borderRadius: 15, borderWidth: 1
-    },
-    approvedbackground: {
-        width: 90, borderColor: Colors.approvedBorder, backgroundColor: Colors.approvedBg, alignItems: 'center', padding: 3, borderRadius: 15, borderWidth: 1
-    },
-    line: {
-        backgroundColor: '#f1f1f1', // Change the color as needed
-        height: 1,
-        width: '90%', marginLeft: '5%',
-        marginTop: '5%', alignItems: 'center'         // Adjust the height as needed
-    },
-    disableBg: {
-        width: '88%', height: 50, backgroundColor: Colors.disableBg,
-        borderRadius: 45, alignItems: 'center', justifyContent: 'center'
-    },
-    enableBg: {
-        width: '88%', height: 50, backgroundColor: Colors.enableBg,
-        borderRadius: 45, alignItems: 'center', justifyContent: 'center'
-    }, fab: {
-        position: 'absolute',
-        margin: 0,
-        right: 0,
-        bottom: 12,
-        width: '100%',
-
-    },
-    modalContent: {
-        width: '90%',  // Set width to 90% of the screen width
-        aspectRatio: 1,
-        backgroundColor: 'white',
-        padding: 10,
-        margin: 10,
-        borderRadius: 20,
-        alignItems: 'center',
-    },
-
+  textColor: {
+    color: '#000',
+    fontSize: 14,
+    fontWeight: '400',
+  },
+  viewStyleFilter: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  viewStyleStatusData: {
+    alignItems: 'center',
+  },
+  picker: {
+    height: 50,
+    width: '85%',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    textAlign: 'center',
+  },
+  pendingbackground: {
+    width: 90,
+    borderColor: Colors.pendingBorder,
+    backgroundColor: Colors.pendingBg,
+    alignItems: 'center',
+    padding: 3,
+    borderRadius: 15,
+    borderWidth: 1,
+  },
+  approvedbackground: {
+    width: 90,
+    borderColor: Colors.approvedBorder,
+    backgroundColor: Colors.approvedBg,
+    alignItems: 'center',
+    padding: 3,
+    borderRadius: 15,
+    borderWidth: 1,
+  },
+  line: {
+    backgroundColor: '#f1f1f1', // Change the color as needed
+    height: 1,
+    width: '90%',
+    marginLeft: '5%',
+    marginTop: '5%',
+    alignItems: 'center', // Adjust the height as needed
+  },
+  disableBg: {
+    width: '88%',
+    height: 50,
+    backgroundColor: Colors.disableBg,
+    borderRadius: 45,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  enableBg: {
+    width: '88%',
+    height: 50,
+    backgroundColor: Colors.enableBg,
+    borderRadius: 45,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fab: {
+    position: 'absolute',
+    margin: 0,
+    right: 0,
+    bottom: 12,
+    width: '100%',
+  },
+  modalContent: {
+    width: '90%', // Set width to 90% of the screen width
+    aspectRatio: 1,
+    backgroundColor: 'white',
+    padding: 10,
+    margin: 10,
+    borderRadius: 20,
+    alignItems: 'center',
+  },
 });
