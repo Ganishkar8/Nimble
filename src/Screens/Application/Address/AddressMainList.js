@@ -35,7 +35,7 @@ import tbl_client from '../../../Database/Table/tbl_client';
 import tbl_loanApplication from '../../../Database/Table/tbl_loanApplication';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import { check } from 'react-native-permissions';
-import { deleteNestedClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
+import { deleteNestedClientDetails, updateNestedClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
 
 const AddressMainList = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -555,6 +555,7 @@ const AddressMainList = (props, { navigation }) => {
             updateFinalLoanStatus();
           } else {
             updatetrackerStatus(status)
+            props.updateNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientManualKycLink', response.data)
           }
         }
         else if (response.data.statusCode === 201) {
@@ -827,6 +828,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => ({
   languageAction: item => dispatch(languageAction(item)),
+  updateNestedClientDetails: (loanApplicationId, clientId, key, nestedKey, data) => dispatch(updateNestedClientDetails(loanApplicationId, clientId, key, nestedKey, data)),
   deleteNestedClientDetails: (loanApplicationId, clientId, key, nestedKey, id) => dispatch(deleteNestedClientDetails(loanApplicationId, clientId, key, nestedKey, id)),
 });
 

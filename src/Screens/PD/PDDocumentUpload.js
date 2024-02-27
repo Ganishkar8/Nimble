@@ -38,7 +38,9 @@ import ImageBottomPreview from '../../Components/ImageBottomPreview';
 import ImagePicker, { ImageOrVideo } from 'react-native-image-crop-picker';
 import apiInstance from '../../Utils/apiInstance';
 import { updatePDModule, updatePDSubStage, updatePDSubModule, updatePDPage } from '../../Utils/redux/actions/PDAction';
-
+import DocumentPicker from 'react-native-document-picker';
+import RNFS, { writeFile } from 'react-native-fs';
+import Share from 'react-native-share';
 
 
 const PDDocumentUpload = (props, { navigation }) => {
@@ -141,11 +143,19 @@ const PDDocumentUpload = (props, { navigation }) => {
                         setLoading(false)
                         // Handle the response data
                         if (response.status == 200) {
-                            console.log("FinalLeadCreationApiResponse::" + JSON.stringify(response.data));
+                            if (global.DEBUG_MODE) console.log("FinalLeadCreationApiResponse::" + JSON.stringify(response.data));
+                            // setFileName(response.data.fileName)
+                            // setImageUri('data:image/png;base64,' + response.data.base64Content)
+                            // props.navigation.navigate('PreviewImage', { imageName: response.data.fileName, imageUri: 'data:image/png;base64,' + response.data.base64Content })
                             setFileName(response.data.fileName)
-                            setImageUri('data:image/png;base64,' + response.data.base64Content)
-                            props.navigation.navigate('PreviewImage', { imageName: response.data.fileName, imageUri: 'data:image/png;base64,' + response.data.base64Content })
-                            // props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
+                            if (isPDFFile(response.data.fileName)) {
+                                var base64pdf = response.data.base64Content;
+                                var fileName = response.data.fileName;
+                                saveBase64Pdf(base64pdf, fileName)
+                            } else {
+                                setImageUri('data:image/png;base64,' + response.data.base64Content)
+                                props.navigation.navigate('PreviewImage', { imageName: response.data.fileName, imageUri: 'data:image/png;base64,' + response.data.base64Content })
+                            }
                         } else if (response.data.statusCode === 201) {
                             setApiError(response.data.message);
                             setErrorModalVisible(true);
@@ -205,6 +215,51 @@ const PDDocumentUpload = (props, { navigation }) => {
             hideImageBottomSheet();
         }
     }
+
+    const isPDFFile = (filename) => {
+        return filename.toLowerCase().endsWith('.pdf');
+    };
+
+    const saveBase64Pdf = async (base64Data, filename) => {
+        const path = RNFS.ExternalDirectoryPath + `/${filename}`;
+
+        const fileExists = await RNFS.exists(path);
+
+        // If the file exists, return its path
+        if (fileExists) {
+            console.log('PDF already exists at:', path);
+            openWithThirdPartyApp(path)
+            return path;
+        }
+
+        try {
+            await RNFS.writeFile(path, base64Data, 'base64');
+            openWithThirdPartyApp(path)
+            console.log('PDF saved successfully at:', path);
+            return path;
+        } catch (error) {
+            console.error('Error saving PDF:', error);
+            return null;
+        }
+    };
+
+    const openWithThirdPartyApp = async (pdfPath) => {
+        if (pdfPath) {
+            try {
+                const fileExists = await RNFS.exists(pdfPath);
+                if (fileExists) {
+                    const options = {
+                        url: `file://${pdfPath}`,
+                    };
+                    await Share.open(options);
+                } else {
+                    console.error('PDF file does not exist.');
+                }
+            } catch (error) {
+                console.error('Error opening with third-party app:', error);
+            }
+        }
+    };
 
     const MainData = ({ item }) => {
 
@@ -338,29 +393,46 @@ const PDDocumentUpload = (props, { navigation }) => {
         // setVisible(false)
 
         hidephotoBottomSheet();
-        ImagePicker.openPicker({
-            cropping: true,
-        }).then(image => {
-            setImageFile(image);
 
-            const lastDotIndex = image.path.lastIndexOf('.');
-            var imageName = 'Photo' + '_' + global.CLIENTID;
-            if (lastDotIndex !== -1) {
-                // Get the substring from the last dot to the end of the string
-                const fileExtension = image.path.substring(lastDotIndex);
-                imageName = imageName + fileExtension;
-                console.log('File extension:', fileExtension);
+        try {
+            const result = await DocumentPicker.pick({
+                type: [DocumentPicker.types.images, DocumentPicker.types.pdf],
+            });
+            //alert(JSON.stringify(result))
+            setFileType(result[0].type)
+            setFileName(result[0].name)
+            setImageUri(result[0].uri)
+            updateImage(result[0].uri, result[0].type, result[0].name)
+        } catch (err) {
+            if (DocumentPicker.isCancel(err)) {
+            } else {
+                throw err;
             }
-            console.log('SpecificData:', JSON.stringify(currentPhotoItem));
-            //alert(JSON.stringify(currentPhotoItem))
-            updateImage(image.path, image.mime, imageName)
-            //currentPhotoItem.map
-            setFileType(image.mime)
-            setFileName(imageName)
-            setImageUri(image.path)
-            setVisible(false)
-            // setDeleteVisible(false)
-        })
+        }
+
+        // ImagePicker.openPicker({
+        //     cropping: true,
+        // }).then(image => {
+        //     setImageFile(image);
+
+        //     const lastDotIndex = image.path.lastIndexOf('.');
+        //     var imageName = 'Photo' + '_' + global.CLIENTID;
+        //     if (lastDotIndex !== -1) {
+        //         // Get the substring from the last dot to the end of the string
+        //         const fileExtension = image.path.substring(lastDotIndex);
+        //         imageName = imageName + fileExtension;
+        //         console.log('File extension:', fileExtension);
+        //     }
+        //     console.log('SpecificData:', JSON.stringify(currentPhotoItem));
+        //     //alert(JSON.stringify(currentPhotoItem))
+        //     updateImage(image.path, image.mime, imageName)
+        //     //currentPhotoItem.map
+        //     setFileType(image.mime)
+        //     setFileName(imageName)
+        //     setImageUri(image.path)
+        //     setVisible(false)
+        //     // setDeleteVisible(false)
+        // })
 
     };
 

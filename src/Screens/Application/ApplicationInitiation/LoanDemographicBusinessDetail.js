@@ -413,22 +413,16 @@ const LoanDemographicBusinessDetail = (props) => {
                     setPurchaseFrequencyLabel(clientDetail?.clientBusinessDetail?.purchasesFrequency)
                     setTypePurchaseLabel(clientDetail?.clientBusinessDetail?.typeOfPurchasingFacility)
                     setSalesFrequencyLabel(clientDetail?.clientBusinessDetail?.salesFrequency)
-                    if (clientDetail?.clientBusinessDetail?.dmsId) {
-                        getImage(clientDetail?.clientBusinessDetail?.dmsId);
-                        setDocID(clientDetail?.clientBusinessDetail?.dmsId);
+                    if (clientDetail?.clientBusinessDetail?.clientBusinessImageGeocodeDetail) {
+                        setDocID(clientDetail?.clientBusinessDetail?.clientBusinessImageGeocodeDetail[0]?.dmsId);
                     }
                 } else {
                     if (udyamNum) {
                         getUdyamCheck(udyamNum);
                     }
-
-                    if (!businessAvailable) {
-                        if (global.CLIENTTYPE == 'APPL') {
-                            setCustomerSubCategoryLabel(clientDetail.customerSubcategory);
-                            setCustomerSubCategoryDisable(true);
-                            setLoading(false);
-                        }
-
+                    if (global.CLIENTTYPE == 'APPL') {
+                        setCustomerSubCategoryLabel(clientDetail.customerSubcategory);
+                        setCustomerSubCategoryDisable(true);
                     }
                 }
 
@@ -607,7 +601,9 @@ const LoanDemographicBusinessDetail = (props) => {
                         if (Common.DEBUG_MODE) console.log("GetPhotoApiResponse::" + JSON.stringify(response.data));
 
                         if (response.status == 200) {
-
+                            setFileName(response.data.fileName)
+                            setImageUri('data:image/png;base64,' + response.data.base64Content)
+                            props.navigation.navigate('PreviewImage', { imageName: response.data.fileName, imageUri: 'data:image/png;base64,' + response.data.base64Content })
                         } else if (response.data.statusCode === 201) {
                             setApiError(response.data.message);
                             setErrorModalVisible(true);
@@ -1983,7 +1979,12 @@ const LoanDemographicBusinessDetail = (props) => {
 
     const previewImage = () => {
         hideImageBottomSheet();
-        props.navigation.navigate('PreviewImage', { imageName: fileName, imageUri: imageUri })
+        if (imageUri) {
+            props.navigation.navigate('PreviewImage', { imageName: fileName, imageUri: imageUri })
+        } else {
+            getImage(docID);
+        }
+
     }
 
     const imageDetail = () => {

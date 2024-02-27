@@ -96,10 +96,14 @@ const LoanDocumentUpload = (props, { navigation }) => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
 
-        const filteredDocumentData = documentData.filter(item => item.clientType === global.CLIENTTYPE);
-        setFilteredDocument(filteredDocumentData);
+        const filteredDocumentData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].applicantDocumentDetail.filter(client => client.clientId === parseInt(global.CLIENTID));
 
-        getDocuments(filteredDocumentData);
+        if (filteredDocumentData) {
+            setFilteredDocument(filteredDocumentData);
+            getDocuments(filteredDocumentData);
+        } else {
+            getDocuments([]);
+        }
 
         const filteredData = global.FILTEREDPROCESSMODULE.filter(item => item.moduleCode === "DOC_UPLD");
 
@@ -474,7 +478,7 @@ const LoanDocumentUpload = (props, { navigation }) => {
                         setLoading(false)
                         // Handle the response data
                         if (response.status == 200) {
-                            console.log("FinalLeadCreationApiResponse::" + JSON.stringify(response.data));
+                            if (global.DEBUG_MODE) console.log("FinalLeadCreationApiResponse::" + JSON.stringify(response.data));
                             setFileName(response.data.fileName)
                             if (isPDFFile(response.data.fileName)) {
                                 var base64pdf = response.data.base64Content;
@@ -644,26 +648,40 @@ const LoanDocumentUpload = (props, { navigation }) => {
 
                 if (global.DEBUG_MODE) console.log('UpdateDMSIDResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
-                updateLoanStatus();
-                // if (processModuleLength == 1) {
 
-                // } else if (processModuleLength == 2) {
-                //     if (global.CLIENTTYPE == 'APPL') {
-                //         updateLoanStatus();
-                //     } else if (global.CLIENTTYPE == 'CO-APPL') {
-                //         props.navigation.navigate('FinalConsentScreen');
-                //     } else if (global.CLIENTTYPE == 'GRNTR') {
-                //         props.navigation.navigate('FinalConsentScreen');
-                //     }
-                // } else if (processModuleLength == 3) {
-                //     if (global.CLIENTTYPE == 'APPL') {
-                //         updateLoanStatus();
-                //     } else if (global.CLIENTTYPE == 'CO-APPL') {
-                //         updateLoanStatus();
-                //     } else if (global.CLIENTTYPE == 'GRNTR') {
-                //         props.navigation.navigate('FinalConsentScreen');
-                //     }
-                // }
+                const promises = [];
+                response.data.forEach((data) => {
+                    promises.push(props.updateClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'applicantDocumentDetail', data))
+                });
+
+                Promise.all(promises)
+                    .then(() => {
+                        if (processModuleLength == 1) {
+
+                        } else if (processModuleLength == 2) {
+                            if (global.CLIENTTYPE == 'APPL') {
+                                updateLoanStatus();
+                            } else if (global.CLIENTTYPE == 'CO-APPL') {
+                                props.navigation.navigate('FinalConsentScreen');
+                            } else if (global.CLIENTTYPE == 'GRNTR') {
+                                props.navigation.navigate('FinalConsentScreen');
+                            }
+                        } else if (processModuleLength == 3) {
+                            if (global.CLIENTTYPE == 'APPL') {
+                                updateLoanStatus();
+                            } else if (global.CLIENTTYPE == 'CO-APPL') {
+                                updateLoanStatus();
+                            } else if (global.CLIENTTYPE == 'GRNTR') {
+                                props.navigation.navigate('FinalConsentScreen');
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error updating client details:', error);
+                        // Handle errors if necessary
+                    });
+
+
 
             })
             .catch(error => {
@@ -739,7 +757,7 @@ const LoanDocumentUpload = (props, { navigation }) => {
 
     };
 
-    const getDocuments = () => {
+    const getDocuments = (filteredDocument) => {
 
 
         const appDetails = {
@@ -1014,10 +1032,12 @@ const mapStateToProps = state => {
     const { language } = state.languageReducer;
     const { profileDetails } = state.profileReducer;
     const { mobileCodeDetails } = state.mobilecodeReducer;
+    const { loanInitiationDetails } = state.loanInitiationReducer;
     return {
         language: language,
         profiledetail: profileDetails,
-        mobilecodedetail: mobileCodeDetails
+        mobilecodedetail: mobileCodeDetails,
+        loanInitiationDetails: loanInitiationDetails,
     }
 };
 

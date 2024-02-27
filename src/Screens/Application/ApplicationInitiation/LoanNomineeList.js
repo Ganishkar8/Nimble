@@ -54,12 +54,18 @@ const LoanNomineeList = (props, { navigation }) => {
     const [communicationAvailable, setCommunicationAvailable] = useState(false);
     const showBottomSheet = () => setBottomErrorSheetVisible(true);
     const hideBottomSheet = () => setBottomErrorSheetVisible(false);
+    const [onlyView, setOnlyView] = useState(false);
+
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
 
-        getNomineeData()
+        getNomineeData();
+
+        if (global.USERTYPEID == 1163 || global.ALLOWEDIT == "0") {
+            setOnlyView(true);
+        }
 
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
@@ -96,7 +102,7 @@ const LoanNomineeList = (props, { navigation }) => {
 
         var bg = '';
 
-        if (global.USERTYPEID == 1163) {
+        if (onlyView) {
             bg = 'GREY';
         }
 
@@ -142,13 +148,8 @@ const LoanNomineeList = (props, { navigation }) => {
                         </View>
                     </TouchableOpacity>
                     <TouchableOpacity style={{ width: '20%' }} activeOpacity={0.8} onPress={() => {
-
-                        if (global.USERTYPEID == 1163) {
-
-                        } else {
-                            if (item.isKyc != '1') {
-                                handleClick('delete', item)
-                            }
+                        if (!onlyView) {
+                            handleClick('delete', item)
                         }
                     }
                     }>
@@ -222,7 +223,7 @@ const LoanNomineeList = (props, { navigation }) => {
 
                 setLoading(false);
                 deletedata(nomineeID);
-                props.deleteClientDetails(global.LOANAPPLICATIONID,nomineeID,"nominee");
+                props.deleteClientDetails(global.LOANAPPLICATIONID, nomineeID, "nominee");
             })
             .catch(error => {
                 // Handle the error
@@ -238,10 +239,10 @@ const LoanNomineeList = (props, { navigation }) => {
 
     const deletedata = async (id) => {
 
-        const deletePromises = [
-            tbl_bankdetails.deleteBankDataBasedOnLoanIDAndType(global.LOANAPPLICATIONID, id)
-        ];
-        await Promise.all(deletePromises);
+        // const deletePromises = [
+        //     tbl_bankdetails.deleteBankDataBasedOnLoanIDAndType(global.LOANAPPLICATIONID, id)
+        // ];
+        // await Promise.all(deletePromises);
 
         const newArray = nomineeDetails.filter(item => item.id !== id);
         setNomineeDetails(newArray);
@@ -252,8 +253,8 @@ const LoanNomineeList = (props, { navigation }) => {
 
     const buttonNext = () => {
 
-        if (global.USERTYPEID == 1163) {
-            onGoBack();
+        if (onlyView) {
+            props.navigation.replace('LoanApplicationMain', { fromScreen: 'NomineeList' });
             return;
         }
         updateLoanStatus();
@@ -362,7 +363,7 @@ const LoanNomineeList = (props, { navigation }) => {
                 </View>
             </View>
 
-            {nomineeDetails.length <= 0 &&
+            {(nomineeDetails.length <= 0) &&
                 <TouchableOpacity activeOpacity={8} onPress={() => handleClick('new')}>
                     <View style={{ marginBottom: 10 }}>
                         <IconButtonViewComp
