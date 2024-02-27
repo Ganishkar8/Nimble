@@ -292,6 +292,8 @@ export const language = [
       str_collateralutilization: 'COLLATERAL UTILIZATION',
       str_freecollateral: 'FREE COLLATERAL',
       str_viewDedupeResult: 'VIEW DEDUPE RESULT',
+      str_imageComparison: 'IMAGE COMPARISON',
+      str_viewprevImage: 'VIEW PREVIOUS IMAGE',
     },
 
     ta: {
