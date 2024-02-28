@@ -14,12 +14,12 @@ import {
   PermissionsAndroid,
 } from 'react-native';
 import Modal from 'react-native-modal';
-import {React, useState, useEffect, useRef} from 'react';
+import { React, useState, useEffect, useRef } from 'react';
 import MyStatusBar from '../../Components/MyStatusBar';
 import HeadComp from '../../Components/HeadComp';
-import {connect} from 'react-redux';
-import {languageAction} from '../../Utils/redux/actions/languageAction';
-import {language} from '../../Utils/LanguageString';
+import { connect } from 'react-redux';
+import { languageAction } from '../../Utils/redux/actions/languageAction';
+import { language } from '../../Utils/LanguageString';
 import Loading from '../../Components/Loading';
 import ChildHeadComp from '../../Components/ChildHeadComp';
 import ProgressComp from '../../Components/ProgressComp';
@@ -29,29 +29,30 @@ import Common from '../../Utils/Common';
 import IconButtonViewComp from '../../Components/IconButtonViewComp';
 import TextInputComp from '../../Components/TextInputComp';
 import PickerComp from '../../Components/PickerComp';
-import {useIsFocused} from '@react-navigation/native';
+import { useIsFocused } from '@react-navigation/native';
 import TextComp from '../../Components/TextComp';
 import ImageComp from '../../Components/ImageComp';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {Picker} from '@react-native-picker/picker';
+import { Picker } from '@react-native-picker/picker';
 import ButtonViewComp from '../../Components/ButtonViewComp';
 import apiInstance from '../../Utils/apiInstance';
 import ImageBottomPreview from '../../Components/ImageBottomPreview';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import ImagePicker, {ImageOrVideo} from 'react-native-image-crop-picker';
-import MapView, {Marker} from 'react-native-maps';
+import ImagePicker, { ImageOrVideo } from 'react-native-image-crop-picker';
+import MapView, { Marker } from 'react-native-maps';
 import Geolocation from 'react-native-geolocation-service';
 import ErrorModal from '../../Components/ErrorModal';
 import ErrorMessageModal from '../../Components/ErrorMessageModal';
+import DateInputComp from '../../Components/DateInputComp';
 
-const PDReferenceCheck = (props, {navigation}) => {
+const PDReferenceCheck = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
   const [remarks, setRemarks] = useState('');
   const [pdData, setPdData] = useState([
-    {id: '1', remarks: '', reason: ''},
-    {id: '2', remarks: '', reason: ''},
+    { id: '1', remarks: '', reason: '' },
+    { id: '2', remarks: '', reason: '' },
   ]);
   const isScreenVisible = useIsFocused();
   const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
@@ -124,6 +125,14 @@ const PDReferenceCheck = (props, {navigation}) => {
   const [kycIDMan, setKycIDMan] = useState(false);
   const [kycIDVisible, setKycIDVisible] = useState(true);
   const [kycIDDisable, setKycIDDisable] = useState(false);
+
+  const [kycExpiryDate, setKycExpiryDate] = useState('');
+  const [kycExpiryDateCaption, setKycExpiryDateCaption] = useState('KYC EXPIRY DATE');
+  const [kycExpiryDateMan, setKycExpiryDateMan] = useState(false);
+  const [kycExpiryDateVisible, setKycExpiryDateVisible] = useState(false);
+  const [kycExpiryDateDisable, setKycExpiryDateDisable] = useState(false);
+
+  const [kycNumberTypeID, setkycNumberTypeID] = useState('numeric');
 
   const [referenceTypeLabel, setReferenceTypeLabel] = useState('');
   const [referenceTypeIndex, setReferenceTypeIndex] = useState('');
@@ -227,7 +236,7 @@ const PDReferenceCheck = (props, {navigation}) => {
   useEffect(() => {
     props.navigation
       .getParent()
-      ?.setOptions({tabBarStyle: {display: 'none'}, tabBarVisible: false});
+      ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       handleBackButton,
@@ -239,7 +248,7 @@ const PDReferenceCheck = (props, {navigation}) => {
     return () => {
       props.navigation
         .getParent()
-        ?.setOptions({tabBarStyle: undefined, tabBarVisible: undefined});
+        ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
       backHandler.remove();
     };
   }, [props.navigation, isScreenVisible]);
@@ -590,6 +599,16 @@ const PDReferenceCheck = (props, {navigation}) => {
       setDistrict(detail.district);
       setState(detail.state);
       setRemarksLabel(detail.remark);
+
+      if (detail.kycType == '002' || detail.kycType == '008') {
+        setKycExpiryDateVisible(true);
+        setKycExpiryDateMan(true);
+        setKycExpiryDate(Common.convertDateFormat(detail.expiryDate));
+      } else {
+        setKycExpiryDate('');
+        setKycExpiryDateVisible(false);
+        setKycExpiryDateMan(false);
+      }
       if (detail.dmsId !== undefined && detail.dmsId !== null) {
         if (detail.dmsId?.toString().length > 0) {
           getImage(detail.dmsId);
@@ -915,29 +934,26 @@ const PDReferenceCheck = (props, {navigation}) => {
 
   const submitReference = () => {
     //console.log('QuestionFinalData::' + JSON.stringify(pdData))
-    postReference();
+    if (validateData()) {
+      showBottomSheet();
+    } else {
+      postReference();
+    }
+
   };
 
   const validateData = () => {
     var flag = false;
     var i = 1;
     var errorMessage = '';
+    var isAadharAvailable = false;
+
+    if (kycTypeLabel == '001') {
+      isAadharAvailable = true;
+    }
 
     if (nameMan && nameVisible) {
-      if (name !== undefined && name !== null) {
-        if (name.length <= 0) {
-          errorMessage =
-            errorMessage +
-            i +
-            ')' +
-            ' ' +
-            language[0][props.language].str_plsenter +
-            nameCaption +
-            '\n';
-          i++;
-          flag = true;
-        }
-      } else {
+      if (!name) {
         errorMessage =
           errorMessage +
           i +
@@ -948,8 +964,11 @@ const PDReferenceCheck = (props, {navigation}) => {
           '\n';
         i++;
         flag = true;
+
       }
     }
+
+
 
     if (contactNumberMan && contactNumberVisible) {
       if (contactNumber !== undefined && contactNumber !== null) {
@@ -1001,6 +1020,36 @@ const PDReferenceCheck = (props, {navigation}) => {
           ' ' +
           language[0][props.language].str_plsenter +
           kycTypeCaption +
+          '\n';
+        i++;
+        flag = true;
+      }
+    }
+
+    if (kycTypeLabel.length > 0) {
+      if (kycID.length <= 0) {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          language[0][props.language].str_plsenter +
+          kycIDCaption +
+          '\n';
+        i++;
+        flag = true;
+      }
+    }
+
+    if (kycExpiryDateMan && kycExpiryDateVisible) {
+      if (!kycExpiryDate) {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          language[0][props.language].str_plsenter +
+          kycExpiryDateCaption +
           '\n';
         i++;
         flag = true;
@@ -1235,7 +1284,7 @@ const PDReferenceCheck = (props, {navigation}) => {
     }
 
     if (commentsMan && commentsVisible) {
-      if (comments.length <= 0) {
+      if (!comments) {
         errorMessage =
           errorMessage +
           i +
@@ -1261,15 +1310,82 @@ const PDReferenceCheck = (props, {navigation}) => {
       flag = true;
     }
 
+    if (isAadharAvailable) {
+      if (!Common.validateVerhoeff(kycID)) {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          'Please Enter Valid Aadhar Number' +
+          '\n';
+        i++;
+        flag = true;
+      }
+    }
+
+    if (kycTypeLabel == '007') {
+      if (kycID.length > 0) {
+        if (!Common.isValidPAN(kycID)) {
+          errorMessage =
+            errorMessage +
+            i +
+            ')' +
+            ' ' +
+            language[0][props.language].str_plsenter +
+            'Valid PAN' +
+            '\n';
+          i++;
+          flag = true;
+        }
+      }
+    }
+
+    if (kycTypeLabel == '002') {
+      if (kycID.length > 0) {
+        if (kycID.length != 10) {
+          errorMessage =
+            errorMessage +
+            i +
+            ')' +
+            ' ' +
+            language[0][props.language].str_plsenter +
+            'Valid Driving License' +
+            '\n';
+          i++;
+          flag = true;
+        }
+      }
+    }
+
+    if (kycTypeLabel == '008') {
+      if (kycID.length > 0) {
+        if (kycID.length != 8) {
+          errorMessage =
+            errorMessage +
+            i +
+            ')' +
+            ' ' +
+            language[0][props.language].str_plsenter +
+            'Valid Passport' +
+            '\n';
+          i++;
+          flag = true;
+        }
+      }
+    }
+
     setErrMsg(errorMessage);
     return flag;
   };
 
+
+
   const updateImage = async (imageUri, fileType, fileName) => {
-    if (validateData()) {
-      showBottomSheet();
-      return;
-    }
+    // if (validateData()) {
+    //   showBottomSheet();
+    //   return;
+    // }
     if (imageUri) {
       setLoading(true);
       const formData = new FormData();
@@ -1318,6 +1434,12 @@ const PDReferenceCheck = (props, {navigation}) => {
     const baseURL = global.PORT1;
     setLoading(true);
 
+    var exp1 = '';
+
+    if (kycExpiryDate) {
+      exp1 = Common.convertYearDateFormat(kycExpiryDate)
+    }
+
     const appDetails = {
       createdBy: global.USERID,
       createdDate: new Date(),
@@ -1329,6 +1451,7 @@ const PDReferenceCheck = (props, {navigation}) => {
       contactNo: contactNumber,
       kycType: kycTypeLabel,
       kycId: kycID,
+      expiryDate: exp1,
       reffernceType: referenceTypeLabel,
       familarityWithApplicant: fwa,
       addressLine1: addressLine1,
@@ -1396,6 +1519,21 @@ const PDReferenceCheck = (props, {navigation}) => {
     if (componentName === 'kycTypePicker') {
       setKycTypeLabel(label);
       setKycTypeIndex(index);
+      setKycID('');
+      if (label == '001') {
+        setkycNumberTypeID('numeric');
+      } else {
+        setkycNumberTypeID('email-address');
+      }
+      if (label == '002' || label == '008') {
+        setKycExpiryDateVisible(true);
+        setKycExpiryDateMan(true);
+      } else {
+        setKycExpiryDate('');
+        setKycExpiryDateVisible(false);
+        setKycExpiryDateMan(false);
+      }
+
     } else if (componentName === 'referenceTypePicker') {
       setReferenceTypeLabel(label);
       setReferenceTypeIndex(index);
@@ -1480,6 +1618,24 @@ const PDReferenceCheck = (props, {navigation}) => {
       } else {
         setComments(textValue);
       }
+    } else if (componentName === 'expiryDate') {
+      handleTextChange(componentName, textValue);
+    }
+  };
+
+  const handleTextChange = (componentName, input) => {
+    const numericInput = input.replace(/\D/g, '');
+
+    // Insert slashes while typing
+    let formattedDate = '';
+    for (let i = 0; i < numericInput.length; i++) {
+      if (i === 2 || i === 4) {
+        formattedDate += '-';
+      }
+      formattedDate += numericInput[i];
+    }
+    if (componentName === 'expiryDate') {
+      setKycExpiryDate(formattedDate);
     }
   };
 
@@ -1560,7 +1716,7 @@ const PDReferenceCheck = (props, {navigation}) => {
   };
 
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: 'white'}}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
       {loading ? <Loading /> : null}
       <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
       <ErrorModal
@@ -1617,7 +1773,7 @@ const PDReferenceCheck = (props, {navigation}) => {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            <View style={{width: '30%', alignItems: 'center'}}>
+            <View style={{ width: '30%', alignItems: 'center' }}>
               <TouchableOpacity onPress={() => pickImage()} activeOpacity={11}>
                 <View
                   style={{
@@ -1645,7 +1801,7 @@ const PDReferenceCheck = (props, {navigation}) => {
                 Camera
               </Text>
             </View>
-            <View style={{width: '30%', alignItems: 'center'}}>
+            <View style={{ width: '30%', alignItems: 'center' }}>
               <TouchableOpacity
                 onPress={() => selectImage()}
                 activeOpacity={11}>
@@ -1665,7 +1821,7 @@ const PDReferenceCheck = (props, {navigation}) => {
                   />
                 </View>
               </TouchableOpacity>
-              <Text style={{fontSize: 14, color: Colors.black, marginTop: 7}}>
+              <Text style={{ fontSize: 14, color: Colors.black, marginTop: 7 }}>
                 Gallery
               </Text>
             </View>
@@ -1685,7 +1841,7 @@ const PDReferenceCheck = (props, {navigation}) => {
           onGoBack={onGoBack}
         />
       </View>
-      <View style={{width: '93%', flexDirection: 'row', marginLeft: 20}}>
+      <View style={{ width: '93%', flexDirection: 'row', marginLeft: 20 }}>
         <Text
           style={{
             fontSize: 15,
@@ -1706,7 +1862,7 @@ const PDReferenceCheck = (props, {navigation}) => {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
               <TextComp
                 textVal={nameCaption}
                 textStyle={Commonstyles.inputtextStyle}
@@ -1737,7 +1893,7 @@ const PDReferenceCheck = (props, {navigation}) => {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
               <TextComp
                 textVal={contactNumberCaption}
                 textStyle={Commonstyles.inputtextStyle}
@@ -1760,8 +1916,8 @@ const PDReferenceCheck = (props, {navigation}) => {
         )}
 
         {kycTypeVisible && (
-          <View style={{width: '100%', alignItems: 'center', marginTop: '4%'}}>
-            <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+          <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
               <TextComp
                 textVal={kycTypeCaption}
                 textStyle={Commonstyles.inputtextStyle}
@@ -1788,7 +1944,7 @@ const PDReferenceCheck = (props, {navigation}) => {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
               <TextComp
                 textVal={kycIDCaption}
                 textStyle={Commonstyles.inputtextStyle}
@@ -1798,7 +1954,7 @@ const PDReferenceCheck = (props, {navigation}) => {
             <TextInputComp
               textValue={kycID}
               textStyle={Commonstyles.textinputtextStyle}
-              type="email-address"
+              type={kycNumberTypeID}
               Disable={kycIDDisable}
               ComponentName="kycID"
               reference={kycIDRef}
@@ -1810,9 +1966,52 @@ const PDReferenceCheck = (props, {navigation}) => {
           </View>
         )}
 
+        {kycExpiryDateVisible && (
+          <View
+            style={{
+              width: '100%',
+              marginTop: 19,
+              paddingHorizontal: 0,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+              <TextComp
+                textVal={kycExpiryDateCaption}
+                textStyle={Commonstyles.inputtextStyle}
+                Visible={kycExpiryDateMan}
+              />
+            </View>
+
+            <View style={{ width: '100%', alignItems: 'center' }}>
+              <DateInputComp
+                textStyle={[Commonstyles.inputtextStyle, { width: '90%' }]}
+                ComponentName="expiryDate"
+                textValue={kycExpiryDate}
+                type="numeric"
+                Disable={kycExpiryDateDisable}
+                handleClick={handleClick}
+                handleReference={handleReference}
+                minDate={new Date()}
+              />
+            </View>
+            {/* <TextInputComp
+                textValue={expiryDate1}
+                textStyle={Commonstyles.textinputtextStyle}
+                type="numeric"
+                Disable={expiryDate1Disable}
+                ComponentName="expiryDate1"
+                reference={expityDate1Ref}
+                returnKey="next"
+                handleClick={handleClick}
+                handleReference={handleReference}
+              /> */}
+          </View>
+        )}
+
         {referenceTypeVisible && (
-          <View style={{width: '100%', alignItems: 'center', marginTop: '4%'}}>
-            <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+          <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
               <TextComp
                 textVal={referenceTypeCaption}
                 textStyle={Commonstyles.inputtextStyle}
@@ -1839,7 +2038,7 @@ const PDReferenceCheck = (props, {navigation}) => {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
               <TextComp
                 textVal={fwaCaption}
                 textStyle={Commonstyles.inputtextStyle}
@@ -1870,7 +2069,7 @@ const PDReferenceCheck = (props, {navigation}) => {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
               <TextComp
                 textVal={addressLine1Caption}
                 textStyle={Commonstyles.inputtextStyle}
@@ -1901,7 +2100,7 @@ const PDReferenceCheck = (props, {navigation}) => {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
               <TextComp
                 textVal={addressLine2Caption}
                 textStyle={Commonstyles.inputtextStyle}
@@ -1932,7 +2131,7 @@ const PDReferenceCheck = (props, {navigation}) => {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
               <TextComp
                 textVal={landmarkCaption}
                 textStyle={Commonstyles.inputtextStyle}
@@ -1963,7 +2162,7 @@ const PDReferenceCheck = (props, {navigation}) => {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
               <TextComp
                 textVal={pincodeCaption}
                 textStyle={Commonstyles.inputtextStyle}
@@ -1994,7 +2193,7 @@ const PDReferenceCheck = (props, {navigation}) => {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
               <TextComp
                 textVal={cityCaption}
                 textStyle={Commonstyles.inputtextStyle}
@@ -2025,7 +2224,7 @@ const PDReferenceCheck = (props, {navigation}) => {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
               <TextComp
                 textVal={districtCaption}
                 textStyle={Commonstyles.inputtextStyle}
@@ -2056,7 +2255,7 @@ const PDReferenceCheck = (props, {navigation}) => {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
               <TextComp
                 textVal={stateCaption}
                 textStyle={Commonstyles.inputtextStyle}
@@ -2079,8 +2278,8 @@ const PDReferenceCheck = (props, {navigation}) => {
         )}
 
         {remarksVisible && (
-          <View style={{width: '100%', alignItems: 'center', marginTop: '4%'}}>
-            <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+          <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
               <TextComp
                 textVal={remarksCaption}
                 textStyle={Commonstyles.inputtextStyle}
@@ -2098,8 +2297,8 @@ const PDReferenceCheck = (props, {navigation}) => {
           </View>
         )}
 
-        <View style={{width: '100%', alignItems: 'center', marginTop: '4%'}}>
-          <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+        <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+          <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
             <TextComp
               textVal={language[0][props.language].str_capturecustpht}
               textStyle={Commonstyles.inputtextStyle}
@@ -2146,10 +2345,10 @@ const PDReferenceCheck = (props, {navigation}) => {
                   imageUri: imageUri,
                 });
               }}>
-              <View style={{width: '100%', height: 170}}>
+              <View style={{ width: '100%', height: 170 }}>
                 <Image
-                  source={{uri: imageUri}}
-                  style={{width: '100%', height: 170, borderRadius: 10}}
+                  source={{ uri: imageUri }}
+                  style={{ width: '100%', height: 170, borderRadius: 10 }}
                 />
               </View>
             </TouchableOpacity>
@@ -2198,7 +2397,7 @@ const PDReferenceCheck = (props, {navigation}) => {
             alignItems: 'center',
             justifyContent: 'center',
           }}>
-          <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+          <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
             <TextComp
               textVal={language[0][props.language].str_gpslocation}
               textStyle={Commonstyles.inputtextStyle}
@@ -2234,7 +2433,7 @@ const PDReferenceCheck = (props, {navigation}) => {
                   getlocationPermission();
                 }
               }}
-              style={{marginLeft: 8, marginTop: 5}}
+              style={{ marginLeft: 8, marginTop: 5 }}
               activeOpacity={0.5}>
               <FontAwesome6
                 name="location-dot"
@@ -2245,7 +2444,7 @@ const PDReferenceCheck = (props, {navigation}) => {
           </View>
         </View>
 
-        <View style={{width: '100%', alignItems: 'center', marginTop: '4%'}}>
+        <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
           <View
             style={{
               width: '90%',
@@ -2255,7 +2454,7 @@ const PDReferenceCheck = (props, {navigation}) => {
               borderBottomColor: '#e2e2e2',
             }}>
             <MapView
-              style={{width: '100%', height: 200, marginTop: 15}}
+              style={{ width: '100%', height: 200, marginTop: 15 }}
               ref={mapRef}
               initialRegion={{
                 latitude: currentLatitude,
@@ -2269,8 +2468,8 @@ const PDReferenceCheck = (props, {navigation}) => {
                   longitude: parseFloat(currentLongitude),
                 }}
                 onDragEnd={e => alert(JSON.stringify(e.nativeEvent.coordinate))}
-                //title={'Test Marker'}
-                //description={'This is a description of the marker'}
+              //title={'Test Marker'}
+              //description={'This is a description of the marker'}
               />
             </MapView>
           </View>
@@ -2285,7 +2484,7 @@ const PDReferenceCheck = (props, {navigation}) => {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
               <TextComp
                 textVal={commentsCaption}
                 textStyle={Commonstyles.inputtextStyle}
@@ -2316,7 +2515,7 @@ const PDReferenceCheck = (props, {navigation}) => {
           fontWeight: 500,
           marginBottom: 5,
         }}
-        viewStyle={[Commonstyles.buttonView, {marginBottom: 10}]}
+        viewStyle={[Commonstyles.buttonView, { marginBottom: 10 }]}
         innerStyle={Commonstyles.buttonViewInnerStyle}
         handleClick={submitReference}
       />
@@ -2325,9 +2524,9 @@ const PDReferenceCheck = (props, {navigation}) => {
 };
 
 const mapStateToProps = state => {
-  const {language} = state.languageReducer;
-  const {profileDetails} = state.profileReducer;
-  const {mobileCodeDetails} = state.mobilecodeReducer;
+  const { language } = state.languageReducer;
+  const { profileDetails } = state.profileReducer;
+  const { mobileCodeDetails } = state.mobilecodeReducer;
   return {
     language: language,
     profiledetail: profileDetails,

@@ -630,7 +630,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     if (data.kycTypeId2 == '002' || data.kycTypeId2 == '008') {
       setExpiry2DateVisible(true);
       setExpiry2DateMan(true);
-      setExpiry2Date(Common.convertDateFormat(data[0].kycType2ExpiryDate));
+      setExpiry2Date(Common.convertDateFormat(data.kycType2ExpiryDate));
     } else {
       setExpiry2Date('');
       setExpiry2DateVisible(false);
@@ -641,7 +641,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     if (data.kycTypeId3 == '002' || data.kycTypeId3 == '008') {
       setExpiry3DateVisible(true);
       setExpiry3DateMan(true);
-      setExpiry3Date(Common.convertDateFormat(data[0].kycType3ExpiryDate));
+      setExpiry3Date(Common.convertDateFormat(data.kycType3ExpiryDate));
     } else {
       setExpiry3Date('');
       setExpiry3DateVisible(false);
@@ -652,7 +652,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     if (data.kycTypeId4 == '002' || data.kycTypeId4 == '008') {
       setExpiry4DateVisible(true);
       setExpiry4DateMan(true);
-      setExpiry4Date(Common.convertDateFormat(data[0].kycType4ExpiryDate));
+      setExpiry4Date(Common.convertDateFormat(data.kycType4ExpiryDate));
     } else {
       setExpiry4Date('');
       setExpiry4DateVisible(false);

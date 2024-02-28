@@ -12,7 +12,7 @@ import {
 import { React, useState, useEffect } from 'react';
 import MyStatusBar from '../../../Components/MyStatusBar';
 import HeadComp from '../../../Components/HeadComp';
-import { connect } from 'react-redux';
+import { connect, useDispatch, useSelector } from 'react-redux';
 import { languageAction } from '../../../Utils/redux/actions/languageAction';
 import { language } from '../../../Utils/LanguageString';
 import Loading from '../../../Components/Loading';
@@ -34,7 +34,7 @@ import tbl_client from '../../../Database/Table/tbl_client';
 import tbl_loanApplication from '../../../Database/Table/tbl_loanApplication';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import tbl_loanaddressinfo from '../../../Database/Table/tbl_loanaddressinfo';
-import { deleteNestedClientDetails, updateNestedClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
+import { deleteNestedClientDetails, updateAsyncNestedClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
 
 
 const LoanAddressList = (props, { navigation }) => {
@@ -61,6 +61,10 @@ const LoanAddressList = (props, { navigation }) => {
     const showBottomSheet = () => setBottomErrorSheetVisible(true);
     const hideBottomSheet = () => setBottomErrorSheetVisible(false);
     const [onlyView, setOnlyView] = useState(false);
+    const reduxdispatch = useDispatch();
+    const loanInitiationDetails = useSelector(state => state.loanInitiationReducer.loanInitiationDetails);
+    const [loaded, setLoaded] = useState(false); // State to track if data is loaded
+
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
@@ -78,6 +82,18 @@ const LoanAddressList = (props, { navigation }) => {
         }
     }, [props.navigation, isScreenVisible]);
 
+    useEffect(() => {
+        // Any logic you want to execute when loanInitiationDetails changes
+        // For example, dispatch an action to update the details
+        if (loaded) {
+            //alert('hi')
+            getAddressData();
+            //setLoaded(false);
+        }
+
+    }, [loanInitiationDetails, loaded]);
+
+
     const handleBackButton = () => {
         onGoBack();
         return true; // Prevent default back button behavior
@@ -86,18 +102,28 @@ const LoanAddressList = (props, { navigation }) => {
     const getAddressData = () => {
 
 
-        const allClientDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].clientDetail;
+        const allClientDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
 
-        allClientDetail.map(item => {
-            if (item.udyamRegistrationNumber) {
-                setUrmNumber(item.udyamRegistrationNumber);
+        if (allClientDetail) {
+            if (allClientDetail.udyamRegistrationNumber) {
+                setUrmNumber(allClientDetail.udyamRegistrationNumber);
                 // setUrmNumberDisable(true);
                 // UrNumberAvailable = true;
-                getAllLoanAddressData(item.udyamRegistrationNumber);
+                getAllLoanAddressData(allClientDetail.udyamRegistrationNumber);
             } else {
                 getAllLoanAddressData("")
             }
-        });
+        }
+        // allClientDetail.map(item => {
+        //     if (item.udyamRegistrationNumber) {
+        //         setUrmNumber(item.udyamRegistrationNumber);
+        //         // setUrmNumberDisable(true);
+        //         // UrNumberAvailable = true;
+        //         getAllLoanAddressData(item.udyamRegistrationNumber);
+        //     } else {
+        //         getAllLoanAddressData("")
+        //     }
+        // });
 
         // tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE).then(value => {
         //     if (value !== undefined && value.length > 0) {
@@ -142,6 +168,7 @@ const LoanAddressList = (props, { navigation }) => {
                 if (urmNumber) {
                     if (urmNumber.length > 0) {
                         if (!onlyView) {
+
                             getUdyamRAOCheck(urmNumber);
                         }
                     }
@@ -246,8 +273,18 @@ const LoanAddressList = (props, { navigation }) => {
 
                             setLoading(false);
 
-                            props.updateNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientAddress', response.data)
+                            const addressData = response.data.clientAddressInfoDto;
+                            addressData.addressType = "ROA";
 
+                            //props.updateAsyncNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientAddress', response.data)
+                            reduxdispatch(updateAsyncNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientAddress', addressData))
+                                .then(() => {
+                                    setLoaded(true);
+                                })
+                                .catch(error => {
+                                    // Handle any errors that occurred during the dispatch
+                                    console.error('Error dispatching updateAsyncNestedClientDetails:', error);
+                                });
                             //insertData(response.data);
 
 
@@ -659,7 +696,12 @@ const LoanAddressList = (props, { navigation }) => {
                             global.CLIENTTYPE == 'APPL' ? language[0][props.language].str_baddressdetailappl : language[0][props.language].str_baddressdetail
                         }></TextComp>
 
-                    <ProgressComp progressvalue={0.60} textvalue="4 of 6" />
+
+                    {global.CLIENTTYPE == 'APPL' ? (
+                        <ProgressComp progressvalue={0.50} textvalue="4 of 6" />
+                    ) : (
+                        <ProgressComp progressvalue={0.50} textvalue="2 of 4" />
+                    )}
                 </View>
             </View>
 
@@ -723,18 +765,6 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => ({
     languageAction: item => dispatch(languageAction(item)),
-    updateNestedClientDetails: (loanApplicationId, clientId, key, nestedKey, data) => {
-        // Dispatch the updateNestedClientDetails action creator
-        return dispatch(updateNestedClientDetails(loanApplicationId, clientId, key, nestedKey, data))
-            .then(() => {
-                // After the update is done, dispatch getAddressData
-                getAddressData();
-            })
-            .catch(error => {
-                // Handle any errors that might occur during the update process
-                console.error('Error updating client details:', error);
-            });
-    },
     deleteNestedClientDetails: (loanApplicationId, clientId, key, nestedKey, id) => dispatch(deleteNestedClientDetails(loanApplicationId, clientId, key, nestedKey, id)),
 });
 

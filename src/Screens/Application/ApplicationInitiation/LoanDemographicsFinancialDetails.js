@@ -40,6 +40,8 @@ import ImageComp from '../../../Components/ImageComp';
 import { Item } from 'react-native-paper/lib/typescript/components/Drawer/Drawer';
 import tbl_finexpdetails from '../../../Database/Table/tbl_finexpdetails';
 import ErrorModal from '../../../Components/ErrorModal';
+import { updateLoanInitiationDetails, deleteLoanInitiationDetails, updateNestedClientDetails, deleteAddressNestedClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
+
 
 const LoanDemographicsFinancialDetails = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -158,12 +160,27 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
 
 
     try {
-      const filteredClients = global.LEADTRACKERDATA.clientDetail.filter((client) => client.clientType === global.CLIENTTYPE);
+      // const filteredClients = global.LEADTRACKERDATA.clientDetail.filter((client) => client.id === global.CLIENTTYPE);
+      const filteredClients = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
 
-      if (filteredClients.length > 0) {
-        if (filteredClients[0].clientFinancialDetail != undefined) {
-          setEarningFrequencyLabel(filteredClients[0].clientFinancialDetail.earningFrequency)
-          setEarningTypeLabel(filteredClients[0].clientFinancialDetail.earningType)
+      if (filteredClients) {
+
+        if (filteredClients.clientFinancialDetail) {
+
+          const jsonData = JSON.parse(JSON.stringify(filteredClients.clientFinancialDetail));
+          var financialData = '';
+
+          if (Array.isArray(jsonData)) {
+            financialData = filteredClients.clientFinancialDetail[0];
+          } else if (typeof jsonData === 'object' && jsonData !== null) {
+            financialData = filteredClients.clientFinancialDetail;
+          }
+
+          if (financialData) {
+            setEarningFrequencyLabel(financialData.earningFrequency)
+            setEarningTypeLabel(financialData.earningType)
+          }
+
         }
       }
     }
@@ -564,6 +581,7 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
           if (global.DEBUG_MODE) console.log('PostFinancialResponse::' + JSON.stringify(response.data),);
           setLoading(false);
           if (response.status == 200) {
+            props.updateNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientFinancialDetail', response.data)
             insertData(mergedArray);
           } else if (response.data.statusCode === 201) {
             setApiError(response.data.message);
@@ -1238,15 +1256,18 @@ const mapStateToProps = (state) => {
   const { language } = state.languageReducer;
   const { profileDetails } = state.profileReducer;
   const { mobileCodeDetails } = state.mobilecodeReducer;
+  const { loanInitiationDetails } = state.loanInitiationReducer;
   return {
     language: language,
     profiledetail: profileDetails,
-    mobilecodedetail: mobileCodeDetails
+    mobilecodedetail: mobileCodeDetails,
+    loanInitiationDetails: loanInitiationDetails
   }
 }
 
 const mapDispatchToProps = dispatch => ({
   languageAction: item => dispatch(languageAction(item)),
+  updateNestedClientDetails: (loanApplicationId, clientId, key, nestedKey, data) => dispatch(updateNestedClientDetails(loanApplicationId, clientId, key, nestedKey, data)),
 });
 
 export default connect(

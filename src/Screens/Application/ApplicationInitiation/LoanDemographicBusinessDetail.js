@@ -382,50 +382,65 @@ const LoanDemographicBusinessDetail = (props) => {
 
         if (filteredData) {
             const clientDetail = filteredData[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
+
             if (clientDetail) {
                 if (clientDetail.clientBusinessDetail) {
 
-                    businessAvailable = true;
-                    setCustomerSubCategoryLabel(clientDetail.clientBusinessDetail.customerSubcategory)
-                    setCustomerSubCategoryDisable(true);
-                    setEntShopName(clientDetail.clientBusinessDetail.enterpriseShopName)
-                    setUrmNumber(clientDetail.clientBusinessDetail.udyamRegistrationNumber)
-                    if (UrNumberAvailable) {
-                        setUrmNumberDisable(true)
-                    }
-                    setDOR(clientDetail.clientBusinessDetail.dateOfRegistration ? Common.convertDateFormat(clientDetail.clientBusinessDetail.dateOfRegistration) : '') //dateofReg
-                    setDOI(clientDetail.clientBusinessDetail.dateOfIncorporation ? Common.convertDateFormat(clientDetail.clientBusinessDetail.dateOfIncorporation) : '')
-                    setDOBC(clientDetail.clientBusinessDetail.dateOfBusinessCommencement ? Common.convertDateFormat(clientDetail.clientBusinessDetail.dateOfBusinessCommencement) : '')
-                    setYear(clientDetail?.clientBusinessDetail?.businessVintageYears?.toString() || '')
-                    setMonthLabel(parseInt(clientDetail?.clientBusinessDetail?.businessVintageMonths))
-                    setIndustryTypeLabel(clientDetail?.clientBusinessDetail?.industryType)
-                    setIndustryLineLabel(clientDetail?.clientBusinessDetail?.industryLine)
-                    setCompanyTypeLabel(clientDetail?.clientBusinessDetail?.companyType)
-                    setEnterpriseTypeLabel(clientDetail?.clientBusinessDetail?.enterpriseType)
-                    setBusinessLocationLabel(clientDetail?.clientBusinessDetail?.businessLocationVillage)
-                    setNoofEmployee(clientDetail?.clientBusinessDetail?.noOfEmployees)
-                    setOperatingDays(clientDetail?.clientBusinessDetail?.operatingDaysInAWeek) //operatingtiming
-                    setBookKeepStatusLabel(clientDetail?.clientBusinessDetail?.bookKeepingStatus)
-                    setHomeBasedBusinessLabel(clientDetail?.clientBusinessDetail?.homeBasedBusiness)
-                    setACTMLabel(clientDetail?.clientBusinessDetail?.applicantCustomerTransactionMode)
-                    setTimeByPromoter(clientDetail?.clientBusinessDetail?.timeSpentAtTheBusinessInADay)
-                    setNPMRate(clientDetail?.clientBusinessDetail?.npmRateOfBusiness)
-                    setPurchaseFrequencyLabel(clientDetail?.clientBusinessDetail?.purchasesFrequency)
-                    setTypePurchaseLabel(clientDetail?.clientBusinessDetail?.typeOfPurchasingFacility)
-                    setSalesFrequencyLabel(clientDetail?.clientBusinessDetail?.salesFrequency)
-                    if (clientDetail?.clientBusinessDetail?.clientBusinessImageGeocodeDetail) {
-                        setDocID(clientDetail?.clientBusinessDetail?.clientBusinessImageGeocodeDetail[0]?.dmsId);
-                    }
-                } else {
-                    if (udyamNum) {
-                        getUdyamCheck(udyamNum);
-                    }
-                    if (global.CLIENTTYPE == 'APPL') {
-                        setCustomerSubCategoryLabel(clientDetail.customerSubcategory);
-                        setCustomerSubCategoryDisable(true);
-                    }
-                }
+                    const jsonData = JSON.parse(JSON.stringify(clientDetail.clientBusinessDetail));
+                    var businessData = '';
 
+                    if (Array.isArray(jsonData)) {
+                        businessData = clientDetail.clientBusinessDetail[0];
+                    } else if (typeof jsonData === 'object' && jsonData !== null) {
+                        businessData = clientDetail.clientBusinessDetail;
+                    }
+
+                    if (businessData) {
+
+                        businessAvailable = true;
+                        setCustomerSubCategoryLabel(businessData?.customerSubcategory)
+                        setCustomerSubCategoryDisable(true);
+                        setEntShopName(businessData?.enterpriseShopName)
+                        setUrmNumber(businessData?.udyamRegistrationNumber)
+                        if (UrNumberAvailable) {
+                            setUrmNumberDisable(true)
+                        }
+                        setDOR(businessData?.dateOfRegistration ? Common.convertDateFormat(businessData?.dateOfRegistration) : '') //dateofReg
+                        setDOI(businessData?.dateOfIncorporation ? Common.convertDateFormat(businessData?.dateOfIncorporation) : '')
+                        setDOBC(businessData?.dateOfBusinessCommencement ? Common.convertDateFormat(businessData?.dateOfBusinessCommencement) : '')
+                        setYear(businessData?.businessVintageYears?.toString() || '')
+                        setMonthLabel(parseInt(businessData?.businessVintageMonths))
+                        setIndustryTypeLabel(businessData?.industryType)
+                        setIndustryLineLabel(businessData?.industryLine)
+                        setCompanyTypeLabel(businessData?.companyType)
+                        setEnterpriseTypeLabel(businessData?.enterpriseType)
+                        setBusinessLocationLabel(businessData?.businessLocationVillage)
+                        setNoofEmployee(businessData?.noOfEmployees?.toString() || '')
+                        setOperatingDays(businessData?.operatingDaysInAWeek?.toString() || '') //operatingtiming
+                        setOperatingTimings(businessData?.operatingTimesInADay?.toString() || '') //operatingtiming
+                        setBookKeepStatusLabel(businessData?.bookKeepingStatus)
+                        setHomeBasedBusinessLabel(businessData?.homeBasedBusiness)
+                        setACTMLabel(businessData?.applicantCustomerTransactionMode)
+                        setTimeByPromoter(businessData?.timeSpentAtTheBusinessInADay?.toString() || '')
+                        setYearAtPresent(businessData?.yearsAtPresentPremises?.toString() || '')
+                        setNPMRate(businessData?.npmRateOfBusiness?.toString() || '')
+                        setPurchaseFrequencyLabel(businessData?.purchasesFrequency)
+                        setTypePurchaseLabel(businessData?.typeOfPurchasingFacility)
+                        setSalesFrequencyLabel(businessData?.salesFrequency)
+                        if (businessData?.clientBusinessImageGeocodeDetail) {
+                            setDocID(businessData?.clientBusinessImageGeocodeDetail[0]?.dmsId);
+                        }
+                    } else {
+                        if (udyamNum) {
+                            getUdyamCheck(udyamNum);
+                        }
+                        if (global.CLIENTTYPE == 'APPL') {
+                            setCustomerSubCategoryLabel(filteredData[0].customerSubcategory);
+                            setCustomerSubCategoryDisable(true);
+                        }
+                    }
+
+                }
             }
         }
 
@@ -658,6 +673,7 @@ const LoanDemographicBusinessDetail = (props) => {
         setBusinessLocationDisable(true);
         setNoofEmployeeDisable(true);
         setOperatingDaysDisable(true);
+        setOperatingTimingsDisable(true);
         setBookKeepStatusDisable(true);
         setHomeBasedBusinessDisable(true);
         setACTMDisable(true);
@@ -666,6 +682,7 @@ const LoanDemographicBusinessDetail = (props) => {
         setPurchaseFrequencyDisable(true);
         setTypePurchaseDisable(true);
         setSalesFrequencyDisable(true);
+        setYearAtPresentDisable(true);
     }
 
     const checkPermissions = async () => {
@@ -2441,7 +2458,7 @@ const LoanDemographicBusinessDetail = (props) => {
                         </View>
                     )}
 
-                    {yearAtPresent && (
+                    {yearAtPresentVisible && (
                         <View
                             style={{
                                 width: '100%',

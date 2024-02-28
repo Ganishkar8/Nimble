@@ -242,7 +242,7 @@ const LoanDemographicFamilyDetails = (props) => {
             ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
         const clientDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].familyDetail;
-        
+
         if (props.route.params.familyDetails.length > 0) {
             fetchFamilyData();
         }
@@ -275,7 +275,7 @@ const LoanDemographicFamilyDetails = (props) => {
         setName(data[0].name);
         setGenderLabel(data[0].gender);
         setDOB(Common.convertDateFormat(data[0].dateOfBirth))
-        setAge(data[0].age)
+        setAge(data[0].age.toString())
         setMobileNumber(data[0].mobileNumber)
         setKycType1Label(data[0].kycTypeId1)
         setkycID1(data[0].kycIdValue1)
@@ -284,8 +284,13 @@ const LoanDemographicFamilyDetails = (props) => {
         setkycID2(data[0].kycIdValue2)
         setExpiry2Date(data[0].kycType2ExpiryDate)
         setKycType3Label(data[0].kycTypeId3)
-        setkycID3(data[0].kycTypeId3)
+        setkycID3(data[0].kycIdValue3)
         setExpiry3Date(data[0].kycType3ExpiryDate)
+        setKycType4Label(data[0].kycTypeId4)
+        setkycID4(data[0].kycIdValue4)
+        setExpiry4Date(data[0].kycType4ExpiryDate)
+
+
         setRelationStatuswithCOAPPLabel(data[0].relationshipWithCoApplicant)
         setRelationStatuswithGRNTRLabel(data[0].relationshipWithGuarantor)
     };
@@ -730,6 +735,7 @@ const LoanDemographicFamilyDetails = (props) => {
                     "name": Name,
                     "dateOfBirth": DOB.length > 0 ? Common.convertYearDateFormat(DOB) : '',
                     "age": Age,
+                    "title": titleLabel,
                     "mobileNumber": mobileNumber,
                     "gender": genderLabel,
                     "kycTypeId1": KycType1Label,

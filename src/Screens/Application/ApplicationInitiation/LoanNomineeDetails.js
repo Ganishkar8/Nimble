@@ -170,6 +170,7 @@ const LoanNomineeDetails = (props, { navigation }) => {
     const [nomineeID, setNomineeID] = useState('');
     const [nomineeMaxID, setNomineeMaxID] = useState('');
     const [pageId, setPageId] = useState(global.CURRENTPAGEID);
+    const [onlyView, setOnlyView] = useState(false);
 
 
     useEffect(() => {
@@ -179,7 +180,8 @@ const LoanNomineeDetails = (props, { navigation }) => {
         makeSystemMandatoryFields();
         getExistingData()
 
-        if (global.USERTYPEID == 1163) {
+        if (global.USERTYPEID == 1163 || global.ALLOWEDIT == "0") {
+            setOnlyView(true);
             fieldsDisable();
         }
 
@@ -197,53 +199,73 @@ const LoanNomineeDetails = (props, { navigation }) => {
     const getExistingData = () => {
 
         if (isNew != 'new') {
-            getExistingBankData(isNew.loanApplicationId, isNew.id)
+            getExistingBankData(isNew)
         }
 
     }
 
     const getApplicantData = async (clientType) => {
-        setLoading(true);
+        // setLoading(true);
 
-        await tbl_client
-            .getClientBasedOnID(global.LOANAPPLICATIONID, clientType)
-            .then(data => {
-                if (global.DEBUG_MODE) console.log('Applicant Data:', data);
-                if (data !== undefined && data.length > 0) {
+        // await tbl_client
+        //     .getClientBasedOnID(global.LOANAPPLICATIONID, clientType)
+        //     .then(data => {
+        //         if (global.DEBUG_MODE) console.log('Applicant Data:', data);
+        //         if (data !== undefined && data.length > 0) {
 
-                    setTitleLabel(data[0].titleId);
-                    setFullName(data[0].firstName + ' ' + data[0].middleName + ' ' + data[0].lastName);
-                    setGenderLabel(data[0].genderId);
-                    setDOB(data[0]?.dateOfBirth ?? '');
-                    setAge(data[0]?.age ?? '');
-                    setMobileNumber(data[0].mobileNumber);
-                    if (data[0].kycTypeId1 == '001') {
-                        setAadharID(data[0].kycIdValue1)
-                    } else if (data[0].kycTypeId2 == '001') {
-                        setAadharID(data[0].kycIdValue2)
-                    } else if (data[0].kycTypeId3 == '001') {
-                        setAadharID(data[0].kycIdValue3)
-                    } else if (data[0].kycTypeId4 == '001') {
-                        setAadharID(data[0].kycIdValue4)
-                    }
+        //             setTitleLabel(data[0].titleId);
+        //             setFullName(data[0].firstName + ' ' + data[0].middleName + ' ' + data[0].lastName);
+        //             setGenderLabel(data[0].genderId);
+        //             setDOB(data[0]?.dateOfBirth ?? '');
+        //             setAge(data[0]?.age ?? '');
+        //             setMobileNumber(data[0].mobileNumber);
+        //             if (data[0].kycTypeId1 == '001') {
+        //                 setAadharID(data[0].kycIdValue1)
+        //             } else if (data[0].kycTypeId2 == '001') {
+        //                 setAadharID(data[0].kycIdValue2)
+        //             } else if (data[0].kycTypeId3 == '001') {
+        //                 setAadharID(data[0].kycIdValue3)
+        //             } else if (data[0].kycTypeId4 == '001') {
+        //                 setAadharID(data[0].kycIdValue4)
+        //             }
 
-                    setLoading(false);
-                } else {
-                    setLoading(false)
-                    setTitleLabel('');
-                    setFullName('');
-                    setGenderLabel('');
-                    setDOB('');
-                    setAge('');
-                    setMobileNumber('');
-                    setAadharID('')
-                }
-            })
-            .catch(error => {
-                setLoading(false);
-                if (global.DEBUG_MODE)
-                    console.error('Error fetching Applicant details:', error);
-            });
+        //             setLoading(false);
+        //         } else {
+        //             setLoading(false)
+        //             setTitleLabel('');
+        //             setFullName('');
+        //             setGenderLabel('');
+        //             setDOB('');
+        //             setAge('');
+        //             setMobileNumber('');
+        //             setAadharID('')
+        //         }
+        //     })
+        //     .catch(error => {
+        //         setLoading(false);
+        //         if (global.DEBUG_MODE)
+        //             console.error('Error fetching Applicant details:', error);
+        //     });
+
+        const clientDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
+
+        if (clientDetail) {
+            setTitleLabel(clientDetail?.title);
+            setFullName(clientDetail?.firstName + ' ' + clientDetail?.middleName + ' ' + clientDetail?.lastName);
+            setGenderLabel(clientDetail?.gender);
+            setDOB(clientDetail.dateOfBirth ? Common.convertDateFormat(clientDetail.dateOfBirth) : '');
+            setAge(clientDetail?.age?.toString());
+            setMobileNumber(clientDetail?.mobileNumber);
+            if (clientDetail.kycTypeId1 == '001') {
+                setAadharID(clientDetail.kycIdValue1)
+            } else if (clientDetail.kycTypeId2 == '001') {
+                setAadharID(clientDetail.kycIdValue2)
+            } else if (clientDetail.kycTypeId3 == '001') {
+                setAadharID(clientDetail.kycIdValue3)
+            } else if (clientDetail.kycTypeId4 == '001') {
+                setAadharID(clientDetail.kycIdValue4)
+            }
+        }
 
 
     };
@@ -268,33 +290,27 @@ const LoanNomineeDetails = (props, { navigation }) => {
 
     }
 
-    const getExistingBankData = (loanAppId, id) => {
+    const getExistingBankData = (data) => {
 
-        tbl_nomineeDetails.getNomineeDetailsOnID(loanAppId, id)
-            .then(data => {
-                if (global.DEBUG_MODE) console.log('Nominee Detail:', data);
-                setNomineeID(data[0].id)
-                setIsNomineeLabel(data[0].isNomineeId)
-                setRelationStatuswithBorrowerLabel(data[0].relstatuswithBorrower)
-                setTitleLabel(data[0].titleId)
-                setFullName(data[0].fullName)
-                setAadharID(data[0].aadharId)
-                setDOB(data[0].dateOfBirth)
-                setAge(data[0].age)
-                setGenderLabel(data[0].genderId)
-                setMobileNumber(data[0].mobileNum)
-                setNomineePercent(data[0].nomineePercent)
-                setNomineeAccountNumber(data[0].nomineeBankAccNo)
-                setNomineeIfscCode(data[0].nomineeIfsc)
-                setNomineeBankName(data[0].nomineeBankName)
-                setNomineeBranchName(data[0].nomineeBankBranch)
-                setNomineeNameInBank(data[0].nomineeNameInBank)
-                setLoading(false)
-            })
-            .catch(error => {
-                if (global.DEBUG_MODE) console.error('Error fetching Bank details:', error);
-                setLoading(false)
-            });
+        if (global.DEBUG_MODE) console.log('Nominee Detail:', data);
+        setNomineeID(data.id)
+        setIsNomineeLabel(data?.isNominee)
+        setRelationStatuswithBorrowerLabel(data?.relationshipWithBorrower)
+        setTitleLabel(data?.title)
+        setFullName(data?.fullName)
+        setAadharID(data?.aadhaarId)
+        setDOB(data.dateOfBirth ? Common.convertDateFormat(data.dateOfBirth) : '')
+        setAge(data?.age?.toString())
+        setGenderLabel(data?.gender)
+        setMobileNumber(data?.mobileNo)
+        setNomineePercent(data?.nomineePercentage?.toString())
+        setNomineeAccountNumber(data?.nomineeBankAccountNo)
+        setNomineeIfscCode(data?.nomineeIfscCode)
+        setNomineeBankName(data?.nomineeBankName)
+        setNomineeBranchName(data?.nomineeBranchName)
+        setNomineeNameInBank(data?.nomineeNameInBank)
+        setLoading(false)
+
 
     }
 
@@ -858,7 +874,7 @@ const LoanNomineeDetails = (props, { navigation }) => {
 
     const nomineeSubmit = () => {
 
-        if (global.USERTYPEID == 1163) {
+        if (onlyView) {
             onGoBack();
             return;
         }
@@ -889,6 +905,7 @@ const LoanNomineeDetails = (props, { navigation }) => {
             const appDetails = [
                 {
                     "isNominee": isNomineeLabel,
+                    "title": TitleLabel,
                     "relationshipWithBorrower": relationStatuswithBorrowerLabel,
                     "fullName": fullName,
                     "aadhaarId": aadharID,
@@ -940,6 +957,7 @@ const LoanNomineeDetails = (props, { navigation }) => {
             const appDetails = {
                 "id": nomineeID,
                 "isNominee": isNomineeLabel,
+                "title": TitleLabel,
                 "relationshipWithBorrower": relationStatuswithBorrowerLabel,
                 "fullName": fullName,
                 "aadhaarId": aadharID,
@@ -1640,10 +1658,12 @@ const mapStateToProps = state => {
     const { language } = state.languageReducer;
     const { profileDetails } = state.profileReducer;
     const { mobileCodeDetails } = state.mobilecodeReducer;
+    const { loanInitiationDetails } = state.loanInitiationReducer;
     return {
         language: language,
         profiledetail: profileDetails,
-        mobilecodedetail: mobileCodeDetails
+        mobilecodedetail: mobileCodeDetails,
+        loanInitiationDetails: loanInitiationDetails,
     }
 };
 

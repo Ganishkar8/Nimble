@@ -48,7 +48,7 @@ import Geolocation from 'react-native-geolocation-service';
 import { useIsFocused } from '@react-navigation/native';
 import ErrorModal from '../../../Components/ErrorModal';
 import DateInputComp from '../../../Components/DateInputComp';
-import { updateNestedClientDetails, deleteLoanInitiationDetails } from '../../../Utils/redux/actions/loanInitiationAction';
+import { updateNestedClientDetails, deleteLoanInitiationDetails, updateLoanInitiationDetails } from '../../../Utils/redux/actions/loanInitiationAction';
 
 const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const [errorModalVisible, setErrorModalVisible] = useState(false);
@@ -1489,6 +1489,14 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
     appDetails[0].clientManualAddresses = []
 
+    if (kycSourceDmsId) {
+      appDetails[0].isManualKycRequired = true;
+    } else if (kycID1DmsId) {
+      appDetails[0].isManualKycRequired = true;
+    } else if (dobDmsId) {
+      appDetails[0].isManualKycRequired = true;
+    }
+
     const baseURL = global.PORT1
     apiInstance(baseURL).post(`/api/v2/profile-short/manualKyc/${global.CLIENTID}`, appDetails)
       .then(async (response) => {
@@ -1499,7 +1507,8 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
           // tbl_client.updateKYCManual("1", global.LOANAPPLICATIONID, global.CLIENTTYPE)
           props.updateNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientManualKycLink', response.data[0])
           //updateDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientManualKycLink', response.data[0])
-          buttonNext();
+          //buttonNext();
+          updateBasicDOB();
         } else if (response.data.statusCode === 201) {
           setApiError(response.data.message);
           setErrorModalVisible(true);
@@ -1530,6 +1539,57 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       });
 
   }
+
+  const updateBasicDOB = () => {
+
+    const appDetails = {
+      "isActive": true,
+      "createdBy": global.USERID,
+      "id": global.CLIENTID,
+      "dateOfBirth": Common.convertYearDateFormat(DOB),
+    }
+    const baseURL = global.PORT1;
+    setLoading(true);
+    apiInstance(baseURL)
+      .put(`/api/v2/profile-short/personal-details/${global.CLIENTID}`, appDetails)
+      .then(async response => {
+        // Handle the response data
+        if (global.DEBUG_MODE) console.log('PersonalDetailApiResponse::' + JSON.stringify(response.data));
+        //  await tbl_client.updatePersonalDetails(TitleLabel, firstName, middleName, lastName, DOB, Age, GenderLabel, FatherName, SpouseName, CasteLabel, ReligionLabel, MotherTongueLabel, EADLabel, gpslatlon, id, global.LOANAPPLICATIONID);
+
+        setLoading(false);
+        if (response.status == 200) {
+
+          props.updateLoanInitiationDetails(parseInt(global.LOANAPPLICATIONID), [], 'clientDetail', response.data.id, response.data)
+          buttonNext();
+        }
+        else if (response.data.statusCode === 201) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        } else if (response.data.statusCode === 202) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        }
+      })
+      .catch(error => {
+        // Handle the error
+        setLoading(false);
+        if (error.response.status == 404) {
+          setApiError(Common.error404);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 400) {
+          setApiError(Common.error400);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 500) {
+          setApiError(Common.error500);
+          setErrorModalVisible(true)
+        } else if (error.response.data != null) {
+          setApiError(error.response.data.message);
+          setErrorModalVisible(true)
+        }
+      });
+
+  };
 
   const closeErrorModal = () => {
     setErrorModalVisible(false);
@@ -2708,6 +2768,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = dispatch => ({
   languageAction: item => dispatch(languageAction(item)),
   deleteLoanInitiationDetails: item => dispatch(deleteLoanInitiationDetails(item)),
+  updateLoanInitiationDetails: (loanApplicationId, loanData, key, clientId, updatedDetails) => dispatch(updateLoanInitiationDetails(loanApplicationId, loanData, key, clientId, updatedDetails)),
   updateNestedClientDetails: (loanApplicationId, clientId, key, nestedKey, data) => dispatch(updateNestedClientDetails(loanApplicationId, clientId, key, nestedKey, data)),
 });
 

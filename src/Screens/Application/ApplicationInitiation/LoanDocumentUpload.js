@@ -91,13 +91,15 @@ const LoanDocumentUpload = (props, { navigation }) => {
     const [filteredDocument, setFilteredDocument] = useState([]);
 
     const [documentList, setDocumentList] = useState([]);
+    const [onlyView, setOnlyView] = useState(false);
+
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
 
         const filteredDocumentData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].applicantDocumentDetail.filter(client => client.clientId === parseInt(global.CLIENTID));
-
+        console.log(filteredDocumentData)
         if (filteredDocumentData) {
             setFilteredDocument(filteredDocumentData);
             getDocuments(filteredDocumentData);
@@ -109,6 +111,9 @@ const LoanDocumentUpload = (props, { navigation }) => {
 
         setProcessModuleLength(filteredData[0].nestedSubData.length);
 
+        if (global.USERTYPEID == 1163 || global.ALLOWEDIT == "0") {
+            setOnlyView(true);
+        }
 
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
@@ -264,7 +269,10 @@ const LoanDocumentUpload = (props, { navigation }) => {
                             marginTop: 20,
                         }}>
                         <TouchableOpacity style={{ width: '20%', }}
-                            onPress={() => pickDocument(item)} activeOpacity={0.8}>
+                            onPress={() => {
+                                if (!onlyView)
+                                    pickDocument(item)
+                            }} activeOpacity={0.8}>
                             {item.dmsID.toString().length > 0 ?
                                 <View style={{ width: 40, height: 40, backgroundColor: '#33AD3E99', borderRadius: 10, justifyContent: 'center', alignItems: 'center' }}>
                                     <ImageComp imageSrc={require('../../../Images/cloudcomputing.png')} imageStylee={{ width: 28, height: 22 }} />
@@ -294,7 +302,14 @@ const LoanDocumentUpload = (props, { navigation }) => {
                         <TouchableOpacity style={{ width: '10%', }}
                             onPress={() => {
                                 if (item.dmsID.toString().length > 0) {
-                                    showImageBottomSheet(item)
+                                    showImageBottomSheet(item);
+                                    if (onlyView) {
+                                        setHideRetake(true);
+                                        setHideDelete(true);
+                                    } else {
+                                        setHideRetake(false);
+                                        setHideDelete(false);
+                                    }
                                 }
                             }} activeOpacity={0.8}>
                             <View >
@@ -573,6 +588,12 @@ const LoanDocumentUpload = (props, { navigation }) => {
 
 
     const buttonNext = () => {
+
+        if (onlyView) {
+            props.navigation.replace('LoanApplicationMain', { fromScreen: 'BankList' });
+            return;
+        }
+
         let error = ''
         //alert(JSON.stringify(data))
         documentList.map((item) => {
@@ -656,31 +677,33 @@ const LoanDocumentUpload = (props, { navigation }) => {
 
                 Promise.all(promises)
                     .then(() => {
-                        if (processModuleLength == 1) {
-
-                        } else if (processModuleLength == 2) {
-                            if (global.CLIENTTYPE == 'APPL') {
-                                updateLoanStatus();
-                            } else if (global.CLIENTTYPE == 'CO-APPL') {
-                                props.navigation.navigate('FinalConsentScreen');
-                            } else if (global.CLIENTTYPE == 'GRNTR') {
-                                props.navigation.navigate('FinalConsentScreen');
-                            }
-                        } else if (processModuleLength == 3) {
-                            if (global.CLIENTTYPE == 'APPL') {
-                                updateLoanStatus();
-                            } else if (global.CLIENTTYPE == 'CO-APPL') {
-                                updateLoanStatus();
-                            } else if (global.CLIENTTYPE == 'GRNTR') {
-                                props.navigation.navigate('FinalConsentScreen');
-                            }
-                        }
+                        updateLoanStatus();
                     })
                     .catch(error => {
                         console.error('Error updating client details:', error);
                         // Handle errors if necessary
                     });
 
+
+                // if (processModuleLength == 1) {
+
+                // } else if (processModuleLength == 2) {
+                //     if (global.CLIENTTYPE == 'APPL') {
+                //         updateLoanStatus();
+                //     } else if (global.CLIENTTYPE == 'CO-APPL') {
+                //         props.navigation.navigate('FinalConsentScreen');
+                //     } else if (global.CLIENTTYPE == 'GRNTR') {
+                //         props.navigation.navigate('FinalConsentScreen');
+                //     }
+                // } else if (processModuleLength == 3) {
+                //     if (global.CLIENTTYPE == 'APPL') {
+                //         updateLoanStatus();
+                //     } else if (global.CLIENTTYPE == 'CO-APPL') {
+                //         updateLoanStatus();
+                //     } else if (global.CLIENTTYPE == 'GRNTR') {
+                //         props.navigation.navigate('FinalConsentScreen');
+                //     }
+                // }
 
 
             })
@@ -782,13 +805,13 @@ const LoanDocumentUpload = (props, { navigation }) => {
                     if (existingCodeIndex !== -1) {
                         // If the category exists, push the installment to its data array
                         var filteredData = [];
-                        if (filteredDocument !== '') {
+                        if (filteredDocument.length > 0) {
                             filteredData = filteredDocument.filter(item => item.documentType === installment.subCode);
                         }
 
                         if (filteredData != undefined && filteredData != null) {
                             if (filteredData.length > 0) {
-                                const extraJSON = { dmsID: filteredData[0].dmsId, isImagePresent: true, documentName: filteredData[0].documentName };
+                                const extraJSON = { dmsID: filteredData[0]?.dmsId, isImagePresent: true, documentName: filteredData[0].documentName };
                                 acc[existingCodeIndex].dataNew.push({
                                     ...installment,
                                     ...extraJSON
@@ -812,13 +835,13 @@ const LoanDocumentUpload = (props, { navigation }) => {
                     } else {
                         // If the category does not exist, create a new entry with the category and data array
                         var filteredData = [];
-                        if (filteredDocument !== '') {
+                        if (filteredDocument.length > 0) {
                             filteredData = filteredDocument.filter(item => item.documentType === installment.subCode);
                         }
 
                         if (filteredData != undefined && filteredData != null) {
                             if (filteredData.length > 0) {
-                                const extraJSON = { dmsID: filteredData[0].dmsId, isImagePresent: true, documentName: filteredData[0].documentName };
+                                const extraJSON = { dmsID: filteredData[0]?.dmsId, isImagePresent: true, documentName: filteredData[0].documentName };
                                 acc.push({
                                     code,
                                     dataNew: [{ ...installment, ...extraJSON, documentName: '' }],

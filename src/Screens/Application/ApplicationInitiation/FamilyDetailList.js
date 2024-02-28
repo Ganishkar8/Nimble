@@ -227,7 +227,7 @@ const FamilyDetailList = (props, { navigation }) => {
 
                 setLoading(false);
                 deletedata(relationID);
-                props.deleteClientDetails(global.LOANAPPLICATIONID,relationID,"familyDetail");
+                props.deleteClientDetails(global.LOANAPPLICATIONID, relationID, "familyDetail");
             })
             .catch(error => {
                 // Handle the error
@@ -415,7 +415,7 @@ const FamilyDetailList = (props, { navigation }) => {
                             language[0][props.language].str_familydetails
                         }></TextComp>
 
-                    <ProgressComp progressvalue={1} textvalue="1 of 4" />
+                    <ProgressComp progressvalue={1} textvalue="1 of 6" />
                 </View>
             </View>
             {!(global.ALLOWEDIT == "0") &&

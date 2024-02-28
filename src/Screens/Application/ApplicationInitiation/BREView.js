@@ -40,6 +40,8 @@ const BREView = (props, { navigation }) => {
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const [apiError, setApiError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [isFailPresent, setIsFailPresent] = useState(false);
+    const [isDeviationPresent, setIsDeviationPresent] = useState(false);
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
@@ -98,6 +100,7 @@ const BREView = (props, { navigation }) => {
                         const extraJson = { isSelected: false };
                         return { ...item, ...extraJson };
                     });
+                    checkFailOrDeviation(response.data);
                     setCBResponse(newData)
                 }
 
@@ -131,6 +134,7 @@ const BREView = (props, { navigation }) => {
                         const extraJson = { isSelected: false };
                         return { ...item, ...extraJson };
                     });
+                    checkFailOrDeviation(response.data);
                     setCBResponse(newData)
                 }
             })
@@ -146,7 +150,50 @@ const BREView = (props, { navigation }) => {
 
     };
 
+    const checkFailOrDeviation = (data) => {
+        let hasFailResult = false;
+
+        data.forEach((item) => {
+
+            item.loanElgResultsSummariesClientWise.forEach((summary) => {
+                if (summary.result == 'Fail') {
+                    // If a 'Fail' result is found, set the variable to true and break the loop
+                    hasFailResult = true;
+                    setIsFailPresent(true)
+                    global.ISFAILPRESENT = true;
+                    return;
+                }
+            });
+
+            // If a 'Fail' result is found, break the outer loop
+            if (hasFailResult) {
+                return;
+            }
+        });
+
+        let hasDeviationResult = false;
+
+        data.forEach((item) => {
+
+            item.loanElgResultsSummariesClientWise.forEach((summary) => {
+                if (summary.result == 'Fail') {
+                    // If a 'Fail' result is found, set the variable to true and break the loop
+                    setIsDeviationPresent(true)
+                    hasDeviationResult = true;
+                    global.ISDEVIATIONPRESENT = true;
+                    return;
+                }
+            });
+
+            // If a 'Fail' result is found, break the outer loop
+            if (hasDeviationResult) {
+                return;
+            }
+        });
+    }
+
     const submitBre = () => {
+
         props.navigation.navigate('FinalConsentScreen');
     }
 

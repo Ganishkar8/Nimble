@@ -55,6 +55,7 @@ const LMSLOSDetails = (props, { navigation }) => {
     const [lmsDedupeCheck, setLmsDedupeCheck] = useState(true);
     const [losDedupeCheck, setLosDedupeCheck] = useState(false);
     const [onlyLOS, setOnlyLOS] = useState(false);
+    const [onlyView, setOnlyView] = useState(false);
     const [lmsData, setlmsData] = useState([]);
     const [losData, setlosData] = useState([]);
 
@@ -63,8 +64,10 @@ const LMSLOSDetails = (props, { navigation }) => {
         //alert(JSON.stringify(props.loanInitiationDetails))
         setLmsDedupeCheck(true);
         setLosDedupeCheck(false);
-        loanOriginationDedupeCheck();
         updateBasicDedupe();
+        if (global.ALLOWEDIT == "0") {
+            setOnlyView(true);
+        }
 
     }, [props.navigation]);
 
@@ -203,7 +206,7 @@ const LMSLOSDetails = (props, { navigation }) => {
                 if (response.status == 200) {
 
                     props.updateLoanInitiationDetails(parseInt(global.LOANAPPLICATIONID), [], 'clientDetail', response.data.id, response.data)
-
+                    loanOriginationDedupeCheck();
 
                 }
                 else if (response.data.statusCode === 201) {
@@ -449,25 +452,37 @@ const LMSLOSDetails = (props, { navigation }) => {
 
             </View>
 
-            <View style={{ marginBottom: 20, flexDirection: 'row' }}>
+            {!onlyView &&
+                <View style={{ marginBottom: 20, flexDirection: 'row' }}>
+                    <ButtonViewComp
+                        textValue={language[0][props.language].str_proceed.toUpperCase()}
+                        textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
+                        viewStyle={[Commonstyles.buttonView, { width: '50%' }]}
+                        innerStyle={Commonstyles.buttonViewInnerStyle}
+                        handleClick={onButtonClick}
+                        value={'Proceed'}
+                    />
+                    <ButtonViewComp
+                        textValue={language[0][props.language].str_reject.toUpperCase()}
+                        textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
+                        viewStyle={[Commonstyles.buttonView, { width: '50%' }]}
+                        innerStyle={Commonstyles.buttonViewInnerStyle}
+                        handleClick={updateLoanStatus}
+                        value={'Reject'}
+                    />
+                </View>
+            }
+
+            {onlyView &&
                 <ButtonViewComp
-                    textValue={language[0][props.language].str_proceed.toUpperCase()}
+                    textValue={language[0][props.language].str_next.toUpperCase()}
                     textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
-                    viewStyle={[Commonstyles.buttonView, { width: '50%' }]}
+                    viewStyle={[Commonstyles.buttonView, { marginBottom: 20 }]}
                     innerStyle={Commonstyles.buttonViewInnerStyle}
                     handleClick={onButtonClick}
                     value={'Proceed'}
                 />
-                <ButtonViewComp
-                    textValue={language[0][props.language].str_reject.toUpperCase()}
-                    textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
-                    viewStyle={[Commonstyles.buttonView, { width: '50%' }]}
-                    innerStyle={Commonstyles.buttonViewInnerStyle}
-                    handleClick={updateLoanStatus}
-                    value={'Reject'}
-                />
-            </View>
-
+            }
 
         </SafeAreaView>
     );
