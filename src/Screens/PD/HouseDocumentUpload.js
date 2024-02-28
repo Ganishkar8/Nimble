@@ -82,6 +82,7 @@ const HouseDocumentUpload = (props, {navigation}) => {
   };
   const hideImageBottomSheet = () => setBottomSheetVisible(false);
   const [imageUri, setImageUri] = useState(null);
+  const [houseImageUri, setHouseImageUri] = useState(null);
   const [imageFile, setImageFile] = useState([]);
   const [hideRetake, setHideRetake] = useState(false);
   const [hideDelete, setHideDelete] = useState(false);
@@ -103,7 +104,9 @@ const HouseDocumentUpload = (props, {navigation}) => {
   const [parentDocId, setParentDocId] = useState(0);
   const [currentItem, setCurrentItem] = useState([]);
   const [currentLongitude, setCurrentLongitude] = useState(0.0);
+  const [houseLongitude, setHouseLongitude] = useState(0.0);
   const [currentLatitude, setCurrentLatitude] = useState(0.0);
+  const [houseLatitude, setHouseLatitude] = useState(0.0);
   const [locationStatus, setLocationStatus] = useState('');
 
   const [documentList, setDocumentList] = useState([]);
@@ -162,7 +165,7 @@ const HouseDocumentUpload = (props, {navigation}) => {
 
   const previewImage = () => {
     setBottomSheetVisible(false);
-    getImage();
+    getImage('1');
   };
 
   const reTakePhoto = () => {
@@ -264,7 +267,7 @@ const HouseDocumentUpload = (props, {navigation}) => {
     }
   };
 
-  const getOneTimeLocation = () => {
+  const getOneTimeLocation = (imgPath, imgMime, imgName) => {
     Geolocation.getCurrentPosition(
       //Will give you the current location
       position => {
@@ -276,10 +279,19 @@ const HouseDocumentUpload = (props, {navigation}) => {
 
         //Setting Longitude state
         setCurrentLongitude(parseFloat(currentLongitude));
+        setHouseLongitude(parseFloat(currentLongitude));
 
         //Setting Longitude state
         setCurrentLatitude(parseFloat(currentLatitude));
-        checkGeo(currentPhotoItem.subCode, currentLatitude, currentLongitude);
+        setHouseLatitude(parseFloat(currentLatitude));
+        checkGeo(
+          currentPhotoItem.subCode,
+          currentLatitude,
+          currentLongitude,
+          imgPath,
+          imgMime,
+          imgName,
+        );
       },
       error => {
         console.log(error);
@@ -452,7 +464,7 @@ const HouseDocumentUpload = (props, {navigation}) => {
       console.log('SpecificData:', JSON.stringify(currentPhotoItem));
       if (currentPhotoItem.subCode == 'HOU_VIS_IMG') {
         if (global.PDSTAGE == 'PD_1') {
-          updateImage(image.path, image.mime, imageName);
+          updateImage(image.path, image.mime, imageName, 0);
           setFileType(image.mime);
           setFileName(imageName);
           setImageUri(image.path);
@@ -460,7 +472,7 @@ const HouseDocumentUpload = (props, {navigation}) => {
         } else {
           checkPermissions().then(res => {
             if (res == true) {
-              getOneTimeLocation();
+              getOneTimeLocation(image.path, image.mime, imageName);
             } else {
               setApiError('Permission Not Granted');
               setErrorModalVisible(true);
@@ -468,7 +480,7 @@ const HouseDocumentUpload = (props, {navigation}) => {
           });
         }
       } else {
-        updateImage(image.path, image.mime, imageName);
+        updateImage(image.path, image.mime, imageName, 0);
         setFileType(image.mime);
         setFileName(imageName);
         setImageUri(image.path);
@@ -495,18 +507,41 @@ const HouseDocumentUpload = (props, {navigation}) => {
         console.log('File extension:', fileExtension);
       }
       console.log('SpecificData:', JSON.stringify(currentPhotoItem));
-      //alert(JSON.stringify(currentPhotoItem))
-      updateImage(image.path, image.mime, imageName);
-      //currentPhotoItem.map
-      setFileType(image.mime);
-      setFileName(imageName);
-      setImageUri(image.path);
-      setVisible(false);
-      // setDeleteVisible(false)
+      if (currentPhotoItem.subCode == 'HOU_VIS_IMG') {
+        if (global.PDSTAGE == 'PD_1') {
+          updateImage(image.path, image.mime, imageName, 0);
+          setFileType(image.mime);
+          setFileName(imageName);
+          setImageUri(image.path);
+          setVisible(false);
+        } else {
+          checkPermissions().then(res => {
+            if (res == true) {
+              getOneTimeLocation(image.path, image.mime, imageName);
+            } else {
+              setApiError('Permission Not Granted');
+              setErrorModalVisible(true);
+            }
+          });
+        }
+      } else {
+        updateImage(image.path, image.mime, imageName, 0);
+        setFileType(image.mime);
+        setFileName(imageName);
+        setImageUri(image.path);
+        setVisible(false);
+      }
     });
   };
 
-  const checkGeo = (subCodeId, latitude, longitude) => {
+  const checkGeo = (
+    subCodeId,
+    latitude,
+    longitude,
+    imgPath,
+    imgMime,
+    imgName,
+  ) => {
     const baseURL = global.PORT1;
     setLoading(true);
 
@@ -529,10 +564,20 @@ const HouseDocumentUpload = (props, {navigation}) => {
           console.log('ResponseDataApi::' + JSON.stringify(response.data));
 
         if (response.status == 200) {
-          if (response.data === '') {
-            alert('empty');
-          } else {
-            alert(JSON.stringify(response.data));
+          setLoading(false);
+          if (response.data) {
+            // alert(JSON.stringify(response.data));
+            if (response.data.geoCheck) {
+              updateImage(imgPath, imgMime, imgName, 1);
+              setFileType(imgMime);
+              setFileName(imgName);
+              setImageUri(imgPath);
+              setHouseImageUri(imgPath);
+              setVisible(false);
+            } else {
+              setApiError('geoLocation not Matching');
+              setErrorModalVisible(true);
+            }
           }
         } else if (response.data.statusCode === 201) {
           setLoading(false);
@@ -567,7 +612,7 @@ const HouseDocumentUpload = (props, {navigation}) => {
       });
   };
 
-  const updateImage = async (imageUri, fileType, fileName) => {
+  const updateImage = async (imageUri, fileType, fileName, num) => {
     if (imageUri) {
       setLoading(true);
       const formData = new FormData();
@@ -591,6 +636,9 @@ const HouseDocumentUpload = (props, {navigation}) => {
           if (dataResponse.docId) {
             //updateDmsID(dataResponse.docId)
             updateData(dataResponse.docId, fileType, fileName);
+            if (num === 1) {
+              setShowPreview(true);
+            }
           } else {
             alert('Cannot Update DMSID , please try again...');
           }
@@ -746,6 +794,22 @@ const HouseDocumentUpload = (props, {navigation}) => {
           } else {
             setParentDocId(response.data.id);
             getDocuments([response.data]);
+            const filteredData = response.data.pdHouseVisitChild.filter(
+              item => item.documentType == 'HOU_VIS_IMG',
+            );
+            if (filteredData) {
+              if (filteredData[0].geolocation) {
+                const [latitude, longitude] =
+                  filteredData[0].geolocation.split(',');
+                setHouseLongitude(parseFloat(longitude));
+                setHouseLatitude(parseFloat(latitude));
+              }
+              if (filteredData[0].dmsId) {
+                if (global.PDSTAGE == 'PD_2' || global.PDSTAGE == 'PD_3')
+                  setShowPreview(true);
+                getImage('0', filteredData[0].dmsId);
+              }
+            }
           }
         } else if (response.data.statusCode === 201) {
           setLoading(false);
@@ -942,15 +1006,20 @@ const HouseDocumentUpload = (props, {navigation}) => {
     setDocumentList(organizedData);
   };
 
-  const getImage = () => {
+  const getImage = (type, dmsId) => {
+    var dmsID = '';
+    if (type === '1') {
+      dmsID = currentPhotoItem.dmsID;
+    } else {
+      dmsID = dmsId;
+    }
     Common.getNetworkConnection().then(value => {
       if (value.isConnected == true) {
         setLoading(true);
         const baseURL = global.PORT2;
         apiInstance(baseURL)
-          .get(`/api/documents/document/${currentPhotoItem.dmsID}`)
+          .get(`/api/documents/document/${dmsID}`)
           .then(async response => {
-            setLoading(false);
             // Handle the response data
             if (response.status == 200) {
               console.log(
@@ -958,14 +1027,23 @@ const HouseDocumentUpload = (props, {navigation}) => {
                   JSON.stringify(response.data),
               );
               setFileName(response.data.fileName);
+              // alert(response.data.fileName);
               setImageUri(
                 'data:image/png;base64,' + response.data.base64Content,
               );
-              props.navigation.navigate('PreviewImage', {
-                imageName: response.data.fileName,
-                imageUri:
+              if (type == '1') {
+                props.navigation.navigate('PreviewImage', {
+                  imageName: response.data.fileName,
+                  imageUri:
+                    'data:image/png;base64,' + response.data.base64Content,
+                });
+              } else {
+                setHouseImageUri(
                   'data:image/png;base64,' + response.data.base64Content,
-              });
+                );
+              }
+
+              setLoading(false);
               // props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
             } else if (response.data.statusCode === 201) {
               setApiError(response.data.message);
@@ -1186,8 +1264,12 @@ const HouseDocumentUpload = (props, {navigation}) => {
   };
 
   const onClickPreview = () => {
-    props.navigation.replace('PreviousDocumentPreview', {
-      clientType: global.CLIENTTYPE,
+    props.navigation.navigate('PreviousDocumentPreview', {
+      pageId: currentPageId,
+      imageUri: houseImageUri,
+      longitude: houseLongitude,
+      latitude: houseLatitude,
+      fromScreen: 'HouseVisit',
     });
   };
 
