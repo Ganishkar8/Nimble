@@ -175,7 +175,8 @@ export const language = [
       str_errinternet: 'Internet is not Connected',
       str_errinternetimage: 'Internet is not Connected so Unable to load Image',
       str_previous: 'PREVIOUS',
-      str_close: 'CLOSE', str_profileshort: 'Profile Short',
+      str_close: 'CLOSE',
+      str_profileshort: 'Profile Short',
       str_applicantdetails: 'Applicant Details',
       str_coapplicantdetails: 'Co-Applicant Details',
       str_guarantordetails: 'Guarantor Details',
@@ -223,11 +224,13 @@ export const language = [
       str_mobileotpverification: 'Mobile OTP Verification',
       str_aadharotpverification: 'Aadhar OTP Verification',
       str_mobileverifydesc: 'An authentication code has been send to ',
-      str_aadharverifydesc: 'An authentication code has been send to registered mobile number',
+      str_aadharverifydesc:
+        'An authentication code has been send to registered mobile number',
       str_aadharverifynewcust: 'Aadhar OTP Verification New Customer',
       str_dedupefailedresult: 'Dedupe Failed Result',
       str_clientdedupecheck: 'Client Dedupe ',
-      str_clientdedupeavailable: 'Another client ID is available for the selected KYC.',
+      str_clientdedupeavailable:
+        'Another client ID is available for the selected KYC.',
       str_accopendate: 'ACCOUNT OPENED DATE',
       str_loansacamount: 'LOAN SANCTIONED AMOUNT',
       str_loannum: 'LOAN NUMBER',
@@ -245,7 +248,8 @@ export const language = [
       str_contactDetails: 'Contact Details',
       str_deletedesc: 'Are you sure you want to delete?',
       str_approve: 'Approve',
-      str_aadhaarpdfopen: 'Password of E-Aadhaar is the combination of the \nfirst 4 letters of name in CAPITAL and the year of \nbirth (YYYY). \nEg: If customer name is Sobha and year of birth is \n2000 then password of E -Aadhar will be \nSOBH2000.',
+      str_aadhaarpdfopen:
+        'Password of E-Aadhaar is the combination of the \nfirst 4 letters of name in CAPITAL and the year of \nbirth (YYYY). \nEg: If customer name is Sobha and year of birth is \n2000 then password of E -Aadhar will be \nSOBH2000.',
       str_financialdetails: 'Financial Details',
       str_incomedetails: 'Income Details',
       str_expensedetails: 'Expense Details',
@@ -263,7 +267,8 @@ export const language = [
       str_totavgmntincome: 'Total Average Monthly Income',
       str_totavgmntexpenses: 'Total Average Monthly Expenses',
       str_familydetails: 'Family Details',
-      str_accoutnnonotmatching: 'Account Number and Confirm Account Number Not Matching',
+      str_accoutnnonotmatching:
+        'Account Number and Confirm Account Number Not Matching',
       str_nomineeDetails: 'Nominee Details',
       str_loannomineedtls: 'Loan (Nominee Details)',
       str_repayschedule: 'Repayment Schedule',
@@ -294,6 +299,12 @@ export const language = [
       str_viewDedupeResult: 'VIEW DEDUPE RESULT',
       str_imageComparison: 'IMAGE COMPARISON',
       str_viewprevImage: 'VIEW PREVIOUS IMAGE',
+      str_HouseVisitImage: 'House Visit Image',
+      str_BusinessVisitImage: 'Business Visit Image',
+      str_prevHouseImage: 'Pervious House Visit Image',
+      str_currentHouseImage: 'Current House Visit Image',
+      str_prevBusinessImage: 'Pervious Business Visit Image',
+      str_currentBusinessImage: 'Current Business Visit Image',
     },
 
     ta: {
