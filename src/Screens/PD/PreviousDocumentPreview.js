@@ -1,4 +1,4 @@
-import React, {useState, useRef, useEffect, createRef} from 'react';
+import React, { useState, useRef, useEffect, createRef } from 'react';
 import {
   Text,
   Image,
@@ -9,15 +9,15 @@ import {
   BackHandler,
 } from 'react-native';
 import HeadComp from '../../Components/HeadComp';
-import {language} from '../../Utils/LanguageString';
+import { language } from '../../Utils/LanguageString';
 import apiInstance from '../../Utils/apiInstance';
 import Colors from '../../Utils/Colors';
 import Common from '../../Utils/Common';
 import Loading from '../../Components/Loading';
-import {languageAction} from '../../Utils/redux/actions/languageAction';
-import {connect} from 'react-redux';
+import { languageAction } from '../../Utils/redux/actions/languageAction';
+import { connect } from 'react-redux';
 
-const PreviousDocumentPreview = (props, {navigation, route}) => {
+const PreviousDocumentPreview = (props, { navigation, route }) => {
   const [imageName, setImageName] = useState(props.route.params.imageName);
   const [fileName, setFileName] = useState('');
   const [imageUri, setImageUri] = useState('');
@@ -33,10 +33,16 @@ const PreviousDocumentPreview = (props, {navigation, route}) => {
   const [apiError, setApiError] = useState('');
   const [fromScreen, setFromScreen] = useState(props.route.params.fromScreen);
 
+  const screenHeight = Dimensions.get('window').height;
+
+  // Calculate half of the screen height
+  const halfScreenHeight = screenHeight / 2;
+
+
   useEffect(() => {
     props.navigation
       .getParent()
-      ?.setOptions({tabBarStyle: {display: 'none'}, tabBarVisible: false});
+      ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       handleBackButton,
@@ -52,7 +58,7 @@ const PreviousDocumentPreview = (props, {navigation, route}) => {
     return () => {
       props.navigation
         .getParent()
-        ?.setOptions({tabBarStyle: undefined, tabBarVisible: undefined});
+        ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
       backHandler.remove();
     };
   }, [props.navigation]);
@@ -62,20 +68,23 @@ const PreviousDocumentPreview = (props, {navigation, route}) => {
     setLoading(true);
     var stage = '';
     var pageId = 0;
+    var apiName = '';
+
     if (fromScreen == 'HouseVisit') {
-      if (global.CLIENTYPE == 'APPL') {
+      apiName = 'PDHouseVisit';
+      if (global.CLIENTTYPE == 'APPL') {
         if (global.PDSTAGE == 'PD_2') {
           pageId = 11;
         } else if (global.PDSTAGE == 'PD_3') {
           pageId = 48;
         }
-      } else if (global.CLIENTYPE == 'CO-APPL') {
+      } else if (global.CLIENTTYPE == 'CO-APPL') {
         if (global.PDSTAGE == 'PD_2') {
           pageId = 23;
         } else if (global.PDSTAGE == 'PD_3') {
           pageId = 60;
         }
-      } else if (global.CLIENTYPE == 'GRNTR') {
+      } else if (global.CLIENTTYPE == 'GRNTR') {
         if (global.PDSTAGE == 'PD_2') {
           pageId = 35;
         } else if (global.PDSTAGE == 'PD_3') {
@@ -83,19 +92,20 @@ const PreviousDocumentPreview = (props, {navigation, route}) => {
         }
       }
     } else {
-      if (global.CLIENTYPE == 'APPL') {
+      apiName = 'PDBusinessVisit';
+      if (global.CLIENTTYPE == 'APPL') {
         if (global.PDSTAGE == 'PD_2') {
           pageId = 12;
         } else if (global.PDSTAGE == 'PD_3') {
           pageId = 49;
         }
-      } else if (global.CLIENTYPE == 'CO-APPL') {
+      } else if (global.CLIENTTYPE == 'CO-APPL') {
         if (global.PDSTAGE == 'PD_2') {
           pageId = 24;
         } else if (global.PDSTAGE == 'PD_3') {
           pageId = 61;
         }
-      } else if (global.CLIENTYPE == 'GRNTR') {
+      } else if (global.CLIENTTYPE == 'GRNTR') {
         if (global.PDSTAGE == 'PD_2') {
           pageId = 36;
         } else if (global.PDSTAGE == 'PD_3') {
@@ -118,8 +128,9 @@ const PreviousDocumentPreview = (props, {navigation, route}) => {
       loanApplicationNumber: global.LOANAPPLICATIONNUM,
     };
 
+
     apiInstance(baseURL)
-      .post(`/api/v1/pd/PDHouseVisit`, appDetails)
+      .post(`/api/v1/pd/${apiName}`, appDetails)
       .then(response => {
         // Handle the response data
         if (global.DEBUG_MODE)
@@ -129,13 +140,19 @@ const PreviousDocumentPreview = (props, {navigation, route}) => {
           if (response.data) {
             // setParentDocId(response.data.id);
             // getDocuments([response.data]);
-            const filteredData = response.data.pdHouseVisitChild.filter(
-              item => item.documentType == 'HOU_VIS_IMG',
-            );
-            // alert(JSON.stringify(filteredData[0].geolocation));
-            getImage(filteredData[0].dmsId);
-            setPreviousGeoLocation(filteredData[0].geolocation);
-            // alert(JSON.stringify(response.data));
+            if (fromScreen == 'HouseVisit') {
+              const filteredData = response.data.pdHouseVisitChild.filter(
+                item => item.documentType == 'HOU_VIS_IMG',
+              );
+              getImage(filteredData[0].dmsId);
+              setPreviousGeoLocation(filteredData[0].geolocation);
+            } else {
+              const filteredData = response.data.pdBusinessVisitChild.filter(
+                item => item.documentType == 'BUS_VIS_IMG',
+              );
+              getImage(filteredData[0].dmsId);
+              setPreviousGeoLocation(filteredData[0].geolocation);
+            }
           }
         } else if (response.data.statusCode === 201) {
           setLoading(false);
@@ -184,7 +201,7 @@ const PreviousDocumentPreview = (props, {navigation, route}) => {
             if (response.status == 200) {
               console.log(
                 'FinalLeadCreationApiResponse::' +
-                  JSON.stringify(response.data),
+                JSON.stringify(response.data),
               );
               setFileName(response.data.fileName);
 
@@ -211,7 +228,7 @@ const PreviousDocumentPreview = (props, {navigation, route}) => {
             if (global.DEBUG_MODE)
               console.log(
                 'FinalLeadCreationApiResponse::' +
-                  JSON.stringify(error.response.data),
+                JSON.stringify(error.response.data),
               );
             setLoading(false);
             if (error.response.status == 404) {
@@ -258,7 +275,7 @@ const PreviousDocumentPreview = (props, {navigation, route}) => {
   };
 
   return (
-    <View style={{backgroundColor: 'white', flex: 1}}>
+    <View style={{ backgroundColor: 'white', flex: 1 }}>
       <View
         style={{
           width: '100%',
@@ -273,79 +290,80 @@ const PreviousDocumentPreview = (props, {navigation, route}) => {
         />
       </View>
       {loading ? <Loading /> : null}
+      <Text
+        style={[styles.textStyle, { paddingLeft: '5%', marginBottom: '5%' }]}>
+        {fromScreen == 'HouseVisit'
+          ? language[0][props.language].str_HouseVisitImage
+          : language[0][props.language].str_BusinessVisitImage}
+      </Text>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled">
-        <Text
-          style={[styles.textStyle, {paddingLeft: '5%', marginBottom: '5%'}]}>
-          {fromScreen == 'HouseVisit'
-            ? language[0][props.language].str_HouseVisitImage
-            : language[0][props.language].str_BusinessVisitImage}
-        </Text>
-        <View style={styles.imgContainer}>
-          <Text style={styles.textStyle}>
-            {fromScreen == 'HouseVisit'
-              ? language[0][props.language].str_prevHouseImage
-              : language[0][props.language].str_prevBusinessImage}
-          </Text>
-          <View
-            style={{
-              flex: 1,
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: '#00000080',
-              marginTop: '2%',
-            }}>
-            {imageUriprev != '' && (
-              <Image
-                source={{uri: imageUriprev}}
-                style={{width: '100%', height: 350, resizeMode: 'stretch'}}
-              />
-            )}
-          </View>
-          <View>
-            <Text
-              style={{
-                color: Colors.darkblack,
-                fontFamily: 'Poppins-Medium',
-                marginTop: '3%',
-              }}>
-              Geo Location : {currentLatitude} , {currentLongitude}
+        <View style={{ flex: 1 }}>
+
+          <View style={styles.imgContainer}>
+            <Text style={styles.textStyle}>
+              {fromScreen == 'HouseVisit'
+                ? language[0][props.language].str_prevHouseImage
+                : language[0][props.language].str_prevBusinessImage}
             </Text>
-          </View>
-        </View>
-        <View style={styles.imgContainer}>
-          <Text style={styles.textStyle}>
-            {fromScreen == 'HouseVisit'
-              ? language[0][props.language].str_currentHouseImage
-              : language[0][props.language].str_currentBusinessImage}
-          </Text>
-          <View
-            style={{
-              flex: 1,
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: '#00000080',
-              marginTop: '3%',
-            }}>
-            {imageUri != '' && (
-              <Image
-                source={{uri: imageUri}}
-                style={{width: '100%', height: 350, resizeMode: 'stretch'}}
-              />
-            )}
-          </View>
-          <View>
-            <Text
+            <View
               style={{
-                color: Colors.darkblack,
-                fontFamily: 'Poppins-Medium',
-                marginTop: '3%',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#00000080',
               }}>
-              Geo Location : {previousGeoLocation}
+              {imageUriprev != '' && (
+                <Image
+                  source={{ uri: imageUriprev }}
+                  style={{ width: '100%', height: halfScreenHeight, resizeMode: 'stretch' }}
+                />
+              )}
+            </View>
+            <View>
+              <Text
+                style={{
+                  flex: 1,
+                  color: Colors.darkblack,
+                  fontFamily: 'Poppins-Medium',
+                  marginTop: 20,
+                }}>
+                Geo Location : {currentLatitude} , {currentLongitude}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.imgContainer}>
+            <Text style={styles.textStyle}>
+              {fromScreen == 'HouseVisit'
+                ? language[0][props.language].str_currentHouseImage
+                : language[0][props.language].str_currentBusinessImage}
             </Text>
+            <View
+              style={{
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#00000080',
+              }}>
+              {imageUri != '' && (
+                <Image
+                  source={{ uri: imageUri }}
+                  style={{ width: '100%', height: halfScreenHeight, resizeMode: 'stretch' }}
+                />
+              )}
+            </View>
+            <View>
+              <Text
+                style={{
+                  color: Colors.darkblack,
+                  fontFamily: 'Poppins-Medium',
+                  marginTop: '3%',
+                }}>
+                Geo Location : {previousGeoLocation}
+              </Text>
+            </View>
           </View>
         </View>
       </ScrollView>
@@ -358,7 +376,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   textStyle: {
-    fontSize: 18,
+    fontSize: 16,
     color: Colors.darkblack,
     fontFamily: 'Poppins-Medium',
     marginTop: 3,
@@ -366,12 +384,15 @@ const styles = StyleSheet.create({
   imgContainer: {
     marginLeft: '5%',
     marginRight: '5%',
-    marginBottom: '2%',
+  },
+  contentContainer: {
+    paddingBottom: 50,
+    flexGrow: 1,
   },
 });
 
 const mapStateToProps = state => {
-  const {language} = state.languageReducer;
+  const { language } = state.languageReducer;
 
   return {
     language: language,

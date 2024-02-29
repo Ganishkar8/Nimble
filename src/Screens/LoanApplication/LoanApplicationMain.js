@@ -931,9 +931,17 @@ const LoanApplicationMain = (props, { navigation }) => {
                 props.navigation.replace('LoanNomineeList');
             }
         } else if (item.pageCode == 'BRE_VIEW') {
-            global.CLIENTTYPE = 'APPL';
-            global.CURRENTPAGEID = item.pageId;
-            props.navigation.replace('BREView');
+            if (item.nestedSubDataIsCompleted) {
+                global.ALLOWEDIT = "0";
+                global.CLIENTTYPE = 'APPL';
+                global.CURRENTPAGEID = item.pageId;
+                props.navigation.replace('BREView');
+            } else {
+                global.ALLOWEDIT = "1";
+                global.CLIENTTYPE = 'APPL';
+                global.CURRENTPAGEID = item.pageId;
+                props.navigation.replace('BREView');
+            }
         }
 
         // } else {

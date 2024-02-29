@@ -759,8 +759,13 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
               props={props} onGoBack={onGoBack}
             />
           </View>
+
           <ChildHeadComp
-            textval={language[0][props.language].str_applicantdetails}
+            textval={global.CLIENTTYPE == 'APPL'
+              ? language[0][props.language].str_applicantdetails
+              : global.CLIENTTYPE == 'CO-APPL'
+                ? language[0][props.language].str_coapplicantdetails
+                : language[0][props.language].str_guarantordetails}
           />
 
           <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>

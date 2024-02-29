@@ -42,11 +42,16 @@ const BREView = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
     const [isFailPresent, setIsFailPresent] = useState(false);
     const [isDeviationPresent, setIsDeviationPresent] = useState(false);
+    const [onlyView, setOnlyView] = useState(false);
+
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
         getBreData();
+        if (global.USERTYPEID == 1163 || global.ALLOWEDIT == "0") {
+            setOnlyView(true);
+        }
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
             backHandler.remove();
@@ -194,6 +199,15 @@ const BREView = (props, { navigation }) => {
 
     const submitBre = () => {
 
+        if (!isDeviationPresent) {
+            global.ISDEVIATIONPRESENT = false;
+        }
+
+        if (onlyView) {
+            props.navigation.replace('LoanApplicationMain', { fromScreen: 'CBStatus' });
+            return;
+        }
+
         props.navigation.navigate('FinalConsentScreen');
     }
 
@@ -299,7 +313,7 @@ const BREView = (props, { navigation }) => {
             </View>
             <View style={styles.fab}>
 
-                {cbResponse.length > 0 &&
+                {cbResponse.length > 0 && !isFailPresent &&
                     <ButtonViewComp
                         textValue={language[0][props.language].str_next.toUpperCase()}
                         textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}

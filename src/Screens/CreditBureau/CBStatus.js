@@ -47,7 +47,7 @@ const CBStatus = (props, { navigation }) => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
         getcbData();
-        const filterCbCheck = global.LEADTRACKERDATA.loanApplicationStatusDtos[0].subStageLog.filter((data) => data.subStageCode === 'CB_CHK');
+        const filterCbCheck = global.TRACKERSTATUSDATA.loanApplicationStatus[0].subStageLog.filter((data) => data.subStageCode === 'CB_CHK');
         const filterCbResponse = filterCbCheck[0].moduleLog.filter((data) => data.moduleCode === 'CB_BRE_DCSN')
         setCbResponseStatus(filterCbResponse[0].moduleStatus);
 

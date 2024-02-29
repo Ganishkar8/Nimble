@@ -15,31 +15,31 @@ import {
   Image,
 } from 'react-native';
 import Modal from 'react-native-modal';
-import React, {useState, useRef, useEffect} from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import MyStatusBar from '../../Components/MyStatusBar';
 import HeadComp from '../../Components/HeadComp';
-import {connect} from 'react-redux';
-import {languageAction} from '../../Utils/redux/actions/languageAction';
-import {language} from '../../Utils/LanguageString';
+import { connect } from 'react-redux';
+import { languageAction } from '../../Utils/redux/actions/languageAction';
+import { language } from '../../Utils/LanguageString';
 import Loading from '../../Components/Loading';
 import ChildHeadComp from '../../Components/ChildHeadComp';
 import ProgressComp from '../../Components/ProgressComp';
 import Colors from '../../Utils/Colors';
 import Commonstyles from '../../Utils/Commonstyles';
 import IconButtonViewComp from '../../Components/IconButtonViewComp';
-import {useIsFocused} from '@react-navigation/native';
+import { useIsFocused } from '@react-navigation/native';
 import TextComp from '../../Components/TextComp';
 import ImageComp from '../../Components/ImageComp';
 import Entypo from 'react-native-vector-icons/Entypo';
-import {Picker} from '@react-native-picker/picker';
+import { Picker } from '@react-native-picker/picker';
 import ButtonViewComp from '../../Components/ButtonViewComp';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import Common from '../../Utils/Common';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import ErrorModal from '../../Components/ErrorModal';
 import Geolocation from 'react-native-geolocation-service';
 
-const PdQuestionSubStage = (props, {navigation}) => {
+const PdQuestionSubStage = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
   const [remarks, setRemarks] = useState('');
   const [pdData, setPdData] = useState([]);
@@ -55,7 +55,7 @@ const PdQuestionSubStage = (props, {navigation}) => {
   useEffect(() => {
     props.navigation
       .getParent()
-      ?.setOptions({tabBarStyle: {display: 'none'}, tabBarVisible: false});
+      ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       handleBackButton,
@@ -71,7 +71,7 @@ const PdQuestionSubStage = (props, {navigation}) => {
     return () => {
       props.navigation
         .getParent()
-        ?.setOptions({tabBarStyle: undefined, tabBarVisible: undefined});
+        ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
       backHandler.remove();
     };
   }, [props.navigation, isScreenVisible]);
@@ -214,7 +214,7 @@ const PdQuestionSubStage = (props, {navigation}) => {
   };
 
   const onGoBack = () => {
-    props.navigation.replace('PDItems', {clientType: global.CLIENTTYPE});
+    props.navigation.replace('PDItems', { clientType: global.CLIENTTYPE });
   };
 
   const navigateToQuestion = item => {
@@ -247,7 +247,7 @@ const PdQuestionSubStage = (props, {navigation}) => {
       } else {
         pageId = 93;
       }
-      props.navigation.replace('PdQuestionarire', {
+      props.navigation.replace('PDReferenceCheckList', {
         pageId: pageId,
         pageCode: pageCode,
         pageDesc: pageDesc,
@@ -261,7 +261,7 @@ const PdQuestionSubStage = (props, {navigation}) => {
       } else {
         pageId = 105;
       }
-      props.navigation.replace('PdQuestionarire', {
+      props.navigation.replace('PDReferenceCheckList', {
         pageId: pageId,
         pageCode: pageCode,
         pageDesc: pageDesc,
@@ -456,7 +456,7 @@ const PdQuestionSubStage = (props, {navigation}) => {
     setErrorModalVisible(false);
   };
 
-  const FlatView = ({item}) => {
+  const FlatView = ({ item }) => {
     return (
       <View
         style={{
@@ -467,13 +467,13 @@ const PdQuestionSubStage = (props, {navigation}) => {
           height: 50,
         }}>
         <View
-          style={{width: '70%', justifyContent: 'center', textAlign: 'center'}}>
-          <Text style={{color: Colors.black, fontFamily: 'PoppinsRegular'}}>
+          style={{ width: '70%', justifyContent: 'center', textAlign: 'center' }}>
+          <Text style={{ color: Colors.black, fontFamily: 'PoppinsRegular' }}>
             {item.subModuleDescription} {item.isMandatory ? '' : '(Optional)'}
           </Text>
         </View>
 
-        <View style={{width: '20%'}}>
+        <View style={{ width: '20%' }}>
           {item.subModuleStatus === 'Completed' && (
             <AntDesign name="checkcircle" size={18} color={Colors.green} />
           )}
@@ -483,7 +483,7 @@ const PdQuestionSubStage = (props, {navigation}) => {
           onPress={() => {
             navigateToQuestion(item);
           }}
-          style={{width: '10%', justifyContent: 'center'}}>
+          style={{ width: '10%', justifyContent: 'center' }}>
           <View>
             <Entypo name="chevron-right" color={Colors.darkblack} size={25} />
           </View>
@@ -493,7 +493,7 @@ const PdQuestionSubStage = (props, {navigation}) => {
   };
   return (
     <SafeAreaView
-      style={[styles.parentView, {backgroundColor: Colors.lightwhite}]}>
+      style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
       {loading ? <Loading /> : null}
       <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
       <ErrorModal
@@ -504,11 +504,11 @@ const PdQuestionSubStage = (props, {navigation}) => {
       />
       <Modal
         isVisible={locationSheetVisible}
-        onBackdropPress={() => {}}
+        onBackdropPress={() => { }}
         backdropOpacity={0.5}
         style={styles.modal}>
         <View style={styles.modalContent}>
-          <View style={{alignItems: 'center'}}>
+          <View style={{ alignItems: 'center' }}>
             <View
               style={{
                 width: '100%',
@@ -558,7 +558,7 @@ const PdQuestionSubStage = (props, {navigation}) => {
           }}>
           <Image
             source={require('../../Images/orderblue.png')}
-            style={{width: 16, height: 20}}
+            style={{ width: 16, height: 20 }}
           />
           <Text
             style={{
@@ -572,7 +572,7 @@ const PdQuestionSubStage = (props, {navigation}) => {
         </View>
       </View>
 
-      <View style={{marginTop: 20}}>
+      <View style={{ marginTop: 20 }}>
         <FlatList
           data={pdData}
           renderItem={FlatView}
@@ -622,10 +622,10 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = state => {
-  const {language} = state.languageReducer;
-  const {profileDetails} = state.profileReducer;
-  const {mobileCodeDetails} = state.mobilecodeReducer;
-  const {pdSubStages} = state.pdStagesReducer;
+  const { language } = state.languageReducer;
+  const { profileDetails } = state.profileReducer;
+  const { mobileCodeDetails } = state.mobilecodeReducer;
+  const { pdSubStages } = state.pdStagesReducer;
   return {
     language: language,
     profiledetail: profileDetails,
