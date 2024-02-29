@@ -7,7 +7,7 @@ const database_size = 200000;
 // Add your encryption key here
 const encryptionKey = '123456789';
 
-SQLite.DEBUG(true);
+SQLite.DEBUG(false);
 SQLite.enablePromise(true);
 
 class Database {

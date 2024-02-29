@@ -40,6 +40,8 @@ import ImageComp from '../../../Components/ImageComp';
 import { Item } from 'react-native-paper/lib/typescript/components/Drawer/Drawer';
 import tbl_finexpdetails from '../../../Database/Table/tbl_finexpdetails';
 import ErrorModal from '../../../Components/ErrorModal';
+import { updateLoanInitiationDetails, deleteLoanInitiationDetails, updateNestedClientDetails, deleteAddressNestedClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
+
 
 const LoanDemographicsFinancialDetails = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -119,7 +121,7 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [apiError, setApiError] = useState('');
   const [pageId, setPageId] = useState(global.CURRENTPAGEID);
-
+  const [onlyView, setOnlyView] = useState(false);
 
   useEffect(() => {
     props.navigation
@@ -129,10 +131,12 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
     getSystemCodeDetail();
     getSavedData()
 
-    if (global.USERTYPEID == 1163) {
+    if (global.USERTYPEID == 1163 || global.ALLOWEDIT == "0") {
+      setOnlyView(true);
       setEarningFrequencyDisable(true);
       setEarningTypeDisable(true);
     }
+
 
     return () =>
       props.navigation
@@ -156,12 +160,27 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
 
 
     try {
-      const filteredClients = global.LEADTRACKERDATA.clientDetail.filter((client) => client.clientType === global.CLIENTTYPE);
+      // const filteredClients = global.LEADTRACKERDATA.clientDetail.filter((client) => client.id === global.CLIENTTYPE);
+      const filteredClients = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
 
-      if (filteredClients.length > 0) {
-        if (filteredClients[0].clientFinancialDetail != undefined) {
-          setEarningFrequencyLabel(filteredClients[0].clientFinancialDetail.earningFrequency)
-          setEarningTypeLabel(filteredClients[0].clientFinancialDetail.earningType)
+      if (filteredClients) {
+
+        if (filteredClients.clientFinancialDetail) {
+
+          const jsonData = JSON.parse(JSON.stringify(filteredClients.clientFinancialDetail));
+          var financialData = '';
+
+          if (Array.isArray(jsonData)) {
+            financialData = filteredClients.clientFinancialDetail[0];
+          } else if (typeof jsonData === 'object' && jsonData !== null) {
+            financialData = filteredClients.clientFinancialDetail;
+          }
+
+          if (financialData) {
+            setEarningFrequencyLabel(financialData.earningFrequency)
+            setEarningTypeLabel(financialData.earningType)
+          }
+
         }
       }
     }
@@ -464,7 +483,7 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
 
           </View>
 
-          {global.USERTYPEID == 1164 &&
+          {!onlyView &&
             <View>
               <MaterialCommunityIcons
                 name="delete"
@@ -480,9 +499,18 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
 
   }
 
-  const callFinancialData = () => {
+  const callFinancialData = async () => {
 
-    if (global.USERTYPEID == 1163) {
+    if (onlyView) {
+      if (global.CLIENTTYPE == 'APPL') {
+        page = 'DMGRC_APPL_BNK_DTLS';
+      } else if (global.CLIENTTYPE == 'CO-APPL') {
+        page = 'DMGRC_COAPPL_BNK_DTLS';
+      } else if (global.CLIENTTYPE == 'GRNTR') {
+        page = 'DMGRC_GRNTR_BNK_DTLS';
+      }
+      await Common.getPageStatus(global.FILTEREDPROCESSMODULE, page)
+
       navigatetoBank();
       return;
     }
@@ -553,6 +581,7 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
           if (global.DEBUG_MODE) console.log('PostFinancialResponse::' + JSON.stringify(response.data),);
           setLoading(false);
           if (response.status == 200) {
+            props.updateNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientFinancialDetail', response.data)
             insertData(mergedArray);
           } else if (response.data.statusCode === 201) {
             setApiError(response.data.message);
@@ -730,8 +759,13 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
               props={props} onGoBack={onGoBack}
             />
           </View>
+
           <ChildHeadComp
-            textval={language[0][props.language].str_applicantdetails}
+            textval={global.CLIENTTYPE == 'APPL'
+              ? language[0][props.language].str_applicantdetails
+              : global.CLIENTTYPE == 'CO-APPL'
+                ? language[0][props.language].str_coapplicantdetails
+                : language[0][props.language].str_guarantordetails}
           />
 
           <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
@@ -838,7 +872,7 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
             />
           </View>
 
-          {global.USERTYPEID == 1164 &&
+          {!onlyView &&
             <View
               style={{
                 marginTop: 25,
@@ -907,7 +941,7 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
             />
           </View>
 
-          {global.USERTYPEID == 1164 &&
+          {!onlyView &&
             <View
               style={{
                 marginTop: 25,
@@ -1015,7 +1049,7 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
             />
           </View>
 
-          {global.USERTYPEID == 1164 &&
+          {!onlyView &&
             <View
               style={{
                 marginTop: 25,
@@ -1083,7 +1117,7 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
             />
           </View>
 
-          {global.USERTYPEID == 1164 &&
+          {!onlyView &&
             <View
               style={{
                 marginTop: 25,
@@ -1227,15 +1261,18 @@ const mapStateToProps = (state) => {
   const { language } = state.languageReducer;
   const { profileDetails } = state.profileReducer;
   const { mobileCodeDetails } = state.mobilecodeReducer;
+  const { loanInitiationDetails } = state.loanInitiationReducer;
   return {
     language: language,
     profiledetail: profileDetails,
-    mobilecodedetail: mobileCodeDetails
+    mobilecodedetail: mobileCodeDetails,
+    loanInitiationDetails: loanInitiationDetails
   }
 }
 
 const mapDispatchToProps = dispatch => ({
   languageAction: item => dispatch(languageAction(item)),
+  updateNestedClientDetails: (loanApplicationId, clientId, key, nestedKey, data) => dispatch(updateNestedClientDetails(loanApplicationId, clientId, key, nestedKey, data)),
 });
 
 export default connect(

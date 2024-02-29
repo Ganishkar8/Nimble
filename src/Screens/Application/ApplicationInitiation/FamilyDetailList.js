@@ -60,7 +60,7 @@ const FamilyDetailList = (props, { navigation }) => {
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
 
         getRelationData()
-        if (global.USERTYPEID == 1163) {
+        if (global.USERTYPEID == 1163 || global.ALLOWEDIT == "0") {
             setOnlyView(true);
         }
 
@@ -105,7 +105,7 @@ const FamilyDetailList = (props, { navigation }) => {
         if (global.USERTYPEID == 1163) {
             bg = 'GREY'
         } else {
-            if (item.isKyc == '1') {
+            if (global.ALLOWEDIT == "0") {
                 bg = 'GREY'
             }
         }
@@ -152,9 +152,9 @@ const FamilyDetailList = (props, { navigation }) => {
                         if (global.USERTYPEID == 1163) {
 
                         } else {
-
-                            handleClick('delete', item)
-
+                            if (!(global.ALLOWEDIT == "0")) {
+                                handleClick('delete', item)
+                            }
                         }
                     }
                     }>
@@ -227,7 +227,7 @@ const FamilyDetailList = (props, { navigation }) => {
 
                 setLoading(false);
                 deletedata(relationID);
-                props.deleteClientDetails(global.LOANAPPLICATIONID,relationID,"familyDetail");
+                props.deleteClientDetails(global.LOANAPPLICATIONID, relationID, "familyDetail");
             })
             .catch(error => {
                 // Handle the error
@@ -254,9 +254,19 @@ const FamilyDetailList = (props, { navigation }) => {
     }
 
 
-    const buttonNext = () => {
+    const buttonNext = async () => {
 
         if (onlyView) {
+
+            if (global.CLIENTTYPE == 'APPL') {
+                page = 'DMGRC_APPL_BSN_DTLS';
+            } else if (global.CLIENTTYPE == 'CO-APPL') {
+                page = 'DMGRC_COAPPL_BSN_DTLS';
+            } else if (global.CLIENTTYPE == 'GRNTR') {
+                page = 'DMGRC_GRNTR_BSN_DTLS';
+            }
+            await Common.getPageStatus(global.FILTEREDPROCESSMODULE, page)
+
             navigatetoBusiness();
             return;
         }
@@ -405,24 +415,25 @@ const FamilyDetailList = (props, { navigation }) => {
                             language[0][props.language].str_familydetails
                         }></TextComp>
 
-                    <ProgressComp progressvalue={1} textvalue="1 of 4" />
+                    <ProgressComp progressvalue={1} textvalue="1 of 6" />
                 </View>
             </View>
-
-            <TouchableOpacity activeOpacity={8} onPress={() => handleClick('new')}>
-                <View style={{ marginBottom: 10 }}>
-                    <IconButtonViewComp
-                        icon={'+'}
-                        textValue={language[0][
-                            props.language
-                        ].str_familydetails.toUpperCase()}
-                        textStyle={{ color: Colors.skyBlue, fontSize: 13, fontWeight: 500 }}
-                        viewStyle={Commonstyles.buttonView}
-                        innerStyle={Commonstyles.buttonViewBorderStyle}
-                    //handleClick={() => handleClick('new')}
-                    />
-                </View>
-            </TouchableOpacity>
+            {!(global.ALLOWEDIT == "0") &&
+                <TouchableOpacity activeOpacity={8} onPress={() => handleClick('new')}>
+                    <View style={{ marginBottom: 10 }}>
+                        <IconButtonViewComp
+                            icon={'+'}
+                            textValue={language[0][
+                                props.language
+                            ].str_familydetails.toUpperCase()}
+                            textStyle={{ color: Colors.skyBlue, fontSize: 13, fontWeight: 500 }}
+                            viewStyle={Commonstyles.buttonView}
+                            innerStyle={Commonstyles.buttonViewBorderStyle}
+                        //handleClick={() => handleClick('new')}
+                        />
+                    </View>
+                </TouchableOpacity>
+            }
 
             <FlatList
                 data={relationDetails}

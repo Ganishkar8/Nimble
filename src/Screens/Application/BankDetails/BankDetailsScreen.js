@@ -151,6 +151,7 @@ const BankDetailsScreen = (props, { navigation }) => {
     const [hideRetake, setHideRetake] = useState(false);
     const [hideDelete, setHideDelete] = useState(false);
     const [pageId, setPageId] = useState(global.CURRENTPAGEID);
+    const [onlyView, setOnlyView] = useState(false);
 
 
     useEffect(() => {
@@ -159,7 +160,8 @@ const BankDetailsScreen = (props, { navigation }) => {
         makeSystemMandatoryFields();
         getExistingData()
 
-        if (global.USERTYPEID == 1163) {
+        if (global.USERTYPEID == 1163 || global.ALLOWEDIT == "0") {
+            setOnlyView(true);
             fieldsDisable();
         }
 
@@ -615,7 +617,7 @@ const BankDetailsScreen = (props, { navigation }) => {
 
     const bankSubmit = () => {
 
-        if (global.USERTYPEID == 1163) {
+        if (onlyView) {
             props.navigation.replace('BankList')
             return;
         }
@@ -625,7 +627,12 @@ const BankDetailsScreen = (props, { navigation }) => {
                 if (validateData()) {
                     showBottomSheet()
                 } else {
-                    updateImage();
+                    if (bankID.length <= 0) {
+                        postBankData();
+                    } else {
+                        updateBankData();
+                    }
+
                 }
 
             } else {
@@ -637,7 +644,7 @@ const BankDetailsScreen = (props, { navigation }) => {
 
     }
 
-    const updateImage = async () => {
+    const updateImage = async (imageUri, fileType, fileName) => {
         if (imageUri) {
             setLoading(true);
             const formData = new FormData();
@@ -660,11 +667,10 @@ const BankDetailsScreen = (props, { navigation }) => {
                     // Handle the response from Cloudinary
                     setLoading(false)
                     setDocID(data.docId);
-                    if (bankID.length <= 0) {
-                        postBankData(data.docId);
-                    } else {
-                        updateBankData(data.docId);
-                    }
+                    setFileType(fileType)
+                    setFileName(fileName)
+                    setImageUri(imageUri)
+                    setVisible(false)
 
                 } else {
                     setLoading(false)
@@ -683,7 +689,7 @@ const BankDetailsScreen = (props, { navigation }) => {
         }
     }
 
-    const postBankData = (dmsID) => {
+    const postBankData = () => {
         if (validateData()) {
             showBottomSheet();
             //alert(errMsg)
@@ -700,7 +706,7 @@ const BankDetailsScreen = (props, { navigation }) => {
                     "confirmedAccountNumber": confirmAccountNumber,
                     "bankLinkedMobileNo": bankLinkedMobNo,
                     "upiId": upiID,
-                    "dmsId": dmsID,
+                    "dmsId": docID,
                     "accountToBeUsedFor": accountToUseLabel,
                     "accountVerificationStatus": "",
                     "createdBy": global.USERID,
@@ -748,7 +754,7 @@ const BankDetailsScreen = (props, { navigation }) => {
         }
     };
 
-    const updateBankData = (dmsID) => {
+    const updateBankData = () => {
         if (validateData()) {
             showBottomSheet();
         } else {
@@ -764,7 +770,7 @@ const BankDetailsScreen = (props, { navigation }) => {
                 "confirmedAccountNumber": confirmAccountNumber,
                 "bankLinkedMobileNo": bankLinkedMobNo,
                 "upiId": upiID,
-                "dmsId": dmsID,
+                "dmsId": docID,
                 "accountToBeUsedFor": accountToUseLabel,
                 "accountVerificationStatus": "",
                 "createdBy": global.USERID,
@@ -902,11 +908,8 @@ const BankDetailsScreen = (props, { navigation }) => {
                 imageName = imageName + fileExtension;
                 console.log('File extension:', fileExtension);
             }
+            updateImage(image.path, image.mime, imageName)
 
-            setFileType(image.mime)
-            setFileName(imageName)
-            setImageUri(image.path)
-            setVisible(false)
             props.onChange?.(image);
         })
 
@@ -930,10 +933,8 @@ const BankDetailsScreen = (props, { navigation }) => {
                 imageName = imageName + fileExtension;
                 console.log('File extension:', fileExtension);
             }
-            setFileType(image.mime)
-            setFileName(imageName)
-            setImageUri(image.path)
-            setVisible(false)
+            updateImage(image.path, image.mime, imageName)
+
             setDeleteVisible(false)
             props.onChange?.(image);
         })

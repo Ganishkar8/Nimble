@@ -630,7 +630,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     if (data.kycTypeId2 == '002' || data.kycTypeId2 == '008') {
       setExpiry2DateVisible(true);
       setExpiry2DateMan(true);
-      setExpiry2Date(Common.convertDateFormat(data[0].kycType2ExpiryDate));
+      setExpiry2Date(Common.convertDateFormat(data.kycType2ExpiryDate));
     } else {
       setExpiry2Date('');
       setExpiry2DateVisible(false);
@@ -641,7 +641,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     if (data.kycTypeId3 == '002' || data.kycTypeId3 == '008') {
       setExpiry3DateVisible(true);
       setExpiry3DateMan(true);
-      setExpiry3Date(Common.convertDateFormat(data[0].kycType3ExpiryDate));
+      setExpiry3Date(Common.convertDateFormat(data.kycType3ExpiryDate));
     } else {
       setExpiry3Date('');
       setExpiry3DateVisible(false);
@@ -652,7 +652,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     if (data.kycTypeId4 == '002' || data.kycTypeId4 == '008') {
       setExpiry4DateVisible(true);
       setExpiry4DateMan(true);
-      setExpiry4Date(Common.convertDateFormat(data[0].kycType4ExpiryDate));
+      setExpiry4Date(Common.convertDateFormat(data.kycType4ExpiryDate));
     } else {
       setExpiry4Date('');
       setExpiry4DateVisible(false);
@@ -1761,7 +1761,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
 
   }
 
-  const generateLoanAppNum = (dedupeData) => {
+  const generateLoanAppNum = (dedupeData, type) => {
 
     if (validate()) {
       showBottomSheet();
@@ -1775,7 +1775,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
 
       const appDetails = {
         loanApplicationId: global.LOANAPPLICATIONID,
-        lmsClientId: lmsID,
+        //lmsClientId: lmsID,
       };
       const baseURL = global.PORT1;
       setLoading(true);
@@ -1791,19 +1791,8 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           if (response.status == 200) {
 
             global.TEMPAPPID = response.data.loanApplicationNumber;
-
             if (dedupeData.clientExistingDetails == null) {
-              setClientTypeLabel('NEW');
-              setClientTypeVisible(true);
-              if (global.CLIENTTYPE == 'APPL') {
-                // setErrorModalVisible(true);
-                // setApiError('No Result Found');
-
-                props.navigation.replace('LMSLOSDetails');
-                setLoading(false);
-              } else {
-                // setErrorModalVisible1(true);
-                // setApiError('No Result Found');
+              if (type == 'NEW') {
                 props.navigation.replace('LMSLOSDetails');
                 setLoading(false);
               }
@@ -1813,11 +1802,11 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
               setClientTypeLabel('EXISTING');
               setClientTypeVisible(true);
               setLoading(false);
+              global.isDedupeDone = '1';
+              setIsDedupeDone(true);
+              setClientTypeVisible(true);
             }
 
-            global.isDedupeDone = '1';
-            setIsDedupeDone(true);
-            setClientTypeVisible(true);
 
             // if (
             //   KycType1Label == '001' ||
@@ -2080,7 +2069,42 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           //await tbl_client.deleteAllClient();
           if (response.status == 200) {
 
-            generateLoanAppNum(response.data);
+            if (response.data.clientExistingDetails == null) {
+              setClientTypeLabel('NEW');
+              setClientTypeVisible(true);
+              if (global.CLIENTTYPE == 'APPL') {
+                // setErrorModalVisible(true);
+                // setApiError('No Result Found');
+                generateLoanAppNum(response.data, 'NEW');
+                global.isDedupeDone = '1';
+                setIsDedupeDone(true);
+                setClientTypeVisible(true);
+              } else {
+                // setErrorModalVisible1(true);
+                // setApiError('No Result Found');
+                props.navigation.replace('LMSLOSDetails');
+                setLoading(false);
+                global.isDedupeDone = '1';
+                setIsDedupeDone(true);
+                setClientTypeVisible(true);
+
+              }
+            } else {
+              if (global.CLIENTTYPE == 'APPL') {
+                generateLoanAppNum(response.data, 'EXISTING');
+              } else {
+                props.dedupeAction(response.data);
+                setDedupeModalVisible(true);
+                setClientTypeLabel('EXISTING');
+                setClientTypeVisible(true);
+                setLoading(false);
+                global.isDedupeDone = '1';
+                setIsDedupeDone(true);
+                setClientTypeVisible(true);
+              }
+            }
+
+
 
             // props.navigation.navigate('AadharOTPVerification', { aadharNumber: aadhar });
             // generateAadharOTP();

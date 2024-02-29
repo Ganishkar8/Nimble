@@ -242,7 +242,7 @@ const LoanDemographicFamilyDetails = (props) => {
             ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
         const clientDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].familyDetail;
-        
+
         if (props.route.params.familyDetails.length > 0) {
             fetchFamilyData();
         }
@@ -274,8 +274,8 @@ const LoanDemographicFamilyDetails = (props) => {
         setTitleLabel(data[0].title);
         setName(data[0].name);
         setGenderLabel(data[0].gender);
-        setDOB(data[0].dateOfBirth)
-        setAge(data[0].age)
+        setDOB(Common.convertDateFormat(data[0].dateOfBirth))
+        setAge(data[0].age.toString())
         setMobileNumber(data[0].mobileNumber)
         setKycType1Label(data[0].kycTypeId1)
         setkycID1(data[0].kycIdValue1)
@@ -284,8 +284,13 @@ const LoanDemographicFamilyDetails = (props) => {
         setkycID2(data[0].kycIdValue2)
         setExpiry2Date(data[0].kycType2ExpiryDate)
         setKycType3Label(data[0].kycTypeId3)
-        setkycID3(data[0].kycTypeId3)
+        setkycID3(data[0].kycIdValue3)
         setExpiry3Date(data[0].kycType3ExpiryDate)
+        setKycType4Label(data[0].kycTypeId4)
+        setkycID4(data[0].kycIdValue4)
+        setExpiry4Date(data[0].kycType4ExpiryDate)
+
+
         setRelationStatuswithCOAPPLabel(data[0].relationshipWithCoApplicant)
         setRelationStatuswithGRNTRLabel(data[0].relationshipWithGuarantor)
     };
@@ -298,7 +303,7 @@ const LoanDemographicFamilyDetails = (props) => {
 
 
 
-            if (global.USERTYPEID == 1163) {
+            if (global.USERTYPEID == 1163 || global.ALLOWEDIT == "0") {
                 setOnlyView(true);
                 fieldsDisable();
             }
@@ -312,37 +317,19 @@ const LoanDemographicFamilyDetails = (props) => {
 
     const getApplicantData = () => {
 
-        tbl_loanApplication.getLoanAppWorkFlowID(global.LOANAPPLICATIONID, 'APPL', relationID)
-            .then(data => {
-                if (global.DEBUG_MODE) console.log('Loan Data:', data);
-                if (data !== undefined && data.length > 0) {
+        if (props.loanInitiationDetails) {
 
-                    getID1data(data[0].workflow_id);
-                    getID2data(data[0].workflow_id);
-                    getID3data(data[0].workflow_id);
-                    getID4data(data[0].workflow_id);
-                    setWorkflowIDLabel(data[0].workflow_id)
-                }
+            const filteredData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID));
 
-            })
-            .catch(error => {
-                if (global.DEBUG_MODE) console.error('Error fetching Loan details:', error);
-            });
+            if (filteredData.length > 0) {
+                getID1data(filteredData[0].workflowId);
+                getID2data(filteredData[0].workflowId);
+                getID3data(filteredData[0].workflowId);
+                getID4data(filteredData[0].workflowId);
+                setWorkflowIDLabel(filteredData[0].workflowId)
+            }
 
-        tbl_familydetails.getFamilyDetailsOnID(global.LOANAPPLICATIONID, 'APPL', familyID)
-            .then(data => {
-                if (global.DEBUG_MODE) console.log('Family Data:', data);
-                if (data !== undefined && data.length > 0) {
-
-                }
-
-            })
-            .catch(error => {
-                if (global.DEBUG_MODE) console.error('Error fetching Family details:', error);
-            });
-
-
-
+        }
 
     }
 
@@ -748,6 +735,7 @@ const LoanDemographicFamilyDetails = (props) => {
                     "name": Name,
                     "dateOfBirth": DOB.length > 0 ? Common.convertYearDateFormat(DOB) : '',
                     "age": Age,
+                    "title": titleLabel,
                     "mobileNumber": mobileNumber,
                     "gender": genderLabel,
                     "kycTypeId1": KycType1Label,

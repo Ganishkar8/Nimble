@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
+import { Modal, View, Text, TouchableOpacity, StyleSheet, FlatList, ScrollView } from 'react-native';
 import Colors from '../Utils/Colors';
 import ImageComp from './ImageComp';
 import TextComp from './TextComp';
@@ -13,6 +13,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import { it } from 'react-native-paper-dates';
 import CheckBoxComp from './CheckBoxComp';
 import CheckBox from '@react-native-community/checkbox';
+
 
 const DedupeModal = props => {
 
@@ -60,73 +61,81 @@ const DedupeModal = props => {
             transparent={true}
         >
             <View style={styles.modalContainer}>
+
                 <View style={styles.modalContent}>
 
-                    <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
 
-                        <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, flexDirection: 'row' }}>
-                            <TextComp textVal={`${language[0][props.language].str_clientdedupecheck}${props.dedupeDetails.remarks ? 'Failed' : ''}`} textStyle={{ width: '90%', color: Colors.darkblack, fontFamily: 'Poppins-Medium', fontSize: 16 }} Visible={false} />
+                    <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, flexDirection: 'row' }}>
+                        <TextComp textVal={`${language[0][props.language].str_clientdedupecheck}${props.dedupeDetails.remarks ? 'Failed' : ''}`} textStyle={{ width: '90%', color: Colors.darkblack, fontFamily: 'Poppins-Medium', fontSize: 16 }} Visible={false} />
 
-                            <TouchableOpacity onPress={() => props.onClose('Cancel', [])} style={{ justifyContent: 'center' }}>
-                                <View >
+                        <TouchableOpacity onPress={() => props.onClose('Cancel', [])} style={{ justifyContent: 'center' }}>
+                            <View >
 
-                                    <Entypo name='cross' size={23} color={Colors.darkblack} />
+                                <Entypo name='cross' size={23} color={Colors.darkblack} />
 
-                                </View>
-                            </TouchableOpacity>
-                        </View>
-
-                        {props.dedupeDetails.remarks ? (
-                            <View style={{ width: '90%' }}>
-                                <Text style={[{ color: Colors.mediumgrey, fontFamily: 'Poppins-Medium', fontSize: 12, marginTop: 5 }]}>
-                                    {props.dedupeDetails.remarks.substring(1, props.dedupeDetails.remarks.length - 1).replace('\n, ', '\n')}
-                                </Text>
                             </View>
-                        ) : (
-                            <View style={{ width: '100%', marginTop: 15 }}>
+                        </TouchableOpacity>
+                    </View>
 
-                                <FlatList
-                                    data={clientData}
-                                    showsHorizontalScrollIndicator={false}
-                                    keyExtractor={(item, index) => index.toString()}
-                                    renderItem={({ item, index }) => {
-                                        return (
 
-                                            <View style={{ width: '100%', flexDirection: 'row', color: Colors.white, justifyContent: 'center' }}>
+                    <ScrollView>
 
-                                                <CheckBox
-                                                    value={item.isSelected}
-                                                    disabled={false}
-                                                    onValueChange={() => { valueChange(item) }}
-                                                    color="#000000"
-                                                    style={styles.checkbox}
-                                                    tintColors={{ true: Colors.darkblue }}
-                                                />
+                        <View style={{ flex: 1 }}>
 
-                                                <View style={{ width: '90%' }}>
-                                                    <Text style={[{ color: Colors.lightgrey, fontFamily: 'PoppinsRegular', fontSize: 12 }]}>CLIENT ID - CLIENT NAME - BRANCH</Text>
-                                                    <Text style={[{ color: Colors.mediumgrey, fontFamily: 'Poppins-Medium', fontSize: 12, marginTop: 5 }]}>{`${item.lmsClientId} - ${item.lmsCustomerName} - ${item.branchId}`}</Text>
-                                                </View>
-                                                {/* <TouchableOpacity onPress={() => alert('cancel')} style={{ justifyContent: 'center', alignItems: 'center', width: '10%' }}>
+                            <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
+
+                                {props.dedupeDetails.remarks ? (
+                                    <View style={{ width: '90%' }}>
+                                        <Text style={[{ color: Colors.mediumgrey, fontFamily: 'Poppins-Medium', fontSize: 12, marginTop: 5 }]}>
+                                            {props.dedupeDetails.remarks.substring(1, props.dedupeDetails.remarks.length - 1).replace('\n, ', '\n')}
+                                        </Text>
+                                    </View>
+                                ) : (
+                                    <View style={{ width: '100%', marginTop: 15 }}>
+
+                                        <FlatList
+                                            data={clientData}
+                                            showsHorizontalScrollIndicator={false}
+                                            keyExtractor={(item, index) => index.toString()}
+                                            renderItem={({ item, index }) => {
+                                                return (
+
+                                                    <View style={{ width: '100%', flexDirection: 'row', color: Colors.white, justifyContent: 'center' }}>
+
+                                                        <CheckBox
+                                                            value={item.isSelected}
+                                                            disabled={false}
+                                                            onValueChange={() => { valueChange(item) }}
+                                                            color="#000000"
+                                                            style={styles.checkbox}
+                                                            tintColors={{ true: Colors.darkblue }}
+                                                        />
+
+                                                        <View style={{ width: '90%' }}>
+                                                            <Text style={[{ color: Colors.lightgrey, fontFamily: 'PoppinsRegular', fontSize: 12 }]}>CLIENT ID - CLIENT NAME - BRANCH</Text>
+                                                            <Text style={[{ color: Colors.mediumgrey, fontFamily: 'Poppins-Medium', fontSize: 12, marginTop: 5 }]}>{`${item.lmsClientId} - ${item.lmsCustomerName} - ${item.branchId}`}</Text>
+                                                        </View>
+                                                        {/* <TouchableOpacity onPress={() => alert('cancel')} style={{ justifyContent: 'center', alignItems: 'center', width: '10%' }}>
                                                     <View >
 
                                                         <AntDesign name='eye' size={23} color={Colors.darkblue} />
 
                                                     </View>
                                                 </TouchableOpacity> */}
-                                            </View>
+                                                    </View>
 
-                                        )
-                                    }}
-                                />
+                                                )
+                                            }}
+                                        />
+
+                                    </View>
+                                )}
+
 
                             </View>
-                        )}
 
-
-                    </View>
-
-
+                        </View>
+                    </ScrollView>
 
                     <View style={{ width: '100%', height: 'auto', flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'flex-end', alignSelf: 'flex-end', marginTop: 20, }}>
                         {!(props.dedupeDetails.remarks) && oneSelected &&
@@ -141,7 +150,9 @@ const DedupeModal = props => {
 
                     </View>
 
+
                 </View>
+
 
             </View>
         </Modal >
@@ -158,6 +169,7 @@ const styles = StyleSheet.create({
     modalContent: {
         width: '80%',
         height: 'auto',
+        maxHeight: '50%',
         backgroundColor: 'white',
         padding: 20,
         borderRadius: 10,

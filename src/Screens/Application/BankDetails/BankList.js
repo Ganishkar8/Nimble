@@ -55,12 +55,17 @@ const BankList = (props, { navigation }) => {
     const [communicationAvailable, setCommunicationAvailable] = useState(false);
     const showBottomSheet = () => setBottomErrorSheetVisible(true);
     const hideBottomSheet = () => setBottomErrorSheetVisible(false);
+    const [onlyView, setOnlyView] = useState(false);
+
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
 
-        getBankData()
+        getBankData();
+        if (global.USERTYPEID == 1163 || global.ALLOWEDIT == "0") {
+            setOnlyView(true);
+        }
 
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
@@ -100,7 +105,7 @@ const BankList = (props, { navigation }) => {
 
         var bg = '';
 
-        if (global.USERTYPEID == 1163) {
+        if (onlyView) {
             bg = 'GREY'
         } else {
 
@@ -149,12 +154,8 @@ const BankList = (props, { navigation }) => {
                     </TouchableOpacity>
                     <TouchableOpacity style={{ width: '20%' }} activeOpacity={0.8} onPress={() => {
 
-                        if (global.USERTYPEID == 1163) {
-
-                        } else {
-
+                        if (!onlyView) {
                             handleClick('delete', item)
-
                         }
                     }
                     }>
@@ -258,7 +259,7 @@ const BankList = (props, { navigation }) => {
         //     showBottomSheet();
         //     return;
         // }
-        if (global.USERTYPEID == 1163) {
+        if (onlyView) {
             props.navigation.replace('LoanApplicationMain', { fromScreen: 'BankList' });
             return;
         }
@@ -411,21 +412,22 @@ const BankList = (props, { navigation }) => {
                     <ProgressComp progressvalue={1} textvalue="6 of 6" />
                 </View>
             </View>
-
-            <TouchableOpacity activeOpacity={8} onPress={() => handleClick('new')}>
-                <View style={{ marginBottom: 10 }}>
-                    <IconButtonViewComp
-                        icon={'+'}
-                        textValue={language[0][
-                            props.language
-                        ].str_addbankdetailsbutton.toUpperCase()}
-                        textStyle={{ color: Colors.skyBlue, fontSize: 13, fontWeight: 500 }}
-                        viewStyle={Commonstyles.buttonView}
-                        innerStyle={Commonstyles.buttonViewBorderStyle}
-                    //handleClick={() => handleClick('new')}
-                    />
-                </View>
-            </TouchableOpacity>
+            {!onlyView &&
+                <TouchableOpacity activeOpacity={8} onPress={() => handleClick('new')}>
+                    <View style={{ marginBottom: 10 }}>
+                        <IconButtonViewComp
+                            icon={'+'}
+                            textValue={language[0][
+                                props.language
+                            ].str_addbankdetailsbutton.toUpperCase()}
+                            textStyle={{ color: Colors.skyBlue, fontSize: 13, fontWeight: 500 }}
+                            viewStyle={Commonstyles.buttonView}
+                            innerStyle={Commonstyles.buttonViewBorderStyle}
+                        //handleClick={() => handleClick('new')}
+                        />
+                    </View>
+                </TouchableOpacity>
+            }
 
             <FlatList
                 data={bankDetails}

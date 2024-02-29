@@ -91,20 +91,29 @@ const LoanDocumentUpload = (props, { navigation }) => {
     const [filteredDocument, setFilteredDocument] = useState([]);
 
     const [documentList, setDocumentList] = useState([]);
+    const [onlyView, setOnlyView] = useState(false);
+
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
 
-        const filteredDocumentData = documentData.filter(item => item.clientType === global.CLIENTTYPE);
-        setFilteredDocument(filteredDocumentData);
-
-        getDocuments(filteredDocumentData);
+        const filteredDocumentData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].applicantDocumentDetail.filter(client => client.clientId === parseInt(global.CLIENTID));
+        console.log(filteredDocumentData)
+        if (filteredDocumentData) {
+            setFilteredDocument(filteredDocumentData);
+            getDocuments(filteredDocumentData);
+        } else {
+            getDocuments([]);
+        }
 
         const filteredData = global.FILTEREDPROCESSMODULE.filter(item => item.moduleCode === "DOC_UPLD");
 
         setProcessModuleLength(filteredData[0].nestedSubData.length);
 
+        if (global.USERTYPEID == 1163 || global.ALLOWEDIT == "0") {
+            setOnlyView(true);
+        }
 
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
@@ -260,7 +269,10 @@ const LoanDocumentUpload = (props, { navigation }) => {
                             marginTop: 20,
                         }}>
                         <TouchableOpacity style={{ width: '20%', }}
-                            onPress={() => pickDocument(item)} activeOpacity={0.8}>
+                            onPress={() => {
+                                if (!onlyView)
+                                    pickDocument(item)
+                            }} activeOpacity={0.8}>
                             {item.dmsID.toString().length > 0 ?
                                 <View style={{ width: 40, height: 40, backgroundColor: '#33AD3E99', borderRadius: 10, justifyContent: 'center', alignItems: 'center' }}>
                                     <ImageComp imageSrc={require('../../../Images/cloudcomputing.png')} imageStylee={{ width: 28, height: 22 }} />
@@ -290,7 +302,14 @@ const LoanDocumentUpload = (props, { navigation }) => {
                         <TouchableOpacity style={{ width: '10%', }}
                             onPress={() => {
                                 if (item.dmsID.toString().length > 0) {
-                                    showImageBottomSheet(item)
+                                    showImageBottomSheet(item);
+                                    if (onlyView) {
+                                        setHideRetake(true);
+                                        setHideDelete(true);
+                                    } else {
+                                        setHideRetake(false);
+                                        setHideDelete(false);
+                                    }
                                 }
                             }} activeOpacity={0.8}>
                             <View >
@@ -474,7 +493,7 @@ const LoanDocumentUpload = (props, { navigation }) => {
                         setLoading(false)
                         // Handle the response data
                         if (response.status == 200) {
-                            console.log("FinalLeadCreationApiResponse::" + JSON.stringify(response.data));
+                            if (global.DEBUG_MODE) console.log("FinalLeadCreationApiResponse::" + JSON.stringify(response.data));
                             setFileName(response.data.fileName)
                             if (isPDFFile(response.data.fileName)) {
                                 var base64pdf = response.data.base64Content;
@@ -569,6 +588,12 @@ const LoanDocumentUpload = (props, { navigation }) => {
 
 
     const buttonNext = () => {
+
+        if (onlyView) {
+            props.navigation.replace('LoanApplicationMain', { fromScreen: 'BankList' });
+            return;
+        }
+
         let error = ''
         //alert(JSON.stringify(data))
         documentList.map((item) => {
@@ -644,7 +669,22 @@ const LoanDocumentUpload = (props, { navigation }) => {
 
                 if (global.DEBUG_MODE) console.log('UpdateDMSIDResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
-                updateLoanStatus();
+
+                const promises = [];
+                response.data.forEach((data) => {
+                    promises.push(props.updateClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'applicantDocumentDetail', data))
+                });
+
+                Promise.all(promises)
+                    .then(() => {
+                        updateLoanStatus();
+                    })
+                    .catch(error => {
+                        console.error('Error updating client details:', error);
+                        // Handle errors if necessary
+                    });
+
+
                 // if (processModuleLength == 1) {
 
                 // } else if (processModuleLength == 2) {
@@ -664,6 +704,7 @@ const LoanDocumentUpload = (props, { navigation }) => {
                 //         props.navigation.navigate('FinalConsentScreen');
                 //     }
                 // }
+
 
             })
             .catch(error => {
@@ -739,7 +780,7 @@ const LoanDocumentUpload = (props, { navigation }) => {
 
     };
 
-    const getDocuments = () => {
+    const getDocuments = (filteredDocument) => {
 
 
         const appDetails = {
@@ -764,13 +805,13 @@ const LoanDocumentUpload = (props, { navigation }) => {
                     if (existingCodeIndex !== -1) {
                         // If the category exists, push the installment to its data array
                         var filteredData = [];
-                        if (filteredDocument !== '') {
+                        if (filteredDocument.length > 0) {
                             filteredData = filteredDocument.filter(item => item.documentType === installment.subCode);
                         }
 
                         if (filteredData != undefined && filteredData != null) {
                             if (filteredData.length > 0) {
-                                const extraJSON = { dmsID: filteredData[0].dmsId, isImagePresent: true, documentName: filteredData[0].documentName };
+                                const extraJSON = { dmsID: filteredData[0]?.dmsId, isImagePresent: true, documentName: filteredData[0].documentName };
                                 acc[existingCodeIndex].dataNew.push({
                                     ...installment,
                                     ...extraJSON
@@ -794,13 +835,13 @@ const LoanDocumentUpload = (props, { navigation }) => {
                     } else {
                         // If the category does not exist, create a new entry with the category and data array
                         var filteredData = [];
-                        if (filteredDocument !== '') {
+                        if (filteredDocument.length > 0) {
                             filteredData = filteredDocument.filter(item => item.documentType === installment.subCode);
                         }
 
                         if (filteredData != undefined && filteredData != null) {
                             if (filteredData.length > 0) {
-                                const extraJSON = { dmsID: filteredData[0].dmsId, isImagePresent: true, documentName: filteredData[0].documentName };
+                                const extraJSON = { dmsID: filteredData[0]?.dmsId, isImagePresent: true, documentName: filteredData[0].documentName };
                                 acc.push({
                                     code,
                                     dataNew: [{ ...installment, ...extraJSON, documentName: '' }],
@@ -1014,10 +1055,12 @@ const mapStateToProps = state => {
     const { language } = state.languageReducer;
     const { profileDetails } = state.profileReducer;
     const { mobileCodeDetails } = state.mobilecodeReducer;
+    const { loanInitiationDetails } = state.loanInitiationReducer;
     return {
         language: language,
         profiledetail: profileDetails,
-        mobilecodedetail: mobileCodeDetails
+        mobilecodedetail: mobileCodeDetails,
+        loanInitiationDetails: loanInitiationDetails,
     }
 };
 

@@ -12,7 +12,7 @@ import {
 import { React, useState, useEffect } from 'react';
 import MyStatusBar from '../../../Components/MyStatusBar';
 import HeadComp from '../../../Components/HeadComp';
-import { connect } from 'react-redux';
+import { connect, useDispatch, useSelector } from 'react-redux';
 import { languageAction } from '../../../Utils/redux/actions/languageAction';
 import { language } from '../../../Utils/LanguageString';
 import Loading from '../../../Components/Loading';
@@ -34,7 +34,7 @@ import tbl_client from '../../../Database/Table/tbl_client';
 import tbl_loanApplication from '../../../Database/Table/tbl_loanApplication';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import tbl_loanaddressinfo from '../../../Database/Table/tbl_loanaddressinfo';
-import { deleteNestedClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
+import { deleteNestedClientDetails, updateAsyncNestedClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
 
 
 const LoanAddressList = (props, { navigation }) => {
@@ -61,6 +61,10 @@ const LoanAddressList = (props, { navigation }) => {
     const showBottomSheet = () => setBottomErrorSheetVisible(true);
     const hideBottomSheet = () => setBottomErrorSheetVisible(false);
     const [onlyView, setOnlyView] = useState(false);
+    const reduxdispatch = useDispatch();
+    const loanInitiationDetails = useSelector(state => state.loanInitiationReducer.loanInitiationDetails);
+    const [loaded, setLoaded] = useState(false); // State to track if data is loaded
+
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
@@ -68,7 +72,7 @@ const LoanAddressList = (props, { navigation }) => {
 
         getAddressData()
 
-        if (global.USERTYPEID == 1163) {
+        if (global.USERTYPEID == 1163 || global.ALLOWEDIT == "0") {
             setOnlyView(true);
         }
 
@@ -78,6 +82,18 @@ const LoanAddressList = (props, { navigation }) => {
         }
     }, [props.navigation, isScreenVisible]);
 
+    useEffect(() => {
+        // Any logic you want to execute when loanInitiationDetails changes
+        // For example, dispatch an action to update the details
+        if (loaded) {
+            //alert('hi')
+            getAddressData();
+            //setLoaded(false);
+        }
+
+    }, [loanInitiationDetails, loaded]);
+
+
     const handleBackButton = () => {
         onGoBack();
         return true; // Prevent default back button behavior
@@ -86,18 +102,28 @@ const LoanAddressList = (props, { navigation }) => {
     const getAddressData = () => {
 
 
-        const allClientDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].clientDetail;
+        const allClientDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
 
-        allClientDetail.map(item => {
-            if (item.udyamRegistrationNumber) {
-                setUrmNumber(item.udyamRegistrationNumber);
+        if (allClientDetail) {
+            if (allClientDetail.udyamRegistrationNumber) {
+                setUrmNumber(allClientDetail.udyamRegistrationNumber);
                 // setUrmNumberDisable(true);
                 // UrNumberAvailable = true;
-                getAllLoanAddressData(item.udyamRegistrationNumber);
+                getAllLoanAddressData(allClientDetail.udyamRegistrationNumber);
             } else {
                 getAllLoanAddressData("")
             }
-        });
+        }
+        // allClientDetail.map(item => {
+        //     if (item.udyamRegistrationNumber) {
+        //         setUrmNumber(item.udyamRegistrationNumber);
+        //         // setUrmNumberDisable(true);
+        //         // UrNumberAvailable = true;
+        //         getAllLoanAddressData(item.udyamRegistrationNumber);
+        //     } else {
+        //         getAllLoanAddressData("")
+        //     }
+        // });
 
         // tbl_client.getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE).then(value => {
         //     if (value !== undefined && value.length > 0) {
@@ -130,7 +156,6 @@ const LoanAddressList = (props, { navigation }) => {
 
     }
 
-
     const getAllLoanAddressData = (urmNumber) => {
 
         const clientDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
@@ -142,7 +167,10 @@ const LoanAddressList = (props, { navigation }) => {
             if (!RegisteredOfficeAddress) {
                 if (urmNumber) {
                     if (urmNumber.length > 0) {
-                        getUdyamRAOCheck(urmNumber);
+                        if (!onlyView) {
+
+                            getUdyamRAOCheck(urmNumber);
+                        }
                     }
                 }
             }
@@ -150,7 +178,9 @@ const LoanAddressList = (props, { navigation }) => {
         } else {
             if (urmNumber) {
                 if (urmNumber.length > 0) {
-                    getUdyamRAOCheck(urmNumber);
+                    if (!onlyView) {
+                        getUdyamRAOCheck(urmNumber);
+                    }
                 }
             }
         }
@@ -243,7 +273,19 @@ const LoanAddressList = (props, { navigation }) => {
 
                             setLoading(false);
 
-                            insertData(response.data);
+                            const addressData = response.data.clientAddressInfoDto;
+                            addressData.addressType = "ROA";
+
+                            //props.updateAsyncNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientAddress', response.data)
+                            reduxdispatch(updateAsyncNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientAddress', addressData))
+                                .then(() => {
+                                    setLoaded(true);
+                                })
+                                .catch(error => {
+                                    // Handle any errors that occurred during the dispatch
+                                    console.error('Error dispatching updateAsyncNestedClientDetails:', error);
+                                });
+                            //insertData(response.data);
 
 
                         } else if (response.data.statusCode === 201) {
@@ -291,7 +333,7 @@ const LoanAddressList = (props, { navigation }) => {
         if (global.USERTYPEID == 1163) {
             bg = 'GREY'
         } else {
-            if (item.isUdyam) {
+            if (item.isUdyam || global.ALLOWEDIT == "0") {
                 bg = 'GREY'
             }
         }
@@ -338,7 +380,7 @@ const LoanAddressList = (props, { navigation }) => {
                         if (global.USERTYPEID == 1163) {
 
                         } else {
-                            if (item.isUdyam) {
+                            if (!item.isUdyam && !(global.ALLOWEDIT == "0")) {
                                 handleClick('delete', item)
                             }
                         }
@@ -453,9 +495,18 @@ const LoanAddressList = (props, { navigation }) => {
     }
 
 
-    const buttonNext = () => {
+    const buttonNext = async () => {
 
         if (onlyView) {
+            if (global.CLIENTTYPE == 'APPL') {
+                page = 'DMGRC_APPL_GST_DTLS';
+            } else if (global.CLIENTTYPE == 'CO-APPL') {
+                page = 'DMGRC_COAPPL_FNCL_DTLS';
+            } else if (global.CLIENTTYPE == 'GRNTR') {
+                page = 'DMGRC_GRNTR_FNCL_DTLS';
+            }
+            await Common.getPageStatus(global.FILTEREDPROCESSMODULE, page)
+
             navigatetoGSTDetail();
             return;
         }
@@ -645,7 +696,12 @@ const LoanAddressList = (props, { navigation }) => {
                             global.CLIENTTYPE == 'APPL' ? language[0][props.language].str_baddressdetailappl : language[0][props.language].str_baddressdetail
                         }></TextComp>
 
-                    <ProgressComp progressvalue={0.60} textvalue="4 of 6" />
+
+                    {global.CLIENTTYPE == 'APPL' ? (
+                        <ProgressComp progressvalue={0.50} textvalue="4 of 6" />
+                    ) : (
+                        <ProgressComp progressvalue={0.50} textvalue="2 of 4" />
+                    )}
                 </View>
             </View>
 

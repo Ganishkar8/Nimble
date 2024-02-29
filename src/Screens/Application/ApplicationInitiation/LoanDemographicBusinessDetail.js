@@ -338,7 +338,7 @@ const LoanDemographicBusinessDetail = (props) => {
             getApplicantData();
 
 
-            if (global.USERTYPEID == 1163) {
+            if (global.USERTYPEID == 1163 || global.ALLOWEDIT == "0") {
                 setOnlyView(true);
                 setHideDelete(true);
                 setHideRetake(true);
@@ -355,109 +355,165 @@ const LoanDemographicBusinessDetail = (props) => {
     const getApplicantData = async () => {
 
         var UrNumberAvailable = false;
+        const filteredData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID));
 
-        await tbl_client
-            .getClientBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE)
-            .then(data => {
-                if (global.DEBUG_MODE) console.log('Applicant Data:', data);
-                if (data !== undefined && data.length > 0) {
-                    if (data[0].udyamRegistrationNumber !== undefined && data[0].udyamRegistrationNumber !== null) {
-                        if (data[0].udyamRegistrationNumber.length > 0) {
-                            setUrmNumber(data[0].udyamRegistrationNumber);
-                            setUrmNumberDisable(true);
-                            UrNumberAvailable = true;
-                            getBusinessData(data[0].udyamRegistrationNumber);
-                        } else {
-                            getBusinessData("");
-                        }
-                    } else {
-                        getBusinessData("");
-                    }
+        if (filteredData) {
+            const clientDetail = filteredData[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
+
+            if (clientDetail) {
+                if (clientDetail.udyamRegistrationNumber) {
+                    setUrmNumber(clientDetail.udyamRegistrationNumber);
+                    setUrmNumberDisable(true);
+                    UrNumberAvailable = true;
+                    getBusinessData(clientDetail.udyamRegistrationNumber, true);
+                } else {
+                    getBusinessData("", false);
                 }
-            })
-            .catch(error => {
-                setLoading(false);
-                if (global.DEBUG_MODE)
-                    console.error('Error fetching Applicant details:', error);
-            });
+            }
 
-
+        }
 
     }
 
-    const getBusinessData = async (udyamNum) => {
+    const getBusinessData = async (udyamNum, UrNumberAvailable) => {
         var businessAvailable = false;
 
-        await tbl_loanbusinessDetail.getBusinessDetailsBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE, global.CLIENTID)
-            .then(value => {
-                if (global.DEBUG_MODE) console.log('Business Data:', value);
-                if (value !== undefined && value.length > 0) {
-                    businessAvailable = true;
-                    setCustomerSubCategoryLabel(value[0].customerSubCatg)
-                    setCustomerSubCategoryDisable(true);
-                    setEntShopName(value[0].enterpriseShopName)
-                    setUrmNumber(value[0].udyamRegNum)
-                    if (UrNumberAvailable) {
-                        setUrmNumberDisable(true)
+        const filteredData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID));
+
+        if (filteredData) {
+            const clientDetail = filteredData[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
+
+            if (clientDetail) {
+                if (clientDetail.clientBusinessDetail) {
+
+                    const jsonData = JSON.parse(JSON.stringify(clientDetail.clientBusinessDetail));
+                    var businessData = '';
+
+                    if (Array.isArray(jsonData)) {
+                        businessData = clientDetail.clientBusinessDetail[0];
+                    } else if (typeof jsonData === 'object' && jsonData !== null) {
+                        businessData = clientDetail.clientBusinessDetail;
                     }
-                    setDOR(value[0].dateofReg) //dateofReg
-                    setDOI(value[0].dateofIncorp) //dateofIncorp
-                    setDOBC(value[0].dateofBusiness) //dateofBusiness
-                    setYear(value[0].year)
-                    setMonthLabel(parseInt(value[0].month))
-                    setIndustryTypeLabel(value[0].industryType)
-                    setIndustryLineLabel(value[0].industryLine)
-                    setCompanyTypeLabel(value[0].companyType)
-                    setEnterpriseTypeLabel(value[0].enterpriseType)
-                    setBusinessLocationLabel(value[0].businessLocation)
-                    setNoofEmployee(value[0].noofEmployees)
-                    setOperatingDays(value[0].operatingdays) //operatingtiming
-                    setBookKeepStatusLabel(value[0].bookKeepingStatus)
-                    setHomeBasedBusinessLabel(value[0].homeBasedBusiness)
-                    setACTMLabel(value[0].custTransMode)
-                    setTimeByPromoter(value[0].operatingtiming)
-                    setNPMRate(value[0].npmRate)
-                    setPurchaseFrequencyLabel(value[0].purchaseFrequency)
-                    setTypePurchaseLabel(value[0].typeofPurchase)
-                    setSalesFrequencyLabel(value[0].salesFrequency)
-                    if (value[0].dmsId !== undefined) {
-                        if (value[0].dmsId.length > 0) {
-                            getImage(value[0].dmsId);
+
+                    if (businessData) {
+
+                        businessAvailable = true;
+                        setCustomerSubCategoryLabel(businessData?.customerSubcategory)
+                        setCustomerSubCategoryDisable(true);
+                        setEntShopName(businessData?.enterpriseShopName)
+                        setUrmNumber(businessData?.udyamRegistrationNumber)
+                        if (UrNumberAvailable) {
+                            setUrmNumberDisable(true)
                         }
-                        setDocID(value[0].dmsId);
-                    }
-                } else {
-                    if (udyamNum) {
-                        getUdyamCheck(udyamNum);
+                        setDOR(businessData?.dateOfRegistration ? Common.convertDateFormat(businessData?.dateOfRegistration) : '') //dateofReg
+                        setDOI(businessData?.dateOfIncorporation ? Common.convertDateFormat(businessData?.dateOfIncorporation) : '')
+                        setDOBC(businessData?.dateOfBusinessCommencement ? Common.convertDateFormat(businessData?.dateOfBusinessCommencement) : '')
+                        setYear(businessData?.businessVintageYears?.toString() || '')
+                        setMonthLabel(parseInt(businessData?.businessVintageMonths))
+                        setIndustryTypeLabel(businessData?.industryType)
+                        setIndustryLineLabel(businessData?.industryLine)
+                        setCompanyTypeLabel(businessData?.companyType)
+                        setEnterpriseTypeLabel(businessData?.enterpriseType)
+                        setBusinessLocationLabel(businessData?.businessLocationVillage)
+                        setNoofEmployee(businessData?.noOfEmployees?.toString() || '')
+                        setOperatingDays(businessData?.operatingDaysInAWeek?.toString() || '') //operatingtiming
+                        setOperatingTimings(businessData?.operatingTimesInADay?.toString() || '') //operatingtiming
+                        setBookKeepStatusLabel(businessData?.bookKeepingStatus)
+                        setHomeBasedBusinessLabel(businessData?.homeBasedBusiness)
+                        setACTMLabel(businessData?.applicantCustomerTransactionMode)
+                        setTimeByPromoter(businessData?.timeSpentAtTheBusinessInADay?.toString() || '')
+                        setYearAtPresent(businessData?.yearsAtPresentPremises?.toString() || '')
+                        setNPMRate(businessData?.npmRateOfBusiness?.toString() || '')
+                        setPurchaseFrequencyLabel(businessData?.purchasesFrequency)
+                        setTypePurchaseLabel(businessData?.typeOfPurchasingFacility)
+                        setSalesFrequencyLabel(businessData?.salesFrequency)
+                        if (businessData?.clientBusinessImageGeocodeDetail) {
+                            setDocID(businessData?.clientBusinessImageGeocodeDetail[0]?.dmsId);
+                        }
+                    } else {
+                        if (udyamNum) {
+                            getUdyamCheck(udyamNum);
+                        }
+                        if (global.CLIENTTYPE == 'APPL') {
+                            setCustomerSubCategoryLabel(filteredData[0].customerSubcategory);
+                            setCustomerSubCategoryDisable(true);
+                        }
                     }
 
                 }
-
-            })
-            .catch(error => {
-                if (global.DEBUG_MODE) console.error('Error fetching Business details:', error);
-            });
-
-        if (!businessAvailable) {
-            if (global.CLIENTTYPE == 'APPL') {
-                tbl_loanApplication
-                    .getLoanAppBasedOnID(global.LOANAPPLICATIONID, 'APPL')
-                    .then(data => {
-                        if (global.DEBUG_MODE) console.log('Applicant Data:', data);
-                        if (data !== undefined && data.length > 0) {
-                            setCustomerSubCategoryLabel(data[0].customer_subcategory);
-                            setCustomerSubCategoryDisable(true);
-                            setLoading(false);
-                        }
-                    })
-                    .catch(error => {
-                        setLoading(false);
-                        if (global.DEBUG_MODE)
-                            console.error('Error fetching Applicant details:', error);
-                    });
-
             }
         }
+
+        // await tbl_loanbusinessDetail.getBusinessDetailsBasedOnID(global.LOANAPPLICATIONID, global.CLIENTTYPE, global.CLIENTID)
+        //     .then(value => {
+        //         if (global.DEBUG_MODE) console.log('Business Data:', value);
+        //         if (value !== undefined && value.length > 0) {
+        //             businessAvailable = true;
+        //             setCustomerSubCategoryLabel(value[0].customerSubCatg)
+        //             setCustomerSubCategoryDisable(true);
+        //             setEntShopName(value[0].enterpriseShopName)
+        //             setUrmNumber(value[0].udyamRegNum)
+        //             if (UrNumberAvailable) {
+        //                 setUrmNumberDisable(true)
+        //             }
+        //             setDOR(value[0].dateofReg) //dateofReg
+        //             setDOI(value[0].dateofIncorp) //dateofIncorp
+        //             setDOBC(value[0].dateofBusiness) //dateofBusiness
+        //             setYear(value[0].year)
+        //             setMonthLabel(parseInt(value[0].month))
+        //             setIndustryTypeLabel(value[0].industryType)
+        //             setIndustryLineLabel(value[0].industryLine)
+        //             setCompanyTypeLabel(value[0].companyType)
+        //             setEnterpriseTypeLabel(value[0].enterpriseType)
+        //             setBusinessLocationLabel(value[0].businessLocation)
+        //             setNoofEmployee(value[0].noofEmployees)
+        //             setOperatingDays(value[0].operatingdays) //operatingtiming
+        //             setBookKeepStatusLabel(value[0].bookKeepingStatus)
+        //             setHomeBasedBusinessLabel(value[0].homeBasedBusiness)
+        //             setACTMLabel(value[0].custTransMode)
+        //             setTimeByPromoter(value[0].operatingtiming)
+        //             setNPMRate(value[0].npmRate)
+        //             setPurchaseFrequencyLabel(value[0].purchaseFrequency)
+        //             setTypePurchaseLabel(value[0].typeofPurchase)
+        //             setSalesFrequencyLabel(value[0].salesFrequency)
+        //             if (value[0].dmsId !== undefined) {
+        //                 if (value[0].dmsId.length > 0) {
+        //                     getImage(value[0].dmsId);
+        //                 }
+        //                 setDocID(value[0].dmsId);
+        //             }
+        //         } else {
+        //             if (udyamNum) {
+        //                 getUdyamCheck(udyamNum);
+        //             }
+
+        //         }
+
+        //     })
+        //     .catch(error => {
+        //         if (global.DEBUG_MODE) console.error('Error fetching Business details:', error);
+        //     });
+
+        // if (!businessAvailable) {
+        //     if (global.CLIENTTYPE == 'APPL') {
+        //         tbl_loanApplication
+        //             .getLoanAppBasedOnID(global.LOANAPPLICATIONID, 'APPL')
+        //             .then(data => {
+        //                 if (global.DEBUG_MODE) console.log('Applicant Data:', data);
+        //                 if (data !== undefined && data.length > 0) {
+        //                     setCustomerSubCategoryLabel(data[0].customer_subcategory);
+        //                     setCustomerSubCategoryDisable(true);
+        //                     setLoading(false);
+        //                 }
+        //             })
+        //             .catch(error => {
+        //                 setLoading(false);
+        //                 if (global.DEBUG_MODE)
+        //                     console.error('Error fetching Applicant details:', error);
+        //             });
+
+        //     }
+        // }
     }
 
     const getUdyamCheck = (udyamNum) => {
@@ -560,7 +616,9 @@ const LoanDemographicBusinessDetail = (props) => {
                         if (Common.DEBUG_MODE) console.log("GetPhotoApiResponse::" + JSON.stringify(response.data));
 
                         if (response.status == 200) {
-
+                            setFileName(response.data.fileName)
+                            setImageUri('data:image/png;base64,' + response.data.base64Content)
+                            props.navigation.navigate('PreviewImage', { imageName: response.data.fileName, imageUri: 'data:image/png;base64,' + response.data.base64Content })
                         } else if (response.data.statusCode === 201) {
                             setApiError(response.data.message);
                             setErrorModalVisible(true);
@@ -615,6 +673,7 @@ const LoanDemographicBusinessDetail = (props) => {
         setBusinessLocationDisable(true);
         setNoofEmployeeDisable(true);
         setOperatingDaysDisable(true);
+        setOperatingTimingsDisable(true);
         setBookKeepStatusDisable(true);
         setHomeBasedBusinessDisable(true);
         setACTMDisable(true);
@@ -623,6 +682,7 @@ const LoanDemographicBusinessDetail = (props) => {
         setPurchaseFrequencyDisable(true);
         setTypePurchaseDisable(true);
         setSalesFrequencyDisable(true);
+        setYearAtPresentDisable(true);
     }
 
     const checkPermissions = async () => {
@@ -1157,9 +1217,18 @@ const LoanDemographicBusinessDetail = (props) => {
 
     };
 
-    const callBusinessDetails = () => {
+    const callBusinessDetails = async () => {
 
         if (onlyView) {
+            if (global.CLIENTTYPE == 'APPL') {
+                page = 'DMGRC_APPL_BSN_ADDR_DTLS';
+            } else if (global.CLIENTTYPE == 'CO-APPL') {
+                page = 'DMGRC_COAPPL_BSN_ADDR_DTLS';
+            } else if (global.CLIENTTYPE == 'GRNTR') {
+                page = 'DMGRC_GRNTR_BSN_ADDR_DTLS';
+            }
+            await Common.getPageStatus(global.FILTEREDPROCESSMODULE, page)
+
             navigatetoBusinessAddress();
             return;
         }
@@ -1292,7 +1361,8 @@ const LoanDemographicBusinessDetail = (props) => {
                     setLoading(false);
                     if (response.status == 200) {
                         props.updateNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientBusinessDetail', response.data)
-                        await insertData(response.data.id, imageID);
+                        updateLoanStatus();
+                        // await insertData(response.data.id, imageID);
                     } else if (response.data.statusCode === 201) {
                         setApiError(response.data.message);
                         setErrorModalVisible(true);
@@ -1357,7 +1427,6 @@ const LoanDemographicBusinessDetail = (props) => {
                 "salesFrequency": salesFrequencyLabel,
                 "clientBusinessImageGeocodeDetail": [
                     {
-                        "id": 0,
                         "dmsId": imageID,
                         "image": fileName,
                         "geoCode": "",
@@ -1378,7 +1447,8 @@ const LoanDemographicBusinessDetail = (props) => {
 
                     setLoading(false);
                     if (response.status == 200) {
-                        await insertData(familyID);
+                        updateLoanStatus();
+                        //await insertData(familyID);
                     } else if (response.data.statusCode === 201) {
                         setApiError(response.data.message);
                         setErrorModalVisible(true);
@@ -1852,6 +1922,10 @@ const LoanDemographicBusinessDetail = (props) => {
 
     const pickDocument = async () => {
 
+        if (onlyView) {
+            return;
+        }
+
         checkPermissions().then(res => {
             if (res == true) {
                 showphotoBottomSheet();
@@ -1922,7 +1996,12 @@ const LoanDemographicBusinessDetail = (props) => {
 
     const previewImage = () => {
         hideImageBottomSheet();
-        props.navigation.navigate('PreviewImage', { imageName: fileName, imageUri: imageUri })
+        if (imageUri) {
+            props.navigation.navigate('PreviewImage', { imageName: fileName, imageUri: imageUri })
+        } else {
+            getImage(docID);
+        }
+
     }
 
     const imageDetail = () => {
@@ -2065,7 +2144,11 @@ const LoanDemographicBusinessDetail = (props) => {
                                     language[0][props.language].str_businessdetails
                                 }></TextComp>
 
-                            <ProgressComp progressvalue={0.50} textvalue="2 of 4" />
+                            {global.CLIENTTYPE == 'APPL' ? (
+                                <ProgressComp progressvalue={0.50} textvalue="2 of 6" />
+                            ) : (
+                                <ProgressComp progressvalue={0.50} textvalue="1 of 4" />
+                            )}
                         </View>
                     </View>
 
@@ -2375,7 +2458,7 @@ const LoanDemographicBusinessDetail = (props) => {
                         </View>
                     )}
 
-                    {yearAtPresent && (
+                    {yearAtPresentVisible && (
                         <View
                             style={{
                                 width: '100%',
@@ -2742,7 +2825,7 @@ const LoanDemographicBusinessDetail = (props) => {
                                 {fileName}
                             </Text>
 
-                            {imageUri &&
+                            {docID &&
                                 <TouchableOpacity style={{ width: '20%', alignItems: 'flex-end' }}
                                     onPress={() => {
                                         showImageBottomSheet();

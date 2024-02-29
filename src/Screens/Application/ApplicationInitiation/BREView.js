@@ -40,11 +40,18 @@ const BREView = (props, { navigation }) => {
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const [apiError, setApiError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [isFailPresent, setIsFailPresent] = useState(false);
+    const [isDeviationPresent, setIsDeviationPresent] = useState(false);
+    const [onlyView, setOnlyView] = useState(false);
+
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
         getBreData();
+        if (global.USERTYPEID == 1163 || global.ALLOWEDIT == "0") {
+            setOnlyView(true);
+        }
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
             backHandler.remove();
@@ -98,6 +105,7 @@ const BREView = (props, { navigation }) => {
                         const extraJson = { isSelected: false };
                         return { ...item, ...extraJson };
                     });
+                    checkFailOrDeviation(response.data);
                     setCBResponse(newData)
                 }
 
@@ -131,6 +139,7 @@ const BREView = (props, { navigation }) => {
                         const extraJson = { isSelected: false };
                         return { ...item, ...extraJson };
                     });
+                    checkFailOrDeviation(response.data);
                     setCBResponse(newData)
                 }
             })
@@ -146,7 +155,59 @@ const BREView = (props, { navigation }) => {
 
     };
 
+    const checkFailOrDeviation = (data) => {
+        let hasFailResult = false;
+
+        data.forEach((item) => {
+
+            item.loanElgResultsSummariesClientWise.forEach((summary) => {
+                if (summary.result == 'Fail') {
+                    // If a 'Fail' result is found, set the variable to true and break the loop
+                    hasFailResult = true;
+                    setIsFailPresent(true)
+                    global.ISFAILPRESENT = true;
+                    return;
+                }
+            });
+
+            // If a 'Fail' result is found, break the outer loop
+            if (hasFailResult) {
+                return;
+            }
+        });
+
+        let hasDeviationResult = false;
+
+        data.forEach((item) => {
+
+            item.loanElgResultsSummariesClientWise.forEach((summary) => {
+                if (summary.result == 'Fail') {
+                    // If a 'Fail' result is found, set the variable to true and break the loop
+                    setIsDeviationPresent(true)
+                    hasDeviationResult = true;
+                    global.ISDEVIATIONPRESENT = true;
+                    return;
+                }
+            });
+
+            // If a 'Fail' result is found, break the outer loop
+            if (hasDeviationResult) {
+                return;
+            }
+        });
+    }
+
     const submitBre = () => {
+
+        if (!isDeviationPresent) {
+            global.ISDEVIATIONPRESENT = false;
+        }
+
+        if (onlyView) {
+            props.navigation.replace('LoanApplicationMain', { fromScreen: 'CBStatus' });
+            return;
+        }
+
         props.navigation.navigate('FinalConsentScreen');
     }
 
@@ -252,7 +313,7 @@ const BREView = (props, { navigation }) => {
             </View>
             <View style={styles.fab}>
 
-                {cbResponse.length > 0 &&
+                {cbResponse.length > 0 && !isFailPresent &&
                     <ButtonViewComp
                         textValue={language[0][props.language].str_next.toUpperCase()}
                         textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}

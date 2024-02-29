@@ -1543,6 +1543,7 @@ const AddressDetails = (props, { navigation }) => {
 
     const appDetails = {
       "manualKycStatus": "InProgress",
+      "isManualKycRequired": true,
       "clientManualAddresses": [
         {
           "addressChangeType": actionTypeLabel,

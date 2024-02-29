@@ -20,7 +20,7 @@ import apiInstance from '../../../Utils/apiInstance';
 import ErrorModal from '../../../Components/ErrorModal';
 import tbl_client from '../../../Database/Table/tbl_client';
 import tbl_clientaddressinfo from '../../../Database/Table/tbl_clientaddressinfo';
-import { updateLoanInitiationDetails, deleteLoanInitiationDetails, updateNestedClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
+import { updateLoanInitiationDetails, deleteLoanInitiationDetails, updateNestedClientDetails, deleteAddressNestedClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
 
 
 const LoanAddressDetails = (props, { navigation }) => {
@@ -146,6 +146,7 @@ const LoanAddressDetails = (props, { navigation }) => {
 
     const [addressID, setAddressID] = useState('');
     const [isKYC, setIsKYC] = useState('');
+    const [isUdyam, setIsUdyam] = useState(false);
     const [onlyView, setOnlyView] = useState(false);
 
 
@@ -161,7 +162,8 @@ const LoanAddressDetails = (props, { navigation }) => {
         getSystemCodeDetail()
         makeSystemMandatoryFields();
         getExistingData()
-        if (global.USERTYPEID == 1163) {
+
+        if (global.USERTYPEID == 1163 || global.ALLOWEDIT == "0") {
             fieldsDisable();
             setOnlyView(true);
         }
@@ -219,7 +221,8 @@ const LoanAddressDetails = (props, { navigation }) => {
         setAddressOwnerTypeDisable(true);
         setOwnerDetailsDisable(true);
         setOwnerNameDisable(true);
-
+        setMobileNoDisable(true);
+        setEmailDisable(true);
     }
 
     const getExistingAddressData = (data) => {
@@ -267,6 +270,7 @@ const LoanAddressDetails = (props, { navigation }) => {
             setAddressTypeDisable(true);
         }
         setIsKYC(data.isEkyc);
+        setIsUdyam(data.isUdyam);
         setLoading(false)
 
     }
@@ -583,7 +587,7 @@ const LoanAddressDetails = (props, { navigation }) => {
         var errorMessage = '';
 
         if (addressTypeMan && addressTypeVisible) {
-            if (addressTypeLabel.length <= 0) {
+            if (!addressTypeLabel) {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + addressTypeCaption + '\n';
                 i++;
                 flag = true;
@@ -591,7 +595,7 @@ const LoanAddressDetails = (props, { navigation }) => {
         }
 
         if (addressLine1Man && addressLine1Visible) {
-            if (addressLine1.length <= 0) {
+            if (!addressLine1) {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + addressLine1Caption + '\n';
                 i++;
                 flag = true;
@@ -599,7 +603,7 @@ const LoanAddressDetails = (props, { navigation }) => {
         }
 
         if (addressLine2Man && addressLine2Visible) {
-            if (addressLine2.length <= 0) {
+            if (!addressLine2) {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + addressLine2Caption + '\n';
                 i++;
                 flag = true;
@@ -607,7 +611,7 @@ const LoanAddressDetails = (props, { navigation }) => {
         }
 
         if (landmarkMan && landmarkVisible) {
-            if (landmark.length <= 0) {
+            if (!landmark) {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + landmarkCaption + '\n';
                 i++;
                 flag = true;
@@ -615,7 +619,7 @@ const LoanAddressDetails = (props, { navigation }) => {
         }
 
         if (pincodeMan && pincodeVisible) {
-            if (pincode.length <= 0) {
+            if (!pincode) {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + pincodeCaption + '\n';
                 i++;
                 flag = true;
@@ -627,7 +631,7 @@ const LoanAddressDetails = (props, { navigation }) => {
         }
 
         if (cityMan && cityVisible) {
-            if (city.length <= 0) {
+            if (!city) {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + cityCaption + '\n';
                 i++;
                 flag = true;
@@ -635,7 +639,7 @@ const LoanAddressDetails = (props, { navigation }) => {
         }
 
         if (districtMan && districtVisible) {
-            if (district.length <= 0) {
+            if (!district) {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + districtCaption + '\n';
                 i++;
                 flag = true;
@@ -643,7 +647,7 @@ const LoanAddressDetails = (props, { navigation }) => {
         }
 
         if (stateMan && stateVisible) {
-            if (state.length <= 0) {
+            if (!state) {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + stateCaption + '\n';
                 i++;
                 flag = true;
@@ -651,7 +655,7 @@ const LoanAddressDetails = (props, { navigation }) => {
         }
 
         if (countryMan && countryVisible) {
-            if (country.length <= 0) {
+            if (!country) {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + countryCaption + '\n';
                 i++;
                 flag = true;
@@ -659,14 +663,14 @@ const LoanAddressDetails = (props, { navigation }) => {
         }
 
         if (mobileNoMan && mobileNoVisible) {
-            if (mobileNo.length <= 0) {
+            if (!mobileNo) {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + mobileNoCaption + '\n';
                 i++;
                 flag = true;
             }
         }
 
-        if (mobileNo.length > 0) {
+        if (mobileNo) {
             if (!Common.isValidPhoneNumber(mobileNo)) {
                 errorMessage =
                     errorMessage +
@@ -682,7 +686,7 @@ const LoanAddressDetails = (props, { navigation }) => {
         }
 
         if (emailMan && emailVisible) {
-            if (email.length <= 0) {
+            if (!email) {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + emailCaption + '\n';
                 i++;
                 flag = true;
@@ -705,7 +709,7 @@ const LoanAddressDetails = (props, { navigation }) => {
         }
 
         if (addressOwnerTypeMan && addressOwnerTypeVisible) {
-            if (addressOwnerTypeLabel.length <= 0) {
+            if (!addressOwnerTypeLabel) {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + addressOwnerTypeCaption + '\n';
                 i++;
                 flag = true;
@@ -713,7 +717,7 @@ const LoanAddressDetails = (props, { navigation }) => {
         }
 
         if (ownerDetailsMan && ownerDetailsVisible) {
-            if (ownerDetailsLabel.length <= 0) {
+            if (!ownerDetailsLabel) {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + ownerDetailsCaption + '\n';
                 i++;
                 flag = true;
@@ -735,12 +739,12 @@ const LoanAddressDetails = (props, { navigation }) => {
 
     const addressSubmit = () => {
 
-        if (global.USERTYPEID == 1163) {
+        if (onlyView) {
             props.navigation.replace('LoanAddressList')
             return;
         }
 
-        if (addressID.length <= 0) {
+        if (!addressID) {
             postAddressData();
         } else {
             updateAddressData();
@@ -777,7 +781,8 @@ const LoanAddressDetails = (props, { navigation }) => {
                 "geoClassification": '',
                 "yearsAtResidence": '',
                 "yearsInCurrentCityOrTown": '',
-                "supervisedDate": new Date()
+                "supervisedDate": new Date(),
+                "isUdyam": isUdyam,
             }]
             const baseURL = '8901';
             setLoading(true);
@@ -795,6 +800,11 @@ const LoanAddressDetails = (props, { navigation }) => {
                     //     tbl_loanaddressinfo.deleteLoanDataBasedOnAddressAndClient(global.LOANAPPLICATIONID, addressTypeLabel, global.CLIENTTYPE);
                     //     insertData(response.data[0].id)
                     // }
+                    if (addressTypeLabel == 'ROA') {
+                        if (!addressID) {
+                            props.deleteAddressNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientAddress', 'ROA')
+                        }
+                    }
                     props.updateNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientAddress', response.data[0])
                     props.navigation.replace('LoanAddressList')
 
@@ -842,7 +852,8 @@ const LoanAddressDetails = (props, { navigation }) => {
                 "geoClassification": '',
                 "yearsAtResidence": '',
                 "yearsInCurrentCityOrTown": '',
-                "supervisedDate": new Date()
+                "supervisedDate": new Date(),
+                "isUdyam": isUdyam,
             }
             const baseURL = '8901';
             setLoading(true);
@@ -851,6 +862,11 @@ const LoanAddressDetails = (props, { navigation }) => {
                 .then(async response => {
                     // Handle the response data
                     if (global.DEBUG_MODE) console.log('UpdateAddressResponse::' + JSON.stringify(response.data),);
+                    if (addressTypeLabel == 'ROA') {
+                        if (!addressID) {
+                            props.deleteAddressNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientAddress', 'ROA')
+                        }
+                    }
                     props.updateNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientAddress', response.data)
                     props.navigation.replace('LoanAddressList')
                     //insertData(addressID)
@@ -1253,6 +1269,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => ({
     languageAction: item => dispatch(languageAction(item)),
     updateNestedClientDetails: (loanApplicationId, clientId, key, nestedKey, data) => dispatch(updateNestedClientDetails(loanApplicationId, clientId, key, nestedKey, data)),
+    deleteAddressNestedClientDetails: (loanApplicationId, clientId, key, nestedKey, type) => dispatch(deleteAddressNestedClientDetails(loanApplicationId, clientId, key, nestedKey, type)),
     updateLoanInitiationDetails: (loanApplicationId, loanData, key, clientId, updatedDetails) => dispatch(updateLoanInitiationDetails(loanApplicationId, loanData, key, clientId, updatedDetails)),
 });
 

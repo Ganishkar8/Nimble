@@ -1,4 +1,4 @@
-import { ADDLOANINITIATION_DETAIL, UPDATELOANINITIATION_DETAIL, DELETELOANINITIATION_DETAIL, DELETE_CLIENT_DETAIL, UPDATE_CLIENT_DETAIL, UPDATENESTED_CLIENT_DETAIL, DELETENESTED_CLIENT_DETAIL } from "../actions/loanInitiationActionType"
+import { ADDLOANINITIATION_DETAIL, UPDATELOANINITIATION_DETAIL, DELETELOANINITIATION_DETAIL, DELETE_CLIENT_DETAIL, UPDATE_CLIENT_DETAIL, UPDATENESTED_CLIENT_DETAIL, DELETENESTED_CLIENT_DETAIL, DELETEADDRESSNESTED_CLIENT_DETAIL } from "../actions/loanInitiationActionType"
 
 const initialState = {
     loanInitiationDetails: [],
@@ -59,20 +59,31 @@ const loanInitiationReducer = (state = initialState, action) => {
                 ...state,
                 loanInitiationDetails: state.loanInitiationDetails.map((item) => {
                     if (item.id === parseInt(loanApplicationId)) {
-                        const isExistingId = item[key].some(
+                        const isExistingId = item[key] && item[key].some(
                             (clientDetail) => clientDetail.id === parseInt(clientId)
                         );
 
-                        return {
-                            ...item,
-                            [key]: isExistingId
-                                ? item[key].map((clientDetail) =>
-                                    clientDetail.id === data.id
-                                        ? { ...clientDetail, ...data } // Update existing data
-                                        : clientDetail
-                                )
-                                : [...item[key], data], // Add new data
-                        };
+                        if (key == 'applicantSalesDetail') {
+                            return {
+                                ...item,
+                                [key]: isExistingId
+                                    ? { ...item[key], ...data } // Update existing data
+                                    : data, // Assign new data
+                            };
+                        } else {
+                            return {
+                                ...item,
+                                [key]: isExistingId
+                                    ? item[key].map((clientDetail) =>
+                                        clientDetail.id === data.id
+                                            ? { ...clientDetail, ...data } // Update existing data
+                                            : clientDetail
+                                    )
+                                    : [...item[key], data], // Add new data
+                            };
+                        }
+
+
                     }
                     return item;
                 })
@@ -153,6 +164,33 @@ const loanInitiationReducer = (state = initialState, action) => {
             };
         }
 
+        case DELETEADDRESSNESTED_CLIENT_DETAIL: {
+            const { loanApplicationId, clientId, key, nestedKey, type } = action.payload;
+
+            return {
+                ...state,
+                loanInitiationDetails: state.loanInitiationDetails.map((item) => {
+                    if (item.id === parseInt(loanApplicationId)) {
+                        return {
+                            ...item,
+                            [key]: item[key].map((clientDetail) => {
+                                if (clientDetail.id === parseInt(clientId)) {
+                                    // If data is an object with an 'id' property, find and remove the item with that id
+                                    if (type !== undefined) {
+                                        return {
+                                            ...clientDetail,
+                                            [nestedKey]: clientDetail[nestedKey].filter((link) => link.addressType !== type),
+                                        };
+                                    }
+                                }
+                                return clientDetail;
+                            }),
+                        };
+                    }
+                    return item;
+                }),
+            };
+        }
 
         case DELETELOANINITIATION_DETAIL:
             return {
@@ -162,24 +200,24 @@ const loanInitiationReducer = (state = initialState, action) => {
                 ),
             };
 
-            case DELETE_CLIENT_DETAIL: {
-                const { loanApplicationId, clientId, key } = action.payload;
-              
-                return {
-                  ...state,
-                  loanInitiationDetails: state.loanInitiationDetails.map((item) => {
+        case DELETE_CLIENT_DETAIL: {
+            const { loanApplicationId, clientId, key } = action.payload;
+
+            return {
+                ...state,
+                loanInitiationDetails: state.loanInitiationDetails.map((item) => {
                     if (item.id === parseInt(loanApplicationId)) {
-                      // Use filter and reassign the result to item[key]
-                      item[key] = item[key].filter(
-                        (clientDetail) => clientDetail.id !== parseInt(clientId)
-                      );
+                        // Use filter and reassign the result to item[key]
+                        item[key] = item[key].filter(
+                            (clientDetail) => clientDetail.id !== parseInt(clientId)
+                        );
                     }
                     return item;
-                  }),
-                };
-              }
-              
-            
+                }),
+            };
+        }
+
+
 
         default:
             return state;

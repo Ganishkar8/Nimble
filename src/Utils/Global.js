@@ -49,3 +49,5 @@ global.PORT1 = '8901';
 global.PORT2 = '8094';
 global.PORT3 = '8908';
 global.PORT4 = '8082';
+global.ISFAILPRESENT = false;
+global.ISDEVIATIONPRESENT = false;

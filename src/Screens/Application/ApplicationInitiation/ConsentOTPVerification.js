@@ -279,10 +279,46 @@ const ConsentOTPVerification = (props, { navigation }) => {
             .then(async response => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
-                setLoading(false);
+
                 global.COMPLETEDSUBSTAGE = 'BRE';
                 global.COMPLETEDMODULE = 'BRE';
                 global.COMPLETEDPAGE = 'BRE_VIEW';
+                if (global.ISDEVIATIONPRESENT) {
+                    updateLoanStatusDeviation();
+                } else {
+                    setLoading(false);
+                    props.navigation.replace('LoanApplicationMain', { fromScreen: 'BREView' })
+                }
+
+
+            })
+            .catch(error => {
+                // Handle the error
+                if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
+                setLoading(false);
+                if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
+
+    };
+
+    const updateLoanStatusDeviation = () => {
+
+        const appDetails = {
+            "loanApplicationId": global.LOANAPPLICATIONID,
+            "loanWorkflowStage": "LN_APP_DEVIATION",
+            "status": "InProgress"
+        }
+        const baseURL = '8901';
+        setLoading(true);
+        apiInstance(baseURL)
+            .post(`/api/v2/loan-application-status/updateStatus`, appDetails)
+            .then(async response => {
+                // Handle the response data
+                if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
+                setLoading(false);
 
                 props.navigation.replace('LoanApplicationMain', { fromScreen: 'BREView' })
 

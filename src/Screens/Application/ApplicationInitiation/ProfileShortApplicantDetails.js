@@ -851,7 +851,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
 
     Common.getNetworkConnection().then(value => {
       if (value.isConnected == true) {
-        updateImage();
+        updateApplicantDetails()
       } else {
         setApiError(language[0][props.language].str_errinternet);
         setErrorModalVisible(true)
@@ -862,7 +862,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
 
   };
 
-  const updateImage = async () => {
+  const updateImage = async (imageUri, fileType, fileName) => {
     if (imageUri) {
 
       setLoading(true);
@@ -886,8 +886,10 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
           // Handle the response from Cloudinary
 
           setDocID(data.docId);
-          updateApplicantDetails(data.docId)
-
+          setFileType(fileType)
+          setFileName(fileName)
+          setImageUri(imageUri)
+          setVisible(false)
         } else {
           if (global.DEBUG_MODE) console.log('Upload failed:', response.status);
           setApiError(response.status);
@@ -903,7 +905,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
     }
   }
 
-  const updateApplicantDetails = (id) => {
+  const updateApplicantDetails = () => {
     var manualKYC = false;
     if (isAadharVerified) {
       manualKYC = true;
@@ -929,7 +931,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
         "motherTongue": MotherTongueLabel,
         "educationQualification": EADLabel,
         "gender": GenderLabel,
-        "dmsId": id,
+        "dmsId": docID,
         "imageName": fileName,
         "geoCode": currentLatitude + "," + currentLongitude,
       }
@@ -1097,10 +1099,8 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
 
       // const imageName = image.path.split('/').pop();
-      setFileType(image.mime)
-      setFileName(imageName)
-      setImageUri(image.path)
-      setVisible(false)
+      updateImage(image.path, image.mime, imageName)
+
       props.onChange?.(image);
     })
 

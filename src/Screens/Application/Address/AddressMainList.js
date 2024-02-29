@@ -12,7 +12,7 @@ import {
 import { React, useState, useEffect } from 'react';
 import MyStatusBar from '../../../Components/MyStatusBar';
 import HeadComp from '../../../Components/HeadComp';
-import { connect } from 'react-redux';
+import { connect, useDispatch, useSelector } from 'react-redux';
 import { languageAction } from '../../../Utils/redux/actions/languageAction';
 import { language } from '../../../Utils/LanguageString';
 import Loading from '../../../Components/Loading';
@@ -35,7 +35,7 @@ import tbl_client from '../../../Database/Table/tbl_client';
 import tbl_loanApplication from '../../../Database/Table/tbl_loanApplication';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import { check } from 'react-native-permissions';
-import { deleteNestedClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
+import { deleteNestedClientDetails, updateAsyncNestedClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
 
 const AddressMainList = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -57,11 +57,19 @@ const AddressMainList = (props, { navigation }) => {
   const [addAddressVisible, setAddAddressVisible] = useState(false);
   const showBottomSheet = () => setBottomErrorSheetVisible(true);
   const hideBottomSheet = () => setBottomErrorSheetVisible(false);
+  const reduxdispatch = useDispatch(); // Initialize useDispatch hook
+
+
+  const loanInitiationDetails = useSelector(state => state.loanInitiationReducer.loanInitiationDetails);
+  const [loaded, setLoaded] = useState(false); // State to track if data is loaded
+
 
   useEffect(() => {
     props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
     //alert(JSON.stringify(props.loanInitiationDetails))
+
+    // fetchData();
 
     //props.deleteNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientAddress', 870)
     getAddressData()
@@ -77,10 +85,37 @@ const AddressMainList = (props, { navigation }) => {
     }
   }, [props.navigation, isScreenVisible]);
 
+  useEffect(() => {
+    // Any logic you want to execute when loanInitiationDetails changes
+    // For example, dispatch an action to update the details
+    if (loaded) {
+      updatetrackerStatus('Pending')
+    }
+
+  }, [loanInitiationDetails, loaded]);
+
   const handleBackButton = () => {
     onGoBack();
     return true; // Prevent default back button behavior
   };
+
+  const fetchData = async () => {
+
+    reduxdispatch(updateAsyncNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientManualKycLink', dummyData))
+      .then(() => {
+        //setTimeout(() => {
+        // updatetrackerStatus('Pending');
+        setLoaded(true);
+        //   setLoading(false);
+        // }, 1000);
+      })
+      .catch(error => {
+        // Handle any errors that occurred during the dispatch
+        console.error('Error dispatching updateAsyncNestedClientDetails:', error);
+      });
+
+    //updatetrackerStatus('Pending');
+  }
 
   const getAddressData = () => {
 
@@ -108,15 +143,14 @@ const AddressMainList = (props, { navigation }) => {
               } else {
                 if (clientDetail.clientManualKycLink[0].kycDmsId) {
                   setKYCManual('1');
-                } else if (clientDetail.clientManualKycLink[0].clientManualDobs) {
-                  if (clientDetail.clientManualKycLink[0].clientManualDobs.length > 0) {
-                    if (clientDetail.clientManualKycLink[0].clientManualDobs[0].dobDmsId) {
-                      setKYCManual('1');
-                    } else {
-                      setKYCManual('0');
-                    }
+                } else if (clientDetail.clientManualKycLink[0].clientManualDobs.length > 0) {
+                  if (clientDetail.clientManualKycLink[0].clientManualDobs[0].dobDmsId) {
+                    setKYCManual('1');
+                  } else {
+                    setKYCManual('0');
                   }
-                } else if (clientDetail.clientManualKycLink[0].clientManualAddresses) {
+                }
+                else if (clientDetail.clientManualKycLink[0].clientManualAddresses) {
                   if (clientDetail.clientManualKycLink[0].clientManualAddresses.length > 0) {
                     if (clientDetail.clientManualKycLink[0].clientManualAddresses[0].addrDmsId) {
                       setKYCManual('1');
@@ -496,34 +530,53 @@ const AddressMainList = (props, { navigation }) => {
   };
 
   const updatetrackerStatus = (status) => {
-    const clientTypeToUpdate = global.CLIENTTYPE;
+    //const clientTypeToUpdate = global.CLIENTTYPE;
+    const clientToUpdate = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
 
     // Find the client in the clientDetail array
-    const clientToUpdate = global.LEADTRACKERDATA.clientDetail.find(
-      (data) => data.clientType === clientTypeToUpdate
-    );
+    // const clientToUpdate = global.LEADTRACKERDATA.clientDetail.find(
+    //   (data) => data.clientType === clientTypeToUpdate
+    // );
 
     // Update manualKycStatus if the client is found
-    if (clientToUpdate) {
-      const manualKycLink = clientToUpdate.clientManualKycLink;
+    // if (clientToUpdate) {
+    //   const manualKycLink = clientToUpdate.clientManualKycLink;
 
-      // Assuming manualKycLink is an array and you want to update the first element
-      if (manualKycLink && manualKycLink.length > 0) {
-        manualKycLink[0].manualKycStatus = status;
+    //   // Assuming manualKycLink is an array and you want to update the first element
+    //   if (manualKycLink && manualKycLink.length > 0) {
+    //     manualKycLink[0].manualKycStatus = status;
+    //   }
+    // }
+
+
+    // const checkManualKycStatus = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].clientDetail
+    //   ?.every((data) => data.clientManualKycLink?.every(link => link.manualKycStatus === 'Approved'))
+    //   ? '1'
+    //   : '0';
+
+    const checkManualKycStatus = loanInitiationDetails
+      .filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].clientDetail
+      .filter(clientDetail => clientDetail && clientDetail.isKycManual);
+
+    console.log("checkManualKycStatus" + JSON.stringify(checkManualKycStatus))
+
+    let statusValue = '0'; // Default status is '0'
+
+    if (checkManualKycStatus.length > 0) {
+      // If there are clients with isKycManual true, check manual KYC status for each client
+      const allClientsApproved = checkManualKycStatus.every(clientDetail => {
+        console.log("OriginalKycStatus" + JSON.stringify(clientDetail.clientManualKycLink[0].manualKycStatus))
+
+        return clientDetail.clientManualKycLink?.every(link => link.manualKycStatus === 'Approved');
+      });
+
+      // If all clients have their manual KYC statuses approved, set status to '1'
+      if (allClientsApproved) {
+        statusValue = '1';
       }
     }
 
-    // Alert the updated manualKycStatus
-    const updatedManualKycStatus = global.LEADTRACKERDATA.clientDetail
-      .find((data) => data.clientType === clientTypeToUpdate)
-      ?.clientManualKycLink?.[0]?.manualKycStatus;
-
-    const checkManualKycStatus = global.LEADTRACKERDATA.clientDetail
-      ?.every((data) => data.clientManualKycLink?.every(link => link.manualKycStatus === 'Approved'))
-      ? '1'
-      : '0';
-
-    if (checkManualKycStatus == '1') {
+    if (statusValue == '1') {
       global.COMPLETEDSUBSTAGE = 'CB_CHK';
     }
 
@@ -550,12 +603,23 @@ const AddressMainList = (props, { navigation }) => {
       .then(async response => {
         // Handle the response data
         if (global.DEBUG_MODE) console.log('ApproveKYCApiResponse::' + JSON.stringify(response.data),);
-        setLoading(false);
+
         if (response.status == 200) {
           if (status === 'Rejected') {
+            setLoading(false);
             updateFinalLoanStatus();
           } else {
-            updatetrackerStatus(status)
+
+            reduxdispatch(updateAsyncNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientManualKycLink', response.data))
+              .then(() => {
+                setLoaded(true);
+              })
+              .catch(error => {
+                // Handle any errors that occurred during the dispatch
+                console.error('Error dispatching updateAsyncNestedClientDetails:', error);
+              });
+            // props.updateAsyncNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientManualKycLink', response.data)
+            // updatetrackerStatus(status)
           }
         }
         else if (response.data.statusCode === 201) {
@@ -828,6 +892,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => ({
   languageAction: item => dispatch(languageAction(item)),
+  //updateAsyncNestedClientDetails: (loanApplicationId, clientId, key, nestedKey, data) => dispatch(updateAsyncNestedClientDetails(loanApplicationId, clientId, key, nestedKey, data)),
   deleteNestedClientDetails: (loanApplicationId, clientId, key, nestedKey, id) => dispatch(deleteNestedClientDetails(loanApplicationId, clientId, key, nestedKey, id)),
 });
 

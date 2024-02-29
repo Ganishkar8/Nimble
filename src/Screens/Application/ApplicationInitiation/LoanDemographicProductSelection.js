@@ -269,8 +269,9 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
 
 
-        if (global.USERTYPEID == 1163) {
+        if (global.USERTYPEID == 1163 || global.ALLOWEDIT == "0") {
             fieldsDisable();
+            setOnlyView(true);
         }
 
 
@@ -317,58 +318,68 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
     const getApplicantData = () => {
 
 
-        if (loanProductLinkData.length > 0) {
-            setLoanTypeLabel(loanProductLinkData[0].loanType)
-            getProductID(loanProductLinkData[0].loanType)
-            setLoanProductLabel(loanProductLinkData[0].loanProduct)
-            setLoanPurposeCatgLabel(loanProductLinkData[0].loanPurposeCategory)
-            setLoanPurposeLabel(loanProductLinkData[0].loanPurpose)
-            setLoanAmount(loanProductLinkData[0].loanAmount.toString())
-            setLoanTenure(loanProductLinkData[0].loanTenure.toString())
-            setRepaymentModeLabel(loanProductLinkData[0].repaymentMode)
-            setLoanRepaymentFreqLabel(loanProductLinkData[0].loanRepaymentFrequency)
-            setInsuranceCoverageLabel(loanProductLinkData[0].insuranceCoverage)
-            setEmiAmount(loanProductLinkData[0].emiAmount.toString())
-            setMonthlyEmiDate(loanProductLinkData[0].monthlyEmiDate)
-            setDisbursementDate(Common.convertDateFormat(loanProductLinkData[0].disbursementDate))
-            setDisbursementModeLabel(loanProductLinkData[0].disbursementMode)
-            setTotalCharges(loanProductLinkData[0].totalCharges.toString())
-            setRepayScheduleData(loanProductLinkData[0].loanRepaymentSchedules);
-            setChargeData(loanProductLinkData[0].loanProductChargeDetails);
-            setInterestRate(loanProductLinkData[0].interestRate.toString())
-            setInstallmentStartDateDate(Common.convertDateFormat(loanProductLinkData[0].installmentStartDate))
-            callLoanTenure(loanProductLinkData[0].loanProduct, loanProductLinkData[0].loanAmount.toString(), loanProductLinkData[0].loanTenure.toString())
-            setAppInsuranceAmount(loanProductLinkData[0].applicantInsuranceAmount.toString())
-            setCoAppInsuranceAmount(loanProductLinkData[0].coApplicantInsuranceAmount.toString())
-            setApprxDisbAmount(loanProductLinkData[0].approximateDisbursementAmount.toString())
-            if (loanProductLinkData[0].insuranceCoverage == 'SNG') {
-                setCoAppInsuranceAmountVisible(false);
-            } else {
-                setCoAppInsuranceAmountVisible(true);
-            }
-        }
-
         // else {
 
         const loanDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0];
 
+        const filteredData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID));
 
-        if (loanProductLinkData.length <= 0) {
-            setLoanTypeLabel(loanDetail.loanType)
-            setLoanProductLabel(loanDetail.product)
-            setLoanPurposeLabel(loanDetail.loanPurpose);
-            callLoanTenure(loanDetail.product, loanDetail.loanAmount, loanTenure)
-            setLoanAmount(loanDetail.loanAmount.toString())
-            setLoanPurposeLabel(loanDetail.loanPurpose);
-            getProductID(loanDetail.loanType, parseInt(loanDetail.workflowId))
+        if (filteredData) {
+            const loanProductLinkData = filteredData[0].applicantLoanProductLink;
+
+            if (loanProductLinkData) {
+                if (loanProductLinkData.length > 0) {
+                    setLoanTypeLabel(loanProductLinkData[0].loanType)
+                    getProductID(loanProductLinkData[0].loanType)
+                    setLoanProductLabel(loanProductLinkData[0].loanProduct)
+                    setLoanPurposeCatgLabel(loanProductLinkData[0].loanPurposeCategory)
+                    setLoanPurposeLabel(loanProductLinkData[0].loanPurpose)
+                    setLoanAmount(loanProductLinkData[0].loanAmount.toString())
+                    setLoanTenure(loanProductLinkData[0].loanTenure.toString())
+                    setRepaymentModeLabel(loanProductLinkData[0].repaymentMode)
+                    setLoanRepaymentFreqLabel(loanProductLinkData[0].loanRepaymentFrequency)
+                    setInsuranceCoverageLabel(loanProductLinkData[0].insuranceCoverage)
+                    setEmiAmount(loanProductLinkData[0].emiAmount.toString())
+                    setMonthlyEmiDate(loanProductLinkData[0].monthlyEmiDate)
+                    setDisbursementDate(Common.convertDateFormat(loanProductLinkData[0].disbursementDate))
+                    setDisbursementModeLabel(loanProductLinkData[0].disbursementMode)
+                    setTotalCharges(loanProductLinkData[0].totalCharges.toString())
+                    setRepayScheduleData(loanProductLinkData[0].loanRepaymentSchedules);
+                    setChargeData(loanProductLinkData[0].loanProductChargeDetails);
+                    setInterestRate(loanProductLinkData[0].interestRate.toString())
+                    setInstallmentStartDateDate(Common.convertDateFormat(loanProductLinkData[0].installmentStartDate))
+                    callLoanTenure(loanProductLinkData[0].loanProduct, loanProductLinkData[0].loanAmount.toString(), loanProductLinkData[0].loanTenure.toString())
+                    setAppInsuranceAmount(loanProductLinkData[0].applicantInsuranceAmount.toString())
+                    setCoAppInsuranceAmount(loanProductLinkData[0].coApplicantInsuranceAmount.toString())
+                    setApprxDisbAmount(loanProductLinkData[0].approximateDisbursementAmount.toString())
+                    if (loanProductLinkData[0].insuranceCoverage == 'SNG') {
+                        setCoAppInsuranceAmountVisible(false);
+                    } else {
+                        setCoAppInsuranceAmountVisible(true);
+                    }
+                } else {
+                    setLoanTypeLabel(loanDetail.loanType)
+                    setLoanProductLabel(loanDetail.product)
+                    setLoanPurposeLabel(loanDetail.loanPurpose);
+                    callLoanTenure(loanDetail.product, loanDetail.loanAmount, loanTenure)
+                    setLoanAmount(loanDetail.loanAmount.toString())
+                    setLoanPurposeLabel(loanDetail.loanPurpose);
+                    getProductID(loanDetail.loanType, parseInt(loanDetail.workflowId))
+                }
+            } else {
+                setLoanTypeLabel(loanDetail.loanType)
+                setLoanProductLabel(loanDetail.product)
+                setLoanPurposeLabel(loanDetail.loanPurpose);
+                callLoanTenure(loanDetail.product, loanDetail.loanAmount, loanTenure)
+                setLoanAmount(loanDetail.loanAmount.toString())
+                setLoanPurposeLabel(loanDetail.loanPurpose);
+                getProductID(loanDetail.loanType, parseInt(loanDetail.workflowId))
+            }
+
         }
+
+
         callLoanAmount(parseInt(loanDetail.workflowId));
-
-
-        //  }
-
-
-
 
 
     }
@@ -907,9 +918,14 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
     };
 
 
-    const onSubmit = () => {
+    const onSubmit = async () => {
 
-        if (global.USERTYPEID == 1163) {
+        if (onlyView) {
+
+            page = 'NMN_DTLS';
+
+            await Common.getPageStatus(global.FILTEREDPROCESSMODULE, page)
+
             props.navigation.replace('LoanNomineeList');
             return;
         }

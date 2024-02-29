@@ -81,7 +81,7 @@ const ProfessionalDetailsScreen = (props, { navigation }) => {
 
                             <Text
                                 style={styles.childText}>
-                                {professionalDetail.agentType}
+                                {professionalDetail?.agentType}
                             </Text>
 
                         </View>
@@ -95,7 +95,7 @@ const ProfessionalDetailsScreen = (props, { navigation }) => {
 
                             <Text
                                 style={styles.childText}>
-                                {professionalDetail.agencyName}
+                                {professionalDetail?.agencyName}
                             </Text>
 
                         </View>
