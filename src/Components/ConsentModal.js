@@ -49,7 +49,7 @@ const ConsentModal = props => {
                                 <Text style={{ color: Colors.black, fontWeight: 800, marginLeft: 4, textDecorationLine: 'underline', }}> {language[0][props.language].str_privacypolicy}</Text>
                                 <Text style={{ color: Colors.black, fontWeight: 800, marginLeft: 4, textDecorationLine: 'underline', }}>, {language[0][props.language].str_termsandcondition}</Text>
                                 <Text style={{ color: Colors.black, fontWeight: 800, marginLeft: 4 }}> {language[0][props.language].str_and}</Text>
-                                <Text style={{ color: Colors.black, fontWeight: 800, marginLeft: 4, textDecorationLine: 'underline', }}> {language[0][props.language].str_disclaimers}</Text>
+                                <Text onPress={props.handleLinkPress} style={{ color: Colors.black, fontWeight: 800, marginLeft: 4, textDecorationLine: 'underline', }}> {language[0][props.language].str_disclaimers}</Text>
                             </Text>
                         </View>
 

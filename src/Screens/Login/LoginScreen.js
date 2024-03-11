@@ -214,6 +214,7 @@ const LoginScreen = (props, { navigation }) => {
             .then(async (response) => {
                 // Handle the response data
                 if (response.status == 200) {
+                    setLoading(false);
                     props.MobileCodeAction(response.data)
                     loginHandle();
                 } else if (response.data.statusCode === 201) {

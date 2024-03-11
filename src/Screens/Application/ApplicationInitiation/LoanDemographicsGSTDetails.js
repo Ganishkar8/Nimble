@@ -131,7 +131,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
 
     const gstData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].applicantSalesDetail;
 
-    if (gstData != undefined) {
+    if (gstData) {
       if (gstData.isAvailable) {
         setSelectedValue('Available')
         const newObject = gstData.applicantGstInfos.map(item => ({
@@ -176,6 +176,22 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
         //console.log(mappedArray);
       }
 
+    } else {
+      const filteredData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID));
+
+      const clientDetail = filteredData[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
+
+      if (clientDetail) {
+        if (clientDetail?.kycTypeId1 == '007') {
+          getGSTDetails(clientDetail.kycIdValue1);
+        } else if (clientDetail?.kycTypeId2 == '007') {
+          getGSTDetails(clientDetail.kycIdValue2);
+        } else if (clientDetail?.kycTypeId3 == '007') {
+          getGSTDetails(clientDetail.kycIdValue3);
+        } else if (clientDetail?.kycTypeId4 == '007') {
+          getGSTDetails(clientDetail.kycIdValue4);
+        }
+      }
     }
 
 
@@ -227,6 +243,77 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
 
     const filteredTimeFrameData = leaduserCodeDetail.filter((data) => data.masterId === 'TIME_FRAME').sort((a, b) => a.Description.localeCompare(b.Description));;
     setTimeFrameData(filteredTimeFrameData);
+
+  };
+
+
+
+  const getGSTDetails = (panNumber) => {
+
+    const appDetails = {
+
+      "clientId": global.CLIENTID?.toString(),
+      "pan": panNumber
+
+    }
+    const baseURL = global.PORT1;
+    setLoading(true);
+    apiInstance(baseURL)
+      .post(`/api/v1/gst-search/basis-pan`, appDetails)
+      .then(async response => {
+        // Handle the response data
+        if (global.DEBUG_MODE) console.log('GSTDetailApiResponse::' + JSON.stringify(response.data));
+        //  await tbl_client.updatePersonalDetails(TitleLabel, firstName, middleName, lastName, DOB, Age, GenderLabel, FatherName, SpouseName, CasteLabel, ReligionLabel, MotherTongueLabel, EADLabel, gpslatlon, id, global.LOANAPPLICATIONID);
+
+        setLoading(false);
+        if (response.status == 200) {
+          if (response?.data?.result) {
+            if (response.data.result.length > 0) {
+              setSelectedValue('Available');
+              const newDataArray = [];
+              response.data.result.forEach(item => {
+                const newObject = {
+                  isActive: true,
+                  isSelect: false,
+                  gstLabel: 'GST IN',
+                  gstNumber: item.gstinId,
+                  gstUserName: item.registrationName,
+                  isConsented: true,
+                };
+                newDataArray.push(newObject);
+              });
+              setAvailableGSTData(newDataArray);
+            } else {
+              setSelectedValue('NotAvailable');
+            }
+
+          }
+        }
+        else if (response.data.statusCode === 201) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        } else if (response.data.statusCode === 202) {
+          setApiError(response.data.message);
+          setErrorModalVisible(true);
+        }
+      })
+      .catch(error => {
+        // Handle the error
+        setLoading(false);
+        if (error.response.status == 404) {
+          setApiError(Common.error404);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 400) {
+          setApiError(Common.error400);
+          setErrorModalVisible(true)
+        } else if (error.response.status == 500) {
+          setApiError(Common.error500);
+          setErrorModalVisible(true)
+        } else if (error.response.data != null) {
+          setApiError(error.response.data.message);
+          setErrorModalVisible(true)
+        }
+      });
 
   };
 
@@ -705,7 +792,6 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
         "isActive": true,
         "createdBy": global.USERID,
         "createdDate": new Date(),
-        "supervisedBy": global.USERID,
         "isAvailable": selectedValue == 'Available' ? true : false,
         "captureReason": captureReasonLabel,
         "timeFrame": timeFrameLabel,
@@ -994,7 +1080,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
                   data={availableGSTData}
                   renderItem={FlatView}
                   extraData={refreshAvailableGSTFlatlist}
-                  keyExtractor={item => item.gstLabel}
+                  keyExtractor={(item, index) => index.toString()}
                 />
               </View>
 
@@ -1141,7 +1227,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
                       data={monthsData}
                       renderItem={FlatMonthsView}
                       extraData={setRefreshMonthsFlatList}
-                      keyExtractor={item => item.month}
+                      keyExtractor={(item, index) => index.toString()}
                     />
                   </View>
 

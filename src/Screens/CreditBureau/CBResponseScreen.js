@@ -31,6 +31,7 @@ import apiInstance from '../../Utils/apiInstance';
 import Commonstyles from '../../Utils/Commonstyles';
 import Common from '../../Utils/Common';
 import Loading from '../../Components/Loading';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 const CBResponseScreen = (props, { navigation }) => {
 
@@ -40,23 +41,36 @@ const CBResponseScreen = (props, { navigation }) => {
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const [apiError, setApiError] = useState('');
     const [htmlContent, setHtmlContent] = useState('');
+    const [previewHeader, setPreviewHeader] = useState('');
     const [loading, setLoading] = useState(false);
     const [cbResponseStatus, setCbResponseStatus] = useState('');
 
 
     useEffect(() => {
-        props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
-        const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
-        const filterCbCheck = global.TRACKERSTATUSDATA.loanApplicationStatus[0].subStageLog.filter((data) => data.subStageCode === 'CB_CHK');
-        const filterCbResponse = filterCbCheck[0].moduleLog.filter((data) => data.moduleCode === 'CB_RSPNS')
-        setCbResponseStatus(filterCbResponse[0].moduleStatus);
 
-        getcbData();
+
+        props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
-            backHandler.remove();
+
+
         }
     }, [props.navigation, isScreenVisible]);
+
+    useFocusEffect(
+        React.useCallback(() => {
+            const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
+            const filterCbCheck = global.TRACKERSTATUSDATA.loanApplicationStatus[0].subStageLog.filter((data) => data.subStageCode === 'CB_CHK');
+            const filterCbResponse = filterCbCheck[0].moduleLog.filter((data) => data.moduleCode === 'CB_RSPNS')
+            setCbResponseStatus(filterCbResponse[0].moduleStatus);
+
+            getcbData();
+            return () => {
+                backHandler.remove();
+                setBottomSheetVisible(false);
+            };
+        }, []),
+    );
 
     const handleBackButton = () => {
         onGoBack();
@@ -72,8 +86,11 @@ const CBResponseScreen = (props, { navigation }) => {
         setBottomSheetVisible(!bottomSheetVisible);
     };
 
-    const showPreView = (content) => {
+    const showPreView = (content, type) => {
         setHtmlContent(content);
+
+        setPreviewHeader(type == 'APPL' ? 'Applicant' : type == 'CO-APPL' ? 'Co-Applicant' : 'Guarantor')
+
         setBottomSheetVisible(!bottomSheetVisible);
     }
 
@@ -258,7 +275,7 @@ const CBResponseScreen = (props, { navigation }) => {
                         <View style={{ width: '89%', flexDirection: 'row', alignItems: 'center' }}>
                             <Text style={{ color: Colors.black, fontSize: 14, fontWeight: '100', marginLeft: 20 }}>{item.clientType == 'APPL' ? 'Applicant' : item.clientType == 'CO-APPL' ? 'Co-Applicant' : 'Guarantor'}</Text>
                         </View>
-                        <TouchableOpacity onPress={() => { showPreView(item.cbResponseHtml) }}
+                        <TouchableOpacity onPress={() => { showPreView(item.cbResponseHtml, item.clientType) }}
                             style={{ width: '15%', flexDirection: 'row' }}>
                             <View >
                                 <Entypo name='dots-three-vertical' size={20} color={Colors.skyBlue} />
@@ -367,12 +384,12 @@ const CBResponseScreen = (props, { navigation }) => {
                                 fontWeight: 400,
                                 marginLeft: 10
                             }}>
-                            {'Applicant : ' + language[0][props.language].str_Cbreport}
+                            {previewHeader + ' : ' + language[0][props.language].str_Cbreport}
                         </Text>
                     </View>
                     <View style={{ height: 1, width: '100%', backgroundColor: Colors.line }} />
 
-                    <TouchableOpacity onPress={() => { props.navigation.navigate('CBPreview', { htmlcontent: htmlContent }) }}>
+                    <TouchableOpacity onPress={() => { props.navigation.navigate('CBPreview', { htmlcontent: htmlContent, header: previewHeader }) }}>
                         <View style={{ width: '100%', flexDirection: 'row', marginTop: 10 }}>
                             <View style={{ padding: 15 }}>
                                 <FontAwesome name='arrows' size={20} color={Colors.skyBlue} />

@@ -1598,7 +1598,7 @@ const PDReferenceCheck = (props, { navigation }) => {
       if (textValue.length > 0) {
         if (Common.isValidText(textValue)) setCity(textValue);
       } else {
-        setPincode(textValue);
+        setCity(textValue);
       }
     } else if (componentName === 'district') {
       if (textValue.length > 0) {

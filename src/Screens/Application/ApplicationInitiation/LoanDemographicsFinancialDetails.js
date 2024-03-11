@@ -868,7 +868,7 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
               data={incomeList}
               renderItem={FlatView}
               extraData={refreshIncomeFlatlist}
-              keyExtractor={item => item.incomeLabel}
+              keyExtractor={(item, index) => index.toString()}
             />
           </View>
 
@@ -937,7 +937,7 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
               data={otherIncomeList}
               renderItem={FlatView}
               extraData={refreshOtherIncomeFlatlist}
-              keyExtractor={item => item.incomeLabel}
+              keyExtractor={(item, index) => index.toString()}
             />
           </View>
 
@@ -1045,7 +1045,7 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
               data={expenseList}
               renderItem={FlatView}
               extraData={refreshExpenseFlatlist}
-              keyExtractor={item => item.incomeLabel}
+              keyExtractor={(item, index) => index.toString()}
             />
           </View>
 
@@ -1113,7 +1113,7 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
               data={otherExpenseList}
               renderItem={FlatView}
               extraData={refreshOtherExpenseFlatlist}
-              keyExtractor={item => item.incomeLabel}
+              keyExtractor={(item, index) => index.toString()}
             />
           </View>
 

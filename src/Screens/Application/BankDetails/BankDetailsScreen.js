@@ -84,6 +84,12 @@ const BankDetailsScreen = (props, { navigation }) => {
     const [ifscCodeVisible, setIfscCodeVisible] = useState(true);
     const [ifscCodeDisable, setIfscCodeDisable] = useState(false);
 
+    const [accVerificationStatus, setAccVerificationStatus] = useState('');
+    const [accVerificationStatusCaption, setAccVerificationStatusCaption] = useState('ACCOUNT VERIFICATION STATUS');
+    const [accVerificationStatusMan, setAccVerificationStatusMan] = useState(false);
+    const [accVerificationStatusVisible, setAccVerificationStatusVisible] = useState(false);
+    const [accVerificationStatusDisable, setAccVerificationStatusDisable] = useState(false);
+
     const [bankName, setBankName] = useState('');
     const [bankNameCaption, setBankNameCaption] = useState('BANK NAME');
     const [bankNameMan, setBankNameMan] = useState(false);
@@ -152,6 +158,13 @@ const BankDetailsScreen = (props, { navigation }) => {
     const [hideDelete, setHideDelete] = useState(false);
     const [pageId, setPageId] = useState(global.CURRENTPAGEID);
     const [onlyView, setOnlyView] = useState(false);
+    const [isBankVerified, setIsBankVerfied] = useState(null);
+    const [isProceed, setIsProceed] = useState(false);
+
+    const [verifiedAccountHolderName, setVerifiedAccountHolderName] = useState('');
+    const [verifiedifscCode, setVerifiedIfscCode] = useState('');
+    const [verifiedAccountNumber, setVerifiedAccountNumber] = useState('');
+    const [verifiedAccountStatus, setVerifiedAccountStatus] = useState('');
 
 
     useEffect(() => {
@@ -223,6 +236,16 @@ const BankDetailsScreen = (props, { navigation }) => {
         if (data.dmsId) {
             getImage(data.dmsId);
             setDocID(data.dmsId);
+        }
+        setIsBankVerfied(data.isBankVerified);
+        if (data.isBankVerified != null && data.isBankVerified != undefined) {
+            setVerifiedAccountNumber(data.accountNumber);
+            setVerifiedAccountHolderName(data.accountHolderNameAsPerBank);
+            setVerifiedIfscCode(data.ifscCode);
+            setAccVerificationStatusVisible(true);
+            setAccVerificationStatus(data.accountVerificationStatus);
+            setVerifiedAccountStatus(data.accountVerificationStatus);
+            setIsProceed(true);
         }
 
     }
@@ -583,14 +606,6 @@ const BankDetailsScreen = (props, { navigation }) => {
             }
         }
 
-        if (accountToUseMan && accountToUseVisible) {
-            if (accountToUseLabel.length <= 0) {
-                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsselect + accountToUseCaption + '\n';
-                i++;
-                flag = true;
-            }
-        }
-
         if (imageUri == null) {
             errorMessage =
                 errorMessage +
@@ -611,9 +626,133 @@ const BankDetailsScreen = (props, { navigation }) => {
             }
         }
 
+        if (accountToUseVisible && (accountToUseLabel == 'DSBAC' || accountToUseLabel == 'BOTH')) {
+
+            if (isBankVerified == null || isBankVerified == undefined) {
+                errorMessage =
+                    errorMessage +
+                    i +
+                    ')' +
+                    ' ' +
+                    'Please Verify Bank Account'
+                '\n';
+                i++;
+                flag = true;
+            } else {
+                if (!isProceed) {
+                    errorMessage =
+                        errorMessage +
+                        i +
+                        ')' +
+                        ' ' +
+                        'Cannot proceed without verifying a Valid Bank Account'
+                    '\n';
+                    i++;
+                    flag = true;
+                }
+            }
+
+        }
+
         setErrMsg(errorMessage);
         return flag;
     };
+
+    const validateBankVerifyData = () => {
+        var flag = false;
+        var i = 1;
+        var errorMessage = '';
+
+        if (accountHolderNameMan && accountHolderNameVisible) {
+            if (accountHolderName.length <= 0) {
+                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + accountHolderNameCaption + '\n';
+                i++;
+                flag = true;
+            }
+        }
+
+        if (ifscCodeMan && ifscCodeVisible) {
+            if (ifscCode.length <= 0) {
+                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + ifscCodeCaption + '\n';
+                i++;
+                flag = true;
+            }
+        }
+
+        if (ifscCode.length > 0) {
+            if (ifscCode.length !== 11) {
+                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + ' Valid ' + ifscCodeCaption + '\n';
+                i++;
+                flag = true;
+            }
+        }
+
+        if (accountNumberMan && accountNumberVisible) {
+            if (accountNumber.length <= 0) {
+                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + accountNumberCaption + '\n';
+                i++;
+                flag = true;
+            }
+        }
+
+        if (confirmAccountNumberMan && confirmAccountNumberVisible) {
+            if (confirmAccountNumber.length <= 0) {
+                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + confirmAccountNumberCaption + '\n';
+                i++;
+                flag = true;
+            }
+        }
+
+        if (confirmAccountNumber.length > 0 && accountNumber.length > 0) {
+            if (confirmAccountNumber != accountNumber) {
+                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_accoutnnonotmatching + '\n';
+                i++;
+                flag = true;
+            }
+        }
+
+        if (upiIDMan && upiIDVisible) {
+            if (upiID.length <= 0) {
+                errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + upiIDCaption + '\n';
+                i++;
+                flag = true;
+            }
+        }
+
+        setErrMsg(errorMessage);
+        return flag;
+    };
+
+    const checkVerifiedAccount = (accountHolderName, accountNumber, confirmAccountNumber, ifscCode) => {
+
+        var flag = false;
+
+        if (accountNumber == verifiedAccountNumber) {
+            flag = true;
+        } else {
+            return false;
+        }
+        if (confirmAccountNumber == verifiedAccountNumber) {
+            flag = true;
+        } else {
+            return false;
+        }
+
+        if (accountHolderName == verifiedAccountHolderName) {
+            flag = true;
+        } else {
+            return false;
+        }
+
+        if (ifscCode == verifiedifscCode) {
+            flag = true;
+        } else {
+            return false;
+        }
+
+        return flag;
+
+    }
 
     const bankSubmit = () => {
 
@@ -708,8 +847,9 @@ const BankDetailsScreen = (props, { navigation }) => {
                     "upiId": upiID,
                     "dmsId": docID,
                     "accountToBeUsedFor": accountToUseLabel,
-                    "accountVerificationStatus": "",
+                    "accountVerificationStatus": accVerificationStatus,
                     "createdBy": global.USERID,
+                    "isBankVerified": isBankVerified
                 }
             ]
             const baseURL = global.PORT1;
@@ -772,8 +912,9 @@ const BankDetailsScreen = (props, { navigation }) => {
                 "upiId": upiID,
                 "dmsId": docID,
                 "accountToBeUsedFor": accountToUseLabel,
-                "accountVerificationStatus": "",
+                "accountVerificationStatus": accVerificationStatus,
                 "createdBy": global.USERID,
+                "isBankVerified": isBankVerified
             }
             const baseURL = '8901';
             setLoading(true);
@@ -972,11 +1113,103 @@ const BankDetailsScreen = (props, { navigation }) => {
         }
     }
 
+    const getBankVerify = () => {
+
+        if (validateBankVerifyData()) {
+            showBottomSheet();
+            return;
+        }
+
+        const appDetails = {
+            "userId": global.USERID,
+            "clientId": global.CLIENTID,
+            "accountNumber": accountNumber,
+            "accountHolderName": accountHolderName?.toUpperCase(),
+            "ifsc": ifscCode?.toUpperCase()
+        }
+
+
+        const baseURL = global.PORT1;
+        setLoading(true);
+        apiInstance(baseURL)
+            .post(`/api/v2/bank-account-verify`, appDetails)
+            .then(async response => {
+                // Handle the response data
+                if (global.DEBUG_MODE) console.log('BankDetailApiResponse::' + JSON.stringify(response.data));
+                //  await tbl_client.updatePersonalDetails(TitleLabel, firstName, middleName, lastName, DOB, Age, GenderLabel, FatherName, SpouseName, CasteLabel, ReligionLabel, MotherTongueLabel, EADLabel, gpslatlon, id, global.LOANAPPLICATIONID);
+
+                setLoading(false);
+                if (response.status == 200) {
+                    setIsProceed(response?.data?.isProcessed);
+                    //setIsProceed(true);
+                    setIsBankVerfied(response?.data?.isValid ?? false);
+                    //setIsBankVerfied(true);
+                    setAccVerificationStatusVisible(true)
+                    if (response?.data?.isValid) {
+                        setAccVerificationStatus('Verified');
+                        setVerifiedAccountStatus('Verified');
+                    } else {
+                        setAccVerificationStatus('Not Verified');
+                        setVerifiedAccountStatus('Not Verified');
+                    }
+                    setVerifiedAccountNumber(accountNumber);
+                    setVerifiedAccountHolderName(accountHolderName);
+                    setVerifiedIfscCode(ifscCode);
+                    //   if(response.data.statusCode == 101){
+
+                    //   }else{
+
+                    //   }
+                }
+                else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
+            })
+            .catch(error => {
+                // Handle the error
+                setLoading(false);
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
+
+    };
+
     const handlePickerClick = (componentName, label, index) => {
         if (componentName === 'AccountTypePicker') {
             setAccountTypeLabel(label);
             setAccountTypeIndex(index);
         } else if (componentName === 'AccountToUsePicker') {
+            if (label == 'DSBAC' || label == 'BOTH') {
+
+                if (checkVerifiedAccount(accountHolderName, accountNumber, confirmAccountNumber, ifscCode)) {
+                    setIsBankVerfied(true);
+                    setAccVerificationStatusVisible(true);
+                    setAccVerificationStatus(verifiedAccountStatus)
+                } else {
+                    setIsBankVerfied(null)
+                    setAccVerificationStatusVisible(false);
+                    setAccVerificationStatus('')
+                }
+
+            } else {
+                setAccVerificationStatusVisible(false);
+                setIsBankVerfied(null)
+            }
             setAccountToUseLabel(label);
             setAccountToUseIndex(index);
         }
@@ -991,17 +1224,48 @@ const BankDetailsScreen = (props, { navigation }) => {
             } else {
                 setAccountHolderName(textValue)
             }
+
+            if (accountToUseLabel == 'DSBAC' || accountToUseLabel == 'BOTH') {
+                if (checkVerifiedAccount(textValue, accountNumber, confirmAccountNumber, ifscCode)) {
+                    setIsBankVerfied(true);
+                    setAccVerificationStatusVisible(true);
+                    setAccVerificationStatus(verifiedAccountStatus)
+                } else {
+                    setIsBankVerfied(null)
+                    setAccVerificationStatusVisible(false);
+                    setAccVerificationStatus('')
+                }
+            }
+
         } else if (componentName === 'ifsccode') {
             if (textValue.length > 0) {
                 // textValue.toUpperCase();
                 setIfscCode(textValue)
                 if (textValue.length == 11) {
                     getIFSCCode(textValue)
+                } else {
+                    setBankName('');
+                    setBranchName('');
                 }
             } else {
                 // textValue.toUpperCase();
-                setIfscCode(textValue)
+                setIfscCode(textValue);
+                setBankName('');
+                setBranchName('');
             }
+
+            if (accountToUseLabel == 'DSBAC' || accountToUseLabel == 'BOTH') {
+                if (checkVerifiedAccount(accountHolderName, accountNumber, confirmAccountNumber, textValue)) {
+                    setIsBankVerfied(true);
+                    setAccVerificationStatusVisible(true);
+                    setAccVerificationStatus(verifiedAccountStatus)
+                } else {
+                    setIsBankVerfied(null)
+                    setAccVerificationStatusVisible(false);
+                    setAccVerificationStatus('')
+                }
+            }
+
         } else if (componentName === 'bankname') {
             if (textValue.length > 0) {
                 if (Common.isValidText(textValue))
@@ -1022,12 +1286,38 @@ const BankDetailsScreen = (props, { navigation }) => {
             } else {
                 setAccountNumber(textValue)
             }
+
+            if (accountToUseLabel == 'DSBAC' || accountToUseLabel == 'BOTH') {
+                if (checkVerifiedAccount(accountHolderName, textValue, confirmAccountNumber, ifscCode)) {
+                    setIsBankVerfied(true);
+                    setAccVerificationStatusVisible(true);
+                    setAccVerificationStatus(verifiedAccountStatus)
+                } else {
+                    setIsBankVerfied(null)
+                    setAccVerificationStatusVisible(false);
+                    setAccVerificationStatus('')
+                }
+            }
+
         } else if (componentName === 'confirmaccountnumber') {
             if (textValue.length > 0) {
                 setConfirmAccountNumber(textValue)
             } else {
                 setConfirmAccountNumber(textValue)
             }
+
+            if (accountToUseLabel == 'DSBAC' || accountToUseLabel == 'BOTH') {
+                if (checkVerifiedAccount(accountHolderName, accountNumber, textValue, ifscCode)) {
+                    setIsBankVerfied(true);
+                    setAccVerificationStatusVisible(true);
+                    setAccVerificationStatus(verifiedAccountStatus)
+                } else {
+                    setIsBankVerfied(null)
+                    setAccVerificationStatusVisible(false);
+                    setAccVerificationStatus('');
+                }
+            }
+
         } else if (componentName === 'banklinkedmobilenumber') {
             if (textValue.length > 0) {
                 if (Common.numberRegex.test(textValue)) setBankLinkedMobNo(textValue);
@@ -1306,6 +1596,56 @@ const BankDetailsScreen = (props, { navigation }) => {
                         <TextComp textVal={accountToUseCaption} textStyle={Commonstyles.inputtextStyle} Visible={accountToUseMan} />
                     </View>
                     <PickerComp textLabel={accountToUseLabel} pickerStyle={Commonstyles.picker} Disable={accountToUseDisable} pickerdata={accountToUseData} componentName='AccountToUsePicker' handlePickerClick={handlePickerClick} />
+
+                    {(accountToUseLabel == 'DSBAC' || accountToUseLabel == 'BOTH') && !isBankVerified && !onlyView &&
+                        < View style={{ width: '90%', alignSelf: 'center', alignItems: 'flex-end', marginTop: 5 }}>
+                            <TouchableOpacity onPress={getBankVerify}>
+                                <Text
+                                    style={{
+                                        color: Colors.darkblue,
+                                        fontWeight: 500,
+                                    }}>
+                                    {'Verify'}
+                                </Text>
+                            </TouchableOpacity>
+
+                        </View>
+                    }
+
+                </View>}
+
+                {/* <View style={{ width: '90%', alignSelf: 'center', alignItems: 'flex-end', marginTop: 5 }}>
+                    <TouchableOpacity onPress={getBankDetails}>
+                        <Text
+                            style={{
+                                color: Colors.darkblue,
+                                fontWeight: 500,
+                            }}>
+                            Verify
+                        </Text>
+                    </TouchableOpacity>
+                </View> */}
+
+                {accVerificationStatusVisible && <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center', alignSelf: 'center' }}>
+                    <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
+                        <TextComp textVal={accVerificationStatusCaption} textStyle={Commonstyles.inputtextStyle} Visible={accVerificationStatusMan} />
+                    </View>
+                    <View style={{ width: '90%', alignSelf: 'center', flexDirection: 'row' }}>
+
+                        <TextInputComp textValue={accVerificationStatus} textStyle={Commonstyles.textinputtextStyle} type='email-address' Disable={true} ComponentName='accVerfication' reference={upiIdRef} returnKey="next" handleClick={handleClick} handleReference={handleReference} length={30} />
+
+                        {isBankVerified ? (
+                            <View style={{ alignItems: 'center', justifyContent: 'center', position: 'absolute', right: 0, alignSelf: 'center' }}>
+                                <Ionicons name='checkmark-circle-sharp' size={23} color={Colors.green} />
+                            </View>) :
+                            <View style={{ alignItems: 'center', justifyContent: 'center', position: 'absolute', right: 0, alignSelf: 'center' }}>
+                                <Entypo name="cross" size={23} color={Colors.red} />
+                            </View>}
+
+                    </View>
+
+
+
                 </View>}
 
                 <ButtonViewComp
@@ -1316,7 +1656,7 @@ const BankDetailsScreen = (props, { navigation }) => {
                     handleClick={bankSubmit}
                 />
             </ScrollView>
-        </SafeAreaView>
+        </SafeAreaView >
     );
 };
 

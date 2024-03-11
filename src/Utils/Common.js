@@ -171,6 +171,20 @@ export function convertDateFormat(inputDate) {
   return formattedDate;
 }
 
+export function convertDateFormatDuplicate(inputDate) {
+  // Split the input date into year, month, and day
+  const parts = inputDate.split('-');
+
+  // Create a new date object using the year, month, and day
+  const date = new Date(parts[2], parts[1] - 1, parts[0]); // Months are 0-based in JavaScript Date objects
+
+  // Format the date in "dd-mm-yyyy" format
+  const formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+
+  return formattedDate;
+
+}
+
 export function convertYearDateFormat(inputDate) {
   // Split the input date into year, month, and day
   const parts = inputDate.split('-');
@@ -406,6 +420,6 @@ export function isValidDob(dob) {
 
 export default {
   isValidPhoneNumber, isEmailValid, isValidText, convertDateFormat, isDateGreaterThan, isValidAlphaText, showErrorAlert, getSystemCodeDescription,
-  numberRegex, CS_URL, CS_URL1, integerPattern, formatDate, getCodeDescription, formatTime, hasOnlyOneKey, getCurrentDateTime, getNetworkConnection, isValidDob,
+  numberRegex, CS_URL, CS_URL1, integerPattern, formatDate, getCodeDescription, formatTime, hasOnlyOneKey, getCurrentDateTime, getNetworkConnection, isValidDob, convertDateFormatDuplicate,
   isValidPin, isValidPAN, validateVerhoeff, isValidEmail, calculateAge, convertYearDateFormat, getPageID, getClientID, isEmptyObject, error400, error404, error500, errorNetwork, getBankCodeDescription, getPageStatus
 };

@@ -14,17 +14,17 @@ import {
   PermissionsAndroid,
 } from 'react-native';
 import Modal from 'react-native-modal';
-import {React, useState, useEffect} from 'react';
+import { React, useState, useEffect } from 'react';
 import MyStatusBar from '../../Components/MyStatusBar';
 import HeadComp from '../../Components/HeadComp';
-import {connect} from 'react-redux';
-import {languageAction} from '../../Utils/redux/actions/languageAction';
-import {language} from '../../Utils/LanguageString';
+import { connect } from 'react-redux';
+import { languageAction } from '../../Utils/redux/actions/languageAction';
+import { language } from '../../Utils/LanguageString';
 import Loading from '../../Components/Loading';
 import ChildHeadComp from '../../Components/ChildHeadComp';
 import Colors from '../../Utils/Colors';
 import Commonstyles from '../../Utils/Commonstyles';
-import {useIsFocused} from '@react-navigation/native';
+import { useIsFocused } from '@react-navigation/native';
 import apiInstancelocal from '../../Utils/apiInstancelocal';
 import ErrorModal from '../../Components/ErrorModal';
 import TextComp from '../../Components/TextComp';
@@ -39,7 +39,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Octicons from 'react-native-vector-icons/Octicons';
 import ImageComp from '../../Components/ImageComp';
 import ImageBottomPreview from '../../Components/ImageBottomPreview';
-import ImagePicker, {ImageOrVideo} from 'react-native-image-crop-picker';
+import ImagePicker, { ImageOrVideo } from 'react-native-image-crop-picker';
 import apiInstance from '../../Utils/apiInstance';
 import {
   updatePDModule,
@@ -49,7 +49,7 @@ import {
 } from '../../Utils/redux/actions/PDAction';
 import Geolocation from 'react-native-geolocation-service';
 
-const BusinessDocumentUpload = (props, {navigation}) => {
+const BusinessDocumentUpload = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
   const [nomineeDetails, setNomineeDetails] = useState([]);
   const [nomineeID, setNomineeID] = useState('');
@@ -114,7 +114,7 @@ const BusinessDocumentUpload = (props, {navigation}) => {
   useEffect(() => {
     props.navigation
       .getParent()
-      ?.setOptions({tabBarStyle: {display: 'none'}, tabBarVisible: false});
+      ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       handleBackButton,
@@ -127,10 +127,21 @@ const BusinessDocumentUpload = (props, {navigation}) => {
 
     getAllDocuments();
 
+    if (global.PDSTAGE == 'PD_1') {
+      checkPermissions().then(res => {
+        if (res == true) {
+          getOneTimeLocationPD1();
+        } else {
+          setApiError('Permission Not Granted');
+          setErrorModalVisible(true);
+        }
+      });
+    }
+
     return () => {
       props.navigation
         .getParent()
-        ?.setOptions({tabBarStyle: undefined, tabBarVisible: undefined});
+        ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
       backHandler.remove();
     };
   }, [props.navigation]);
@@ -138,7 +149,7 @@ const BusinessDocumentUpload = (props, {navigation}) => {
   useEffect(() => {
     props.navigation
       .getParent()
-      ?.setOptions({tabBarStyle: {display: 'none'}, tabBarVisible: false});
+      ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       handleBackButton,
@@ -147,7 +158,7 @@ const BusinessDocumentUpload = (props, {navigation}) => {
     return () => {
       props.navigation
         .getParent()
-        ?.setOptions({tabBarStyle: undefined, tabBarVisible: undefined});
+        ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
       backHandler.remove();
     };
   }, [isScreenVisible]);
@@ -264,7 +275,7 @@ const BusinessDocumentUpload = (props, {navigation}) => {
             if (response.status == 200) {
               console.log(
                 'FinalLeadCreationApiResponse::' +
-                  JSON.stringify(response.data),
+                JSON.stringify(response.data),
               );
               setFileName(response.data.fileName);
               setImageUri(
@@ -297,7 +308,7 @@ const BusinessDocumentUpload = (props, {navigation}) => {
             if (global.DEBUG_MODE)
               console.log(
                 'FinalLeadCreationApiResponse::' +
-                  JSON.stringify(error.response.data),
+                JSON.stringify(error.response.data),
               );
             setLoading(false);
             if (error.response.status == 404) {
@@ -345,9 +356,9 @@ const BusinessDocumentUpload = (props, {navigation}) => {
     }
   };
 
-  const MainData = ({item}) => {
+  const MainData = ({ item }) => {
     return (
-      <View style={{width: '100%', marginLeft: 10, marginRight: 10}}>
+      <View style={{ width: '100%', marginLeft: 10, marginRight: 10 }}>
         <View
           style={{
             width: '100%',
@@ -360,7 +371,7 @@ const BusinessDocumentUpload = (props, {navigation}) => {
               alignItems: 'center',
               marginTop: 20,
             }}>
-            <View style={{width: '95%'}}>
+            <View style={{ width: '95%' }}>
               <Text
                 style={{
                   color: Colors.dimmText,
@@ -384,9 +395,9 @@ const BusinessDocumentUpload = (props, {navigation}) => {
       </View>
     );
   };
-  const FlatView = ({item}) => {
+  const FlatView = ({ item }) => {
     return (
-      <View style={{width: '100%'}}>
+      <View style={{ width: '100%' }}>
         <View
           style={{
             width: '94%',
@@ -400,7 +411,7 @@ const BusinessDocumentUpload = (props, {navigation}) => {
               marginTop: 20,
             }}>
             <TouchableOpacity
-              style={{width: '20%'}}
+              style={{ width: '20%' }}
               onPress={() => pickDocument(item)}
               activeOpacity={0.8}>
               {item.dmsID.toString().length > 0 ? (
@@ -415,7 +426,7 @@ const BusinessDocumentUpload = (props, {navigation}) => {
                   }}>
                   <ImageComp
                     imageSrc={require('../../Images/cloudcomputing.png')}
-                    imageStylee={{width: 28, height: 22}}
+                    imageStylee={{ width: 28, height: 22 }}
                   />
                 </View>
               ) : (
@@ -430,13 +441,13 @@ const BusinessDocumentUpload = (props, {navigation}) => {
                   }}>
                   <ImageComp
                     imageSrc={require('../../Images/cloudcomputing.png')}
-                    imageStylee={{width: 28, height: 22}}
+                    imageStylee={{ width: 28, height: 22 }}
                   />
                 </View>
               )}
             </TouchableOpacity>
 
-            <View style={{width: '68%'}}>
+            <View style={{ width: '68%' }}>
               <Text
                 style={{
                   color: Colors.dimmText,
@@ -445,11 +456,11 @@ const BusinessDocumentUpload = (props, {navigation}) => {
                 }}>
                 {item.genericName}
                 {item.isDocumentMandatory && (
-                  <Text style={{color: 'red'}}>*</Text>
+                  <Text style={{ color: 'red' }}>*</Text>
                 )}
               </Text>
             </View>
-            <View style={{width: '10%'}}>
+            <View style={{ width: '10%' }}>
               {item.dmsID.toString().length > 0 && (
                 <MaterialIcons name="verified" size={20} color={Colors.green} />
               )}
@@ -457,7 +468,7 @@ const BusinessDocumentUpload = (props, {navigation}) => {
             </View>
 
             <TouchableOpacity
-              style={{width: '10%'}}
+              style={{ width: '10%' }}
               onPress={() => {
                 if (item.dmsID.toString().length > 0) {
                   showImageBottomSheet(item);
@@ -658,6 +669,33 @@ const BusinessDocumentUpload = (props, {navigation}) => {
     }
   };
 
+  const getOneTimeLocationPD1 = () => {
+    Geolocation.getCurrentPosition(
+      //Will give you the current location
+      position => {
+        //getting the Longitude from the location json
+        const currentLongitude = JSON.stringify(position.coords.longitude);
+
+        //getting the Latitude from the location json
+        const currentLatitude = JSON.stringify(position.coords.latitude);
+
+        //Setting Longitude state
+        setCurrentLongitude(parseFloat(currentLongitude));
+        //Setting Longitude state
+        setCurrentLatitude(parseFloat(currentLatitude));
+
+      },
+      error => {
+        console.log(error);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 30000,
+        maximumAge: 1000,
+      },
+    );
+  };
+
   const getOneTimeLocation = (imgPath, imgMime, imgName) => {
     Geolocation.getCurrentPosition(
       //Will give you the current location
@@ -746,7 +784,7 @@ const BusinessDocumentUpload = (props, {navigation}) => {
   };
 
   const updateData = (dmsID, type, fileName) => {
-    const updatedObject = {...currentPhotoItem};
+    const updatedObject = { ...currentPhotoItem };
     updatedObject.dmsID = dmsID;
     updatedObject.isImagePresent = true;
     updatedObject.documentName = fileName;
@@ -766,7 +804,7 @@ const BusinessDocumentUpload = (props, {navigation}) => {
           }
         }
         // Create a new object with the updated name property
-        return {...item, dataNew: newDataArray};
+        return { ...item, dataNew: newDataArray };
       }
       // If the id doesn't match, return the original object
       return item;
@@ -778,18 +816,18 @@ const BusinessDocumentUpload = (props, {navigation}) => {
 
   const handleClick = (value, data) => {
     if (value === 'edit') {
-      props.navigation.navigate('LoanNomineeDetails', {bankType: data});
+      props.navigation.navigate('LoanNomineeDetails', { bankType: data });
     } else if (value === 'new') {
-      props.navigation.navigate('LoanNomineeDetails', {bankType: 'new'});
+      props.navigation.navigate('LoanNomineeDetails', { bankType: 'new' });
     } else if (value === 'delete') {
       deletedata(data.id);
     }
   };
 
-  const deleteAddressData = () => {};
+  const deleteAddressData = () => { };
 
   const deletedata = async id => {
-    const updatedObject = {...currentPhotoItem};
+    const updatedObject = { ...currentPhotoItem };
     updatedObject.dmsID = '';
     updatedObject.isImagePresent = false;
     setCurrentPhotoItem(updatedObject);
@@ -811,7 +849,7 @@ const BusinessDocumentUpload = (props, {navigation}) => {
           }
         }
         // Create a new object with the updated name property
-        return {...item, dataNew: newDataArray};
+        return { ...item, dataNew: newDataArray };
       }
       // If the id doesn't match, return the original object
       return item;
@@ -1059,22 +1097,22 @@ const BusinessDocumentUpload = (props, {navigation}) => {
             };
             acc.push({
               code,
-              dataNew: [{...installment, ...extraJSON}],
+              dataNew: [{ ...installment, ...extraJSON }],
               isSelected: false,
             });
           } else {
-            const extraJSON = {dmsID: '', isImagePresent: false, imageId: 0};
+            const extraJSON = { dmsID: '', isImagePresent: false, imageId: 0 };
             acc.push({
               code,
-              dataNew: [{...installment, ...extraJSON}],
+              dataNew: [{ ...installment, ...extraJSON }],
               isSelected: false,
             });
           }
         } else {
-          const extraJSON = {dmsID: '', isImagePresent: false, imageId: 0};
+          const extraJSON = { dmsID: '', isImagePresent: false, imageId: 0 };
           acc.push({
             code,
-            dataNew: [{...installment, ...extraJSON}],
+            dataNew: [{ ...installment, ...extraJSON }],
             isSelected: false,
           });
         }
@@ -1170,16 +1208,16 @@ const BusinessDocumentUpload = (props, {navigation}) => {
     if (Common.DEBUG_MODE)
       console.log(
         'DateOfTravel::' +
-          dateOfTravel +
-          ' ' +
-          ' Mode Of Travel::' +
-          modeOfTravelLabel +
-          ' ' +
-          'Distance Travelled::' +
-          distanceTravelled +
-          ' ' +
-          'Remarks::' +
-          remarks,
+        dateOfTravel +
+        ' ' +
+        ' Mode Of Travel::' +
+        modeOfTravelLabel +
+        ' ' +
+        'Distance Travelled::' +
+        distanceTravelled +
+        ' ' +
+        'Remarks::' +
+        remarks,
       );
   };
 
@@ -1260,14 +1298,14 @@ const BusinessDocumentUpload = (props, {navigation}) => {
         global.PDSUBMODULE,
         currentPageCode,
       );
-      props.navigation.replace('PDItems', {clientType: global.CLIENTTYPE});
+      props.navigation.replace('PDItems', { clientType: global.CLIENTTYPE });
     } else {
       if (Common.DEBUG_MODE) console.log('Module not found.');
     }
   };
 
   const onGoBack = () => {
-    props.navigation.replace('PDItems', {clientType: global.CLIENTTYPE});
+    props.navigation.replace('PDItems', { clientType: global.CLIENTTYPE });
   };
 
   const closeErrorModal = () => {
@@ -1294,7 +1332,7 @@ const BusinessDocumentUpload = (props, {navigation}) => {
   };
 
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: 'white'}}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
       <ErrorModal
         isVisible={errorModalVisible}
         onClose={closeErrorModal}
@@ -1361,7 +1399,7 @@ const BusinessDocumentUpload = (props, {navigation}) => {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            <View style={{width: '30%', alignItems: 'center'}}>
+            <View style={{ width: '30%', alignItems: 'center' }}>
               <TouchableOpacity onPress={() => pickImage()} activeOpacity={11}>
                 <View
                   style={{
@@ -1389,7 +1427,7 @@ const BusinessDocumentUpload = (props, {navigation}) => {
                 Camera
               </Text>
             </View>
-            <View style={{width: '30%', alignItems: 'center'}}>
+            <View style={{ width: '30%', alignItems: 'center' }}>
               <TouchableOpacity
                 onPress={() => selectImage()}
                 activeOpacity={11}>
@@ -1409,7 +1447,7 @@ const BusinessDocumentUpload = (props, {navigation}) => {
                   />
                 </View>
               </TouchableOpacity>
-              <Text style={{fontSize: 14, color: Colors.black, marginTop: 7}}>
+              <Text style={{ fontSize: 14, color: Colors.black, marginTop: 7 }}>
                 Gallery
               </Text>
             </View>
@@ -1444,7 +1482,7 @@ const BusinessDocumentUpload = (props, {navigation}) => {
           }}>
           <Image
             source={require('../../Images/orderblue.png')}
-            style={{width: 16, height: 20}}
+            style={{ width: 16, height: 20 }}
           />
           <Text
             style={{
@@ -1470,8 +1508,8 @@ const BusinessDocumentUpload = (props, {navigation}) => {
           textValue={language[0][
             props.language
           ].str_viewprevImage.toUpperCase()}
-          textStyle={{color: Colors.white, fontSize: 13, fontWeight: 500}}
-          viewStyle={[Commonstyles.buttonView, {marginBottom: 20}]}
+          textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
+          viewStyle={[Commonstyles.buttonView, { marginBottom: 20 }]}
           innerStyle={Commonstyles.buttonViewInnerStyle}
           handleClick={onClickPreview}
         />
@@ -1479,8 +1517,8 @@ const BusinessDocumentUpload = (props, {navigation}) => {
 
       <ButtonViewComp
         textValue={language[0][props.language].str_submit.toUpperCase()}
-        textStyle={{color: Colors.white, fontSize: 13, fontWeight: 500}}
-        viewStyle={[Commonstyles.buttonView, {marginBottom: 20}]}
+        textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
+        viewStyle={[Commonstyles.buttonView, { marginBottom: 20 }]}
         innerStyle={Commonstyles.buttonViewInnerStyle}
         handleClick={buttonNext}
       />
@@ -1526,11 +1564,11 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = state => {
-  const {language} = state.languageReducer;
-  const {profileDetails} = state.profileReducer;
-  const {mobileCodeDetails} = state.mobilecodeReducer;
-  const {pdDetails} = state.personalDiscussionReducer;
-  const {pdSubStages} = state.pdStagesReducer;
+  const { language } = state.languageReducer;
+  const { profileDetails } = state.profileReducer;
+  const { mobileCodeDetails } = state.mobilecodeReducer;
+  const { pdDetails } = state.personalDiscussionReducer;
+  const { pdSubStages } = state.pdStagesReducer;
   return {
     language: language,
     profiledetail: profileDetails,

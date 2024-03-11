@@ -9,6 +9,7 @@ import {
     Alert,
     Image,
     StatusBar,
+    Linking,
     Text,
     BackHandler,
     ScrollView,
@@ -195,10 +196,14 @@ const ConsentScreen = (props, { navigation }) => {
                         global.LOANAPPLICATIONID = response.data.id;
 
                         if (props.route.params.leadData.length > 0) {
-                            insertLeadData(response.data.id, response.data.tempNumber);
+                            global.INITIATETRACKERDATA = props.route.params.leadData;
+                            props.navigation.replace('LoanApplicationMain', { fromScreen: 'ConsentScreen' })
+
+                            //insertLeadData(response.data.id, response.data.tempNumber);
                         } else {
-                            tbl_client.deleteBasedOnClientID(response.data.id);
-                            tbl_loanApplication.deleteLoanBasedOnID(response.data.id)
+                            global.INITIATETRACKERDATA = [];
+                            // tbl_client.deleteBasedOnClientID(response.data.id);
+                            // tbl_loanApplication.deleteLoanBasedOnID(response.data.id)
                             props.navigation.replace('LoanApplicationMain', { fromScreen: 'ConsentScreen' })
                         }
 
@@ -254,6 +259,11 @@ const ConsentScreen = (props, { navigation }) => {
         setErrorModalVisible(false);
     };
 
+    const handleLinkPress = () => {
+        const url = 'https://www.craftsilicon.com/asia/privacy-policy/'; // Replace with the URL you want to open
+        Linking.openURL(url);
+    };
+
 
     return (
 
@@ -269,7 +279,8 @@ const ConsentScreen = (props, { navigation }) => {
                     contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" >
                     <View style={{ flex: 1 }}>
 
-                        <ConsentModal nextScreen={nextScreen} textContent={"I, hereby provide my informed consent you to proceed with my loan application. I acknowledge that I have received, read, and understood all the loan terms and conditions, as well as the associated costs, fees, and interest rates. I understand that the loan application process will involve the collection, processing, and verification of my personal and financial information.I consent to the following:1. The collection of necessary personal and financial information for the purpose of assessing and processing my loan application.2. The verification of my credit history and financial background as required by [Your Company Name or Bank].3. The disclosure of my credit score and related information to relevant credit reporting agencies for the purpose of this loan application.4. The sharing of my application and credit information with any necessary third parties such as underwriters, appraisers, or legal entities involved in the loan processing.5. The use of electronic signatures and documents as part of the application process.I acknowledge my responsibility to repay the loan in accordance with the terms and conditions specified in the loan agreement. I am aware that any false or misleading information provided in this application may result in the denial of my loan request.By signing this consent form, I confirm that I am providing my full consent and understanding of the loan application process as described."}></ConsentModal>
+                        <ConsentModal nextScreen={nextScreen} handleLinkPress={handleLinkPress}
+                            textContent={"I, hereby provide my informed consent you to proceed with my loan application. I acknowledge that I have received, read, and understood all the loan terms and conditions, as well as the associated costs, fees, and interest rates. I understand that the loan application process will involve the collection, processing, and verification of my personal and financial information.I consent to the following:1. The collection of necessary personal and financial information for the purpose of assessing and processing my loan application.2. The verification of my credit history and financial background as required by [Your Company Name or Bank].3. The disclosure of my credit score and related information to relevant credit reporting agencies for the purpose of this loan application.4. The sharing of my application and credit information with any necessary third parties such as underwriters, appraisers, or legal entities involved in the loan processing.5. The use of electronic signatures and documents as part of the application process.I acknowledge my responsibility to repay the loan in accordance with the terms and conditions specified in the loan agreement. I am aware that any false or misleading information provided in this application may result in the denial of my loan request.By signing this consent form, I confirm that I am providing my full consent and understanding of the loan application process as described."}></ConsentModal>
 
                     </View>
                 </ScrollView>

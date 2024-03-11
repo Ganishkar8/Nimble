@@ -78,8 +78,10 @@ const FamilyDetailList = (props, { navigation }) => {
     const getRelationData = () => {
 
         const familyDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].familyDetail;
-        setRelationDetails(familyDetail)
-        setRefreshFlatList(!refreshFlatlist)
+        if (familyDetail) {
+            setRelationDetails(familyDetail)
+            setRefreshFlatList(!refreshFlatlist)
+        }
         // console.log(JSON.stringify(familyDetail))
 
         // tbl_familydetails.getAllFamilyDetails(global.LOANAPPLICATIONID)
@@ -443,7 +445,7 @@ const FamilyDetailList = (props, { navigation }) => {
             />
 
 
-            {relationDetails.length > 0 && <ButtonViewComp
+            {relationDetails?.length > 0 && <ButtonViewComp
                 textValue={language[0][props.language].str_submit.toUpperCase()}
                 textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
                 viewStyle={[Commonstyles.buttonView, { marginBottom: 20 }]}

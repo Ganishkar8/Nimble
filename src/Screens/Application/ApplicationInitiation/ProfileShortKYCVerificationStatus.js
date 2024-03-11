@@ -48,7 +48,10 @@ import Geolocation from 'react-native-geolocation-service';
 import { useIsFocused } from '@react-navigation/native';
 import ErrorModal from '../../../Components/ErrorModal';
 import DateInputComp from '../../../Components/DateInputComp';
-import { updateNestedClientDetails, deleteLoanInitiationDetails, updateLoanInitiationDetails } from '../../../Utils/redux/actions/loanInitiationAction';
+import PANModal from '../../../Components/PANModal';
+import Feather from 'react-native-vector-icons/Feather';
+import { updateNestedClientDetails, deleteLoanInitiationDetails, updateLoanInitiationDetails, updateClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
+import { tr } from 'react-native-paper-dates';
 
 const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const [errorModalVisible, setErrorModalVisible] = useState(false);
@@ -58,6 +61,9 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
   const showBottomSheet = () => setBottomErrorSheetVisible(true);
   const hideBottomSheet = () => setBottomErrorSheetVisible(false);
+  const [panModalVisible, setPanModalVisible] = useState(false);
+  const showPanBottomSheet = () => setPanModalVisible(true);
+  const hidePanBottomSheet = () => setPanModalVisible(false);
   const [KYC1Caption, setKYC1Caption] = useState('KYC 1');
   const [KYC1, setKYC1] = useState(true);
   const [KYC2Caption, setKYC2Caption] = useState('KYC 2');
@@ -79,7 +85,14 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     useState(false);
   const LoanApplicationIDRef = useRef(null);
 
-  const [KycTypeMan, setKycTypeMan] = useState(false);
+  const [name, setName] = useState('');
+  const [panCard, setPanCard] = useState('');
+  const [panDetails, setPanDetails] = useState('');
+  const [panCardVisibleID, setPanCardVisibleID] = useState('');
+  const [isPanVerified, setIsPanVerified] = useState(null);
+  const [eyeButtonVisible, setEyeButtonVisible] = useState(false);
+
+  const [KycTypeMan, setKycTypeMan] = useState(true);
   const [KycTypeVisible, setKycTypeVisible] = useState(true);
   const [KycTypeDisable, setKycTypeDisable] = useState(false);
   const [KycTypeData, setKycTypeData] = useState([]);
@@ -121,7 +134,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
   const [kycID, setkycID] = useState('');
   const [kycIDCaption, setkycIDCaption] = useState('KYC ID');
-  const [kycIDMan, setkycIDMan] = useState(false);
+  const [kycIDMan, setkycIDMan] = useState(true);
   const [kycIDVisible, setkycIDVisible] = useState(true);
   const [kycIDDisable, setkycIDDisable] = useState(true);
   const KycIDRef = useRef(null);
@@ -161,7 +174,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const [kycID4Disable, setkycID4Disable] = useState(true);
   const KycID4Ref = useRef(null);
 
-  const [KycSourceMan, setKycSourceMan] = useState(false);
+  const [KycSourceMan, setKycSourceMan] = useState(true);
   const [KycSourceVisible, setKycSourceVisible] = useState(true);
   const [KycSourceDisable, setKycSourceDisable] = useState(true);
   const [KycSourceData, setKycSourceData] = useState([]);
@@ -259,7 +272,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     }
 
 
-    if (global.USERTYPEID == 1163) {
+    if (global.USERTYPEID == 1163 || global.ALLOWEDIT == "0") {
       if (global.LOANSTATUS == 'MANUAL KYC PENDING' || global.LOANSTATUS == 'MANUAL KYC REJECTED') {
 
       }
@@ -420,7 +433,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     setkycID(data.kycValue)
     if (data.kycType == '002' || data.kycType == '008') {
       setkycExpiryDateVisible(true);
-      setkycExpiryDate(data.kycExpiryDate);
+      setkycExpiryDate(data.kycExpiryDate ? Common.convertDateFormat(data.kycExpiryDate) : '');
     } else {
       setkycExpiryDate('');
       setkycExpiryDateVisible(false);
@@ -458,7 +471,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
           }
           setKycTypeLabel(response.data.kycType)
           setkycID(response.data.kycValue)
-          setkycExpiryDate(response.data.kycExpiryDate);
+          setkycExpiryDate(response.data.kycExpiryDate ? Common.convertDateFormat(response.data.kycExpiryDate) : '');
         } else if (response.data.statusCode === 201) {
           setApiError(response.data.message);
           setErrorModalVisible(true);
@@ -692,11 +705,44 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
   const getClientData = (value) => {
 
+    setName(value?.firstName + ' ' + value?.middleName + ' ' + value?.lastName)
+    setIsPanVerified(value.isPanVerified);
+
+    if (global.ALLOWEDIT == '0') {
+      if (value.isPanVerified) {
+        setEyeButtonVisible(true);
+      } else {
+        setEyeButtonVisible(false)
+      }
+    } else {
+      if (value.isPanVerified) {
+        setEyeButtonVisible(true);
+      } else if (value.isPanVerified === false) {
+        setEyeButtonVisible(true)
+      } else {
+        setEyeButtonVisible(true);
+      }
+
+    }
+    if (value.kycTypeId1 == '007') {
+      setPanCard(value.kycIdValue1)
+      setPanCardVisibleID('ID1')
+    } else if (value.kycTypeId2 == '007') {
+      setPanCard(value.kycIdValue2)
+      setPanCardVisibleID('ID2')
+    } else if (value.kycTypeId3 == '007') {
+      setPanCard(value.kycIdValue3)
+      setPanCardVisibleID('ID3')
+    } else if (value.kycTypeId4 == '007') {
+      setPanCard(value.kycIdValue4)
+      setPanCardVisibleID('ID4')
+    }
+
     setKycType1Label(value.kycTypeId1);
     setkycID1(value.kycIdValue1);
     if (value.kycTypeId1 == '002' || value.kycTypeId1 == '008') {
       setExpiry1DateVisible(true);
-      setExpiry1Date(value.kycType1ExpiryDate);
+      setExpiry1Date(value.kycType1ExpiryDate ? Common.convertDateFormat(value.kycType1ExpiryDate) : '');
     } else {
       setExpiry1Date('');
       setExpiry1DateVisible(false);
@@ -705,7 +751,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     setkycID2(value.kycIdValue2);
     if (value.kycTypeId2 == '002' || value.kycTypeId2 == '008') {
       setExpiry2DateVisible(true);
-      setExpiry2Date(value.kycType2ExpiryDate);
+      setExpiry2Date(value.kycType2ExpiryDate ? Common.convertDateFormat(value.kycType2ExpiryDate) : '');
     } else {
       setExpiry2Date('');
       setExpiry2DateVisible(false);
@@ -714,7 +760,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     setkycID3(value.kycIdValue3);
     if (value.kycTypeId3 == '002' || value.kycTypeId3 == '008') {
       setExpiry3DateVisible(true);
-      setExpiry3Date(value.kycType3ExpiryDate);
+      setExpiry3Date(value.kycType3ExpiryDate ? Common.convertDateFormat(value.kycType3ExpiryDate) : '');
     } else {
       setExpiry3Date('');
       setExpiry3DateVisible(false);
@@ -723,7 +769,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     setkycID4(value.kycIdValue4);
     if (value.kycTypeId4 == '002' || value.kycTypeId4 == '008') {
       setExpiry4DateVisible(true);
-      setExpiry4Date(value.kycType4ExpiryDate);
+      setExpiry4Date(value.kycType4ExpiryDate ? Common.convertDateFormat(value.kycType4ExpiryDate) : '');
     } else {
       setExpiry4Date('');
       setExpiry4DateVisible(false);
@@ -1384,6 +1430,42 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
       }
     }
 
+    if (panCard && isPanVerified == null) {
+      errorMessage =
+        errorMessage +
+        i +
+        ')' +
+        ' ' +
+        'Please click on eye button to  verify PAN CARD'
+      '\n';
+      i++;
+      flag = true;
+    }
+
+
+    setErrMsg(errorMessage);
+    return flag;
+  };
+
+  const validateDOB = () => {
+    var flag = false;
+    var i = 1;
+    var errorMessage = '';
+
+    if (DOBMan && DOBVisible) {
+      if (DOB.length <= 0) {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          language[0][props.language].str_plsselect +
+          DOBCaption +
+          '\n';
+        i++;
+        flag = true;
+      }
+    }
 
     setErrMsg(errorMessage);
     return flag;
@@ -1450,7 +1532,8 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
         "kycType": KycTypeLabel,
         "kycValue": kycID,
         "kycDmsId": kycSourceDmsId,
-        "kycExpiryDate": kycExpiryDate,
+        "kycExpiryDate": kycExpiryDate ? Common.convertYearDateFormat(kycExpiryDate) : '',
+        "kycExpiryDate": '',
         "createdBy": global.USERID,
         "createdDate": new Date(),
         "kycSource": KycSourceLabel,
@@ -1477,7 +1560,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
           "kycType": KycType1Label,
           "kycValue": kycID1,
           "kycDmsId": kycID1DmsId,
-          "kycExpiryDate": "",
+          "kycExpiryDate": kycExpiryDate ? Common.convertYearDateFormat(kycExpiryDate) : '',
           "createdBy": global.USERID,
           "createdDate": new Date(),
         }
@@ -1591,6 +1674,73 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
   };
 
+  const getPANVerify = () => {
+
+    if (validateDOB()) {
+      showBottomSheet();
+      return;
+    }
+
+    Common.getNetworkConnection().then(value => {
+      if (value.isConnected == true) {
+        setLoading(true)
+        const baseURL = global.PORT1
+
+        const appDetails = {
+          "pan": panCard,
+          "name": name,
+          "dob": Common.convertDateFormatDuplicate(DOB),
+          "clientId": global.CLIENTID
+        }
+
+        apiInstance(baseURL).post(`/api/v2/pan/verify`, appDetails)
+          .then(async (response) => {
+
+            if (response.status == 200) {
+              setPanDetails(response.data)
+              setIsPanVerified(response.data.clientDetailDto.isPanVerified)
+              props.updateClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', response.data.clientDetailDto)
+
+              if (response.data.statusCode == 101) {
+                setPanModalVisible(true);
+                //setEyeButtonVisible(true);
+              } else {
+                //setEyeButtonVisible(false);
+              }
+
+            } else if (response.data.statusCode === 201) {
+              setApiError(response.data.message);
+              setErrorModalVisible(true);
+            } else if (response.data.statusCode === 202) {
+              setApiError(response.data.message);
+              setErrorModalVisible(true);
+            }
+
+            // props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
+            setLoading(false)
+
+          })
+          .catch((error) => {
+            // Handle the error
+            setLoading(false)
+            if (global.DEBUG_MODE) console.log("GetPhotoApiResponse::" + JSON.stringify(error));
+            if (error.response.data != null) {
+              setApiError(error.response.data.message);
+              setErrorModalVisible(true)
+            } else if (error.response.httpStatusCode == 500) {
+              setApiError(error.response.message);
+              setErrorModalVisible(true)
+            }
+          });
+      } else {
+        setApiError(language[0][props.language].str_errinternetimage);
+        setErrorModalVisible(true)
+
+      }
+
+    })
+  }
+
   const closeErrorModal = () => {
     setErrorModalVisible(false);
   };
@@ -1680,6 +1830,12 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
         </View>
       </Modal>
+
+      <PANModal
+        isVisible={panModalVisible}
+        onClose={hidePanBottomSheet}
+        panDetails={panDetails}
+      />
 
 
       <ScrollView
@@ -2017,17 +2173,54 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                         />
                       </View>
 
-                      <TextInputComp
-                        textValue={kycID1}
-                        textStyle={Commonstyles.textinputtextStyle}
-                        type="email-address"
-                        Disable={kycID1Disable}
-                        ComponentName="kycID1"
-                        reference={KycID1Ref}
-                        returnKey="next"
-                        handleClick={handleClick}
-                        handleReference={handleReference}
-                      />
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          width: '90%',
+                          alignSelf: 'center',
+                        }}>
+                        <TextInputComp
+                          textValue={kycID1}
+                          textStyle={[Commonstyles.textinputtextStyle, { width: '65%' }]}
+                          type="email-address"
+                          Disable={kycID1Disable}
+                          ComponentName="kycID1"
+                          reference={KycID1Ref}
+                          returnKey="next"
+                          handleClick={handleClick}
+                          handleReference={handleReference}
+                        />
+                        {panCardVisibleID == 'ID1' && eyeButtonVisible &&
+                          <View
+                            style={{
+                              width: '20%',
+                              marginTop: 3,
+                              paddingHorizontal: 0,
+                              borderBottomWidth: 1,
+                              borderBottomColor: '#e2e2e2',
+                              color: 'darkblue',
+                              justifyContent: 'center',
+                            }}>
+                            <Feather name='eye' color={Colors.darkblue} size={20} onPress={getPANVerify} />
+                          </View>
+                        }
+                      </View>
+
+                      {panCardVisibleID == 'ID1' && isPanVerified != null &&
+                        <View style={{ width: '90%', alignSelf: 'center', alignItems: 'flex-end', marginTop: 5 }}>
+
+                          <Text
+                            style={{
+                              color: isPanVerified ? Colors.green : Colors.red,
+                              fontWeight: 500,
+                            }}>
+                            {isPanVerified ? 'Verified' : 'Not Verified'}
+                          </Text>
+
+                        </View>
+                      }
+
+
                     </View>
                   )}
 
@@ -2201,17 +2394,54 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                         />
                       </View>
 
-                      <TextInputComp
-                        textValue={kycID2}
-                        textStyle={Commonstyles.textinputtextStyle}
-                        type="email-address"
-                        Disable={kycID2Disable}
-                        ComponentName="kycID2"
-                        reference={KycID2Ref}
-                        returnKey="next"
-                        handleClick={handleClick}
-                        handleReference={handleReference}
-                      />
+
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          width: '90%',
+                          alignSelf: 'center',
+                        }}>
+                        <TextInputComp
+                          textValue={kycID2}
+                          textStyle={Commonstyles.textinputtextStyle}
+                          type="email-address"
+                          Disable={kycID2Disable}
+                          ComponentName="kycID2"
+                          reference={KycID2Ref}
+                          returnKey="next"
+                          handleClick={handleClick}
+                          handleReference={handleReference}
+                        />
+                        {panCardVisibleID == 'ID2' && eyeButtonVisible &&
+                          <View
+                            style={{
+                              width: '20%',
+                              marginTop: 3,
+                              paddingHorizontal: 0,
+                              borderBottomWidth: 1,
+                              borderBottomColor: '#e2e2e2',
+                              color: 'darkblue',
+                              justifyContent: 'center',
+                            }}>
+                            <Feather name='eye' color={Colors.darkblue} size={20} onPress={getPANVerify} />
+                          </View>
+                        }
+                      </View>
+
+                      {panCardVisibleID == 'ID2' && isPanVerified != null &&
+                        <View style={{ width: '90%', alignSelf: 'center', alignItems: 'flex-end', marginTop: 5 }}>
+
+                          <Text
+                            style={{
+                              color: isPanVerified ? Colors.green : Colors.red,
+                              fontWeight: 500,
+                            }}>
+                            {isPanVerified ? 'Verified' : 'Not Verified'}
+                          </Text>
+
+                        </View>
+                      }
+
                       {/* <View
                     style={{
                       width: '100%',
@@ -2369,17 +2599,52 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                         />
                       </View>
 
-                      <TextInputComp
-                        textValue={kycID3}
-                        textStyle={Commonstyles.textinputtextStyle}
-                        type="email-address"
-                        Disable={kycID3Disable}
-                        ComponentName="kycID3"
-                        reference={KycID3Ref}
-                        returnKey="next"
-                        handleClick={handleClick}
-                        handleReference={handleReference}
-                      />
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          width: '90%',
+                          alignSelf: 'center',
+                        }}>
+                        <TextInputComp
+                          textValue={kycID3}
+                          textStyle={Commonstyles.textinputtextStyle}
+                          type="email-address"
+                          Disable={kycID3Disable}
+                          ComponentName="kycID3"
+                          reference={KycID3Ref}
+                          returnKey="next"
+                          handleClick={handleClick}
+                          handleReference={handleReference}
+                        />
+                        {panCardVisibleID == 'ID3' && eyeButtonVisible &&
+                          <View
+                            style={{
+                              width: '20%',
+                              marginTop: 3,
+                              paddingHorizontal: 0,
+                              borderBottomWidth: 1,
+                              borderBottomColor: '#e2e2e2',
+                              color: 'darkblue',
+                              justifyContent: 'center',
+                            }}>
+                            <Feather name='eye' color={Colors.darkblue} size={20} onPress={getPANVerify} />
+                          </View>
+                        }
+                      </View>
+
+                      {panCardVisibleID == 'ID3' && isPanVerified != null &&
+                        <View style={{ width: '90%', alignSelf: 'center', alignItems: 'flex-end', marginTop: 5 }}>
+
+                          <Text
+                            style={{
+                              color: isPanVerified ? Colors.green : Colors.red,
+                              fontWeight: 500,
+                            }}>
+                            {isPanVerified ? 'Verified' : 'Not Verified'}
+                          </Text>
+
+                        </View>
+                      }
                       {/* <View
                     style={{
                       width: '100%',
@@ -2534,18 +2799,53 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                           Visible={kycID4Man}
                         />
                       </View>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          width: '90%',
+                          alignSelf: 'center',
+                        }}>
+                        <TextInputComp
+                          textValue={kycID4}
+                          textStyle={Commonstyles.textinputtextStyle}
+                          type="email-address"
+                          Disable={kycID4Disable}
+                          ComponentName="kycID4"
+                          reference={KycID4Ref}
+                          returnKey="next"
+                          handleClick={handleClick}
+                          handleReference={handleReference}
+                        />
+                        {panCardVisibleID == 'ID4' && eyeButtonVisible &&
+                          <View
+                            style={{
+                              width: '20%',
+                              marginTop: 3,
+                              paddingHorizontal: 0,
+                              borderBottomWidth: 1,
+                              borderBottomColor: '#e2e2e2',
+                              color: 'darkblue',
+                              justifyContent: 'center',
+                            }}>
+                            <Feather name='eye' color={Colors.darkblue} size={20} onPress={getPANVerify} />
+                          </View>
+                        }
+                      </View>
 
-                      <TextInputComp
-                        textValue={kycID4}
-                        textStyle={Commonstyles.textinputtextStyle}
-                        type="email-address"
-                        Disable={kycID4Disable}
-                        ComponentName="kycID4"
-                        reference={KycID4Ref}
-                        returnKey="next"
-                        handleClick={handleClick}
-                        handleReference={handleReference}
-                      />
+                      {panCardVisibleID == 'ID4' && isPanVerified != null &&
+                        <View style={{ width: '90%', alignSelf: 'center', alignItems: 'flex-end', marginTop: 5 }}>
+
+                          <Text
+                            style={{
+                              color: isPanVerified ? Colors.green : Colors.red,
+                              fontWeight: 500,
+                            }}>
+                            {isPanVerified ? 'Verified' : 'Not Verified'}
+                          </Text>
+
+                        </View>
+                      }
+
                       {/* <View
                     style={{
                       width: '100%',
@@ -2770,6 +3070,7 @@ const mapDispatchToProps = dispatch => ({
   deleteLoanInitiationDetails: item => dispatch(deleteLoanInitiationDetails(item)),
   updateLoanInitiationDetails: (loanApplicationId, loanData, key, clientId, updatedDetails) => dispatch(updateLoanInitiationDetails(loanApplicationId, loanData, key, clientId, updatedDetails)),
   updateNestedClientDetails: (loanApplicationId, clientId, key, nestedKey, data) => dispatch(updateNestedClientDetails(loanApplicationId, clientId, key, nestedKey, data)),
+  updateClientDetails: (loanApplicationId, clientId, key, data) => dispatch(updateClientDetails(loanApplicationId, clientId, key, data)),
 });
 
 export default connect(
