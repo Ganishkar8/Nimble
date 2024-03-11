@@ -247,7 +247,7 @@ const LoanNomineeDetails = (props, { navigation }) => {
         //             console.error('Error fetching Applicant details:', error);
         //     });
 
-        const clientDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
+        const clientDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].clientDetail.find(client => client.clientType === clientType);
 
         if (clientDetail) {
             setTitleLabel(clientDetail?.title);
@@ -1602,6 +1602,7 @@ const LoanNomineeDetails = (props, { navigation }) => {
                             returnKey="next"
                             handleClick={handleClick}
                             handleReference={handleReference}
+                            length={50}
                         />
                     </View>
                 )}

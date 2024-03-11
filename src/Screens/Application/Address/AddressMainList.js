@@ -73,7 +73,7 @@ const AddressMainList = (props, { navigation }) => {
 
     //props.deleteNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientAddress', 870)
     getAddressData()
-    if (global.USERTYPEID == 1163) {
+    if (global.USERTYPEID == 1163 || global.ALLOWEDIT == '0') {
       setAddAddressVisible(false)
     } else {
       setAddAddressVisible(true)
@@ -409,7 +409,7 @@ const AddressMainList = (props, { navigation }) => {
 
   const buttonNext = () => {
 
-    if (global.USERTYPEID == 1163) {
+    if (global.USERTYPEID == 1163 || global.ALLOWEDIT == "0") {
       props.navigation.replace('LoanApplicationMain', { fromScreen: 'AddressDetail' });
       return;
     }

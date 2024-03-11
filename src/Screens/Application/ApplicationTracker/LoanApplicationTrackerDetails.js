@@ -31,7 +31,8 @@ import tbl_loanaddressinfo from '../../../Database/Table/tbl_loanaddressinfo';
 import tbl_finexpdetails from '../../../Database/Table/tbl_finexpdetails';
 import tbl_bankdetails from '../../../Database/Table/tbl_bankdetails';
 import { addLoanInitiationDetails, deleteLoanInitiationDetails } from '../../../Utils/redux/actions/loanInitiationAction';
-
+import ButtonViewComp from '../../../Components/ButtonViewComp';
+import Commonstyles from '../../../Utils/Commonstyles';
 
 const LoanApplicationTrackerDetails = (props, { navigation }) => {
 
@@ -120,26 +121,27 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
 
     const insertData = async (value) => {
 
-        global.COMPLETEDSUBSTAGE = value.currentStatus.subStageCode;
-        global.COMPLETEDMODULE = value.currentStatus.moduleCode;
+        global.STAGESTATUS = value.lnAppInitiationCompletedDto.stageStatus;
+        global.COMPLETEDSUBSTAGE = value.lnAppInitiationCompletedDto.subStageCode;
+        global.COMPLETEDMODULE = value.lnAppInitiationCompletedDto.moduleCode;
         global.LOANAPPLICATIONID = value.id;
         global.TEMPAPPID = value.loanApplicationNumber;
         const filteredProcessSubStage = processSubStage.filter((data) => {
-            return data.wfId === listData.wfId && (data.subStageCode === value.currentStatus.subStageCode);
+            return data.wfId === listData.wfId && (data.subStageCode === value.lnAppInitiationCompletedDto.subStageCode);
         }).sort((a, b) => a.displayOrder - b.displayOrder)
 
         const filteredProcessModule = processModule.filter((data) => {
-            return data.wfId === listData.wfId && (data.moduleCode === value.currentStatus.moduleCode);
+            return data.wfId === listData.wfId && (data.moduleCode === value.lnAppInitiationCompletedDto.moduleCode);
         }).sort((a, b) => a.displayOrder - b.displayOrder)
 
         const filteredProcessPage = processPage.filter((data) => {
             return data.wfId === listData.wfId;
         }).sort((a, b) => a.displayOrder - b.displayOrder)
 
-        const index = filteredProcessPage.findIndex(item => item.pageCode === value.currentStatus.pageCode);
+        const index = filteredProcessPage.findIndex(item => item.pageCode === value.lnAppInitiationCompletedDto.pageCode);
 
-        if (value.currentStatus.subStageStatus.toUpperCase() == 'COMPLETED') {
-            global.COMPLETEDPAGE = value.currentStatus.pageCode
+        if (value.lnAppInitiationCompletedDto.subStageStatus?.toUpperCase() == 'COMPLETED' || value.lnAppInitiationCompletedDto.subStageStatus?.toUpperCase() == 'REJECTED') {
+            global.COMPLETEDPAGE = value.lnAppInitiationCompletedDto.pageCode
         } else {
             if (index > 0) {
                 const previousPage = filteredProcessPage[index - 1];
@@ -260,6 +262,59 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
         props.navigation.navigate('LoanApplicationMain', { fromScreen: 'ApplicationTrackerDetails' })
     }
 
+    const updateLoanStatus = () => {
+
+        const appDetails = {
+            loanApplicationId: global.LOANAPPLICATIONID,
+            loanWorkflowStage: 'LN_APP_INITIATION',
+            status: 'Rejected',
+        };
+        const baseURL = global.PORT1;
+        setLoading(true);
+        apiInstance(baseURL)
+            .post(`/api/v2/loan-application-status/updateStatus`, appDetails)
+            .then(async response => {
+                // Handle the response data
+                if (global.DEBUG_MODE)
+                    console.log(
+                        'UpdateStatusApiResponse::' + JSON.stringify(response.data),
+                    );
+                setLoading(false);
+                if (response.status == 200) {
+                    props.navigation.replace('HomeScreen');
+                }
+                else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
+            })
+            .catch(error => {
+                // Handle the error
+                if (global.DEBUG_MODE)
+                    console.log(
+                        'UpdateStatusApiResponse' + JSON.stringify(error.response),
+                    );
+                setLoading(false);
+
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
+    };
+
     const closeErrorModal = () => {
         setErrorModalVisible(false);
     };
@@ -268,112 +323,129 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
         <View style={{ flex: 1, backgroundColor: '#fefefe' }}>
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
             <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
-
-            {loading ? <Loading /> : null}
-            <View style={{
-                width: '100%', height: 56,
-                flexDirection: 'row', marginTop: 5
-            }}>
-                <TouchableOpacity onPress={() => props.navigation.goBack()} style={{ height: 56, justifyContent: 'center', marginLeft: 5 }}>
-                    <View>
-                        <Entypo name='chevron-left' size={25} color='#4e4e4e' />
+            <ScrollView style={styles.scrollView}
+                contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+                {loading ? <Loading /> : null}
+                <View style={{ flex: 1 }}>
+                    <View style={{
+                        width: '100%', height: 56,
+                        flexDirection: 'row', marginTop: 5
+                    }}>
+                        <TouchableOpacity onPress={() => props.navigation.goBack()} style={{ height: 56, justifyContent: 'center', marginLeft: 5 }}>
+                            <View>
+                                <Entypo name='chevron-left' size={25} color='#4e4e4e' />
+                            </View>
+                        </TouchableOpacity>
+                        <View style={{ width: '90%', height: 56, justifyContent: 'center', marginLeft: 5 }}>
+                            <Text style={{ fontSize: 18, color: '#000', fontFamily: 'Poppins-Medium', marginTop: 3 }}>{language[0][props.language].str_loanappdetails}</Text>
+                        </View>
                     </View>
-                </TouchableOpacity>
-                <View style={{ width: '90%', height: 56, justifyContent: 'center', marginLeft: 5 }}>
-                    <Text style={{ fontSize: 18, color: '#000', fontFamily: 'Poppins-Medium', marginTop: 3 }}>{language[0][props.language].str_loanappdetails}</Text>
+                    <View style={{ height: 6, backgroundColor: Colors.skyblue }} />
+
+                    <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 10 }}>
+                        <View style={{ width: '90%', borderWidth: 1, borderColor: Colors.borderbg, borderRadius: 5 }}>
+                            <View style={{ width: '100%', flexDirection: 'row', marginTop: 13 }}>
+                                <View style={{ width: '35%', flexDirection: 'row', alignItems: 'center' }}>
+                                    <Text style={{ color: Colors.black, fontSize: 14, marginLeft: 26, fontFamily: 'Poppins-Medium' }}>{language[0][props.language].str_status}</Text>
+                                </View>
+                                <View style={{ width: '65%', flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'flex-end' }}>
+                                    <View style={bg == 'GREEN' ? styles.approvedbackground : bg == 'YELLOW' ? styles.pendingbackground : bg == 'GREY' ? styles.draftbackground : styles.rejectedbackground}>
+                                        <Text style={{ color: Colors.black, fontSize: 12, fontFamily: 'Poppins-Medium' }}>{listData.status}</Text>
+                                    </View>
+                                </View>
+                            </View>
+                            <View style={{ width: '100%', height: .9, backgroundColor: Colors.line, marginTop: 13 }} />
+                            <View style={{ width: '100%', marginLeft: 15 }}>
+                                <View style={{ width: '100%', flexDirection: 'row', marginTop: 13, }}>
+                                    <View style={{ width: '45%' }}>
+                                        <Text style={styles.headText}>{language[0][props.language].str_customername}</Text>
+                                    </View>
+                                    <View style={{ width: '55%' }}>
+                                        <Text style={styles.childText}>:  {listData.customerName}</Text>
+                                    </View>
+                                </View>
+                                <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
+                                    <View style={{ width: '45%' }}>
+                                        <Text style={styles.headText}>{language[0][props.language].str_laonappid}</Text>
+                                    </View>
+                                    <View style={{ width: '55%' }}>
+                                        <Text style={styles.childText}>:  {listData.loanApplicationNumber}</Text>
+                                    </View>
+                                </View>
+                                <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
+                                    <View style={{ width: '45%' }}>
+                                        <Text style={styles.headText}>{language[0][props.language].str_workflowstage}</Text>
+                                    </View>
+                                    <View style={{ width: '55%' }}>
+                                        <Text style={styles.childText}>:   {listData.workflowStage}</Text>
+                                    </View>
+                                </View>
+                                <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
+                                    <View style={{ width: '45%' }}>
+                                        <Text style={styles.headText}>{language[0][props.language].str_creationdate}</Text>
+                                    </View>
+                                    <View style={{ width: '55%' }}>
+                                        <Text style={styles.childText}>:  {Common.formatDate(listData.creationDate)}</Text>
+                                    </View>
+                                </View>
+                                <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
+                                    <View style={{ width: '45%' }}>
+                                        <Text style={styles.headText}>{language[0][props.language].str_completiondate}</Text>
+                                    </View>
+                                    <View style={{ width: '55%' }}>
+                                        <Text style={styles.childText}>:  {bg == 'GREEN' ? Common.formatDate(listData.completionDate) : bg == 'RED' ? Common.formatDate(listData.completionDate) : ''} </Text>
+                                    </View>
+                                </View>
+                                <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, marginBottom: 5 }}>
+                                    <View style={{ width: '45%' }}>
+                                        <Text style={styles.headText}>{language[0][props.language].str_ageing}</Text>
+                                    </View>
+                                    <View style={{ width: '55%' }}>
+                                        <Text style={styles.childText}>:  {listData.ageing} days</Text>
+                                    </View>
+                                </View>
+                                <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, marginBottom: 5 }}>
+                                    <View style={{ width: '45%' }}>
+                                        <Text style={styles.headText}>{language[0][props.language].str_currentleadownerid}</Text>
+                                    </View>
+                                    <View style={{ width: '55%' }}>
+                                        <Text style={styles.childText}>:  {listData.agentName}</Text>
+                                    </View>
+                                </View>
+                            </View>
+                        </View>
+                    </View>
+
+                    <TouchableOpacity activeOpacity={0.5} style={{ width: '100%', marginTop: '8%', alignItems: 'center' }}
+                        onPress={() => getLoanAppIdDetails()}>
+                        <View style={{ flexDirection: 'row' }}>
+
+                            <View style={{ width: '52%', justifyContent: 'center' }}>
+                                <Text style={styles.textStyle}>{language[0][props.language].str_reviewLoanAppForm}</Text>
+                            </View>
+
+                            <View style={{ width: '30%' }}></View>
+                            <Entypo name='chevron-right' size={23} color={Colors.darkblack} />
+
+                        </View>
+                        <View style={{ width: '90%', height: .9, backgroundColor: Colors.line, marginTop: 13 }} />
+                    </TouchableOpacity>
+
                 </View>
-            </View>
-            <View style={{ height: 6, backgroundColor: Colors.skyblue }} />
 
-            <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 10 }}>
-                <View style={{ width: '90%', borderWidth: 1, borderColor: Colors.borderbg, borderRadius: 5 }}>
-                    <View style={{ width: '100%', flexDirection: 'row', marginTop: 13 }}>
-                        <View style={{ width: '35%', flexDirection: 'row', alignItems: 'center' }}>
-                            <Text style={{ color: Colors.black, fontSize: 14, marginLeft: 26, fontFamily: 'Poppins-Medium' }}>{language[0][props.language].str_status}</Text>
-                        </View>
-                        <View style={{ width: '65%', flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'flex-end' }}>
-                            <View style={bg == 'GREEN' ? styles.approvedbackground : bg == 'YELLOW' ? styles.pendingbackground : bg == 'GREY' ? styles.draftbackground : styles.rejectedbackground}>
-                                <Text style={{ color: Colors.black, fontSize: 12, fontFamily: 'Poppins-Medium' }}>{listData.status}</Text>
-                            </View>
-                        </View>
-                    </View>
-                    <View style={{ width: '100%', height: .9, backgroundColor: Colors.line, marginTop: 13 }} />
-                    <View style={{ width: '100%', marginLeft: 15 }}>
-                        <View style={{ width: '100%', flexDirection: 'row', marginTop: 13, }}>
-                            <View style={{ width: '45%' }}>
-                                <Text style={styles.headText}>{language[0][props.language].str_customername}</Text>
-                            </View>
-                            <View style={{ width: '55%' }}>
-                                <Text style={styles.childText}>:  {listData.customerName}</Text>
-                            </View>
-                        </View>
-                        <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                            <View style={{ width: '45%' }}>
-                                <Text style={styles.headText}>{language[0][props.language].str_laonappid}</Text>
-                            </View>
-                            <View style={{ width: '55%' }}>
-                                <Text style={styles.childText}>:  {listData.loanApplicationNumber}</Text>
-                            </View>
-                        </View>
-                        <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                            <View style={{ width: '45%' }}>
-                                <Text style={styles.headText}>{language[0][props.language].str_workflowstage}</Text>
-                            </View>
-                            <View style={{ width: '55%' }}>
-                                <Text style={styles.childText}>:   {listData.workflowStage}</Text>
-                            </View>
-                        </View>
-                        <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                            <View style={{ width: '45%' }}>
-                                <Text style={styles.headText}>{language[0][props.language].str_creationdate}</Text>
-                            </View>
-                            <View style={{ width: '55%' }}>
-                                <Text style={styles.childText}>:  {Common.formatDate(listData.creationDate)}</Text>
-                            </View>
-                        </View>
-                        <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
-                            <View style={{ width: '45%' }}>
-                                <Text style={styles.headText}>{language[0][props.language].str_completiondate}</Text>
-                            </View>
-                            <View style={{ width: '55%' }}>
-                                <Text style={styles.childText}>:  {bg == 'GREEN' ? Common.formatDate(listData.completionDate) : bg == 'RED' ? Common.formatDate(listData.completionDate) : ''} </Text>
-                            </View>
-                        </View>
-                        <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, marginBottom: 5 }}>
-                            <View style={{ width: '45%' }}>
-                                <Text style={styles.headText}>{language[0][props.language].str_ageing}</Text>
-                            </View>
-                            <View style={{ width: '55%' }}>
-                                <Text style={styles.childText}>:  {listData.ageing} days</Text>
-                            </View>
-                        </View>
-                        <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, marginBottom: 5 }}>
-                            <View style={{ width: '45%' }}>
-                                <Text style={styles.headText}>{language[0][props.language].str_currentleadownerid}</Text>
-                            </View>
-                            <View style={{ width: '55%' }}>
-                                <Text style={styles.childText}>:  {listData.agentName}</Text>
-                            </View>
-                        </View>
-                    </View>
-                </View>
-            </View>
+                {!(listData?.status?.toUpperCase() == 'COMPLETED') && !(listData?.status?.toUpperCase() == 'REJECTED') &&
+                    <ButtonViewComp
+                        textValue={
+                            language[0][props.language].str_reject.toUpperCase()
+                        }
+                        textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
+                        viewStyle={Commonstyles.buttonView}
+                        innerStyle={Commonstyles.buttonViewInnerStyle}
+                        handleClick={updateLoanStatus}
+                    />
+                }
 
-            <TouchableOpacity activeOpacity={0.5} style={{ width: '100%', marginTop: '8%', alignItems: 'center' }}
-                onPress={() => getLoanAppIdDetails()}>
-                <View style={{ flexDirection: 'row' }}>
-
-                    <View style={{ width: '52%', justifyContent: 'center' }}>
-                        <Text style={styles.textStyle}>{language[0][props.language].str_reviewLoanAppForm}</Text>
-                    </View>
-
-                    <View style={{ width: '30%' }}></View>
-                    <Entypo name='chevron-right' size={23} color={Colors.darkblack} />
-
-                </View>
-                <View style={{ width: '90%', height: .9, backgroundColor: Colors.line, marginTop: 13 }} />
-            </TouchableOpacity>
-
+            </ScrollView>
 
         </View>
     );

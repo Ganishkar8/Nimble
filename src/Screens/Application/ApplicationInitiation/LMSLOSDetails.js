@@ -187,7 +187,7 @@ const LMSLOSDetails = (props, { navigation }) => {
             "dedupeCheckDate": new Date(),
         }
 
-        if (clientDetail.lmsClientId) {
+        if (clientDetail?.lmsClientId) {
             appDetails.customerType = "EXISTING";
         } else {
             appDetails.customerType = "NEW";

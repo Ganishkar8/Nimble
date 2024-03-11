@@ -754,6 +754,7 @@ const LoanDemographicFamilyDetails = (props) => {
                     "relationshipWithCoApplicant": relationStatuswithCOAPPLabel,
                     "relationshipWithGuarantor": relationStatuswithGRNTRLabel,
                     "loanApplicationId": global.LOANAPPLICATIONID,
+                    "createdBy": global.USERID,
                 }
             ]
 
@@ -830,6 +831,7 @@ const LoanDemographicFamilyDetails = (props) => {
                 "relationshipWithCoApplicant": relationStatuswithCOAPPLabel,
                 "relationshipWithGuarantor": relationStatuswithGRNTRLabel,
                 "loanApplicationId": global.LOANAPPLICATIONID,
+                "createdBy": global.USERID,
             }
 
             const baseURL = global.PORT1;
@@ -1512,6 +1514,7 @@ const LoanDemographicFamilyDetails = (props) => {
                                 returnKey="next"
                                 handleClick={handleClick}
                                 handleReference={handleReference}
+                                length={30}
                             />
                         </View>
                     )}

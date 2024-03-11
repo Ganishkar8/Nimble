@@ -649,7 +649,8 @@ const LoanDocumentUpload = (props, { navigation }) => {
                         "passwordRequired": false,
                         "documentCategory": newDataArray[i].documentCategoryCode,
                         "workflowStageId": "LN_APP_INITIATION",
-                        "workflowSubStageId": worksubstage
+                        "workflowSubStageId": worksubstage,
+                        "createdBy": global.USERID,
                     }
                     appDetailsFinal.push(appDetails)
                 }

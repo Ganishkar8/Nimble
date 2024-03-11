@@ -115,7 +115,7 @@ const PDTrackerDetails = (props, { navigation }) => {
                             </View>
                         </TouchableOpacity>
                         <View style={{ width: '90%', height: 56, justifyContent: 'center', marginLeft: 5 }}>
-                            <Text style={{ fontSize: 18, color: '#000', fontFamily: 'Poppins-Medium', marginTop: 3 }}>{language[0][props.language].str_loanappdetails}</Text>
+                            <Text style={{ fontSize: 18, color: '#000', fontFamily: 'Poppins-Medium', marginTop: 3 }}>{language[0][props.language].str_loanpddetails}</Text>
                         </View>
                     </View>
                     <View style={{ height: 6, backgroundColor: Colors.skyblue }} />
@@ -209,7 +209,7 @@ const PDTrackerDetails = (props, { navigation }) => {
                         <View style={{ width: '90%', height: .9, backgroundColor: Colors.line, marginTop: 13 }} />
                     </TouchableOpacity> */}
 
-                    <TouchableOpacity activeOpacity={0.5} style={{ width: '100%', marginTop: '8%', alignItems: 'center' }}
+                    {/* <TouchableOpacity activeOpacity={0.5} style={{ width: '100%', marginTop: '8%', alignItems: 'center' }}
                         onPress={() => { }}>
                         <View style={{ flexDirection: 'row' }}>
 
@@ -238,7 +238,7 @@ const PDTrackerDetails = (props, { navigation }) => {
 
                         </View>
                         <View style={{ width: '90%', height: .9, backgroundColor: Colors.line, marginTop: 13 }} />
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
 
 
                     <View

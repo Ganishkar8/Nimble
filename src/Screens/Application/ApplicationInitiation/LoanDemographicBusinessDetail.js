@@ -16,6 +16,7 @@ import MyStatusBar from '../../../Components/MyStatusBar';
 import Loading from '../../../Components/Loading';
 import TextComp from '../../../Components/TextComp';
 import { connect } from 'react-redux';
+import Feather from 'react-native-vector-icons/Feather';
 import { languageAction } from '../../../Utils/redux/actions/languageAction';
 import { dedupeAction } from '../../../Utils/redux/actions/ProfileAction';
 import { language } from '../../../Utils/LanguageString';
@@ -51,7 +52,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import ImagePicker, { ImageOrVideo } from 'react-native-image-crop-picker';
 import tbl_loanbusinessDetail from '../../../Database/Table/tbl_loanbusinessDetail';
 import { addLoanInitiationDetails, updateLoanInitiationDetails, deleteLoanInitiationDetails, updateClientDetails, updateNestedClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
-
+import RNFS, { writeFile } from 'react-native-fs';
+import Share from 'react-native-share';
 
 const LoanDemographicBusinessDetail = (props) => {
 
@@ -271,6 +273,7 @@ const LoanDemographicBusinessDetail = (props) => {
     const [imageFile, setImageFile] = useState([]);
     const [deleteVisible, setDeleteVisible] = useState(false);
     const [docID, setDocID] = useState('');
+    const [udyamDmsID, setUdyamDmsID] = useState('');
     const [fileName, setFileName] = useState('');
     const [fileType, setFileType] = useState('');
     const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
@@ -415,6 +418,7 @@ const LoanDemographicBusinessDetail = (props) => {
                         setCompanyTypeLabel(businessData?.companyType)
                         setEnterpriseTypeLabel(businessData?.enterpriseType)
                         setBusinessLocationLabel(businessData?.businessLocationVillage)
+                        setUdyamDmsID(businessData?.udyamDmsId)
                         setNoofEmployee(businessData?.noOfEmployees?.toString() || '')
                         setOperatingDays(businessData?.operatingDaysInAWeek?.toString() || '') //operatingtiming
                         setOperatingTimings(businessData?.operatingTimesInADay?.toString() || '') //operatingtiming
@@ -440,6 +444,14 @@ const LoanDemographicBusinessDetail = (props) => {
                         }
                     }
 
+                } else {
+                    if (udyamNum) {
+                        getUdyamCheck(udyamNum);
+                    }
+                    if (global.CLIENTTYPE == 'APPL') {
+                        setCustomerSubCategoryLabel(filteredData[0].customerSubcategory);
+                        setCustomerSubCategoryDisable(true);
+                    }
                 }
             }
         }
@@ -536,6 +548,10 @@ const LoanDemographicBusinessDetail = (props) => {
 
                         if (response.status == 200) {
 
+                            if (response.data.clientBusinessDetailDto.udyamDmsId) {
+                                setUdyamDmsID(response.data.clientBusinessDetailDto.udyamDmsId);
+                            }
+
                             if (response.data.clientBusinessDetailDto.enterpriseShopName) {
                                 setEntShopName(response.data.clientBusinessDetailDto.enterpriseShopName)
                                 setEntShopNameDisable(true)
@@ -603,6 +619,89 @@ const LoanDemographicBusinessDetail = (props) => {
 
         })
     }
+
+    const getUdyamImage = () => {
+
+        Common.getNetworkConnection().then(value => {
+            if (value.isConnected == true) {
+                setLoading(true)
+                const baseURL = '8094'
+                apiInstance(baseURL).get(`/api/documents/document/${parseInt(udyamDmsID)}`)
+                    .then(async (response) => {
+                        // Handle the response data
+                        //  console.log("GetPhotoApiResponse::" + JSON.stringify(response.data));
+
+
+                        var base64pdf = response.data.base64Content;
+                        var fileName = response.data.fileName;
+                        saveBase64Pdf(base64pdf, fileName)
+
+                        // props.navigation.navigate('LeadManagement', { fromScreen: 'LeadCompletion' })
+                        setLoading(false)
+
+                    })
+                    .catch((error) => {
+                        // Handle the error
+                        setLoading(false)
+                        if (global.DEBUG_MODE) console.log("GetPhotoApiResponse::" + JSON.stringify(error));
+                        if (error.response.data != null) {
+                            setApiError(error.response.data.message);
+                            setErrorModalVisible(true)
+                        } else if (error.response.httpStatusCode == 500) {
+                            setApiError(error.response.message);
+                            setErrorModalVisible(true)
+                        }
+                    });
+            } else {
+                setApiError(language[0][props.language].str_errinternetimage);
+                setErrorModalVisible(true)
+
+            }
+
+        })
+    }
+
+    const saveBase64Pdf = async (base64Data, filename) => {
+        const path = RNFS.ExternalDirectoryPath + `/${filename}`;
+
+
+        const fileExists = await RNFS.exists(path);
+
+        // If the file exists, return its path
+        if (fileExists) {
+            console.log('PDF already exists at:', path);
+            openWithThirdPartyApp(path)
+            return path;
+        }
+
+        try {
+            await RNFS.writeFile(path, base64Data, 'base64');
+            openWithThirdPartyApp(path)
+            console.log('PDF saved successfully at:', path);
+            return path;
+        } catch (error) {
+            console.error('Error saving PDF:', error);
+            return null;
+        }
+    };
+
+    const openWithThirdPartyApp = async (pdfPath) => {
+        if (pdfPath) {
+            try {
+                const fileExists = await RNFS.exists(pdfPath);
+                if (fileExists) {
+                    const options = {
+                        url: `file://${pdfPath}`,
+                    };
+                    await Share.open(options);
+                } else {
+                    console.error('PDF file does not exist.');
+                }
+            } catch (error) {
+                console.error('Error opening with third-party app:', error);
+            }
+        }
+    };
 
     const getImage = (dmsID) => {
 
@@ -1235,11 +1334,15 @@ const LoanDemographicBusinessDetail = (props) => {
         if (validate()) {
             showBottomSheet();
         } else {
-            updateImage();
+            if (businessDetailAvailable) {
+                updateBusinessDetails();
+            } else {
+                postBusinessDetails();
+            }
         }
     }
 
-    const updateImage = async () => {
+    const updateImage = async (imageUri, fileType, fileName) => {
         if (imageUri) {
 
             setLoading(true);
@@ -1262,12 +1365,13 @@ const LoanDemographicBusinessDetail = (props) => {
                     const data = await response.json();
                     // Handle the response from Cloudinary
 
+
                     setDocID(data.docId);
-                    if (businessDetailAvailable) {
-                        updateBusinessDetails(data.docId);
-                    } else {
-                        postBusinessDetails(data.docId);
-                    }
+                    setFileType(fileType)
+                    setFileName(fileName)
+                    setImageUri(imageUri)
+                    setVisible(false)
+
 
                 } else {
                     if (global.DEBUG_MODE) console.log('Upload failed:', response.status);
@@ -1284,7 +1388,7 @@ const LoanDemographicBusinessDetail = (props) => {
         }
     }
 
-    const postBusinessDetails = (imageID) => {
+    const postBusinessDetails = () => {
 
         var dor = '', doi = '', dobc = '';
 
@@ -1337,10 +1441,11 @@ const LoanDemographicBusinessDetail = (props) => {
                 "purchasesFrequency": purchaseFrequencyLabel,
                 "typeOfPurchasingFacility": typePurchaseLabel,
                 "salesFrequency": salesFrequencyLabel,
+                "udyamDmsId": udyamDmsID,
 
                 "clientBusinessImageGeocodeDetail": [
                     {
-                        "dmsId": imageID,
+                        "dmsId": docID,
                         "image": fileName,
                         "geoCode": "",
                         "isActive": true,
@@ -1393,7 +1498,7 @@ const LoanDemographicBusinessDetail = (props) => {
         }
     };
 
-    const updateBusinessDetails = (imageID) => {
+    const updateBusinessDetails = () => {
 
         if (validate()) {
             showBottomSheet();
@@ -1427,7 +1532,7 @@ const LoanDemographicBusinessDetail = (props) => {
                 "salesFrequency": salesFrequencyLabel,
                 "clientBusinessImageGeocodeDetail": [
                     {
-                        "dmsId": imageID,
+                        "dmsId": docID,
                         "image": fileName,
                         "geoCode": "",
                         "isActive": true,
@@ -1947,7 +2052,7 @@ const LoanDemographicBusinessDetail = (props) => {
             setImageFile(image)
 
             const lastDotIndex = image.path.lastIndexOf('.');
-            var imageName = 'Photo' + '_' + global.leadID;
+            var imageName = 'Photo' + '_' + global.TEMPAPPID;
             if (lastDotIndex !== -1) {
                 // Get the substring from the last dot to the end of the string
                 const fileExtension = image.path.substring(lastDotIndex);
@@ -1955,9 +2060,9 @@ const LoanDemographicBusinessDetail = (props) => {
                 console.log('File extension:', fileExtension);
             }
 
-            setFileType(image.mime)
-            setFileName(imageName)
-            setImageUri(image.path)
+
+            updateImage(image.path, image.mime, imageName)
+
             //setVisible(false)
             props.onChange?.(image);
         })
@@ -1983,9 +2088,8 @@ const LoanDemographicBusinessDetail = (props) => {
                 imageName = imageName + fileExtension;
                 console.log('File extension:', fileExtension);
             }
-            setFileType(image.mime)
-            setFileName(imageName)
-            setImageUri(image.path)
+            updateImage(image.path, image.mime, imageName)
+
             //setVisible(false)
             //setDeleteVisible(false)
             props.onChange?.(image);
@@ -2100,7 +2204,7 @@ const LoanDemographicBusinessDetail = (props) => {
                             </TouchableOpacity>
                             <Text style={{ fontSize: 14, color: Colors.black, marginTop: 7, fontFamily: 'PoppinsRegular' }}>Camera</Text>
                         </View>
-                        <View style={{ width: '30%', alignItems: 'center' }}>
+                        {/* <View style={{ width: '30%', alignItems: 'center' }}>
                             <TouchableOpacity onPress={() => selectImage()} activeOpacity={11}>
                                 <View style={{
                                     width: 53, height: 53, borderRadius: 53, backgroundColor: '#8E44AD',
@@ -2110,7 +2214,7 @@ const LoanDemographicBusinessDetail = (props) => {
                                 </View>
                             </TouchableOpacity>
                             <Text style={{ fontSize: 14, color: Colors.black, marginTop: 7 }}>Gallery</Text>
-                        </View>
+                        </View> */}
 
                     </View>
                 </View>
@@ -2202,6 +2306,7 @@ const LoanDemographicBusinessDetail = (props) => {
                                 returnKey="next"
                                 handleClick={handleClick}
                                 handleReference={handleReference}
+                                length={100}
                             />
                         </View>
                     )}
@@ -2223,18 +2328,42 @@ const LoanDemographicBusinessDetail = (props) => {
                                 />
                             </View>
 
-                            <TextInputComp
-                                textValue={urmNumber}
-                                textStyle={Commonstyles.textinputtextStyle}
-                                type="email-address"
-                                Disable={urmNumberDisable}
-                                ComponentName="URMNumber"
-                                reference={urmNumberRef}
-                                returnKey="next"
-                                handleClick={handleClick}
-                                autocapital={'characters'}
-                                handleReference={handleReference}
-                            />
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    width: '90%',
+                                    alignSelf: 'center',
+                                }}>
+                                <TextInputComp
+                                    textValue={urmNumber}
+                                    textStyle={Commonstyles.textinputtextStyle}
+                                    type="email-address"
+                                    Disable={urmNumberDisable}
+                                    ComponentName="URMNumber"
+                                    reference={urmNumberRef}
+                                    returnKey="next"
+                                    handleClick={handleClick}
+                                    autocapital={'characters'}
+                                    handleReference={handleReference}
+                                />
+
+                                {udyamDmsID &&
+                                    <View
+                                        style={{
+                                            width: '20%',
+                                            marginTop: 3,
+                                            paddingHorizontal: 0,
+                                            borderBottomWidth: 1,
+                                            borderBottomColor: '#e2e2e2',
+                                            color: 'darkblue',
+                                            justifyContent: 'center',
+                                        }}>
+                                        <Feather name='eye' color={Colors.darkblue} size={20} onPress={getUdyamImage} />
+                                    </View>
+                                }
+
+                            </View>
+
                         </View>
                     )}
 
@@ -2569,6 +2698,7 @@ const LoanDemographicBusinessDetail = (props) => {
                                 returnKey="next"
                                 handleClick={handleClick}
                                 handleReference={handleReference}
+                                length={1}
                             />
                         </View>
                     )}
@@ -2697,6 +2827,7 @@ const LoanDemographicBusinessDetail = (props) => {
                                 returnKey="next"
                                 handleClick={handleClick}
                                 handleReference={handleReference}
+                                length={2}
                             />
                         </View>
                     )}
@@ -2728,6 +2859,7 @@ const LoanDemographicBusinessDetail = (props) => {
                                 returnKey="next"
                                 handleClick={handleClick}
                                 handleReference={handleReference}
+                                length={3}
                             />
                         </View>
                     )}

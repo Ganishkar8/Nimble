@@ -18,6 +18,7 @@ import { language } from '../../Utils/LanguageString';
 import Loading from '../../Components/Loading';
 import ChildHeadComp from '../../Components/ChildHeadComp';
 import ProgressComp from '../../Components/ProgressComp';
+import Entypo from 'react-native-vector-icons/Entypo';
 import Colors from '../../Utils/Colors';
 import Commonstyles from '../../Utils/Commonstyles';
 import IconButtonViewComp from '../../Components/IconButtonViewComp';
@@ -44,6 +45,7 @@ const PdMainScreen = (props, { navigation }) => {
     const [apiError, setApiError] = useState('');
     const [allCompleted, setAllCompleted] = useState(false);
     const [psDtatusData, setPDStatusData] = useState(false);
+    const [grntrClientID, setGrntrClientID] = useState('');
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
@@ -90,6 +92,12 @@ const PdMainScreen = (props, { navigation }) => {
                 if (response.status == 200) {
                     //setClientData(response.data)
                     getClientSubStageData(response.data);
+                    if (response.data) {
+                        const guarantorDetail = response.data.filter(item => item.clientType == 'GRNTR')
+                        if (guarantorDetail) {
+                            setGrntrClientID(guarantorDetail[0]?.clientId)
+                        }
+                    }
                 }
                 else if (response.data.statusCode === 201) {
                     setLoading(false)
@@ -270,17 +278,17 @@ const PdMainScreen = (props, { navigation }) => {
             });
     }
 
-    const buttonNext = () => {
-        updateLoanStatus();
+    const buttonNext = (status) => {
+        updateLoanStatus(status);
     }
 
-    const updateLoanStatus = () => {
+    const updateLoanStatus = (status) => {
 
         const appDetails = {
             loanApplicationId: global.LOANAPPLICATIONID,
             loanWorkflowStage: 'PD',
             subStageCode: global.PDSTAGE,
-            status: 'Completed',
+            status: status,
         };
         const baseURL = global.PORT1;
         setLoading(true);
@@ -403,6 +411,8 @@ const PdMainScreen = (props, { navigation }) => {
             });
     };
 
+
+
     const listView = ({ item }) => {
 
         var bg = ''; clientTypeName = ''
@@ -480,79 +490,82 @@ const PdMainScreen = (props, { navigation }) => {
 
             {loading ? <Loading /> : null}
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
-
-            <View
-                style={{
-                    width: '100%',
-                    height: 56,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                }}>
-                <HeadComp
-                    textval={language[0][props.language].str_pd}
-                    props={props}
-                    onGoBack={onGoBack}
-                />
-            </View>
-
-            <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
-                <View style={{ width: '90%', marginTop: 3 }}>
-                    <TextComp
-                        textStyle={{
-                            color: Colors.darkblack,
-                            fontSize: 15,
-                            fontFamily: 'Poppins-Medium'
-                        }}
-                        textVal={
-                            listData.subStageName
-                        }></TextComp>
-                </View>
-            </View>
-
-            <View>
-                <FlatList
-                    data={clientData}
-                    renderItem={listView}
-                    showsVerticalScrollIndicator={false}
-                    keyExtractor={(item, index) => index.toString()} />
-
-            </View>
-
-            <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
-                <View
-                    style={{
-                        width: '90%',
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        marginTop: 20,
-                    }}>
-
-                    <View style={{ width: '90%', marginLeft: 15 }}>
-                        <Text style={{ color: Colors.dimmText, textAlign: 'left', fontFamily: 'PoppinsRegular' }}>
-                            {language[0][props.language].str_loandetails}
-                        </Text>
-                    </View>
-                    <TouchableOpacity style={{ width: '10%' }}
-                        activeOpacity={8} onPress={() => {
-                            if (showAllData) {
-                                setShowAllData(false)
-                            } else {
-                                setShowAllData(true)
-                            }
-                        }}>
-                        <View >
-                            {showAllData ?
-                                <AntDesign name='up' size={20} color={Colors.black} /> :
-                                <AntDesign name='down' size={20} color={Colors.black} />
-                            }
-
-                        </View>
-                    </TouchableOpacity>
-                </View>
-            </View>
             <ScrollView showsVerticalScrollIndicator={false}>
                 <View>
+
+                    <View
+                        style={{
+                            width: '100%',
+                            height: 56,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}>
+                        <HeadComp
+                            textval={language[0][props.language].str_pd}
+                            props={props}
+                            onGoBack={onGoBack}
+                        />
+                    </View>
+
+                    <View style={{ width: '100%', alignItems: 'center', marginTop: '3%' }}>
+                        <View style={{ width: '90%', marginTop: 3 }}>
+                            <TextComp
+                                textStyle={{
+                                    color: Colors.darkblack,
+                                    fontSize: 15,
+                                    fontFamily: 'Poppins-Medium'
+                                }}
+                                textVal={
+                                    listData.subStageName
+                                }></TextComp>
+                        </View>
+                    </View>
+
+                    <View>
+                        <FlatList
+                            data={clientData}
+                            renderItem={listView}
+                            showsVerticalScrollIndicator={false}
+                            keyExtractor={(item, index) => index.toString()} />
+
+                    </View>
+
+                    <View style={{ width: '100%', alignItems: 'center', }}>
+                        <View
+                            style={{
+                                width: '100%',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                marginTop: 20,
+                            }}>
+
+                            <TouchableOpacity activeOpacity={0.5} style={{ width: '100%', marginTop: '8%', alignItems: 'center' }}
+                                onPress={() => {
+                                    if (showAllData) {
+                                        setShowAllData(false)
+                                    } else {
+                                        setShowAllData(true)
+                                    }
+                                }}>
+                                <View style={{ flexDirection: 'row' }}>
+
+                                    <View style={{ width: '52%', justifyContent: 'center' }}>
+                                        <Text style={styles.textStyle}>{language[0][props.language].str_loandetails}</Text>
+                                    </View>
+
+                                    <View style={{ width: '30%' }}></View>
+                                    {showAllData ?
+                                        <Entypo name='chevron-up' size={23} color={Colors.black} /> :
+                                        <Entypo name='chevron-down' size={23} color={Colors.black} />
+                                    }
+
+                                </View>
+                                {/* <View style={{ width: '90%', height: .9, backgroundColor: Colors.line, marginTop: 13 }} /> */}
+                            </TouchableOpacity>
+
+                        </View>
+                    </View>
 
                     {showAllData ?
                         <View>
@@ -730,20 +743,65 @@ const PdMainScreen = (props, { navigation }) => {
                         </View>
                         : null}
 
-                </View>
-            </ScrollView>
+                    {global.PDSTAGE != 'PD_1' &&
+                        <View style={{ flexDirection: 'column' }}>
+                            <TouchableOpacity activeOpacity={0.5} style={{ width: '100%', marginTop: '8%', alignItems: 'center' }}
+                                onPress={() => { props.navigation.navigate('PDFoir', { header: language[0][props.language].str_combinedfoir, clientId: '' }) }}>
+                                <View style={{ flexDirection: 'row' }}>
 
-            {!showAllData && allCompleted &&
-                <ButtonViewComp
-                    textValue={language[0][props.language].str_submit.toUpperCase()}
-                    textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
-                    viewStyle={[Commonstyles.buttonView, { marginBottom: 20 }]}
-                    innerStyle={Commonstyles.buttonViewInnerStyle}
-                    handleClick={buttonNext}
-                />
-            }
+                                    <View style={{ width: '52%', justifyContent: 'center' }}>
+                                        <Text style={styles.textStyle}>{language[0][props.language].str_combinedfoir}</Text>
+                                    </View>
 
-            {/* <View style={{ width: '100%', alignItems: 'center', marginTop: '3%', justifyContent: 'center', marginBottom: 5 }}>
+                                    <View style={{ width: '30%' }}></View>
+                                    <Entypo name='chevron-right' size={23} color={Colors.darkblack} />
+
+                                </View>
+                                {/* <View style={{ width: '90%', height: .9, backgroundColor: Colors.line, marginTop: 13 }} /> */}
+                            </TouchableOpacity>
+
+                            {grntrClientID &&
+
+                                <TouchableOpacity activeOpacity={0.5} style={{ width: '100%', marginTop: '8%', alignItems: 'center', marginBottom: 20 }}
+                                    onPress={() => { props.navigation.navigate('PDFoir', { header: language[0][props.language].str_individualfoir, clientId: grntrClientID }) }}>
+                                    <View style={{ flexDirection: 'row' }}>
+
+                                        <View style={{ width: '52%', justifyContent: 'center' }}>
+                                            <Text style={styles.textStyle}>{language[0][props.language].str_individualfoir}</Text>
+                                        </View>
+
+                                        <View style={{ width: '30%' }}></View>
+                                        <Entypo name='chevron-right' size={23} color={Colors.darkblack} />
+
+                                    </View>
+                                    {/* <View style={{ width: '90%', height: .9, backgroundColor: Colors.line, marginTop: 13 }} /> */}
+                                </TouchableOpacity>
+                            }
+
+                        </View>
+                    }
+
+                    {!showAllData && allCompleted &&
+                        <ButtonViewComp
+                            textValue={language[0][props.language].str_submit.toUpperCase()}
+                            textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
+                            viewStyle={[Commonstyles.buttonView, { marginBottom: 20 }]}
+                            innerStyle={Commonstyles.buttonViewInnerStyle}
+                            handleClick={() => { buttonNext('Completed') }}
+                        />
+                    }
+
+                    {!showAllData && !allCompleted && !(global.PDSTAGE == 'PD_1') && (props.route.params.PDData.status != 'Rejected') &&
+                        <ButtonViewComp
+                            textValue={language[0][props.language].str_reject.toUpperCase()}
+                            textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
+                            viewStyle={[Commonstyles.buttonView, { marginBottom: 20 }]}
+                            innerStyle={Commonstyles.buttonViewInnerStyle}
+                            handleClick={() => { buttonNext('Rejected') }}
+                        />
+                    }
+
+                    {/* <View style={{ width: '100%', alignItems: 'center', marginTop: '3%', justifyContent: 'center', marginBottom: 5 }}>
                 <View style={{ width: '90%', flexDirection: 'row', justifyContent: 'space-between' }}>
                     <View style={{
                         width: '45%', height: 45, backgroundColor: Colors.darkblue,
@@ -772,6 +830,9 @@ const PdMainScreen = (props, { navigation }) => {
                 </View>
             </View> */}
 
+                </View>
+            </ScrollView>
+
 
         </SafeAreaView >
     );
@@ -798,3 +859,110 @@ const mapDispatchToProps = dispatch => ({
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(PdMainScreen);
+
+
+const styles = StyleSheet.create({
+
+    container: {
+        flex: 1,
+        backgroundColor: '#f5f8fa',
+        alignItems: 'center'
+    },
+    parentView: {
+        flex: 1,
+    },
+    scrollView: {
+        flex: 1,
+    },
+    contentContainer: {
+        paddingBottom: 50,
+        flexGrow: 1
+    },
+    headerView: {
+        width: '100%',
+        paddingVertical: 15,
+        backgroundColor: 'white',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    viewStyle: {
+        alignItems: 'center',
+        paddingHorizontal: 20, marginLeft: 9, marginRight: 4,
+        borderColor: '#e3e3e3',
+        marginBottom: 4,
+        marginStart: 12,
+        paddingVertical: 7,
+        borderWidth: 1,
+        borderRadius: 8,
+    },
+    bottomNavigationView: {
+        backgroundColor: '#fff',
+        width: '100%',
+        height: 400,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+    },
+
+    textColor: {
+        color: '#000',
+        fontSize: 14,
+        fontWeight: '400'
+    },
+    viewStyleFilter: {
+        alignItems: 'center', justifyContent: 'center',
+    },
+    viewStyleStatusData: {
+        alignItems: 'center'
+    },
+    picker: {
+        height: 50,
+        width: '85%',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        textAlign: 'center'
+    },
+    pendingbackground: {
+        width: 90, borderColor: Colors.pendingBorder, backgroundColor: Colors.pendingBg, alignItems: 'center', padding: 3, borderRadius: 15, borderWidth: 1, marginRight: 10
+    },
+    approvedbackground: {
+        width: 90, borderColor: Colors.approvedBorder, backgroundColor: Colors.approvedBg, alignItems: 'center', padding: 3, borderRadius: 15, borderWidth: 1, marginRight: 10
+    },
+    rejectedbackground: {
+        width: 90, borderColor: Colors.rejectedBorder, backgroundColor: Colors.rejectedBg, alignItems: 'center', padding: 3, borderRadius: 15, borderWidth: 1, marginRight: 10
+    },
+    draftbackground: {
+        width: 90, borderColor: Colors.lightgrey, backgroundColor: '#f2f2f2', alignItems: 'center', padding: 3, borderRadius: 15, borderWidth: 1, marginRight: 10
+    },
+    line: {
+        backgroundColor: '#f1f1f1', // Change the color as needed
+        height: 1,
+        width: '90%', marginLeft: '5%',
+        marginTop: '5%', alignItems: 'center'         // Adjust the height as needed
+    },
+    disableBg: {
+        width: '88%', height: 50, backgroundColor: Colors.disableBg,
+        borderRadius: 45, alignItems: 'center', justifyContent: 'center'
+    },
+    enableBg: {
+        width: '88%', height: 50, backgroundColor: Colors.enableBg,
+        borderRadius: 45, alignItems: 'center', justifyContent: 'center'
+    }, fab: {
+        position: 'absolute',
+        margin: 0,
+        right: 0,
+        bottom: 12,
+        width: '100%',
+
+    },
+    headText: {
+        color: Colors.dimText, fontSize: 12, marginLeft: 10, fontFamily: 'PoppinsRegular'
+    },
+    childText: {
+        color: Colors.black, fontSize: 12, marginLeft: 10, fontFamily: 'Poppins-Medium'
+    },
+    textStyle: {
+        fontSize: 16, color: Colors.mediumgrey, marginTop: 5, fontFamily: 'PoppinsRegular'
+    }
+
+});

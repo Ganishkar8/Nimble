@@ -66,6 +66,7 @@ import RemarksScreen from '../Screens/Application/ApplicationInitiation/RemarksS
 import LMSLOSDetails from '../Screens/Application/ApplicationInitiation/LMSLOSDetails';
 import ExistingLoanAndCollateralDetails from '../Screens/Application/ApplicationInitiation/ExistingLoanAndCollateralDetails';
 import PreviousDocumentPreview from '../Screens/PD/PreviousDocumentPreview';
+import PDFoir from '../Screens/PD/PDFoir';
 
 const Stack = createNativeStackNavigator();
 
@@ -461,6 +462,12 @@ export default HomeStack = () => {
       <Stack.Screen
         name="PreviousDocumentPreview"
         component={PreviousDocumentPreview}
+        options={{ headerShown: false, tabBarVisible: false }}
+      />
+
+      <Stack.Screen
+        name="PDFoir"
+        component={PDFoir}
         options={{ headerShown: false, tabBarVisible: false }}
       />
 

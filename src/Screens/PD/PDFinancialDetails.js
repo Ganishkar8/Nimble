@@ -126,6 +126,7 @@ const PDFinancialDetails = (props, { navigation }) => {
     const [bankUserCodeDetail, setBankUserCodeDetail] = useState(props.mobilecodedetail.t_BankUserCode);
     const [systemMandatoryField, setSystemMandatoryField] = useState(props.mobilecodedetail.processSystemMandatoryFields);
     const [errorModalVisible, setErrorModalVisible] = useState(false);
+    const [foirVisible, setFoirVisible] = useState(false);
     const [apiError, setApiError] = useState('');
 
     const [currentPageId, setCurrentPageId] = useState(props.route.params.pageId);
@@ -136,6 +137,12 @@ const PDFinancialDetails = (props, { navigation }) => {
     const [currentItem, setCurrentItem] = useState([]);
     const [parentFinancialId, setParentFinancialId] = useState(0);
 
+    const [netIncome, setNetIncome] = useState('');
+    const [balanceFund, setBalanceFund] = useState('');
+    const [emiAmount, setEmiAmount] = useState('');
+    const [excessFund, setExcessFund] = useState('');
+    const [foir, setFoir] = useState('');
+    const [netProfitMargin, setNetProfitMargin] = useState('');
 
     useEffect(() => {
         props.navigation
@@ -147,6 +154,17 @@ const PDFinancialDetails = (props, { navigation }) => {
         getSystemCodeDetail();
         // getSavedData()
         getFinancialData();
+        if (global.PDSTAGE == 'PD_2') {
+            if (global.CLIENTTYPE == 'APPL' || global.CLIENTTYPE == 'GRNTR') {
+                setFoirVisible(true);
+                callFOIRCalculation('PD_1', 'PD_2')
+            }
+        } else if (global.PDSTAGE == 'PD_3') {
+            if (global.CLIENTTYPE == 'APPL' || global.CLIENTTYPE == 'GRNTR') {
+                setFoirVisible(true);
+                callFOIRCalculation('PD_2', 'PD_3')
+            }
+        }
 
         if (global.USERTYPEID == 1163) {
             setEarningFrequencyDisable(true);
@@ -635,10 +653,10 @@ const PDFinancialDetails = (props, { navigation }) => {
                 "pdLevel": global.PDSTAGE,
                 "earningType": earningTypeLabel,
                 "earningFrequency": earningFrequencyLabel,
-                "totalBusinessIncome": parseInt(totalBusineesIncome),
+                "totalBussinessIncome": parseInt(totalBusineesIncome),
                 "totalOtherSourceIncome": parseInt(totalOtherIncome),
                 "totalAvgMonthlyIncome": parseInt(totalBusineesIncome) + parseInt(totalOtherIncome),
-                "totalBusinessExpense": parseInt(totalBusineesExpenses),
+                "totalBussinessExpense": parseInt(totalBusineesExpenses),
                 "totalOtherSourceExpense": parseInt(totalOtherExpense),
                 "totalAvgMonthlyExpense": parseInt(totalBusineesExpenses) + parseInt(totalOtherExpense),
                 "createdBy": global.USERID,
@@ -686,6 +704,67 @@ const PDFinancialDetails = (props, { navigation }) => {
 
         }
     }
+
+    const callFOIRCalculation = (dataLevel, currentLevel) => {
+
+        const appDetails = {
+
+            "la_no": global.LOANAPPLICATIONID,
+            "current_client": global.CLIENTID,
+            "stage_lv": "PD",
+            "data_level": dataLevel,
+            "current_level": currentLevel
+        };
+        const baseURL = global.PORT1;
+        setLoading(true);
+        apiInstance(baseURL)
+            .post(`/api/v2/PD/Update/FoirCalculation`, appDetails)
+            .then(async response => {
+                // Handle the response data
+                if (global.DEBUG_MODE)
+                    console.log(
+                        'FOIRCalculationApiResponse::' + JSON.stringify(response.data),
+                    );
+                setLoading(false);
+                if (response.status == 200) {
+                    setNetIncome(response?.data?.netIncome?.toString() ?? '')
+                    setBalanceFund(response?.data?.balanceFund?.toString() ?? '')
+                    setEmiAmount(response?.data?.emiAmount?.toString() ?? '')
+                    setExcessFund(response?.data?.excessFund?.toString() ?? '')
+                    setFoir(response?.data?.foirValue?.toString() ?? '')
+                    setNetProfitMargin(response?.data?.netProfitMargin?.toString() ?? '' + '%')
+                }
+                else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
+            })
+            .catch(error => {
+                // Handle the error
+                if (global.DEBUG_MODE)
+                    console.log(
+                        'UpdateStatusApiResponse' + JSON.stringify(error.response),
+                    );
+                setLoading(false);
+
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
+    };
 
     const updatePdStatus = () => {
 

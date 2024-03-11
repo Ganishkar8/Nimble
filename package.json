@@ -9,9 +9,7 @@
     "start": "react-native start",
     "test": "jest"
   },
-
-
- "dependencies": {
+  "dependencies": {
     "@react-native-async-storage/async-storage": "^1.19.3",
     "@react-native-community/checkbox": "^0.5.16",
     "@react-native-community/datetimepicker": "^7.6.0",
@@ -60,7 +58,6 @@
     "redux-persist-transform-encrypt": "^4.0.0",
     "redux-thunk": "^2.4.2"
   },
-
   "devDependencies": {
     "@babel/core": "^7.20.0",
     "@babel/preset-env": "^7.20.0",

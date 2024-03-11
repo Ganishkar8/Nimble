@@ -305,6 +305,14 @@ export const language = [
       str_currentHouseImage: 'Current House Visit Image',
       str_prevBusinessImage: 'Pervious Business Visit Image',
       str_currentBusinessImage: 'Current Business Visit Image',
+      str_netincome: 'NET INCOME',
+      str_balancefund: 'BALANCE FUND AVAILABLE FOR EMI PAYMENT',
+      str_emiamount: 'EMI',
+      str_excessfund: 'EXCESS FUND',
+      str_foir: 'FOIR',
+      str_netProfitMargin: 'NET PROFIT MARGIN',
+      str_combinedfoir: 'Combined FOIR',
+      str_individualfoir: 'Individual FOIR',
     },
 
     ta: {

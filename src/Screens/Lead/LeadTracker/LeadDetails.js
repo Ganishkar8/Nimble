@@ -484,22 +484,23 @@ const LeadDetails = (props, { navigation, route }) => {
 
                 </View>
 
+                {!leadTrackerData?.loanApplicationId &&
+                    <View
+                        style={{
+                            width: '100%',
+                            height: 50,
+                            marginTop: 40,
+                            justifyContent: 'flex-end',
+                            alignItems: 'center',
+                        }}>
+                        <TouchableOpacity activeOpacity={0.8} onPress={initiateLoanApplication} style={global.USERTYPEID == '1163' ? Commonstyles.disableBg : leadStatus == 'APPROVED' ? Commonstyles.buttonViewInnerStyle : Commonstyles.disableBg}>
+                            <View >
+                                <TextComp textVal={language[0][props.language].str_initiateloanapplication.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13, fontFamily: 'Poppins-SemiBold', letterSpacing: 0.5 }} />
 
-                <View
-                    style={{
-                        width: '100%',
-                        height: 50,
-                        marginTop: 40,
-                        justifyContent: 'flex-end',
-                        alignItems: 'center',
-                    }}>
-                    <TouchableOpacity activeOpacity={0.8} onPress={initiateLoanApplication} style={global.USERTYPEID == '1163' ? Commonstyles.disableBg : leadStatus == 'APPROVED' ? Commonstyles.buttonViewInnerStyle : Commonstyles.disableBg}>
-                        <View >
-                            <TextComp textVal={language[0][props.language].str_initiateloanapplication.toUpperCase()} textStyle={{ color: Colors.white, fontSize: 13, fontFamily: 'Poppins-SemiBold', letterSpacing: 0.5 }} />
-
-                        </View>
-                    </TouchableOpacity>
-                </View>
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                }
 
             </ScrollView>
         </SafeAreaView >

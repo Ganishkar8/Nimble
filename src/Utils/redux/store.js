@@ -15,18 +15,29 @@ const encryptor = encryptTransform({
 const persistConfig = {
     key: 'root',
     storage: AsyncStorage,
-    transforms: [encryptor]
+    transforms: [encryptor],
+    blacklist: ['mobilecodeReducer'],
 }
+
+
 
 const persistedReducer = persistReducer(persistConfig, rootReducer)
 
 
-//const store = createStore(rootReducer, applyMiddleware(thunk));
+const serializableCheckMiddleware = store => next => action => {
+    // Replace 'MobileCodeAction' with the action type of the reducer you want to skip the check for
+    if (action.type === 'MobileCodeAction') {
+        return next(action);
+    }
+    return next(action);
+};
 
+// Create the Redux store with middleware
 export default () => {
-    let store = createStore(persistedReducer, applyMiddleware(thunk))
-    let persistor = persistStore(store)
-    return { store, persistor }
-}
+    // Apply the serializableCheckMiddleware to the specific reducers you want
+    let store = createStore(persistedReducer, applyMiddleware(thunk, serializableCheckMiddleware));
+    let persistor = persistStore(store);
+    return { store, persistor };
+};
 
 //export default store;

@@ -305,7 +305,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
 
   const [aadharModalVisible, setAadharModalVisible] = useState(false);
 
-  const [isPageCompleted, setIsPageCompleted] = useState(false);
+  const [isRejected, setIsRejected] = useState(false);
 
   useEffect(() => {
 
@@ -409,6 +409,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     getSystemCodeDetail();
     hideFields();
     getApplicantData();
+    getRejectedStatus();
   }, [props.navigation]);
 
   useEffect(() => {
@@ -505,6 +506,25 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     };
   }, [isScreenVisible]);
 
+
+  const getRejectedStatus = () => {
+    if (global.TRACKERSTATUSDATA && global.TRACKERSTATUSDATA?.length > 0) {
+      const filterLNAPP = global.TRACKERSTATUSDATA.loanApplicationStatus.filter((data) => data.loanWorkflowStage === 'LN_APP_INITIATION');
+      const filterSubStage = filterLNAPP[0].subStageLog.filter((data) => data.subStageCode === 'PRF_SHRT');
+      const filtermodule = filterSubStage[0].moduleLog.filter((data) => data.moduleCode === 'PRF_SHRT_APLCT');
+      const filterPage = filtermodule[0].pageLog.filter((data) => data.pageCode === 'PRF_SHRT_APLCT_BSC_DTLS');
+
+      if (filterPage) {
+        if (filterPage[0].pageStatus == 'Rejected') {
+          setIsRejected(true);
+        } else {
+          setIsRejected(false);
+        }
+
+      }
+    }
+  }
+
   const getApplicantData = async () => {
     // Filter data based on loan application number
     const filteredData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID));
@@ -558,6 +578,31 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
         }
       }
     } else {
+      if (global.INITIATETRACKERDATA.length > 0) {
+        const leadBasicData = global.INITIATETRACKERDATA[0].leadCreationBasicDetails;
+        const leadBusinessData = global.INITIATETRACKERDATA[0].leadCreationBusinessDetails;
+        const leadLoanData = global.INITIATETRACKERDATA[0].leadCreationLoanDetails;
+
+        setLeadID(global.INITIATETRACKERDATA[0]?.id?.toString());
+        setLeadIDVisible(true);
+        setName(leadBasicData.firstName + ' ' + leadBasicData.middleName + ' ' + leadBasicData.lastName);
+        setGenderLabel(leadBasicData.gender);
+        setTitleLabel(leadBasicData.title);
+        setMobileNumber(leadBasicData.mobileNumber);
+        setCustCatgLabel(leadBasicData.customerCategory)
+        setLoanTypeLabel(leadLoanData.loanType);
+        getProductID(leadLoanData.loanType);
+        getWorkFlowID(
+          leadLoanData.loanType,
+          leadLoanData.loanProduct,
+          leadBasicData.customerCategory,
+        );
+
+        setProductTypeLabel(leadLoanData.loanProduct);
+        setLoanAmount(leadLoanData?.loanAmount?.toString() ?? '')
+
+        console.log("inititateTracker" + JSON.stringify(global.INITIATETRACKERDATA))
+      }
       if (global.DEBUG_MODE) console.log("Loan application number not found.");
     }
 
@@ -1436,7 +1481,6 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
         isMobileNumberVerified: true,
         isMsme: chkMsme,
         isEmailVerified: false,
-        isPanVerified: false,
         dedupeCheck: true,
         isKycManual: aadhar ? false : true,
       }
@@ -1588,9 +1632,9 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
               isAadharNumberVerified: false,
               udyamRegistrationNumberVerified: false,
               isMobileNumberVerified: true,
+              mobileNumberVerifiedTime: new Date(),
               isMsme: chkMsme,
               isEmailVerified: false,
-              isPanVerified: false,
               isAadharVerificationMandatory: false,
               dedupeCheck: isDedupeDone,
               clientAddress: [],
@@ -1635,9 +1679,9 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
               isAadharNumberVerified: false,
               udyamRegistrationNumberVerified: false,
               isMobileNumberVerified: true,
+              mobileNumberVerifiedTime: new Date(),
               isMsme: chkMsme,
               isEmailVerified: false,
-              isPanVerified: false,
               dedupeCheck: isDedupeDone,
               clientAddress: [],
               clientBankDetail: [],
@@ -1672,10 +1716,16 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
             if (global.CLIENTTYPE == 'APPL') {
               global.CLIENTID = response.data.clientDetail[0].id;
               addInRedux(response.data)
+            } else if (global.CLIENTTYPE == 'CO_APPL') {
+              global.CLIENTID = response.data[0].id;
+              props.updateClientDetails(global.LOANAPPLICATIONID, response.data.clientDetails[0].id, 'clientDetail', response.data.clientDetails[0])
+              props.updateClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'nominee', response.data.nominee[0])
+              props.updateClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'familyDetail', response.data.familyDetail[0])
             } else {
               global.CLIENTID = response.data[0].id;
               props.updateClientDetails(global.LOANAPPLICATIONID, response.data[0].id, 'clientDetail', response.data[0])
             }
+
 
             if (global.isDedupeDone == '1') {
               if (global.CLIENTTYPE == 'APPL') {
@@ -3886,6 +3936,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
                 returnKey="next"
                 handleClick={handleClick}
                 handleReference={handleReference}
+                length={30}
               />
             </View>
           )}
@@ -4509,17 +4560,19 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           />
         }
 
-        <ButtonViewComp
-          textValue={
-            global.isDedupeDone == '1'
-              ? language[0][props.language].str_next.toUpperCase()
-              : language[0][props.language].str_dedupecheck.toUpperCase()
-          }
-          textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
-          viewStyle={Commonstyles.buttonView}
-          innerStyle={Commonstyles.buttonViewInnerStyle}
-          handleClick={postBasicDetails}
-        />
+        {!isRejected &&
+          <ButtonViewComp
+            textValue={
+              global.isDedupeDone == '1'
+                ? language[0][props.language].str_next.toUpperCase()
+                : language[0][props.language].str_dedupecheck.toUpperCase()
+            }
+            textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
+            viewStyle={Commonstyles.buttonView}
+            innerStyle={Commonstyles.buttonViewInnerStyle}
+            handleClick={postBasicDetails}
+          />
+        }
       </ScrollView>
     </SafeAreaView>
   );

@@ -178,7 +178,6 @@ const BankRegistration = (props, { navigation }) => {
 
         if (global.DEBUG_MODE) {
             requestWritePermission
-            writeToFile('vanka,111111111!')
         }
 
 

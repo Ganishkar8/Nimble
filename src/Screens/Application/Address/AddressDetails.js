@@ -457,10 +457,12 @@ const AddressDetails = (props, { navigation }) => {
       setYearsAtCityVisible(false);
       setYearsAtResidenceMan(false);
     }
-    if (data.isEkyc || data.isLms) {
-      setAddressTypeDisable(true);
-    } else {
-      setAddressTypeDisable(false);
+    if (!(global.ALLOWEDIT == "0")) {
+      if (data.isEkyc || data.isLms) {
+        setAddressTypeDisable(true);
+      } else {
+        setAddressTypeDisable(false);
+      }
     }
     setGeoClassificationLabel(data.geoClassification)
     setAddressOwnerTypeLabel(data.addressOwnership)
@@ -602,16 +604,25 @@ const AddressDetails = (props, { navigation }) => {
             if (global.USERTYPEID == 1163) {
               setOnlyView(true);
               fieldsDisable();
+              setHideRetake(true);
+              setHideDelete(true);
+              setActionTypeDisable(true);
             } else {
               if (global.ALLOWEDIT == "0") {
                 setOnlyView(true);
                 fieldsDisable();
+                setHideRetake(true);
+                setHideDelete(true);
+                setActionTypeDisable(true);
               }
             }
           } else {
             if (global.ALLOWEDIT == "0") {
               setOnlyView(true);
+              setActionTypeDisable(true);
               fieldsDisable();
+              setHideRetake(true);
+              setHideDelete(true);
             }
             setKYCManual('1');
           }
@@ -622,6 +633,9 @@ const AddressDetails = (props, { navigation }) => {
             if (clientDetail.clientManualKycLink[0].manualKycStatus == 'Approved') {
               fieldsDisable();
               setOnlyView(true);
+              setHideRetake(true);
+              setHideDelete(true);
+              setActionTypeDisable(true);
             }
 
             if (clientDetail.clientManualKycLink[0].clientManualAddresses) {
@@ -1635,8 +1649,14 @@ const AddressDetails = (props, { navigation }) => {
         setLandmark(textValue)
       }
     } else if (componentName === 'pincode') {
+      if (textValue.length > 0) {
+        if (Common.numberRegex.test(textValue)) setPincode(textValue);
+        //setYearsAtResidence(textValue)
+      } else {
+        setPincode(textValue)
+      }
       if (textValue.length == 6) {
-        getPinCode(textValue)
+        if (Common.numberRegex.test(textValue)) getPinCode(textValue)
       } else {
         setPincodeResponse('');
         setDistrict('');
@@ -1646,7 +1666,7 @@ const AddressDetails = (props, { navigation }) => {
         setStateDisable(false);
         setCountryDisable(false);
       }
-      setPincode(textValue)
+
     } else if (componentName === 'city') {
       if (textValue.length > 0) {
         if (Common.isValidText(textValue))
@@ -1677,13 +1697,15 @@ const AddressDetails = (props, { navigation }) => {
       }
     } else if (componentName === 'YearAtResidence') {
       if (textValue.length > 0) {
-        setYearsAtResidence(textValue)
+        if (Common.numberRegex.test(textValue)) setYearsAtResidence(textValue);
+        //setYearsAtResidence(textValue)
       } else {
         setYearsAtResidence(textValue)
       }
     } else if (componentName === 'YearAtCity') {
       if (textValue.length > 0) {
-        setYearsAtCity(textValue)
+        //setYearsAtCity(textValue)
+        if (Common.numberRegex.test(textValue)) setYearsAtCity(textValue);
       } else {
         setYearsAtCity(textValue)
       }

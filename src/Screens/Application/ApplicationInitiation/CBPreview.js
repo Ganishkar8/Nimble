@@ -12,6 +12,10 @@ import {
     BackHandler
 } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
+import HeadComp from '../../../Components/HeadComp';
+import { language } from '../../../Utils/LanguageString';
+import { languageAction } from '../../../Utils/redux/actions/languageAction';
+import { connect } from 'react-redux';
 
 const CBPreview = (props) => {
     const [htmlContent, setHtmlContent] = useState(props.route.params.htmlcontent);
@@ -37,12 +41,45 @@ const CBPreview = (props) => {
     }
 
     return (
-        <WebView
-            originWhitelist={['*']}
-            source={{ html: htmlContent }}
-            style={{ flex: 1 }}
-        />
+        <View style={{ flex: 1 }}>
+            <View
+                style={{
+                    width: '100%',
+                    height: 56,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: '#fff'
+                }}>
+
+                <HeadComp
+                    textval={props.route.params.header + ' : CB Report'}
+                    props={props}
+                    onGoBack={onGoBack}
+                />
+            </View>
+            <WebView
+                originWhitelist={['*']}
+                source={{ html: htmlContent }}
+                style={{ flex: 1 }}
+            />
+        </View>
     );
 };
 
-export default CBPreview;
+const mapStateToProps = state => {
+    const { language } = state.languageReducer;
+
+    return {
+        language: language,
+
+    };
+};
+
+const mapDispatchToProps = dispatch => ({
+    languageAction: item => dispatch(languageAction(item)),
+});
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps,
+)(CBPreview);

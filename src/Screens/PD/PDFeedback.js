@@ -13,12 +13,12 @@ import {
   Modal,
   ToastAndroid,
 } from 'react-native';
-import {React, useState, useEffect, useRef} from 'react';
+import { React, useState, useEffect, useRef } from 'react';
 import MyStatusBar from '../../Components/MyStatusBar';
 import HeadComp from '../../Components/HeadComp';
-import {connect} from 'react-redux';
-import {languageAction} from '../../Utils/redux/actions/languageAction';
-import {language} from '../../Utils/LanguageString';
+import { connect } from 'react-redux';
+import { languageAction } from '../../Utils/redux/actions/languageAction';
+import { language } from '../../Utils/LanguageString';
 import Loading from '../../Components/Loading';
 import ChildHeadComp from '../../Components/ChildHeadComp';
 import ProgressComp from '../../Components/ProgressComp';
@@ -26,7 +26,7 @@ import Colors from '../../Utils/Colors';
 import Commonstyles from '../../Utils/Commonstyles';
 import Common from '../../Utils/Common';
 import IconButtonViewComp from '../../Components/IconButtonViewComp';
-import {useIsFocused} from '@react-navigation/native';
+import { useIsFocused } from '@react-navigation/native';
 import TextComp from '../../Components/TextComp';
 import ImageComp from '../../Components/ImageComp';
 import Feather from 'react-native-vector-icons/Feather';
@@ -34,7 +34,7 @@ import DateInputComp from '../../Components/DateInputComp';
 import PickerComp from '../../Components/PickerComp';
 import TextInputComp from '../../Components/TextInputComp';
 import ButtonViewComp from '../../Components/ButtonViewComp';
-import {tr} from 'react-native-paper-dates';
+import { tr } from 'react-native-paper-dates';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import ModalContainer from '../../Components/ModalContainer';
@@ -54,7 +54,7 @@ import {
   updatePDPage,
 } from '../../Utils/redux/actions/PDAction';
 
-const PDFeedback = (props, {navigation}) => {
+const PDFeedback = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
   const [pdDetails, setPdDetails] = useState([]);
   const [refreshFlatlist, setRefreshFlatList] = useState(false);
@@ -141,7 +141,7 @@ const PDFeedback = (props, {navigation}) => {
   useEffect(() => {
     props.navigation
       .getParent()
-      ?.setOptions({tabBarStyle: {display: 'none'}, tabBarVisible: false});
+      ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       handleBackButton,
@@ -154,7 +154,7 @@ const PDFeedback = (props, {navigation}) => {
     return () => {
       props.navigation
         .getParent()
-        ?.setOptions({tabBarStyle: undefined, tabBarVisible: undefined});
+        ?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
       backHandler.remove();
     };
   }, [props.navigation, isScreenVisible]);
@@ -175,6 +175,27 @@ const PDFeedback = (props, {navigation}) => {
       pdLevel: global.PDSTAGE,
       loanApplicationNumber: global.LOANAPPLICATIONNUM,
     };
+
+    if (global.CLIENTTYPE == 'APPL') {
+      if (global.PDSTAGE == 'PD_2') {
+        appDetails.previousPage = 13;
+      } else if (global.PDSTAGE == 'PD_3') {
+        appDetails.previousPage = 50;
+      }
+    } else if (global.CLIENTTYPE == 'CO-APPL') {
+      if (global.PDSTAGE == 'PD_2') {
+        appDetails.previousPage = 25;
+      } else if (global.PDSTAGE == 'PD_3') {
+        appDetails.previousPage = 62;
+      }
+    } else if (global.CLIENTTYPE == 'GRNTR') {
+      if (global.PDSTAGE == 'PD_2') {
+        appDetails.previousPage = 37;
+      } else if (global.PDSTAGE == 'PD_3') {
+        appDetails.previousPage = 74;
+      }
+    }
+
 
     apiInstance(baseURL)
       .post(`/api/v1/pd/PDFeedback`, appDetails)
@@ -363,7 +384,7 @@ const PDFeedback = (props, {navigation}) => {
   };
 
   const onGoBack = () => {
-    props.navigation.replace('PDItems', {clientType: global.CLIENTTYPE});
+    props.navigation.replace('PDItems', { clientType: global.CLIENTTYPE });
   };
 
   const submitFeebackData = () => {
@@ -440,16 +461,16 @@ const PDFeedback = (props, {navigation}) => {
     if (Common.DEBUG_MODE)
       console.log(
         'DateOfTravel::' +
-          dateOfTravel +
-          ' ' +
-          ' Mode Of Travel::' +
-          modeOfTravelLabel +
-          ' ' +
-          'Distance Travelled::' +
-          distanceTravelled +
-          ' ' +
-          'Remarks::' +
-          remarks,
+        dateOfTravel +
+        ' ' +
+        ' Mode Of Travel::' +
+        modeOfTravelLabel +
+        ' ' +
+        'Distance Travelled::' +
+        distanceTravelled +
+        ' ' +
+        'Remarks::' +
+        remarks,
       );
   };
 
@@ -530,15 +551,15 @@ const PDFeedback = (props, {navigation}) => {
         global.PDSUBMODULE,
         currentPageCode,
       );
-      props.navigation.replace('PDItems', {clientType: global.CLIENTTYPE});
+      props.navigation.replace('PDItems', { clientType: global.CLIENTTYPE });
     } else {
       if (Common.DEBUG_MODE) console.log('Module not found.');
     }
   };
 
-  const FlatView = ({item}) => {
+  const FlatView = ({ item }) => {
     return (
-      <View style={{width: '100%', alignItems: 'center', marginTop: 15}}>
+      <View style={{ width: '100%', alignItems: 'center', marginTop: 15 }}>
         <View
           style={{
             width: '90%',
@@ -554,9 +575,9 @@ const PDFeedback = (props, {navigation}) => {
                 ? require('../../Images/income.png')
                 : require('../../Images/expense.png')
             }
-            imageStylee={{marginLeft: 10, width: 30, height: 30}}
+            imageStylee={{ marginLeft: 10, width: 30, height: 30 }}
           />
-          <View style={{width: '80%'}}>
+          <View style={{ width: '80%' }}>
             <Text
               style={{
                 width: '80%',
@@ -624,7 +645,7 @@ const PDFeedback = (props, {navigation}) => {
   };
 
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: 'white'}}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
       {loading ? <Loading /> : null}
       <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
 
@@ -648,7 +669,7 @@ const PDFeedback = (props, {navigation}) => {
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled">
-        <View style={{flex: 1}}>
+        <View style={{ flex: 1 }}>
           <View
             style={{
               width: '100%',
@@ -662,15 +683,15 @@ const PDFeedback = (props, {navigation}) => {
               onGoBack={onGoBack}
             />
           </View>
-          <View style={{width: '93%', flexDirection: 'row', marginLeft: 20}}>
+          <View style={{ width: '93%', flexDirection: 'row', marginLeft: 20 }}>
             <TouchableOpacity
               activeOpacity={1}
-              style={{width: '10%', height: 40, justifyContent: 'center'}}>
+              style={{ width: '10%', height: 40, justifyContent: 'center' }}>
               <View>
                 <Feather name="briefcase" size={25} color={Colors.darkblue} />
               </View>
             </TouchableOpacity>
-            <View style={{width: '80%', height: 40, justifyContent: 'center'}}>
+            <View style={{ width: '80%', height: 40, justifyContent: 'center' }}>
               <Text
                 style={{
                   fontSize: 18,
@@ -690,7 +711,7 @@ const PDFeedback = (props, {navigation}) => {
                 alignItems: 'center',
                 marginTop: '4%',
               }}>
-              <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                 <TextComp
                   textVal={riskLevelCaption}
                   textStyle={Commonstyles.inputtextStyle}
@@ -716,7 +737,7 @@ const PDFeedback = (props, {navigation}) => {
                 alignItems: 'center',
                 marginTop: '4%',
               }}>
-              <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                 <TextComp
                   textVal={satisficationScoreCaption}
                   textStyle={Commonstyles.inputtextStyle}
@@ -742,7 +763,7 @@ const PDFeedback = (props, {navigation}) => {
                 alignItems: 'center',
                 marginTop: '4%',
               }}>
-              <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                 <TextComp
                   textVal={politicallyExposedCaption}
                   textStyle={Commonstyles.inputtextStyle}
@@ -770,7 +791,7 @@ const PDFeedback = (props, {navigation}) => {
                 alignItems: 'center',
                 justifyContent: 'center',
               }}>
-              <View style={{width: '90%', marginTop: 3, paddingHorizontal: 0}}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
                 <TextComp
                   textVal={observationCaption}
                   textStyle={Commonstyles.inputtextStyle}
@@ -802,7 +823,7 @@ const PDFeedback = (props, {navigation}) => {
           fontWeight: 500,
           marginBottom: 5,
         }}
-        viewStyle={[Commonstyles.buttonView, {marginBottom: 15}]}
+        viewStyle={[Commonstyles.buttonView, { marginBottom: 15 }]}
         innerStyle={Commonstyles.buttonViewInnerStyle}
         handleClick={submitFeebackData}
       />
@@ -811,11 +832,11 @@ const PDFeedback = (props, {navigation}) => {
 };
 
 const mapStateToProps = state => {
-  const {language} = state.languageReducer;
-  const {profileDetails} = state.profileReducer;
-  const {mobileCodeDetails} = state.mobilecodeReducer;
-  const {pdDetails} = state.personalDiscussionReducer;
-  const {pdSubStages} = state.pdStagesReducer;
+  const { language } = state.languageReducer;
+  const { profileDetails } = state.profileReducer;
+  const { mobileCodeDetails } = state.mobilecodeReducer;
+  const { pdDetails } = state.personalDiscussionReducer;
+  const { pdSubStages } = state.pdStagesReducer;
   return {
     language: language,
     profiledetail: profileDetails,

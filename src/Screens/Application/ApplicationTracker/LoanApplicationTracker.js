@@ -695,6 +695,7 @@ const LeadManagement = (props, { navigation, route }) => {
             <View>
                 <TouchableOpacity onPress={() => {
                     global.LOANSTATUS = item.status.toUpperCase();
+                    global.LOANAPPLICATIONID = item.loanApplicationId;
                     props.navigation.navigate('LoanApplicationTrackerDetails', { leadData: item })
                 }} activeOpacity={0.9}>
                     <View style={{
@@ -1154,6 +1155,7 @@ const LeadManagement = (props, { navigation, route }) => {
                         global.COMPLETEDMODULE = '';
                         global.COMPLETEDPAGE = '';
                         global.COMPLETEDSUBSTAGE = '';
+                        global.STAGESTATUS = "";
                         props.navigation.navigate('ConsentScreen', { leadData: [] });
                     }}
                 />

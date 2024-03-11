@@ -231,6 +231,8 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       if (global.ALLOWEDIT == "0") {
         setOnlyView(true);
         fieldsDisable();
+        setHideRetake(true);
+        setHideDelete(true);
       }
     }
     if (global.USERTYPEID == 1164) {
@@ -696,6 +698,13 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
         setOnlyView(true);
         setHideDelete(true);
         setHideRetake(true);
+      }
+
+      if (global.ALLOWEDIT == "0") {
+        setOnlyView(true);
+        fieldsDisable();
+        setHideRetake(true);
+        setHideDelete(true);
       }
     }
 
@@ -1660,6 +1669,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
                 returnKey="next"
                 handleClick={handleClick}
                 handleReference={handleReference}
+                length={30}
               />
             </View>
           )}
@@ -1691,6 +1701,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
                 returnKey="next"
                 handleClick={handleClick}
                 handleReference={handleReference}
+                length={30}
               />
             </View>
           )}
@@ -1722,6 +1733,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
                 returnKey="next"
                 handleClick={handleClick}
                 handleReference={handleReference}
+                length={30}
               />
             </View>
           )}

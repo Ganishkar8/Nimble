@@ -158,6 +158,7 @@ const LoanApplicationMain = (props, { navigation }) => {
     const [workflowIDLabel, setWorkflowIDLabel] = useState('');
     const [buttonText, setButtonText] = useState('');
     const [cbCheckStatus, setCbCheckStatus] = useState('');
+    const [breStatus, setBREStatus] = useState('');
     const [cbBreCheckStatus, setBreCbCheckStatus] = useState('');
     const [currentStage, setCurrentStage] = useState('');
     const [loading, setLoading] = useState(false);
@@ -220,6 +221,15 @@ const LoanApplicationMain = (props, { navigation }) => {
                     if (filterPage) {
                         setBreCbCheckStatus(filterPage[0].pageStatus);
                     }
+
+                    const filterBreSubStage = filterLNAPP[0].subStageLog.filter((data) => data.subStageCode === 'BRE');
+                    const filterBreModule = filterBreSubStage[0].moduleLog.filter((data) => data.moduleCode === 'BRE');
+                    const filterBrePage = filterBreModule[0].pageLog.filter((data) => data.pageCode === 'BRE_VIEW');
+
+                    if (filterBrePage) {
+                        setBREStatus(filterBrePage[0].pageStatus);
+                    }
+
                     const filterLoan = filterLNAPP[0].subStageLog.filter((data) => data.subStageCode === 'LN_DEMGRP');
                     if (filterLoan[0].subStageStatus == 'Completed') {
                         setIsLoanCompleted(true);
@@ -1078,7 +1088,11 @@ const LoanApplicationMain = (props, { navigation }) => {
                     keyExtractor={(item, index) => index.toString()}
                     renderItem={({ item, index }) => {
                         var gradientColors = '';
-                        if (item.subStageCode == 'CB_CHK' && cbCheckStatus == 'Rejected') {
+                        if (global.STAGESTATUS == 'Completed') {
+                            gradientColors = ['#8EF2CB', '#50C56F', '#3BB650']
+                        } else if (item.subStageCode == 'CB_CHK' && cbCheckStatus == 'Rejected') {
+                            gradientColors = ['#FFC1C1', '#FF6565', '#FF4242'];
+                        } else if (item.subStageCode == 'BRE' && breStatus == 'Rejected') {
                             gradientColors = ['#FFC1C1', '#FF6565', '#FF4242'];
                         } else {
                             gradientColors = item.subStageCode === global.COMPLETEDSUBSTAGE
@@ -1214,8 +1228,8 @@ const LoanApplicationMain = (props, { navigation }) => {
                 />
 
                 {
-                    global.USERTYPEID === 1164 &&
-                    (currentStage !== 'CB_CHK' && (cbCheckStatus !== 'Rejected' || cbCheckStatus !== 'Completed')) && (
+                    global.USERTYPEID === 1164 && global.STAGESTATUS != 'Rejected' && global.STAGESTATUS != 'Completed' &&
+                    (currentStage !== 'CB_CHK' && (cbCheckStatus != 'Rejected' || cbCheckStatus != 'Completed')) && (
                         <ButtonViewComp
                             textValue={buttonText}
                             textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
