@@ -268,31 +268,33 @@ const LoanDemographicFamilyDetails = (props) => {
 
     const fetchFamilyData = () => {
         var data = props.route.params.familyDetails;
-        setFamilyDetailAvailable(true);
-        setFamilyID(data[0].id)
-        setRelationTypeLabel(data[0].relationshipWithApplicant);
-        setTitleLabel(data[0].title);
-        setName(data[0].name);
-        setGenderLabel(data[0].gender);
-        setDOB(Common.convertDateFormat(data[0].dateOfBirth))
-        setAge(data[0].age.toString())
-        setMobileNumber(data[0].mobileNumber)
-        setKycType1Label(data[0].kycTypeId1)
-        setkycID1(data[0].kycIdValue1)
-        setExpiry1Date(data[0].kycType1ExpiryDate)
-        setKycType2Label(data[0].kycTypeId2)
-        setkycID2(data[0].kycIdValue2)
-        setExpiry2Date(data[0].kycType2ExpiryDate)
-        setKycType3Label(data[0].kycTypeId3)
-        setkycID3(data[0].kycIdValue3)
-        setExpiry3Date(data[0].kycType3ExpiryDate)
-        setKycType4Label(data[0].kycTypeId4)
-        setkycID4(data[0].kycIdValue4)
-        setExpiry4Date(data[0].kycType4ExpiryDate)
+        if (data?.length > 0) {
+            setFamilyDetailAvailable(true);
+            setFamilyID(data[0]?.id)
+            setRelationTypeLabel(data[0]?.relationshipWithApplicant);
+            setTitleLabel(data[0]?.title);
+            setName(data[0]?.name);
+            setGenderLabel(data[0]?.gender);
+            setDOB(data[0].dateOfBirth ? Common.convertDateFormat(data[0]?.dateOfBirth) : '')
+            setAge(data[0]?.age?.toString())
+            setMobileNumber(data[0]?.mobileNumber)
+            setKycType1Label(data[0]?.kycTypeId1)
+            setkycID1(data[0]?.kycIdValue1)
+            setExpiry1Date(data[0]?.kycType1ExpiryDate)
+            setKycType2Label(data[0]?.kycTypeId2)
+            setkycID2(data[0]?.kycIdValue2)
+            setExpiry2Date(data[0]?.kycType2ExpiryDate)
+            setKycType3Label(data[0]?.kycTypeId3)
+            setkycID3(data[0]?.kycIdValue3)
+            setExpiry3Date(data[0]?.kycType3ExpiryDate)
+            setKycType4Label(data[0]?.kycTypeId4)
+            setkycID4(data[0]?.kycIdValue4)
+            setExpiry4Date(data[0]?.kycType4ExpiryDate)
 
 
-        setRelationStatuswithCOAPPLabel(data[0].relationshipWithCoApplicant)
-        setRelationStatuswithGRNTRLabel(data[0].relationshipWithGuarantor)
+            setRelationStatuswithCOAPPLabel(data[0]?.relationshipWithCoApplicant)
+            setRelationStatuswithGRNTRLabel(data[0]?.relationshipWithGuarantor)
+        }
     };
 
     useFocusEffect(
@@ -556,7 +558,12 @@ const LoanDemographicFamilyDetails = (props) => {
 
     const makeSystemMandatoryFields = async () => {
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_rlt_type' && data.pageId === pageId).map((value, index) => {
+        const filteredData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID));
+
+        const workFlowId = filteredData[0].workflowId;
+
+
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_rlt_type' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setRelationTypeCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -573,7 +580,7 @@ const LoanDemographicFamilyDetails = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_rlt_typeco' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_rlt_typeco' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setRelationStatuswithCOAPPCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -590,7 +597,7 @@ const LoanDemographicFamilyDetails = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_rlt_typegrntr' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_rlt_typegrntr' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setRelationStatuswithGRNTRCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -607,7 +614,7 @@ const LoanDemographicFamilyDetails = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_gender' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_gender' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setGenderCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -625,7 +632,7 @@ const LoanDemographicFamilyDetails = (props) => {
         });
 
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_title' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_title' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setTitleCaption(value.fieldName)
             if (value.mandatory) {
                 setTitleMan(true);
@@ -641,7 +648,7 @@ const LoanDemographicFamilyDetails = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_name' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_name' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setNameCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -658,7 +665,7 @@ const LoanDemographicFamilyDetails = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_mbl_no' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_mbl_no' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setMobileNumberCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -675,7 +682,7 @@ const LoanDemographicFamilyDetails = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_date_of_birth' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_date_of_birth' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setDOBCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -692,7 +699,7 @@ const LoanDemographicFamilyDetails = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_age' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_age' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setAgeCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -912,7 +919,7 @@ const LoanDemographicFamilyDetails = (props) => {
         }
 
         if (relationTypeMan && relationTypeVisible) {
-            if (relationTypeLabel.length <= 0) {
+            if (!relationTypeLabel) {
                 errorMessage =
                     errorMessage +
                     i +
@@ -927,7 +934,7 @@ const LoanDemographicFamilyDetails = (props) => {
         }
 
         if (titleMan && titleVisible) {
-            if (titleLabel.length <= 0) {
+            if (!titleLabel) {
                 errorMessage =
                     errorMessage +
                     i +
@@ -942,7 +949,7 @@ const LoanDemographicFamilyDetails = (props) => {
         }
 
         if (NameMan && NameVisible) {
-            if (Name.length <= 0) {
+            if (!Name) {
                 errorMessage =
                     errorMessage +
                     i +
@@ -957,7 +964,7 @@ const LoanDemographicFamilyDetails = (props) => {
         }
 
         if (genderMan && genderVisible) {
-            if (genderLabel.length <= 0) {
+            if (!genderLabel) {
                 errorMessage =
                     errorMessage +
                     i +
@@ -972,7 +979,7 @@ const LoanDemographicFamilyDetails = (props) => {
         }
 
         if (DOBMan && DOBVisible) {
-            if (DOB.length <= 0) {
+            if (!DOB) {
                 errorMessage =
                     errorMessage +
                     i +
@@ -987,7 +994,7 @@ const LoanDemographicFamilyDetails = (props) => {
         }
 
         if (AgeMan && AgeVisible) {
-            if (Age.length <= 0) {
+            if (!Age) {
                 errorMessage =
                     errorMessage +
                     i +
@@ -1013,7 +1020,7 @@ const LoanDemographicFamilyDetails = (props) => {
         }
 
         if (mobileNumberMan && mobileNumberVisible) {
-            if (mobileNumber.length <= 0) {
+            if (!mobileNumber) {
                 errorMessage =
                     errorMessage +
                     i +
@@ -1027,7 +1034,7 @@ const LoanDemographicFamilyDetails = (props) => {
             }
         }
 
-        if (mobileNumber.length > 0) {
+        if (mobileNumber?.length > 0) {
             if (!Common.isValidPhoneNumber(mobileNumber)) {
                 errorMessage =
                     errorMessage +
@@ -1043,7 +1050,7 @@ const LoanDemographicFamilyDetails = (props) => {
         }
 
         if (KycType1Man && KycType1Visible) {
-            if (KycType1Label.length <= 0) {
+            if (!KycType1Label) {
                 errorMessage =
                     errorMessage +
                     i +
@@ -1057,8 +1064,8 @@ const LoanDemographicFamilyDetails = (props) => {
             }
         }
 
-        if (KycType1Label.length > 0) {
-            if (kycID1.length <= 0) {
+        if (KycType1Label?.length > 0) {
+            if (!kycID1) {
                 errorMessage =
                     errorMessage +
                     i +
@@ -1073,7 +1080,7 @@ const LoanDemographicFamilyDetails = (props) => {
         }
 
         if (KycType2Man && KycType2Visible) {
-            if (KycType2Label.length <= 0) {
+            if (!KycType2Label) {
                 errorMessage =
                     errorMessage +
                     i +
@@ -1087,8 +1094,8 @@ const LoanDemographicFamilyDetails = (props) => {
             }
         }
 
-        if (KycType2Label.length > 0) {
-            if (kycID2.length <= 0) {
+        if (KycType2Label?.length > 0) {
+            if (!kycID2) {
                 errorMessage =
                     errorMessage +
                     i +
@@ -1118,7 +1125,7 @@ const LoanDemographicFamilyDetails = (props) => {
 
 
         if (KycType1Label == '007') {
-            if (kycID1.length > 0) {
+            if (kycID1?.length > 0) {
                 if (!Common.isValidPAN(kycID1)) {
                     errorMessage =
                         errorMessage +
@@ -1135,7 +1142,7 @@ const LoanDemographicFamilyDetails = (props) => {
         }
 
         if (KycType2Label == '007') {
-            if (kycID2.length > 0) {
+            if (kycID2?.length > 0) {
                 if (!Common.isValidPAN(kycID2)) {
                     errorMessage =
                         errorMessage +
@@ -1152,7 +1159,7 @@ const LoanDemographicFamilyDetails = (props) => {
         }
 
         if (KycType3Label == '007') {
-            if (kycID3.length > 0) {
+            if (kycID3?.length > 0) {
                 if (!Common.isValidPAN(kycID3)) {
                     errorMessage =
                         errorMessage +
@@ -1169,7 +1176,7 @@ const LoanDemographicFamilyDetails = (props) => {
         }
 
         if (KycType4Label == '007') {
-            if (kycID4.length > 0) {
+            if (kycID4?.length > 0) {
                 if (!Common.isValidPAN(kycID4)) {
                     errorMessage =
                         errorMessage +
@@ -1186,7 +1193,7 @@ const LoanDemographicFamilyDetails = (props) => {
         }
 
         if (relationStatuswithCOAPPMan && relationStatuswithCOAPPVisible) {
-            if (relationStatuswithCOAPPLabel.length <= 0) {
+            if (!relationStatuswithCOAPPLabel) {
                 errorMessage =
                     errorMessage +
                     i +
@@ -1201,7 +1208,7 @@ const LoanDemographicFamilyDetails = (props) => {
         }
 
         if (relationStatuswithGRNTRMan && relationStatuswithGRNTRVisible) {
-            if (relationStatuswithGRNTRLabel.length <= 0) {
+            if (!relationStatuswithGRNTRLabel) {
                 errorMessage =
                     errorMessage +
                     i +

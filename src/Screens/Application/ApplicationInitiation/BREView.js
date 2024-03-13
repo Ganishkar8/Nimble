@@ -43,6 +43,7 @@ const BREView = (props, { navigation }) => {
     const [isFailPresent, setIsFailPresent] = useState(false);
     const [isDeviationPresent, setIsDeviationPresent] = useState(false);
     const [onlyView, setOnlyView] = useState(false);
+    const [breStatus, setBreStatus] = useState('');
 
 
     useEffect(() => {
@@ -106,7 +107,7 @@ const BREView = (props, { navigation }) => {
                         return { ...item, ...extraJson };
                     });
                     checkFailOrDeviation(response.data);
-                    setCBResponse(newData)
+                    getcbData(newData);
                 }
 
             })
@@ -140,7 +141,8 @@ const BREView = (props, { navigation }) => {
                         return { ...item, ...extraJson };
                     });
                     checkFailOrDeviation(response.data);
-                    setCBResponse(newData)
+                    getcbData(newData);
+
                 }
             })
             .catch(error => {
@@ -148,6 +150,79 @@ const BREView = (props, { navigation }) => {
                 if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
                 setLoading(false);
                 if (error.response.data != null) {
+                    setApiError(error.response.data.message);
+                    setErrorModalVisible(true)
+                }
+            });
+
+    };
+
+    const getcbData = (breData) => {
+
+        const baseURL = global.PORT1;
+        setLoading(true);
+        apiInstance(baseURL)
+            .get(`/api/v2/getCb/${global.LOANAPPLICATIONID}`)
+            .then(async response => {
+                // Handle the response data
+                if (global.DEBUG_MODE) console.log('CBResponseApiResponse::' + JSON.stringify(response.data),);
+                setLoading(false);
+                if (response.status == 200) {
+
+                    const newdata = breData.map((item) => {
+                        const newDataItem = response.data.find((item1) => item1.clientType === item.clientType);
+                        if (newDataItem) {
+                            return {
+                                ...item,
+                                loanElgResultClientWise: item.loanElgResultClientWise.concat(newDataItem.cbResultClientWise)
+                            };
+                        } else {
+                            // If no corresponding newDataItem is found, return the original item
+                            return item;
+                        }
+                    });
+
+                    const isFailPresent = newdata.map((item) => item.loanElgResultClientWise.some((item1) => {
+                        item1.result == 'Fail'
+                    }))
+                    const isDeviatedPresent = newdata.map((item) => item.loanElgResultClientWise.some((item1) => {
+                        item1.result == 'Deviation'
+                    }))
+
+                    if (isFailPresent) {
+                        setBreStatus('Failed')
+                    } else if (isDeviatedPresent) {
+                        setBreStatus('Deviation')
+                    } else {
+                        setBreStatus('Passed')
+                    }
+
+                    setCBResponse(newdata)
+
+
+                } else if (response.data.statusCode === 201) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                } else if (response.data.statusCode === 202) {
+                    setApiError(response.data.message);
+                    setErrorModalVisible(true);
+                }
+
+            })
+            .catch(error => {
+                // Handle the error
+                if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse' + JSON.stringify(error.response));
+                setLoading(false);
+                if (error.response.status == 404) {
+                    setApiError(Common.error404);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 400) {
+                    setApiError(Common.error400);
+                    setErrorModalVisible(true)
+                } else if (error.response.status == 500) {
+                    setApiError(Common.error500);
+                    setErrorModalVisible(true)
+                } else if (error.response.data != null) {
                     setApiError(error.response.data.message);
                     setErrorModalVisible(true)
                 }
@@ -181,7 +256,7 @@ const BREView = (props, { navigation }) => {
         data.forEach((item) => {
 
             item.loanElgResultsSummariesClientWise.forEach((summary) => {
-                if (summary.result == 'Fail') {
+                if (summary.result == 'Deviation') {
                     // If a 'Fail' result is found, set the variable to true and break the loop
                     setIsDeviationPresent(true)
                     hasDeviationResult = true;
@@ -301,6 +376,13 @@ const BREView = (props, { navigation }) => {
                 </View>
             </View>
 
+            <View style={{ width: '90%', alignSelf: 'center' }}>
+                <Text
+                    style={{ color: Colors.black, fontWeight: 400, fontSize: 16 }}>
+                    Bre Status - <Text style={{ color: breStatus == 'Failed' ? Colors.red : breStatus == 'Deviation' ? Colors.pendingBorder : Colors.green, fontSize: 16 }}>{breStatus}</Text>
+                </Text>
+
+            </View>
 
             <View style={{ width: '100%', justifyContent: 'center', marginBottom: 110 }}>
                 <FlatList

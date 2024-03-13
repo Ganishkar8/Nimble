@@ -361,6 +361,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                     setLoanTypeLabel(loanDetail.loanType)
                     setLoanProductLabel(loanDetail.product)
                     setLoanPurposeLabel(loanDetail.loanPurpose);
+                    setLoanPurposeCatgLabel(loanDetail?.loanPurposeCategory)
                     callLoanTenure(loanDetail.product, loanDetail.loanAmount, loanTenure)
                     setLoanAmount(loanDetail.loanAmount.toString())
                     setLoanPurposeLabel(loanDetail.loanPurpose);
@@ -370,6 +371,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                 setLoanTypeLabel(loanDetail.loanType)
                 setLoanProductLabel(loanDetail.product)
                 setLoanPurposeLabel(loanDetail.loanPurpose);
+                setLoanPurposeCatgLabel(loanDetail?.loanPurposeCategory)
                 callLoanTenure(loanDetail.product, loanDetail.loanAmount, loanTenure)
                 setLoanAmount(loanDetail.loanAmount.toString())
                 setLoanPurposeLabel(loanDetail.loanPurpose);

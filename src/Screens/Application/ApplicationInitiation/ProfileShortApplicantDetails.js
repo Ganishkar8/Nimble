@@ -384,7 +384,11 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
 
   const makeSystemMandatoryFields = () => {
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_title' && data.pageId === pageId).map((value, index) => {
+    const filteredData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID));
+
+    const workFlowId = filteredData[0].workflowId;
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_title' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
       setTitleCaption(value.fieldName)
       if (value.mandatory) {
         setTitleMan(true);
@@ -401,7 +405,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
     });
 
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_first_name' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_first_name' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
       setFirstNameCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -418,7 +422,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_middle_name' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_middle_name' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
       setMiddleNameCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -435,7 +439,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_last_name' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_last_name' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
       setLastNameCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -452,7 +456,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_maritalstatus' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_maritalstatus' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
       setMaritalStatusCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -469,7 +473,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_gender' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_gender' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
       setGenderCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -487,7 +491,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
     });
 
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_date_of_birth' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_date_of_birth' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
       setDOBCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -504,7 +508,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_age' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_age' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
       setAgeCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -521,7 +525,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_fathers name' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_fathers name' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
       setFatherNameCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -538,7 +542,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_spouse name' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_spouse name' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
       setSpouseNameCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -555,7 +559,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_caste' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_caste' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
       setCasteCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -572,7 +576,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_religion' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_religion' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
       setReligionCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -589,7 +593,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_mother tongue' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_mother tongue' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
       setMotherTongueCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -606,7 +610,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_educational qualifications' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_educational qualifications' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
       setEADCaption(value.fieldName)
 
       if (value.isMandatory) {

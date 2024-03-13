@@ -72,6 +72,14 @@ const AddressDetails = (props, { navigation }) => {
   const [addressTypeDisable, setAddressTypeDisable] = useState(false);
   const [addressTypeData, setaddressTypeData] = useState([]);
 
+  const [sameAsLabel, setSameAsLabel] = useState('');
+  const [sameAsIndex, setSameAsIndex] = useState('');
+  const [sameAsCaption, setSameAsCaption] = useState('SAME AS');
+  const [sameAsMan, setSameAsMan] = useState(false);
+  const [sameAsVisible, setSameAsVisible] = useState(false);
+  const [sameAsDisable, setSameAsDisable] = useState(false);
+  const [sameAsData, setSameAsData] = useState([]);
+
   const [sameAsPermVisible, setsameAsPermVisible] = useState(false);
   const [sameAsPerm, setsameAsPerm] = useState(false);
   const [sameAsPermCaption, setsameAsPermCaption] = useState('Is Same As Permanent?');
@@ -271,7 +279,8 @@ const AddressDetails = (props, { navigation }) => {
     setAddressOwnerTypeDisable(true);
     setOwnerDetailsDisable(true);
     setOwnerNameDisable(true);
-
+    setsameAsPermDisable(true);
+    setSameAsDisable(true);
   }
 
   const fieldsEnable = () => {
@@ -299,10 +308,10 @@ const AddressDetails = (props, { navigation }) => {
     setDistrict('')
     setState('')
     setCountry('')
-    setYearsAtResidence('')
+    //setYearsAtResidence('')
     setOwnerName('')
-    setYearsAtCity('')
-    setGeoClassificationLabel('')
+    //setYearsAtCity('')
+    // setGeoClassificationLabel('')
     setAddressOwnerTypeLabel('')
     setOwnerDetailsLabel('')
 
@@ -447,6 +456,10 @@ const AddressDetails = (props, { navigation }) => {
     setYearsAtResidence(data?.yearsAtResidence?.toString())
     setOwnerName(data.ownerName)
     setYearsAtCity(data?.yearsInCurrentCityOrTown?.toString())
+    if (global.CLIENTTYPE == 'CO-APPL' || global.CLIENTTYPE == 'GRNTR') {
+      setSameAsLabel(data?.sameAsCustAddrType);
+      setSameAsVisible(true);
+    }
     //spinner
     setAddressTypeLabel(data.addressType)
     if (data.addressType == 'P') {
@@ -456,6 +469,13 @@ const AddressDetails = (props, { navigation }) => {
       setYearsAtResidenceMan(false);
       setYearsAtCityVisible(false);
       setYearsAtResidenceMan(false);
+    } else {
+      if (data?.sameAs == '1') {
+        setsameAsPerm(true);
+        setsameAsPermVisible(true);
+      } else {
+        setsameAsPerm(false);
+      }
     }
     if (!(global.ALLOWEDIT == "0")) {
       if (data.isEkyc || data.isLms) {
@@ -509,10 +529,10 @@ const AddressDetails = (props, { navigation }) => {
             setDistrict(permanentAddress.district)
             setState(permanentAddress.state)
             setCountry(permanentAddress.country)
-            setYearsAtResidence(permanentAddress.yearsAtResidence)
+            // setYearsAtResidence(permanentAddress.yearsAtResidence)
             setOwnerName(permanentAddress.ownerName)
-            setYearsAtCity(permanentAddress.yearsInCurrentCityOrTown)
-            setGeoClassificationLabel(permanentAddress.geoClassification)
+            //setYearsAtCity(permanentAddress.yearsInCurrentCityOrTown)
+            //setGeoClassificationLabel(permanentAddress.geoClassification)
             setAddressOwnerTypeLabel(permanentAddress.addressOwnership)
             setOwnerDetailsLabel(permanentAddress.ownerDetails)
 
@@ -545,6 +565,82 @@ const AddressDetails = (props, { navigation }) => {
       if (global.DEBUG_MODE) console.log("Loan application number not found.");
     }
 
+
+  }
+
+  const getClientWiseAddressData = (addressType, clientType) => {
+
+    const filteredData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID));
+
+    if (filteredData.length > 0) {
+
+      const clientDetail = filteredData[0].clientDetail.find(client => client.clientType == clientType);
+
+      if (clientDetail) {
+
+        const addressDetails = clientDetail.clientAddress;
+        if (addressDetails) {
+
+          const permanentAddress = addressDetails.find(item => item.addressType === addressType);
+
+          if (permanentAddress) {
+            setAddressLine1(permanentAddress.addressLine1)
+            setAddressLine2(permanentAddress.addressLine2)
+            setLandmark(permanentAddress.landmark)
+            setPincode(permanentAddress.pincode)
+            setCity(permanentAddress.city)
+            setDistrict(permanentAddress.district)
+            setState(permanentAddress.state)
+            setCountry(permanentAddress.country)
+            setYearsAtResidence(permanentAddress?.yearsAtResidence?.toString())
+            setOwnerName(permanentAddress.ownerName)
+            setYearsAtCity(permanentAddress?.yearsInCurrentCityOrTown?.toString())
+            setGeoClassificationLabel(permanentAddress.geoClassification)
+            setAddressOwnerTypeLabel(permanentAddress.addressOwnership)
+            setOwnerDetailsLabel(permanentAddress.ownerDetails)
+
+            if (permanentAddress.ownerDetails == 'OD-OTH' || permanentAddress.ownerDetails == 'OD-RLT') {
+              setOwnerNameDisable(false);
+              setOwnerNameMan(true);
+              setOwnerNameVisible(true);
+            } else {
+              setOwnerNameDisable(true);
+              setOwnerNameMan(false);
+              setOwnerNameVisible(false);
+              setOwnerName('')
+            }
+            fieldsDisable();
+            setIsKYC(false);
+          }
+
+        }
+
+        if (global.DEBUG_MODE) console.log("Address Details:", addressDetails);
+      } else {
+        if (global.DEBUG_MODE) console.log("Client ID not found in clientDetail array.");
+      }
+    } else {
+      if (global.DEBUG_MODE) console.log("Loan application number not found.");
+    }
+
+
+  }
+
+  const clearAllFields = () => {
+    setAddressLine1('')
+    setAddressLine2('')
+    setLandmark('')
+    setPincode('')
+    setCity('')
+    setDistrict('')
+    setState('')
+    setCountry('')
+    setYearsAtResidence('')
+    setOwnerName('')
+    setYearsAtCity('')
+    setGeoClassificationLabel('')
+    setAddressOwnerTypeLabel('')
+    setOwnerDetailsLabel('')
 
   }
 
@@ -747,7 +843,12 @@ const AddressDetails = (props, { navigation }) => {
 
   const makeSystemMandatoryFields = () => {
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_addr_address_type' && data.pageId === pageId).map((value, index) => {
+    const filteredData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID));
+
+    const workFlowId = filteredData[0].workflowId;
+
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_addr_address_type' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
 
       if (value.isMandatory) {
         setAddressTypeMan(true);
@@ -763,7 +864,7 @@ const AddressDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_address_line_1' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_address_line_1' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
 
       if (value.isMandatory) {
         setAddressLine1Man(true);
@@ -779,7 +880,7 @@ const AddressDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_address_line_2' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_address_line_2' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
 
       if (value.isMandatory) {
         setAddressLine2Man(true);
@@ -795,7 +896,7 @@ const AddressDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_landmark' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_landmark' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
 
       if (value.isMandatory) {
         setLandmarkMan(true);
@@ -811,7 +912,7 @@ const AddressDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_pincode' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_pincode' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
 
       if (value.isMandatory) {
         setPincodeMan(true);
@@ -827,7 +928,7 @@ const AddressDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_city/village' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_city/village' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
 
       if (value.isMandatory) {
         setCityMan(true);
@@ -843,7 +944,7 @@ const AddressDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_disrtict' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_disrtict' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
 
       if (value.isMandatory) {
         setDistrictMan(true);
@@ -859,7 +960,7 @@ const AddressDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_state' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_state' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
 
       if (value.isMandatory) {
         setStateMan(true)
@@ -875,7 +976,7 @@ const AddressDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_country' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_country' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
 
       if (value.isMandatory) {
         setCountryMan(true)
@@ -892,7 +993,7 @@ const AddressDetails = (props, { navigation }) => {
     });
 
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_addr_geo-classification' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_addr_geo-classification' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
 
       if (value.isMandatory) {
         setGeoClassificationMan(true)
@@ -908,7 +1009,7 @@ const AddressDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_years at residence' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_years at residence' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
 
       if (value.isMandatory) {
         setYearsAtResidenceMan(true)
@@ -924,7 +1025,7 @@ const AddressDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_years in current city/town' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_addr_years in current city/town' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
 
       if (value.isMandatory) {
         setYearsAtCityMan(true)
@@ -940,7 +1041,7 @@ const AddressDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_addr_address ownership type' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_addr_address ownership type' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
 
       if (value.isMandatory) {
         setAddressOwnerTypeMan(true)
@@ -956,7 +1057,7 @@ const AddressDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_addr_owner_details' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_addr_owner_details' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
 
       if (value.isMandatory) {
         setOwnerDetailsMan(true)
@@ -1205,6 +1306,8 @@ const AddressDetails = (props, { navigation }) => {
         "country": country,
         "mobileOrLandLineNumber": "",
         "emailId": "",
+        "sameAs": sameAsPerm ? '1' : '0',
+        "sameAsCustAddrType": sameAsLabel,
         "addressOwnership": addressOwnerTypeLabel,
         "ownerDetails": ownerDetailsLabel,
         "ownerName": ownerName,
@@ -1285,6 +1388,8 @@ const AddressDetails = (props, { navigation }) => {
         "country": country,
         "mobileOrLandLineNumber": "",
         "emailId": "",
+        "sameAs": sameAsPerm ? '1' : '0',
+        "sameAsCustAddrType": sameAsLabel,
         "addressOwnership": addressOwnerTypeLabel,
         "ownerDetails": ownerDetailsLabel,
         "ownerName": ownerName,
@@ -1397,6 +1502,39 @@ const AddressDetails = (props, { navigation }) => {
     if (componentName === 'AddressTypePicker') {
       setAddressTypeLabel(label);
       setAddressTypeIndex(index);
+
+      if (global.CLIENTTYPE == 'CO-APPL') {
+        setSameAsVisible(true);
+        var type = '';
+        if (label == 'C') {
+          type = 'AP-CA'
+        } else {
+          type = 'AP-PA'
+        }
+        setSameAsLabel('');
+        const filterSameAs = userCodeDetail.filter((data) => data.masterId === 'SAME_AS' && data.subCodeId == type);
+        setSameAsData(filterSameAs)
+        clearAllFields();
+        fieldsEnable();
+
+      } else if (global.CLIENTTYPE == 'GRNTR') {
+        setSameAsVisible(true);
+        var type = '', type1 = '';
+        if (label == 'C') {
+          type = 'AP-CA';
+          type1 = 'CAP-CA';
+        } else {
+          type = 'AP-PA'
+          type1 = 'CAP-PA'
+        }
+        setSameAsLabel('');
+        const filterSameAs = userCodeDetail.filter((data) => data.masterId === 'SAME_AS' && data.subCodeId == type && data.subCodeId == type1);
+        setSameAsData(filterSameAs)
+        clearAllFields();
+        fieldsEnable();
+
+      }
+
       if (label == 'C') {
         if (permAddressAvailable) {
           setsameAsPermVisible(true);
@@ -1423,6 +1561,23 @@ const AddressDetails = (props, { navigation }) => {
     } else if (componentName === 'AddressOwnershipPicker') {
       setAddressOwnerTypeLabel(label);
       setAddressOwnerTypeIndex(index);
+    } else if (componentName === 'SameAsPicker') {
+      if (label?.length > 0) {
+        sameAsPermDisable(true);
+      } else {
+        sameAsPermDisable(false);
+      }
+      setSameAsLabel(label);
+      setSameAsIndex(index);
+      if (label == 'AP-CA') {
+        getClientWiseAddressData('C', 'APPL')
+      } else if (label == 'AP-PA') {
+        getClientWiseAddressData('P', 'APPL')
+      } else if (label == 'CAP-CA') {
+        getClientWiseAddressData('C', 'CO-APPL')
+      } else if (label == 'CAP-PA') {
+        getClientWiseAddressData('P', 'CO-APPL')
+      }
     } else if (componentName === 'ActionTypePicker') {
       setActionTypeLabel(label);
       setActionTypeIndex(index);
@@ -1718,10 +1873,13 @@ const AddressDetails = (props, { navigation }) => {
       }
     } else if (componentName === 'sameAsPerm') {
       setsameAsPerm(textValue)
+
       if (textValue == true) {
         getPermanentAddressData();
+        setSameAsDisable(true);
       } else {
         fieldsEnable();
+        setSameAsDisable(false);
       }
     }
 
@@ -2045,6 +2203,13 @@ const AddressDetails = (props, { navigation }) => {
             <TextComp textVal={addressTypeCaption} textStyle={Commonstyles.inputtextStyle} Visible={addressTypeMan} />
           </View>
           <PickerComp textLabel={addressTypeLabel} pickerStyle={Commonstyles.picker} Disable={addressTypeDisable} pickerdata={addressTypeData} componentName='AddressTypePicker' handlePickerClick={handlePickerClick} />
+        </View>}
+
+        {sameAsVisible && <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+          <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
+            <TextComp textVal={sameAsCaption} textStyle={Commonstyles.inputtextStyle} Visible={sameAsMan} />
+          </View>
+          <PickerComp textLabel={sameAsLabel} pickerStyle={Commonstyles.picker} Disable={sameAsDisable} pickerdata={sameAsData} componentName='SameAsPicker' handlePickerClick={handlePickerClick} />
         </View>}
 
         {sameAsPermVisible &&

@@ -200,8 +200,12 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
 
   const makeSystemMandatoryFields = () => {
 
+    const filteredData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID));
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_cpt_rsn' && data.pageId === pageId).map((value, index) => {
+    const workFlowId = filteredData[0].workflowId;
+
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_cpt_rsn' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
 
       if (value.mandatory) {
         setCaptureReasonMan(true);
@@ -217,7 +221,7 @@ const LoanDemographicsGSTDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_tm_frm' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_tm_frm' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
 
       if (value.mandatory) {
         setTimeFrameMan(true);

@@ -284,10 +284,11 @@ const ConsentOTPVerification = (props, { navigation }) => {
                 global.COMPLETEDMODULE = 'BRE';
                 global.COMPLETEDPAGE = 'BRE_VIEW';
                 if (global.ISDEVIATIONPRESENT) {
-                    updateLoanStatusDeviation();
+                    updateLoanStatusDeviation('InProgress');
                 } else {
-                    setLoading(false);
-                    props.navigation.replace('LoanApplicationMain', { fromScreen: 'BREView' })
+                    updateLoanStatusDeviation('Completed');
+                    //setLoading(false);
+                    //props.navigation.replace('LoanApplicationMain', { fromScreen: 'BREView' })
                 }
 
 
@@ -304,12 +305,12 @@ const ConsentOTPVerification = (props, { navigation }) => {
 
     };
 
-    const updateLoanStatusDeviation = () => {
+    const updateLoanStatusDeviation = (status) => {
 
         const appDetails = {
             "loanApplicationId": global.LOANAPPLICATIONID,
             "loanWorkflowStage": "LN_APP_DEVIATION",
-            "status": "InProgress"
+            "status": status
         }
         const baseURL = '8901';
         setLoading(true);

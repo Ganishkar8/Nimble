@@ -89,6 +89,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const [panCard, setPanCard] = useState('');
   const [panDetails, setPanDetails] = useState('');
   const [panCardVisibleID, setPanCardVisibleID] = useState('');
+  const [aadharVisibleID, setAadharVisibleID] = useState('');
   const [isPanVerified, setIsPanVerified] = useState(null);
   const [eyeButtonVisible, setEyeButtonVisible] = useState(false);
 
@@ -707,7 +708,6 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
     setName(value?.firstName + ' ' + value?.middleName + ' ' + value?.lastName)
     setIsPanVerified(value.isPanVerified);
-
     if (global.ALLOWEDIT == '0') {
       if (value.isPanVerified) {
         setEyeButtonVisible(true);
@@ -736,6 +736,15 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
     } else if (value.kycTypeId4 == '007') {
       setPanCard(value.kycIdValue4)
       setPanCardVisibleID('ID4')
+    }
+    if (value.kycTypeId1 == '001') {
+      setAadharVisibleID('ID1')
+    } else if (value.kycTypeId2 == '001') {
+      setAadharVisibleID('ID2')
+    } else if (value.kycTypeId3 == '001') {
+      setAadharVisibleID('ID3')
+    } else if (value.kycTypeId4 == '001') {
+      setAadharVisibleID('ID4')
     }
 
     setKycType1Label(value.kycTypeId1);
@@ -1697,6 +1706,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
           .then(async (response) => {
 
             if (response.status == 200) {
+              if (global.DEBUG_MODE) console.log("PANVerify::::" + response.data)
               setPanDetails(response.data)
               setIsPanVerified(response.data.clientDetailDto.isPanVerified)
               props.updateClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', response.data.clientDetailDto)
@@ -2215,6 +2225,22 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                               fontWeight: 500,
                             }}>
                             {isPanVerified ? 'Verified' : 'Not Verified'}
+
+                          </Text>
+
+                        </View>
+                      }
+
+                      {aadharVisibleID == 'ID1' && isAadharVerified != null &&
+                        <View style={{ width: '90%', alignSelf: 'center', alignItems: 'flex-end', marginTop: 5 }}>
+
+                          <Text
+                            style={{
+                              color: isAadharVerified ? Colors.green : Colors.red,
+                              fontWeight: 500,
+                            }}>
+                            {isAadharVerified ? 'Verified' : 'Not Verified'}
+
                           </Text>
 
                         </View>
@@ -2442,6 +2468,20 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                         </View>
                       }
 
+                      {aadharVisibleID == 'ID2' && isAadharVerified != null &&
+                        <View style={{ width: '90%', alignSelf: 'center', alignItems: 'flex-end', marginTop: 5 }}>
+
+                          <Text
+                            style={{
+                              color: isAadharVerified ? Colors.green : Colors.red,
+                              fontWeight: 500,
+                            }}>
+                            {isAadharVerified ? 'Verified' : 'Not Verified'}
+                          </Text>
+
+                        </View>
+                      }
+
                       {/* <View
                     style={{
                       width: '100%',
@@ -2645,6 +2685,20 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
 
                         </View>
                       }
+
+                      {aadharVisibleID == 'ID3' && isAadharVerified != null &&
+                        <View style={{ width: '90%', alignSelf: 'center', alignItems: 'flex-end', marginTop: 5 }}>
+
+                          <Text
+                            style={{
+                              color: isAadharVerified ? Colors.green : Colors.red,
+                              fontWeight: 500,
+                            }}>
+                            {isAadharVerified ? 'Verified' : 'Not Verified'}
+                          </Text>
+
+                        </View>
+                      }
                       {/* <View
                     style={{
                       width: '100%',
@@ -2841,6 +2895,20 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                               fontWeight: 500,
                             }}>
                             {isPanVerified ? 'Verified' : 'Not Verified'}
+                          </Text>
+
+                        </View>
+                      }
+
+                      {aadharVisibleID == 'ID4' && isAadharVerified != null &&
+                        <View style={{ width: '90%', alignSelf: 'center', alignItems: 'flex-end', marginTop: 5 }}>
+
+                          <Text
+                            style={{
+                              color: isAadharVerified ? Colors.green : Colors.red,
+                              fontWeight: 500,
+                            }}>
+                            {isAadharVerified ? 'Verified' : 'Not Verified'}
                           </Text>
 
                         </View>

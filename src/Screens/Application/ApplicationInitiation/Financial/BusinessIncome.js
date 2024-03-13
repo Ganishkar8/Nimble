@@ -112,7 +112,7 @@ const BusinessIncome = (props) => {
             setItemData(filteredItemData);
         } else if (props.componentName == 'Expenses') {
 
-            const excludedMasterIds = props.otherIncomeList.map(item => item.incomeLabel);
+            const excludedMasterIds = props.expenseList.map(item => item.incomeLabel);
 
             const filteredItemData = leaduserCodeDetail
                 .filter(data => data.masterId === 'BUSINESS_EXPENSES' && !excludedMasterIds.includes(data.subCodeId))
@@ -121,7 +121,7 @@ const BusinessIncome = (props) => {
             setItemData(filteredItemData);
         } else if (props.componentName == 'OtherExpense') {
 
-            const excludedMasterIds = props.otherIncomeList.map(item => item.incomeLabel);
+            const excludedMasterIds = props.otherExpenseList.map(item => item.incomeLabel);
 
             const filteredItemData = leaduserCodeDetail
                 .filter(data => data.masterId === 'OTHER_SOURCE_EXPENSES' && !excludedMasterIds.includes(data.subCodeId))

@@ -150,6 +150,15 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   const [LoanAmountDisable, setLoanAmountDisable] = useState(false);
   const LoanAmountRef = useRef(null);
 
+  const [loanPurposeCatgMan, setLoanPurposeCatgMan] = useState(true); //Manditory or not
+  const [loanPurposeCatgVisible, setLoanPurposeCatgVisible] = useState(true); //Hide or not
+  const [loanPurposeCatgDisable, setLoanPurposeCatgDisable] = useState(false); //Enable or Disable
+  const [loanPurposeCatgData, setLoanPurposeCatgData] = useState([]); //DataPicking
+  const [loanPurposeCatgCaption, setLoanPurposeCatgCaption] = useState('LOAN PURPOSE CATEGORY'); //FieldCaption
+  const [loanPurposeCatgLabel, setLoanPurposeCatgLabel] = useState('');
+  const [loanPurposeCatgIndex, setLoanPurposeCatgIndex] = useState('');
+
+
   const [LoanPurposeMan, setLoanPurposeMan] = useState(false);
   const [LoanPurposeVisible, setLoanPurposeVisible] = useState(true);
   const [LoanPurposeDisable, setLoanPurposeDisable] = useState(false);
@@ -405,7 +414,24 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     //   "remarks": "[Client ID: 1105000055, Customer Name: Sikhivahan D Mayur, Branch ID: 1105 \n, Client ID: 1180012862, Customer Name: Sikhivahan D Mayur, Branch ID: 1180 \n]"
     // })
     // setDedupeModalVisible(true)
-    makeSystemMandatoryFields();
+    if (global.CLIENTTYPE == 'APPL') {
+      setLoanTypeMan(true);
+      setProductTypeMan(true);
+      setCustCatgMan(true);
+      setCustomerSubCategoryMan(true);
+      setWorkflowIDMan(true);
+      setLoanAmountMan(true);
+      setLoanPurposeCatgMan(true);
+      setLoanPurposeMan(true);
+      setTitleMan(true);
+      setNameMan(true);
+      setGenderMan(true);
+      setMaritalStatusMan(true);
+      setMobileNumberMan(true);
+    } else {
+      makeSystemMandatoryFields();
+    }
+
     getSystemCodeDetail();
     hideFields();
     getApplicantData();
@@ -623,11 +649,13 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       //setWorkflowIDLabel(137)
       //callLoanAmount(137);
     }
-    if (data.loanAmount) {
+    if (data?.loanAmount) {
       setLoanAmount(data?.loanAmount?.toString());
     }
-    setLoanPurposeLabel(data.loanPurpose);
-    getProductID(data.loanType);
+    setLoanPurposeCatgLabel(data?.loanPurposeCategory);
+    setLoanPurposeLabel(data?.loanPurpose);
+    getLoanPurpose(data?.loanPurposeCategory)
+    getProductID(data?.loanType);
 
     getWorkFlowID(
       data.loanType,
@@ -761,6 +789,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     setCustCatgDisable(true);
     setCustomerSubCategoryDisable(true);
     setLoanPurposeDisable(true);
+    setLoanPurposeCatgDisable(true);
     setTitleDisable(true);
     setNameDisable(true);
     setGenderDisable(true);
@@ -787,10 +816,9 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       .sort((a, b) => a.Description.localeCompare(b.Description));
     setLoanTypeData(filteredLoanTypeData);
 
-    const filteredLoanPurposeData = leaduserCodeDetail
-      .filter(data => data.masterId === 'LNPS')
-      .sort((a, b) => a.Description.localeCompare(b.Description));
-    setLoanPurposeData(filteredLoanPurposeData);
+    const filteredLoanPurposeCatgData = leaduserCodeDetail.filter((data) => data.masterId === 'LPC').sort((a, b) => a.Description.localeCompare(b.Description));;
+    setLoanPurposeCatgData(filteredLoanPurposeCatgData);
+
 
     const filteredMaritalStatusData = userCodeDetail
       .filter(data => data.ID === 'MaritalStatusID')
@@ -844,6 +872,16 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       }
       setWorkflowIDData(dataArray);
     }
+  };
+
+  const getLoanPurpose = (loanPurposeCatg) => {
+
+    const filteredLoanPurposeData = leaduserCodeDetail
+      .filter(data => data.masterId === 'LNPS' && data.parentId == loanPurposeCatg)
+      .sort((a, b) => a.Description.localeCompare(b.Description));
+    setLoanPurposeData(filteredLoanPurposeData);
+
+
   };
 
   const getID1data = wfID => {
@@ -1089,8 +1127,14 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   };
 
   const makeSystemMandatoryFields = async () => {
+
+    const filteredData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID));
+
+    const workFlowId = filteredData[0].workflowId;
+
+
     systemMandatoryField
-      .filter(data => data.fieldUiid === 'sp_relationType' && data.pageId === pageId)
+      .filter(data => data.fieldUiid === 'sp_relationType' && data.pageId === pageId && data.wfId == workFlowId)
       .map((value, index) => {
         setRelationTypeCaption(value.fieldName);
 
@@ -1108,27 +1152,27 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
         }
       });
 
-    systemMandatoryField
-      .filter(data => data.fieldUiid === 'sp_ln_type' && data.pageId === pageId)
-      .map((value, index) => {
-        setLoanTypeCaption(value.fieldName);
+    // systemMandatoryField
+    //   .filter(data => data.fieldUiid === 'sp_ln_type' && data.pageId === pageId && data.wfId == workFlowId)
+    //   .map((value, index) => {
+    //     setLoanTypeCaption(value.fieldName);
 
-        if (value.isMandatory) {
-          setLoanTypeMan(true);
-        }
-        if (value.isHide) {
-          setLoanTypeVisible(false);
-        }
-        if (value.isDisable) {
-          setLoanTypeDisable(true);
-        }
-        if (value.isCaptionChange) {
-          setLoanTypeCaption(value[0].fieldCaptionChange);
-        }
-      });
+    //     if (value.isMandatory) {
+    //       setLoanTypeMan(true);
+    //     }
+    //     if (value.isHide) {
+    //       setLoanTypeVisible(false);
+    //     }
+    //     if (value.isDisable) {
+    //       setLoanTypeDisable(true);
+    //     }
+    //     if (value.isCaptionChange) {
+    //       setLoanTypeCaption(value[0].fieldCaptionChange);
+    //     }
+    //   });
 
     systemMandatoryField
-      .filter(data => data.fieldUiid === 'sp_gender' && data.pageId === pageId)
+      .filter(data => data.fieldUiid === 'sp_gender' && data.pageId === pageId && data.wfId == workFlowId)
       .map((value, index) => {
         setGenderCaption(value.fieldName);
 
@@ -1146,103 +1190,103 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
         }
       });
 
+    // systemMandatoryField
+    //   .filter(data => data.fieldUiid === 'sp_pd_id' && data.pageId === pageId)
+    //   .map((value, index) => {
+    //     setProductTypeCaption(value.fieldName);
+
+    //     if (value.isMandatory) {
+    //       setProductTypeMan(true);
+    //     }
+    //     if (value.isHide) {
+    //       setProductTypeVisible(false);
+    //     }
+    //     if (value.isDisable) {
+    //       setProductTypeDisable(true);
+    //     }
+    //     if (value.isCaptionChange) {
+    //       setProductTypeCaption(value[0].fieldCaptionChange);
+    //     }
+    //   });
+
+    // systemMandatoryField
+    //   .filter(data => data.fieldUiid === 'sp_ln_prps' && data.pageId === pageId)
+    //   .map((value, index) => {
+    //     setLoanPurposeCaption(value.fieldName);
+
+    //     if (value.isMandatory) {
+    //       setLoanPurposeMan(true);
+    //     }
+    //     if (value.isHide) {
+    //       setLoanPurposeVisible(false);
+    //     }
+    //     if (value.isDisable) {
+    //       setLoanPurposeDisable(true);
+    //     }
+    //     if (value.isCaptionChange) {
+    //       setLoanPurposeCaption(value[0].fieldCaptionChange);
+    //     }
+    //   });
+
+    // systemMandatoryField
+    //   .filter(data => data.fieldUiid === 'sp_cust_cat' && data.pageId === pageId)
+    //   .map((value, index) => {
+    //     setCustCatgCaption(value.fieldName);
+
+    //     if (value.isMandatory) {
+    //       setCustCatgMan(true);
+    //     }
+    //     if (value.isHide) {
+    //       setCustCatgVisible(false);
+    //     }
+    //     if (value.isDisable) {
+    //       setCustCatgDisable(true);
+    //     }
+    //     if (value.isCaptionChange) {
+    //       setCustCatgCaption(value[0].fieldCaptionChange);
+    //     }
+    //   });
+
+    // systemMandatoryField
+    //   .filter(data => data.fieldUiid === 'sp_cust_subcat' && data.pageId === pageId)
+    //   .map((value, index) => {
+    //     setCustomerSubCategoryCaption(value.fieldName);
+
+    //     if (value.isMandatory) {
+    //       setCustomerSubCategoryMan(true);
+    //     }
+    //     if (value.isHide) {
+    //       setCustomerSubCategoryVisible(false);
+    //     }
+    //     if (value.isDisable) {
+    //       setCustomerSubCategoryDisable(true);
+    //     }
+    //     if (value.isCaptionChange) {
+    //       setCustomerSubCategoryCaption(value[0].fieldCaptionChange);
+    //     }
+    //   });
+
+    // systemMandatoryField
+    //   .filter(data => data.fieldUiid === 'sp_wf_id' && data.pageId === pageId)
+    //   .map((value, index) => {
+    //     setWorkflowIDCaption(value.fieldName);
+
+    //     if (value.isMandatory) {
+    //       setWorkflowIDMan(true);
+    //     }
+    //     if (value.isHide) {
+    //       setWorkflowIDVisible(false);
+    //     }
+    //     if (value.isDisable) {
+    //       setWorkflowIDDisable(true);
+    //     }
+    //     if (value.isCaptionChange) {
+    //       setWorkflowIDCaption(value[0].fieldCaptionChange);
+    //     }
+    //   });
+
     systemMandatoryField
-      .filter(data => data.fieldUiid === 'sp_pd_id' && data.pageId === pageId)
-      .map((value, index) => {
-        setProductTypeCaption(value.fieldName);
-
-        if (value.isMandatory) {
-          setProductTypeMan(true);
-        }
-        if (value.isHide) {
-          setProductTypeVisible(false);
-        }
-        if (value.isDisable) {
-          setProductTypeDisable(true);
-        }
-        if (value.isCaptionChange) {
-          setProductTypeCaption(value[0].fieldCaptionChange);
-        }
-      });
-
-    systemMandatoryField
-      .filter(data => data.fieldUiid === 'sp_ln_prps' && data.pageId === pageId)
-      .map((value, index) => {
-        setLoanPurposeCaption(value.fieldName);
-
-        if (value.isMandatory) {
-          setLoanPurposeMan(true);
-        }
-        if (value.isHide) {
-          setLoanPurposeVisible(false);
-        }
-        if (value.isDisable) {
-          setLoanPurposeDisable(true);
-        }
-        if (value.isCaptionChange) {
-          setLoanPurposeCaption(value[0].fieldCaptionChange);
-        }
-      });
-
-    systemMandatoryField
-      .filter(data => data.fieldUiid === 'sp_cust_cat' && data.pageId === pageId)
-      .map((value, index) => {
-        setCustCatgCaption(value.fieldName);
-
-        if (value.isMandatory) {
-          setCustCatgMan(true);
-        }
-        if (value.isHide) {
-          setCustCatgVisible(false);
-        }
-        if (value.isDisable) {
-          setCustCatgDisable(true);
-        }
-        if (value.isCaptionChange) {
-          setCustCatgCaption(value[0].fieldCaptionChange);
-        }
-      });
-
-    systemMandatoryField
-      .filter(data => data.fieldUiid === 'sp_cust_subcat' && data.pageId === pageId)
-      .map((value, index) => {
-        setCustomerSubCategoryCaption(value.fieldName);
-
-        if (value.isMandatory) {
-          setCustomerSubCategoryMan(true);
-        }
-        if (value.isHide) {
-          setCustomerSubCategoryVisible(false);
-        }
-        if (value.isDisable) {
-          setCustomerSubCategoryDisable(true);
-        }
-        if (value.isCaptionChange) {
-          setCustomerSubCategoryCaption(value[0].fieldCaptionChange);
-        }
-      });
-
-    systemMandatoryField
-      .filter(data => data.fieldUiid === 'sp_wf_id' && data.pageId === pageId)
-      .map((value, index) => {
-        setWorkflowIDCaption(value.fieldName);
-
-        if (value.isMandatory) {
-          setWorkflowIDMan(true);
-        }
-        if (value.isHide) {
-          setWorkflowIDVisible(false);
-        }
-        if (value.isDisable) {
-          setWorkflowIDDisable(true);
-        }
-        if (value.isCaptionChange) {
-          setWorkflowIDCaption(value[0].fieldCaptionChange);
-        }
-      });
-
-    systemMandatoryField
-      .filter(data => data.fieldUiid === 'sp_title' && data.pageId === pageId)
+      .filter(data => data.fieldUiid === 'sp_title' && data.pageId === pageId && data.wfId == workFlowId)
       .map((value, index) => {
         setTitleCaption(value.fieldName);
         if (value.mandatory) {
@@ -1259,27 +1303,27 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
         }
       });
 
-    systemMandatoryField
-      .filter(data => data.fieldUiid === 'et_ln_amt' && data.pageId === pageId)
-      .map((value, index) => {
-        setLoanAmountCaption(value.fieldName);
+    // systemMandatoryField
+    //   .filter(data => data.fieldUiid === 'et_ln_amt' && data.pageId === pageId)
+    //   .map((value, index) => {
+    //     setLoanAmountCaption(value.fieldName);
 
-        if (value.isMandatory) {
-          setLoanAmountMan(true);
-        }
-        if (value.isHide) {
-          setLoanAmountVisible(false);
-        }
-        if (value.isDisable) {
-          setLoanAmountDisable(true);
-        }
-        if (value.isCaptionChange) {
-          setLoanAmountCaption(value[0].fieldCaptionChange);
-        }
-      });
+    //     if (value.isMandatory) {
+    //       setLoanAmountMan(true);
+    //     }
+    //     if (value.isHide) {
+    //       setLoanAmountVisible(false);
+    //     }
+    //     if (value.isDisable) {
+    //       setLoanAmountDisable(true);
+    //     }
+    //     if (value.isCaptionChange) {
+    //       setLoanAmountCaption(value[0].fieldCaptionChange);
+    //     }
+    //   });
 
     systemMandatoryField
-      .filter(data => data.fieldUiid === 'et_name' && data.pageId === pageId)
+      .filter(data => data.fieldUiid === 'et_name' && data.pageId === pageId && data.wfId == workFlowId)
       .map((value, index) => {
         setNameCaption(value.fieldName);
 
@@ -1298,7 +1342,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       });
 
     systemMandatoryField
-      .filter(data => data.fieldUiid === 'sp_mrt_sts' && data.pageId === pageId)
+      .filter(data => data.fieldUiid === 'sp_mrt_sts' && data.pageId === pageId && data.wfId == workFlowId)
       .map((value, index) => {
         setMaritalStatusCaption(value.fieldName);
 
@@ -1317,7 +1361,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       });
 
     systemMandatoryField
-      .filter(data => data.fieldUiid === 'et_mbl_no' && data.pageId === pageId)
+      .filter(data => data.fieldUiid === 'et_mbl_no' && data.pageId === pageId && data.wfId == workFlowId)
       .map((value, index) => {
         setMobileNumberCaption(value.fieldName);
 
@@ -1336,7 +1380,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       });
 
     systemMandatoryField
-      .filter(data => data.fieldUiid === 'et_email' && data.pageId === pageId)
+      .filter(data => data.fieldUiid === 'et_email' && data.pageId === pageId && data.wfId == workFlowId)
       .map((value, index) => {
         setEmailCaption(value.fieldName);
 
@@ -1355,7 +1399,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       });
 
     systemMandatoryField
-      .filter(data => data.fieldUiid === 'chck_is_msme' && data.pageId === pageId)
+      .filter(data => data.fieldUiid === 'chck_is_msme' && data.pageId === pageId && data.wfId == workFlowId)
       .map((value, index) => {
         setchkMsmeCaption(value.fieldName);
 
@@ -1378,6 +1422,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     if (global.CLIENTTYPE == 'CO-APPL' || global.CLIENTTYPE == 'GRNTR') {
       setLeadIDVisible(false);
       setLoanTypeVisible(false);
+      setLoanPurposeCatgVisible(false);
       setProductTypeVisible(false);
       setCustCatgVisible(false);
       setCustomerSubCategoryVisible(false);
@@ -1598,7 +1643,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           loanPurpose: LoanPurposeLabel,
           product: ProductTypeLabel,
           workflowId: workflowIDLabel,
-          //workflowId: 134,
+          loanPurposeCategory: loanPurposeCatgLabel,
           loanAmount: parseInt(LoanAmount),
           consent: true,
           applicationAppliedBy: global.USERID,
@@ -1706,7 +1751,6 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
         )
         .then(async response => {
           // Handle the response data
-
           if (global.DEBUG_MODE)
             console.log(
               'LeadCreationBasicApiResponse::' + JSON.stringify(response.data),
@@ -1717,10 +1761,10 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
               global.CLIENTID = response.data.clientDetail[0].id;
               addInRedux(response.data)
             } else if (global.CLIENTTYPE == 'CO_APPL') {
-              global.CLIENTID = response.data[0].id;
+              global.CLIENTID = response.data.clientDetails[0].id;
               props.updateClientDetails(global.LOANAPPLICATIONID, response.data.clientDetails[0].id, 'clientDetail', response.data.clientDetails[0])
-              props.updateClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'nominee', response.data.nominee[0])
-              props.updateClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'familyDetail', response.data.familyDetail[0])
+              props.updateClientDetails(global.LOANAPPLICATIONID, response.data.clientDetails[0].id, 'nominee', response.data.nominee[0])
+              props.updateClientDetails(global.LOANAPPLICATIONID, response.data.clientDetails[0].id, 'familyDetail', response.data.familyDetail[0])
             } else {
               global.CLIENTID = response.data[0].id;
               props.updateClientDetails(global.LOANAPPLICATIONID, response.data[0].id, 'clientDetail', response.data[0])
@@ -3362,6 +3406,10 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     } else if (componentName === 'RelationTypePicker') {
       setRelationTypeLabel(label);
       setRelationTypeIndex(index);
+    } else if (componentName === 'LoanPurposeCatgPicker') {
+      setLoanPurposeCatgLabel(label);
+      setLoanPurposeCatgIndex(index);
+      getLoanPurpose(label);
     }
   };
   function isMultipleOf5000(number) {
@@ -3861,6 +3909,28 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
                 returnKey="next"
                 handleClick={handleClick}
                 handleReference={handleReference}
+              />
+            </View>
+          )}
+
+          {loanPurposeCatgVisible && (
+            <View
+              style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                <TextComp
+                  textVal={loanPurposeCatgCaption}
+                  textStyle={Commonstyles.inputtextStyle}
+                  Visible={loanPurposeCatgMan}
+                />
+              </View>
+
+              <PickerComp
+                textLabel={loanPurposeCatgLabel}
+                pickerStyle={Commonstyles.picker}
+                Disable={loanPurposeCatgDisable}
+                pickerdata={loanPurposeCatgData}
+                componentName="LoanPurposeCatgPicker"
+                handlePickerClick={handlePickerClick}
               />
             </View>
           )}

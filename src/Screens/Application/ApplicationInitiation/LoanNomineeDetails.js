@@ -317,7 +317,7 @@ const LoanNomineeDetails = (props, { navigation }) => {
 
     const getSystemCodeDetail = () => {
 
-        const filterIsNomineeData = userCodeDetail.filter((data) => data.masterId === 'IS_NOMINEE');
+        const filterIsNomineeData = systemCodeDetail.filter((data) => data.masterId === 'CLIENT_TYPE');
         setIsNomineeData(filterIsNomineeData)
 
         const filteredTitleData = userCodeDetail.filter((data) => data.masterId === 'TITLE').sort((a, b) => a.Description.localeCompare(b.Description));

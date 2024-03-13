@@ -10,6 +10,7 @@ import {
     ScrollView,
     TouchableOpacity,
     SafeAreaView,
+    ToastAndroid
 } from 'react-native';
 import { connect } from 'react-redux';
 import { languageAction } from '../../../Utils/redux/actions/languageAction';
@@ -33,12 +34,17 @@ import tbl_bankdetails from '../../../Database/Table/tbl_bankdetails';
 import { addLoanInitiationDetails, deleteLoanInitiationDetails } from '../../../Utils/redux/actions/loanInitiationAction';
 import ButtonViewComp from '../../../Components/ButtonViewComp';
 import Commonstyles from '../../../Utils/Commonstyles';
+import TextInputComp from '../../../Components/TextInputComp';
+import ModalContainer from '../../../Components/ModalContainer';
+import TextComp from '../../../Components/TextComp';
 
 const LoanApplicationTrackerDetails = (props, { navigation }) => {
 
     const [listData, setListData] = useState(props.route.params.leadData)
     const [errorModalVisible, setErrorModalVisible] = useState(false);
+    const [rejectModalVisible, setRejectModalVisible] = useState(false);
     const [apiError, setApiError] = useState('');
+    const [remarks, setRemarks] = useState('');
     const [loading, setLoading] = useState(false);
     const [bg, setBg] = useState('');
     const isScreenVisible = useIsFocused();
@@ -50,6 +56,11 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
 
     const [processPageData, setprocessPageData] = useState();
     const [processPage, setprocessPage] = useState(props.mobilecodedetail.processPage);
+
+    const showRejectModal = label => {
+        setRejectModalVisible(true);
+    };
+    const hideRejectModal = () => setRejectModalVisible(false);
 
 
     useEffect(() => {
@@ -264,15 +275,26 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
 
     const updateLoanStatus = () => {
 
+        if (remarks.length <= 0) {
+            ToastAndroid.showWithGravityAndOffset(
+                'Please Enter Remarks',
+                ToastAndroid.LONG,
+                ToastAndroid.BOTTOM,
+                25,
+                50
+            );
+            return;
+        }
+
         const appDetails = {
             loanApplicationId: global.LOANAPPLICATIONID,
-            loanWorkflowStage: 'LN_APP_INITIATION',
-            status: 'Rejected',
+            userId: global.USERID,
+            remarks: remarks,
         };
         const baseURL = global.PORT1;
         setLoading(true);
         apiInstance(baseURL)
-            .post(`/api/v2/loan-application-status/updateStatus`, appDetails)
+            .post(`/api/v2/rejectApplication`, appDetails)
             .then(async response => {
                 // Handle the response data
                 if (global.DEBUG_MODE)
@@ -319,10 +341,95 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
         setErrorModalVisible(false);
     };
 
+    const handleClick = (componentName, textValue) => {
+        if (componentName === 'remarks') {
+            setRemarks(textValue);
+        }
+    };
+
     return (
         <View style={{ flex: 1, backgroundColor: '#fefefe' }}>
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
             <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
+
+
+            <ModalContainer
+                visible={rejectModalVisible}
+                closeModal={hideRejectModal}
+                modalstyle={styles.modalContent}
+                contentComponent={
+                    <SafeAreaView
+                        style={[
+                            styles.parentView,
+                            { backgroundColor: Colors.lightwhite },
+                        ]}>
+
+                        <View style={{ width: '100%' }}>
+
+                            <View
+                                style={{
+                                    width: '90%',
+                                    marginTop: 19,
+                                    paddingHorizontal: 0,
+                                    alignSelf: 'center'
+
+                                }}>
+                                <View
+                                    style={{
+                                        width: '90%',
+                                        marginTop: 3,
+                                        paddingHorizontal: 0,
+                                    }}>
+                                    <TextComp
+                                        textVal={'Remarks'}
+                                        textStyle={Commonstyles.inputtextStyle}
+                                        Visible={true}
+                                    />
+                                </View>
+
+                                <TextInputComp
+                                    textValue={remarks}
+                                    textStyle={[
+                                        Commonstyles.textinputtextStyle,
+                                        { maxHeight: 100 },
+                                    ]}
+                                    type="email-address"
+                                    Disable={false}
+                                    ComponentName="remarks"
+                                    returnKey="done"
+                                    handleClick={handleClick}
+                                    length={250}
+                                    multilines={true}
+                                />
+                            </View>
+
+                            <View style={{ width: '90%', alignItems: 'flex-end', marginTop: 25 }}>
+                                <ButtonViewComp
+                                    textValue={language[0][
+                                        props.language
+                                    ].str_ok.toUpperCase()}
+                                    textStyle={{
+                                        color: Colors.white,
+                                        fontSize: 13,
+                                        fontWeight: 500,
+                                    }}
+                                    viewStyle={[
+                                        Commonstyles.buttonView,
+                                        { width: 100, height: 20 },
+                                    ]}
+                                    innerStyle={[
+                                        Commonstyles.buttonViewInnerStyle,
+                                        { height: 35 },
+                                    ]}
+                                    handleClick={updateLoanStatus}
+                                />
+                            </View>
+                        </View>
+
+                    </SafeAreaView>
+                }
+            />
+
             <ScrollView style={styles.scrollView}
                 contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                 {loading ? <Loading /> : null}
@@ -441,7 +548,7 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
                         textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
                         viewStyle={Commonstyles.buttonView}
                         innerStyle={Commonstyles.buttonViewInnerStyle}
-                        handleClick={updateLoanStatus}
+                        handleClick={showRejectModal}
                     />
                 }
 
@@ -572,6 +679,15 @@ const styles = StyleSheet.create({
     },
     textStyle: {
         fontSize: 16, color: Colors.mediumgrey, marginTop: 5, fontFamily: 'PoppinsRegular'
-    }
+    },
+    modalContent: {
+        width: '90%', // Set width to 90% of the screen width
+        aspectRatio: 1.5,
+        backgroundColor: 'white',
+        padding: 10,
+        margin: 10,
+        borderRadius: 20,
+        alignContent: 'center'
+    },
 
 });
