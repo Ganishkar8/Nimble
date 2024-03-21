@@ -200,6 +200,34 @@ const BankDetailsScreen = (props, { navigation }) => {
         if (isNew != 'new') {
             getExistingBankData(isNew)
         }
+
+        const filteredData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID));
+
+        if (filteredData.length > 0) {
+            const clientDetail = filteredData[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
+            if (clientDetail) {
+                if (clientDetail?.clientBankDetail) {
+                    var isRepaymentAvailable = clientDetail.clientBankDetail.some(item => item.accountToBeUsedFor == 'RPYAC' && item.id != isNew?.id);
+                    var isDisbAvailable = clientDetail.clientBankDetail.some(item => item.accountToBeUsedFor == 'DSBAC' && item.id != isNew?.id);
+
+                    if (isRepaymentAvailable) {
+                        const filterAccountUsedForData = userCodeDetail.filter((data) => data.masterId === 'ACCOUNT_TO_BE_USED_FOR' && data.subCodeId == 'DSBAC');
+                        setAccountToUseData(filterAccountUsedForData)
+                    } else if (isDisbAvailable) {
+                        const filterAccountUsedForData = userCodeDetail.filter((data) => data.masterId === 'ACCOUNT_TO_BE_USED_FOR' && data.subCodeId == 'RPYAC');
+                        setAccountToUseData(filterAccountUsedForData)
+                    } else {
+                        const filterAccountUsedForData = userCodeDetail.filter((data) => data.masterId === 'ACCOUNT_TO_BE_USED_FOR');
+                        setAccountToUseData(filterAccountUsedForData)
+                    }
+
+                } else {
+                    const filterAccountUsedForData = userCodeDetail.filter((data) => data.masterId === 'ACCOUNT_TO_BE_USED_FOR');
+                    setAccountToUseData(filterAccountUsedForData)
+                }
+            }
+        }
+
     }
 
     const fieldsDisable = () => {
@@ -306,10 +334,6 @@ const BankDetailsScreen = (props, { navigation }) => {
 
         const filterAccountTypeData = systemCodeDetail.filter((data) => data.masterId === 'ACCOUNT_TYPE');
         setAccountTypeData(filterAccountTypeData)
-
-        const filterAccountUsedForData = userCodeDetail.filter((data) => data.masterId === 'ACCOUNT_TO_BE_USED_FOR');
-        setAccountToUseData(filterAccountUsedForData)
-
 
     }
 
@@ -1194,6 +1218,7 @@ const BankDetailsScreen = (props, { navigation }) => {
             setAccountTypeLabel(label);
             setAccountTypeIndex(index);
         } else if (componentName === 'AccountToUsePicker') {
+
             if (label == 'DSBAC' || label == 'BOTH') {
 
                 if (checkVerifiedAccount(accountHolderName, accountNumber, confirmAccountNumber, ifscCode)) {
@@ -1700,10 +1725,12 @@ const mapStateToProps = state => {
     const { language } = state.languageReducer;
     const { profileDetails } = state.profileReducer;
     const { mobileCodeDetails } = state.mobilecodeReducer;
+    const { loanInitiationDetails } = state.loanInitiationReducer;
     return {
         language: language,
         profiledetail: profileDetails,
-        mobilecodedetail: mobileCodeDetails
+        mobilecodedetail: mobileCodeDetails,
+        loanInitiationDetails: loanInitiationDetails
     }
 };
 

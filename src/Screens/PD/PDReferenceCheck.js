@@ -824,11 +824,15 @@ const PDReferenceCheck = (props, { navigation }) => {
 
       const lastDotIndex = image.path.lastIndexOf('.');
       var imageName = 'Photo' + '_' + global.CLIENTID.toString();
-      if (lastDotIndex !== -1) {
-        // Get the substring from the last dot to the end of the string
-        const fileExtension = image.path.substring(lastDotIndex);
-        imageName = imageName + fileExtension;
-        console.log('File extension:', fileExtension);
+      try {
+        if (lastDotIndex !== -1) {
+          // Get the substring from the last dot to the end of the string
+          const fileExtension = image?.path?.substring(lastDotIndex);
+          imageName = imageName + fileExtension;
+          console.log('File extension:', fileExtension);
+        }
+      } catch (error) {
+        imageName = imageName + '.png';
       }
 
       // const imageName = image.path.split('/').pop();

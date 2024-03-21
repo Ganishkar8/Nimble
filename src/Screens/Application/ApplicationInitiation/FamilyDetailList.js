@@ -34,7 +34,7 @@ import tbl_client from '../../../Database/Table/tbl_client';
 import tbl_loanApplication from '../../../Database/Table/tbl_loanApplication';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import tbl_familydetails from '../../../Database/Table/tbl_familydetails';
-import { deleteClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
+import { deleteClientDetails, deleteNestedClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
 
 const FamilyDetailList = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
@@ -77,11 +77,23 @@ const FamilyDetailList = (props, { navigation }) => {
 
     const getRelationData = () => {
 
-        const familyDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].familyDetail;
-        if (familyDetail) {
-            setRelationDetails(familyDetail)
-            setRefreshFlatList(!refreshFlatlist)
+        const filteredData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID));
+
+        if (filteredData.length > 0) {
+            const clientDetail = filteredData[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
+            if (clientDetail) {
+                if (clientDetail?.familyDetail) {
+                    setRelationDetails(clientDetail.familyDetail)
+                    setRefreshFlatList(!refreshFlatlist)
+                }
+            }
         }
+
+        // const familyDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].familyDetail;
+        // if (familyDetail) {
+        //     setRelationDetails(familyDetail)
+        //     setRefreshFlatList(!refreshFlatlist)
+        // }
         // console.log(JSON.stringify(familyDetail))
 
         // tbl_familydetails.getAllFamilyDetails(global.LOANAPPLICATIONID)
@@ -229,7 +241,8 @@ const FamilyDetailList = (props, { navigation }) => {
 
                 setLoading(false);
                 deletedata(relationID);
-                props.deleteClientDetails(global.LOANAPPLICATIONID, relationID, "familyDetail");
+                props.deleteNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'familyDetail', relationID)
+                //props.deleteClientDetails(global.LOANAPPLICATIONID, relationID, "familyDetail");
             })
             .catch(error => {
                 // Handle the error
@@ -272,7 +285,12 @@ const FamilyDetailList = (props, { navigation }) => {
             navigatetoBusiness();
             return;
         }
-        updateLoanStatus();
+        if (validate()) {
+            showBottomSheet();
+        } else {
+            updateLoanStatus();
+        }
+
 
     }
 
@@ -293,8 +311,17 @@ const FamilyDetailList = (props, { navigation }) => {
 
         var module = ''; var page = '';
 
-        module = 'LN_DMGP_APLCT';
-        page = 'DMGRC_APPL_FMLY_DTLS';
+
+        if (global.CLIENTTYPE == 'APPL') {
+            module = 'LN_DMGP_APLCT';
+            page = 'DMGRC_APPL_FMLY_DTLS';
+        } else if (global.CLIENTTYPE == 'CO-APPL') {
+            module = 'LN_DMGP_COAPLCT';
+            page = 'DMGRC_CO_APPL_FMLY_DTLS';
+        } else if (global.CLIENTTYPE == 'GRNTR') {
+            module = 'LN_DMGP_GRNTR';
+            page = 'DMGRC_GRNTR_FMLY_DTLS';
+        }
 
 
         const appDetails = {
@@ -315,8 +342,16 @@ const FamilyDetailList = (props, { navigation }) => {
                 if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
 
-                global.COMPLETEDMODULE = 'LN_DMGP_APLCT';
-                global.COMPLETEDPAGE = 'DMGRC_APPL_FMLY_DTLS';
+                if (global.CLIENTTYPE == 'APPL') {
+                    global.COMPLETEDMODULE = 'LN_DMGP_APLCT';
+                    global.COMPLETEDPAGE = 'DMGRC_APPL_FMLY_DTLS';
+                } else if (global.CLIENTTYPE == 'CO-APPL') {
+                    global.COMPLETEDMODULE = 'LN_DMGP_COAPLCT';
+                    global.COMPLETEDPAGE = 'DMGRC_CO_APPL_FMLY_DTLS';
+                } else if (global.CLIENTTYPE == 'GRNTR') {
+                    global.COMPLETEDMODULE = 'LN_DMGP_GRNTR';
+                    global.COMPLETEDPAGE = 'DMGRC_GRNTR_FMLY_DTLS';
+                }
 
                 navigatetoBusiness();
 
@@ -347,17 +382,23 @@ const FamilyDetailList = (props, { navigation }) => {
         var i = 1;
         var errorMessage = '';
 
-        // if (!communicationAvailable) {
-        //     errorMessage =
-        //         errorMessage +
-        //         i +
-        //         ')' +
-        //         ' ' +
-        //         "Please Add Communication Address" +
-        //         '\n';
-        //     i++;
-        //     flag = true;
-        // }
+        if (global.CLIENTTYPE == 'GRNTR') {
+            return false;
+        }
+
+        var isNomineeAvailable = relationDetails.some(item => item.isNominee == '1');
+
+        if (!isNomineeAvailable) {
+            errorMessage =
+                errorMessage +
+                i +
+                ')' +
+                ' ' +
+                "Please Add One Relation As a Nominee" +
+                '\n';
+            i++;
+            flag = true;
+        }
 
         setErrMsg(errorMessage);
         return flag;
@@ -474,6 +515,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => ({
     languageAction: item => dispatch(languageAction(item)),
+    deleteNestedClientDetails: (loanApplicationId, clientId, key, nestedKey, id) => dispatch(deleteNestedClientDetails(loanApplicationId, clientId, key, nestedKey, id)),
     deleteClientDetails: (loanApplicationId, clientId, key) => dispatch(deleteClientDetails(loanApplicationId, clientId, key)),
 });
 

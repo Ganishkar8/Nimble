@@ -623,6 +623,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           leadLoanData.loanProduct,
           leadBasicData.customerCategory,
         );
+        getLoanPurpose(leadLoanData.loanProduct, '')
 
         setProductTypeLabel(leadLoanData.loanProduct);
         setLoanAmount(leadLoanData?.loanAmount?.toString() ?? '')
@@ -635,6 +636,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
   };
 
   const getLoanData = (data) => {
+
     setLoanTypeLabel(data?.loanType ?? loanTypeLabel);
     setProductTypeLabel(data.product);
     setCustCatgLabel(data.customerCategory);
@@ -654,7 +656,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     }
     setLoanPurposeCatgLabel(data?.loanPurposeCategory);
     setLoanPurposeLabel(data?.loanPurpose);
-    getLoanPurpose(data?.loanPurposeCategory)
+    getLoanPurpose(data.product, data?.loanPurposeCategory)
     getProductID(data?.loanType);
 
     getWorkFlowID(
@@ -816,10 +818,6 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       .sort((a, b) => a.Description.localeCompare(b.Description));
     setLoanTypeData(filteredLoanTypeData);
 
-    const filteredLoanPurposeCatgData = leaduserCodeDetail.filter((data) => data.masterId === 'LPC').sort((a, b) => a.Description.localeCompare(b.Description));;
-    setLoanPurposeCatgData(filteredLoanPurposeCatgData);
-
-
     const filteredMaritalStatusData = userCodeDetail
       .filter(data => data.ID === 'MaritalStatusID')
       .sort((a, b) => a.Description.localeCompare(b.Description));
@@ -874,7 +872,11 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     }
   };
 
-  const getLoanPurpose = (loanPurposeCatg) => {
+  const getLoanPurpose = (productLabel, loanPurposeCatg) => {
+
+    const filteredLoanPurposeCatgData = leaduserCodeDetail.filter((data) => data.masterId === 'LPC' && data.parentId == productLabel).sort((a, b) => a.Description.localeCompare(b.Description));;
+    setLoanPurposeCatgData(filteredLoanPurposeCatgData);
+
 
     const filteredLoanPurposeData = leaduserCodeDetail
       .filter(data => data.masterId === 'LNPS' && data.parentId == loanPurposeCatg)
@@ -1684,7 +1686,8 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
               dedupeCheck: isDedupeDone,
               clientAddress: [],
               clientBankDetail: [],
-              clientManualKycLink: []
+              clientManualKycLink: [],
+              familyDetail: []
             },
           ],
           isActive: true,
@@ -1730,7 +1733,8 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
               dedupeCheck: isDedupeDone,
               clientAddress: [],
               clientBankDetail: [],
-              clientManualKycLink: []
+              clientManualKycLink: [],
+              familyDetail: [],
             },
           ],
           isActive: true,
@@ -1760,16 +1764,10 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
             if (global.CLIENTTYPE == 'APPL') {
               global.CLIENTID = response.data.clientDetail[0].id;
               addInRedux(response.data)
-            } else if (global.CLIENTTYPE == 'CO_APPL') {
-              global.CLIENTID = response.data.clientDetails[0].id;
-              props.updateClientDetails(global.LOANAPPLICATIONID, response.data.clientDetails[0].id, 'clientDetail', response.data.clientDetails[0])
-              props.updateClientDetails(global.LOANAPPLICATIONID, response.data.clientDetails[0].id, 'nominee', response.data.nominee[0])
-              props.updateClientDetails(global.LOANAPPLICATIONID, response.data.clientDetails[0].id, 'familyDetail', response.data.familyDetail[0])
             } else {
               global.CLIENTID = response.data[0].id;
               props.updateClientDetails(global.LOANAPPLICATIONID, response.data[0].id, 'clientDetail', response.data[0])
             }
-
 
             if (global.isDedupeDone == '1') {
               if (global.CLIENTTYPE == 'APPL') {
@@ -1834,7 +1832,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
       branchId: data.branchId,
       customerCategory: data.customerCategory,
       customerSubcategory: data.customerSubcategory,
-      //customerType: data.customerType,
+      loanPurposeCategory: data.loanPurposeCategory,
       loanType: data.loanType,
       loanPurpose: data.loanPurpose,
       product: data.product,
@@ -3305,6 +3303,9 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     } else if (componentName == 'ProductTypePicker') {
       setProductTypeLabel(label);
       setProductTypeIndex(index);
+      setLoanPurposeCatgLabel('');
+      setLoanPurposeLabel('');
+      getLoanPurpose(label, '');
       getWorkFlowID(loanTypeLabel, label, custCatgLabel);
     } else if (componentName == 'LoanPurposePicker') {
       setLoanPurposeLabel(label);
@@ -3409,7 +3410,8 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     } else if (componentName === 'LoanPurposeCatgPicker') {
       setLoanPurposeCatgLabel(label);
       setLoanPurposeCatgIndex(index);
-      getLoanPurpose(label);
+      setLoanPurposeLabel('');
+      getLoanPurpose(ProductTypeLabel, label);
     }
   };
   function isMultipleOf5000(number) {
@@ -4575,18 +4577,20 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
             </View>
           )}
 
-          <View
-            style={{ flexDirection: 'row', alignItems: 'center', marginTop: 19 }}>
-            <CheckBoxComp
-              textValue={chkMsme}
-              Disable={chkMsmeDisable}
-              ComponentName="chkMsme"
-              returnKey="next"
-              handleClick={handleClick}
-              Visible={chkMsmeMan}
-              textCaption={chkMsmeCaption}
-            />
-          </View>
+          {chkMsmeVisible &&
+            <View
+              style={{ flexDirection: 'row', alignItems: 'center', marginTop: 19 }}>
+              <CheckBoxComp
+                textValue={chkMsme}
+                Disable={chkMsmeDisable}
+                ComponentName="chkMsme"
+                returnKey="next"
+                handleClick={handleClick}
+                Visible={chkMsmeMan}
+                textCaption={chkMsmeCaption}
+              />
+            </View>
+          }
 
           {URNumberVisible && (
             <View

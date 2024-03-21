@@ -47,17 +47,23 @@ const BREView = (props, { navigation }) => {
 
 
     useEffect(() => {
-        props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
-        const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
+
         getBreData();
         if (global.USERTYPEID == 1163 || global.ALLOWEDIT == "0") {
             setOnlyView(true);
         }
+
+    }, [props.navigation]);
+
+    useEffect(() => {
+        props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
+
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
             backHandler.remove();
         }
-    }, [props.navigation, isScreenVisible]);
+    }, [isScreenVisible]);
 
     const handleBackButton = () => {
         onGoBack();
@@ -106,7 +112,7 @@ const BREView = (props, { navigation }) => {
                         const extraJson = { isSelected: false };
                         return { ...item, ...extraJson };
                     });
-                    checkFailOrDeviation(response.data);
+                    //checkFailOrDeviation(response.data);
                     getcbData(newData);
                 }
 
@@ -140,7 +146,7 @@ const BREView = (props, { navigation }) => {
                         const extraJson = { isSelected: false };
                         return { ...item, ...extraJson };
                     });
-                    checkFailOrDeviation(response.data);
+                    //checkFailOrDeviation(response.data);
                     getcbData(newData);
 
                 }
@@ -182,17 +188,23 @@ const BREView = (props, { navigation }) => {
                         }
                     });
 
-                    const isFailPresent = newdata.map((item) => item.loanElgResultClientWise.some((item1) => {
-                        item1.result == 'Fail'
-                    }))
-                    const isDeviatedPresent = newdata.map((item) => item.loanElgResultClientWise.some((item1) => {
-                        item1.result == 'Deviation'
-                    }))
+                    const isFailPresent = newdata.some(item =>
+                        item.loanElgResultClientWise.some(item1 => item1.result === 'Fail')
+                    );
+
+                    const isDeviatedPresent = newdata.some(item =>
+                        item.loanElgResultClientWise.some(item1 => item1.result === 'Deviation')
+                    );
+
 
                     if (isFailPresent) {
                         setBreStatus('Failed')
+                        setIsFailPresent(true)
+                        global.ISFAILPRESENT = true;
                     } else if (isDeviatedPresent) {
                         setBreStatus('Deviation')
+                        setIsDeviationPresent(true)
+                        global.ISDEVIATIONPRESENT = true;
                     } else {
                         setBreStatus('Passed')
                     }

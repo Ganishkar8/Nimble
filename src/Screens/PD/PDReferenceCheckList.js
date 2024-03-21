@@ -112,6 +112,26 @@ const PDReferenceCheckList = (props, { navigation }) => {
             "loanApplicationNumber": global.LOANAPPLICATIONNUM
         }
 
+        if (global.PDSTAGE == 'PD_2') {
+
+            if (currentPageCode == 'PG_REFF_CHECK_APPL') {
+                appDetails.previousPage = 6;
+            } else if (currentPageCode == 'PG_REFF_CHECK_CO_APPL') {
+                appDetails.previousPage = 19;
+            } else if (currentPageCode == 'PG_REFF_CHECK_GRNTR') {
+                appDetails.previousPage = 31;
+            }
+        } else if (global.PDSTAGE == 'PD_3') {
+
+            if (currentPageCode == 'PG_REFF_CHECK_APPL') {
+                appDetails.previousPage = 43;
+            } else if (currentPageCode == 'PG_REFF_CHECK_CO_APPL') {
+                appDetails.previousPage = 56;
+            } else if (currentPageCode == 'PG_REFF_CHECK_GRNTR') {
+                appDetails.previousPage = 68;
+            }
+        }
+
 
         apiInstance(baseURL).post(`/api/v1/pd/PdQAcheck/reffernceByclientId`, appDetails)
             .then((response) => {

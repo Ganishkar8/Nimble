@@ -266,6 +266,7 @@ const LoanDemographicBusinessDetail = (props) => {
     const [salesFrequencyDisable, setSalesFrequencyDisable] = useState(false);
 
     const [imageMan, setImageMan] = useState(false);
+    const [imageCaption, setImageCaption] = useState('CAPTURE BUSINESS IMAGE');
     const [imageVisible, setImageVisible] = useState(true);
     const [imageDisable, setImageDisable] = useState(false);
 
@@ -1325,7 +1326,7 @@ const LoanDemographicBusinessDetail = (props) => {
         });
 
         systemMandatoryField.filter((data) => data.fieldUiid === 'et_cpt_bsn_img' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
-
+            setImageCaption(value.fieldName)
             if (value.mandatory) {
                 setImageMan(true);
             }
@@ -1698,7 +1699,7 @@ const LoanDemographicBusinessDetail = (props) => {
         }
 
         if (companyTypeVisible) {
-            if (industryLineLabel) {
+            if (companyTypeLabel) {
                 return false;
             }
         }
@@ -3137,49 +3138,57 @@ const LoanDemographicBusinessDetail = (props) => {
                         </View>
                     )}
 
-
-                    <View
-                        style={{
-                            width: '100%',
-                            alignItems: 'center',
-                        }}>
+                    {imageVisible &&
                         <View
                             style={{
-                                width: '90%',
-                                flexDirection: 'row',
+                                width: '100%',
                                 alignItems: 'center',
-                                marginTop: 20,
+                                marginTop: '4%'
                             }}>
-                            <TouchableOpacity style={{ width: '30%' }} onPress={pickDocument} activeOpacity={0}>
-                                <View style={{ width: 40, height: 40, backgroundColor: '#DBDBDB', borderRadius: 10, justifyContent: 'center', alignItems: 'center' }}>
-                                    <Image
-                                        source={require('../../../Images/cloudcomputing.png')}
-                                        style={{ width: 28, height: 22 }}
-                                    />
-                                    {/* <FontAwesome6 name="cloud-arrow-up" size={25} color="#b5b6b6" /> */}
-                                </View>
-                            </TouchableOpacity>
-
-                            <Text style={{ width: '50%', color: Colors.dimmText, textAlign: 'left', fontFamily: 'PoppinsRegular' }}>
-                                {fileName}
-                            </Text>
-
-                            {docID &&
-                                <TouchableOpacity style={{ width: '20%', alignItems: 'flex-end' }}
-                                    onPress={() => {
-                                        showImageBottomSheet();
-                                    }}>
-                                    <Entypo
-                                        name="dots-three-vertical"
-                                        size={25}
-                                        color={Colors.darkblue}
-                                    />
+                            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                                <TextComp
+                                    textVal={imageCaption}
+                                    textStyle={Commonstyles.inputtextStyle}
+                                    Visible={imageMan}
+                                />
+                            </View>
+                            <View
+                                style={{
+                                    width: '90%',
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    marginTop: 20,
+                                }}>
+                                <TouchableOpacity style={{ width: '30%' }} onPress={pickDocument} activeOpacity={0}>
+                                    <View style={{ width: 40, height: 40, backgroundColor: '#DBDBDB', borderRadius: 10, justifyContent: 'center', alignItems: 'center' }}>
+                                        <Image
+                                            source={require('../../../Images/cloudcomputing.png')}
+                                            style={{ width: 28, height: 22 }}
+                                        />
+                                        {/* <FontAwesome6 name="cloud-arrow-up" size={25} color="#b5b6b6" /> */}
+                                    </View>
                                 </TouchableOpacity>
-                            }
 
+                                <Text style={{ width: '50%', color: Colors.dimmText, textAlign: 'left', fontFamily: 'PoppinsRegular' }}>
+                                    {fileName}
+                                </Text>
+
+                                {docID &&
+                                    <TouchableOpacity style={{ width: '20%', alignItems: 'flex-end' }}
+                                        onPress={() => {
+                                            showImageBottomSheet();
+                                        }}>
+                                        <Entypo
+                                            name="dots-three-vertical"
+                                            size={25}
+                                            color={Colors.darkblue}
+                                        />
+                                    </TouchableOpacity>
+                                }
+
+                            </View>
                         </View>
-                    </View>
-
+                    }
 
                 </View>
 

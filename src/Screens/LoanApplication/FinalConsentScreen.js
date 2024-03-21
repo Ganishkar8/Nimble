@@ -29,9 +29,9 @@ import ErrorModal from '../../Components/ErrorModal';
 import { language } from '../../Utils/LanguageString';
 import Common from '../../Utils/Common';
 import tbl_client from '../../Database/Table/tbl_client';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
-
-const FinalConsentScreen = (props, { navigation }) => {
+const FinalConsentScreen = (props) => {
 
     const [loading, setLoading] = useState(false);
     const screenWidth = Dimensions.get('window').width;
@@ -39,6 +39,7 @@ const FinalConsentScreen = (props, { navigation }) => {
     const [mobileNumber, setMobileNumber] = useState('');
     const isScreenVisible = useIsFocused();
 
+    const [consentVisible, setConsentVisible] = useState(false);
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const [apiError, setApiError] = useState('');
 
@@ -46,12 +47,28 @@ const FinalConsentScreen = (props, { navigation }) => {
 
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
-        getMobileNumber();
+
         return () => {
             props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
             backHandler.remove();
         }
-    }, [navigation, isScreenVisible]);
+    }, [isScreenVisible]);
+
+    useEffect(() => {
+
+        getMobileNumber();
+
+    }, [props.navigation]);
+
+    useFocusEffect(
+        React.useCallback(() => {
+
+            setConsentVisible(true);
+            return () => {
+
+            };
+        }, []),
+    );
 
     const handleBackButton = () => {
         props.navigation.goBack();
@@ -143,6 +160,7 @@ const FinalConsentScreen = (props, { navigation }) => {
                 if (global.DEBUG_MODE) console.log('MobileOTPApiResponse::' + JSON.stringify(response.data),);
 
                 if (response.status == 200) {
+                    setConsentVisible(false);
                     props.navigation.navigate('ConsentOTPVerification', { mobileNumber: mobileNumber })
                 }
                 setLoading(false);
@@ -179,7 +197,7 @@ const FinalConsentScreen = (props, { navigation }) => {
                     contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" >
                     <View style={{ flex: 1 }}>
 
-                        <ConsentModal nextScreen={nextScreen} textContent={"I, hereby provide my informed consent you to proceed with my loan application. I acknowledge that I have received, read, and understood all the loan terms and conditions, as well as the associated costs, fees, and interest rates. I understand that the loan application process will involve the collection, processing, and verification of my personal and financial information.I consent to the following:1. The collection of necessary personal and financial information for the purpose of assessing and processing my loan application.2. The verification of my credit history and financial background as required by [Your Company Name or Bank].3. The disclosure of my credit score and related information to relevant credit reporting agencies for the purpose of this loan application.4. The sharing of my application and credit information with any necessary third parties such as underwriters, appraisers, or legal entities involved in the loan processing.5. The use of electronic signatures and documents as part of the application process.I acknowledge my responsibility to repay the loan in accordance with the terms and conditions specified in the loan agreement. I am aware that any false or misleading information provided in this application may result in the denial of my loan request.By signing this consent form, I confirm that I am providing my full consent and understanding of the loan application process as described."}></ConsentModal>
+                        <ConsentModal consentVisible={consentVisible} nextScreen={nextScreen} textContent={"I, hereby provide my informed consent you to proceed with my loan application. I acknowledge that I have received, read, and understood all the loan terms and conditions, as well as the associated costs, fees, and interest rates. I understand that the loan application process will involve the collection, processing, and verification of my personal and financial information.I consent to the following:1. The collection of necessary personal and financial information for the purpose of assessing and processing my loan application.2. The verification of my credit history and financial background as required by [Your Company Name or Bank].3. The disclosure of my credit score and related information to relevant credit reporting agencies for the purpose of this loan application.4. The sharing of my application and credit information with any necessary third parties such as underwriters, appraisers, or legal entities involved in the loan processing.5. The use of electronic signatures and documents as part of the application process.I acknowledge my responsibility to repay the loan in accordance with the terms and conditions specified in the loan agreement. I am aware that any false or misleading information provided in this application may result in the denial of my loan request.By signing this consent form, I confirm that I am providing my full consent and understanding of the loan application process as described."}></ConsentModal>
 
                     </View>
                 </ScrollView>

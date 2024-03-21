@@ -368,7 +368,7 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
         );
         console.log(existsInFinancialMandatory)
         if (!existsInFinancialMandatory) {
-          errorMessage = errorMessage + i + ')' + ' ' + 'Please Add ' + item.subCodeId + '\n';
+          errorMessage = errorMessage + i + ')' + ' ' + 'Please Add ' + item.label + '\n';
           i++;
           flag = true;
           //   }
@@ -376,7 +376,7 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
         }
       } else {
         if (item.isMandatory && item.clientType == global.CLIENTTYPE) {
-          errorMessage = errorMessage + i + ')' + ' ' + 'Please Add ' + item.subCodeId + '\n';
+          errorMessage = errorMessage + i + ')' + ' ' + 'Please Add ' + item.label + '\n';
           i++;
           flag = true;
         }
@@ -384,6 +384,14 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
 
 
     })
+
+    if (totalBusineesExpenses && totalOtherExpense && totalBusineesIncome && totalOtherIncome) {
+      if (parseInt(totalBusineesExpenses) + parseInt(totalOtherExpense) > parseInt(totalBusineesIncome) + parseInt(totalOtherIncome)) {
+        errorMessage = errorMessage + i + ')' + ' ' + 'Total Business Expenses Cannot Be Greater Than Total Business Income' + '\n';
+        i++;
+        flag = true;
+      }
+    }
 
     setErrMsg(errorMessage);
     return flag;

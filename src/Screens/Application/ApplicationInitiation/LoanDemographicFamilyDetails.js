@@ -45,7 +45,7 @@ import tbl_client from '../../../Database/Table/tbl_client';
 import tbl_loanApplication from '../../../Database/Table/tbl_loanApplication';
 import tbl_familydetails from '../../../Database/Table/tbl_familydetails';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { addLoanInitiationDetails, updateLoanInitiationDetails, deleteLoanInitiationDetails, updateClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
+import { addLoanInitiationDetails, updateLoanInitiationDetails, deleteLoanInitiationDetails, updateClientDetails, updateNestedClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
 
 
 const LoanDemographicFamilyDetails = (props) => {
@@ -76,6 +76,14 @@ const LoanDemographicFamilyDetails = (props) => {
     const [relationTypeCaption, setRelationTypeCaption] = useState('RELATION TYPE'); //FieldCaption
     const [relationTypeLabel, setRelationTypeLabel] = useState('');
     const [relationTypeIndex, setRelationTypeIndex] = useState('');
+
+    const [sameAsClientTypeMan, setSameAsClientTypeMan] = useState(false); //Manditory or not
+    const [sameAsClientTypeVisible, setSameAsClientTypeVisible] = useState(true); //Hide or not
+    const [sameAsClientTypeDisable, setSameAsClientTypeDisable] = useState(false); //Enable or Disable
+    const [sameAsClientTypeData, setSameAsClientTypeData] = useState([]); //DataPicking
+    const [sameAsClientTypeCaption, setSameAsClientTypeCaption] = useState('SAME AS CLIENT TYPE'); //FieldCaption
+    const [sameAsClientTypeLabel, setSameAsClientTypeLabel] = useState('');
+    const [sameAsClientTypeIndex, setSameAsClientTypeIndex] = useState('');
 
     const [relationStatuswithCOAPPMan, setRelationStatuswithCOAPPMan] = useState(false); //Manditory or not
     const [relationStatuswithCOAPPVisible, setRelationStatuswithCOAPPVisible] = useState(true); //Hide or not
@@ -227,6 +235,11 @@ const LoanDemographicFamilyDetails = (props) => {
     const [minLoanAmount, setMinLoanAmount] = useState(0);
     const [maxLoanAmount, setMaxLoanAmount] = useState(0);
 
+    const [isNomineeVisible, setIsNomineeVisible] = useState(true);
+    const [isNominee, setIsNominee] = useState(false);
+    const [isNomineeCaption, setIsNomineeCaption] = useState('Is Nominee?');
+    const [isNomineeDisable, setIsNomineeDisable] = useState(false);
+
 
     const [aadharNumber, setAadharNumber] = useState('');
     const [pageId, setPageId] = useState(global.CURRENTPAGEID);
@@ -271,8 +284,13 @@ const LoanDemographicFamilyDetails = (props) => {
         if (data?.length > 0) {
             setFamilyDetailAvailable(true);
             setFamilyID(data[0]?.id)
+            setSameAsClientTypeLabel(data[0]?.sameAsClient);
+            if (data[0]?.sameAsClient) {
+                sameAsClientDisable(true);
+            }
             setRelationTypeLabel(data[0]?.relationshipWithApplicant);
             setTitleLabel(data[0]?.title);
+            setIsNominee(data[0]?.isNominee == '1' ? true : false);
             setName(data[0]?.name);
             setGenderLabel(data[0]?.gender);
             setDOB(data[0].dateOfBirth ? Common.convertDateFormat(data[0]?.dateOfBirth) : '')
@@ -290,19 +308,63 @@ const LoanDemographicFamilyDetails = (props) => {
             setKycType4Label(data[0]?.kycTypeId4)
             setkycID4(data[0]?.kycIdValue4)
             setExpiry4Date(data[0]?.kycType4ExpiryDate)
-
-
             setRelationStatuswithCOAPPLabel(data[0]?.relationshipWithCoApplicant)
             setRelationStatuswithGRNTRLabel(data[0]?.relationshipWithGuarantor)
         }
     };
+
+    const getSameAsClientType = () => {
+
+        const filteredData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID));
+        var availRelationType = [];
+
+        if (filteredData.length > 0) {
+            const clientDetail = filteredData[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
+            if (clientDetail) {
+                const familyDetails = clientDetail.familyDetail;
+                if (familyDetails) {
+                    familyDetails.forEach(item => {
+                        availRelationType.push(item.sameAsClient)
+                    });
+                }
+            }
+        }
+
+        if (global.CLIENTTYPE == 'APPL') {
+            if (props.route.params.familyDetails?.length > 0) {
+                const filteredSameAsClientTypeData = leaduserCodeDetail.filter((data) => data.masterId === 'SAME_AS_ANY_CLIENT' && data.subCodeId != 'SAA').sort((a, b) => a.Description.localeCompare(b.Description));;
+                setSameAsClientTypeData(filteredSameAsClientTypeData);
+            } else {
+                const filteredSameAsClientTypeData = leaduserCodeDetail.filter((data) => data.masterId === 'SAME_AS_ANY_CLIENT' && data.subCodeId != 'SAA' && !availRelationType.includes(data.subCodeId)).sort((a, b) => a.Description.localeCompare(b.Description));;
+                setSameAsClientTypeData(filteredSameAsClientTypeData);
+            }
+
+        } else if (global.CLIENTTYPE == 'CO-APPL') {
+            if (props.route.params.familyDetails?.length > 0) {
+                const filteredSameAsClientTypeData = leaduserCodeDetail.filter((data) => data.masterId === 'SAME_AS_ANY_CLIENT' && data.subCodeId != 'SAC').sort((a, b) => a.Description.localeCompare(b.Description));;
+                setSameAsClientTypeData(filteredSameAsClientTypeData);
+            } else {
+                const filteredSameAsClientTypeData = leaduserCodeDetail.filter((data) => data.masterId === 'SAME_AS_ANY_CLIENT' && data.subCodeId != 'SAC' && !availRelationType.includes(data.subCodeId)).sort((a, b) => a.Description.localeCompare(b.Description));;
+                setSameAsClientTypeData(filteredSameAsClientTypeData);
+            }
+        } else if (global.CLIENTTYPE == 'GRNTR') {
+            if (props.route.params.familyDetails?.length > 0) {
+                const filteredSameAsClientTypeData = leaduserCodeDetail.filter((data) => data.masterId === 'SAME_AS_ANY_CLIENT' && data.subCodeId != 'SAG').sort((a, b) => a.Description.localeCompare(b.Description));;
+                setSameAsClientTypeData(filteredSameAsClientTypeData);
+            } else {
+                const filteredSameAsClientTypeData = leaduserCodeDetail.filter((data) => data.masterId === 'SAME_AS_ANY_CLIENT' && data.subCodeId != 'SAG' && !availRelationType.includes(data.subCodeId)).sort((a, b) => a.Description.localeCompare(b.Description));;
+                setSameAsClientTypeData(filteredSameAsClientTypeData);
+            }
+        }
+    }
+
 
     useFocusEffect(
         React.useCallback(() => {
             makeSystemMandatoryFields();
             getSystemCodeDetail();
             getApplicantData();
-
+            getSameAsClientType();
 
 
             if (global.USERTYPEID == 1163 || global.ALLOWEDIT == "0") {
@@ -336,6 +398,28 @@ const LoanDemographicFamilyDetails = (props) => {
     }
 
     const fieldsDisable = () => {
+        setSameAsClientTypeDisable(true);
+        setRelationTypeDisable(true);
+        setIsNomineeDisable(true);
+        setTitleDisable(true);
+        setNameDisable(true);
+        setGenderDisable(true);
+        setDOBDisable(true);
+        setAgeDisable(true);
+        setMobileNumberDisable(true);
+        setKycType1Disable(true);
+        setExpiry1DateDisable(true);
+        setKycType2Disable(true);
+        setExpiry2DateDisable(true);
+        setKycType3Disable(true);
+        setExpiry3DateDisable(true);
+        setKycType4Disable(true);
+        setExpiry4DateDisable(true);
+        setRelationStatuswithCOAPPDisable(true);
+        setRelationStatuswithGRNTRDisable(true);
+    }
+
+    const sameAsClientDisable = () => {
         setRelationTypeDisable(true);
         setTitleDisable(true);
         setNameDisable(true);
@@ -344,11 +428,47 @@ const LoanDemographicFamilyDetails = (props) => {
         setAgeDisable(true);
         setMobileNumberDisable(true);
         setKycType1Disable(true);
+        setExpiry1DateDisable(true);
         setKycType2Disable(true);
+        setExpiry2DateDisable(true);
         setKycType3Disable(true);
+        setExpiry3DateDisable(true);
         setKycType4Disable(true);
-        setRelationStatuswithCOAPPDisable(true);
-        setRelationStatuswithGRNTRDisable(true);
+        setExpiry4DateDisable(true);
+    }
+
+    const sameAsClientEnable = () => {
+        setRelationTypeLabel('');
+        setRelationTypeDisable(false);
+        setTitleLabel('');
+        setTitleDisable(false);
+        setName('');
+        setNameDisable(false);
+        setGenderLabel('');
+        setGenderDisable(false);
+        setDOB('');
+        setDOBDisable(false);
+        setAge('');
+        setAgeDisable(false);
+        setMobileNumber('');
+        setMobileNumberDisable(false);
+        setKycType1Label('');
+        setkycID1('');
+        setExpiry1Date('');
+        setKycType1Disable(false);
+        setExpiry1DateDisable(false);
+        setKycType2Label('');
+        setkycID2('');
+        setExpiry2Date('');
+        setKycType2Disable(false);
+        setKycType3Label('');
+        setkycID3('');
+        setExpiry3Date('');
+        setKycType3Disable(false);
+        setKycType4Label('');
+        setkycID4('');
+        setExpiry4Date('');
+        setKycType4Disable(false);
     }
 
     const getSystemCodeDetail = async () => {
@@ -742,6 +862,8 @@ const LoanDemographicFamilyDetails = (props) => {
                     "name": Name,
                     "dateOfBirth": DOB.length > 0 ? Common.convertYearDateFormat(DOB) : '',
                     "age": Age,
+                    "sameAsClient": sameAsClientTypeLabel,
+                    "isNominee": isNominee ? '1' : '0',
                     "title": titleLabel,
                     "mobileNumber": mobileNumber,
                     "gender": genderLabel,
@@ -768,14 +890,15 @@ const LoanDemographicFamilyDetails = (props) => {
             const baseURL = global.PORT1;
             setLoading(true);
             apiInstance(baseURL)
-                .post(`/api/v2/loan-demographics/${global.LOANAPPLICATIONID}/familyDetails`, appDetails)
+                .post(`/api/v2/loan-demographics/${global.CLIENTID}/familyDetails`, appDetails)
                 .then(async response => {
                     // Handle the response data
 
                     if (global.DEBUG_MODE) console.log('PostFamilyDetailApiResponse::' + JSON.stringify(response.data),);
                     setLoading(false);
                     if (response.status == 200) {
-                        props.updateClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'familyDetail', response.data[0])
+                        props.updateNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'familyDetail', response.data[0])
+                        //props.updateClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'familyDetail', response.data[0])
                         props.navigation.replace('FamilyDetailList');
                         //await insertData(response.data[0].id);
                     } else if (response.data.statusCode === 201) {
@@ -819,6 +942,8 @@ const LoanDemographicFamilyDetails = (props) => {
                 "name": Name,
                 "dateOfBirth": DOB ? Common.convertYearDateFormat(DOB) : '',
                 "age": Age,
+                "sameAsClient": sameAsClientTypeLabel,
+                "isNominee": isNominee ? '1' : '0',
                 "title": titleLabel,
                 "gender": genderLabel,
                 "mobileNumber": mobileNumber,
@@ -851,7 +976,8 @@ const LoanDemographicFamilyDetails = (props) => {
                     if (global.DEBUG_MODE) console.log('UpdateFamilyApiResponse::' + JSON.stringify(response.data),);
                     setLoading(false);
                     if (response.status == 200) {
-                        props.updateLoanInitiationDetails(parseInt(global.LOANAPPLICATIONID), [], 'familyDetail', response.data.id, response.data)
+                        props.updateNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'familyDetail', response.data)
+                        // props.updateLoanInitiationDetails(parseInt(global.LOANAPPLICATIONID), [], 'familyDetail', response.data.id, response.data)
                         props.navigation.replace('FamilyDetailList');
                         // await insertData(familyID);
                     } else if (response.data.statusCode === 201) {
@@ -1238,9 +1364,163 @@ const LoanDemographicFamilyDetails = (props) => {
             }
         }
 
+        const filteredData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID));
+
+        if (filteredData.length > 0) {
+            const clientDetail = filteredData[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
+            if (clientDetail) {
+                if (clientDetail?.familyDetail) {
+                    var isNomineeAvailable = clientDetail.familyDetail.some(item => item.isNominee == '1' && item.id != familyID);
+
+                    if (isNomineeAvailable && isNominee) {
+                        errorMessage =
+                            errorMessage +
+                            i +
+                            ')' +
+                            ' ' +
+                            "Cannot Add Two Relation As a Nominee" +
+                            '\n';
+                        i++;
+                        flag = true;
+                    }
+
+                    var isSameAsClientTypeAvailable = clientDetail.familyDetail.some(item => item.sameAsClient == sameAsClientTypeLabel && item.id != familyID);
+
+                    if (isSameAsClientTypeAvailable && sameAsClientTypeLabel) {
+                        errorMessage =
+                            errorMessage +
+                            i +
+                            ')' +
+                            ' ' +
+                            "Cannot Add Same As Client Type Multiple Times" +
+                            '\n';
+                        i++;
+                        flag = true;
+                    }
+
+                }
+            }
+        }
+
         setErrMsg(errorMessage);
         return flag;
     };
+
+    const getClientWiseData = (clientType) => {
+
+        const filteredData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID));
+
+        if (filteredData.length > 0) {
+
+            const clientDetail = filteredData[0].clientDetail.find(client => client.clientType == clientType);
+            //alert(JSON.stringify(clientDetail))
+            if (clientDetail) {
+
+                setRelationTypeLabel(clientDetail.relationType);
+                if (clientDetail.relationType) {
+                    setRelationTypeDisable(true);
+                }
+                setTitleLabel(clientDetail.title);
+                if (clientDetail.title) {
+                    setTitleDisable(true);
+                }
+                setName(clientDetail.firstName + ' ' + clientDetail.middleName + ' ' + clientDetail.lastName)
+                if (clientDetail.firstName) {
+                    setNameDisable(true);
+                }
+                setGenderLabel(clientDetail.gender);
+                if (clientDetail.gender) {
+                    setGenderDisable(true);
+                }
+                if (clientDetail.dateOfBirth) {
+                    setDOB(Common.convertDateFormat(clientDetail.dateOfBirth))
+                    setDOBDisable(true);
+                }
+
+                if (clientDetail.age) {
+                    setAge(clientDetail?.age?.toString() ?? '');
+                    setAgeDisable(true);
+                } else {
+                    if (clientDetail.dateOfBirth) {
+                        setAge(Common.calculateAge(Common.convertDateFormat(clientDetail.dateOfBirth)).toString())
+                    }
+                }
+
+                setMobileNumber(clientDetail.mobileNumber);
+                if (clientDetail.mobileNumber) {
+                    setMobileNumberDisable(true);
+                }
+
+                setKycType1Label(clientDetail.kycTypeId1);
+                if (clientDetail.kycTypeId1) {
+                    setKycType1Disable(true);
+                    setExpiry1DateDisable(true);
+                }
+                setkycID1(clientDetail.kycIdValue1);
+                if (clientDetail.kycTypeId1 == '002' || clientDetail.kycTypeId1 == '008') {
+                    setExpiry1DateVisible(true);
+                    setExpiry1DateMan(true);
+                    setExpiry1Date(Common.convertDateFormat(clientDetail.kycType1ExpiryDate));
+                } else {
+                    setExpiry1Date('');
+                    setExpiry1DateVisible(false);
+                    setExpiry1DateMan(false);
+                }
+                setKycType2Label(clientDetail.kycTypeId2);
+                if (clientDetail.kycTypeId2) {
+                    setKycType2Disable(true);
+                    setExpiry2DateDisable(true);
+                }
+                setkycID2(clientDetail.kycIdValue2);
+                if (clientDetail.kycTypeId2 == '002' || clientDetail.kycTypeId2 == '008') {
+                    setExpiry2DateVisible(true);
+                    setExpiry2DateMan(true);
+                    setExpiry2Date(Common.convertDateFormat(clientDetail.kycType2ExpiryDate));
+                } else {
+                    setExpiry2Date('');
+                    setExpiry2DateVisible(false);
+                    setExpiry2DateMan(false);
+                }
+                setKycType3Label(clientDetail.kycTypeId3);
+                if (clientDetail.kycTypeId3) {
+                    setKycType3Disable(true);
+                    setExpiry3DateDisable(true);
+                }
+                setkycID3(clientDetail.kycIdValue3);
+                if (clientDetail.kycTypeId3 == '002' || clientDetail.kycTypeId3 == '008') {
+                    setExpiry3DateVisible(true);
+                    setExpiry3DateMan(true);
+                    setExpiry3Date(Common.convertDateFormat(clientDetail.kycType3ExpiryDate));
+                } else {
+                    setExpiry3Date('');
+                    setExpiry3DateVisible(false);
+                    setExpiry3DateMan(false);
+                }
+                setKycType4Label(clientDetail.kycTypeId4);
+                if (clientDetail.kycTypeId4) {
+                    setKycType4Disable(true);
+                    setExpiry4DateDisable(true);
+                }
+                setkycID4(clientDetail.kycIdValue4);
+                if (clientDetail.kycTypeId4 == '002' || clientDetail.kycTypeId4 == '008') {
+                    setExpiry4DateVisible(true);
+                    setExpiry4DateMan(true);
+                    setExpiry4Date(Common.convertDateFormat(clientDetail.kycType4ExpiryDate));
+                } else {
+                    setExpiry4Date('');
+                    setExpiry4DateVisible(false);
+                    setExpiry4DateMan(false);
+                }
+
+            } else {
+                if (global.DEBUG_MODE) console.log("Client ID not found in clientDetail array.");
+            }
+        } else {
+            if (global.DEBUG_MODE) console.log("Loan application number not found.");
+        }
+
+
+    }
 
     const handleClick = (componentName, textValue) => {
         if (componentName === 'kycID1') {
@@ -1273,6 +1553,8 @@ const LoanDemographicFamilyDetails = (props) => {
             } else {
                 setMobileNumber(textValue);
             }
+        } else if (componentName === 'isNominee') {
+            setIsNominee(textValue)
         }
     };
 
@@ -1387,6 +1669,19 @@ const LoanDemographicFamilyDetails = (props) => {
         } else if (componentName === 'RelationTypeGRNTR') {
             setRelationStatuswithGRNTRLabel(label);
             setRelationStatuswithGRNTRIndex(index);
+        } else if (componentName === 'SameAsTypePicker') {
+
+            if (label == 'SAC') {
+                getClientWiseData('CO-APPL');
+            } else if (label == 'SAG') {
+                getClientWiseData('GRNTR');
+            } else if (label == 'SAA') {
+                getClientWiseData('APPL');
+            } else {
+                sameAsClientEnable();
+            }
+            setSameAsClientTypeLabel(label);
+            setSameAsClientTypeIndex(index);
         }
 
 
@@ -1458,6 +1753,28 @@ const LoanDemographicFamilyDetails = (props) => {
                         </View>
                     </View>
 
+                    {sameAsClientTypeVisible && (
+                        <View
+                            style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+                            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                                <TextComp
+                                    textVal={sameAsClientTypeCaption}
+                                    textStyle={Commonstyles.inputtextStyle}
+                                    Visible={sameAsClientTypeMan}
+                                />
+                            </View>
+
+                            <PickerComp
+                                textLabel={sameAsClientTypeLabel}
+                                pickerStyle={Commonstyles.picker}
+                                Disable={sameAsClientTypeDisable}
+                                pickerdata={sameAsClientTypeData}
+                                componentName="SameAsTypePicker"
+                                handlePickerClick={handlePickerClick}
+                            />
+                        </View>
+                    )}
+
 
                     {relationTypeVisible && (
                         <View
@@ -1480,6 +1797,22 @@ const LoanDemographicFamilyDetails = (props) => {
                             />
                         </View>
                     )}
+
+
+                    {isNomineeVisible &&
+                        <View
+                            style={{ flexDirection: 'row', alignItems: 'center', marginTop: 19 }}>
+                            <CheckBoxComp
+                                textValue={isNominee}
+                                Disable={isNomineeDisable}
+                                ComponentName="isNominee"
+                                returnKey="next"
+                                handleClick={handleClick}
+                                Visible={false}
+                                textCaption={isNomineeCaption}
+                            />
+                        </View>
+                    }
 
                     {titleVisible && <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
@@ -2139,6 +2472,7 @@ const mapDispatchToProps = dispatch => ({
     dedupeAction: item => dispatch(dedupeAction(item)),
     deleteDedupe: item => dispatch(deleteDedupe()),
     updateClientDetails: (loanApplicationId, clientId, key, data) => dispatch(updateClientDetails(loanApplicationId, clientId, key, data)),
+    updateNestedClientDetails: (loanApplicationId, clientId, key, nestedKey, data) => dispatch(updateNestedClientDetails(loanApplicationId, clientId, key, nestedKey, data)),
     updateLoanInitiationDetails: (loanApplicationId, loanData, key, clientId, updatedDetails) => dispatch(updateLoanInitiationDetails(loanApplicationId, loanData, key, clientId, updatedDetails)),
 });
 

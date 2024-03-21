@@ -64,11 +64,19 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
   ] = useState('');
 
   const [loading, setLoading] = useState(false);
+
+  const [fullName, setFullName] = useState('');
+  const [fullNameCaption, setFullNameCaption] = useState('FULL NAME');
+  const [fullNameMan, setFullNameMan] = useState(false);
+  const [fullNameVisible, setFullNameVisible] = useState(true);
+  const [fullNameDisable, setFullNameDisable] = useState(true);
+
   const [firstName, setFirstName] = useState('');
   const [firstNameCaption, setFirstNameCaption] = useState('FIRST NAME');
   const [firstNameMan, setFirstNameMan] = useState(false);
   const [firstNameVisible, setFirstNameVisible] = useState(true);
   const [firstNameDisable, setFirstNameDisable] = useState(false);
+
   const [middleName, setMiddleName] = useState('');
   const [middleNameMan, setMiddleNameMan] = useState(false);
   const [middleNameCaption, setMiddleNameCaption] = useState('MIDDLE NAME');
@@ -83,6 +91,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
   const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
   const showBottomSheet = () => setBottomErrorSheetVisible(true);
   const hideBottomSheet = () => setBottomErrorSheetVisible(false);
+  const fullNameRef = useRef(null);
   const firstNameRef = useRef(null);
   const middleNameRef = useRef(null);
   const lastNameRef = useRef(null);
@@ -656,6 +665,13 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
 
   const getClientData = (value) => {
 
+    if (value.fullName) {
+      setFullNameVisible(true);
+      setFullName(value.fullName)
+    } else {
+      setFullNameVisible(false);
+    }
+
     setTitleLabel(value?.title ?? '');
     setFirstName(value?.firstName ?? '');
     setMiddleName(value?.middleName ?? '');
@@ -735,21 +751,21 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
   const disableAadharFields = (aadharverify, fatherName, spouseName) => {
 
     if (aadharverify) {
-      setFirstNameDisable(true);
-      if (middleName) {
-        setMiddleNameDisable(true);
-      } else {
-        setMiddleNameDisable(false);
-      }
+      // setFirstNameDisable(true);
+      // if (middleName) {
+      //   setMiddleNameDisable(true);
+      // } else {
+      //   setMiddleNameDisable(false);
+      // }
 
-      if (lastName) {
-        setLastNameDisable(true);
-      } else {
-        setLastNameDisable(false);
-      }
+      // if (lastName) {
+      //   setLastNameDisable(true);
+      // } else {
+      //   setLastNameDisable(false);
+      // }
 
 
-      setMiddleNameMan(false)
+      // setMiddleNameMan(false)
       setGenderDisable(true);
       setDOBDisable(true);
       setAgeDisable(true);
@@ -1642,6 +1658,38 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
                 pickerdata={TitleData}
                 componentName="Title"
                 handlePickerClick={handlePickerClick}
+              />
+            </View>
+          )}
+
+          {fullNameVisible && (
+            <View
+              style={{
+                width: '100%',
+                marginTop: 19,
+                paddingHorizontal: 0,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                <TextComp
+                  textVal={fullNameCaption}
+                  textStyle={Commonstyles.inputtextStyle}
+                  Visible={fullNameMan}
+                />
+              </View>
+
+              <TextInputComp
+                textValue={fullName}
+                textStyle={Commonstyles.textinputtextStyle}
+                type="email-address"
+                Disable={fullNameDisable}
+                ComponentName="fullName"
+                reference={fullNameRef}
+                returnKey="next"
+                handleClick={handleClick}
+                handleReference={handleReference}
+                length={30}
               />
             </View>
           )}

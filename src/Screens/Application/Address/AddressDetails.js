@@ -459,6 +459,44 @@ const AddressDetails = (props, { navigation }) => {
     if (global.CLIENTTYPE == 'CO-APPL' || global.CLIENTTYPE == 'GRNTR') {
       setSameAsLabel(data?.sameAsCustAddrType);
       setSameAsVisible(true);
+      if (data?.sameAsCustAddrType) {
+        fieldsDisable();
+        if (!(global.ALLOWEDIT == "0")) {
+          setAddressTypeDisable(false);
+          setSameAsDisable(false);
+        }
+
+      }
+      if (global.CLIENTTYPE == 'CO-APPL') {
+        setSameAsVisible(true);
+        var type = '';
+        if (data.addressType == 'C') {
+          type = 'AP-CA'
+        } else {
+          type = 'AP-PA'
+        }
+
+        const filterSameAs = userCodeDetail.filter((data) => data.masterId === 'SAME_AS' && data.subCodeId == type);
+        setSameAsData(filterSameAs)
+
+
+      } else if (global.CLIENTTYPE == 'GRNTR') {
+        setSameAsVisible(true);
+        var type = '', type1 = '';
+        if (data.addressType == 'C') {
+          type = 'AP-CA';
+          type1 = 'CAP-CA';
+        } else {
+          type = 'AP-PA'
+          type1 = 'CAP-PA'
+        }
+
+        const filterSameAs = userCodeDetail.filter((data) => data.masterId === 'SAME_AS' && (data.subCodeId == type || data.subCodeId == type1));
+        setSameAsData(filterSameAs)
+
+
+      }
+
     }
     //spinner
     setAddressTypeLabel(data.addressType)
@@ -575,13 +613,13 @@ const AddressDetails = (props, { navigation }) => {
     if (filteredData.length > 0) {
 
       const clientDetail = filteredData[0].clientDetail.find(client => client.clientType == clientType);
-
+      //alert(JSON.stringify(clientDetail))
       if (clientDetail) {
 
         const addressDetails = clientDetail.clientAddress;
         if (addressDetails) {
 
-          const permanentAddress = addressDetails.find(item => item.addressType === addressType);
+          const permanentAddress = addressDetails.find(item => item.addressType == addressType);
 
           if (permanentAddress) {
             setAddressLine1(permanentAddress.addressLine1)
@@ -610,6 +648,8 @@ const AddressDetails = (props, { navigation }) => {
               setOwnerName('')
             }
             fieldsDisable();
+            setAddressTypeDisable(false);
+            setSameAsDisable(false)
             setIsKYC(false);
           }
 
@@ -801,7 +841,13 @@ const AddressDetails = (props, { navigation }) => {
       const uniqueFilterAddressTypeData = filterAddressTypeData.filter(data => !availAddresssType.includes(data.subCodeId));
       setaddressTypeData(uniqueFilterAddressTypeData)
     } else {
-      setaddressTypeData(filterAddressTypeData)
+      if (availAddresssType?.length >= 2) {
+        const uniqueFilterAddressTypeData = filterAddressTypeData.filter(data => data.subCodeId == isNew.addressType);
+        setaddressTypeData(uniqueFilterAddressTypeData)
+      } else {
+        setaddressTypeData(filterAddressTypeData)
+      }
+
     }
 
     const filterActionTypeData = userCodeDetail.filter((data) => data.masterId === 'ACTION_TYPE');
@@ -1528,7 +1574,7 @@ const AddressDetails = (props, { navigation }) => {
           type1 = 'CAP-PA'
         }
         setSameAsLabel('');
-        const filterSameAs = userCodeDetail.filter((data) => data.masterId === 'SAME_AS' && data.subCodeId == type && data.subCodeId == type1);
+        const filterSameAs = userCodeDetail.filter((data) => data.masterId === 'SAME_AS' && (data.subCodeId == type || data.subCodeId == type1));
         setSameAsData(filterSameAs)
         clearAllFields();
         fieldsEnable();
@@ -1563,9 +1609,11 @@ const AddressDetails = (props, { navigation }) => {
       setAddressOwnerTypeIndex(index);
     } else if (componentName === 'SameAsPicker') {
       if (label?.length > 0) {
-        sameAsPermDisable(true);
+        setsameAsPermDisable(true);
       } else {
-        sameAsPermDisable(false);
+        setsameAsPermDisable(false);
+        fieldsEnable();
+        clearAllFields();
       }
       setSameAsLabel(label);
       setSameAsIndex(index);

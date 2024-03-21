@@ -36,6 +36,7 @@ import tbl_loanApplication from '../../../Database/Table/tbl_loanApplication';
 import ErrorMessageModal from '../../../Components/ErrorMessageModal';
 import { check } from 'react-native-permissions';
 import { deleteNestedClientDetails, updateAsyncNestedClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
+import CenteredModal from '../../../Components/CenteredModal';
 
 const AddressMainList = (props, { navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -48,6 +49,8 @@ const AddressMainList = (props, { navigation }) => {
   const [processModule, setProcessModule] = useState(props.mobilecodedetail.processModule);
   const [processModuleLength, setProcessModuleLength] = useState(global.FILTEREDPROCESSMODULE.length);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [consentModalVisible, setConsentModalVisible] = useState(false);
+  const [description, setDescription] = useState('');
   const [kycManual, setKYCManual] = useState('0');
   const [errMsg, setErrMsg] = useState('');
   const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
@@ -183,7 +186,7 @@ const AddressMainList = (props, { navigation }) => {
           } else {
             setPermanentAvailable(false);
           }
-          if (communicationAvailable && permanentAvailable) {
+          if (communicationAddress && permanentAddress) {
             setAddAddressVisible(false)
           } else {
             setAddAddressVisible(true)
@@ -381,7 +384,7 @@ const AddressMainList = (props, { navigation }) => {
 
   const deletedata = async (addressID) => {
 
-    const newArray = addressDetails.filter(item => item.id !== addressID);
+    const newArray = addressDetails.filter(item => item.id != addressID);
     if (newArray.length > 0) {
       const communicationAddress = newArray.find(item => item.address_type === 'C');
       const permanentAddress = newArray.find(item => item.address_type === 'P');
@@ -395,7 +398,7 @@ const AddressMainList = (props, { navigation }) => {
       } else {
         setPermanentAvailable(false)
       }
-      if (communicationAvailable && permanentAvailable) {
+      if (communicationAddress && permanentAddress) {
         setAddAddressVisible(false)
       } else {
         setAddAddressVisible(true)
@@ -495,8 +498,13 @@ const AddressMainList = (props, { navigation }) => {
               }
             }
           }
+          if (response.data.description) {
+            setDescription(response.data.description)
+            setConsentModalVisible(true);
+          } else {
+            props.navigation.replace('LoanApplicationMain', { fromScreen: 'AddressDetail' });
+          }
 
-          props.navigation.replace('LoanApplicationMain', { fromScreen: 'AddressDetail' });
         }
         else if (response.data.statusCode === 201) {
           setApiError(response.data.message);
@@ -528,6 +536,11 @@ const AddressMainList = (props, { navigation }) => {
       });
 
   };
+
+  const handleModalClick = () => {
+    setConsentModalVisible(false);
+    props.navigation.replace('LoanApplicationMain', { fromScreen: 'AddressDetail' });
+  }
 
   const updatetrackerStatus = (status) => {
     //const clientTypeToUpdate = global.CLIENTTYPE;
@@ -770,6 +783,9 @@ const AddressMainList = (props, { navigation }) => {
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
       <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
       <DeleteConfirmModel isVisible={deleteModalVisible} onClose={closeDeleteModal} textContent={language[0][props.language].str_deletedesc} textClose={language[0][props.language].str_no} textDelete={language[0][props.language].str_yes} deleteClick={onDeleteClick} />
+
+      <CenteredModal isVisible={consentModalVisible} onClose={handleModalClick} textContent={description} textClose={language[0][props.language].str_ok} />
+
 
       <ErrorMessageModal
         isVisible={bottomErrorSheetVisible}

@@ -217,9 +217,10 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
                     tbl_bankdetails.insertBankDetails(bankdetail.id, loanApplicationID, client.id, client.clientType, bankdetail.accountType, bankdetail.accountHolderNameAsPerBank, bankdetail.ifscCode, bankdetail.bankName, bankdetail.branchName, bankdetail.accountNumber, bankdetail.bankLinkedMobileNo, bankdetail.upiId, bankdetail.dmsId, bankdetail.accountToBeUsedFor, "")
                 });
             }
-            if (global.DEBUG_MODE) console.log('Client Business Details:' + client.clientBusinessDetail);
 
             if (client.clientBusinessDetail != undefined) {
+                if (global.DEBUG_MODE) console.log('Client Business Details:' + client.clientBusinessDetail);
+
                 const businessdetail = client.clientBusinessDetail
                 //  client.clientBusinessDetail.forEach((businessdetail) => {
                 tbl_loanbusinessDetail.insertBusinessDetail(loanApplicationID, businessdetail.id, client.id, client.clientType, businessdetail.customerSubcategory, businessdetail.enterpriseShopName, businessdetail.udyamRegistrationNumber, businessdetail.dateOfIncorporation, businessdetail.dateOfRegistration, businessdetail.dateOfBusinessCommencement, businessdetail.businessVintageYears, businessdetail.businessVintageMonths, businessdetail.industryType, businessdetail.industryLine, businessdetail.companyType, businessdetail.enterpriseType, businessdetail.businessLocationVillage, businessdetail.noOfEmployees, businessdetail.operatingDaysInAWeek, businessdetail.operatingTimesInADay, businessdetail.bookKeepingStatus, businessdetail.homeBasedBusiness, businessdetail.applicantCustomerTransactionMode, businessdetail.timeSpentAtTheBusinessInADay, businessdetail.npmRateOfBusiness, businessdetail.purchasesFrequency, businessdetail.typeOfPurchasingFacility, businessdetail.salesFrequency, businessdetail.clientBusinessImageGeocodeDetail[0].dmsId);
@@ -246,27 +247,27 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
 
         });
 
-        await value.familyDetail.forEach(async (client) => {
-            var dob = '', exp1 = '', exp2 = '', exp3 = '', exp4 = '';
-            if (global.DEBUG_MODE) console.log('Loan Family Details:' + client);
-            if (client.dateOfBirth && client.dateOfBirth != undefined) {
-                dob = Common.convertDateFormat(client.dateOfBirth);
-            }
-            if (client.kycType1ExpiryDate && client.kycType1ExpiryDate != undefined) {
-                exp1 = Common.convertDateFormat(client.kycType1ExpiryDate);
-            }
-            if (client.kycType2ExpiryDate && client.kycType2ExpiryDate != undefined) {
-                exp2 = Common.convertDateFormat(client.kycType2ExpiryDate);
-            }
-            if (client.kycType3ExpiryDate && client.kycType3ExpiryDate != undefined) {
-                exp3 = Common.convertDateFormat(client.kycType3ExpiryDate);
-            }
-            if (client.kycType4ExpiryDate && client.kycType4ExpiryDate != undefined) {
-                exp4 = Common.convertDateFormat(client.kycType4ExpiryDate);
-            }
-            await tbl_familydetails.insertFamilyDetails(client.id, loanApplicationID, 'APPL', client.relationshipWithApplicant, client.title, client.name, '', '', dob, client.age, client.gender, client.mobileNumber, client.kycTypeId1, client.kycIdValue1, exp1, client.kycTypeId2, client.kycIdValue2, exp2, client.kycTypeId3, client.kycIdValue3, exp3, client.kycTypeId4, client.kycIdValue4, exp4, '0', client.relationshipWithCoApplicant, client.relationshipWithGuarantor);
+        // await value.familyDetail.forEach(async (client) => {
+        //     var dob = '', exp1 = '', exp2 = '', exp3 = '', exp4 = '';
+        //     if (global.DEBUG_MODE) console.log('Loan Family Details:' + client);
+        //     if (client.dateOfBirth && client.dateOfBirth != undefined) {
+        //         dob = Common.convertDateFormat(client.dateOfBirth);
+        //     }
+        //     if (client.kycType1ExpiryDate && client.kycType1ExpiryDate != undefined) {
+        //         exp1 = Common.convertDateFormat(client.kycType1ExpiryDate);
+        //     }
+        //     if (client.kycType2ExpiryDate && client.kycType2ExpiryDate != undefined) {
+        //         exp2 = Common.convertDateFormat(client.kycType2ExpiryDate);
+        //     }
+        //     if (client.kycType3ExpiryDate && client.kycType3ExpiryDate != undefined) {
+        //         exp3 = Common.convertDateFormat(client.kycType3ExpiryDate);
+        //     }
+        //     if (client.kycType4ExpiryDate && client.kycType4ExpiryDate != undefined) {
+        //         exp4 = Common.convertDateFormat(client.kycType4ExpiryDate);
+        //     }
+        //     await tbl_familydetails.insertFamilyDetails(client.id, loanApplicationID, 'APPL', client.relationshipWithApplicant, client.title, client.name, '', '', dob, client.age, client.gender, client.mobileNumber, client.kycTypeId1, client.kycIdValue1, exp1, client.kycTypeId2, client.kycIdValue2, exp2, client.kycTypeId3, client.kycIdValue3, exp3, client.kycTypeId4, client.kycIdValue4, exp4, '0', client.relationshipWithCoApplicant, client.relationshipWithGuarantor);
 
-        });
+        // });
 
 
         setLoading(false);
@@ -511,6 +512,15 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
                                         <Text style={styles.childText}>:  {listData.ageing} days</Text>
                                     </View>
                                 </View>
+                                {listData.assignedTo &&
+                                    <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, marginBottom: 5 }}>
+                                        <View style={{ width: '45%' }}>
+                                            <Text style={styles.headText}>{language[0][props.language].str_assignedto}</Text>
+                                        </View>
+                                        <View style={{ width: '55%' }}>
+                                            <Text style={styles.childText}>:  {listData.assignedTo}</Text>
+                                        </View>
+                                    </View>}
                                 <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, marginBottom: 5 }}>
                                     <View style={{ width: '45%' }}>
                                         <Text style={styles.headText}>{language[0][props.language].str_currentleadownerid}</Text>

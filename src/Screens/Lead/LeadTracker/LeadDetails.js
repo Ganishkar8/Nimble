@@ -217,6 +217,7 @@ const LeadDetails = (props, { navigation, route }) => {
                 global.COMPLETEDMODULE = '';
                 global.COMPLETEDPAGE = '';
                 global.COMPLETEDSUBSTAGE = '';
+                global.STAGESTATUS = "";
                 props.navigation.navigate('ConsentScreen', { leadData: [leadData] });
             }
         }

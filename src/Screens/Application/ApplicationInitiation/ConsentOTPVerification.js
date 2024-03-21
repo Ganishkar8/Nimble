@@ -39,7 +39,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Button, Menu, Divider } from 'react-native-paper';
 import { useIsFocused } from '@react-navigation/native';
 import ErrorModal from '../../../Components/ErrorModal';
-import tbl_client from '../../../Database/Table/tbl_client';
+import CenteredModal from '../../../Components/CenteredModal';
 const CELL_COUNT = 3;
 const CELL_SIZE = 46;
 const CELL_BORDER_RADIUS = 8;
@@ -88,6 +88,8 @@ const ConsentOTPVerification = (props, { navigation }) => {
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const [apiError, setApiError] = useState('');
 
+    const [consentModalVisible, setConsentModalVisible] = useState(false);
+    const [description, setDescription] = useState('');
 
     const closeMenu = () => setMenuVisible(false);
 
@@ -256,6 +258,11 @@ const ConsentOTPVerification = (props, { navigation }) => {
 
     };
 
+    const handleModalClick = () => {
+        setConsentModalVisible(false);
+        props.navigation.replace('LoanApplicationMain', { fromScreen: 'BankList' });
+    }
+
     const updateLoanStatus = () => {
 
         var module = ''; var page = '';
@@ -284,7 +291,15 @@ const ConsentOTPVerification = (props, { navigation }) => {
                 global.COMPLETEDMODULE = 'BRE';
                 global.COMPLETEDPAGE = 'BRE_VIEW';
                 if (global.ISDEVIATIONPRESENT) {
-                    updateLoanStatusDeviation('InProgress');
+                    //updateLoanStatusDeviation('InProgress');
+                    setLoading(false);
+                    if (response.data.description) {
+                        setDescription(response.data.description)
+                        setConsentModalVisible(true);
+                    } else {
+                        props.navigation.replace('LoanApplicationMain', { fromScreen: 'BREView' });
+                    }
+
                 } else {
                     updateLoanStatusDeviation('Completed');
                     //setLoading(false);
@@ -320,8 +335,12 @@ const ConsentOTPVerification = (props, { navigation }) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log('UpdateStatusApiResponse::' + JSON.stringify(response.data),);
                 setLoading(false);
-
-                props.navigation.replace('LoanApplicationMain', { fromScreen: 'BREView' })
+                if (response.data.description) {
+                    setDescription(response.data.description)
+                    setConsentModalVisible(true);
+                } else {
+                    props.navigation.replace('LoanApplicationMain', { fromScreen: 'BREView' });
+                }
 
             })
             .catch(error => {
@@ -356,6 +375,8 @@ const ConsentOTPVerification = (props, { navigation }) => {
 
         <View style={{ flex: 1, backgroundColor: Colors.lightwhite }}>
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
+            <CenteredModal isVisible={consentModalVisible} onClose={handleModalClick} textContent={description} textClose={language[0][props.language].str_ok} />
+
             <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
             <View style={{ width: '100%', height: 56, alignItems: 'center', justifyContent: 'center', }}>
 

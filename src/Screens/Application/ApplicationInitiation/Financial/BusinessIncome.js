@@ -28,6 +28,7 @@ import TextInputComp from '../../../../Components/TextInputComp';
 import ErrorMessageModal from '../../../../Components/ErrorMessageModal';
 import apiInstancelocal from '../../../../Utils/apiInstancelocal';
 import ErrorModal from '../../../../Components/ErrorModal';
+import Entypo from 'react-native-vector-icons/Entypo';
 
 const BusinessIncome = (props) => {
 
@@ -35,6 +36,7 @@ const BusinessIncome = (props) => {
     const [itemIndex, setItemIndex] = useState('');
     const [itemData, setItemData] = useState([]);
     const [leaduserCodeDetail, setLeadUserCodeDetail] = useState(props.mobilecodedetail.leadUserCodeDto);
+    const [systemValuesDetail, setSystemValuesDetail] = useState(props.mobilecodedetail.systemValues);
 
     const [incomeAmount, setIncomeAmount] = useState('');
 
@@ -71,7 +73,8 @@ const BusinessIncome = (props) => {
     }
 
     const addItem = () => {
-        if (itemLabel.length <= 0 && incomeAmount.length <= 0) {
+
+        if (itemLabel.length <= 0 || incomeAmount.length <= 0) {
             showToast();
         } else {
             props.addIncome(itemLabel, incomeAmount, props.componentName)
@@ -122,9 +125,13 @@ const BusinessIncome = (props) => {
         } else if (props.componentName == 'OtherExpense') {
 
             const excludedMasterIds = props.otherExpenseList.map(item => item.incomeLabel);
-
+            const filteredOtherExpense = systemValuesDetail?.filter((data) => data.systemCode === 'FINANCIAL_OTHER_EXP_EXCLUDED');
+            var excludeOtherExpense = '';
+            if (filteredOtherExpense && filteredOtherExpense?.length > 0) {
+                excludeOtherExpense = filteredOtherExpense[0].value;
+            }
             const filteredItemData = leaduserCodeDetail
-                .filter(data => data.masterId === 'OTHER_SOURCE_EXPENSES' && !excludedMasterIds.includes(data.subCodeId))
+                .filter(data => data.masterId === 'OTHER_SOURCE_EXPENSES' && !excludedMasterIds.includes(data.subCodeId) && data.subCodeId != excludeOtherExpense)
                 .sort((a, b) => a.displayOrder - b.displayOrder);
 
             setItemData(filteredItemData);
@@ -136,6 +143,16 @@ const BusinessIncome = (props) => {
     return (
 
         <SafeAreaView style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
+            <View style={{ width: '100%', marginTop: 3, paddingHorizontal: 0, flexDirection: 'row', justifyContent: 'flex-end' }}>
+
+                <TouchableOpacity onPress={() => props.onCloseIncome()} style={{ justifyContent: 'center' }}>
+                    <View >
+
+                        <Entypo name='cross' size={23} color={Colors.darkblack} />
+
+                    </View>
+                </TouchableOpacity>
+            </View>
             <ScrollView
                 style={styles.scrollView}
                 contentContainerStyle={styles.contentContainer}
