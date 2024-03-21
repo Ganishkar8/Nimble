@@ -31,6 +31,7 @@ import { useIsFocused } from '@react-navigation/native';
 import Commonstyles from '../../Utils/Commonstyles';
 import Common from '../../Utils/Common';
 import Loading from '../../Components/Loading';
+import ConsentModal from '../../Components/ConsentModal';
 
 const CBStatus = (props, { navigation }) => {
 
@@ -41,7 +42,8 @@ const CBStatus = (props, { navigation }) => {
     const [apiError, setApiError] = useState('');
     const [loading, setLoading] = useState(false);
     const [cbResponseStatus, setCbResponseStatus] = useState('');
-
+    const [consentModalVisible, setConsentModalVisible] = useState(false);
+    const [description, setDescription] = useState('');
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });

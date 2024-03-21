@@ -353,11 +353,6 @@ const PDNonGSTDetail = (props, { navigation }) => {
         // props.updateTravelDetails(14, 'BusinessDetail', businessDetails.travelDetails)
         //props.navigation.goBack();
 
-
-
-        if (Common.DEBUG_MODE) console.log("DateOfTravel::" + dateOfTravel + " " + " Mode Of Travel::" + modeOfTravelLabel + " " +
-            "Distance Travelled::" + distanceTravelled + " " + "Remarks::" + remarks)
-
     }
 
     const updatePdStatus = () => {
@@ -684,9 +679,11 @@ const PDNonGSTDetail = (props, { navigation }) => {
         if (value) {
             updatedDataArray[index].verifiedSales = 0;
             updatedDataArray[index].verifiedPurchase = 0;
+            updatedDataArray[index].remarks = '';
         } else {
             updatedDataArray[index].verifiedSales = updatedDataArray[index].sales;
             updatedDataArray[index].verifiedPurchase = updatedDataArray[index].purchase;
+            updatedDataArray[index].remarks = '';
         }
         updatedDataArray[index].verified = value;
         if (global.DEBUG_MODE) console.log(updatedDataArray)

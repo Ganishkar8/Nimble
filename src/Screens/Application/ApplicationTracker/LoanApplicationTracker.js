@@ -137,7 +137,8 @@ const LeadManagement = (props, { navigation, route }) => {
                     getPendingData(null, null, null, null, null, null, null, null);
                     //getDraftData();
                 } else {
-                    getDraftData();
+                    setApiError(language[0][props.language].str_errinternetimage);
+                    setErrorModalVisible(true)
                 }
 
             })
@@ -654,7 +655,8 @@ const LeadManagement = (props, { navigation, route }) => {
                     getPendingData(null, null, null, null, null, null, null, null);
                     //getDraftData();
                 } else {
-                    getDraftData();
+                    setApiError(language[0][props.language].str_errinternetimage);
+                    setErrorModalVisible(true)
                 }
 
             })
@@ -769,6 +771,16 @@ const LeadManagement = (props, { navigation, route }) => {
                                 <Text style={styles.childText}>:  {item.ageing} days</Text>
                             </View>
                         </View>
+                        {item.assignedTo &&
+                            <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
+                                <View style={{ width: '45%' }}>
+                                    <Text style={styles.headText}>{language[0][props.language].str_assignedto}</Text>
+                                </View>
+                                <View style={{ width: '55%' }}>
+                                    <Text style={styles.childText}>:  {item.assignedTo}</Text>
+                                </View>
+                            </View>
+                        }
                         {global.USERTYPEID == '1163' && <View style={{ width: '100%', flexDirection: 'row', marginTop: 11, }}>
                             <View style={{ width: '45%' }}>
                                 <Text style={styles.headText}>{language[0][props.language].str_currentleadownerid}</Text>

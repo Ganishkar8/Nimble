@@ -3,24 +3,28 @@ import { Modal, View, Text, TouchableOpacity, StyleSheet, FlatList, ScrollView }
 import Colors from '../Utils/Colors';
 import ImageComp from './ImageComp';
 import TextComp from './TextComp';
+import Entypo from 'react-native-vector-icons/Entypo';
+import Common from '../Utils/Common';
+import { connect } from 'react-redux';
 
-const ChargeModal = ({ isVisible, onClose, data }) => {
+const ChargeModal = (props) => {
 
     const [totalFinalChargeAmount, setTotalFinalChargeAmount] = React.useState(0);
+    const [leadsystemCodeDetail, setLeadSystemCodeDetail] = useState(props.mobilecodedetail.leadSystemCodeDto);
 
     useEffect(() => {
 
-        const totalFinalChargeAmount = data.reduce((sum, item) => parseFloat(sum) + parseFloat(item.finalChargeAmount), 0);
+        const totalFinalChargeAmount = props.data.reduce((sum, item) => parseFloat(sum) + parseFloat(item.finalChargeAmount), 0);
 
         setTotalFinalChargeAmount(totalFinalChargeAmount.toString());
-    }, [data]);
+    }, [props.data]);
 
     return (
         <Modal
-            visible={isVisible}
+            visible={props.isVisible}
             animationType="slide"
             transparent={true}
-            onRequestClose={onClose}
+            onRequestClose={props.onClose}
         >
             <View style={styles.modalContainer}>
                 <View style={styles.modalContent}>
@@ -31,6 +35,13 @@ const ChargeModal = ({ isVisible, onClose, data }) => {
                             <Text style={{ color: Colors.darkblack, fontSize: 12.5, fontFamily: 'Poppins-Bold' }}>Total Charges</Text>
                         </View>
 
+                        <TouchableOpacity onPress={() => props.onClose()} style={{ width: '43%', alignItems: 'flex-end', justifyContent: 'center' }}>
+                            <View >
+
+                                <Entypo name='cross' size={23} color={Colors.darkblack} />
+
+                            </View>
+                        </TouchableOpacity>
 
 
                     </View>
@@ -44,14 +55,14 @@ const ChargeModal = ({ isVisible, onClose, data }) => {
                                 <Text style={{ width: 120, marginLeft: 15, textAlign: 'center', color: Colors.mediumgrey, fontSize: 12, fontFamily: 'Poppins-Medium' }}>Charge Treatment</Text>
                             </View>
                             <View style={styles.container}>
-                                {data.map(item => (
+                                {props.data?.map(item => (
 
                                     <View key={item.key} style={[styles.item, { alignItems: 'center' }]}>
                                         <Text style={{ width: 120, marginLeft: 15, textAlign: 'center', color: Colors.mediumgrey, fontSize: 12, fontFamily: 'Poppins-Medium' }}>{item.chargeDescription}</Text>
                                         <Text style={{ width: 120, marginLeft: 15, textAlign: 'center', color: Colors.mediumgrey, fontSize: 12, fontFamily: 'Poppins-Medium' }}>{item.chargeAmount}</Text>
                                         <Text style={{ width: 120, marginLeft: 15, textAlign: 'center', color: Colors.mediumgrey, fontSize: 12, fontFamily: 'Poppins-Medium' }}>{item.taxAmount}</Text>
                                         <Text style={{ width: 120, marginLeft: 15, textAlign: 'center', color: Colors.mediumgrey, fontSize: 12, fontFamily: 'Poppins-Medium' }}>{item.finalChargeAmount}</Text>
-                                        <Text style={{ width: 120, marginLeft: 15, textAlign: 'center', color: Colors.mediumgrey, fontSize: 12, fontFamily: 'Poppins-Medium' }}>{item.paymentType}</Text>
+                                        <Text style={{ width: 120, marginLeft: 15, textAlign: 'center', color: Colors.mediumgrey, fontSize: 12, fontFamily: 'Poppins-Medium' }}>{Common.getSystemCodeDescription(props.mobilecodedetail.leadSystemCodeDto, 'PAYMENT_TYPE', item.paymentType)}</Text>
                                     </View>
                                 ))}
                             </View>
@@ -114,4 +125,19 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ChargeModal;
+const mapStateToProps = (state) => {
+    const { language } = state.languageReducer;
+    const { profileDetails } = state.profileReducer;
+    const { mobileCodeDetails } = state.mobilecodeReducer;
+    const { loanInitiationDetails } = state.loanInitiationReducer;
+    return {
+        language: language,
+        profiledetail: profileDetails,
+        mobilecodedetail: mobileCodeDetails,
+        loanInitiationDetails: loanInitiationDetails
+    }
+}
+
+
+
+export default connect(mapStateToProps)(ChargeModal);

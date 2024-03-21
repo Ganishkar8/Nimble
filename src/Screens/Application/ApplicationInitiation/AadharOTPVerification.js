@@ -82,7 +82,8 @@ const AadharOTPVerification = (props, { navigation }) => {
     const [Visible, setVisible] = useState(false);
     const [errMsg, setErrMsg] = useState('');
     const [value, setValue] = useState('');
-    const [timeLeft, setTimeLeft] = useState(60);
+
+
     const ref = useBlurOnFulfill({ value, cellCount: CELL_COUNT });
     const [, getCellOnLayoutHandler] = useClearByFocusCell({
         value,
@@ -97,6 +98,7 @@ const AadharOTPVerification = (props, { navigation }) => {
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const [apiError, setApiError] = useState('');
     const [navAlertVisible, setNavAlertVisible] = useState(false);
+    const [manualKYCVisible, setManualKYCVisible] = useState(false);
 
     const [pdfDmsID, setpdfDmsID] = useState('');
     const [pdfBase64, setpdfBase64] = useState('');
@@ -109,7 +111,16 @@ const AadharOTPVerification = (props, { navigation }) => {
     const closeMenu = () => setMenuVisible(false);
 
     const isScreenVisible = useIsFocused();
+    const [leadsystemCodeDetail, setLeadSystemCodeDetail] = useState(props.mobilecodedetail.leadSystemCodeDto);
+    const [systemValuesDetail, setSystemValuesDetail] = useState(props.mobilecodedetail.systemValues);
 
+    var time = 60;
+    const filteredTime = systemValuesDetail?.filter((data) => data.systemCode === 'AADHAR_OTP_EXPIRY').sort((a, b) => a.Description.localeCompare(b.Description));
+    if (filteredTime && filteredTime?.length > 0) {
+        time = parseInt(filteredTime[0].value) * 60;
+    }
+
+    const [timeLeft, setTimeLeft] = useState(time);
 
     const renderCell = ({ index, symbol, isFocused }) => {
         const hasValue = Boolean(symbol);
@@ -177,11 +188,15 @@ const AadharOTPVerification = (props, { navigation }) => {
         props.navigation
             .getParent()
             ?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
+
+
         const timer = setInterval(() => {
             if (timeLeft > 0) {
                 setTimeLeft(timeLeft - 1);
+                setManualKYCVisible(false);
             } else {
                 clearInterval(timer);
+                setManualKYCVisible(true);
                 // Timer has ended; you can add code for what happens when the timer finishes here
             }
         }, 1000); // Update every second (1000 milliseconds)
@@ -726,15 +741,16 @@ const AadharOTPVerification = (props, { navigation }) => {
                         </TouchableOpacity>
                     }
 
-
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 19, }}>
-                        <CheckBoxComp
-                            Disable={false}
-                            Visible={false}
-                            textCaption={'Select Manual KYC'}
-                            handleClick={getCheckbox}
-                        />
-                    </View>
+                    {timeLeft == 0 &&
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 19, }}>
+                            <CheckBoxComp
+                                Disable={false}
+                                Visible={false}
+                                textCaption={'Select Manual KYC'}
+                                handleClick={getCheckbox}
+                            />
+                        </View>
+                    }
 
 
                 </View>
@@ -755,8 +771,10 @@ const AadharOTPVerification = (props, { navigation }) => {
 const mapStateToProps = (state) => {
     const { language } = state.languageReducer;
     const { loanInitiationDetails } = state.loanInitiationReducer;
+    const { mobileCodeDetails } = state.mobilecodeReducer;
     return {
         language: language,
+        mobilecodedetail: mobileCodeDetails,
         loanInitiationDetails: loanInitiationDetails,
     }
 }

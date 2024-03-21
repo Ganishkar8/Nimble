@@ -235,22 +235,22 @@ const HomeScreen = (props, { navigation }) => {
                                 </View>
 
 
-                                {(props.bankDetails[0].INSTANCE == 'QA' || props.bankDetails[0].INSTANCE == 'DEV') &&
-                                    <View style={{ width: '93%', height: 170, justifyContent: 'space-between', flexDirection: 'row', marginTop: '4%' }}>
 
-                                        <TouchableOpacity onPress={() => props.navigation.navigate('PDTracker', { fromScreen: 'HomeSCreen' })} activeOpacity={0.5} style={{ width: '48%', height: '100%', backgroundColor: '#ffffff99', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
-                                            <View>
-                                                <View style={{ flexDirection: 'column', alignItems: 'center' }}>
-                                                    <View style={styles.circularView1}>
-                                                        <Image source={require('../../Images/lead_list.png')}
-                                                            style={{ width: 22.5, height: 25 }} />
-                                                    </View>
-                                                    <Text style={styles.textstyle1}>Personal Discussion{'\n'}Tracker</Text>
+                                <View style={{ width: '93%', height: 170, justifyContent: 'space-between', flexDirection: 'row', marginTop: '4%' }}>
+
+                                    <TouchableOpacity onPress={() => props.navigation.navigate('PDTracker', { fromScreen: 'HomeSCreen' })} activeOpacity={0.5} style={{ width: '48%', height: '100%', backgroundColor: '#ffffff99', borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
+                                        <View>
+                                            <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+                                                <View style={styles.circularView1}>
+                                                    <Image source={require('../../Images/lead_list.png')}
+                                                        style={{ width: 22.5, height: 25 }} />
                                                 </View>
+                                                <Text style={styles.textstyle1}>Personal Discussion{'\n'}Tracker</Text>
                                             </View>
-                                        </TouchableOpacity>
-                                    </View>
-                                }
+                                        </View>
+                                    </TouchableOpacity>
+                                </View>
+
 
                                 {/* {global.USERTYPEID == '1164' &&
 

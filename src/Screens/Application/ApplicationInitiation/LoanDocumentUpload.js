@@ -48,7 +48,7 @@ import DocumentPicker from 'react-native-document-picker';
 import RNFS, { writeFile } from 'react-native-fs';
 import Share from 'react-native-share';
 import { addLoanInitiationDetails, updateLoanInitiationDetails, deleteLoanInitiationDetails, updateClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
-
+import CenteredModal from '../../../Components/CenteredModal';
 
 const LoanDocumentUpload = (props, { navigation }) => {
     const [loading, setLoading] = useState(false);
@@ -93,6 +93,8 @@ const LoanDocumentUpload = (props, { navigation }) => {
     const [documentList, setDocumentList] = useState([]);
     const [onlyView, setOnlyView] = useState(false);
 
+    const [consentModalVisible, setConsentModalVisible] = useState(false);
+    const [description, setDescription] = useState('');
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
@@ -720,6 +722,11 @@ const LoanDocumentUpload = (props, { navigation }) => {
 
     };
 
+    const handleModalClick = () => {
+        setConsentModalVisible(false);
+        props.navigation.replace('LoanApplicationMain', { fromScreen: 'BankList' });
+    }
+
     const updateLoanStatus = () => {
 
         var module = ''; var page = '';
@@ -756,15 +763,19 @@ const LoanDocumentUpload = (props, { navigation }) => {
                 if (global.CLIENTTYPE == 'APPL') {
                     global.COMPLETEDMODULE = 'DOC_UPLD';
                     global.COMPLETEDPAGE = 'DOC_UPLD_APPLCNT';
-                    props.navigation.replace('LoanApplicationMain', { fromScreen: 'BankList' });
                 } else if (global.CLIENTTYPE == 'CO-APPL') {
                     global.COMPLETEDMODULE = 'DOC_UPLD';
                     global.COMPLETEDPAGE = 'DOC_UPLD_COAPPLCNT';
-                    props.navigation.replace('LoanApplicationMain', { fromScreen: 'BankList' });
                 } else if (global.CLIENTTYPE == 'GRNTR') {
                     global.COMPLETEDSUBSTAGE = 'BRE';
                     global.COMPLETEDMODULE = 'DOC_UPLD';
                     global.COMPLETEDPAGE = 'DOC_UPLD_GRNTR';
+                }
+
+                if (response.data.description) {
+                    setDescription(response.data.description)
+                    setConsentModalVisible(true);
+                } else {
                     props.navigation.replace('LoanApplicationMain', { fromScreen: 'BankList' });
                 }
 
@@ -908,6 +919,9 @@ const LoanDocumentUpload = (props, { navigation }) => {
         <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
             <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
             <DeleteConfirmModel isVisible={deleteModalVisible} onClose={closeDeleteModal} textContent={language[0][props.language].str_deletedesc} textClose={language[0][props.language].str_no} textDelete={language[0][props.language].str_yes} deleteClick={onDeleteClick} />
+
+            <CenteredModal isVisible={consentModalVisible} onClose={handleModalClick} textContent={description} textClose={language[0][props.language].str_ok} />
+
 
             <ErrorMessageModal
                 isVisible={bottomErrorSheetVisible}

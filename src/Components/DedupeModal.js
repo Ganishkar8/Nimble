@@ -68,13 +68,13 @@ const DedupeModal = props => {
                     <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, flexDirection: 'row' }}>
                         <TextComp textVal={`${language[0][props.language].str_clientdedupecheck}${props.dedupeDetails.remarks ? 'Failed' : ''}`} textStyle={{ width: '90%', color: Colors.darkblack, fontFamily: 'Poppins-Medium', fontSize: 16 }} Visible={false} />
 
-                        <TouchableOpacity onPress={() => props.onClose('Cancel', [])} style={{ justifyContent: 'center' }}>
+                        {/* <TouchableOpacity onPress={() => props.onClose('Cancel', [])} style={{ justifyContent: 'center' }}>
                             <View >
 
                                 <Entypo name='cross' size={23} color={Colors.darkblack} />
 
                             </View>
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
                     </View>
 
 

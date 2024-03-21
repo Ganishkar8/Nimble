@@ -56,6 +56,7 @@ const BankList = (props, { navigation }) => {
     const showBottomSheet = () => setBottomErrorSheetVisible(true);
     const hideBottomSheet = () => setBottomErrorSheetVisible(false);
     const [onlyView, setOnlyView] = useState(false);
+    const [showAddBank, setShowAddBank] = useState(true);
 
 
     useEffect(() => {
@@ -81,6 +82,21 @@ const BankList = (props, { navigation }) => {
     const getBankData = () => {
 
         const clientBankDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID)).clientBankDetail;
+        var isBothAvailable = clientBankDetail.some(item => item.accountToBeUsedFor == 'BOTH');
+        var isRepaymentAvailable = clientBankDetail.some(item => item.accountToBeUsedFor == 'RPYAC');
+        var isDisbAvailable = clientBankDetail.some(item => item.accountToBeUsedFor == 'DSBAC');
+
+        if (global.ALLOWEDIT == "0") {
+            setShowAddBank(false);
+        } else {
+            if (isRepaymentAvailable && isDisbAvailable) {
+                setShowAddBank(false);
+            } else if (isBothAvailable) {
+                setShowAddBank(false);
+            } else {
+                setShowAddBank(true);
+            }
+        }
 
         if (clientBankDetail) {
             setBankDetails(clientBankDetail)
@@ -247,6 +263,21 @@ const BankList = (props, { navigation }) => {
     const deletedata = async (bankID) => {
 
         const newArray = bankDetails.filter(item => item.id !== bankID);
+        var isBothAvailable = newArray.some(item => item.accountToBeUsedFor == 'BOTH');
+        var isRepaymentAvailable = newArray.some(item => item.accountToBeUsedFor == 'RPYAC');
+        var isDisbAvailable = newArray.some(item => item.accountToBeUsedFor == 'DSBAC');
+
+        if (global.ALLOWEDIT == "0") {
+            setShowAddBank(false);
+        } else {
+            if (isRepaymentAvailable && isDisbAvailable) {
+                setShowAddBank(false);
+            } else if (isBothAvailable) {
+                setShowAddBank(false);
+            } else {
+                setShowAddBank(true);
+            }
+        }
         setBankDetails(newArray);
         setRefreshFlatList(!refreshFlatlist);
 
@@ -255,13 +286,16 @@ const BankList = (props, { navigation }) => {
 
     const buttonNext = () => {
 
-        // if (validate()) {
-        //     showBottomSheet();
-        //     return;
-        // }
+
         if (onlyView) {
             props.navigation.replace('LoanApplicationMain', { fromScreen: 'BankList' });
             return;
+        }
+        if (global.CLIENTTYPE == 'APPL') {
+            if (validate()) {
+                showBottomSheet();
+                return;
+            }
         }
         updateLoanStatus();
 
@@ -339,16 +373,23 @@ const BankList = (props, { navigation }) => {
         var i = 1;
         var errorMessage = '';
 
-        if (!communicationAvailable) {
-            errorMessage =
-                errorMessage +
-                i +
-                ')' +
-                ' ' +
-                "Please Add Communication Address" +
-                '\n';
-            i++;
-            flag = true;
+        const clientBankDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID)).clientBankDetail;
+        var isBothAvailable = clientBankDetail.some(item => item.accountToBeUsedFor == 'BOTH');
+        var isRepaymentAvailable = clientBankDetail.some(item => item.accountToBeUsedFor == 'RPYAC');
+        var isDisbAvailable = clientBankDetail.some(item => item.accountToBeUsedFor == 'DSBAC');
+
+        if (!isBothAvailable) {
+            if (!isRepaymentAvailable || !isDisbAvailable) {
+                errorMessage =
+                    errorMessage +
+                    i +
+                    ')' +
+                    ' ' +
+                    "Please Add Both Repayment and Disbursement Account" +
+                    '\n';
+                i++;
+                flag = true;
+            }
         }
 
         setErrMsg(errorMessage);
@@ -412,7 +453,7 @@ const BankList = (props, { navigation }) => {
                     <ProgressComp progressvalue={1} textvalue="6 of 6" />
                 </View>
             </View>
-            {!onlyView &&
+            {!onlyView && showAddBank &&
                 <TouchableOpacity activeOpacity={8} onPress={() => handleClick('new')}>
                     <View style={{ marginBottom: 10 }}>
                         <IconButtonViewComp

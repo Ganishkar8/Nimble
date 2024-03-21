@@ -133,9 +133,19 @@ const PDFoir = (props, { navigation }) => {
 
     const callCombinedFOIR = () => {
 
+        let dataLevel = '';
+
+        if (global.PDSTAGE == 'PD_2') {
+            dataLevel = 'PD_1';
+        } else if (global.PDSTAGE == 'PD_3') {
+            dataLevel = 'PD_2';
+        }
+
         const appDetails = {
 
             "la_no": global.LOANAPPLICATIONID,
+            "stage_lv": "PD",
+            "data_level": dataLevel,
             "current_level": global.PDSTAGE
         };
         const baseURL = global.PORT1;

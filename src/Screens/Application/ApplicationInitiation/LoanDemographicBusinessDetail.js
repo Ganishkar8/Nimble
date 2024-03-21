@@ -265,6 +265,12 @@ const LoanDemographicBusinessDetail = (props) => {
     const [salesFrequencyVisible, setSalesFrequencyVisible] = useState(true);
     const [salesFrequencyDisable, setSalesFrequencyDisable] = useState(false);
 
+    const [imageMan, setImageMan] = useState(false);
+    const [imageCaption, setImageCaption] = useState('CAPTURE BUSINESS IMAGE');
+    const [imageVisible, setImageVisible] = useState(true);
+    const [imageDisable, setImageDisable] = useState(false);
+
+
     const [visible, setVisible] = useState(true);
     const [photoOptionvisible, setphotoOptionvisible] = useState(false);
     const showphotoBottomSheet = () => setphotoOptionvisible(true);
@@ -889,7 +895,12 @@ const LoanDemographicBusinessDetail = (props) => {
 
     const makeSystemMandatoryFields = async () => {
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_cust_subcat' && data.pageId === pageId).map((value, index) => {
+        const filteredData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID));
+
+        const workFlowId = filteredData[0].workflowId;
+
+
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_cust_subcat' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setCustomerSubCategoryCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -906,7 +917,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_shp_name' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_shp_name' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setEntShopNameCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -924,7 +935,7 @@ const LoanDemographicBusinessDetail = (props) => {
         });
 
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_udyam_registration_number' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_udyam_registration_number' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setUrmNumberCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -941,7 +952,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_dt_of_reg' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_dt_of_reg' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setDORCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -958,7 +969,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_dt_of_inct' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_dt_of_inct' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setDOICaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -975,7 +986,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_dt_of_bsn_cmn' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_dt_of_bsn_cmn' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setDOBCCaption(value.fieldName)
 
             if (value.isMandatory) {
@@ -992,7 +1003,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_year' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_year' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setYearCaption(value.fieldName)
             if (value.mandatory) {
                 setYearMan(true);
@@ -1008,7 +1019,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_mnths' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_mnths' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setMonthsCaption(value.fieldName)
             if (value.mandatory) {
                 setMonthsMan(true);
@@ -1024,7 +1035,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ind_typ' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ind_typ' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setIndustryTypeCaption(value.fieldName)
             if (value.mandatory) {
                 setIndustryTypeMan(true);
@@ -1040,7 +1051,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ind_lin' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ind_lin' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setIndustryLineCaption(value.fieldName)
             if (value.mandatory) {
                 setIndustryLineMan(true);
@@ -1056,7 +1067,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_cmp_typ' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_cmp_typ' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setCompanyTypeCaption(value.fieldName)
             if (value.mandatory) {
                 setCompanyTypeMan(true);
@@ -1072,7 +1083,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ent_typ' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ent_typ' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setEnterpriseTypeCaption(value.fieldName)
             if (value.mandatory) {
                 setEnterpriseTypeMan(true);
@@ -1089,7 +1100,7 @@ const LoanDemographicBusinessDetail = (props) => {
         });
 
 
-        systemMandatoryField.filter((data) => data.operatingTimings === 'et_op_tmng_dy' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.operatingTimings === 'et_op_tmng_dy' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setOperatingTimings(value.fieldName)
             if (value.mandatory) {
                 setOperatingTimings(true);
@@ -1106,7 +1117,7 @@ const LoanDemographicBusinessDetail = (props) => {
         });
 
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsn_prms' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsn_prms' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setYearAtPresentCaption(value.fieldName)
             if (value.mandatory) {
                 setYearAtPresentMan(true);
@@ -1122,7 +1133,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_bsn_lcn_vilg' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_bsn_lcn_vilg' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setBusinessLocationCaption(value.fieldName)
             if (value.mandatory) {
                 setBusinessLocationMan(true);
@@ -1138,7 +1149,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_no_empl' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_no_empl' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setNoofEmployeeCaption(value.fieldName)
             if (value.mandatory) {
                 setNoofEmployeeMan(true);
@@ -1154,7 +1165,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_op_dy_wk' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_op_dy_wk' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setOperatingDaysCaption(value.fieldName)
             if (value.mandatory) {
                 setOperatingDaysMan(true);
@@ -1170,7 +1181,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_op_tmng_dy' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_op_tmng_dy' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setOperatingTimingsCaption(value.fieldName)
             if (value.mandatory) {
                 setOperatingDaysMan(true);
@@ -1186,7 +1197,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_bk_kp_sts' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_bk_kp_sts' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setBookKeepStatusCaption(value.fieldName)
             if (value.mandatory) {
                 setBookKeepStatusMan(true);
@@ -1202,7 +1213,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_hm_bsd_bsn' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_hm_bsd_bsn' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setHomeBasedBusinessCaption(value.fieldName)
             if (value.mandatory) {
                 setHomeBasedBusinessMan(true);
@@ -1218,7 +1229,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ctmr_trns_md' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ctmr_trns_md' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setACTMCaption(value.fieldName)
             if (value.mandatory) {
                 setACTMMan(true);
@@ -1234,7 +1245,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_tm_spt_bsn_dy' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_tm_spt_bsn_dy' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setTimeByPromoterCaption(value.fieldName)
             if (value.mandatory) {
                 setTimeByPromoterMan(true);
@@ -1250,7 +1261,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'et_npm_rt_bsn' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_npm_rt_bsn' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setNPMRateCaption(value.fieldName)
             if (value.mandatory) {
                 setNPMRateMan(true);
@@ -1266,7 +1277,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prchs_frq' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prchs_frq' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setPurchaseFrequencyCaption(value.fieldName)
             if (value.mandatory) {
                 setPurchaseFrequencyMan(true);
@@ -1282,7 +1293,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_tp_prc_fct' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_tp_prc_fct' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setTypePurchaseCaption(value.fieldName)
             if (value.mandatory) {
                 setTypePurchaseMan(true);
@@ -1298,7 +1309,7 @@ const LoanDemographicBusinessDetail = (props) => {
             }
         });
 
-        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_sls_frq' && data.pageId === pageId).map((value, index) => {
+        systemMandatoryField.filter((data) => data.fieldUiid === 'sp_sls_frq' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
             setSalesFrequencyCaption(value.fieldName)
             if (value.mandatory) {
                 setSalesFrequencyMan(true);
@@ -1312,6 +1323,20 @@ const LoanDemographicBusinessDetail = (props) => {
             if (value.captionChange) {
                 setSalesFrequencyCaption(value[0].fieldCaptionChange)
             }
+        });
+
+        systemMandatoryField.filter((data) => data.fieldUiid === 'et_cpt_bsn_img' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
+            setImageCaption(value.fieldName)
+            if (value.mandatory) {
+                setImageMan(true);
+            }
+            if (value.hide) {
+                setImageVisible(false);
+            }
+            if (value.disable) {
+                setImageDisable(true);
+            }
+
         });
 
     };
@@ -1337,7 +1362,16 @@ const LoanDemographicBusinessDetail = (props) => {
             if (businessDetailAvailable) {
                 updateBusinessDetails();
             } else {
-                postBusinessDetails();
+                if (global.CLIENTTYPE == 'CO-APPL' || global.CLIENTTYPE == 'GRNTR') {
+                    if (!checkAllFieldEmpty()) {
+                        postBusinessDetails();
+                    } else {
+                        updateLoanStatus();
+                    }
+                } else {
+                    postBusinessDetails();
+                }
+
             }
         }
     }
@@ -1443,7 +1477,19 @@ const LoanDemographicBusinessDetail = (props) => {
                 "salesFrequency": salesFrequencyLabel,
                 "udyamDmsId": udyamDmsID,
 
-                "clientBusinessImageGeocodeDetail": [
+                // "clientBusinessImageGeocodeDetail": [
+                //     {
+                //         "dmsId": docID,
+                //         "image": fileName,
+                //         "geoCode": "",
+                //         "isActive": true,
+                //         "createdBy": global.USERID,
+                //     }
+                // ]
+            }
+
+            if (docID) {
+                appDetails.clientBusinessImageGeocodeDetail = [
                     {
                         "dmsId": docID,
                         "image": fileName,
@@ -1530,7 +1576,10 @@ const LoanDemographicBusinessDetail = (props) => {
                 "purchasesFrequency": purchaseFrequencyLabel,
                 "typeOfPurchasingFacility": typePurchaseLabel,
                 "salesFrequency": salesFrequencyLabel,
-                "clientBusinessImageGeocodeDetail": [
+
+            }
+            if (docID) {
+                appDetails.clientBusinessImageGeocodeDetail = [
                     {
                         "dmsId": docID,
                         "image": fileName,
@@ -1585,6 +1634,164 @@ const LoanDemographicBusinessDetail = (props) => {
         }
     };
 
+
+    const checkAllFieldEmpty = () => {
+        var empty = true;
+
+        if (CustomerSubCategoryVisible) {
+            if (CustomerSubCategoryLabel) {
+                return false;
+            }
+        }
+
+        if (entShopNameVisible) {
+            if (entShopName) {
+                return false;
+            }
+        }
+
+        if (urmNumberVisible) {
+            if (urmNumber) {
+                return false;
+            }
+        }
+
+        if (DORVisible) {
+            if (DOR.length) {
+                return false
+            }
+        }
+
+        if (DOIVisible) {
+            if (DOI.length) {
+                return false;
+            }
+        }
+
+        if (DOBCVisible) {
+            if (DOBC) {
+                return false;
+            }
+        }
+
+        if (yearVisible) {
+            if (year) {
+                return false;
+            }
+        }
+
+        if (monthsVisible) {
+            if (monthLabel) {
+                return false;
+            }
+        }
+
+        if (industryTypeVisible) {
+            if (industryTypeLabel) {
+                return false;
+            }
+        }
+
+        if (industryLineVisible) {
+            if (industryLineLabel) {
+                return false;
+            }
+        }
+
+        if (companyTypeVisible) {
+            if (companyTypeLabel) {
+                return false;
+            }
+        }
+
+        if (enterpriseTypeVisible) {
+            if (enterpriseTypeLabel) {
+                return false;
+            }
+        }
+
+        if (yearAtPresentVisible) {
+            if (yearAtPresent) {
+                return false;
+            }
+        }
+
+        if (noofEmployeeVisible) {
+            if (noofEmployee) {
+                return false;
+            }
+        }
+
+        if (operatingDaysVisible) {
+            if (operatingDays) {
+                return false;
+            }
+        }
+
+        if (operatingTimingsVisible) {
+            if (operatingTimings) {
+                return false;
+            }
+        }
+
+        if (bookKeepStatusVisible) {
+            if (bookKeepStatusLabel) {
+                return false;
+            }
+        }
+
+        if (homeBasedBussinessVisible) {
+            if (homeBasedBussinessLabel) {
+                return false
+            }
+        }
+
+        if (actmVisible) {
+            if (actmLabel) {
+                return false
+            }
+        }
+
+        if (timeByPromoterVisible) {
+            if (timeByPromoter) {
+                return false;
+            }
+        }
+
+        if (npmRateVisible) {
+            if (npmRate) {
+                return false;
+            }
+        }
+
+        if (purchaseFrequencyVisible) {
+            if (purchaseFrequencyLabel) {
+                return false;
+            }
+        }
+
+        if (typePurchaseVisible) {
+            if (typePurchaseLabel) {
+                return false
+            }
+        }
+
+        if (salesFrequencyVisible) {
+            if (salesFrequencyLabel) {
+                return false;
+            }
+        }
+        if (imageMan) {
+            if (docID) {
+                return false;
+            }
+        }
+
+
+        return empty;
+
+
+    }
 
     const updateLoanStatus = () => {
 
@@ -1919,17 +2126,18 @@ const LoanDemographicBusinessDetail = (props) => {
                 flag = true;
             }
         }
-
-        if (imageUri == null) {
-            errorMessage =
-                errorMessage +
-                i +
-                ')' +
-                ' ' +
-                language[0][props.language].str_errorimage +
-                '\n';
-            i++;
-            flag = true;
+        if (imageMan) {
+            if (!docID) {
+                errorMessage =
+                    errorMessage +
+                    i +
+                    ')' +
+                    ' ' +
+                    language[0][props.language].str_errorimage +
+                    '\n';
+                i++;
+                flag = true;
+            }
         }
 
         setErrMsg(errorMessage);
@@ -2930,49 +3138,57 @@ const LoanDemographicBusinessDetail = (props) => {
                         </View>
                     )}
 
-
-                    <View
-                        style={{
-                            width: '100%',
-                            alignItems: 'center',
-                        }}>
+                    {imageVisible &&
                         <View
                             style={{
-                                width: '90%',
-                                flexDirection: 'row',
+                                width: '100%',
                                 alignItems: 'center',
-                                marginTop: 20,
+                                marginTop: '4%'
                             }}>
-                            <TouchableOpacity style={{ width: '30%' }} onPress={pickDocument} activeOpacity={0}>
-                                <View style={{ width: 40, height: 40, backgroundColor: '#DBDBDB', borderRadius: 10, justifyContent: 'center', alignItems: 'center' }}>
-                                    <Image
-                                        source={require('../../../Images/cloudcomputing.png')}
-                                        style={{ width: 28, height: 22 }}
-                                    />
-                                    {/* <FontAwesome6 name="cloud-arrow-up" size={25} color="#b5b6b6" /> */}
-                                </View>
-                            </TouchableOpacity>
-
-                            <Text style={{ width: '50%', color: Colors.dimmText, textAlign: 'left', fontFamily: 'PoppinsRegular' }}>
-                                {fileName}
-                            </Text>
-
-                            {docID &&
-                                <TouchableOpacity style={{ width: '20%', alignItems: 'flex-end' }}
-                                    onPress={() => {
-                                        showImageBottomSheet();
-                                    }}>
-                                    <Entypo
-                                        name="dots-three-vertical"
-                                        size={25}
-                                        color={Colors.darkblue}
-                                    />
+                            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                                <TextComp
+                                    textVal={imageCaption}
+                                    textStyle={Commonstyles.inputtextStyle}
+                                    Visible={imageMan}
+                                />
+                            </View>
+                            <View
+                                style={{
+                                    width: '90%',
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    marginTop: 20,
+                                }}>
+                                <TouchableOpacity style={{ width: '30%' }} onPress={pickDocument} activeOpacity={0}>
+                                    <View style={{ width: 40, height: 40, backgroundColor: '#DBDBDB', borderRadius: 10, justifyContent: 'center', alignItems: 'center' }}>
+                                        <Image
+                                            source={require('../../../Images/cloudcomputing.png')}
+                                            style={{ width: 28, height: 22 }}
+                                        />
+                                        {/* <FontAwesome6 name="cloud-arrow-up" size={25} color="#b5b6b6" /> */}
+                                    </View>
                                 </TouchableOpacity>
-                            }
 
+                                <Text style={{ width: '50%', color: Colors.dimmText, textAlign: 'left', fontFamily: 'PoppinsRegular' }}>
+                                    {fileName}
+                                </Text>
+
+                                {docID &&
+                                    <TouchableOpacity style={{ width: '20%', alignItems: 'flex-end' }}
+                                        onPress={() => {
+                                            showImageBottomSheet();
+                                        }}>
+                                        <Entypo
+                                            name="dots-three-vertical"
+                                            size={25}
+                                            color={Colors.darkblue}
+                                        />
+                                    </TouchableOpacity>
+                                }
+
+                            </View>
                         </View>
-                    </View>
-
+                    }
 
                 </View>
 

@@ -152,13 +152,19 @@ const LoanApplicationMain = (props, { navigation }) => {
     const [completedModule, setCompletedModule] = useState(global.COMPLETEDMODULE);
     const [completedPage, setCompletedPage] = useState(global.COMPLETEDPAGE);
     const [subStageOrder, setsubStageOrder] = useState();
+
+    const [profileShortStatus, setProfileShortStatus] = useState('InProgress');
+    const [cbCheckCurrentStatus, setCbCheckCurrentStatus] = useState('Pending');
+    const [loanStatus, setLoanStatus] = useState('Pending');
+    const [breCurrentStatus, setBreCurrentStatus] = useState('Pending');
+
     const [moduleOrder, setModuleOrder] = useState();
     const [pageOrder, setPageOrder] = useState();
     const [isMounted, setIsMounted] = useState(true);
     const [workflowIDLabel, setWorkflowIDLabel] = useState('');
     const [buttonText, setButtonText] = useState('');
-    const [cbCheckStatus, setCbCheckStatus] = useState('');
-    const [breStatus, setBREStatus] = useState('');
+    const [cbCheckStatus, setCbCheckStatus] = useState('Pending');
+    const [breStatus, setBREStatus] = useState('Pending');
     const [cbBreCheckStatus, setBreCbCheckStatus] = useState('');
     const [currentStage, setCurrentStage] = useState('');
     const [loading, setLoading] = useState(false);
@@ -210,13 +216,28 @@ const LoanApplicationMain = (props, { navigation }) => {
                 setLoading(false);
                 if (response.status == 200) {
                     global.TRACKERSTATUSDATA = response.data;
+
+
                     const filterLNAPP = response.data.loanApplicationStatus.filter((data) => data.loanWorkflowStage === 'LN_APP_INITIATION');
+                    const filterProfileShort = filterLNAPP[0].subStageLog.filter((data) => data.subStageCode === 'PRF_SHRT');
+                    const filterLoanDemograpgic = filterLNAPP[0].subStageLog.filter((data) => data.subStageCode === 'LN_DEMGRP');
+
+                    if (filterProfileShort) {
+                        setProfileShortStatus(filterProfileShort[0].subStageStatus);
+                    }
+                    if (filterLoanDemograpgic) {
+                        setLoanStatus(filterLoanDemograpgic[0].subStageStatus);
+                    }
+
                     const filterSubStage = filterLNAPP[0].subStageLog.filter((data) => data.subStageCode === 'CB_CHK');
                     const filtermodule = filterSubStage[0].moduleLog.filter((data) => data.moduleCode === 'CB_BRE_DCSN');
                     const filterPage = filtermodule[0].pageLog.filter((data) => data.pageCode === 'CB_CHK_BRE_DCSN');
                     if (response.data.pageCode == 'CB_CHK_BRE_DCSN') {
                         global.COMPLETEDMODULE = 'CB_RSPNS';
                         global.COMPLETEDPAGE = 'CB_CHK_CB_RSPNS';
+                    }
+                    if (filterSubStage) {
+                        setCbCheckCurrentStatus(filterSubStage[0].subStageStatus);
                     }
                     if (filterPage) {
                         setBreCbCheckStatus(filterPage[0].pageStatus);
@@ -226,6 +247,9 @@ const LoanApplicationMain = (props, { navigation }) => {
                     const filterBreModule = filterBreSubStage[0].moduleLog.filter((data) => data.moduleCode === 'BRE');
                     const filterBrePage = filterBreModule[0].pageLog.filter((data) => data.pageCode === 'BRE_VIEW');
 
+                    if (filterBreSubStage) {
+                        setBreCurrentStatus(filterBreSubStage[0].subStageStatus);
+                    }
                     if (filterBrePage) {
                         setBREStatus(filterBrePage[0].pageStatus);
                     }
@@ -249,7 +273,7 @@ const LoanApplicationMain = (props, { navigation }) => {
             })
             .catch(error => {
                 // Handle the error
-                if (global.DEBUG_MODE) console.log('CBCheckApiResponse' + JSON.stringify(error.response));
+                if (global.DEBUG_MODE) console.log('CBCheckApiResponseError' + JSON.stringify(error.response));
                 setLoading(false);
                 getWorkFlowID();
                 if (error.response.status == 404) {
@@ -336,6 +360,7 @@ const LoanApplicationMain = (props, { navigation }) => {
                 pageOrder = filteredProcessPage[0].displayOrder;
             }
         }
+
 
         setModuleOrder(moduleOrder);
         setPageOrder(pageOrder);
@@ -463,6 +488,11 @@ const LoanApplicationMain = (props, { navigation }) => {
                     global.CURRENTPAGEID = currentPage.pageId;
                     await getClientID(global.CLIENTTYPE);
                     props.navigation.replace('BankList');
+                } else if (currentPage.pageCode == 'DMGRC_CO_APPL_FMLY_DTLS') {
+                    global.CLIENTTYPE = 'CO-APPL';
+                    global.CURRENTPAGEID = currentPage.pageId;
+                    await getClientID(global.CLIENTTYPE);
+                    props.navigation.replace('FamilyDetailList');
                 } else if (currentPage.pageCode == 'DMGRC_COAPPL_BSN_DTLS') {
                     global.CLIENTTYPE = 'CO-APPL';
                     global.CURRENTPAGEID = currentPage.pageId;
@@ -483,6 +513,11 @@ const LoanApplicationMain = (props, { navigation }) => {
                     global.CURRENTPAGEID = currentPage.pageId;
                     await getClientID(global.CLIENTTYPE);
                     props.navigation.replace('BankList');
+                } else if (currentPage.pageCode == 'DMGRC_GRNTR_FMLY_DTLS') {
+                    global.CLIENTTYPE = 'GRNTR';
+                    global.CURRENTPAGEID = currentPage.pageId;
+                    await getClientID(global.CLIENTTYPE);
+                    props.navigation.replace('FamilyDetailList');
                 } else if (currentPage.pageCode == 'DMGRC_GRNTR_BSN_DTLS') {
                     global.CLIENTTYPE = 'GRNTR';
                     global.CURRENTPAGEID = currentPage.pageId;
@@ -603,7 +638,7 @@ const LoanApplicationMain = (props, { navigation }) => {
         if (item.subStageCode == 'PRF_SHRT') {
             setButtonText(language[0][props.language].str_editprofileshort.toUpperCase())
         } else if (item.subStageCode == 'CB_CHK') {
-            setButtonText(language[0][props.language].str_triggerCBResponse.toUpperCase())
+            setButtonText(language[0][props.language].str_checkCBResponse.toUpperCase())
         } else if (item.subStageCode == 'LN_DEMGRP') {
             setButtonText(language[0][props.language].str_editLoan.toUpperCase())
         } else if (item.subStageCode == 'BRE') {
@@ -826,6 +861,15 @@ const LoanApplicationMain = (props, { navigation }) => {
                 await getClientID(global.CLIENTTYPE);
                 props.navigation.replace('BankList');
             }
+        } else if (item.pageCode == 'DMGRC_CO_APPL_FMLY_DTLS') {
+
+            if (item.nestedSubDataIsCompleted) {
+                global.ALLOWEDIT = "0";
+                global.CLIENTTYPE = 'CO-APPL';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('FamilyDetailList');
+            }
         } else if (item.pageCode == 'DMGRC_COAPPL_BSN_DTLS') {
             if (item.nestedSubDataIsCompleted) {
                 global.ALLOWEDIT = "0";
@@ -857,6 +901,15 @@ const LoanApplicationMain = (props, { navigation }) => {
                 global.CURRENTPAGEID = item.pageId;
                 await getClientID(global.CLIENTTYPE);
                 props.navigation.replace('BankList');
+            }
+        } else if (item.pageCode == 'DMGRC_GRNTR_FMLY_DTLS') {
+
+            if (item.nestedSubDataIsCompleted) {
+                global.ALLOWEDIT = "0";
+                global.CLIENTTYPE = 'GRNTR';
+                global.CURRENTPAGEID = item.pageId;
+                await getClientID(global.CLIENTTYPE);
+                props.navigation.replace('FamilyDetailList');
             }
         } else if (item.pageCode == 'DMGRC_GRNTR_BSN_DTLS') {
             if (item.nestedSubDataIsCompleted) {
@@ -990,12 +1043,16 @@ const LoanApplicationMain = (props, { navigation }) => {
 
         if (substage == 'PRF_SHRT') {
             setButtonText(language[0][props.language].str_editprofileshort.toUpperCase())
+            setSelectedData('Profile Short')
         } else if (substage == 'CB_CHK') {
-            setButtonText(language[0][props.language].str_triggerCBResponse.toUpperCase())
+            setButtonText(language[0][props.language].str_checkCBResponse.toUpperCase())
+            setSelectedData('CB Check')
         } else if (substage == 'LN_DEMGRP') {
             setButtonText(language[0][props.language].str_editLoan.toUpperCase())
+            setSelectedData('Loan')
         } else if (substage == 'BRE') {
             setButtonText(language[0][props.language].str_viewbreresult.toUpperCase())
+            setSelectedData('BRE')
         }
 
         const filteredProcessSubStage = processSubStage.filter((data) => {
@@ -1011,7 +1068,7 @@ const LoanApplicationMain = (props, { navigation }) => {
         const filteredAndSelectedProcessSubStage = filteredProcessSubStage
             .filter(data => data.isSelected === true);
 
-        if (global.DEBUG_MODE) console.log('filteredAndSelectedProcessSubStage::' + JSON.stringify(filteredAndSelectedProcessSubStage));
+        if (global.DEBUG_MODE) console.log('filteredAndSelectedProcessSubStage::' + JSON.stringify(filteredProcessSubStage));
 
         setProcessSubStageData(filteredProcessSubStage);
 
@@ -1071,16 +1128,16 @@ const LoanApplicationMain = (props, { navigation }) => {
                     {/* <TextComp textVal={language[0][props.language].str_applicationStatus + ': 98%'}
                         textStyle={{ color: Colors.dimText, fontFamily: 'PoppinsRegular' }} /> */}
                 </View>
-                <View style={{ width: '30%', justifyContent: 'center' }}>
+                <View style={{ width: '30%', justifyContent: 'center', marginLeft: 20 }}>
                     <Image source={require('../../Images/loanappimage.png')}
-                        style={{ width: 70, height: 100, resizeMode: 'contain' }} />
+                        style={{ width: 50, height: 80, resizeMode: 'contain' }} />
                 </View>
 
             </View>
 
             <BottomToastModal IsVisible={bottomLeadSheetVisible} onClose={hideLeadBottomSheet} textContent={`Temp Loan Application ID: ${global.TEMPAPPID} created successfully`} />
 
-            <View style={{ width: '85%', marginTop: 30, alignSelf: 'center' }}>
+            <View style={{ width: '85%', marginTop: 15, alignSelf: 'center' }}>
                 <FlatList
                     extraData={refreshFlatlist}
                     data={processSubStageData}
@@ -1143,6 +1200,29 @@ const LoanApplicationMain = (props, { navigation }) => {
                                     <View style={{ alignItems: 'center', marginRight: 5 }}>
                                         <TextComp textVal={item.subStageName}
                                             textStyle={{ color: Colors.black, fontFamily: 'PoppinsRegular' }} />
+                                    </View>
+                                    <View style={{ alignItems: 'center', marginRight: 5 }}>
+                                        <TextComp textVal={item.subStageCode == 'PRF_SHRT' ? profileShortStatus : item.subStageCode == 'CB_CHK' ? cbCheckCurrentStatus : item.subStageCode == 'LN_DEMGRP' ? loanStatus : breCurrentStatus}
+                                            textStyle={{
+                                                color: (
+                                                    (item.subStageCode === 'PRF_SHRT' && profileShortStatus === 'Completed') ||
+                                                    (item.subStageCode === 'CB_CHK' && cbCheckCurrentStatus === 'Completed') ||
+                                                    (item.subStageCode === 'LN_DEMGRP' && loanStatus === 'Completed') ||
+                                                    (item.subStageCode === 'BRE' && breCurrentStatus === 'Completed')
+                                                ) ? Colors.green : (
+                                                    (item.subStageCode === 'PRF_SHRT' && profileShortStatus === 'InProgress') ||
+                                                    (item.subStageCode === 'CB_CHK' && cbCheckCurrentStatus === 'InProgress') ||
+                                                    (item.subStageCode === 'LN_DEMGRP' && loanStatus === 'InProgress') ||
+                                                    (item.subStageCode === 'BRE' && breCurrentStatus === 'InProgress')
+                                                ) ? Colors.pendingBorder : (
+                                                    (item.subStageCode === 'PRF_SHRT' && profileShortStatus === 'Rejected') ||
+                                                    (item.subStageCode === 'CB_CHK' && cbCheckCurrentStatus === 'Rejected') ||
+                                                    (item.subStageCode === 'LN_DEMGRP' && loanStatus === 'Rejected') ||
+                                                    (item.subStageCode === 'BRE' && breCurrentStatus === 'Rejected')
+                                                ) ? Colors.red : Colors.dimText,
+                                                fontFamily: 'PoppinsRegular',
+                                                fontSize: 12
+                                            }} />
                                     </View>
                                     <View style={{ marginLeft: 5 }}>
 
@@ -1228,8 +1308,9 @@ const LoanApplicationMain = (props, { navigation }) => {
                 />
 
                 {
-                    global.USERTYPEID === 1164 && global.STAGESTATUS != 'Rejected' && global.STAGESTATUS != 'Completed' &&
-                    (currentStage !== 'CB_CHK' && (cbCheckStatus != 'Rejected' || cbCheckStatus != 'Completed')) && (
+                    (global.USERTYPEID === 1164 || (global.USERTYPEID === 1163 && cbCheckCurrentStatus == 'InProgress' && currentStage == 'CB_CHK')) && global.STAGESTATUS != 'Rejected' && global.STAGESTATUS != 'Completed' &&
+                    {/*  (currentStage !== 'CB_CHK' && (cbCheckStatus != 'Rejected' || cbCheckStatus != 'Completed'))*/ }
+                    && (
                         <ButtonViewComp
                             textValue={buttonText}
                             textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}

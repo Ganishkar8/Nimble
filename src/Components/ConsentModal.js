@@ -11,7 +11,7 @@ const ConsentModal = props => {
     const [isSelected, setSelection] = useState(false);
     return (
         <Modal
-            visible={true}
+            visible={props.consentVisible}
             animationType="slide"
             transparent={true}
             onRequestClose={props.onClose}

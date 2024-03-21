@@ -306,8 +306,8 @@ const PreviousDocumentPreview = (props, { navigation, route }) => {
           <View style={styles.imgContainer}>
             <Text style={styles.textStyle}>
               {fromScreen == 'HouseVisit'
-                ? language[0][props.language].str_prevHouseImage
-                : language[0][props.language].str_prevBusinessImage}
+                ? language[0][props.language].str_currentHouseImage
+                : language[0][props.language].str_currentBusinessImage}
             </Text>
             <View
               style={{
@@ -337,8 +337,9 @@ const PreviousDocumentPreview = (props, { navigation, route }) => {
           <View style={styles.imgContainer}>
             <Text style={styles.textStyle}>
               {fromScreen == 'HouseVisit'
-                ? language[0][props.language].str_currentHouseImage
-                : language[0][props.language].str_currentBusinessImage}
+                ? language[0][props.language].str_prevHouseImage
+                : language[0][props.language].str_prevBusinessImage}
+
             </Text>
             <View
               style={{

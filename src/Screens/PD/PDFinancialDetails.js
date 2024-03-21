@@ -154,17 +154,17 @@ const PDFinancialDetails = (props, { navigation }) => {
         getSystemCodeDetail();
         // getSavedData()
         getFinancialData();
-        if (global.PDSTAGE == 'PD_2') {
-            if (global.CLIENTTYPE == 'APPL' || global.CLIENTTYPE == 'GRNTR') {
-                setFoirVisible(true);
-                callFOIRCalculation('PD_1', 'PD_2')
-            }
-        } else if (global.PDSTAGE == 'PD_3') {
-            if (global.CLIENTTYPE == 'APPL' || global.CLIENTTYPE == 'GRNTR') {
-                setFoirVisible(true);
-                callFOIRCalculation('PD_2', 'PD_3')
-            }
-        }
+        // if (global.PDSTAGE == 'PD_2') {
+        //     if (global.CLIENTTYPE == 'APPL' || global.CLIENTTYPE == 'GRNTR') {
+        //         setFoirVisible(true);
+        //         callFOIRCalculation('PD_1', 'PD_2')
+        //     }
+        // } else if (global.PDSTAGE == 'PD_3') {
+        //     if (global.CLIENTTYPE == 'APPL' || global.CLIENTTYPE == 'GRNTR') {
+        //         setFoirVisible(true);
+        //         callFOIRCalculation('PD_2', 'PD_3')
+        //     }
+        // }
 
         if (global.USERTYPEID == 1163) {
             setEarningFrequencyDisable(true);
@@ -965,7 +965,7 @@ const PDFinancialDetails = (props, { navigation }) => {
                             visible={incomeModalVisible}
                             closeModal={hideIncomeSheet}
                             modalstyle={styles.modalContent}
-                            contentComponent={<BusinessIncome addIncome={addIncome} onCloseIncome={hideIncomeSheet} incomeList={incomeList} otherIncomeList={otherIncomeList} componentName={componentName} />} // Pass your custom component here
+                            contentComponent={<BusinessIncome addIncome={addIncome} onCloseIncome={hideIncomeSheet} incomeList={incomeList} otherIncomeList={otherIncomeList} expenseList={expenseList} otherExpenseList={otherExpenseList} componentName={componentName} />} // Pass your custom component here
                         />
 
                         <ModalContainer

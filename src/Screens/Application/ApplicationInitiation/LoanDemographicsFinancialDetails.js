@@ -122,6 +122,7 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
   const [apiError, setApiError] = useState('');
   const [pageId, setPageId] = useState(global.CURRENTPAGEID);
   const [onlyView, setOnlyView] = useState(false);
+  const [financialMandatory, setFinancialMandatory] = useState(props.mobilecodedetail.clientFinancialTypeLink);
 
   useEffect(() => {
     props.navigation
@@ -269,7 +270,12 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
 
   const makeSystemMandatoryFields = () => {
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ern_typ' && data.pageId === pageId).map((value, index) => {
+    const filteredData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID));
+
+    const workFlowId = filteredData[0].workflowId;
+
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ern_typ' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
 
       if (value.isMandatory) {
         setEarningTypeMan(true);
@@ -285,7 +291,7 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ern_frq' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_ern_frq' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
 
       if (value.isMandatory) {
         setEarningFrequencyMan(true);
@@ -324,28 +330,67 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
       }
     }
 
-    if (incomeList.length <= 0) {
-      errorMessage = errorMessage + i + ')' + ' ' + 'Please Add ' + 'Business Income' + '\n';
-      i++;
-      flag = true;
-    }
+    // if (incomeList.length <= 0) {
+    //   errorMessage = errorMessage + i + ')' + ' ' + 'Please Add ' + 'Business Income' + '\n';
+    //   i++;
+    //   flag = true;
+    // }
 
-    if (otherIncomeList.length <= 0) {
-      errorMessage = errorMessage + i + ')' + ' ' + 'Please Add ' + 'Other Source of Income' + '\n';
-      i++;
-      flag = true;
-    }
+    // if (otherIncomeList.length <= 0) {
+    //   errorMessage = errorMessage + i + ')' + ' ' + 'Please Add ' + 'Other Source of Income' + '\n';
+    //   i++;
+    //   flag = true;
+    // }
 
-    if (expenseList.length <= 0) {
-      errorMessage = errorMessage + i + ')' + ' ' + 'Please Add ' + 'Business Expense' + '\n';
-      i++;
-      flag = true;
-    }
+    // if (expenseList.length <= 0) {
+    //   errorMessage = errorMessage + i + ')' + ' ' + 'Please Add ' + 'Business Expense' + '\n';
+    //   i++;
+    //   flag = true;
+    // }
 
-    if (otherExpenseList.length <= 0) {
-      errorMessage = errorMessage + i + ')' + ' ' + 'Please Add' + 'Other Source of Expense' + '\n';
-      i++;
-      flag = true;
+    // if (otherExpenseList.length <= 0) {
+    //   errorMessage = errorMessage + i + ')' + ' ' + 'Please Add' + 'Other Source of Expense' + '\n';
+    //   i++;
+    //   flag = true;
+    // }
+
+
+    const mergedList = [...incomeList, ...otherIncomeList, ...expenseList, ...otherExpenseList];
+
+    financialMandatory.forEach(item => {
+
+      if (item.isMandatory && item.clientType == global.CLIENTTYPE) {
+        // if (mergedList.length > 0) {
+        //   mergedList.forEach(item1 => {
+
+        const existsInFinancialMandatory = mergedList.some(item2 =>
+          item.subCodeId === item2.incomeLabel
+        );
+        console.log(existsInFinancialMandatory)
+        if (!existsInFinancialMandatory) {
+          errorMessage = errorMessage + i + ')' + ' ' + 'Please Add ' + item.label + '\n';
+          i++;
+          flag = true;
+          //   }
+          // })
+        }
+      } else {
+        if (item.isMandatory && item.clientType == global.CLIENTTYPE) {
+          errorMessage = errorMessage + i + ')' + ' ' + 'Please Add ' + item.label + '\n';
+          i++;
+          flag = true;
+        }
+      }
+
+
+    })
+
+    if (totalBusineesExpenses && totalOtherExpense && totalBusineesIncome && totalOtherIncome) {
+      if (parseInt(totalBusineesExpenses) + parseInt(totalOtherExpense) > parseInt(totalBusineesIncome) + parseInt(totalOtherIncome)) {
+        errorMessage = errorMessage + i + ')' + ' ' + 'Total Business Expenses Cannot Be Greater Than Total Business Income' + '\n';
+        i++;
+        flag = true;
+      }
     }
 
     setErrMsg(errorMessage);
@@ -520,6 +565,7 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
   }
 
   const postFinancialData = () => {
+
     if (validate()) {
       showBottomSheet();
     } else {
@@ -841,7 +887,7 @@ const LoanDemographicsFinancialDetails = (props, { navigation }) => {
               visible={incomeModalVisible}
               closeModal={hideIncomeSheet}
               modalstyle={styles.modalContent}
-              contentComponent={<BusinessIncome addIncome={addIncome} onCloseIncome={hideIncomeSheet} incomeList={incomeList} otherIncomeList={otherIncomeList} componentName={componentName} />} // Pass your custom component here
+              contentComponent={<BusinessIncome addIncome={addIncome} onCloseIncome={hideIncomeSheet} incomeList={incomeList} otherIncomeList={otherIncomeList} expenseList={expenseList} otherExpenseList={otherExpenseList} componentName={componentName} />} // Pass your custom component here
             />
 
           </View>

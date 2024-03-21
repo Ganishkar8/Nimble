@@ -511,19 +511,19 @@ const RepaymentSchedule = (props, { navigation }) => {
                                     <View style={{ width: '85%', alignSelf: 'center', flexDirection: 'row' }}>
 
                                         <View style={{ width: '25%' }}>
-                                            <Text style={{ color: Colors.mediumgrey, fontSize: 12.5, fontFamily: 'Poppins-Medium' }}>Month</Text>
+                                            <Text style={{ color: Colors.black, fontSize: 12.5, fontFamily: 'Poppins-Medium' }}>Month</Text>
                                         </View>
 
                                         <View style={{ width: '25%' }}>
-                                            <Text style={{ color: Colors.mediumgrey, fontSize: 12.5, fontFamily: 'Poppins-Medium' }}>EMI</Text>
+                                            <Text style={{ color: Colors.black, fontSize: 12.5, fontFamily: 'Poppins-Medium' }}>EMI</Text>
                                         </View>
 
                                         <View style={{ width: '25%' }}>
-                                            <Text style={{ color: Colors.mediumgrey, fontSize: 12.5, fontFamily: 'Poppins-Medium' }}>Principle</Text>
+                                            <Text style={{ color: Colors.black, fontSize: 12.5, fontFamily: 'Poppins-Medium' }}>Principle</Text>
                                         </View>
 
                                         <View style={{ width: '25%' }}>
-                                            <Text style={{ color: Colors.mediumgrey, fontSize: 12.5, fontFamily: 'Poppins-Medium' }}>Interest</Text>
+                                            <Text style={{ color: Colors.black, fontSize: 12.5, fontFamily: 'Poppins-Medium' }}>Interest</Text>
                                         </View>
 
                                     </View>

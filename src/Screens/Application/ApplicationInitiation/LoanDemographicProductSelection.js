@@ -137,10 +137,13 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
     const [LoanPurposeIndex, setLoanPurposeIndex] = useState('');
 
     const [loanTenure, setLoanTenure] = useState('');
+    const [loanTenureData, setLoanTenureData] = useState([]);
     const [loanTenureCaption, setLoanTenureCaption] = useState("LOAN TENURE");
     const [loanTenureMan, setLoanTenureMan] = useState(false);
     const [loanTenureVisible, setLoanTenureVisible] = useState(true);
     const [loanTenureDisable, setLoanTenureDisable] = useState(false);
+    const [loanTenureIndex, setloanTenureIndex] = useState('');
+
     const loanTenureRef = useRef(null);
 
 
@@ -249,6 +252,8 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
     const [workFlowDetail, setWorkFlowDetail] = useState(props.mobilecodedetail.wfConfig1s);
     const [kycConifig, setKYCConfig] = useState(props.mobilecodedetail.loanProductKycLink);
 
+    const [systemValuesDetail, setSystemValuesDetail] = useState(props.mobilecodedetail.systemValues);
+
     const [systemMandatoryField, setSystemMandatoryField] = useState(props.mobilecodedetail.processSystemMandatoryFields);
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const [apiError, setApiError] = useState('');
@@ -259,8 +264,13 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
     const [maxLoanTenure, setMaxLoanTenure] = useState(0);
     const [pageId, setPageId] = useState(global.CURRENTPAGEID);
 
+    const [workFlowID, setworkFlowID] = useState('');
 
     const [onlyView, setOnlyView] = useState(false);
+
+    const currentDate = new Date();
+    const maxDate = new Date();
+    maxDate.setDate(currentDate.getDate() + 30);
 
     useEffect(() => {
         props.navigation
@@ -326,7 +336,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
 
         if (filteredData) {
             const loanProductLinkData = filteredData[0].applicantLoanProductLink;
-
+            setworkFlowID(loanDetail.workflowId);
             if (loanProductLinkData) {
                 if (loanProductLinkData.length > 0) {
                     setLoanTypeLabel(loanProductLinkData[0].loanType)
@@ -335,7 +345,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                     setLoanPurposeCatgLabel(loanProductLinkData[0].loanPurposeCategory)
                     setLoanPurposeLabel(loanProductLinkData[0].loanPurpose)
                     setLoanAmount(loanProductLinkData[0].loanAmount.toString())
-                    setLoanTenure(loanProductLinkData[0].loanTenure.toString())
+                    setLoanTenure(loanProductLinkData[0].loanTenure)
                     setRepaymentModeLabel(loanProductLinkData[0].repaymentMode)
                     setLoanRepaymentFreqLabel(loanProductLinkData[0].loanRepaymentFrequency)
                     setInsuranceCoverageLabel(loanProductLinkData[0].insuranceCoverage)
@@ -349,6 +359,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                     setInterestRate(loanProductLinkData[0].interestRate.toString())
                     setInstallmentStartDateDate(Common.convertDateFormat(loanProductLinkData[0].installmentStartDate))
                     callLoanTenure(loanProductLinkData[0].loanProduct, loanProductLinkData[0].loanAmount.toString(), loanProductLinkData[0].loanTenure.toString())
+                    callLoanAmount(parseInt(loanDetail.workflowId), loanProductLinkData[0].loanAmount);
                     setAppInsuranceAmount(loanProductLinkData[0].applicantInsuranceAmount.toString())
                     setCoAppInsuranceAmount(loanProductLinkData[0].coApplicantInsuranceAmount.toString())
                     setApprxDisbAmount(loanProductLinkData[0].approximateDisbursementAmount.toString())
@@ -361,7 +372,9 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                     setLoanTypeLabel(loanDetail.loanType)
                     setLoanProductLabel(loanDetail.product)
                     setLoanPurposeLabel(loanDetail.loanPurpose);
+                    setLoanPurposeCatgLabel(loanDetail?.loanPurposeCategory)
                     callLoanTenure(loanDetail.product, loanDetail.loanAmount, loanTenure)
+                    callLoanAmount(parseInt(loanDetail.workflowId), loanDetail.loanAmount);
                     setLoanAmount(loanDetail.loanAmount.toString())
                     setLoanPurposeLabel(loanDetail.loanPurpose);
                     getProductID(loanDetail.loanType, parseInt(loanDetail.workflowId))
@@ -370,17 +383,15 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                 setLoanTypeLabel(loanDetail.loanType)
                 setLoanProductLabel(loanDetail.product)
                 setLoanPurposeLabel(loanDetail.loanPurpose);
+                setLoanPurposeCatgLabel(loanDetail?.loanPurposeCategory)
                 callLoanTenure(loanDetail.product, loanDetail.loanAmount, loanTenure)
+                callLoanAmount(parseInt(loanDetail.workflowId), loanDetail.loanAmount);
                 setLoanAmount(loanDetail.loanAmount.toString())
                 setLoanPurposeLabel(loanDetail.loanPurpose);
                 getProductID(loanDetail.loanType, parseInt(loanDetail.workflowId))
             }
 
         }
-
-
-        callLoanAmount(parseInt(loanDetail.workflowId));
-
 
     }
 
@@ -448,9 +459,48 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
         setLoanProductData(dataArray)
     }
 
-    const callLoanAmount = (workflowID) => {
+    const callLoanAmount = (workflowID, loanAmount) => {
 
-        const filteredProductIDData = props.mobilecodedetail.laProductLoan.filter((data) => data.wfId === workflowID);
+        const filteredProductIDData = props.mobilecodedetail.laProductLoan.filter((data) => data.wfId == workflowID);
+
+        const IntRateMenuID = filteredProductIDData[0].productId;
+        // const filteredIntRateMenuData = props.mobilecodedetail.t_InterestRateMenuDetail.filter((data) => data.RateMenuID === IntRateMenuID);
+        //alert(JSON.stringify(IntRateMenuID + '' + loanAmount + '' + loanTenure))
+        const filteredIntRateMenuData = props.mobilecodedetail.t_InterestRateMenuDetail?.filter(item =>
+            item.RateMenuID == IntRateMenuID &&
+            loanAmount >= item.AmountSlabFrom &&
+            loanAmount <= item.AmountSlabTo
+        );
+
+        const addLoanUnit = systemValuesDetail?.filter((data) => data.systemCode === 'LOAN_TENURE');
+        var addLoanTenure = 6;
+        if (addLoanUnit && addLoanUnit?.length > 0) {
+            addLoanTenure = parseInt(addLoanUnit[0]?.value);
+        }
+
+        var loanTenureArray = [];
+        if (filteredIntRateMenuData && filteredIntRateMenuData?.length > 0) {
+            var lastAdd = 0;
+            for (var i = filteredIntRateMenuData[0].TermFrom; i <= filteredIntRateMenuData[0].TermTo; i++) {
+                if (i == filteredIntRateMenuData[0].TermFrom) {
+                    loanTenureArray.push({ subCodeId: i, Description: i.toString() })
+                    lastAdd = i;
+                } else if ((lastAdd + addLoanTenure) <= parseInt(filteredIntRateMenuData[0].TermTo)) {
+                    lastAdd = lastAdd + addLoanTenure;
+                    loanTenureArray.push({ subCodeId: lastAdd, Description: lastAdd.toString() })
+                } else {
+                    var termToPresent = loanTenureArray.some(item => item.subCodeId == filteredIntRateMenuData[0].TermTo);
+                    if (!termToPresent) {
+                        loanTenureArray.push({ subCodeId: filteredIntRateMenuData[0].TermTo, Description: filteredIntRateMenuData[0].TermTo.toString() })
+                    }
+                    break;
+                }
+
+            }
+            setLoanTenureData(loanTenureArray);
+        } else {
+            setLoanTenureData([]);
+        }
 
         if (filteredProductIDData.length > 0) {
             setMinLoanAmount(filteredProductIDData[0].loanAmountFrom);
@@ -964,8 +1014,10 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                 global.COMPLETEDMODULE = 'LN_PRDT';
                 global.COMPLETEDPAGE = 'LN_PRDT_SLCTN';
 
-                await Common.getPageID(global.FILTEREDPROCESSMODULE, 'NMN_DTLS')
-                props.navigation.replace('LoanNomineeList');
+                //await Common.getPageID(global.FILTEREDPROCESSMODULE, 'NMN_DTLS')
+                //props.navigation.replace('LoanNomineeList');
+                props.navigation.replace('LoanApplicationMain', { fromScreen: 'ProductSelection' });
+
             })
             .catch(error => {
                 // Handle the error
@@ -1084,14 +1136,14 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                 errorMessage = errorMessage + i + ')' + ' ' + language[0][props.language].str_plsenter + loanTenureCaption + '\n';
                 i++;
                 flag = true;
-            } else if (loanTenure < minLoanTenure) {
-                errorMessage = errorMessage + i + ')' + ' ' + loanTenureCaption + ' ' + language[0][props.language].str_cannotlessthan + ' ' + minLoanTenure + '\n';
-                i++;
-                flag = true;
-            } else if (loanTenure > maxLoanTenure) {
-                errorMessage = errorMessage + i + ')' + ' ' + loanTenureCaption + ' ' + language[0][props.language].str_cannotgreaterthan + ' ' + maxLoanTenure + '\n';
-                i++;
-                flag = true;
+                // } else if (loanTenure < minLoanTenure) {
+                //     errorMessage = errorMessage + i + ')' + ' ' + loanTenureCaption + ' ' + language[0][props.language].str_cannotlessthan + ' ' + minLoanTenure + '\n';
+                //     i++;
+                //     flag = true;
+                // } else if (loanTenure > maxLoanTenure) {
+                //     errorMessage = errorMessage + i + ')' + ' ' + loanTenureCaption + ' ' + language[0][props.language].str_cannotgreaterthan + ' ' + maxLoanTenure + '\n';
+                //     i++;
+                //     flag = true;
             }
         }
 
@@ -1196,6 +1248,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
         if (componentName === 'LoanAmount') {
             setLoanAmount(textValue);
             callLoanTenure(loanProductLabel, textValue, loanTenure)
+            callLoanAmount(workFlowID, textValue);
             setDisbursementDate('');
         } else if (componentName === 'LoanTenure') {
             setLoanTenure(textValue);
@@ -1251,6 +1304,12 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
         } else if (componentName === 'LoanPurposeCatgPicker') {
             setLoanPurposeCatgLabel(label);
             setLoanPurposeCatgIndex(index);
+        } else if (componentName === 'LoanTenurePicker') {
+            setLoanTenure(label);
+            setloanTenureIndex(index);
+            callLoanTenure(loanProductLabel, LoanAmount, label)
+            setDisbursementDate('');
+
         }
 
 
@@ -1370,28 +1429,6 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                         </View>
                     )}
 
-                    {LoanPurposeVisible && (
-                        <View
-                            style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
-                            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
-                                <TextComp
-                                    textVal={LoanPurposeCaption}
-                                    textStyle={Commonstyles.inputtextStyle}
-                                    Visible={LoanPurposeMan}
-                                />
-                            </View>
-
-                            <PickerComp
-                                textLabel={LoanPurposeLabel}
-                                pickerStyle={Commonstyles.picker}
-                                Disable={LoanPurposeDisable}
-                                pickerdata={LoanPurposeData}
-                                componentName="LoanPurposePicker"
-                                handlePickerClick={handlePickerClick}
-                            />
-                        </View>
-                    )}
-
                     {loanPurposeCatgVisible && (
                         <View
                             style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
@@ -1415,6 +1452,28 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                     )}
 
 
+
+                    {LoanPurposeVisible && (
+                        <View
+                            style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+                            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                                <TextComp
+                                    textVal={LoanPurposeCaption}
+                                    textStyle={Commonstyles.inputtextStyle}
+                                    Visible={LoanPurposeMan}
+                                />
+                            </View>
+
+                            <PickerComp
+                                textLabel={LoanPurposeLabel}
+                                pickerStyle={Commonstyles.picker}
+                                Disable={LoanPurposeDisable}
+                                pickerdata={LoanPurposeData}
+                                componentName="LoanPurposePicker"
+                                handlePickerClick={handlePickerClick}
+                            />
+                        </View>
+                    )}
 
 
                     {LoanAmountVisible && (
@@ -1448,7 +1507,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                         </View>
                     )}
 
-                    {loanTenureVisible && (
+                    {/* {loanTenureVisible && (
                         <View
                             style={{
                                 width: '100%',
@@ -1476,6 +1535,28 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                                 handleClick={handleClick}
                                 length={3}
                                 handleReference={handleReference}
+                            />
+                        </View>
+                    )} */}
+
+                    {loanTenureVisible && (
+                        <View
+                            style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+                            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                                <TextComp
+                                    textVal={loanTenureCaption}
+                                    textStyle={Commonstyles.inputtextStyle}
+                                    Visible={loanTenureMan}
+                                />
+                            </View>
+
+                            <PickerComp
+                                textLabel={loanTenure}
+                                pickerStyle={Commonstyles.picker}
+                                Disable={loanTenureDisable}
+                                pickerdata={loanTenureData}
+                                componentName="LoanTenurePicker"
+                                handlePickerClick={handlePickerClick}
                             />
                         </View>
                     )}
@@ -1625,6 +1706,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
                                     Disable={disbursementDateDisable}
                                     reference={disbursementDateRef}
                                     minDate={new Date()}
+                                    maxDate={maxDate}
                                     handleReference={handleReference} />
                             </View>
 

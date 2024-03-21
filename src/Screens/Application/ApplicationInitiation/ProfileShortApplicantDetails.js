@@ -64,11 +64,19 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
   ] = useState('');
 
   const [loading, setLoading] = useState(false);
+
+  const [fullName, setFullName] = useState('');
+  const [fullNameCaption, setFullNameCaption] = useState('FULL NAME');
+  const [fullNameMan, setFullNameMan] = useState(false);
+  const [fullNameVisible, setFullNameVisible] = useState(true);
+  const [fullNameDisable, setFullNameDisable] = useState(true);
+
   const [firstName, setFirstName] = useState('');
   const [firstNameCaption, setFirstNameCaption] = useState('FIRST NAME');
   const [firstNameMan, setFirstNameMan] = useState(false);
   const [firstNameVisible, setFirstNameVisible] = useState(true);
   const [firstNameDisable, setFirstNameDisable] = useState(false);
+
   const [middleName, setMiddleName] = useState('');
   const [middleNameMan, setMiddleNameMan] = useState(false);
   const [middleNameCaption, setMiddleNameCaption] = useState('MIDDLE NAME');
@@ -83,6 +91,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
   const [bottomErrorSheetVisible, setBottomErrorSheetVisible] = useState(false);
   const showBottomSheet = () => setBottomErrorSheetVisible(true);
   const hideBottomSheet = () => setBottomErrorSheetVisible(false);
+  const fullNameRef = useRef(null);
   const firstNameRef = useRef(null);
   const middleNameRef = useRef(null);
   const lastNameRef = useRef(null);
@@ -384,7 +393,11 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
 
   const makeSystemMandatoryFields = () => {
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_title' && data.pageId === pageId).map((value, index) => {
+    const filteredData = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID));
+
+    const workFlowId = filteredData[0].workflowId;
+
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_title' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
       setTitleCaption(value.fieldName)
       if (value.mandatory) {
         setTitleMan(true);
@@ -401,7 +414,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
     });
 
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_first_name' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_first_name' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
       setFirstNameCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -418,7 +431,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_middle_name' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_middle_name' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
       setMiddleNameCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -435,7 +448,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_last_name' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_last_name' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
       setLastNameCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -452,7 +465,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_maritalstatus' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_maritalstatus' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
       setMaritalStatusCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -469,7 +482,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_gender' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_gender' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
       setGenderCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -487,7 +500,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
     });
 
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_date_of_birth' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_date_of_birth' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
       setDOBCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -504,7 +517,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_age' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_age' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
       setAgeCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -521,7 +534,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_fathers name' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_fathers name' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
       setFatherNameCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -538,7 +551,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_spouse name' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'et_prsnl_dtl_spouse name' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
       setSpouseNameCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -555,7 +568,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_caste' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_caste' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
       setCasteCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -572,7 +585,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_religion' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_religion' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
       setReligionCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -589,7 +602,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_mother tongue' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_mother tongue' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
       setMotherTongueCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -606,7 +619,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       }
     });
 
-    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_educational qualifications' && data.pageId === pageId).map((value, index) => {
+    systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_educational qualifications' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
       setEADCaption(value.fieldName)
 
       if (value.isMandatory) {
@@ -651,6 +664,13 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
   };
 
   const getClientData = (value) => {
+
+    if (value.fullName) {
+      setFullNameVisible(true);
+      setFullName(value.fullName)
+    } else {
+      setFullNameVisible(false);
+    }
 
     setTitleLabel(value?.title ?? '');
     setFirstName(value?.firstName ?? '');
@@ -731,21 +751,21 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
   const disableAadharFields = (aadharverify, fatherName, spouseName) => {
 
     if (aadharverify) {
-      setFirstNameDisable(true);
-      if (middleName) {
-        setMiddleNameDisable(true);
-      } else {
-        setMiddleNameDisable(false);
-      }
+      // setFirstNameDisable(true);
+      // if (middleName) {
+      //   setMiddleNameDisable(true);
+      // } else {
+      //   setMiddleNameDisable(false);
+      // }
 
-      if (lastName) {
-        setLastNameDisable(true);
-      } else {
-        setLastNameDisable(false);
-      }
+      // if (lastName) {
+      //   setLastNameDisable(true);
+      // } else {
+      //   setLastNameDisable(false);
+      // }
 
 
-      setMiddleNameMan(false)
+      // setMiddleNameMan(false)
       setGenderDisable(true);
       setDOBDisable(true);
       setAgeDisable(true);
@@ -1638,6 +1658,38 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
                 pickerdata={TitleData}
                 componentName="Title"
                 handlePickerClick={handlePickerClick}
+              />
+            </View>
+          )}
+
+          {fullNameVisible && (
+            <View
+              style={{
+                width: '100%',
+                marginTop: 19,
+                paddingHorizontal: 0,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
+                <TextComp
+                  textVal={fullNameCaption}
+                  textStyle={Commonstyles.inputtextStyle}
+                  Visible={fullNameMan}
+                />
+              </View>
+
+              <TextInputComp
+                textValue={fullName}
+                textStyle={Commonstyles.textinputtextStyle}
+                type="email-address"
+                Disable={fullNameDisable}
+                ComponentName="fullName"
+                reference={fullNameRef}
+                returnKey="next"
+                handleClick={handleClick}
+                handleReference={handleReference}
+                length={30}
               />
             </View>
           )}
