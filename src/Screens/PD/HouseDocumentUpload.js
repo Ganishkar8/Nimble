@@ -482,94 +482,106 @@ const HouseDocumentUpload = (props, { navigation }) => {
   const pickImage = () => {
     // setVisible(false)
 
-    hidephotoBottomSheet();
-    ImagePicker.openCamera({
-      cropping: true,
-    }).then(image => {
-      setImageFile(image);
+    try {
+      hidephotoBottomSheet();
+      ImagePicker.openCamera({
+        cropping: true,
+      }).then(image => {
+        setImageFile(image);
 
-      const lastDotIndex = image.path.lastIndexOf('.');
-      var imageName = 'Photo' + '_' + global.CLIENTID;
-      if (lastDotIndex !== -1) {
-        // Get the substring from the last dot to the end of the string
-        const fileExtension = image.path.substring(lastDotIndex);
-        imageName = imageName + fileExtension;
-        console.log('File extension:', fileExtension);
-      }
-      //alert(JSON.stringify(currentPhotoItem))
+        const lastDotIndex = image.path.lastIndexOf('.');
+        var imageName = 'Photo' + '_' + global.CLIENTID;
+        if (lastDotIndex !== -1) {
+          // Get the substring from the last dot to the end of the string
+          const fileExtension = image.path.substring(lastDotIndex);
+          imageName = imageName + fileExtension;
+          console.log('File extension:', fileExtension);
+        }
+        //alert(JSON.stringify(currentPhotoItem))
 
-      // const imageName = image.path.split('/').pop();
-      console.log('SpecificData:', JSON.stringify(currentPhotoItem));
-      if (currentPhotoItem.subCode == 'HOU_VIS_IMG') {
-        if (global.PDSTAGE == 'PD_1') {
+        // const imageName = image.path.split('/').pop();
+        console.log('SpecificData:', JSON.stringify(currentPhotoItem));
+        if (currentPhotoItem.subCode == 'HOU_VIS_IMG') {
+          if (global.PDSTAGE == 'PD_1') {
+            updateImage(image.path, image.mime, imageName, 0);
+            setFileType(image.mime);
+            setFileName(imageName);
+            setImageUri(image.path);
+            setVisible(false);
+          } else {
+            checkPermissions().then(res => {
+              if (res == true) {
+                getOneTimeLocation(image.path, image.mime, imageName);
+              } else {
+                setApiError('Permission Not Granted');
+                setErrorModalVisible(true);
+              }
+            });
+          }
+        } else {
           updateImage(image.path, image.mime, imageName, 0);
           setFileType(image.mime);
           setFileName(imageName);
           setImageUri(image.path);
           setVisible(false);
-        } else {
-          checkPermissions().then(res => {
-            if (res == true) {
-              getOneTimeLocation(image.path, image.mime, imageName);
-            } else {
-              setApiError('Permission Not Granted');
-              setErrorModalVisible(true);
-            }
-          });
         }
-      } else {
-        updateImage(image.path, image.mime, imageName, 0);
-        setFileType(image.mime);
-        setFileName(imageName);
-        setImageUri(image.path);
-        setVisible(false);
-      }
-    });
+      });
+    } catch (error) {
+      alert(JSON.stringify(error))
+    }
+
+
   };
 
   const selectImage = async () => {
     // setVisible(false)
 
-    hidephotoBottomSheet();
-    ImagePicker.openPicker({
-      cropping: true,
-    }).then(image => {
-      setImageFile(image);
+    try {
+      hidephotoBottomSheet();
+      ImagePicker.openPicker({
+        cropping: true,
+      }).then(image => {
+        setImageFile(image);
 
-      const lastDotIndex = image.path.lastIndexOf('.');
-      var imageName = 'Photo' + '_' + global.CLIENTID;
-      if (lastDotIndex !== -1) {
-        // Get the substring from the last dot to the end of the string
-        const fileExtension = image.path.substring(lastDotIndex);
-        imageName = imageName + fileExtension;
-        console.log('File extension:', fileExtension);
-      }
-      console.log('SpecificData:', JSON.stringify(currentPhotoItem));
-      if (currentPhotoItem.subCode == 'HOU_VIS_IMG') {
-        if (global.PDSTAGE == 'PD_1') {
+        const lastDotIndex = image.path.lastIndexOf('.');
+        var imageName = 'Photo' + '_' + global.CLIENTID;
+        if (lastDotIndex !== -1) {
+          // Get the substring from the last dot to the end of the string
+          const fileExtension = image.path.substring(lastDotIndex);
+          imageName = imageName + fileExtension;
+          console.log('File extension:', fileExtension);
+        }
+        console.log('SpecificData:', JSON.stringify(currentPhotoItem));
+        if (currentPhotoItem.subCode == 'HOU_VIS_IMG') {
+          if (global.PDSTAGE == 'PD_1') {
+            updateImage(image.path, image.mime, imageName, 0);
+            setFileType(image.mime);
+            setFileName(imageName);
+            setImageUri(image.path);
+            setVisible(false);
+          } else {
+            checkPermissions().then(res => {
+              if (res == true) {
+                getOneTimeLocation(image.path, image.mime, imageName);
+              } else {
+                setApiError('Permission Not Granted');
+                setErrorModalVisible(true);
+              }
+            });
+          }
+        } else {
           updateImage(image.path, image.mime, imageName, 0);
           setFileType(image.mime);
           setFileName(imageName);
           setImageUri(image.path);
           setVisible(false);
-        } else {
-          checkPermissions().then(res => {
-            if (res == true) {
-              getOneTimeLocation(image.path, image.mime, imageName);
-            } else {
-              setApiError('Permission Not Granted');
-              setErrorModalVisible(true);
-            }
-          });
         }
-      } else {
-        updateImage(image.path, image.mime, imageName, 0);
-        setFileType(image.mime);
-        setFileName(imageName);
-        setImageUri(image.path);
-        setVisible(false);
-      }
-    });
+      });
+    } catch (error) {
+      alert(JSON.stringify(error))
+    }
+
+
   };
 
   const checkGeo = (

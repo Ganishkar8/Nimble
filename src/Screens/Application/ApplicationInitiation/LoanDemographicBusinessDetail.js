@@ -2253,27 +2253,33 @@ const LoanDemographicBusinessDetail = (props) => {
     const pickImage = () => {
         // setVisible(false)
 
-        hidephotoBottomSheet();
-        ImagePicker.openCamera({
-            cropping: true,
-        }).then(image => {
-            setImageFile(image)
+        try {
+            hidephotoBottomSheet();
+            ImagePicker.openCamera({
+                cropping: true,
+            }).then(image => {
+                setImageFile(image)
 
-            const lastDotIndex = image.path.lastIndexOf('.');
-            var imageName = 'Photo' + '_' + global.TEMPAPPID;
-            if (lastDotIndex !== -1) {
-                // Get the substring from the last dot to the end of the string
-                const fileExtension = image.path.substring(lastDotIndex);
-                imageName = imageName + fileExtension;
-                console.log('File extension:', fileExtension);
-            }
+                const lastDotIndex = image.path.lastIndexOf('.');
+                var imageName = 'Photo' + '_' + global.TEMPAPPID;
+                if (lastDotIndex !== -1) {
+                    // Get the substring from the last dot to the end of the string
+                    const fileExtension = image.path.substring(lastDotIndex);
+                    imageName = imageName + fileExtension;
+                    console.log('File extension:', fileExtension);
+                }
 
 
-            updateImage(image.path, image.mime, imageName)
+                updateImage(image.path, image.mime, imageName)
 
-            //setVisible(false)
-            props.onChange?.(image);
-        })
+                //setVisible(false)
+                props.onChange?.(image);
+            })
+        } catch (error) {
+            alert(JSON.stringify(error))
+        }
+
+
 
     };
 
@@ -2758,7 +2764,7 @@ const LoanDemographicBusinessDetail = (props) => {
                                 <TextComp
                                     textVal={companyTypeCaption}
                                     textStyle={Commonstyles.inputtextStyle}
-                                    Visible={industryLineMan}
+                                    Visible={companyTypeMan}
                                 />
                             </View>
 

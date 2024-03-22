@@ -1057,52 +1057,63 @@ const BankDetailsScreen = (props, { navigation }) => {
 
     const pickImage = () => {
 
-        hidephotoBottomSheet();
-        ImagePicker.openCamera({
-            cropping: true,
-        }).then(image => {
-            setImageFile(image)
+        try {
+            hidephotoBottomSheet();
+            ImagePicker.openCamera({
+                cropping: true,
+            }).then(image => {
+                setImageFile(image)
 
-            const lastDotIndex = image.path.lastIndexOf('.');
-            var imageName = 'Photo' + '_' + global.leadID;
+                const lastDotIndex = image.path.lastIndexOf('.');
+                var imageName = 'Photo' + '_' + global.leadID;
 
-            if (lastDotIndex !== -1) {
+                if (lastDotIndex !== -1) {
 
-                // Get the substring from the last dot to the end of the string
-                const fileExtension = image.path.substring(lastDotIndex);
-                imageName = imageName + fileExtension;
-                console.log('File extension:', fileExtension);
-            }
-            updateImage(image.path, image.mime, imageName)
+                    // Get the substring from the last dot to the end of the string
+                    const fileExtension = image.path.substring(lastDotIndex);
+                    imageName = imageName + fileExtension;
+                    console.log('File extension:', fileExtension);
+                }
+                updateImage(image.path, image.mime, imageName)
 
-            props.onChange?.(image);
-        })
+                props.onChange?.(image);
+            })
+        } catch (error) {
+            alert(JSON.stringify(error))
+        }
+
 
     };
 
     const selectImage = async () => {
 
-        hidephotoBottomSheet();
-        ImagePicker.openPicker({
-            width: 300,
-            height: 400,
-            cropping: true,
-        }).then(image => {
-            setImageFile(image);
+        try {
+            hidephotoBottomSheet();
+            ImagePicker.openPicker({
+                width: 300,
+                height: 400,
+                cropping: true,
+            }).then(image => {
+                setImageFile(image);
 
-            const lastDotIndex = image.path.lastIndexOf('.');
-            var imageName = 'Photo' + '_' + global.TEMPAPPID;
-            if (lastDotIndex !== -1) {
-                // Get the substring from the last dot to the end of the string
-                const fileExtension = image.path.substring(lastDotIndex);
-                imageName = imageName + fileExtension;
-                console.log('File extension:', fileExtension);
-            }
-            updateImage(image.path, image.mime, imageName)
+                const lastDotIndex = image.path.lastIndexOf('.');
+                var imageName = 'Photo' + '_' + global.TEMPAPPID;
+                if (lastDotIndex !== -1) {
+                    // Get the substring from the last dot to the end of the string
+                    const fileExtension = image.path.substring(lastDotIndex);
+                    imageName = imageName + fileExtension;
+                    console.log('File extension:', fileExtension);
+                }
+                updateImage(image.path, image.mime, imageName)
 
-            setDeleteVisible(false)
-            props.onChange?.(image);
-        })
+                setDeleteVisible(false)
+                props.onChange?.(image);
+            })
+        } catch (error) {
+            alert(JSON.stringify(error))
+        }
+
+
 
     };
 

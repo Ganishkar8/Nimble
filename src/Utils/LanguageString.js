@@ -314,7 +314,7 @@ export const language = [
       str_foir: 'FOIR',
       str_netProfitMargin: 'NET PROFIT MARGIN',
       str_combinedfoir: 'Combined FOIR',
-      str_individualfoir: 'Individual FOIR',
+      str_individualfoir: 'Guarantor FOIR',
     },
 
     ta: {

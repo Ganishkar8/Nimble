@@ -92,8 +92,10 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
                 if (response.status == 200) {
                     if (global.DEBUG_MODE) console.log("LoanAppDetails::" + JSON.stringify(response.data));
                     global.LEADTRACKERDATA = response.data;
+                    const keysToRemove = ['loanApplicationStatusDtos']; // Add the keys you want to remove here
+
                     const updatedObject = Object.keys(response.data).reduce((acc, key) => {
-                        if (key !== 'loanApplicationStatusDtos') {
+                        if (!keysToRemove.includes(key)) {
                             acc[key] = response.data[key];
                         }
                         return acc;

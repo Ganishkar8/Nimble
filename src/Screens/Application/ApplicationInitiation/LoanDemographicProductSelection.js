@@ -283,6 +283,9 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
             fieldsDisable();
             setOnlyView(true);
         }
+        const clientToUpdate = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0];
+
+        console.log(JSON.stringify(clientToUpdate))
 
 
         return () => {
@@ -915,7 +918,7 @@ const LoanDemographicProductSelection = (props, { navigation }) => {
             .then(async response => {
                 // Handle the response data
 
-                if (global.DEBUG_MODE) console.log('RepaymentScheduleApiResponse::' + JSON.stringify(response.data),);
+                if (global.DEBUG_MODE) console.log('RepaymentScheduleApiResponse::' + response.data);
 
                 setLoading(false);
                 //await insertData();

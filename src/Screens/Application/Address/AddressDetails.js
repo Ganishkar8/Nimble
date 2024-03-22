@@ -2017,64 +2017,75 @@ const AddressDetails = (props, { navigation }) => {
   const pickImage = () => {
     // setVisible(false)
 
-    hidephotoBottomSheet();
-    ImagePicker.openCamera({
-      cropping: true,
-    }).then(image => {
-      setImageFile(image)
+    try {
+      hidephotoBottomSheet();
+      ImagePicker.openCamera({
+        cropping: true,
+      }).then(image => {
+        setImageFile(image)
 
-      const lastDotIndex = image.path.lastIndexOf('.');
-      var imageName = 'Photo' + '_' + global.CLIENTID;
-      if (lastDotIndex !== -1) {
-        // Get the substring from the last dot to the end of the string
-        const fileExtension = image.path.substring(lastDotIndex);
-        imageName = imageName + fileExtension;
-        if (global.DEBUG_MODE) console.log('File extension:', fileExtension);
-      }
+        const lastDotIndex = image.path.lastIndexOf('.');
+        var imageName = 'Photo' + '_' + global.CLIENTID;
+        if (lastDotIndex !== -1) {
+          // Get the substring from the last dot to the end of the string
+          const fileExtension = image.path.substring(lastDotIndex);
+          imageName = imageName + fileExtension;
+          if (global.DEBUG_MODE) console.log('File extension:', fileExtension);
+        }
 
-      // const imageName = image.path.split('/').pop();
+        // const imageName = image.path.split('/').pop();
 
-      setFileType(image.mime)
-      setFileName(imageName)
-      setImageUri(image.path)
+        setFileType(image.mime)
+        setFileName(imageName)
+        setImageUri(image.path)
 
-      updateImage(image.path, image.mime, imageName)
-      //setVisible(false)
-      props.onChange?.(image);
-    })
+        updateImage(image.path, image.mime, imageName)
+        //setVisible(false)
+        props.onChange?.(image);
+      })
+    } catch (error) {
+      alert(JSON.stringify(error))
+    }
+
+
 
   };
 
   const selectImage = async () => {
     // setVisible(false)
 
-    hidephotoBottomSheet();
-    ImagePicker.openPicker({
-      width: 300,
-      height: 400,
-      cropping: true,
-    }).then(image => {
-      setImageFile(image);
+    try {
+      hidephotoBottomSheet();
+      ImagePicker.openPicker({
+        width: 300,
+        height: 400,
+        cropping: true,
+      }).then(image => {
+        setImageFile(image);
 
-      const lastDotIndex = image.path.lastIndexOf('.');
-      var imageName = 'Photo' + '_' + global.CLIENTID;
-      if (lastDotIndex !== -1) {
-        // Get the substring from the last dot to the end of the string
-        const fileExtension = image.path.substring(lastDotIndex);
-        imageName = imageName + fileExtension;
-        console.log('File extension:', fileExtension);
-      }
+        const lastDotIndex = image.path.lastIndexOf('.');
+        var imageName = 'Photo' + '_' + global.CLIENTID;
+        if (lastDotIndex !== -1) {
+          // Get the substring from the last dot to the end of the string
+          const fileExtension = image.path.substring(lastDotIndex);
+          imageName = imageName + fileExtension;
+          console.log('File extension:', fileExtension);
+        }
 
-      setFileType(image.mime)
-      setFileName(imageName)
-      setImageUri(image.path)
+        setFileType(image.mime)
+        setFileName(imageName)
+        setImageUri(image.path)
 
 
-      updateImage(image.path, image.mime, imageName)
-      //setVisible(false)
-      //setDeleteVisible(false)
-      props.onChange?.(image);
-    })
+        updateImage(image.path, image.mime, imageName)
+        //setVisible(false)
+        //setDeleteVisible(false)
+        props.onChange?.(image);
+      })
+    } catch (error) {
+      alert(JSON.stringify(error))
+    }
+
 
   };
 

@@ -1112,26 +1112,32 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
   const pickImage = () => {
     // setVisible(false)
 
-    hidephotoBottomSheet();
-    ImagePicker.openCamera({
-      cropping: true,
-    }).then(image => {
-      setImageFile(image)
+    try {
+      hidephotoBottomSheet();
+      ImagePicker.openCamera({
+        cropping: true,
+      }).then(image => {
+        setImageFile(image)
 
-      const lastDotIndex = image.path.lastIndexOf('.');
-      var imageName = 'Photo' + '_' + global.CLIENTID;
-      if (lastDotIndex !== -1) {
-        // Get the substring from the last dot to the end of the string
-        const fileExtension = image.path.substring(lastDotIndex);
-        imageName = imageName + fileExtension;
-        console.log('File extension:', fileExtension);
-      }
+        const lastDotIndex = image.path.lastIndexOf('.');
+        var imageName = 'Photo' + '_' + global.CLIENTID;
+        if (lastDotIndex !== -1) {
+          // Get the substring from the last dot to the end of the string
+          const fileExtension = image.path.substring(lastDotIndex);
+          imageName = imageName + fileExtension;
+          console.log('File extension:', fileExtension);
+        }
 
-      // const imageName = image.path.split('/').pop();
-      updateImage(image.path, image.mime, imageName)
+        // const imageName = image.path.split('/').pop();
+        updateImage(image.path, image.mime, imageName)
 
-      props.onChange?.(image);
-    })
+        props.onChange?.(image);
+      })
+    } catch (error) {
+      alert(JSON.stringify(error))
+    }
+
+
 
   };
 

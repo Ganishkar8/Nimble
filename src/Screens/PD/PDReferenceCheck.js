@@ -816,54 +816,66 @@ const PDReferenceCheck = (props, { navigation }) => {
   const pickImage = () => {
     // setVisible(false)
 
-    hidephotoBottomSheet();
-    ImagePicker.openCamera({
-      cropping: true,
-    }).then(image => {
-      setImageFile(image);
+    try {
+      hidephotoBottomSheet();
+      ImagePicker.openCamera({
+        cropping: true,
+      }).then(image => {
+        setImageFile(image);
 
-      const lastDotIndex = image.path.lastIndexOf('.');
-      var imageName = 'Photo' + '_' + global.CLIENTID.toString();
-      try {
-        if (lastDotIndex !== -1) {
-          // Get the substring from the last dot to the end of the string
-          const fileExtension = image?.path?.substring(lastDotIndex);
-          imageName = imageName + fileExtension;
-          console.log('File extension:', fileExtension);
+        const lastDotIndex = image.path.lastIndexOf('.');
+        var imageName = 'Photo' + '_' + global.CLIENTID.toString();
+        try {
+          if (lastDotIndex !== -1) {
+            // Get the substring from the last dot to the end of the string
+            const fileExtension = image?.path?.substring(lastDotIndex);
+            imageName = imageName + fileExtension;
+            console.log('File extension:', fileExtension);
+          }
+        } catch (error) {
+          imageName = imageName + '.png';
         }
-      } catch (error) {
-        imageName = imageName + '.png';
-      }
 
-      // const imageName = image.path.split('/').pop();
-      updateImage(image.path, image.mime, imageName);
+        // const imageName = image.path.split('/').pop();
+        updateImage(image.path, image.mime, imageName);
 
-      props.onChange?.(image);
-    });
+        props.onChange?.(image);
+      });
+    } catch (error) {
+      alert(JSON.stringify(error))
+    }
+
+
   };
 
   const selectImage = async () => {
     // setVisible(false)
 
-    hidephotoBottomSheet();
-    ImagePicker.openPicker({
-      cropping: true,
-    }).then(image => {
-      setImageFile(image);
+    try {
 
-      const lastDotIndex = image.path.lastIndexOf('.');
-      var imageName = 'Photo' + '_' + global.CLIENTID.toString();
-      if (lastDotIndex !== -1) {
-        // Get the substring from the last dot to the end of the string
-        const fileExtension = image.path.substring(lastDotIndex);
-        imageName = imageName + fileExtension;
-        console.log('File extension:', fileExtension);
-      }
-      updateImage(image.path, image.mime, imageName);
+      hidephotoBottomSheet();
+      ImagePicker.openPicker({
+        cropping: true,
+      }).then(image => {
+        setImageFile(image);
 
-      setDeleteVisible(false);
-      props.onChange?.(image);
-    });
+        const lastDotIndex = image.path.lastIndexOf('.');
+        var imageName = 'Photo' + '_' + global.CLIENTID.toString();
+        if (lastDotIndex !== -1) {
+          // Get the substring from the last dot to the end of the string
+          const fileExtension = image.path.substring(lastDotIndex);
+          imageName = imageName + fileExtension;
+          console.log('File extension:', fileExtension);
+        }
+        updateImage(image.path, image.mime, imageName);
+
+        setDeleteVisible(false);
+        props.onChange?.(image);
+      });
+    } catch (error) {
+      alert(JSON.stringify(error))
+    }
+
   };
 
   const getlocationPermission = () => {
