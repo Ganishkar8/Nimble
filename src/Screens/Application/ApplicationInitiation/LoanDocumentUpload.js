@@ -327,36 +327,42 @@ const LoanDocumentUpload = (props, { navigation }) => {
 
     const pickImage = () => {
         // setVisible(false)
+        try {
+            hidephotoBottomSheet();
+            ImagePicker.openCamera({
+                cropping: true,
+            }).then(image => {
+                setImageFile(image)
 
-        hidephotoBottomSheet();
-        ImagePicker.openCamera({
-            cropping: true,
-        }).then(image => {
-            setImageFile(image)
+                const lastDotIndex = image.path.lastIndexOf('.');
+                var imageName = 'Photo' + '_' + global.CLIENTID;
+                if (lastDotIndex !== -1) {
+                    // Get the substring from the last dot to the end of the string
+                    const fileExtension = image.path.substring(lastDotIndex);
+                    imageName = imageName + fileExtension;
+                    console.log('File extension:', fileExtension);
+                }
+                //alert(JSON.stringify(currentPhotoItem))
 
-            const lastDotIndex = image.path.lastIndexOf('.');
-            var imageName = 'Photo' + '_' + global.CLIENTID;
-            if (lastDotIndex !== -1) {
-                // Get the substring from the last dot to the end of the string
-                const fileExtension = image.path.substring(lastDotIndex);
-                imageName = imageName + fileExtension;
-                console.log('File extension:', fileExtension);
-            }
-            //alert(JSON.stringify(currentPhotoItem))
+                // const imageName = image.path.split('/').pop();
+                console.log('SpecificData:', JSON.stringify(currentPhotoItem));
+                updateImage(image.path, image.mime, imageName)
+                setFileType(image.mime)
+                setFileName(imageName)
+                setImageUri(image.path)
+                setVisible(false)
+            })
+        } catch (error) {
+            alert(JSON.stringify(error))
+        }
 
-            // const imageName = image.path.split('/').pop();
-            console.log('SpecificData:', JSON.stringify(currentPhotoItem));
-            updateImage(image.path, image.mime, imageName)
-            setFileType(image.mime)
-            setFileName(imageName)
-            setImageUri(image.path)
-            setVisible(false)
-        })
+
 
     };
 
     const selectImage = async () => {
         // setVisible(false)
+
 
         hidephotoBottomSheet();
 

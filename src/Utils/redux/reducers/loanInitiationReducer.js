@@ -63,6 +63,14 @@ const loanInitiationReducer = (state = initialState, action) => {
                             (clientDetail) => clientDetail.id === parseInt(clientId)
                         );
 
+                        if (!item[key]) {
+                            // If nestedKey is not present, add it with the new data
+                            return {
+                                ...item,
+                                [item]: [data],
+                            };
+                        }
+
                         if (key == 'applicantSalesDetail') {
                             return {
                                 ...item,
@@ -70,7 +78,14 @@ const loanInitiationReducer = (state = initialState, action) => {
                                     ? { ...item[key], ...data } // Update existing data
                                     : data, // Assign new data
                             };
-                        } else {
+                        } else if (!item[key]) {
+                            // If nestedKey is not present, add it with the new data
+                            return {
+                                ...item,
+                                [item]: [data],
+                            };
+                        }
+                        else {
                             return {
                                 ...item,
                                 [key]: isExistingId

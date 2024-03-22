@@ -76,8 +76,8 @@ const PDFoir = (props, { navigation }) => {
 
             "la_no": global.LOANAPPLICATIONID,
             "current_client": props.route.params.clientId,
-            "stage_lv": "PD",
-            "data_level": dataLevel,
+            //"stage_lv": "PD",
+            //"data_level": dataLevel,
             "current_level": global.PDSTAGE
         };
         const baseURL = global.PORT1;
@@ -144,8 +144,8 @@ const PDFoir = (props, { navigation }) => {
         const appDetails = {
 
             "la_no": global.LOANAPPLICATIONID,
-            "stage_lv": "PD",
-            "data_level": dataLevel,
+            // "stage_lv": "PD",
+            // "data_level": dataLevel,
             "current_level": global.PDSTAGE
         };
         const baseURL = global.PORT1;

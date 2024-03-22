@@ -1147,81 +1147,90 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
   const pickImage = () => {
     // setVisible(false)
 
-    hidephotoBottomSheet();
-    ImagePicker.openCamera({
-      cropping: true,
-    }).then(image => {
-      setImageFile(image)
+    try {
+      hidephotoBottomSheet();
+      ImagePicker.openCamera({
+        cropping: true,
+      }).then(image => {
+        setImageFile(image)
 
-      const lastDotIndex = image.path.lastIndexOf('.');
-      var imageName = 'Photo' + '_' + global.CLIENTID;
-      if (lastDotIndex !== -1) {
-        // Get the substring from the last dot to the end of the string
-        const fileExtension = image.path.substring(lastDotIndex);
-        imageName = imageName + fileExtension;
-        if (global.DEBUG_MODE) console.log('File extension:', fileExtension);
-      }
+        const lastDotIndex = image.path.lastIndexOf('.');
+        var imageName = 'Photo' + '_' + global.CLIENTID;
+        if (lastDotIndex !== -1) {
+          // Get the substring from the last dot to the end of the string
+          const fileExtension = image.path.substring(lastDotIndex);
+          imageName = imageName + fileExtension;
+          if (global.DEBUG_MODE) console.log('File extension:', fileExtension);
+        }
 
-      // const imageName = image.path.split('/').pop();
-      setTime(Common.getCurrentDateTime());
-      if (selectedImageType == 'KYCSOURCE') {
-        setFileType(image.mime)
-        setFileName(imageName)
-        setImageUri(image.path)
-      } else if (selectedImageType == 'KYCID1') {
-        setKycID1Type(image.mime)
-        setKycID1FileName(imageName)
-        setkycID1ImageUri(image.path)
-      } else if (selectedImageType == 'KYCDOB') {
-        setKycDOBType(image.mime)
-        setKycDOBFileName(imageName)
-        setkycDobImageUri(image.path)
-      }
-      updateImage(image.path, image.mime, imageName)
-      //setVisible(false)
-      props.onChange?.(image);
-    })
+        setTime(Common.getCurrentDateTime());
+        if (selectedImageType == 'KYCSOURCE') {
+          setFileType(image.mime)
+          setFileName(imageName)
+          setImageUri(image.path)
+        } else if (selectedImageType == 'KYCID1') {
+          setKycID1Type(image.mime)
+          setKycID1FileName(imageName)
+          setkycID1ImageUri(image.path)
+        } else if (selectedImageType == 'KYCDOB') {
+          setKycDOBType(image.mime)
+          setKycDOBFileName(imageName)
+          setkycDobImageUri(image.path)
+        }
+        updateImage(image.path, image.mime, imageName)
+        //setVisible(false)
+        props.onChange?.(image);
+      })
+    } catch (error) {
+      alert(JSON.stringify(error))
+    }
+
+
 
   };
 
   const selectImage = async () => {
     // setVisible(false)
 
-    hidephotoBottomSheet();
-    ImagePicker.openPicker({
-      width: 300,
-      height: 400,
-      cropping: true,
-    }).then(image => {
-      setImageFile(image);
+    try {
+      hidephotoBottomSheet();
+      ImagePicker.openPicker({
+        width: 300,
+        height: 400,
+        cropping: true,
+      }).then(image => {
+        setImageFile(image);
 
-      const lastDotIndex = image.path.lastIndexOf('.');
-      var imageName = 'Photo' + '_' + global.CLIENTID;
-      if (lastDotIndex !== -1) {
-        // Get the substring from the last dot to the end of the string
-        const fileExtension = image.path.substring(lastDotIndex);
-        imageName = imageName + fileExtension;
-        console.log('File extension:', fileExtension);
-      }
-      if (selectedImageType == 'KYCSOURCE') {
-        setFileType(image.mime)
-        setFileName(imageName)
-        setImageUri(image.path)
-      } else if (selectedImageType == 'KYCID1') {
-        setKycID1Type(image.mime)
-        setKycID1FileName(imageName)
-        setkycID1ImageUri(image.path)
-      } else if (selectedImageType == 'KYCDOB') {
-        setKycDOBType(image.mime)
-        setKycDOBFileName(imageName)
-        setkycDobImageUri(image.path)
-      }
+        const lastDotIndex = image.path.lastIndexOf('.');
+        var imageName = 'Photo' + '_' + global.CLIENTID;
+        if (lastDotIndex !== -1) {
+          // Get the substring from the last dot to the end of the string
+          const fileExtension = image.path.substring(lastDotIndex);
+          imageName = imageName + fileExtension;
+          console.log('File extension:', fileExtension);
+        }
+        if (selectedImageType == 'KYCSOURCE') {
+          setFileType(image.mime)
+          setFileName(imageName)
+          setImageUri(image.path)
+        } else if (selectedImageType == 'KYCID1') {
+          setKycID1Type(image.mime)
+          setKycID1FileName(imageName)
+          setkycID1ImageUri(image.path)
+        } else if (selectedImageType == 'KYCDOB') {
+          setKycDOBType(image.mime)
+          setKycDOBFileName(imageName)
+          setkycDobImageUri(image.path)
+        }
 
-      updateImage(image.path, image.mime, imageName)
-      //setVisible(false)
-      //setDeleteVisible(false)
-      props.onChange?.(image);
-    })
+        updateImage(image.path, image.mime, imageName)
+        //setVisible(false)
+        //setDeleteVisible(false)
+        props.onChange?.(image);
+      })
+    } catch (error) {
+      alert(JSON.stringify(error))
+    }
 
   };
 
