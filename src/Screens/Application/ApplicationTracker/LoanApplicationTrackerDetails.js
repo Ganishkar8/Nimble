@@ -540,7 +540,7 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
                         <View style={{ flexDirection: 'row' }}>
 
                             <View style={{ width: '52%', justifyContent: 'center' }}>
-                                <Text style={styles.textStyle}>{language[0][props.language].str_reviewLoanAppForm}</Text>
+                                <Text style={styles.textStyle1}>{language[0][props.language].str_reviewLoanAppForm}</Text>
                             </View>
 
                             <View style={{ width: '30%' }}></View>
@@ -552,23 +552,25 @@ const LoanApplicationTrackerDetails = (props, { navigation }) => {
 
                 </View>
 
-                {!(listData?.status?.toUpperCase() == 'COMPLETED') && !(listData?.status?.toUpperCase() == 'REJECTED') &&
-                    <ButtonViewComp
-                        textValue={
-                            language[0][props.language].str_reject.toUpperCase()
-                        }
-                        textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
-                        viewStyle={Commonstyles.buttonView}
-                        innerStyle={Commonstyles.buttonViewInnerStyle}
-                        handleClick={showRejectModal}
-                    />
-                }
+
 
             </ScrollView>
 
         </View>
     );
 };
+
+// {!(listData?.status?.toUpperCase() == 'COMPLETED') && !(listData?.status?.toUpperCase() == 'REJECTED') &&
+// <ButtonViewComp
+//     textValue={
+//         language[0][props.language].str_reject.toUpperCase()
+//     }
+//     textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
+//     viewStyle={Commonstyles.buttonView}
+//     innerStyle={Commonstyles.buttonViewInnerStyle}
+//     handleClick={showRejectModal}
+// />
+// }
 
 const mapStateToProps = (state) => {
     const { language } = state.languageReducer;
@@ -691,6 +693,9 @@ const styles = StyleSheet.create({
     },
     textStyle: {
         fontSize: 16, color: Colors.mediumgrey, marginTop: 5, fontFamily: 'PoppinsRegular'
+    },
+    textStyle1: {
+        fontSize: 16, color: Colors.black, marginTop: 5, fontFamily: 'PoppinsRegular'
     },
     modalContent: {
         width: '90%', // Set width to 90% of the screen width
