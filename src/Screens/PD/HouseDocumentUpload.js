@@ -625,7 +625,7 @@ const HouseDocumentUpload = (props, { navigation }) => {
               setHouseImageUri(imgPath);
               setVisible(false);
             } else {
-              setApiError('geoLocation not Matching');
+              setApiError('GEO LOCATION RANGE is not matched');
               setErrorModalVisible(true);
             }
           }
@@ -1432,7 +1432,8 @@ const HouseDocumentUpload = (props, { navigation }) => {
                 Camera
               </Text>
             </View>
-            <View style={{ width: '30%', alignItems: 'center' }}>
+
+            {/* <View style={{ width: '30%', alignItems: 'center' }}>
               <TouchableOpacity
                 onPress={() => selectImage()}
                 activeOpacity={11}>
@@ -1455,7 +1456,8 @@ const HouseDocumentUpload = (props, { navigation }) => {
               <Text style={{ fontSize: 14, color: Colors.black, marginTop: 7 }}>
                 Gallery
               </Text>
-            </View>
+            </View> */}
+
           </View>
         </View>
       </Modal>

@@ -54,14 +54,15 @@ const ConsentModal = props => {
                         </View>
 
                         <View style={{ width: '93%', justifyContent: 'flex-end', flexDirection: 'row', marginTop: 25 }}>
-                            <TouchableOpacity onPress={() => { if (isSelected) { props.nextScreen('Agree') } }} >
-                                <Text style={{ color: isSelected ? Colors.darkblue : Colors.dimText, fontWeight: 500 }}>{language[0][props.language].str_agree}</Text>
-                            </TouchableOpacity>
-
 
                             <TouchableOpacity onPress={() => { props.nextScreen('Cancel') }} >
-                                <Text style={{ color: Colors.darkblue, marginLeft: 20, fontWeight: 500 }}>{language[0][props.language].str_cancel}</Text>
+                                <Text style={{ color: Colors.red, fontWeight: 500 }}>{language[0][props.language].str_cancel}</Text>
                             </TouchableOpacity>
+
+                            <TouchableOpacity onPress={() => { if (isSelected) { props.nextScreen('Agree') } }} >
+                                <Text style={{ color: isSelected ? Colors.green : Colors.dimText, fontWeight: 500, marginLeft: 20 }}>{language[0][props.language].str_agree}</Text>
+                            </TouchableOpacity>
+
 
                         </View>
 

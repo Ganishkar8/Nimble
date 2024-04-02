@@ -31,7 +31,7 @@ const DateComp = ({ props, filterClick, fromCompDate, toCompDate }) => {
     const [isDisplayDate, setShow] = React.useState(false);
     const [isDisplayDateTo, setShowTo] = React.useState(false);
     React.useEffect(() => {
-        //updateAgeData(formattedServerDatee, formattedServerDatee)
+
         if (fromCompDate) {
             setFromDate(Common.convertDateFormat(fromCompDate))
             setFromServerDate(fromCompDate)
@@ -39,6 +39,7 @@ const DateComp = ({ props, filterClick, fromCompDate, toCompDate }) => {
             const date = new Date(parts[0], parts[1] - 1, parts[2]); // Month is zero-based
             setDate(date)
         }
+
         if (toCompDate) {
             setToDate(Common.convertDateFormat(toCompDate))
             setToServerDate(toCompDate)
@@ -46,6 +47,11 @@ const DateComp = ({ props, filterClick, fromCompDate, toCompDate }) => {
             const date = new Date(parts[0], parts[1] - 1, parts[2]); // Month is zero-based
             setTooDate(date)
         }
+
+        if (!fromCompDate && !toCompDate) {
+            updateAgeData(formattedServerDatee, formattedServerDatee)
+        }
+
     }, [fromCompDate, toCompDate]);
     const displayDatepicker = (type) => {
         if (type == 1) {

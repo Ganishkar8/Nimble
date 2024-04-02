@@ -64,9 +64,13 @@ const LMSLOSDetails = (props, { navigation }) => {
         //alert(JSON.stringify(props.loanInitiationDetails))
         setLmsDedupeCheck(true);
         setLosDedupeCheck(false);
-        updateBasicDedupe();
+
         if (global.ALLOWEDIT == "0") {
             setOnlyView(true);
+            loanOriginationDedupeCheck();
+
+        } else {
+            updateBasicDedupe();
         }
 
     }, [props.navigation]);
@@ -241,8 +245,6 @@ const LMSLOSDetails = (props, { navigation }) => {
     const loanOriginationDedupeCheck = () => {
         const clientDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
 
-
-
         const appDetails = {
             "clientId": global.CLIENTID,
             "loanApplicationId": global.LOANAPPLICATIONID,
@@ -256,28 +258,53 @@ const LMSLOSDetails = (props, { navigation }) => {
                 setLmsDedupeCheck(true);
                 setLosDedupeCheck(false);
             } else {
-
-                if (clientDetail.lmsClientId) {
-                    setLmsDedupeCheck(true);
-                    setLosDedupeCheck(false);
-                    appDetails.clientExistingDetails = {
-                        "lmsClientId": clientDetail.lmsClientId,
+                if (global.ALLOWEDIT == '0') {
+                    if (clientDetail.customerType == 'EXISTING') {
+                        setLmsDedupeCheck(true);
+                        setLosDedupeCheck(false);
+                        appDetails.clientExistingDetails = {
+                            "lmsClientId": clientDetail.lmsClientId,
+                        }
+                    } else {
+                        setLmsDedupeCheck(false);
+                        setLosDedupeCheck(true);
+                        setOnlyLOS(true);
+                        appDetails.clientExistingDetails = {
+                            "kycTypeId1": clientDetail.kycTypeId1,
+                            "kycIdValue1": clientDetail.kycIdValue1,
+                            "kycTypeId2": clientDetail.kycTypeId2,
+                            "kycIdValue2": clientDetail.kycIdValue2,
+                            "kycTypeId3": clientDetail.kycTypeId3,
+                            "kycIdValue3": clientDetail.kycIdValue3,
+                            "kycTypeId4": clientDetail.kycTypeId4,
+                            "kycIdValue4": clientDetail.kycIdValue4,
+                            "emailId": clientDetail.email,
+                            "mobileNumber": clientDetail.mobileNumber
+                        }
                     }
                 } else {
-                    setLmsDedupeCheck(false);
-                    setLosDedupeCheck(true);
-                    setOnlyLOS(true);
-                    appDetails.clientExistingDetails = {
-                        "kycTypeId1": clientDetail.kycTypeId1,
-                        "kycIdValue1": clientDetail.kycIdValue1,
-                        "kycTypeId2": clientDetail.kycTypeId2,
-                        "kycIdValue2": clientDetail.kycIdValue2,
-                        "kycTypeId3": clientDetail.kycTypeId3,
-                        "kycIdValue3": clientDetail.kycIdValue3,
-                        "kycTypeId4": clientDetail.kycTypeId4,
-                        "kycIdValue4": clientDetail.kycIdValue4,
-                        "emailId": clientDetail.email,
-                        "mobileNumber": clientDetail.mobileNumber
+                    if (clientDetail.lmsClientId) {
+                        setLmsDedupeCheck(true);
+                        setLosDedupeCheck(false);
+                        appDetails.clientExistingDetails = {
+                            "lmsClientId": clientDetail.lmsClientId,
+                        }
+                    } else {
+                        setLmsDedupeCheck(false);
+                        setLosDedupeCheck(true);
+                        setOnlyLOS(true);
+                        appDetails.clientExistingDetails = {
+                            "kycTypeId1": clientDetail.kycTypeId1,
+                            "kycIdValue1": clientDetail.kycIdValue1,
+                            "kycTypeId2": clientDetail.kycTypeId2,
+                            "kycIdValue2": clientDetail.kycIdValue2,
+                            "kycTypeId3": clientDetail.kycTypeId3,
+                            "kycIdValue3": clientDetail.kycIdValue3,
+                            "kycTypeId4": clientDetail.kycTypeId4,
+                            "kycIdValue4": clientDetail.kycIdValue4,
+                            "emailId": clientDetail.email,
+                            "mobileNumber": clientDetail.mobileNumber
+                        }
                     }
                 }
 

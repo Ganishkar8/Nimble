@@ -77,6 +77,8 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
   const [firstNameVisible, setFirstNameVisible] = useState(true);
   const [firstNameDisable, setFirstNameDisable] = useState(false);
 
+  const [isMarried, setIsMarried] = useState(false);
+
   const [middleName, setMiddleName] = useState('');
   const [middleNameMan, setMiddleNameMan] = useState(false);
   const [middleNameCaption, setMiddleNameCaption] = useState('MIDDLE NAME');
@@ -193,7 +195,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
   const FatherNameRef = useRef(null);
 
   const [SpouseName, setSpouseName] = useState('');
-  const [SpouseNameCaption, setSpouseNameCaption] = useState('HUSBAND NAME');
+  const [SpouseNameCaption, setSpouseNameCaption] = useState('SPOUSE NAME');
   const [SpouseNameMan, setSpouseNameMan] = useState(false);
   const [SpouseNameVisible, setSpouseNameVisible] = useState(true);
   const [SpouseNameDisable, setSpouseNameDisable] = useState(false);
@@ -555,17 +557,15 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
       setSpouseNameCaption(value.fieldName)
 
       if (value.isMandatory) {
-        setFatherNameMan(true);
+        setSpouseNameMan(true);
       }
       if (value.isHide) {
-        setFatherNameVisible(false);
+        setSpouseNameVisible(false);
       }
       if (value.isDisable) {
-        setFatherNameDisable(true);
+        setSpouseNameDisable(true);
       }
-      if (value.isCaptionChange) {
-        setSpouseNameCaption(value[0].fieldCaptionChange)
-      }
+
     });
 
     systemMandatoryField.filter((data) => data.fieldUiid === 'sp_prsnl_dtl_caste' && data.pageId === pageId && data.wfId == workFlowId).map((value, index) => {
@@ -665,9 +665,14 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
 
   const getClientData = (value) => {
 
-    if (value.fullName) {
+    if (value?.fullName) {
       setFullNameVisible(true);
       setFullName(value.fullName)
+      if (value.isEkyc == true || value.isEkyc == '1') {
+        setFullNameCaption('FULL NAME AS PER AADHAR')
+      } else if (value.isLms == true || value.isLms == '1') {
+        setFullNameCaption('FULL NAME AS PER SOURCE')
+      }
     } else {
       setFullNameVisible(false);
     }
@@ -677,6 +682,22 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
     setMiddleName(value?.middleName ?? '');
     setLastName(value?.lastName ?? '');
     setGenderLabel(value?.gender ?? '');
+
+    if (value?.maritalStatus) {
+      if (value?.maritalStatus == 'M') {
+        setSpouseNameVisible(true);
+        setSpouseNameMan(true);
+      } else if (value?.maritalStatus == 'S') {
+        setSpouseNameVisible(false);
+        setSpouseNameMan(false);
+      } else {
+        setSpouseNameVisible(true);
+        setSpouseNameMan(false);
+      }
+    } else {
+      setSpouseNameVisible(false);
+      setSpouseNameMan(false);
+    }
     //setDOB(value?.dateOfBirth ?? '');
     if (value.dateOfBirth) {
       setDOB(Common.convertDateFormat(value.dateOfBirth))
@@ -1238,6 +1259,22 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
         flag = true;
       }
     }
+
+    if (fullNameVisible) {
+
+      if (!fullName?.toLowerCase().includes(firstName?.toLowerCase())) {
+        errorMessage =
+          errorMessage +
+          i +
+          ')' +
+          ' ' +
+          'First Name is not matching with Full Name' +
+          '\n';
+        i++;
+        flag = true;
+      }
+    }
+
     if (firstNameMan && firstNameVisible) {
       if (firstName.length <= 0) {
         errorMessage =
@@ -1252,6 +1289,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
         flag = true;
       }
     }
+
     if (middleNameMan && middleNameVisible) {
       if (middleName.length <= 0) {
         errorMessage =
@@ -1426,7 +1464,7 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
           i++;
           flag = true;
         }
-      } else if (TitleLabel === 'MRS' || TitleLabel === 'MISS') {
+      } else if (TitleLabel === 'MRS' || TitleLabel === 'MISS' || TitleLabel === 'RS') {
         if (GenderLabel == 'M') {
           errorMessage = errorMessage + i + ')' + ' ' + TitleCaption + ' AND ' + GenderCaption + ' Not matching' + '\n';
           i++;
@@ -1479,9 +1517,21 @@ const ProfileShortApplicantDetails = (props, { navigation }) => {
     if (componentName === 'Title') {
       setTitleLabel(label);
       setTitleIndex(index);
+      if (label == 'MR') {
+        setGenderLabel('M')
+      } else if (label == 'MRS' || label == 'RS' || label == 'MS') {
+        setGenderLabel('F');
+      } else if (label?.length <= 0) {
+        setGenderLabel('');
+      }
     } else if (componentName === 'Gender') {
       setGenderLabel(label);
       setGenderIndex(index);
+      if (label == 'M') {
+        setTitleLabel('MR')
+      } else if (label == 'F') {
+        setTitleLabel('MS')
+      }
     } else if (componentName === 'Caste') {
       setCasteLabel(label);
       setCasteIndex(index);

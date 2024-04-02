@@ -197,6 +197,7 @@ export const language = [
       str_baddressdetailappl: 'Business Address Details',
       str_baddressdetail: 'Business Address Details (Optional)',
       str_bankdetail: 'Bank Details',
+      str_bankdetailoptional: 'Bank Details(Optional)',
       str_addaddressbutton: 'Add Address',
       str_addbankdetailsbutton: 'Bank Details',
       str_addreferencecheck: 'Add Reference Check',

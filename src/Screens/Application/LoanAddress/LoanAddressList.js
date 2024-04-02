@@ -70,17 +70,21 @@ const LoanAddressList = (props, { navigation }) => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
 
+        return () => {
+            props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
+            backHandler.remove();
+        }
+    }, [isScreenVisible]);
+
+    useEffect(() => {
+
         getAddressData()
 
         if (global.USERTYPEID == 1163 || global.ALLOWEDIT == "0") {
             setOnlyView(true);
         }
 
-        return () => {
-            props.navigation.getParent()?.setOptions({ tabBarStyle: undefined, tabBarVisible: undefined });
-            backHandler.remove();
-        }
-    }, [props.navigation, isScreenVisible]);
+    }, [props.navigation]);
 
     useEffect(() => {
         // Any logic you want to execute when loanInitiationDetails changes
@@ -160,15 +164,16 @@ const LoanAddressList = (props, { navigation }) => {
 
         const clientDetail = props.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID));
         const filterBusinessAddress = clientDetail.clientAddress.filter(item => item.addressType != 'P' && item.addressType != 'C')
-
+        console.log("filterBusinessAddress::::" + filterBusinessAddress.length)
         if (filterBusinessAddress.length > 0) {
             setAddressDetails(filterBusinessAddress)
-            const RegisteredOfficeAddress = filterBusinessAddress.find(item => item.addressType === 'ROA');
+            const RegisteredOfficeAddress = filterBusinessAddress.some(item => item.addressType == 'ROA');
+            console.log("RegisteredOfficeAddress::::" + RegisteredOfficeAddress)
             if (!RegisteredOfficeAddress) {
+
                 if (urmNumber) {
                     if (urmNumber.length > 0) {
                         if (!onlyView) {
-
                             getUdyamRAOCheck(urmNumber);
                         }
                     }
@@ -434,9 +439,9 @@ const LoanAddressList = (props, { navigation }) => {
 
     const handleClick = (value, data) => {
         if (value === 'edit') {
-            props.navigation.navigate('LoanAddressDetails', { addressType: data })
+            props.navigation.replace('LoanAddressDetails', { addressType: data })
         } else if (value === 'new') {
-            props.navigation.navigate('LoanAddressDetails', { addressType: 'new' })
+            props.navigation.replace('LoanAddressDetails', { addressType: 'new' })
         } else if (value === 'delete') {
             setAddressID(data.id);
             setDeleteModalVisible(true);

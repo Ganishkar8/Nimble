@@ -14,9 +14,16 @@ const errorNetwork = "Network Error";
 
 const isValidPhoneNumber = (phoneNumber) => {
   // Regular expression to validate a mobile number with a country code
-  const phoneRegex = /^(\+\d{1,3})?(\d{10})$/;
+  // const phoneRegex = /^(\+\d{1,3})?(\d{10})$/;
 
-  return phoneRegex.test(phoneNumber);
+  // return phoneRegex.test(phoneNumber);
+  const pattern = /^(0\/91)?[6-9][0-9]{9}$/;
+
+  // Create a RegExp object with the pattern
+  const regex = new RegExp(pattern);
+
+  // Use test() method to check if the input matches the pattern
+  return regex.test(phoneNumber);
 };
 
 const isEmailValid = (email) => {

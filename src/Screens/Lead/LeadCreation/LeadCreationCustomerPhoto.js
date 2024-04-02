@@ -63,6 +63,7 @@ import { profileAction } from '../../../Utils/redux/actions/ProfileAction';
 import ButtonViewComp from '../../../Components/ButtonViewComp';
 import ErrorModal from '../../../Components/ErrorModal';
 import { useIsFocused } from '@react-navigation/native';
+import CenteredModal from '../../../Components/CenteredModal';
 
 const LeadCreationCustomerPhoto = (props, { navigation }) => {
 
@@ -114,6 +115,9 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [apiError, setApiError] = useState('');
   const isScreenVisible = useIsFocused();
+
+  const [consentModalVisible, setConsentModalVisible] = useState(false);
+  const [description, setDescription] = useState('');
 
   useEffect(() => {
 
@@ -317,7 +321,9 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
           ];
           await Promise.all(deletePromises);
           setLoading(false)
-          props.navigation.replace('LeadManagement', { fromScreen: 'LeadCompletion' })
+          setConsentModalVisible(true);
+          setDescription('Lead Submitted to BM');
+
         }
         else if (response.data.statusCode === 201) {
           setApiError(response.data.message);
@@ -347,6 +353,11 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
         }
       });
 
+  }
+
+  const handleModalClick = () => {
+    setConsentModalVisible(false);
+    props.navigation.replace('LeadManagement', { fromScreen: 'LeadCompletion' })
   }
 
   const insertLead = async (leadID, nav) => {
@@ -570,6 +581,9 @@ const LeadCreationCustomerPhoto = (props, { navigation }) => {
       <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
 
       <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
+
+      <CenteredModal isVisible={consentModalVisible} onClose={handleModalClick} textContent={description} textClose={language[0][props.language].str_ok} />
+
 
       <View style={{
         width: '100%', height: 56, alignItems: 'center', justifyContent: 'center',

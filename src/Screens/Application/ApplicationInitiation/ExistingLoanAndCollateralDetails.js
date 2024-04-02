@@ -56,6 +56,7 @@ const ExistingLoanAndCollateralDetails = (props, { navigation }) => {
     const [losData, setlosData] = useState([]);
 
     const [leadsystemCodeDetail, setLeadSystemCodeDetail] = useState(props.mobilecodedetail.leadSystemCodeDto);
+    const [systemCodeDetail, setSystemCodeDetail] = useState(props.mobilecodedetail.t_SystemCodeDetail);
     const [leaduserCodeDetail, setLeadUserCodeDetail] = useState(props.mobilecodedetail.leadUserCodeDto);
 
     useEffect(() => {
@@ -210,14 +211,14 @@ const ExistingLoanAndCollateralDetails = (props, { navigation }) => {
                 <View style={{ flexDirection: 'row', width: '100%', marginTop: 10 }}>
 
                     <Text style={[Commonstyles.inputtextStyle, { color: Colors.mediumgrey, width: '50%', fontFamily: 'Poppins-Medium' }]}>{language[0][props.language].str_loantype.toUpperCase()}</Text>
-                    <Text style={[Commonstyles.inputtextStyle, { color: Colors.black, width: '50%', marginTop: 0.2 }]}>{Common.getSystemCodeDescription(leadsystemCodeDetail, 'LNTP', item.loanTypeId)}</Text>
+                    <Text style={[Commonstyles.inputtextStyle, { color: Colors.black, width: '50%', marginTop: 0.2 }]}>{Common.getSystemCodeDescription(leaduserCodeDetail, 'LoanStatusID', item.loanStatus)}</Text>
 
                 </View>
 
                 <View style={{ flexDirection: 'row', width: '100%', marginTop: 10 }}>
 
                     <Text style={[Commonstyles.inputtextStyle, { color: Colors.mediumgrey, width: '50%', fontFamily: 'Poppins-Medium' }]}>{language[0][props.language].str_productId.toUpperCase()}</Text>
-                    <Text style={[Commonstyles.inputtextStyle, { color: Colors.black, width: '50%', marginTop: 0.2 }]}>{Common.getSystemCodeDescription(leaduserCodeDetail, 'LNPS', item.productId)}</Text>
+                    <Text style={[Commonstyles.inputtextStyle, { color: Colors.black, width: '50%', marginTop: 0.2 }]}>{Common.getSystemCodeDescription(leadsystemCodeDetail, 'PD', item.productId)}</Text>
 
                 </View>
 
@@ -238,7 +239,7 @@ const ExistingLoanAndCollateralDetails = (props, { navigation }) => {
                 <View style={{ flexDirection: 'row', width: '100%', marginTop: 10 }}>
 
                     <Text style={[Commonstyles.inputtextStyle, { color: Colors.mediumgrey, width: '50%', fontFamily: 'Poppins-Medium' }]}>{language[0][props.language].str_loanassclass.toUpperCase()}</Text>
-                    <Text style={[Commonstyles.inputtextStyle, { color: Colors.black, width: '50%', marginTop: 0.2 }]}>{item.loanAssetClassification}</Text>
+                    <Text style={[Commonstyles.inputtextStyle, { color: Colors.black, width: '50%', marginTop: 0.2 }]}>{Common.getSystemCodeDescription(leaduserCodeDetail, 'AssetClassID', item.loanAssetClassification)}</Text>
 
                 </View>
 

@@ -1065,7 +1065,7 @@ const BankDetailsScreen = (props, { navigation }) => {
                 setImageFile(image)
 
                 const lastDotIndex = image.path.lastIndexOf('.');
-                var imageName = 'Photo' + '_' + global.leadID;
+                var imageName = 'Photo' + '_' + global.LOANAPPLICATIONID;
 
                 if (lastDotIndex !== -1) {
 
@@ -1233,7 +1233,11 @@ const BankDetailsScreen = (props, { navigation }) => {
             if (label == 'DSBAC' || label == 'BOTH') {
 
                 if (checkVerifiedAccount(accountHolderName, accountNumber, confirmAccountNumber, ifscCode)) {
-                    setIsBankVerfied(true);
+                    if (verifiedAccountStatus == 'Verified') {
+                        setIsBankVerfied(true);
+                    } else {
+                        setIsBankVerfied(false);
+                    }
                     setAccVerificationStatusVisible(true);
                     setAccVerificationStatus(verifiedAccountStatus)
                 } else {
@@ -1427,7 +1431,8 @@ const BankDetailsScreen = (props, { navigation }) => {
                             </TouchableOpacity>
                             <Text style={{ fontSize: 14, color: Colors.black, marginTop: 7, fontFamily: 'PoppinsRegular' }}>Camera</Text>
                         </View>
-                        <View style={{ width: '30%', alignItems: 'center' }}>
+
+                        {/* <View style={{ width: '30%', alignItems: 'center' }}>
                             <TouchableOpacity onPress={() => selectImage()} activeOpacity={11}>
                                 <View style={{
                                     width: 53, height: 53, borderRadius: 53, backgroundColor: '#8E44AD',
@@ -1437,7 +1442,7 @@ const BankDetailsScreen = (props, { navigation }) => {
                                 </View>
                             </TouchableOpacity>
                             <Text style={{ fontSize: 14, color: Colors.black, marginTop: 7 }}>Gallery</Text>
-                        </View>
+                        </View> */}
 
                     </View>
                 </View>

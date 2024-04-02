@@ -28,6 +28,7 @@ import ImageBottomPreview from '../../../Components/ImageBottomPreview';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useIsFocused } from '@react-navigation/native';
+import ChildHeadComp from '../../../Components/ChildHeadComp';
 import { updateLoanInitiationDetails, deleteLoanInitiationDetails, updateNestedClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
 
 const AddressDetails = (props, { navigation }) => {
@@ -2194,6 +2195,10 @@ const AddressDetails = (props, { navigation }) => {
         <HeadComp textval={language[0][props.language].str_addaddressbutton} props={props} onGoBack={onGoBack} />
       </View>
 
+      <ChildHeadComp
+        textval={global.CLIENTTYPE == 'APPL' ? language[0][props.language].str_applicantdetails : global.CLIENTTYPE == 'CO-APPL' ? language[0][props.language].str_coapplicantdetails : language[0][props.language].str_guarantordetails}
+      />
+
       <ImageBottomPreview bottomSheetVisible={bottomSheetVisible} previewImage={previewImage} hideBottomSheet={hideImageBottomSheet} reTakePhoto={reTakePhoto} fileName={fileName} detailHide={true} deleteVisible={deleteVisible} deletePhoto={deletePhoto} onDeleteorCancel={onDeleteorCancel} hideDelete={hideDelete} hideRetake={hideRetake} />
 
 
@@ -2230,7 +2235,8 @@ const AddressDetails = (props, { navigation }) => {
               </TouchableOpacity>
               <Text style={{ fontSize: 14, color: Colors.black, marginTop: 7, fontFamily: 'PoppinsRegular' }}>Camera</Text>
             </View>
-            <View style={{ width: '30%', alignItems: 'center' }}>
+
+            {/* <View style={{ width: '30%', alignItems: 'center' }}>
               <TouchableOpacity onPress={() => selectImage()} activeOpacity={11}>
                 <View style={{
                   width: 53, height: 53, borderRadius: 53, backgroundColor: '#8E44AD',
@@ -2240,7 +2246,7 @@ const AddressDetails = (props, { navigation }) => {
                 </View>
               </TouchableOpacity>
               <Text style={{ fontSize: 14, color: Colors.black, marginTop: 7 }}>Gallery</Text>
-            </View>
+            </View> */}
 
           </View>
         </View>

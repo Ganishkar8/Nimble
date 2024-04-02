@@ -1809,7 +1809,8 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
               </TouchableOpacity>
               <Text style={{ fontSize: 14, color: Colors.black, marginTop: 7, fontFamily: 'PoppinsRegular' }}>Camera</Text>
             </View>
-            <View style={{ width: '30%', alignItems: 'center' }}>
+
+            {/* <View style={{ width: '30%', alignItems: 'center' }}>
               <TouchableOpacity onPress={() => selectImage()} activeOpacity={11}>
                 <View style={{
                   width: 53, height: 53, borderRadius: 53, backgroundColor: '#8E44AD',
@@ -1819,7 +1820,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                 </View>
               </TouchableOpacity>
               <Text style={{ fontSize: 14, color: Colors.black, marginTop: 7 }}>Gallery</Text>
-            </View>
+            </View> */}
 
           </View>
         </View>
@@ -2220,8 +2221,25 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                               color: 'darkblue',
                               justifyContent: 'center',
                             }}>
-                            <Feather name='eye' color={Colors.darkblue} size={20} onPress={getPANVerify} />
+                            {(isPanVerified == null || isPanVerified == false) ? (
+
+                              <TouchableOpacity onPress={getPANVerify}>
+                                <Text
+                                  style={{
+                                    color: Colors.darkblue,
+                                    fontWeight: 500,
+                                  }}>
+                                  Verify
+                                </Text>
+                              </TouchableOpacity>
+                            ) : (
+
+                              <Feather name='eye' color={Colors.darkblue} size={20} onPress={getPANVerify} />
+
+                            )}
+
                           </View>
+
                         }
                       </View>
 
@@ -2458,8 +2476,25 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                               color: 'darkblue',
                               justifyContent: 'center',
                             }}>
-                            <Feather name='eye' color={Colors.darkblue} size={20} onPress={getPANVerify} />
+                            {(isPanVerified == null || isPanVerified == false) ? (
+
+                              <TouchableOpacity onPress={getPANVerify}>
+                                <Text
+                                  style={{
+                                    color: Colors.darkblue,
+                                    fontWeight: 500,
+                                  }}>
+                                  Verify
+                                </Text>
+                              </TouchableOpacity>
+                            ) : (
+
+                              <Feather name='eye' color={Colors.darkblue} size={20} onPress={getPANVerify} />
+
+                            )}
+
                           </View>
+
                         }
                       </View>
 
@@ -2666,6 +2701,7 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                           handleReference={handleReference}
                         />
                         {panCardVisibleID == 'ID3' && eyeButtonVisible &&
+
                           <View
                             style={{
                               width: '20%',
@@ -2676,8 +2712,26 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                               color: 'darkblue',
                               justifyContent: 'center',
                             }}>
-                            <Feather name='eye' color={Colors.darkblue} size={20} onPress={getPANVerify} />
+                            {(isPanVerified == null || isPanVerified == false) ? (
+
+                              <TouchableOpacity onPress={getPANVerify}>
+                                <Text
+                                  style={{
+                                    color: Colors.darkblue,
+                                    fontWeight: 500,
+                                  }}>
+                                  Verify
+                                </Text>
+                              </TouchableOpacity>
+                            ) : (
+
+                              <Feather name='eye' color={Colors.darkblue} size={20} onPress={getPANVerify} />
+
+                            )}
+
                           </View>
+
+
                         }
                       </View>
 
@@ -2890,8 +2944,25 @@ const ProfileShortKYCVerificationStatus = (props, { navigation }) => {
                               color: 'darkblue',
                               justifyContent: 'center',
                             }}>
-                            <Feather name='eye' color={Colors.darkblue} size={20} onPress={getPANVerify} />
+                            {(isPanVerified == null || isPanVerified == false) ? (
+
+                              <TouchableOpacity onPress={getPANVerify}>
+                                <Text
+                                  style={{
+                                    color: Colors.darkblue,
+                                    fontWeight: 500,
+                                  }}>
+                                  Verify
+                                </Text>
+                              </TouchableOpacity>
+                            ) : (
+
+                              <Feather name='eye' color={Colors.darkblue} size={20} onPress={getPANVerify} />
+
+                            )}
+
                           </View>
+
                         }
                       </View>
 
