@@ -917,7 +917,8 @@ const PDDocumentUpload = (props, { navigation }) => {
                             </TouchableOpacity>
                             <Text style={{ fontSize: 14, color: Colors.black, marginTop: 7, fontFamily: 'PoppinsRegular' }}>Camera</Text>
                         </View>
-                        <View style={{ width: '30%', alignItems: 'center' }}>
+
+                        {/* <View style={{ width: '30%', alignItems: 'center' }}>
                             <TouchableOpacity onPress={() => selectImage()} activeOpacity={11}>
                                 <View style={{
                                     width: 53, height: 53, borderRadius: 53, backgroundColor: '#8E44AD',
@@ -927,7 +928,7 @@ const PDDocumentUpload = (props, { navigation }) => {
                                 </View>
                             </TouchableOpacity>
                             <Text style={{ fontSize: 14, color: Colors.black, marginTop: 7 }}>Gallery</Text>
-                        </View>
+                        </View> */}
 
                     </View>
                 </View>

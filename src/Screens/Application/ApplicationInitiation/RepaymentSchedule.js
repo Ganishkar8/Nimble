@@ -519,7 +519,7 @@ const RepaymentSchedule = (props, { navigation }) => {
                                         </View>
 
                                         <View style={{ width: '25%' }}>
-                                            <Text style={{ color: Colors.black, fontSize: 12.5, fontFamily: 'Poppins-Medium' }}>Principle</Text>
+                                            <Text style={{ color: Colors.black, fontSize: 12.5, fontFamily: 'Poppins-Medium' }}>Principal</Text>
                                         </View>
 
                                         <View style={{ width: '25%' }}>

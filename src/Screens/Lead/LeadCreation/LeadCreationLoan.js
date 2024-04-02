@@ -49,6 +49,8 @@ import Common from '../../../Utils/Common';
 import { profileAction } from '../../../Utils/redux/actions/ProfileAction';
 import ButtonViewComp from '../../../Components/ButtonViewComp';
 import ErrorModal from '../../../Components/ErrorModal';
+import SearchDropDownComp from '../../../Components/SearchDropDownComp';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 
 const LeadCreationLoan = (props, { navigation }) => {
@@ -114,6 +116,10 @@ const LeadCreationLoan = (props, { navigation }) => {
     const [systemMandatoryField, setSystemMandatoryField] = useState(props.mobilecodedetail.leadSystemMandatoryFieldDto);
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const [apiError, setApiError] = useState('');
+
+    const [dropDownSearchVisible, setDropDownSearchVisible] = useState(false);
+    const showDropDownSearch = () => setDropDownSearchVisible(true);
+    const hideDropDownSearch = () => setDropDownSearchVisible(false);
 
 
     useEffect(() => {
@@ -780,6 +786,11 @@ const LeadCreationLoan = (props, { navigation }) => {
 
     }
 
+    const getDropDownSubcodeId = (value) => {
+        setLoanPurposeLabel(value)
+        hideDropDownSearch();
+    };
+
     const closeErrorModal = () => {
         setErrorModalVisible(false);
     };
@@ -793,6 +804,10 @@ const LeadCreationLoan = (props, { navigation }) => {
         <SafeAreaView style={[styles.parentView, { backgroundColor: Colors.lightwhite }]}>
             <ErrorModal isVisible={errorModalVisible} onClose={closeErrorModal} textContent={apiError} textClose={language[0][props.language].str_ok} />
             <MyStatusBar backgroundColor={'white'} barStyle="dark-content" />
+
+            <SearchDropDownComp dropDownSearchVisible={dropDownSearchVisible} closeSearchModal={hideDropDownSearch} dropDownData={loanPurposeData} getDropDownSubcodeId={getDropDownSubcodeId} />
+
+
             <View style={{
                 width: '100%', height: 56, alignItems: 'center', justifyContent: 'center',
 
@@ -935,7 +950,7 @@ const LeadCreationLoan = (props, { navigation }) => {
 
                     </View>}
 
-
+                    {/* 
                     {loanPurposeVisible && <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
 
@@ -946,9 +961,27 @@ const LeadCreationLoan = (props, { navigation }) => {
                         <PickerComp textLabel={loanPurposeLabel} pickerStyle={Commonstyles.picker} Disable={loanPurposeDisable} pickerdata={loanPurposeData} componentName='loanPurposePicker' handlePickerClick={handlePickerClick} />
 
 
-                    </View>}
+                    </View>} */}
 
 
+                    {loanPurposeVisible &&
+                        <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+                            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
+
+                                <TextComp textVal={loanPurposeCaption} textStyle={Commonstyles.inputtextStyle} Visible={loanPurposeMan} />
+
+                            </View>
+
+
+                            <View style={{ width: '90%', height: 48, marginTop: 3, paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: '#e2e2e2', justifyContent: 'center', alignItems: 'center', flexDirection: 'row' }}>
+
+                                <TextComp textVal={Common.getSystemCodeDescription(userCodeDetail, 'LNPS', loanPurposeLabel)} textStyle={[Commonstyles.inputtextStyle, { color: Colors.black, width: '85%', fontSize: 14 }]} Visible={false} />
+                                <TouchableOpacity onPress={() => { showDropDownSearch() }} activeOpacity={0.8} >
+                                    <Ionicons name="search" style={{ marginStart: 32 }} size={20} color={'#aaaaaa'} />
+                                </TouchableOpacity>
+                            </View>
+
+                        </View>}
 
                     {loanAmountVisible && <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
 

@@ -206,8 +206,8 @@ const LeadManagement = (props, { navigation, route }) => {
         await Promise.all(promises);
 
         // alert(JSON.stringify(data))
-        setFilteredData(data.slice().reverse())
-        setPendingData(data.slice().reverse())
+        setFilteredData(data)
+        setPendingData(data)
         setRefreshing(false)
     }
 
@@ -363,8 +363,8 @@ const LeadManagement = (props, { navigation, route }) => {
             .then((response) => {
                 // Handle the response data
                 if (global.DEBUG_MODE) console.log("ResponseDataApi::" + JSON.stringify(response.data));
-                setPendingData(response.data.slice().reverse())
-                setFilteredData(response.data.slice().reverse())
+                setPendingData(response.data)
+                setFilteredData(response.data)
                 setLoading(false)
                 setRefreshing(false)
 

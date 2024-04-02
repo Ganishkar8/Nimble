@@ -54,7 +54,7 @@ const LeadManagement = (props, { navigation, route }) => {
 
         { name: 'Filter', isSelected: false, id: 1 },
         { name: 'Sort by', isSelected: false, id: 2 },
-        { name: 'Pending', isSelected: false, id: 3 },
+        { name: 'InProgress', isSelected: false, id: 3 },
         { name: "Today's Application", isSelected: false, id: 4 }
     ]
     const mainFilterDataArr = [
@@ -452,10 +452,10 @@ const LeadManagement = (props, { navigation, route }) => {
                 }
             }
 
-        } else if (value.name == 'Pending') {
+        } else if (value.name == 'InProgress') {
             // alert(upperData[index].isSelected)
             if (!upperData[index].isSelected) {
-                getPendingData('PENDING', null, null, null, null, null, null, null);
+                getPendingData('InProgress', null, null, null, null, null, null, null);
             } else {
                 getPendingData(null, null, null, null, null, null, null, null);
             }

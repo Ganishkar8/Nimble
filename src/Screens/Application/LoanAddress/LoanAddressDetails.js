@@ -2,7 +2,7 @@ import { View, Text, ScrollView, SafeAreaView, StyleSheet, BackHandler } from 'r
 import { React, useState, useRef, useEffect } from 'react';
 import MyStatusBar from '../../../Components/MyStatusBar';
 import HeadComp from '../../../Components/HeadComp';
-import { connect } from 'react-redux';
+import { connect, useDispatch, useSelector } from 'react-redux';
 import { languageAction } from '../../../Utils/redux/actions/languageAction';
 import { language } from '../../../Utils/LanguageString';
 import Commonstyles from '../../../Utils/Commonstyles';
@@ -19,7 +19,8 @@ import tbl_loanaddressinfo from '../../../Database/Table/tbl_loanaddressinfo';
 import apiInstance from '../../../Utils/apiInstance';
 import ErrorModal from '../../../Components/ErrorModal';
 import CheckBoxComp from '../../../Components/CheckBoxComp';
-import { updateLoanInitiationDetails, deleteLoanInitiationDetails, updateNestedClientDetails, deleteAddressNestedClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
+import ChildHeadComp from '../../../Components/ChildHeadComp';
+import { updateLoanInitiationDetails, deleteLoanInitiationDetails, updateNestedClientDetails, deleteAddressNestedClientDetails, updateAsyncNestedClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
 
 
 const LoanAddressDetails = (props, { navigation }) => {
@@ -160,6 +161,12 @@ const LoanAddressDetails = (props, { navigation }) => {
 
     const [pincodeResponse, setPincodeResponse] = useState('');
     const [pageId, setPageId] = useState(global.CURRENTPAGEID);
+    const [loaded, setLoaded] = useState(false); // State to track if data is loaded
+    const isInitialRender = useRef(true);
+
+
+    const reduxdispatch = useDispatch();
+    const loanInitiationDetails = useSelector(state => state.loanInitiationReducer.loanInitiationDetails.filter(item => item.id === parseInt(global.LOANAPPLICATIONID))[0].clientDetail.find(client => client.id === parseInt(global.CLIENTID)));
 
     useEffect(() => {
         props.navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' }, tabBarVisible: false });
@@ -178,6 +185,22 @@ const LoanAddressDetails = (props, { navigation }) => {
             backHandler.remove();
         }
     }, [props.navigation]);
+
+    // useEffect(() => {
+
+
+    //     if (isInitialRender.current) {
+    //         isInitialRender.current = false;
+    //         return;
+    //     }
+
+    //     // if (loaded) {
+    //     setLoading(false);
+    //     console.log(JSON.stringify(loanInitiationDetails))
+    //     props.navigation.replace('LoanAddressList')
+    //     // }
+
+    // }, [loanInitiationDetails]);
 
     const handleBackButton = () => {
         onGoBack();
@@ -814,6 +837,11 @@ const LoanAddressDetails = (props, { navigation }) => {
             showBottomSheet();
             //alert(errMsg)
         } else {
+            if (addressTypeLabel == 'ROA') {
+                if (!addressID) {
+                    props.deleteAddressNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientAddress', 'ROA')
+                }
+            }
 
             const appDetails = [{
                 "isActive": true,
@@ -851,7 +879,7 @@ const LoanAddressDetails = (props, { navigation }) => {
                     // Handle the response data
                     if (global.DEBUG_MODE) console.log('PostAddressResponse::' + JSON.stringify(response.data),);
 
-                    setLoading(false);
+
                     // if (addressID) {
                     //     props.updateNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientManualKycLink', response.data)
                     //     insertData(response.data[0].id)
@@ -859,11 +887,7 @@ const LoanAddressDetails = (props, { navigation }) => {
                     //     tbl_loanaddressinfo.deleteLoanDataBasedOnAddressAndClient(global.LOANAPPLICATIONID, addressTypeLabel, global.CLIENTTYPE);
                     //     insertData(response.data[0].id)
                     // }
-                    if (addressTypeLabel == 'ROA') {
-                        if (!addressID) {
-                            props.deleteAddressNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientAddress', 'ROA')
-                        }
-                    }
+
                     props.updateNestedClientDetails(global.LOANAPPLICATIONID, global.CLIENTID, 'clientDetail', 'clientAddress', response.data[0])
                     props.navigation.replace('LoanAddressList')
 
@@ -1237,7 +1261,8 @@ const LoanAddressDetails = (props, { navigation }) => {
     };
 
     const onGoBack = () => {
-        props.navigation.goBack();
+        props.navigation.replace('LoanAddressList')
+        //props.navigation.goBack();
     }
 
     return (
@@ -1255,6 +1280,10 @@ const LoanAddressDetails = (props, { navigation }) => {
             <View style={{ width: '100%', height: 56, alignItems: 'center', justifyContent: 'center', }}>
                 <HeadComp textval={language[0][props.language].str_loanDemographics} props={props} onGoBack={onGoBack} />
             </View>
+
+            <ChildHeadComp
+                textval={global.CLIENTTYPE == 'APPL' ? language[0][props.language].str_applicantdetails : global.CLIENTTYPE == 'CO-APPL' ? language[0][props.language].str_coapplicantdetails : language[0][props.language].str_guarantordetails}
+            />
 
             <ScrollView style={styles.scrollView}
                 contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
@@ -1438,6 +1467,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => ({
     languageAction: item => dispatch(languageAction(item)),
     updateNestedClientDetails: (loanApplicationId, clientId, key, nestedKey, data) => dispatch(updateNestedClientDetails(loanApplicationId, clientId, key, nestedKey, data)),
+    updateAsyncNestedClientDetails: (loanApplicationId, clientId, key, nestedKey, data) => dispatch(updateAsyncNestedClientDetails(loanApplicationId, clientId, key, nestedKey, data)),
     deleteAddressNestedClientDetails: (loanApplicationId, clientId, key, nestedKey, type) => dispatch(deleteAddressNestedClientDetails(loanApplicationId, clientId, key, nestedKey, type)),
     updateLoanInitiationDetails: (loanApplicationId, loanData, key, clientId, updatedDetails) => dispatch(updateLoanInitiationDetails(loanApplicationId, loanData, key, clientId, updatedDetails)),
 });

@@ -138,6 +138,9 @@ const BankList = (props, { navigation }) => {
                         {Common.getSystemCodeDescription(props.mobilecodedetail.leadSystemCodeDto, 'ACCOUNT_TYPE', item.accountType)}
                     </Text>
                     <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: Colors.black }}>{`${item.branchName}, ${item.bankName}`}</Text>
+                    {(item.accountToBeUsedFor == 'BOTH' || item.accountToBeUsedFor == 'DSBAC') &&
+                        <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: item?.isBankVerified == true ? Colors.green : Colors.red }}>{item?.isBankVerified == true ? 'Verified' : 'Not Verified'}</Text>
+                    }
                 </View>
 
                 <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
@@ -447,7 +450,7 @@ const BankList = (props, { navigation }) => {
                             fontFamily: 'Poppins-Medium'
                         }}
                         textVal={
-                            language[0][props.language].str_bankdetail
+                            global.CLIENTTYPE == 'APPL' ? language[0][props.language].str_bankdetail : language[0][props.language].str_bankdetailoptional
                         }></TextComp>
 
                     <ProgressComp progressvalue={1} textvalue="6 of 6" />
@@ -478,7 +481,16 @@ const BankList = (props, { navigation }) => {
             />
 
 
-            {bankDetails.length > 0 && <ButtonViewComp
+            {bankDetails.length > 0 && global.CLIENTTYPE == 'APPL' && <ButtonViewComp
+                textValue={language[0][props.language].str_submit.toUpperCase()}
+                textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
+                viewStyle={[Commonstyles.buttonView, { marginBottom: 20 }]}
+                innerStyle={Commonstyles.buttonViewInnerStyle}
+                handleClick={buttonNext}
+            />
+            }
+
+            {global.CLIENTTYPE != 'APPL' && <ButtonViewComp
                 textValue={language[0][props.language].str_submit.toUpperCase()}
                 textStyle={{ color: Colors.white, fontSize: 13, fontWeight: 500 }}
                 viewStyle={[Commonstyles.buttonView, { marginBottom: 20 }]}

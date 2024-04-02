@@ -46,7 +46,8 @@ import tbl_lead_creation_business_details from '../../../Database/Table/tbl_lead
 import { profileAction } from '../../../Utils/redux/actions/ProfileAction';
 import ButtonViewComp from '../../../Components/ButtonViewComp';
 import ErrorModal from '../../../Components/ErrorModal';
-
+import SearchDropDownComp from '../../../Components/SearchDropDownComp';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const LeadCreationBusiness = (props, { navigation }) => {
 
@@ -57,6 +58,11 @@ const LeadCreationBusiness = (props, { navigation }) => {
         setTimeout(() => hideLeadBottomSheet(), 2000);
     };
     const hideLeadBottomSheet = () => setBottomLeadSheetVisible(false);
+
+    const [dropDownSearchVisible, setDropDownSearchVisible] = useState(false);
+    const showDropDownSearch = () => setDropDownSearchVisible(true);
+    const hideDropDownSearch = () => setDropDownSearchVisible(false);
+
     const [leadType, setLeadType] = useState(global.LEADTYPE);
     const [errMsg, setErrMsg] = useState('');
     const [loading, setLoading] = useState(false);
@@ -458,6 +464,11 @@ const LeadCreationBusiness = (props, { navigation }) => {
 
     };
 
+    const getDropDownSubcodeId = (value) => {
+        setIndustryTypeLabel(value)
+        hideDropDownSearch();
+    };
+
     const closeErrorModal = () => {
         setErrorModalVisible(false);
     };
@@ -477,6 +488,8 @@ const LeadCreationBusiness = (props, { navigation }) => {
             }}>
                 <HeadComp textval={leadType != 'COMP' ? language[0][props.language].str_leadcreation : language[0][props.language].str_captureddetails} props={props} onGoBack={onGoBack} />
             </View>
+
+            <SearchDropDownComp dropDownSearchVisible={dropDownSearchVisible} closeSearchModal={hideDropDownSearch} dropDownData={industryTypeData} getDropDownSubcodeId={getDropDownSubcodeId} />
 
             <View style={{ width: '100%', justifyContent: 'center', alignItems: 'flex-end' }}>
                 <Text style={{
@@ -588,7 +601,7 @@ const LeadCreationBusiness = (props, { navigation }) => {
 
                     </View>}
 
-                    {industryTypeVisible && <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+                    {/* {industryTypeVisible && <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
                         <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
 
                             <TextComp textVal={industryTypeCaption} textStyle={Commonstyles.inputtextStyle} Visible={industryTypeMan} />
@@ -598,7 +611,26 @@ const LeadCreationBusiness = (props, { navigation }) => {
                         <PickerComp textLabel={industryTypeLabel} pickerStyle={Commonstyles.picker} Disable={industryTypeDisable} pickerdata={industryTypeData} componentName='industryPicker' handlePickerClick={handlePickerClick} />
 
 
-                    </View>}
+                    </View>} */}
+
+                    {industryTypeVisible &&
+                        <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+                            <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
+
+                                <TextComp textVal={industryTypeCaption} textStyle={Commonstyles.inputtextStyle} Visible={industryTypeMan} />
+
+                            </View>
+
+
+                            <View style={{ width: '90%', height: 48, marginTop: 3, paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: '#e2e2e2', justifyContent: 'center', alignItems: 'center', flexDirection: 'row' }}>
+
+                                <TextComp textVal={Common.getSystemCodeDescription(userCodeDetail, 'INDUSTRY_LINE', industryTypeLabel)} textStyle={[Commonstyles.inputtextStyle, { color: Colors.black, width: '85%', fontSize: 14 }]} Visible={false} />
+                                <TouchableOpacity onPress={() => { showDropDownSearch() }} activeOpacity={0.8} >
+                                    <Ionicons name="search" style={{ marginStart: 32 }} size={20} color={'#aaaaaa'} />
+                                </TouchableOpacity>
+                            </View>
+
+                        </View>}
 
                     {incomeTurnOverVisible && <View style={{ width: '100%', marginTop: 19, paddingHorizontal: 0, alignItems: 'center', justifyContent: 'center' }}>
 

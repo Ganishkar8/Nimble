@@ -1355,7 +1355,7 @@ const LoanDemographicFamilyDetails = (props) => {
                     i++;
                     flag = true;
                 }
-            } else if (titleLabel === 'MRS' || titleLabel === 'MISS') {
+            } else if (titleLabel === 'MRS' || titleLabel === 'MISS' || titleLabel === 'RS') {
                 if (genderLabel == 'M') {
                     errorMessage = errorMessage + i + ')' + ' ' + titleCaption + ' AND ' + genderCaption + ' Not matching' + '\n';
                     i++;
@@ -1657,9 +1657,21 @@ const LoanDemographicFamilyDetails = (props) => {
         } else if (componentName === 'titlePicker') {
             setTitleLabel(label);
             setTitleIndex(index);
+            if (label == 'MR') {
+                setGenderLabel('M')
+            } else if (label == 'MRS' || label == 'RS' || label == 'MS') {
+                setGenderLabel('F');
+            } else if (label?.length <= 0) {
+                setGenderLabel('');
+            }
         } else if (componentName === 'genderPicker') {
             setGenderLabel(label);
             setGenderIndex(index);
+            if (label == 'M') {
+                setTitleLabel('MR')
+            } else if (label == 'F') {
+                setTitleLabel('MS')
+            }
         } else if (componentName === 'RelationTypePicker') {
             setRelationTypeLabel(label);
             setRelationTypeIndex(index);
@@ -1694,7 +1706,7 @@ const LoanDemographicFamilyDetails = (props) => {
     };
 
     const onGoBack = () => {
-        props.navigation.replace('LoanApplicationMain', { fromScreen: 'LoanFamilyDetail' })
+        props.navigation.goBack();
     }
 
     return (

@@ -258,7 +258,7 @@ const AddressMainList = (props, { navigation }) => {
               />
             </View>
           </TouchableOpacity>
-          <TouchableOpacity style={{ width: '20%' }} activeOpacity={0.8} onPress={() => {
+          {/* <TouchableOpacity style={{ width: '20%' }} activeOpacity={0.8} onPress={() => {
 
             if (global.USERTYPEID == 1163) {
 
@@ -305,7 +305,7 @@ const AddressMainList = (props, { navigation }) => {
                 }}
               />
             </View>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         <View

@@ -2887,7 +2887,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
           i++;
           flag = true;
         }
-      } else if (titleLabel === 'MRS' || titleLabel === 'MISS') {
+      } else if (titleLabel === 'MRS' || titleLabel === 'MISS' || titleLabel === 'RS') {
         if (genderLabel == 'M') {
           errorMessage = errorMessage + i + ')' + ' ' + titleCaption + ' AND ' + genderCaption + ' Not matching' + '\n';
           i++;
@@ -3401,10 +3401,29 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     } else if (componentName === 'titlePicker') {
       setTitleLabel(label);
       setTitleIndex(index);
+      if (label == 'MR') {
+        setGenderLabel('M')
+      } else if (label == 'MRS' || label == 'RS' || label == 'MS') {
+        if (label == 'MRS' || label == 'RS') {
+          setMaritalStatusLabel('M');
+        } else {
+          setMaritalStatusLabel('');
+        }
+        setGenderLabel('F');
+      } else if (label?.length <= 0) {
+        setGenderLabel('');
+      }
     } else if (componentName === 'genderPicker') {
       setGenderLabel(label);
       setGenderIndex(index);
-    } else if (componentName === 'RelationTypePicker') {
+      if (label == 'M') {
+        setTitleLabel('MR')
+      } else if (label == 'F') {
+        setTitleLabel('MS')
+      }
+    }
+
+    else if (componentName === 'RelationTypePicker') {
       setRelationTypeLabel(label);
       setRelationTypeIndex(index);
     } else if (componentName === 'LoanPurposeCatgPicker') {

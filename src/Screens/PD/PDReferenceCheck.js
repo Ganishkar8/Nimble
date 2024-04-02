@@ -1817,7 +1817,8 @@ const PDReferenceCheck = (props, { navigation }) => {
                 Camera
               </Text>
             </View>
-            <View style={{ width: '30%', alignItems: 'center' }}>
+
+            {/* <View style={{ width: '30%', alignItems: 'center' }}>
               <TouchableOpacity
                 onPress={() => selectImage()}
                 activeOpacity={11}>
@@ -1840,7 +1841,8 @@ const PDReferenceCheck = (props, { navigation }) => {
               <Text style={{ fontSize: 14, color: Colors.black, marginTop: 7 }}>
                 Gallery
               </Text>
-            </View>
+            </View> */}
+
           </View>
         </View>
       </Modal>

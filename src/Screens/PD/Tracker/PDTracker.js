@@ -55,7 +55,7 @@ const PDTracker = (props, { navigation, route }) => {
 
         { name: 'Filter', isSelected: false, id: 1 },
         { name: 'Sort by', isSelected: false, id: 2 },
-        { name: 'Pending', isSelected: false, id: 3 },
+        { name: 'InProgress', isSelected: false, id: 3 },
         { name: "Today's Lead", isSelected: false, id: 4 }
     ]
     const mainFilterDataArr = [
@@ -327,15 +327,15 @@ const PDTracker = (props, { navigation, route }) => {
         setLoading(true)
         const appDetails = {
             "userId": global.USERID,
-            // "userTypeId": global.USERTYPEID,
-            // "status": status,
-            // "leadType": leadType,
-            // "from": from,
-            // "to": to,
-            // "operator": operator,
-            // "ageing": ageing,
-            // "agentName": agentName,
-            // "sort": sort
+            "userTypeId": global.USERTYPEID,
+            "status": status,
+            "leadType": leadType,
+            "from": from,
+            "to": to,
+            "operator": operator,
+            "ageing": ageing,
+            "agentName": agentName,
+            "sort": sort
         }
 
         apiInstance(baseURL).post(`/api/v2/pdTracker`, appDetails)
@@ -414,10 +414,10 @@ const PDTracker = (props, { navigation, route }) => {
                 }
             }
 
-        } else if (value.name == 'Pending') {
+        } else if (value.name == 'InProgress') {
             // alert(upperData[index].isSelected)
             if (!upperData[index].isSelected) {
-                getPendingData('PENDING', null, null, null, null, null, null, null);
+                getPendingData('InProgress', null, null, null, null, null, null, null);
             } else {
                 getPendingData(null, null, null, null, null, null, null, null);
             }

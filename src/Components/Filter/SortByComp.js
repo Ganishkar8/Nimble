@@ -21,11 +21,11 @@ const SortByComp = ({ props, filterClick, selectedValue, from }) => {
 
     const setFilterVal = (value) => {
         if (value == 1) {
-            setSortValue('ASC')
-            filterClick('SO', 'ASC', from)
-        } else {
             setSortValue('DESC')
             filterClick('SO', 'DESC', from)
+        } else {
+            setSortValue('ASC')
+            filterClick('SO', 'ASC', from)
         }
     }
     return (
@@ -48,9 +48,9 @@ const SortByComp = ({ props, filterClick, selectedValue, from }) => {
                         <View style={{ width: '18%', justifyContent: 'center' }}>
                             <RadioButton
                                 uncheckedColor={Colors.darkblue}
-                                value="ASC"
+                                value="DESC"
                                 color={Colors.darkblue}
-                                status={sortValue === 'ASC' ? 'checked' : 'unchecked'}
+                                status={sortValue === 'DESC' ? 'checked' : 'unchecked'}
                                 onPress={() => setFilterVal(1)}
                             />
                         </View>
@@ -72,9 +72,9 @@ const SortByComp = ({ props, filterClick, selectedValue, from }) => {
                         <View style={{ width: '18%', justifyContent: 'center' }}>
                             <RadioButton
                                 uncheckedColor={Colors.darkblue}
-                                value="DESC"
+                                value="ASC"
                                 color={Colors.darkblue}
-                                status={sortValue === 'DESC' ? 'checked' : 'unchecked'}
+                                status={sortValue === 'ASC' ? 'checked' : 'unchecked'}
                                 onPress={() => setFilterVal(2)}
                             />
                         </View>
