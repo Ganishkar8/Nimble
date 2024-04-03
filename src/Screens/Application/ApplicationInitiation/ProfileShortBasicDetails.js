@@ -24,7 +24,7 @@ import Commonstyles from '../../../Utils/Commonstyles';
 import HeadComp from '../../../Components/HeadComp';
 import ProgressComp from '../../../Components/ProgressComp';
 import tbl_SystemMandatoryFields from '../../../Database/Table/tbl_SystemMandatoryFields';
-
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Common from '../../../Utils/Common';
 import tbl_SystemCodeDetails from '../../../Database/Table/tbl_SystemCodeDetails';
@@ -45,6 +45,7 @@ import { useIsFocused } from '@react-navigation/native';
 import tbl_client from '../../../Database/Table/tbl_client';
 import tbl_loanApplication from '../../../Database/Table/tbl_loanApplication';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import SearchDropDownComp from '../../../Components/SearchDropDownComp';
 import { addLoanInitiationDetails, updateLoanInitiationDetails, deleteLoanInitiationDetails, updateClientDetails } from '../../../Utils/redux/actions/loanInitiationAction';
 
 const ProfileShortBasicDetails = (props, { navigation }) => {
@@ -316,6 +317,11 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
 
   const [isRejected, setIsRejected] = useState(false);
 
+  const [dropDownSearchVisible, setDropDownSearchVisible] = useState(false);
+  const showDropDownSearch = () => setDropDownSearchVisible(true);
+  const hideDropDownSearch = () => setDropDownSearchVisible(false);
+
+
   useEffect(() => {
 
 
@@ -532,6 +538,10 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
     };
   }, [isScreenVisible]);
 
+  const getDropDownSubcodeId = (value) => {
+    setLoanPurposeLabel(value)
+    hideDropDownSearch();
+  };
 
   const getRejectedStatus = () => {
     if (global.TRACKERSTATUSDATA && global.TRACKERSTATUSDATA?.length > 0) {
@@ -3662,6 +3672,9 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
         }
       />
 
+      <SearchDropDownComp dropDownSearchVisible={dropDownSearchVisible} closeSearchModal={hideDropDownSearch} dropDownData={LoanPurposeData} getDropDownSubcodeId={getDropDownSubcodeId} />
+
+
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.contentContainer}
@@ -3956,7 +3969,7 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
             </View>
           )}
 
-          {LoanPurposeVisible && (
+          {/* {LoanPurposeVisible && (
             <View
               style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
               <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0 }}>
@@ -3976,7 +3989,26 @@ const ProfileShortBasicDetails = (props, { navigation }) => {
                 handlePickerClick={handlePickerClick}
               />
             </View>
-          )}
+          )} */}
+
+          {LoanPurposeVisible &&
+            <View style={{ width: '100%', alignItems: 'center', marginTop: '4%' }}>
+              <View style={{ width: '90%', marginTop: 3, paddingHorizontal: 0, }}>
+
+                <TextComp textVal={LoanPurposeCaption} textStyle={Commonstyles.inputtextStyle} Visible={LoanPurposeMan} />
+
+              </View>
+
+
+              <View style={{ width: '90%', height: 48, marginTop: 3, paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: '#e2e2e2', justifyContent: 'center', alignItems: 'center', flexDirection: 'row' }}>
+
+                <TextComp textVal={Common.getSystemCodeDescription(leaduserCodeDetail, 'LNPS', LoanPurposeLabel)} textStyle={[Commonstyles.inputtextStyle, { color: Colors.black, width: '85%', fontSize: 14 }]} Visible={false} />
+                <TouchableOpacity onPress={() => { showDropDownSearch() }} activeOpacity={0.8} >
+                  <Ionicons name="search" style={{ marginStart: 32 }} size={20} color={'#aaaaaa'} />
+                </TouchableOpacity>
+              </View>
+
+            </View>}
 
           {titleVisible && (
             <View
