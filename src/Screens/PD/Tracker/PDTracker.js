@@ -163,7 +163,7 @@ const PDTracker = (props, { navigation, route }) => {
     }, [props.navigation, isScreenVisible]);
 
     const handleBackButton = () => {
-        props.navigation.goBack();
+        props.navigation.replace('HomeScreen');
         return true; // Prevent default back button behavior
     };
 
